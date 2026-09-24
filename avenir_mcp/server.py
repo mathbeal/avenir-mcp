@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import logging
 import os
+from datetime import date
 from typing import Any, Literal, TypedDict
 
 from fastmcp import Context, FastMCP  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp import types  # pylint: disable=import-error
 
-from avenir_mcp import analytics, classifier, client, journal, triage, writes
+from avenir_mcp import analytics, classifier, client, journal, reconcile, triage, writes
 
 # Root logger so library log calls appear in server output
 logging.basicConfig(level=logging.INFO)
@@ -391,6 +392,8 @@ async def undo_operation(
             "Nothing to undo: no operation of this budget is still in effect"
             + (f" with id {operation_id}." if operation_id else ".")
         )
+    if entry["kind"] == "reconcile":
+        return await _undo_reconcile(ctx, budget_id, book, entry, confirmation)
     transactions = await client.get_transactions(budget_id)
     categories = await client.get_categories(budget_id)
     plan = writes.plan_undo(transactions, categories, entry["moves"])
@@ -399,6 +402,189 @@ async def undo_operation(
         book.mark_undone(entry["operation_id"])
         book.mark_undone(new_operation)
     return result
+
+
+async def _undo_reconcile(
+    ctx: Context,
+    budget_id: str,
+    book: journal.Journal,
+    entry: journal.Entry,
+    confirmation: str | None,
+) -> WriteResult:
+    """Put reconciled transactions back to cleared and delete the adjustment, if any."""
+    details = entry["details"]
+    statuses = {tx["id"]: tx for tx in await client.get_transactions(budget_id)}
+    reverted = [
+        tx_id
+        for tx_id in details["reconciled_ids"]
+        if statuses.get(tx_id, {}).get("cleared") == "reconciled"
+    ]
+    adjustment = details.get("adjustment_id")
+    empty: writes.Plan = {"changes": [], "unchanged_count": 0, "conflicts": []}
+    question = f"Undo reconciliation: mark {len(reverted)} transaction(s) back to cleared" + (
+        " and delete the balance adjustment?" if adjustment else "?"
+    )
+    decision = await _confirmed(
+        ctx, budget_id, {"undo": entry["operation_id"]}, question, confirmation
+    )
+    if decision == "declined":
+        return _result("declined", "The user declined: nothing was changed.", empty)
+    if decision != "applied":
+        message = f"Nothing changed yet. {question} If the user agrees, call again with this code."
+        return _result("confirmation_required", message, empty, confirmation=decision)
+    await client.set_transactions_cleared(budget_id, reverted, "cleared")
+    if adjustment:
+        await client.delete_transaction(budget_id, adjustment)
+    book.mark_undone(entry["operation_id"])
+    return _result("applied", "Reconciliation undone.", empty)
+
+
+ReconcileStatus = Literal[
+    "applied", "confirmation_required", "declined", "nothing_to_do", "difference_found"
+]
+
+
+class ReconcileResult(TypedDict):
+    """The outcome of reconcile_account."""
+
+    status: ReconcileStatus
+    message: str
+    account: str
+    analysis: reconcile.Analysis
+    adjustment: float | None
+    confirmation: str | None
+    operation_id: str | None
+
+
+@mcp.tool(
+    annotations={
+        "title": "Reconcile an account with the bank",
+        "readOnlyHint": False,
+        "destructiveHint": True,
+        "idempotentHint": False,
+        "openWorldHint": True,
+    }
+)
+async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-locals
+    budget_id: str,
+    account_id: str,
+    bank_balance: float,
+    ctx: Context,
+    *,
+    adjust: bool = False,
+    confirmation: str | None = None,
+) -> ReconcileResult:
+    """Compare an account with the balance your bank shows, then reconcile it.
+
+    Give the balance shown by the bank today (currency units). If YNAB's cleared
+    balance differs, nothing is written: the result explains the gap with the
+    pending transactions, the one whose amount matches the difference
+    (`explained_by`) and likely duplicates. Fix those first (with the user), then
+    call again. Only if the user wants to accept the remaining gap, call with
+    adjust=true: a "Balance adjustment" transaction is added to Ready to Assign.
+    When balances match, every cleared transaction is marked reconciled after the
+    user confirms (as for apply_categories). undo_operation reverts it.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+        account_id: Account to reconcile (from list_accounts).
+        bank_balance: Balance shown by the bank, in currency units.
+        adjust: Record the remaining difference as an adjustment.
+        confirmation: Code from a previous "confirmation_required" result.
+    """
+    logger.info("Tool called: reconcile_account(adjust=%s)", adjust)
+    accounts = {a["id"]: a["name"] for a in await client.get_accounts(budget_id)}
+    if account_id not in accounts:
+        raise ToolError(
+            f"Account {account_id} is not in this budget: use an id from list_accounts."
+        )
+    transactions = await client.get_transactions(budget_id)
+    analysis = reconcile.analyse(account_id, transactions, bank_balance)
+    difference = analysis["difference"]
+    result: ReconcileResult = {
+        "status": "nothing_to_do",
+        "message": "Already reconciled: nothing to do.",
+        "account": accounts[account_id],
+        "analysis": analysis,
+        "adjustment": None,
+        "confirmation": None,
+        "operation_id": None,
+    }
+    if difference and not adjust:
+        return {
+            **result,
+            "status": "difference_found",
+            "message": (
+                f"YNAB's cleared balance differs from the bank by {difference:.2f}. Nothing was "
+                "changed. Check explained_by, uncleared and possible_duplicates with the user; "
+                "call again once fixed, or with adjust=true to record the gap as an adjustment."
+            ),
+        }
+    if not difference and not analysis["to_reconcile_count"]:
+        return result
+    question = (
+        f"Reconcile {accounts[account_id]}: mark {analysis['to_reconcile_count']} "
+        "cleared transaction(s) reconciled"
+        + (f" and add a balance adjustment of {difference:.2f}?" if difference else "?")
+    )
+    subject = {"account": account_id, "balance": bank_balance, "adjust": difference}
+    decision = await _confirmed(ctx, budget_id, subject, question, confirmation)
+    if decision == "declined":
+        return {**result, "status": "declined", "message": "The user declined: nothing changed."}
+    if decision != "applied":
+        return {
+            **result,
+            "status": "confirmation_required",
+            "message": (
+                f"Nothing changed yet. {question} If the user agrees, call again with this code."
+            ),
+            "confirmation": decision,
+        }
+    adjustment_id = None
+    if difference:
+        inflow = next(
+            (
+                c["id"]
+                for c in await client.get_categories(budget_id)
+                if c["name"].startswith("Inflow")
+            ),
+            None,
+        )
+        created = await client.create_transactions(
+            budget_id,
+            account_id,
+            [
+                {
+                    "date": date.today().isoformat(),
+                    "amount": difference,
+                    "payee_name": "Balance adjustment",
+                    "memo": "Entered by reconcile_account",
+                    "category_id": inflow,
+                }
+            ],
+        )
+        adjustment_id = created["transaction_ids"][0]
+    to_reconcile = [
+        tx["id"]
+        for tx in await client.get_transactions(budget_id)
+        if tx.get("account_id") == account_id
+        and not tx.get("deleted")
+        and tx.get("cleared") == "cleared"
+    ]
+    await client.set_transactions_cleared(budget_id, to_reconcile, "reconciled")
+    operation_id = journal.Journal(journal.default_path()).record(
+        budget_id,
+        "reconcile",
+        [],
+        {"account_id": account_id, "reconciled_ids": to_reconcile, "adjustment_id": adjustment_id},
+    )
+    return {
+        **result,
+        "status": "applied",
+        "message": f"Reconciled. undo_operation with operation_id {operation_id} reverts it.",
+        "adjustment": difference or None,
+        "operation_id": operation_id,
+    }
 
 
 class CategoryUpdate(TypedDict):

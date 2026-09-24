@@ -32,6 +32,7 @@ def _async_client_returning(payload: Any) -> MagicMock:
     mock_http = AsyncMock()
     mock_http.get = AsyncMock(return_value=mock_resp)
     mock_http.patch = AsyncMock(return_value=mock_resp)
+    mock_http.delete = AsyncMock(return_value=mock_resp)
     ctx = MagicMock()
     ctx.__aenter__ = AsyncMock(return_value=mock_http)
     ctx.__aexit__ = AsyncMock(return_value=None)
@@ -731,3 +732,36 @@ def test_update_category_move_only_sends_the_group() -> None:
             asyncio.run(client.update_category("b1", "c1", category_group_id="g2"))
     sent = ctx.__aenter__.return_value.patch.call_args.kwargs["json"]
     assert sent == {"category": {"category_group_id": "g2"}}
+
+
+def test_set_transactions_cleared_bulk_patches_the_status() -> None:
+    """Reconciling many transactions is one PATCH."""
+    payload = {"data": {"transaction_ids": ["t1", "t2"], "transactions": []}}
+    ctx = _async_client_returning(payload)
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            result = asyncio.run(client.set_transactions_cleared("b1", ["t1", "t2"], "reconciled"))
+    assert result == ["t1", "t2"]
+    assert ctx.__aenter__.return_value.patch.call_args.kwargs["json"] == {
+        "transactions": [
+            {"id": "t1", "cleared": "reconciled"},
+            {"id": "t2", "cleared": "reconciled"},
+        ]
+    }
+
+
+def test_set_transactions_cleared_empty_list_makes_no_call() -> None:
+    """Nothing to mark must not hit the API."""
+    with patch("httpx.AsyncClient") as mock_client:
+        assert asyncio.run(client.set_transactions_cleared("b1", [], "reconciled")) == []
+    mock_client.assert_not_called()
+
+
+def test_delete_transaction_sends_delete() -> None:
+    """Deleting targets the transaction's own path."""
+    ctx = _async_client_returning({"data": {"transaction": {"id": "t1", "deleted": True}}})
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            asyncio.run(client.delete_transaction("b1", "t1"))
+    http = ctx.__aenter__.return_value
+    assert http.delete.call_args.args[0].endswith("/budgets/b1/transactions/t1")

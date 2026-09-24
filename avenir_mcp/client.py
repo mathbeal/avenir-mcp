@@ -111,6 +111,18 @@ async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
         return _check(response)
 
 
+async def _delete(path: str) -> dict[str, Any]:
+    """Execute an authenticated DELETE request against the YNAB API.
+
+    Raises:
+        RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
+    """
+    headers = {"Authorization": f"Bearer {_api_key()}"}
+    async with httpx.AsyncClient() as client:
+        response = await client.delete(f"{_BASE_URL}{path}", headers=headers)
+        return _check(response)
+
+
 async def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
     """Execute an authenticated POST request against the YNAB API.
 
@@ -521,3 +533,23 @@ async def update_category(
     logger.info("Updating category %s (%s)", category_id, ", ".join(fields))
     data = await _patch(f"/budgets/{budget_id}/categories/{category_id}", {"category": fields})
     return data["data"]["category"]  # type: ignore[no-any-return]
+
+
+async def set_transactions_cleared(budget_id: str, tx_ids: list[str], cleared: str) -> list[str]:
+    """Set the cleared status ("cleared", "uncleared" or "reconciled") in one bulk request.
+
+    Returns:
+        The ids of the transactions YNAB updated.
+    """
+    if not tx_ids:
+        return []
+    logger.info("Marking %d transactions %s", len(tx_ids), cleared)
+    body = {"transactions": [{"id": tx_id, "cleared": cleared} for tx_id in tx_ids]}
+    data = await _patch(f"/budgets/{budget_id}/transactions", body)
+    return list(data["data"].get("transaction_ids", []))
+
+
+async def delete_transaction(budget_id: str, tx_id: str) -> None:
+    """Delete one transaction."""
+    logger.info("Deleting transaction %s", tx_id)
+    await _delete(f"/budgets/{budget_id}/transactions/{tx_id}")

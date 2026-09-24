@@ -1,0 +1,85 @@
+"""Tests for reconcile.py — comparing an account with the bank's balance."""
+
+from __future__ import annotations
+
+from datetime import date
+from typing import Any
+
+from avenir_mcp import reconcile
+
+
+def _tx(tx_id: str, amount: int, cleared: str = "cleared", **extra: Any) -> dict[str, Any]:
+    tx: dict[str, Any] = {
+        "id": tx_id,
+        "account_id": "acc",
+        "account_name": "Checking",
+        "date": "2026-09-10",
+        "amount": amount,
+        "payee_name": "Shop",
+        "cleared": cleared,
+        "deleted": False,
+    }
+    tx.update(extra)
+    return tx
+
+
+def test_matching_balance_has_no_difference() -> None:
+    """Bank balance equal to the cleared balance: nothing to explain."""
+    txs = [_tx("t1", 100000, "reconciled"), _tx("t2", -30000), _tx("t3", -5000, "uncleared")]
+    result = reconcile.analyse("acc", txs, 70.0)
+    assert result["cleared_balance"] == 70.0
+    assert result["working_balance"] == 65.0
+    assert result["difference"] == 0.0
+    assert result["to_reconcile_count"] == 1
+
+
+def test_other_accounts_and_deleted_transactions_are_ignored() -> None:
+    """Only live transactions of the account count."""
+    txs = [
+        _tx("t1", 100000),
+        _tx("t2", -50000, account_id="other"),
+        _tx("t3", -50000, deleted=True),
+    ]
+    assert reconcile.analyse("acc", txs, 100.0)["difference"] == 0.0
+
+
+def test_uncleared_transaction_of_the_exact_difference_is_pointed_out() -> None:
+    """If clearing one pending transaction closes the gap, say which."""
+    txs = [_tx("t1", 100000), _tx("t2", -12340, "uncleared"), _tx("t3", -999, "uncleared")]
+    result = reconcile.analyse("acc", txs, 87.66)
+    assert result["difference"] == -12.34
+    assert result["explained_by"] == ["t2"]
+    assert [u["transaction_id"] for u in result["uncleared"]] == ["t2", "t3"]
+    assert result["uncleared"][0]["amount"] == -12.34
+
+
+def test_likely_duplicates_are_flagged() -> None:
+    """Same amount, same merchant, a few days apart: probably imported twice."""
+    txs = [
+        _tx("t1", -4500, payee_name="CB CAFE FACT 100926 525130******2", date="2026-09-10"),
+        _tx("t2", -4500, payee_name="CB CAFE FACT 110926 525130******2", date="2026-09-12"),
+        _tx("t3", -4500, payee_name="OTHER", date="2026-09-12"),
+        _tx("t4", -4500, payee_name="CB CAFE FACT 200926 525130******2", date="2026-09-20"),
+    ]
+    result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 24))
+    assert result["possible_duplicates"] == [["t1", "t2"]]
+
+
+def test_uncleared_list_is_bounded() -> None:
+    """A neglected account cannot flood the answer."""
+    txs = [_tx(f"t{i}", -1000, "uncleared") for i in range(80)]
+    result = reconcile.analyse("acc", txs, 0.0)
+    assert len(result["uncleared"]) == reconcile.MAX_LISTED
+    assert result["uncleared_count"] == 80
+
+
+def test_old_look_alike_transactions_are_not_flagged() -> None:
+    """Only recent transactions can be fresh duplicates; old ones were checked long ago."""
+    txs = [
+        _tx("t1", -6000, payee_name="HOTEL", date="2026-01-12"),
+        _tx("t2", -6000, payee_name="HOTEL", date="2026-01-12"),
+        _tx("t3", -4500, payee_name="CAFE", date="2026-09-20"),
+        _tx("t4", -4500, payee_name="CAFE", date="2026-09-21"),
+    ]
+    result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 24))
+    assert result["possible_duplicates"] == [["t3", "t4"]]

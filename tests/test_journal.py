@@ -100,3 +100,13 @@ def test_older_operation_can_be_named_while_newer_ones_exist(tmp_path: Path) -> 
     first = book.record("b1", "categorize", _MOVES)
     book.record("b1", "categorize", _MOVES)
     assert book.find("b1", first)["operation_id"] == first  # type: ignore[index]
+
+
+def test_operation_details_are_kept(tmp_path: Path) -> None:
+    """Operations other than recategorisation keep what undo needs, as identifiers."""
+    book = journal.Journal(tmp_path / "journal.jsonl")
+    details = {"account_id": "acc", "reconciled_ids": ["t1"], "adjustment_id": "t9"}
+    op_id = book.record("b1", "reconcile", [], details)
+    assert book.find("b1", op_id)["details"] == details  # type: ignore[index]
+    other = book.record("b1", "categorize", _MOVES)
+    assert book.find("b1", other)["details"] == {}  # type: ignore[index]

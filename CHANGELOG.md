@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `reconcile_account`: compare an account with the bank's balance. A gap is explained
+  (pending transactions, the one matching the difference, likely duplicates over the
+  last 60 days) and never adjusted silently; a matching account is marked reconciled
+  after confirmation, and `undo_operation` reverts it.
 - `update_category`: rename a category or move it to another group, after a confirmed
   preview.
 - Fixed: a suggestion could point to a hidden or deleted category, shown as a bare id.

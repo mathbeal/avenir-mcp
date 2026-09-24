@@ -31,6 +31,7 @@ class Entry(TypedDict):
     kind: str
     applied_at: str
     moves: list[Move]
+    details: dict[str, Any]
 
 
 def default_path() -> Path:
@@ -60,8 +61,18 @@ class Journal:
         with self._path.open(encoding="utf-8") as file:
             return [json.loads(line) for line in file if line.strip()]
 
-    def record(self, budget_id: str, kind: str, moves: list[Move]) -> str:
-        """Append an applied operation and return its id."""
+    def record(
+        self,
+        budget_id: str,
+        kind: str,
+        moves: list[Move],
+        details: dict[str, Any] | None = None,
+    ) -> str:
+        """Append an applied operation and return its id.
+
+        `details` holds what undoing an operation other than a recategorisation
+        needs, as identifiers only.
+        """
         operation_id = secrets.token_hex(6)
         entry: Entry = {
             "operation_id": operation_id,
@@ -69,6 +80,7 @@ class Journal:
             "kind": kind,
             "applied_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "moves": moves,
+            "details": details or {},
         }
         self._append(dict(entry))
         return operation_id
@@ -96,5 +108,6 @@ class Journal:
                     "kind": line["kind"],
                     "applied_at": line["applied_at"],
                     "moves": line["moves"],
+                    "details": line.get("details", {}),
                 }
         return None
