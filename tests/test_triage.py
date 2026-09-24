@@ -130,3 +130,15 @@ def test_well_encoded_foreign_cursor_is_rejected() -> None:
         assert "next_cursor" in str(error)
     else:  # pragma: no cover
         raise AssertionError("a foreign cursor must raise")
+
+
+def test_suggestions_follow_the_direction_of_the_money() -> None:
+    """A payee that once paid you in does not make a payment to it look like income."""
+    history = [
+        _tx("h1", "LENDER", "c-fun", amount=500000),
+        _tx("h2", "LENDER", "c-fun", amount=500000),
+    ]
+    repayment = _tx("p1", "LENDER", amount=-212000)
+    assert triage.prepare(history + [repayment], _CATEGORIES)["items"][0]["suggestion"] is None
+    refund = _tx("p2", "LENDER", amount=1000)
+    assert triage.prepare(history + [refund], _CATEGORIES)["items"][0]["suggestion"] is not None

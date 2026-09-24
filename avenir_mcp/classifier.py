@@ -109,11 +109,13 @@ def score_payee(
     cat_index = {c["id"]: c["name"] for c in categories}
     payee = normalize_payee(payee_name)
 
-    if payee not in history:
-        logger.info("Unknown payee %r — no suggestion", payee)
+    # Only categories that can still be assigned count: a hidden or deleted one
+    # would be suggested as a bare id.
+    counts = {cat_id: n for cat_id, n in history.get(payee, {}).items() if cat_id in cat_index}
+    if not counts:
+        logger.info("No usable history for payee %r — no suggestion", payee)
         return {"confidence": 0.0, "auto_classify": False, "candidates": []}
 
-    counts = history[payee]
     total = sum(counts.values())
     sorted_cats = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)
     top_cat_id, top_count = sorted_cats[0]
@@ -131,7 +133,7 @@ def score_payee(
             "confidence": confidence,
             "auto_classify": True,
             "category_id": top_cat_id,
-            "category_name": cat_index.get(top_cat_id, top_cat_id),
+            "category_name": cat_index[top_cat_id],
         }
 
     logger.info(
@@ -143,7 +145,7 @@ def score_payee(
     candidates = [
         {
             "category_id": cat_id,
-            "category_name": cat_index.get(cat_id, cat_id),
+            "category_name": cat_index[cat_id],
             "frequency": count,
         }
         for cat_id, count in sorted_cats[:3]

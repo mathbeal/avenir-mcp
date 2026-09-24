@@ -157,9 +157,12 @@ async def suggest_category(budget_id: str, tx_id: str) -> dict[str, Any]:
     tx = await client.get_transaction(budget_id, tx_id)
     payee_name: str = tx.get("payee_name") or ""
 
-    # Build payee history from all transactions
+    # Build payee history from past transactions in the same direction (in or out)
+    outflow = tx.get("amount", 0) < 0
     all_transactions = await client.get_transactions(budget_id)
-    history = classifier.build_payee_history(all_transactions)
+    history = classifier.build_payee_history(
+        [t for t in all_transactions if (t.get("amount", 0) < 0) == outflow]
+    )
 
     # Fetch available categories
     categories = await client.get_categories(budget_id)

@@ -80,6 +80,40 @@ def _is_pending(tx: dict[str, Any]) -> bool:
     return not tx.get("deleted") and not tx.get("category_id") and not tx.get("transfer_account_id")
 
 
+def _histories(transactions: list[dict[str, Any]]) -> dict[bool, dict[str, dict[str, int]]]:
+    """Payee histories keyed by direction: True for money out, False for money in.
+
+    Money in and money out are learnt apart: a lender that once paid you does
+    not make your repayments income.
+    """
+    known = [
+        tx for tx in transactions if not tx.get("deleted") and not tx.get("transfer_account_id")
+    ]
+    return {
+        outflow: classifier.build_payee_history(
+            [tx for tx in known if (tx["amount"] < 0) == outflow]
+        )
+        for outflow in (True, False)
+    }
+
+
+def _suggestion(
+    tx: dict[str, Any],
+    histories: dict[bool, dict[str, dict[str, int]]],
+    categories: list[dict[str, Any]],
+    threshold: float | None,
+) -> Suggestion | None:
+    history = histories[tx["amount"] < 0]
+    score = classifier.score_payee(tx.get("payee_name") or "", history, categories, threshold)
+    if not score["auto_classify"]:
+        return None
+    return {
+        "category_id": score["category_id"],
+        "category_name": score["category_name"],
+        "confidence": round(score["confidence"], 2),
+    }
+
+
 def prepare(
     transactions: list[dict[str, Any]],
     categories: list[dict[str, Any]],
@@ -100,37 +134,23 @@ def prepare(
         ValueError: If ``cursor`` was not issued by this function.
     """
     offset = _decode_cursor(cursor) if cursor else 0
-    history = classifier.build_payee_history(
-        [tx for tx in transactions if not tx.get("deleted") and not tx.get("transfer_account_id")]
-    )
+    histories = _histories(transactions)
     pending = sorted(
         (tx for tx in transactions if _is_pending(tx)), key=lambda tx: tx["date"], reverse=True
     )
-
-    items: list[PendingItem] = []
-    suggested = 0
-    for tx in pending:
-        score = classifier.score_payee(tx.get("payee_name") or "", history, categories, threshold)
-        suggestion: Suggestion | None = None
-        if score["auto_classify"]:
-            suggested += 1
-            suggestion = {
-                "category_id": score["category_id"],
-                "category_name": score["category_name"],
-                "confidence": round(score["confidence"], 2),
-            }
-        memo = tx.get("memo")
-        items.append(
-            {
-                "transaction_id": tx["id"],
-                "date": tx["date"],
-                "amount": milliunit_to_amount(tx["amount"]),
-                "payee": _truncate(tx.get("payee_name") or ""),
-                "memo": _truncate(memo) if memo else None,
-                "account": tx.get("account_name") or "",
-                "suggestion": suggestion,
-            }
-        )
+    items: list[PendingItem] = [
+        {
+            "transaction_id": tx["id"],
+            "date": tx["date"],
+            "amount": milliunit_to_amount(tx["amount"]),
+            "payee": _truncate(tx.get("payee_name") or ""),
+            "memo": _truncate(tx["memo"]) if tx.get("memo") else None,
+            "account": tx.get("account_name") or "",
+            "suggestion": _suggestion(tx, histories, categories, threshold),
+        }
+        for tx in pending
+    ]
+    suggested = sum(1 for item in items if item["suggestion"] is not None)
 
     end = offset + limit
     return {

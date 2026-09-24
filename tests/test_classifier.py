@@ -131,13 +131,6 @@ def test_candidates_capped_at_three() -> None:
     assert len(result["candidates"]) == 3
 
 
-def test_category_name_falls_back_to_id_if_unknown() -> None:
-    """If a category_id from history is not in the categories list, use the id as name."""
-    history = {"AWS": {"c_unknown": 5}}
-    result = classifier.score_payee("AWS", history, _CATEGORIES, threshold=0.90)
-    assert result["category_name"] == "c_unknown"
-
-
 def test_score_payee_uses_default_threshold_from_env() -> None:
     """A lower default threshold lets a 0.5 confidence auto-classify."""
     # Patch the module-level default
@@ -210,3 +203,18 @@ def test_score_payee_unknown_payee_returns_no_candidates() -> None:
     """With no history there is nothing to suggest: no dump of every category."""
     result = classifier.score_payee("NEVER SEEN", {}, _CATEGORIES)
     assert result == {"confidence": 0.0, "auto_classify": False, "candidates": []}
+
+
+def test_score_payee_ignores_categories_no_longer_available() -> None:
+    """History pointing to a hidden or deleted category suggests nothing, not a raw id."""
+    history = {"ATM": {"c-hidden": 5}}
+    result = classifier.score_payee("ATM", history, _CATEGORIES)
+    assert result == {"confidence": 0.0, "auto_classify": False, "candidates": []}
+
+
+def test_score_payee_counts_only_available_categories() -> None:
+    """Past assignments to a vanished category do not dilute the confidence."""
+    history = {"AWS": {"c-hidden": 9, "c2": 3}}
+    result = classifier.score_payee("AWS", history, _CATEGORIES)
+    assert result["auto_classify"] is True
+    assert result["category_id"] == "c2"
