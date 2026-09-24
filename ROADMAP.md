@@ -36,6 +36,10 @@ previewed, confirmed and undoable; short, structured answers.
 - MCP resources (categories, accounts, a YNAB method guide) and prompts (monthly review,
   classify pending transactions, reconcile an account, plan next month).
 
+## Done since 0.5
+
+- `forecast_balance`: month-by-month projection with visible assumptions.
+
 ## 1.0: verified and published
 
 - Contract tests through the MCP protocol, and an MCP Inspector session in CI.

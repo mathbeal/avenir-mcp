@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import date
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -326,3 +327,8 @@ def test_main_runs_http_on_configured_host_and_port(monkeypatch: pytest.MonkeyPa
     with patch.object(server.mcp, "run") as run:
         server.main()
     run.assert_called_once_with(transport="streamable-http", host="127.0.0.2", port=9000)
+
+
+def test_today_is_the_real_date() -> None:
+    """Tools reckon from the actual date unless a test fixes it."""
+    assert server.today() == date.today()

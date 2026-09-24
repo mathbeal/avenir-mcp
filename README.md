@@ -37,6 +37,7 @@ read-only by default, previewable and undoable.
 | `get_spending_trends` | read | spending per category over the last N months |
 | `get_uncategorized_transactions` | read | what still needs a category |
 | `suggest_categories` | read | **start here to classify**: pending transactions, newest first, paginated, with a suggestion when the payee's history allows, and the category list, in two YNAB requests |
+| `forecast_balance` | read | project the balance month by month up to 24 months ahead and name the first month it goes below zero; every assumption (recurring charges found in your history, average spending and income, your one-off amounts) is returned so you can correct it |
 | `suggest_category` | read | a category guess for a single transaction |
 | `apply_categories` | **write, confirmed, undoable** | assign categories to many transactions: previewed, confirmed by the user, then journaled |
 | `undo_operation` | **write, confirmed** | revert the latest operation (or a named one); never overwrites a later change |
@@ -108,6 +109,9 @@ Written down so that nobody discovers them the hard way:
   out, and only point to categories you can still assign. A merchant never classified
   before gets no suggestion, and the agent chooses from the category list. YNAB allows 200 requests
   per hour; `suggest_categories` uses two per page.
+- `forecast_balance` extrapolates your last months: recurring charges must appear in
+  3 of the last 4 months at a stable amount, and averages include one-off money
+  (a capital injection, a yearly tax). Read its assumptions before its conclusion.
 - Transaction memos and payee names come from your bank and are untrusted text. See
   [SECURITY.md](SECURITY.md).
 
@@ -115,9 +119,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 179, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (773 statements) |
-| Branch coverage | 100 % (168 branches) |
+| Tests | 209, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (955 statements) |
+| Branch coverage | 100 % (220 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 

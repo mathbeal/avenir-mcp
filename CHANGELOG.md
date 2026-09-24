@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `forecast_balance`: project the balance month by month and name the first shortfall.
+  Recurring charges come from the history, other spending and income from the last
+  3 months' averages (what already happened this month is deducted), one-off amounts
+  from the caller; all are returned as assumptions.
+- Fixed: normalized payees kept the creditor's IBAN from direct-debit labels.
 - `reconcile_account`: compare an account with the bank's balance. A gap is explained
   (pending transactions, the one matching the difference, likely duplicates over the
   last 60 days) and never adjusted silently; a matching account is marked reconciled
