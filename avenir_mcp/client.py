@@ -494,3 +494,30 @@ async def set_transaction_categories(
     body = {"transactions": [{"id": tx_id, "category_id": cat} for tx_id, cat in moves]}
     data = await _patch(f"/budgets/{budget_id}/transactions", body)
     return list(data["data"].get("transaction_ids", []))
+
+
+async def update_category(
+    budget_id: str,
+    category_id: str,
+    name: str | None = None,
+    category_group_id: str | None = None,
+) -> dict[str, Any]:
+    """Rename a category and/or move it to another group.
+
+    Args:
+        budget_id: YNAB budget UUID or "last-used".
+        category_id: Category to update.
+        name: New name, or None to keep it.
+        category_group_id: Group to move it to, or None to keep it.
+
+    Returns:
+        The updated category dict.
+    """
+    fields: dict[str, str] = {}
+    if name is not None:
+        fields["name"] = name
+    if category_group_id is not None:
+        fields["category_group_id"] = category_group_id
+    logger.info("Updating category %s (%s)", category_id, ", ".join(fields))
+    data = await _patch(f"/budgets/{budget_id}/categories/{category_id}", {"category": fields})
+    return data["data"]["category"]  # type: ignore[no-any-return]

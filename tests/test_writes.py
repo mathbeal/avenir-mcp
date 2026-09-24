@@ -154,3 +154,13 @@ def test_confirmation_code_expires() -> None:
 def test_unknown_confirmation_code_is_refused() -> None:
     """A code the server never issued confirms nothing."""
     assert writes.Confirmations().consume("made-up", "b1", _changes()) is False
+
+
+def test_confirmation_code_can_bind_any_json_subject() -> None:
+    """A code can confirm a change other than a list of transactions."""
+    confirmations = writes.Confirmations()
+    rename = {"category_id": "c1", "name": "Pharmacy"}
+    code = confirmations.issue("b1", rename)
+    assert confirmations.consume(code, "b1", {"category_id": "c1", "name": "Other"}) is False
+    code = confirmations.issue("b1", rename)
+    assert confirmations.consume(code, "b1", dict(rename)) is True

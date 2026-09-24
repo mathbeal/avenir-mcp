@@ -698,3 +698,36 @@ def test_set_transaction_categories_empty_list_makes_no_call() -> None:
         result = asyncio.run(client.set_transaction_categories("b1", []))
     mock_client.assert_not_called()
     assert result == []
+
+
+def test_update_category_patches_only_given_fields() -> None:
+    """Renaming sends the name; moving sends the group; nothing else."""
+    payload = {"data": {"category": {"id": "c1", "name": "Pets", "category_group_id": "g2"}}}
+    ctx = _async_client_returning(payload)
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            result = asyncio.run(
+                client.update_category("b1", "c1", name="Pets", category_group_id="g2")
+            )
+    http = ctx.__aenter__.return_value
+    assert result["name"] == "Pets"
+    assert http.patch.call_args.args[0].endswith("/budgets/b1/categories/c1")
+    assert http.patch.call_args.kwargs["json"] == {
+        "category": {"name": "Pets", "category_group_id": "g2"}
+    }
+    with patch("httpx.AsyncClient", return_value=_async_client_returning(payload)) as mocked:
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            asyncio.run(client.update_category("b1", "c1", name="Pets"))
+    sent = mocked.return_value.__aenter__.return_value.patch.call_args.kwargs["json"]
+    assert sent == {"category": {"name": "Pets"}}
+
+
+def test_update_category_move_only_sends_the_group() -> None:
+    """Moving without renaming leaves the name out of the request."""
+    payload = {"data": {"category": {"id": "c1"}}}
+    ctx = _async_client_returning(payload)
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            asyncio.run(client.update_category("b1", "c1", category_group_id="g2"))
+    sent = ctx.__aenter__.return_value.patch.call_args.kwargs["json"]
+    assert sent == {"category": {"category_group_id": "g2"}}

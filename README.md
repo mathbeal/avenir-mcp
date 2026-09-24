@@ -40,6 +40,7 @@ read-only by default, previewable and undoable.
 | `suggest_category` | read | a category guess for a single transaction |
 | `apply_categories` | **write, confirmed, undoable** | assign categories to many transactions: previewed, confirmed by the user, then journaled |
 | `undo_operation` | **write, confirmed** | revert the latest operation (or a named one); never overwrites a later change |
+| `update_category` | **write, confirmed** | rename a category or move it to another group; the result gives the previous name and group to revert |
 | `classify_transaction` | **write** | assign a category to one transaction, immediately |
 | `approve_transactions` | **write** | mark transactions as reviewed |
 | `create_category` | **write** | add a category |
@@ -102,8 +103,9 @@ Written down so that nobody discovers them the hard way:
   units. Each tool's description says which.
 - Large budgets produce large answers: `get_uncategorized_transactions` is not
   paginated; prefer `suggest_categories`.
-- Suggestions come from your own history: a merchant never classified before gets no
-  suggestion, and the agent chooses from the category list. YNAB allows 200 requests
+- Suggestions come from your own history, learnt separately for money in and money
+  out, and only point to categories you can still assign. A merchant never classified
+  before gets no suggestion, and the agent chooses from the category list. YNAB allows 200 requests
   per hour; `suggest_categories` uses two per page.
 - Transaction memos and payee names come from your bank and are untrusted text. See
   [SECURITY.md](SECURITY.md).
@@ -112,9 +114,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 147, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (606 statements) |
-| Branch coverage | 100 % (122 branches) |
+| Tests | 160, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (653 statements) |
+| Branch coverage | 100 % (138 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 

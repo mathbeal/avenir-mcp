@@ -138,9 +138,11 @@ def plan_undo(
     return {"changes": changes, "unchanged_count": 0, "conflicts": conflicts}
 
 
-def _fingerprint(budget_id: str, changes: list[Change]) -> str:
-    moves = sorted((c["transaction_id"], c["to_category_id"] or "") for c in changes)
-    payload = json.dumps([budget_id, moves], separators=(",", ":"))
+def _fingerprint(budget_id: str, subject: object) -> str:
+    """Hash what is being confirmed; the order of a list of changes does not matter."""
+    if isinstance(subject, list):
+        subject = sorted(json.dumps(item, sort_keys=True) for item in subject)
+    payload = json.dumps([budget_id, subject], sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
@@ -156,17 +158,17 @@ class Confirmations:
         self._clock = clock
         self._issued: dict[str, tuple[str, float]] = {}
 
-    def issue(self, budget_id: str, changes: list[Change]) -> str:
-        """Return a new code that confirms these changes, and nothing else."""
+    def issue(self, budget_id: str, subject: object) -> str:
+        """Return a new code that confirms this subject (JSON data), and nothing else."""
         code = secrets.token_urlsafe(8)
-        self._issued[code] = (_fingerprint(budget_id, changes), self._clock())
+        self._issued[code] = (_fingerprint(budget_id, subject), self._clock())
         return code
 
-    def consume(self, code: str, budget_id: str, changes: list[Change]) -> bool:
-        """Spend a code: True only if it was issued for these changes and is still fresh."""
+    def consume(self, code: str, budget_id: str, subject: object) -> bool:
+        """Spend a code: True only if it was issued for this subject and is still fresh."""
         issued = self._issued.pop(code, None)
         if issued is None:
             return False
         fingerprint, issued_at = issued
         fresh = self._clock() - issued_at <= self._ttl
-        return fresh and fingerprint == _fingerprint(budget_id, changes)
+        return fresh and fingerprint == _fingerprint(budget_id, subject)

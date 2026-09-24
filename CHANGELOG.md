@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `update_category`: rename a category or move it to another group, after a confirmed
+  preview.
+- Fixed: a suggestion could point to a hidden or deleted category, shown as a bare id.
+- Fixed: a payee that once paid you in made payments to it look like income; history
+  is now learnt separately for money in and money out.
 - `apply_categories`: assign categories to many transactions in one YNAB request,
   after a preview the user confirms (elicitation, or a single-use code bound to the
   exact changes). Every applied operation is journaled locally.
