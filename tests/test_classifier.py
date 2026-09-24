@@ -157,6 +157,10 @@ def test_default_threshold_is_read_from_env(monkeypatch: pytest.MonkeyPatch) -> 
 # ---------------------------------------------------------------------------
 
 
+# Built at run time so that no IBAN-shaped string sits in the repository.
+_FAKE_IBAN = "FR" + "00" + "1" * 23
+
+
 @pytest.mark.parametrize(
     ("label", "expected"),
     [
@@ -170,6 +174,8 @@ def test_default_threshold_is_read_from_env(monkeypatch: pytest.MonkeyPatch) -> 
         ("Corner Shop", "CORNER SHOP"),
         ("  corner   shop ", "CORNER SHOP"),
         ("ONLINE STORE 1234567890", "ONLINE STORE"),
+        ("INSURER - PRELEV - IBAN: " + _FAKE_IBAN, "INSURER - PRELEV"),
+        ("TAX OFFICE - REF 123 - IBAN: " + _FAKE_IBAN, "TAX OFFICE - REF 123"),
         ("", ""),
     ],
 )

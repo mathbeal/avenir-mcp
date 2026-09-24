@@ -13,6 +13,9 @@ _DEFAULT_THRESHOLD = float(os.getenv("AVENIR_MCP_CONFIDENCE_THRESHOLD", "0.90"))
 
 # Payment-method prefixes that French bank exports put before the merchant.
 _PAYMENT_PREFIX = re.compile(r"^(?:CB|CARTE|PRLV(?: SEPA)?|VIR(?:EMENT)?(?: INST| SEPA)?)\s+")
+# A bank account number and everything after it ("- IBAN: FR76…"): private, and
+# noise for recognising the merchant.
+_IBAN_SUFFIX = re.compile(r"\s*-?\s*IBAN\s*:.*$")
 # Everything from an invoice date ("FACT 110126") to the end of the label.
 _INVOICE_SUFFIX = re.compile(r"\s+FACT\s+\d{6}\b.*$")
 # A masked card number ("525130******2"), a date ("12/01", "12/01/26") or a long reference.
@@ -33,6 +36,7 @@ def normalize_payee(label: str) -> str:
         'CORNER SHOP'
     """
     text = " ".join(label.upper().split())
+    text = _IBAN_SUFFIX.sub("", text)
     text = _PAYMENT_PREFIX.sub("", text)
     text = _INVOICE_SUFFIX.sub("", text)
     text = _NOISE.sub("", text)
