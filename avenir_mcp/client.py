@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 _BASE_URL = "https://api.ynab.com/v1"
 
-# Delta-sync cache: {budget_id: {"data": [...], "server_knowledge": int}}
+# Delta-sync cache: {budget_id: {"server_knowledge": int, "transactions": {tx_id: tx}}}
 _CACHE: dict[str, dict[str, Any]] = {}
 
 
@@ -246,14 +246,23 @@ async def get_transactions(
 
     data = await _get(f"/budgets/{budget_id}/transactions", params=params)
     payload = data["data"]
+    transactions: list[dict[str, Any]] = payload["transactions"]
+    if since_date or uncategorized_only:
+        return transactions
 
-    # Update cache with new server_knowledge
-    if not since_date and not uncategorized_only:
-        _CACHE[cache_key] = {
-            "server_knowledge": payload.get("server_knowledge", 0),
-        }
-
-    return payload["transactions"]  # type: ignore[no-any-return]
+    # A delta only holds what changed since the last load: merge it into the
+    # cached transactions, dropping the deleted ones.
+    known: dict[str, dict[str, Any]] = _CACHE.get(cache_key, {}).get("transactions", {})
+    for tx in transactions:
+        if tx.get("deleted"):
+            known.pop(tx["id"], None)
+        else:
+            known[tx["id"]] = tx
+    _CACHE[cache_key] = {
+        "server_knowledge": payload.get("server_knowledge", 0),
+        "transactions": known,
+    }
+    return list(known.values())
 
 
 async def get_months(budget_id: str) -> list[dict[str, Any]]:

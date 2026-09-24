@@ -175,6 +175,42 @@ def test_get_transactions_delta_sync_uses_cached_knowledge() -> None:
     assert call_kwargs.kwargs["params"].get("last_knowledge_of_server") == 42
 
 
+def _get_transactions_twice(
+    first: list[dict[str, Any]], delta: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Load a budget's transactions, then reload it when YNAB returns only `delta`."""
+    with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+        payload = {"data": {"transactions": first, "server_knowledge": 1}}
+        with patch("httpx.AsyncClient", return_value=_async_client_returning(payload)):
+            asyncio.run(client.get_transactions("b1"))
+        payload = {"data": {"transactions": delta, "server_knowledge": 2}}
+        with patch("httpx.AsyncClient", return_value=_async_client_returning(payload)):
+            return asyncio.run(client.get_transactions("b1"))
+
+
+def test_get_transactions_delta_sync_returns_full_list_when_nothing_changed() -> None:
+    """An empty delta means nothing changed, not that the budget is empty."""
+    first = [{"id": "t1", "deleted": False}, {"id": "t2", "deleted": False}]
+    assert _get_transactions_twice(first, []) == first
+
+
+def test_get_transactions_delta_sync_merges_changes() -> None:
+    """A delta updates changed transactions, adds new ones and drops deleted ones."""
+    first = [
+        {"id": "t1", "memo": "old", "deleted": False},
+        {"id": "t2", "deleted": False},
+    ]
+    delta = [
+        {"id": "t1", "memo": "new", "deleted": False},
+        {"id": "t2", "deleted": True},
+        {"id": "t3", "deleted": False},
+    ]
+    assert _get_transactions_twice(first, delta) == [
+        {"id": "t1", "memo": "new", "deleted": False},
+        {"id": "t3", "deleted": False},
+    ]
+
+
 def test_get_transactions_by_category_uses_category_endpoint() -> None:
     """Passing category_id should hit the category-specific endpoint."""
     payload = {"data": {"transactions": [{"id": "t9"}]}}
