@@ -11,6 +11,9 @@ jobs:
   lock:
     name: lockfile is in sync
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -21,6 +24,9 @@ jobs:
   lint:
     name: black, isort, pylint
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,6 +41,9 @@ jobs:
   types:
     name: mypy --strict
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -47,6 +56,9 @@ jobs:
   tests:
     name: pytest, 100 % line and branch coverage
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -61,6 +73,9 @@ jobs:
   vocabulary:
     name: lexdrift against its baseline
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -72,6 +87,9 @@ jobs:
   hygiene:
     name: typos and workflow audit
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -83,6 +101,9 @@ jobs:
   audit:
     name: known vulnerabilities
     runs-on: ubuntu-latest
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
