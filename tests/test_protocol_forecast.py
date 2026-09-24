@@ -15,7 +15,7 @@ from avenir_mcp import server
 
 _ACCOUNTS = [
     {"id": "acc", "name": "Checking", "on_budget": True, "closed": False, "balance": 1000.0},
-    {"id": "sav", "name": "Savings", "on_budget": True, "closed": False, "balance": 500.0},
+    {"id": "savings", "name": "Savings", "on_budget": True, "closed": False, "balance": 500.0},
     {"id": "old", "name": "Old", "on_budget": True, "closed": True, "balance": 0.0},
     {"id": "loan", "name": "Loan", "on_budget": False, "closed": False, "balance": -9000.0},
 ]
@@ -36,7 +36,7 @@ _TXS = [
         "date": f"2026-{m:02d}-03",
         "deleted": False,
         "transfer_account_id": None,
-        "account_id": "sav",
+        "account_id": "savings",
     }
     for m in (5, 6, 7, 8)
 ]
@@ -83,7 +83,9 @@ def test_forecast_uses_open_budget_accounts_and_shows_its_assumptions() -> None:
 
 def test_forecast_can_be_limited_to_chosen_accounts() -> None:
     """account_ids narrows both the starting balance and the history."""
-    data = _call({"budget_id": "b1", "until": "2026-10", "account_ids": ["sav"]}).structured_content
+    data = _call(
+        {"budget_id": "b1", "until": "2026-10", "account_ids": ["savings"]}
+    ).structured_content
     assert data["start_balance"] == 500.0
     assert [r["payee"] for r in data["assumptions"]["recurring"]] == ["GYM"]
 

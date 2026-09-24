@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- GitHub Actions quality workflow: lockfile, lint, types, tests at 100 % coverage,
+  lexdrift against a baseline, typos, zizmor and pip-audit; no permissions, actions
+  pinned by SHA.
+- fastmcp 3.2.0 and pytest 9.0.3, which fix known advisories.
 - Read-only by default: write tools are registered only with `AVENIR_MCP_WRITE=1`.
 - Every tool declares MCP annotations (`readOnlyHint`, and for writes
   `destructiveHint` and `idempotentHint`); a test enforces it.

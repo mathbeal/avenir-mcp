@@ -64,7 +64,7 @@ def analyse(
     bank_balance: float,
     today: date | None = None,
 ) -> Analysis:
-    """Compare the account's cleared balance with `bank_balance` (currency units).
+    """Analyse the account's cleared balance against `bank_balance` (currency units).
 
     `difference` is bank minus cleared: negative when YNAB counts more money
     than the bank. Duplicates are only looked for in the last 60 days.

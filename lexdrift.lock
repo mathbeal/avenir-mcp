@@ -1,0 +1,169 @@
+{
+  "families": {
+    "add": {
+      "append": 1
+    },
+    "analyse": {
+      "analyse": 1
+    },
+    "apply": {
+      "apply": 1
+    },
+    "check": {
+      "check": 2
+    },
+    "clean": {
+      "normalize": 1
+    },
+    "convert": {
+      "decode": 1,
+      "encode": 1
+    },
+    "create": {
+      "build": 1,
+      "create": 4
+    },
+    "delete": {
+      "delete": 2
+    },
+    "init": {
+      "configure": 1,
+      "prepare": 1
+    },
+    "obtain": {
+      "get": 15
+    },
+    "save": {
+      "write": 1
+    },
+    "search": {
+      "find": 1
+    },
+    "send": {
+      "post": 1
+    },
+    "update": {
+      "patch": 2,
+      "set": 4,
+      "update": 2
+    }
+  },
+  "imposed": 2,
+  "imposed_by_reason": {
+    "language special method": 2
+  },
+  "nouns": {
+    "account": 1,
+    "accounts": 2,
+    "actual": 2,
+    "amount": 2,
+    "analysis": 1,
+    "api": 1,
+    "applied": 2,
+    "approve": 2,
+    "ask": 1,
+    "assignment": 1,
+    "assumptions": 1,
+    "average": 3,
+    "balance": 1,
+    "balances": 1,
+    "before": 1,
+    "budget": 3,
+    "budgeted": 1,
+    "budgets": 2,
+    "categories": 5,
+    "categorization": 1,
+    "category": 12,
+    "change": 1,
+    "choice": 1,
+    "classify": 1,
+    "cleared": 1,
+    "confirmations": 1,
+    "consume": 1,
+    "cursor": 2,
+    "date": 1,
+    "default": 1,
+    "describe": 1,
+    "duplicates": 1,
+    "entry": 1,
+    "fingerprint": 1,
+    "forecast": 3,
+    "groups": 2,
+    "histories": 1,
+    "history": 1,
+    "horizon": 2,
+    "income": 1,
+    "issue": 1,
+    "item": 1,
+    "journal": 1,
+    "key": 1,
+    "lines": 1,
+    "list": 3,
+    "main": 1,
+    "mark": 1,
+    "milliunit": 2,
+    "month": 4,
+    "monthly": 1,
+    "months": 2,
+    "move": 1,
+    "off": 1,
+    "one": 1,
+    "operation": 1,
+    "other": 1,
+    "path": 1,
+    "payee": 3,
+    "payees": 1,
+    "pending": 2,
+    "plan": 4,
+    "project": 1,
+    "projection": 2,
+    "reconcile": 3,
+    "record": 1,
+    "recurring": 2,
+    "result": 4,
+    "score": 1,
+    "spending": 2,
+    "spread": 1,
+    "suggest": 2,
+    "suggestion": 2,
+    "summary": 1,
+    "today": 1,
+    "top": 1,
+    "transaction": 5,
+    "transactions": 7,
+    "trends": 2,
+    "triage": 1,
+    "truncate": 1,
+    "uncategorized": 1,
+    "uncleared": 1,
+    "undo": 3,
+    "undone": 1,
+    "update": 1,
+    "usable": 1,
+    "variable": 1,
+    "vs": 2,
+    "write": 1
+  },
+  "own": 115,
+  "verbs": {
+    "analyse": 1,
+    "append": 1,
+    "apply": 1,
+    "build": 1,
+    "check": 2,
+    "configure": 1,
+    "create": 4,
+    "decode": 1,
+    "delete": 2,
+    "encode": 1,
+    "find": 1,
+    "get": 15,
+    "normalize": 1,
+    "patch": 2,
+    "post": 1,
+    "prepare": 1,
+    "set": 4,
+    "update": 2,
+    "write": 1
+  }
+}

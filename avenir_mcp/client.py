@@ -66,7 +66,7 @@ def _check(response: Any) -> dict[str, Any]:
 
 
 async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Execute an authenticated GET request against the YNAB API.
+    """Get a YNAB API path with an authenticated GET request.
 
     Args:
         path: API path relative to the base URL (e.g. "/budgets").
@@ -89,7 +89,7 @@ async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any
 
 
 async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """Execute an authenticated PATCH request against the YNAB API.
+    """Patch a YNAB API path with an authenticated PATCH request.
 
     Args:
         path: API path relative to the base URL.
@@ -112,7 +112,7 @@ async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _delete(path: str) -> dict[str, Any]:
-    """Execute an authenticated DELETE request against the YNAB API.
+    """Delete a YNAB API path with an authenticated DELETE request.
 
     Raises:
         RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
@@ -124,7 +124,7 @@ async def _delete(path: str) -> dict[str, Any]:
 
 
 async def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """Execute an authenticated POST request against the YNAB API.
+    """Post a YNAB API path with an authenticated POST request.
 
     Args:
         path: API path relative to the base URL.

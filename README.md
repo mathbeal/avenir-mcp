@@ -1,5 +1,6 @@
 # Avenir — an MCP server for YNAB
 
+[![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![python](https://img.shields.io/badge/python-3.14-blue)](https://github.com/mathbeal/avenir-mcp)
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/mathbeal/avenir-mcp)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
@@ -129,6 +130,8 @@ Written down so that nobody discovers them the hard way:
 | Branch coverage | 100 % (222 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
+| Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |
+| Supply chain | pip-audit on the locked dependencies, zizmor on the workflows |
 
 Coverage below 100 % fails the test run (`--cov-fail-under=100`, branches included).
 `tests/test_hygiene.py` also fails if an IBAN, a YNAB token or a bank statement ever
@@ -144,7 +147,11 @@ uv run pytest            # fails under 100 % line and branch coverage
 uv run mypy
 uv run black --check avenir_mcp tests && uv run isort --check avenir_mcp tests
 uv run pylint avenir_mcp tests
+uvx lexdrift check avenir_mcp --baseline lexdrift.lock
 ```
+
+CI (`.github/workflows/quality.yml`) runs the same, plus the lockfile check, typos,
+zizmor and pip-audit.
 
 Read [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md) before opening a
 pull request.
