@@ -4,11 +4,39 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _DEFAULT_THRESHOLD = float(os.getenv("AVENIR_MCP_CONFIDENCE_THRESHOLD", "0.90"))
+
+# Payment-method prefixes that French bank exports put before the merchant.
+_PAYMENT_PREFIX = re.compile(r"^(?:CB|CARTE|PRLV(?: SEPA)?|VIR(?:EMENT)?(?: INST| SEPA)?)\s+")
+# Everything from an invoice date ("FACT 110126") to the end of the label.
+_INVOICE_SUFFIX = re.compile(r"\s+FACT\s+\d{6}\b.*$")
+# A masked card number ("525130******2"), a date ("12/01", "12/01/26") or a long reference.
+_NOISE = re.compile(r"\b\d{4,}\*+\d*|\b\d{2}/\d{2}(?:/\d{2,4})?\b|\b\d{5,}\b")
+
+
+def normalize_payee(label: str) -> str:
+    """Reduce a bank label to the merchant it names.
+
+    Card payments and transfers of the same merchant carry a different date,
+    reference or card number every time. Stripping them lets every payment at
+    one shop share a single history.
+
+    Examples:
+        >>> normalize_payee("CB ACME OUTDOOR FACT 110126 525130******2")
+        'ACME OUTDOOR'
+        >>> normalize_payee("Corner Shop")
+        'CORNER SHOP'
+    """
+    text = " ".join(label.upper().split())
+    text = _PAYMENT_PREFIX.sub("", text)
+    text = _INVOICE_SUFFIX.sub("", text)
+    text = _NOISE.sub("", text)
+    return " ".join(text.split())
 
 
 def build_payee_history(
@@ -23,7 +51,8 @@ def build_payee_history(
         transactions: List of YNAB transaction dicts.
 
     Returns:
-        Dict of the form ``{payee_name: {category_id: count}}``.
+        Dict of the form ``{normalized_payee: {category_id: count}}``, keyed by
+        :func:`normalize_payee`.
 
     Examples:
         >>> txs = [
@@ -36,7 +65,7 @@ def build_payee_history(
     """
     history: dict[str, dict[str, int]] = {}
     for tx in transactions:
-        payee = tx.get("payee_name") or ""
+        payee = normalize_payee(tx.get("payee_name") or "")
         category_id = tx.get("category_id")
         if not payee or not category_id:
             continue
@@ -60,7 +89,8 @@ def score_payee(
 
     Args:
         payee_name: Name of the payee to classify.
-        history: Frequency table from :func:`build_payee_history`.
+        history: Frequency table from :func:`build_payee_history`, keyed by
+            normalized payee.
         categories: Full list of available YNAB categories (id, name).
         threshold: Minimum confidence to set ``auto_classify: True``.
 
@@ -70,19 +100,20 @@ def score_payee(
         - ``confidence`` (float 0–1)
         - ``auto_classify`` (bool)
         - ``category_id`` / ``category_name`` if ``auto_classify`` is True
-        - ``candidates`` (list of top-3 dicts) if ``auto_classify`` is False
+        - ``candidates`` (list of top-3 dicts) if ``auto_classify`` is False;
+          empty when the payee has no history
     """
     if threshold is None:
         threshold = _DEFAULT_THRESHOLD
 
     cat_index = {c["id"]: c["name"] for c in categories}
+    payee = normalize_payee(payee_name)
 
-    if payee_name not in history:
-        logger.info("Unknown payee %r — returning all categories as candidates", payee_name)
-        candidates = [{"category_id": c["id"], "category_name": c["name"]} for c in categories]
-        return {"confidence": 0.0, "auto_classify": False, "candidates": candidates}
+    if payee not in history:
+        logger.info("Unknown payee %r — no suggestion", payee)
+        return {"confidence": 0.0, "auto_classify": False, "candidates": []}
 
-    counts = history[payee_name]
+    counts = history[payee]
     total = sum(counts.values())
     sorted_cats = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)
     top_cat_id, top_count = sorted_cats[0]

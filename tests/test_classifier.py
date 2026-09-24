@@ -31,10 +31,10 @@ def _make_tx(payee: str, category_id: str | None) -> dict[str, Any]:
 
 
 def test_build_payee_history_groups_by_payee() -> None:
-    """Transactions for the same payee should be grouped together."""
+    """Transactions for the same payee are grouped under its normalized name."""
     txs = [_make_tx("AWS", "c2"), _make_tx("AWS", "c2"), _make_tx("Rent", "c1")]
     result = classifier.build_payee_history(txs)
-    assert result == {"AWS": {"c2": 2}, "Rent": {"c1": 1}}
+    assert result == {"AWS": {"c2": 2}, "RENT": {"c1": 1}}
 
 
 def test_build_payee_history_skips_uncategorized() -> None:
@@ -70,12 +70,11 @@ def test_build_payee_history_doctest() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_unknown_payee_returns_all_categories() -> None:
-    """An unknown payee should return confidence=0 and all categories."""
+def test_unknown_payee_returns_zero_confidence() -> None:
+    """An unknown payee gets confidence 0 and is left for review."""
     result = classifier.score_payee("NewVendor", {}, _CATEGORIES)
     assert result["confidence"] == 0.0
     assert result["auto_classify"] is False
-    assert len(result["candidates"]) == len(_CATEGORIES)
 
 
 # ---------------------------------------------------------------------------
@@ -158,3 +157,56 @@ def test_default_threshold_is_read_from_env(monkeypatch: pytest.MonkeyPatch) -> 
     finally:
         monkeypatch.delenv("AVENIR_MCP_CONFIDENCE_THRESHOLD")
         importlib.reload(classifier)
+
+
+# ---------------------------------------------------------------------------
+# normalize_payee — bank labels reduced to the merchant
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("CB ACME OUTDOOR FACT 110126 525130******2", "ACME OUTDOOR"),
+        ("CB WWW.EXAMPLE.IO FACT 220126 525130******2", "WWW.EXAMPLE.IO"),
+        ("CB FOO BAR 525130******2", "FOO BAR"),
+        ("VIR INST GARAGE MARTIN", "GARAGE MARTIN"),
+        ("VIR SEPA JOHN SMITH", "JOHN SMITH"),
+        ("PRLV SEPA MOBILE TELECOM", "MOBILE TELECOM"),
+        ("CARTE 12/01 BAKERY ROSE", "BAKERY ROSE"),
+        ("Corner Shop", "CORNER SHOP"),
+        ("  corner   shop ", "CORNER SHOP"),
+        ("ONLINE STORE 1234567890", "ONLINE STORE"),
+        ("", ""),
+    ],
+)
+def test_normalize_payee(label: str, expected: str) -> None:
+    """Card prefixes, invoice dates, masked card numbers and references are removed."""
+    assert classifier.normalize_payee(label) == expected
+
+
+def test_build_payee_history_groups_labels_of_the_same_merchant() -> None:
+    """Two card payments at the same shop on different days share one history."""
+    txs = [
+        {"payee_name": "CB ACME OUTDOOR FACT 110126 525130******2", "category_id": "c1"},
+        {"payee_name": "CB ACME OUTDOOR FACT 140226 525130******2", "category_id": "c1"},
+    ]
+    assert classifier.build_payee_history(txs) == {"ACME OUTDOOR": {"c1": 2}}
+
+
+def test_score_payee_recognises_a_new_label_of_a_known_merchant() -> None:
+    """A payment dated differently from past ones still matches its merchant."""
+    history = classifier.build_payee_history(
+        [{"payee_name": "CB ACME OUTDOOR FACT 110126 525130******2", "category_id": "c1"}]
+    )
+    result = classifier.score_payee(
+        "CB ACME OUTDOOR FACT 300926 525130******2", history, _CATEGORIES
+    )
+    assert result["auto_classify"] is True
+    assert result["category_id"] == "c1"
+
+
+def test_score_payee_unknown_payee_returns_no_candidates() -> None:
+    """With no history there is nothing to suggest: no dump of every category."""
+    result = classifier.score_payee("NEVER SEEN", {}, _CATEGORIES)
+    assert result == {"confidence": 0.0, "auto_classify": False, "candidates": []}
