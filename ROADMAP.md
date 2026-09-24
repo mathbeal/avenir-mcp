@@ -14,8 +14,8 @@ previewed, confirmed and undoable; short, structured answers.
 
 ## 0.3: safe writes
 
-- Tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`) on every tool, enforced by a test.
-- Read-only by default: write tools are not even registered unless enabled.
+- Tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`) on every tool, enforced by a test. *Done.*
+- Read-only by default: write tools are not even registered unless enabled. *Done.*
 - Preview → confirmation (MCP elicitation, or a single-use token bound to the preview) → apply.
   *Done for categories (`apply_categories`).*
 - A local journal of applied writes and an `undo` tool. What cannot be undone is documented.

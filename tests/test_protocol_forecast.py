@@ -47,7 +47,7 @@ def _budget() -> Iterator[None]:
     with (
         patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
         patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=_TXS)),
-        patch("avenir_mcp.server.today", lambda: date(2026, 9, 24)),
+        patch("avenir_mcp.app.today", lambda: date(2026, 9, 24)),
     ):
         yield
 

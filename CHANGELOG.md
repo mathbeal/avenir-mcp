@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Read-only by default: write tools are registered only with `AVENIR_MCP_WRITE=1`.
+- Every tool declares MCP annotations (`readOnlyHint`, and for writes
+  `destructiveHint` and `idempotentHint`); a test enforces it.
+- The server is split into topic modules (`tools_*`, `confirm`, `app`).
 - `forecast_balance`: project the balance month by month and name the first shortfall.
   Recurring charges come from the history, other spending and income from the last
   3 months' averages (what already happened this month is deducted), one-off amounts

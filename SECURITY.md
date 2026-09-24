@@ -8,6 +8,9 @@ tokens. Treat the token like a bank password.
 
 What the server does:
 
+- by default it is **read-only**: tools that change the budget are registered only
+  with `AVENIR_MCP_WRITE=1`
+
 - it calls `api.ynab.com` over HTTPS, and nothing else
 - it reads the token from the environment and never writes it anywhere
 - `apply_categories` and `undo_operation` change nothing until the user confirms the

@@ -51,6 +51,9 @@ read-only by default, previewable and undoable.
 
 ## Install
 
+The examples enable write tools (`AVENIR_MCP_WRITE=1`); drop it to keep the server
+read-only.
+
 You need [uv](https://docs.astral.sh/uv/) and a YNAB personal access token
 (YNAB → Account Settings → Developer Settings).
 
@@ -62,7 +65,7 @@ Until the first PyPI release, install from GitHub:
     "avenir": {
       "command": "uvx",
       "args": ["--from", "git+https://github.com/mathbeal/avenir-mcp", "avenir-mcp"],
-      "env": { "YNAB_API_KEY": "your-token" }
+      "env": { "YNAB_API_KEY": "your-token", "AVENIR_MCP_WRITE": "1" }
     }
   }
 }
@@ -71,7 +74,7 @@ Until the first PyPI release, install from GitHub:
 With Claude Code:
 
 ```bash
-claude mcp add avenir --env YNAB_API_KEY=your-token -- uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp
+claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp
 ```
 
 ## Environment variables
@@ -79,6 +82,7 @@ claude mcp add avenir --env YNAB_API_KEY=your-token -- uvx --from git+https://gi
 | Variable | Required | Default | Used by | Meaning |
 |---|---|---|---|---|
 | `YNAB_API_KEY` | **yes** | — | every tool | YNAB personal access token. It grants full read and write access to your budgets: keep it in your MCP client's `env` block or in a `.env` file, never in the repository. |
+| `AVENIR_MCP_WRITE` | no | unset (read-only) | write tools | `1` registers the tools that change your budget. Without it the server is read-only: write tools are neither listed nor callable. |
 | `AVENIR_MCP_TRANSPORT` | no | `stdio` | `avenir-mcp` command | `stdio` for a client that launches the server itself (Claude Desktop, Claude Code, Cursor); `http` to serve streamable HTTP. |
 | `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
 | `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
@@ -95,9 +99,10 @@ Written down so that nobody discovers them the hard way:
   and wait for the user: through the client's confirmation dialog (MCP elicitation)
   when it has one, otherwise through a single-use code valid 10 minutes for exactly the
   previewed changes.
-- **Older write tools still act immediately**: `classify_transaction`,
-  `approve_transactions`, `create_category`, `set_category_budget`,
-  `create_transactions`. There is no read-only mode yet.
+- **Read-only by default.** Write tools exist only with `AVENIR_MCP_WRITE=1`.
+- **Older write tools still act immediately** once writes are enabled:
+  `classify_transaction`, `approve_transactions`, `create_category`,
+  `set_category_budget`, `create_transactions`.
 - Undo covers operations made with `apply_categories` and `reconcile_account`, and only on the machine whose
   journal recorded them. An undo cannot itself be undone.
 - `create_transactions` creates transactions that are already approved and cleared.
@@ -119,9 +124,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 209, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (955 statements) |
-| Branch coverage | 100 % (220 branches) |
+| Tests | 215, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1011 statements) |
+| Branch coverage | 100 % (222 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 
