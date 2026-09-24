@@ -38,7 +38,9 @@ read-only by default, previewable and undoable.
 | `get_uncategorized_transactions` | read | what still needs a category |
 | `suggest_categories` | read | **start here to classify**: pending transactions, newest first, paginated, with a suggestion when the payee's history allows, and the category list, in two YNAB requests |
 | `suggest_category` | read | a category guess for a single transaction |
-| `classify_transaction` | **write** | assign a category |
+| `apply_categories` | **write, confirmed, undoable** | assign categories to many transactions: previewed, confirmed by the user, then journaled |
+| `undo_operation` | **write, confirmed** | revert the latest operation (or a named one); never overwrites a later change |
+| `classify_transaction` | **write** | assign a category to one transaction, immediately |
 | `approve_transactions` | **write** | mark transactions as reviewed |
 | `create_category` | **write** | add a category |
 | `set_category_budget` | **write** | assign an amount to a category for a month |
@@ -77,6 +79,7 @@ claude mcp add avenir --env YNAB_API_KEY=your-token -- uvx --from git+https://gi
 | `AVENIR_MCP_TRANSPORT` | no | `stdio` | `avenir-mcp` command | `stdio` for a client that launches the server itself (Claude Desktop, Claude Code, Cursor); `http` to serve streamable HTTP. |
 | `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
 | `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
+| `AVENIR_MCP_JOURNAL` | no | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, else `~/.local/state/avenir-mcp/journal.jsonl` | `apply_categories`, `undo_operation` | File recording applied operations so they can be undone. Holds identifiers only (transaction and category ids), no amounts or payees; created with owner-only permissions. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_category`, `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
 
 Every tool takes a `budget_id`: a budget UUID from `list_budgets`, or `last-used`.
@@ -85,8 +88,15 @@ Every tool takes a `budget_id`: a budget UUID from `list_budgets`, or `last-used
 
 Written down so that nobody discovers them the hard way:
 
-- **Write tools act immediately.** There is no preview, confirmation or undo yet,
-  and no read-only mode. Your MCP client's confirmation prompt is the only guard.
+- **Confirmed writes.** `apply_categories` and `undo_operation` show what will change
+  and wait for the user: through the client's confirmation dialog (MCP elicitation)
+  when it has one, otherwise through a single-use code valid 10 minutes for exactly the
+  previewed changes.
+- **Older write tools still act immediately**: `classify_transaction`,
+  `approve_transactions`, `create_category`, `set_category_budget`,
+  `create_transactions`. There is no read-only mode yet.
+- Undo covers operations made with `apply_categories`, and only on the machine whose
+  journal recorded them. An undo cannot itself be undone.
 - `create_transactions` creates transactions that are already approved and cleared.
 - Some tools return amounts in milliunits (YNAB's unit: 1.00 = 1000), others in currency
   units. Each tool's description says which.
@@ -102,9 +112,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 113, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (391 statements) |
-| Branch coverage | 100 % (72 branches) |
+| Tests | 147, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (606 statements) |
+| Branch coverage | 100 % (122 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 

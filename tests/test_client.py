@@ -673,3 +673,28 @@ def test_approve_transactions_empty_list_makes_no_call() -> None:
         result = asyncio.run(client.approve_transactions("b1", []))
     mock_client.assert_not_called()
     assert result == {"approved": 0}
+
+
+def test_set_transaction_categories_bulk_patches_category_ids() -> None:
+    """All category changes go in one PATCH; None clears a category."""
+    payload = {"data": {"transaction_ids": ["t1", "t2"], "transactions": []}}
+    ctx = _async_client_returning(payload)
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            result = asyncio.run(
+                client.set_transaction_categories("b1", [("t1", "c1"), ("t2", None)])
+            )
+    http = ctx.__aenter__.return_value
+    assert result == ["t1", "t2"]
+    assert http.patch.call_args.args[0].endswith("/budgets/b1/transactions")
+    assert http.patch.call_args.kwargs["json"] == {
+        "transactions": [{"id": "t1", "category_id": "c1"}, {"id": "t2", "category_id": None}]
+    }
+
+
+def test_set_transaction_categories_empty_list_makes_no_call() -> None:
+    """Nothing to change must not hit the API."""
+    with patch("httpx.AsyncClient") as mock_client:
+        result = asyncio.run(client.set_transaction_categories("b1", []))
+    mock_client.assert_not_called()
+    assert result == []

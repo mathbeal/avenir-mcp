@@ -474,3 +474,23 @@ async def approve_transactions(budget_id: str, tx_ids: list[str]) -> dict[str, i
     body = {"transactions": [{"id": tx_id, "approved": True} for tx_id in tx_ids]}
     data = await _patch(f"/budgets/{budget_id}/transactions", body)
     return {"approved": len(data["data"].get("transaction_ids", []))}
+
+
+async def set_transaction_categories(
+    budget_id: str, moves: list[tuple[str, str | None]]
+) -> list[str]:
+    """Give each transaction a category in one bulk request.
+
+    Args:
+        budget_id: YNAB budget UUID or "last-used".
+        moves: (transaction_id, category_id) pairs; None clears the category.
+
+    Returns:
+        The ids of the transactions YNAB updated.
+    """
+    if not moves:
+        return []
+    logger.info("Setting the category of %d transactions", len(moves))
+    body = {"transactions": [{"id": tx_id, "category_id": cat} for tx_id, cat in moves]}
+    data = await _patch(f"/budgets/{budget_id}/transactions", body)
+    return list(data["data"].get("transaction_ids", []))
