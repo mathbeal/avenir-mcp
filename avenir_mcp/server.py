@@ -16,25 +16,21 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
 from avenir_mcp.app import WRITE_TAG, configure, mcp, today
 from avenir_mcp.tools_budget import (
     approve_transactions,
-    classify_transaction,
     create_category,
     create_transactions,
     get_budget_vs_actual,
     get_category_balances,
     get_monthly_summary,
     get_spending_trends,
-    get_uncategorized_transactions,
     list_accounts,
     list_budgets,
     list_category_groups,
     set_category_budget,
-    suggest_category,
 )
 
 __all__ = [
     "WRITE_TAG",
     "approve_transactions",
-    "classify_transaction",
     "configure",
     "create_category",
     "create_transactions",
@@ -42,14 +38,12 @@ __all__ = [
     "get_category_balances",
     "get_monthly_summary",
     "get_spending_trends",
-    "get_uncategorized_transactions",
     "list_accounts",
     "list_budgets",
     "list_category_groups",
     "main",
     "mcp",
     "set_category_budget",
-    "suggest_category",
     "today",
 ]
 

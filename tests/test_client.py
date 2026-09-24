@@ -232,7 +232,7 @@ def test_get_transactions_by_category_uses_category_endpoint() -> None:
 
 
 # ---------------------------------------------------------------------------
-# patch_transaction
+# get_month
 # ---------------------------------------------------------------------------
 
 
@@ -343,52 +343,6 @@ def test_get_months_returns_list() -> None:
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
             result = asyncio.run(client.get_months("b1"))
     assert result == [{"month": "2026-03-01"}, {"month": "2026-04-01"}]
-
-
-def test_get_transaction_returns_transaction_dict() -> None:
-    """get_transaction should return the transaction dict from the API payload."""
-    payload = {"data": {"transaction": {"id": "t42", "payee_name": "AWS"}}}
-    ctx = _async_client_returning(payload)
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            result = asyncio.run(client.get_transaction("b1", "t42"))
-    assert result == {"id": "t42", "payee_name": "AWS"}
-
-
-def test_patch_transaction_sends_correct_body() -> None:
-    """classify_transaction should PUT {transaction: {category_id: ...}}."""
-    payload = {"data": {"transaction": {"id": "t1", "category_id": "c99"}}}
-    mock_resp = _mock_response(payload)
-    mock_http = AsyncMock()
-    mock_http.patch = AsyncMock(return_value=mock_resp)
-    ctx = MagicMock()
-    ctx.__aenter__ = AsyncMock(return_value=mock_http)
-    ctx.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            result = asyncio.run(client.patch_transaction("b1", "t1", "c99"))
-
-    assert result["category_id"] == "c99"
-    sent_json = mock_http.patch.call_args.kwargs["json"]
-    assert sent_json == {"transaction": {"category_id": "c99"}}
-
-
-def test_patch_transaction_adds_flag_color_when_given() -> None:
-    """An optional flag_color is sent alongside the category."""
-    payload = {"data": {"transaction": {"id": "t1", "category_id": "c99", "flag_color": "purple"}}}
-    mock_http = AsyncMock()
-    mock_http.patch = AsyncMock(return_value=_mock_response(payload))
-    ctx = MagicMock()
-    ctx.__aenter__ = AsyncMock(return_value=mock_http)
-    ctx.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            asyncio.run(client.patch_transaction("b1", "t1", "c99", flag_color="purple"))
-
-    sent_json = mock_http.patch.call_args.kwargs["json"]
-    assert sent_json == {"transaction": {"category_id": "c99", "flag_color": "purple"}}
 
 
 # ---------------------------------------------------------------------------

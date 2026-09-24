@@ -18,7 +18,7 @@ What the server does:
   only confirms the exact changes it was issued for
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
   identifiers only, readable by its owner only
-- its older write tools (`classify_transaction`, `approve_transactions`, `create_category`,
+- its older write tools (`approve_transactions`, `create_category`,
   `set_category_budget`, `create_transactions`) change your budget **immediately**.
   Keep your MCP client's per-call confirmation on for them.
 

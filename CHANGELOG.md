@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Removed `get_uncategorized_transactions`, `suggest_category` and
+  `classify_transaction`: `suggest_categories` and `apply_categories` do the same,
+  paginated, previewed and undoable. The catalog is 17 tools.
 - GitHub Actions quality workflow: lockfile, lint, types, tests at 100 % coverage,
   lexdrift against a baseline, typos, zizmor and pip-audit; no permissions, actions
   pinned by SHA.

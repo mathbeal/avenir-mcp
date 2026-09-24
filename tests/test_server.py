@@ -23,21 +23,30 @@ def test_mcp_instance_name() -> None:
     assert server.mcp.name == "avenir"
 
 
-def test_tools_registered() -> None:
-    """All 8 tools must be registered on the FastMCP instance."""
-    tool_names = [t.name for t in asyncio.run(server.mcp.list_tools())]
-    expected = [
-        "list_budgets",
-        "get_category_balances",
-        "get_monthly_summary",
-        "get_budget_vs_actual",
-        "get_spending_trends",
-        "get_uncategorized_transactions",
-        "suggest_category",
-        "classify_transaction",
-    ]
-    for name in expected:
-        assert name in tool_names
+def test_catalog_is_exactly_the_published_tools() -> None:
+    """One tool per task: tools superseded by safer ones are gone."""
+    tool_names = sorted(t.name for t in asyncio.run(server.mcp.list_tools()))
+    assert tool_names == sorted(
+        [
+            "list_budgets",
+            "list_accounts",
+            "list_category_groups",
+            "get_category_balances",
+            "get_monthly_summary",
+            "get_budget_vs_actual",
+            "get_spending_trends",
+            "suggest_categories",
+            "forecast_balance",
+            "apply_categories",
+            "undo_operation",
+            "reconcile_account",
+            "update_category",
+            "create_category",
+            "set_category_budget",
+            "create_transactions",
+            "approve_transactions",
+        ]
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -131,82 +140,6 @@ def test_get_spending_trends_fetches_last_n_months() -> None:
 
 
 # ---------------------------------------------------------------------------
-# get_uncategorized_transactions
-# ---------------------------------------------------------------------------
-
-
-def test_get_uncategorized_transactions_delegates_to_client() -> None:
-    """get_uncategorized_transactions should call get_transactions with uncategorized_only=True."""
-    txs = [{"id": "t1", "payee_name": "NewVendor", "category_id": None}]
-    with patch("avenir_mcp.client.get_transactions", new=AsyncMock(return_value=txs)) as mock_fn:
-        result = asyncio.run(server.get_uncategorized_transactions("b1"))
-    mock_fn.assert_called_once_with("b1", uncategorized_only=True)
-    assert result == txs
-
-
-# ---------------------------------------------------------------------------
-# suggest_category
-# ---------------------------------------------------------------------------
-
-
-def test_suggest_category_high_confidence_auto_classify() -> None:
-    """suggest_category returns auto_classify=True when confidence ≥ threshold."""
-    tx = {"id": "t1", "payee_name": "AWS", "category_id": None}
-    all_txs = [
-        {"payee_name": "AWS", "category_id": "c1"},
-        {"payee_name": "AWS", "category_id": "c1"},
-        {"payee_name": "AWS", "category_id": "c1"},
-    ]
-    categories = [{"id": "c1", "name": "AWS / Cloud"}]
-
-    with (
-        patch("avenir_mcp.client.get_transaction", new=AsyncMock(return_value=tx)),
-        patch("avenir_mcp.client.get_transactions", new=AsyncMock(return_value=all_txs)),
-        patch("avenir_mcp.client.get_categories", new=AsyncMock(return_value=categories)),
-    ):
-        result = asyncio.run(server.suggest_category("b1", "t1"))
-
-    assert result["auto_classify"] is True
-    assert result["category_id"] == "c1"
-
-
-def test_suggest_category_low_confidence_returns_candidates() -> None:
-    """suggest_category returns candidates when confidence < threshold."""
-    tx = {"id": "t1", "payee_name": "AWS", "category_id": None}
-    all_txs = [
-        {"payee_name": "AWS", "category_id": "c1"},
-        {"payee_name": "AWS", "category_id": "c2"},
-    ]
-    categories = [{"id": "c1", "name": "Cat1"}, {"id": "c2", "name": "Cat2"}]
-
-    with (
-        patch("avenir_mcp.client.get_transaction", new=AsyncMock(return_value=tx)),
-        patch("avenir_mcp.client.get_transactions", new=AsyncMock(return_value=all_txs)),
-        patch("avenir_mcp.client.get_categories", new=AsyncMock(return_value=categories)),
-    ):
-        result = asyncio.run(server.suggest_category("b1", "t1"))
-
-    assert result["auto_classify"] is False
-    assert "candidates" in result
-
-
-# ---------------------------------------------------------------------------
-# classify_transaction
-# ---------------------------------------------------------------------------
-
-
-def test_classify_transaction_calls_patch() -> None:
-    """classify_transaction must call client.patch_transaction with correct args."""
-    updated_tx = {"id": "t1", "category_id": "c99"}
-    with patch(
-        "avenir_mcp.client.patch_transaction", new=AsyncMock(return_value=updated_tx)
-    ) as mock_fn:
-        result = asyncio.run(server.classify_transaction("b1", "t1", "c99"))
-    mock_fn.assert_called_once_with("b1", "t1", "c99")
-    assert result["category_id"] == "c99"
-
-
-# ---------------------------------------------------------------------------
 # list_category_groups / create_category
 # ---------------------------------------------------------------------------
 
@@ -229,13 +162,6 @@ def test_create_category_delegates_to_client() -> None:
         result = asyncio.run(server.create_category("b1", "g1", "Miscellaneous"))
     mock_fn.assert_called_once_with("b1", "g1", "Miscellaneous")
     assert result == created
-
-
-def test_new_category_tools_registered() -> None:
-    """The category-management tools must be exposed over MCP."""
-    tool_names = [t.name for t in asyncio.run(server.mcp.list_tools())]
-    assert "list_category_groups" in tool_names
-    assert "create_category" in tool_names
 
 
 # ---------------------------------------------------------------------------
@@ -261,13 +187,6 @@ def test_list_accounts_delegates_to_client() -> None:
         result = asyncio.run(server.list_accounts("b1"))
     mock_fn.assert_called_once_with("b1")
     assert result == accounts
-
-
-def test_budget_tools_registered() -> None:
-    """The budgeting and account tools must be exposed over MCP."""
-    tool_names = [t.name for t in asyncio.run(server.mcp.list_tools())]
-    assert "set_category_budget" in tool_names
-    assert "list_accounts" in tool_names
 
 
 def test_create_transactions_delegates_to_client() -> None:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from avenir_mcp import analytics, classifier, client
+from avenir_mcp import analytics, client
 from avenir_mcp.app import WRITE_TAG, mcp
 
 logger = logging.getLogger(__name__)
@@ -149,99 +149,6 @@ async def get_spending_trends(
 
 @mcp.tool(
     annotations={
-        "title": "Uncategorized transactions",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    }
-)
-async def get_uncategorized_transactions(budget_id: str) -> list[dict[str, Any]]:
-    """Return all transactions that have not yet been assigned a category.
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-
-    Returns a list of transaction dicts (id, date, amount, payee_name, memo).
-    Use suggest_category to get a classification suggestion for each one.
-    """
-    logger.info("Tool called: get_uncategorized_transactions(budget_id=%r)", budget_id)
-    return await client.get_transactions(budget_id, uncategorized_only=True)
-
-
-@mcp.tool(
-    annotations={
-        "title": "Suggest a category for one transaction",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    }
-)
-async def suggest_category(budget_id: str, tx_id: str) -> dict[str, Any]:
-    """Suggest the most likely category for an uncategorized transaction.
-
-    Uses the historical payee → category frequency from the budget to score
-    confidence.  If confidence ≥ AVENIR_MCP_CONFIDENCE_THRESHOLD (default 0.90),
-    the result includes auto_classify=True and a single category_id/name.
-    Otherwise, auto_classify=False and the top-3 candidates are returned for
-    human review.
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-        tx_id: Transaction UUID to classify.
-
-    Returns a dict with confidence (0–1), auto_classify (bool), and either
-    category_id/category_name or candidates (list of top-3).
-    """
-    logger.info("Tool called: suggest_category(budget_id=%r, tx_id=%r)", budget_id, tx_id)
-
-    # Fetch the target transaction
-    tx = await client.get_transaction(budget_id, tx_id)
-    payee_name: str = tx.get("payee_name") or ""
-
-    # Build payee history from past transactions in the same direction (in or out)
-    outflow = tx.get("amount", 0) < 0
-    all_transactions = await client.get_transactions(budget_id)
-    history = classifier.build_payee_history(
-        [t for t in all_transactions if (t.get("amount", 0) < 0) == outflow]
-    )
-
-    # Fetch available categories
-    categories = await client.get_categories(budget_id)
-
-    return classifier.score_payee(payee_name, history, categories)
-
-
-@mcp.tool(
-    tags={WRITE_TAG},
-    annotations={
-        "title": "Assign a category to one transaction",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
-)
-async def classify_transaction(budget_id: str, tx_id: str, category_id: str) -> dict[str, Any]:
-    """Assign a category to a transaction in YNAB.
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-        tx_id: Transaction UUID to update.
-        category_id: Target category UUID.
-
-    Returns the updated transaction dict from the YNAB API.
-    """
-    logger.info(
-        "Tool called: classify_transaction(budget_id=%r, tx_id=%r, category_id=%r)",
-        budget_id,
-        tx_id,
-        category_id,
-    )
-    return await client.patch_transaction(budget_id, tx_id, category_id)
-
-
-@mcp.tool(
-    annotations={
         "title": "List category groups",
         "readOnlyHint": True,
         "idempotentHint": True,
@@ -279,7 +186,7 @@ async def create_category(budget_id: str, category_group_id: str, name: str) -> 
         category_group_id: Group UUID, from list_category_groups.
         name: Name of the new category.
 
-    Returns the created category dict (its id can be used with classify_transaction).
+    Returns the created category dict (its id can be used with apply_categories).
     """
     logger.info(
         "Tool called: create_category(budget_id=%r, category_group_id=%r, name=%r)",

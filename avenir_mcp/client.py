@@ -291,43 +291,6 @@ async def get_months(budget_id: str) -> list[dict[str, Any]]:
     return data["data"]["months"]  # type: ignore[no-any-return]
 
 
-async def get_transaction(budget_id: str, tx_id: str) -> dict[str, Any]:
-    """Return a single transaction by ID.
-
-    Args:
-        budget_id: YNAB budget UUID or "last-used".
-        tx_id: Transaction UUID.
-
-    Returns:
-        Transaction dict from the YNAB API.
-    """
-    logger.info("Fetching transaction %s for budget %s", tx_id, budget_id)
-    data = await _get(f"/budgets/{budget_id}/transactions/{tx_id}")
-    return data["data"]["transaction"]  # type: ignore[no-any-return]
-
-
-async def patch_transaction(
-    budget_id: str, tx_id: str, category_id: str, flag_color: str | None = None
-) -> dict[str, Any]:
-    """Set the category of a transaction in YNAB.
-
-    Args:
-        budget_id: YNAB budget UUID or "last-used".
-        tx_id: Transaction UUID to update.
-        category_id: Target category UUID.
-        flag_color: Optional YNAB flag (red, orange, yellow, green, blue, purple).
-
-    Returns:
-        Updated transaction dict from the YNAB API response.
-    """
-    logger.info("Classifying transaction %s → category %s", tx_id, category_id)
-    body: dict[str, Any] = {"transaction": {"category_id": category_id}}
-    if flag_color:
-        body["transaction"]["flag_color"] = flag_color
-    data = await _patch(f"/budgets/{budget_id}/transactions/{tx_id}", body)
-    return data["data"]["transaction"]  # type: ignore[no-any-return]
-
-
 # YNAB system groups (Ready to Assign, card payments, hidden bin): no user categories there.
 _SYSTEM_GROUPS = {"Internal Master Category", "Credit Card Payments", "Hidden Categories"}
 

@@ -36,15 +36,12 @@ read-only by default, previewable and undoable.
 | `get_category_balances` | read | assigned, activity and available per category |
 | `get_budget_vs_actual` | read | how much of each category's budget is spent |
 | `get_spending_trends` | read | spending per category over the last N months |
-| `get_uncategorized_transactions` | read | what still needs a category |
 | `suggest_categories` | read | **start here to classify**: pending transactions, newest first, paginated, with a suggestion when the payee's history allows, and the category list, in two YNAB requests |
 | `forecast_balance` | read | project the balance month by month up to 24 months ahead and name the first month it goes below zero; every assumption (recurring charges found in your history, average spending and income, your one-off amounts) is returned so you can correct it |
-| `suggest_category` | read | a category guess for a single transaction |
 | `apply_categories` | **write, confirmed, undoable** | assign categories to many transactions: previewed, confirmed by the user, then journaled |
 | `undo_operation` | **write, confirmed** | revert the latest operation (or a named one); never overwrites a later change |
 | `reconcile_account` | **write, confirmed, undoable** | compare an account with the balance your bank shows; explain a gap (pending transactions, the one matching the difference, likely duplicates) without writing; once it matches, mark cleared transactions reconciled; an adjustment only on explicit request |
 | `update_category` | **write, confirmed** | rename a category or move it to another group; the result gives the previous name and group to revert |
-| `classify_transaction` | **write** | assign a category to one transaction, immediately |
 | `approve_transactions` | **write** | mark transactions as reviewed |
 | `create_category` | **write** | add a category |
 | `set_category_budget` | **write** | assign an amount to a category for a month |
@@ -88,7 +85,7 @@ claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- 
 | `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
 | `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
 | `AVENIR_MCP_JOURNAL` | no | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, else `~/.local/state/avenir-mcp/journal.jsonl` | `apply_categories`, `reconcile_account`, `undo_operation` | File recording applied operations so they can be undone. Holds identifiers only (transaction and category ids), no amounts or payees; created with owner-only permissions. |
-| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_category`, `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
+| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
 
 Every tool takes a `budget_id`: a budget UUID from `list_budgets`, or `last-used`.
 
@@ -102,15 +99,13 @@ Written down so that nobody discovers them the hard way:
   previewed changes.
 - **Read-only by default.** Write tools exist only with `AVENIR_MCP_WRITE=1`.
 - **Older write tools still act immediately** once writes are enabled:
-  `classify_transaction`, `approve_transactions`, `create_category`,
+  `approve_transactions`, `create_category`,
   `set_category_budget`, `create_transactions`.
 - Undo covers operations made with `apply_categories` and `reconcile_account`, and only on the machine whose
   journal recorded them. An undo cannot itself be undone.
 - `create_transactions` creates transactions that are already approved and cleared.
 - Some tools return amounts in milliunits (YNAB's unit: 1.00 = 1000), others in currency
   units. Each tool's description says which.
-- Large budgets produce large answers: `get_uncategorized_transactions` is not
-  paginated; prefer `suggest_categories`.
 - Suggestions come from your own history, learnt separately for money in and money
   out, and only point to categories you can still assign. A merchant never classified
   before gets no suggestion, and the agent chooses from the category list. YNAB allows 200 requests
@@ -125,9 +120,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 215, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1011 statements) |
-| Branch coverage | 100 % (222 branches) |
+| Tests | 206, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (982 statements) |
+| Branch coverage | 100 % (220 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |
