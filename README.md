@@ -36,7 +36,8 @@ read-only by default, previewable and undoable.
 | `get_budget_vs_actual` | read | how much of each category's budget is spent |
 | `get_spending_trends` | read | spending per category over the last N months |
 | `get_uncategorized_transactions` | read | what still needs a category |
-| `suggest_category` | read | a category guess from the payee's history |
+| `suggest_categories` | read | **start here to classify**: pending transactions, newest first, paginated, with a suggestion when the payee's history allows, and the category list, in two YNAB requests |
+| `suggest_category` | read | a category guess for a single transaction |
 | `classify_transaction` | **write** | assign a category |
 | `approve_transactions` | **write** | mark transactions as reviewed |
 | `create_category` | **write** | add a category |
@@ -76,7 +77,7 @@ claude mcp add avenir --env YNAB_API_KEY=your-token -- uvx --from git+https://gi
 | `AVENIR_MCP_TRANSPORT` | no | `stdio` | `avenir-mcp` command | `stdio` for a client that launches the server itself (Claude Desktop, Claude Code, Cursor); `http` to serve streamable HTTP. |
 | `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
 | `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
-| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_category` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
+| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_category`, `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
 
 Every tool takes a `budget_id`: a budget UUID from `list_budgets`, or `last-used`.
 
@@ -90,10 +91,10 @@ Written down so that nobody discovers them the hard way:
 - Some tools return amounts in milliunits (YNAB's unit: 1.00 = 1000), others in currency
   units. Each tool's description says which.
 - Large budgets produce large answers: `get_uncategorized_transactions` is not
-  paginated yet.
-- `suggest_category` matches exact payee names, which bank imports often make unique.
-  It downloads the full history on each call and costs 3 API requests. YNAB allows
-  200 requests per hour.
+  paginated; prefer `suggest_categories`.
+- Suggestions come from your own history: a merchant never classified before gets no
+  suggestion, and the agent chooses from the category list. YNAB allows 200 requests
+  per hour; `suggest_categories` uses two per page.
 - Transaction memos and payee names come from your bank and are untrusted text. See
   [SECURITY.md](SECURITY.md).
 
@@ -101,9 +102,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 84, none of which calls the YNAB API |
-| Line coverage | 100 % (304 statements) |
-| Branch coverage | 100 % (62 branches) |
+| Tests | 113, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (391 statements) |
+| Branch coverage | 100 % (72 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 
