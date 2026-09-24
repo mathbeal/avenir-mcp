@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.DS_Store
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# never commit real financial data
+*.pdf
+*.csv
+*.ofx
+*.qif
+*.log
