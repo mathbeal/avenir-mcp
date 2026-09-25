@@ -196,6 +196,46 @@ def _spread(total: int, first_day: int, last_day: int) -> dict[int, int]:
     return {first_day + i: (base + (1 if i < extra else 0)) * 10 for i in range(days)}
 
 
+def _dated(  # pylint: disable=too-many-arguments
+    recurring: list[Recurring],  # pylint: disable=redefined-outer-name
+    one_offs: list[OneOff],
+    *,
+    label: str,
+    first_day: int,
+    days: int,
+    today: date,
+) -> dict[int, int]:
+    """Milliunits falling on a given day: recurring amounts from first_day, and one-offs."""
+    dated: dict[int, int] = defaultdict(int)
+    for r in recurring:
+        if r["day"] >= first_day:
+            dated[min(r["day"], days)] += amount_to_milliunit(r["amount"])
+    for o in one_offs:
+        if o["date"].startswith(label) and o["date"] > today.isoformat():
+            dated[int(o["date"][8:10])] += amount_to_milliunit(o["amount"])
+    return dated
+
+
+def _walk(
+    label: str, balance: int, first_day: int, days: int, daily: list[dict[int, int]]
+) -> tuple[MonthProjection, int]:
+    """Walk one month day by day from first_day; return it and its closing balance."""
+    running = lowest = balance
+    for day in range(first_day, days + 1):
+        running += sum(flow.get(day, 0) for flow in daily)
+        lowest = min(lowest, running)
+    amounts = [amount for flow in daily for amount in flow.values()]
+    month: MonthProjection = {
+        "month": label,
+        "start": milliunit_to_amount(balance),
+        "inflows": milliunit_to_amount(sum(a for a in amounts if a > 0)),
+        "outflows": milliunit_to_amount(sum(a for a in amounts if a < 0)),
+        "end": milliunit_to_amount(running),
+        "lowest": milliunit_to_amount(lowest),
+    }
+    return month, running
+
+
 def project(  # pylint: disable=too-many-arguments,too-many-locals
     *,
     start_balance: float,
@@ -230,31 +270,13 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         to_receive = (
             max(0, income - amount_to_milliunit(received_this_month)) if current else income
         )
-        dated: dict[int, int] = defaultdict(int)
-        for r in recurring:
-            if r["day"] >= first_day:
-                dated[min(r["day"], days)] += amount_to_milliunit(r["amount"])
-        for o in one_offs:
-            if o["date"][:7] == label and o["date"] > today.isoformat():
-                dated[int(o["date"][8:10])] += amount_to_milliunit(o["amount"])
-        spending = _spread(to_spend, first_day, days)
-        receiving = _spread(to_receive, first_day, days)
-        start = running = lowest = balance
-        for day in range(first_day, days + 1):
-            running += spending.get(day, 0) + receiving.get(day, 0) + dated.get(day, 0)
-            lowest = min(lowest, running)
-        flows = list(dated.values()) + [sum(spending.values()), sum(receiving.values())]
-        months.append(
-            {
-                "month": label,
-                "start": milliunit_to_amount(start),
-                "inflows": milliunit_to_amount(sum(a for a in flows if a > 0)),
-                "outflows": milliunit_to_amount(sum(a for a in flows if a < 0)),
-                "end": milliunit_to_amount(running),
-                "lowest": milliunit_to_amount(lowest),
-            }
-        )
-        if lowest < 0 and first_shortfall is None:
+        daily = [
+            _spread(to_spend, first_day, days),
+            _spread(to_receive, first_day, days),
+            _dated(recurring, one_offs, label=label, first_day=first_day, days=days, today=today),
+        ]
+        projection, balance = _walk(label, balance, first_day, days, daily)
+        months.append(projection)
+        if projection["lowest"] < 0 and first_shortfall is None:
             first_shortfall = label
-        balance = running
     return {"months": months, "first_shortfall": first_shortfall}

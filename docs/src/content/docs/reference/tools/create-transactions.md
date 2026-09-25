@@ -105,9 +105,9 @@ Answer on the demo budget:
 - `{date} is in the future: YNAB only records transactions that happened.`
 - `Category {category} is not in this budget: use a category_id from get_category_balances.`
 - `date must be YYYY-MM-DD, got '{date}'.`
-- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
 - `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 YNAB's own errors come back as `Error calling tool '<tool>': YNAB <status>: <detail>`.

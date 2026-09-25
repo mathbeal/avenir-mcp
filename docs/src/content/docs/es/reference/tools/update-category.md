@@ -81,9 +81,9 @@ Respuesta sobre el presupuesto de demostración:
 - `Category {category_id} is not in this budget: use a category_id from suggest_categories.`
 - `Group {category_group_id} is not in this budget: use an id from list_category_groups.`
 - `The new name is empty: give a name, or omit it to keep the current one.`
-- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
 - `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 Los errores propios de YNAB llegan como `Error calling tool '<tool>': YNAB <status>: <detail>`.

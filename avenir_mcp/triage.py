@@ -7,7 +7,6 @@ list of what is pending: no request per transaction.
 from __future__ import annotations
 
 import base64
-import binascii
 from typing import Any, TypedDict
 
 from pydantic import ConfigDict, with_config  # pylint: disable=import-error
@@ -88,7 +87,7 @@ def _decode_cursor(cursor: str) -> int:
         prefix, _, value = base64.urlsafe_b64decode(cursor.encode()).decode().partition(":")
         if prefix != "offset" or not value.isdigit():
             raise ValueError(cursor)
-    except (ValueError, binascii.Error, UnicodeDecodeError) as error:
+    except ValueError as error:  # binascii.Error and UnicodeDecodeError are ValueErrors
         raise ValueError(
             "Invalid cursor: pass the next_cursor value from the previous page unchanged, "
             "or omit it to start from the first page."

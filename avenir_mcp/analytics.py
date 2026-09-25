@@ -45,7 +45,7 @@ def budget_vs_actual(
         actual = client.milliunit_to_amount(abs(activity_mu))
         balance = client.milliunit_to_amount(balance_mu)
 
-        if budgeted == 0.0:
+        if budgeted_mu == 0:
             utilization_pct = 0.0
         else:
             utilization_pct = round(actual / budgeted * 100, 1)

@@ -100,6 +100,58 @@ def _answer(action: str, content: dict[str, Any] | None) -> WriteStatus | None:
     return None
 
 
+def _spend_code(confirmation: str, budget_id: str, subject: object, required: bool) -> WriteStatus:
+    """ "applied" when the code was issued for exactly this subject; otherwise an error."""
+    if required:
+        raise ToolError(
+            "Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again "
+            "without confirmation, and the user answers in the client."
+        )
+    if CONFIRMATIONS.consume(confirmation, budget_id, subject):
+        return "applied"
+    raise ToolError(
+        "This confirmation code is unknown, expired, already used, or was issued for "
+        "different changes. Call again without confirmation to get a new preview."
+    )
+
+
+def _modern_answer(
+    ctx: Context, budget_id: str, subject: object, question: str
+) -> WriteStatus | None | types.InputRequiredResult:
+    """Protocol 2026-07-28: request the answer, or read the one the client sends back.
+
+    The request state carries the preview's fingerprint: an answer to a preview of
+    other changes is refused.
+    """
+    fingerprint = writes.fingerprint(budget_id, subject)
+    responses = ctx.input_responses
+    if not responses or _QUESTION_KEY not in responses:
+        request = types.ElicitRequest(
+            params=types.ElicitRequestFormParams(message=question, requested_schema=_YES_NO.schema)
+        )
+        return types.InputRequiredResult(
+            input_requests={_QUESTION_KEY: request}, request_state=fingerprint
+        )
+    if ctx.request_state != fingerprint:
+        raise ToolError(
+            "The budget changed between the preview and the answer. "
+            "Call again without an answer to get a new preview."
+        )
+    reply = responses[_QUESTION_KEY]
+    return _answer(reply.action, reply.content) if isinstance(reply, types.ElicitResult) else None
+
+
+async def _answer_in_client(
+    ctx: Context, budget_id: str, subject: object, question: str
+) -> WriteStatus | None | types.InputRequiredResult:
+    """The user's answer given in the client; None when nobody answered."""
+    rc = ctx.request_context
+    if rc is not None and rc.protocol_version in MODERN_PROTOCOL_VERSIONS:
+        return _modern_answer(ctx, budget_id, subject, question)
+    answer = await ctx.elicit(question, bool)
+    return _answer(answer.action, {"value": getattr(answer, "data", None)})
+
+
 async def ask(
     ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
 ) -> WriteStatus | str | types.InputRequiredResult:
@@ -113,18 +165,8 @@ async def ask(
     an agent could relay a code without asking, so codes are neither issued nor accepted.
     """
     required = os.getenv("AVENIR_MCP_REQUIRE_ELICITATION") == "1"
-    if confirmation is not None and required:
-        raise ToolError(
-            "Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again "
-            "without confirmation, and the user answers in the client."
-        )
     if confirmation is not None:
-        if CONFIRMATIONS.consume(confirmation, budget_id, subject):
-            return "applied"
-        raise ToolError(
-            "This confirmation code is unknown, expired, already used, or was issued for "
-            "different changes. Call again without confirmation to get a new preview."
-        )
+        return _spend_code(confirmation, budget_id, subject, required)
     can_ask = ctx.session.check_client_capability(
         types.ClientCapabilities(elicitation=types.ElicitationCapability())
     )
@@ -136,35 +178,12 @@ async def ask(
         )
     if not can_ask:
         return CONFIRMATIONS.issue(budget_id, subject)
-    rc = ctx.request_context
-    if rc is not None and rc.protocol_version in MODERN_PROTOCOL_VERSIONS:
-        fingerprint = writes.fingerprint(budget_id, subject)
-        responses = ctx.input_responses
-        if not responses or _QUESTION_KEY not in responses:
-            request = types.ElicitRequest(
-                params=types.ElicitRequestFormParams(
-                    message=question, requested_schema=_YES_NO.schema
-                )
-            )
-            return types.InputRequiredResult(
-                input_requests={_QUESTION_KEY: request}, request_state=fingerprint
-            )
-        if ctx.request_state != fingerprint:
-            raise ToolError(
-                "The budget changed between the preview and the answer. "
-                "Call again without an answer to get a new preview."
-            )
-        reply = responses[_QUESTION_KEY]
-        decision = (
-            _answer(reply.action, reply.content) if isinstance(reply, types.ElicitResult) else None
-        )
-    else:
-        answer = await ctx.elicit(question, bool)
-        decision = _answer(answer.action, {"value": getattr(answer, "data", None)})
-    if decision is None and required:
-        return "declined"
-    # Nobody said no when the question was dismissed: fall back to a code.
-    return decision or CONFIRMATIONS.issue(budget_id, subject)
+    decision = await _answer_in_client(ctx, budget_id, subject, question)
+    if decision is not None:
+        return decision
+    # Nobody said no when the question was dismissed: fall back to a code, unless
+    # only an answer in the client may confirm.
+    return "declined" if required else CONFIRMATIONS.issue(budget_id, subject)
 
 
 async def write_plan(
