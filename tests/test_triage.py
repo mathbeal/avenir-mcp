@@ -142,3 +142,11 @@ def test_suggestions_follow_the_direction_of_the_money() -> None:
     assert triage.prepare(history + [repayment], _CATEGORIES)["items"][0]["suggestion"] is None
     refund = _tx("p2", "LENDER", amount=1000)
     assert triage.prepare(history + [refund], _CATEGORIES)["items"][0]["suggestion"] is not None
+
+
+def test_split_transactions_are_not_pending() -> None:
+    """A split has no category of its own: its lines carry them, so it is not waiting."""
+    split = _tx(
+        "p1", "SUPERMARKET", subtransactions=[{"category_id": "c-food"}, {"category_id": "c-fun"}]
+    )
+    assert triage.prepare([split], _CATEGORIES)["pending_count"] == 0

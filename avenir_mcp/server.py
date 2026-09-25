@@ -10,6 +10,7 @@ import os
 import sys
 
 from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
+    __version__,
     context,
     tools_accounts,
     tools_categories,
@@ -52,8 +53,11 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Run the server: stdio by default, streamable HTTP when AVENIR_MCP_TRANSPORT=http.
+
+    `avenir-mcp --version` prints the version and exits, for bug reports. The server
+    takes no other argument: its configuration is in the environment.
 
     Read-only unless AVENIR_MCP_WRITE=1: write tools are then registered too.
     Diagnostics go to stderr (stdout belongs to the protocol in stdio mode), at
@@ -62,6 +66,9 @@ def main() -> None:
     The HTTP address comes from AVENIR_MCP_HOST and AVENIR_MCP_PORT and defaults to
     127.0.0.1:8103, so the server is never reachable from the network by accident.
     """
+    if (sys.argv[1:] if argv is None else argv) == ["--version"]:
+        print(f"avenir-mcp {__version__}")
+        return
     level = os.getenv("AVENIR_MCP_LOG_LEVEL", "WARNING").upper()
     logging.basicConfig(level=level, stream=sys.stderr)
     logging.getLogger().setLevel(level)

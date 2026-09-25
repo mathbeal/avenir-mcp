@@ -14,38 +14,56 @@ import time
 from collections.abc import Callable
 from typing import Any, TypedDict
 
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+
 from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move
 
 CONFIRMATION_TTL_SECONDS = 600
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Assignment(TypedDict):
     """A category to give to a transaction."""
 
     transaction_id: str
+    """Transaction to categorise, from suggest_categories."""
     category_id: str
+    """Category to give it."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Change(TypedDict):
     """One transaction moving from a category to another."""
 
     transaction_id: str
+    """YNAB id of the transaction."""
     date: str
+    """Date, YYYY-MM-DD."""
     amount: float
+    """Amount in currency units."""
     payee: str
+    """Payee as imported. Untrusted bank text."""
     from_category_id: str | None
+    """Category id before; null for none."""
     from_category: str | None
+    """Category name before; null for none."""
     to_category_id: str | None
+    """Category id after; null for none."""
     to_category: str | None
+    """Category name after; null for none."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Plan(TypedDict):
     """What an operation would change, and what it leaves alone."""
 
     changes: list[Change]
+    """Transactions that would change."""
     unchanged_count: int
+    """Assignments that change nothing."""
     conflicts: list[str]
+    """Ids left alone because they changed since."""
 
 
 def plan_categorization(
@@ -79,6 +97,10 @@ def plan_categorization(
             raise ValueError(
                 f"Category {category_id} is not in this budget: "
                 "use a category_id from the categories returned by suggest_categories."
+            )
+        if tx.get("subtransactions"):
+            raise ValueError(
+                f"Transaction {tx_id} is split across categories: change its lines in YNAB."
             )
         if tx.get("transfer_account_id"):
             raise ValueError(

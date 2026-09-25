@@ -262,3 +262,14 @@ def test_category_balances_are_compact_and_skip_hidden_internal_and_empty() -> N
     ]
     names = [c["name"] for c in analytics.category_balances(cats, include_empty=True)]
     assert names == ["Groceries", "Restaurants", "Unused"]
+
+
+def test_budget_vs_actual_and_trends_skip_internal_and_hidden_categories() -> None:
+    """Like category_balances: YNAB's internal and hidden categories are not spending."""
+    inflow = _month_cat(
+        "c5", "Inflow: Ready to Assign", 0, category_group_name="Internal Master Category"
+    )
+    hidden = _month_cat("c3", "Old", 0, hidden=True)
+    shown = _month_cat("c1", "Groceries", 50000)
+    assert [c["name"] for c in analytics.budget_vs_actual([inflow, hidden, shown])] == ["Groceries"]
+    assert list(analytics.spending_trends([("2026-09", [inflow, hidden, shown])])) == ["Groceries"]

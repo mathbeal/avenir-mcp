@@ -20,7 +20,7 @@ GROUPS: dict[str, list[tuple[str, str]]] = {
         ("cat-restaurants", "Restaurants"),
         ("cat-transport", "Transport"),
     ],
-    "Fun": [("cat-leisure", "Leisure"), ("cat-subscriptions", "Subscriptions")],
+    "Fun": [("cat-tennis", "Tennis"), ("cat-subscriptions", "Subscriptions")],
     "Savings goals": [("cat-holidays", "Holidays")],
 }
 
@@ -32,7 +32,7 @@ BUDGETED: dict[str, int] = {
     "cat-groceries": 400_000,
     "cat-restaurants": 120_000,
     "cat-transport": 90_000,
-    "cat-leisure": 80_000,
+    "cat-tennis": 80_000,
     "cat-subscriptions": 15_000,
     "cat-holidays": 200_000,
 }
@@ -67,7 +67,7 @@ def _month_transactions(month: str) -> list[tuple[str, str, int, str | None, str
         (f"{y_m}-10", _card("CHEZ LUCIE", f"{y_m}-10"), -r1, "cat-restaurants", CHECKING),
         (f"{y_m}-24", _card("SUSHI GO", f"{y_m}-24"), -r2, "cat-restaurants", CHECKING),
         (f"{y_m}-18", "RAIL CO", -45_000, "cat-transport", CHECKING),
-        (f"{y_m}-20", _card("CINEMA ODEON", f"{y_m}-20"), -22_000, "cat-leisure", CHECKING),
+        (f"{y_m}-20", "TENNIS CLUB - PRELEV", -22_000, "cat-tennis", CHECKING),
         (f"{y_m}-28", "ACME EMPLOYER SALAIRE", 3_200_000, "cat-inflow", CHECKING),
         (f"{y_m}-29", "Transfer : Savings", -200_000, None, CHECKING),
         (f"{y_m}-29", "Transfer : Checking", 200_000, None, SAVINGS),

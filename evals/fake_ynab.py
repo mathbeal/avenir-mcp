@@ -28,6 +28,8 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         self.groups = {name: [list(c) for c in cats] for name, cats in demo.GROUPS.items()}
         self.lock = threading.Lock()
         self.next_id = len(self.transactions)
+        # Requests served, so the documentation can state what each tool costs.
+        self.requests = 0
 
     # --- reads -----------------------------------------------------------
 
@@ -187,6 +189,7 @@ class Handler(BaseHTTPRequestHandler):
         path = re.sub(r"^/v1", "", url.path)
         query = {k: v[0] for k, v in parse_qs(url.query).items()}
         with STATE.lock:
+            STATE.requests += 1
             if (method, path) == ("GET", "/budgets"):
                 budget = {
                     "id": demo.BUDGET_ID,

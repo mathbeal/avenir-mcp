@@ -13,6 +13,8 @@ from collections import defaultdict
 from datetime import date
 from typing import Any, TypedDict
 
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 
@@ -22,39 +24,58 @@ AMOUNT_TOLERANCE = 0.2
 VARIABLE_MONTHS = 3
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Recurring(TypedDict):
     """A charge (or income) seen most months at about the same amount."""
 
     payee: str
+    """Normalised payee name."""
     amount: float
+    """Median monthly amount, negative for a charge, positive for income."""
     day: int
+    """Median day of the month it falls on."""
     months_seen: int
+    """How many of the last 4 full months it appeared in."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class OneOff(TypedDict):
     """An amount expected once, on a date."""
 
     date: str
+    """Day it is expected, YYYY-MM-DD."""
     amount: float
+    """Amount, negative for a payment, positive for money received."""
     label: str
+    """What it is, for the reader."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class MonthProjection(TypedDict):
     """One projected month."""
 
     month: str
+    """Month, YYYY-MM."""
     start: float
+    """Projected balance on the first day (today's balance for the current month)."""
     inflows: float
+    """Money expected in during the month."""
     outflows: float
+    """Money expected out during the month, negative."""
     end: float
+    """Projected balance at the end of the month."""
     lowest: float
+    """Lowest projected balance within the month, day by day."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Projection(TypedDict):
     """The projected months and the first one where money runs out."""
 
     months: list[MonthProjection]
+    """One projection per month, from the current month to the horizon."""
     first_shortfall: str | None
+    """First month whose lowest balance is below zero; null if none."""
 
 
 def _months_before(today: date, count: int) -> list[str]:

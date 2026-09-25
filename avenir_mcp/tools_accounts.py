@@ -9,6 +9,7 @@ from typing import Any, Literal, TypedDict
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import app, client, forecast, journal, reconcile
 from avenir_mcp.app import WRITE_TAG, mcp
@@ -22,16 +23,28 @@ ReconcileStatus = Literal[
 ]
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class ReconcileResult(TypedDict):
     """The outcome of reconcile_account."""
 
     status: ReconcileStatus
+    """Outcome: difference_found (nothing changed; see analysis), confirmation_required, applied,
+    declined, or nothing_to_do (already reconciled).
+    """
     message: str
+    """What happened and what to do next, for the agent to relay."""
     account: str
+    """Account name."""
     analysis: reconcile.Analysis
+    """The comparison with the bank."""
     adjustment: float | None
+    """Amount of the balance adjustment created, if adjust was requested; else null."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
     operation_id: str | None
+    """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
 @mcp.tool(
@@ -160,24 +173,36 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
 MAX_FORECAST_MONTHS = 24
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class ForecastAssumptions(TypedDict):
     """What the projection assumed, so the user can correct it."""
 
     recurring: list[forecast.Recurring]
+    """Charges and income found recurring in the history."""
     variable_monthly: float
+    """Monthly spending besides recurring charges, negative."""
     monthly_income: float
+    """Monthly income assumed, besides recurring income."""
     one_offs: list[forecast.OneOff]
+    """One-off amounts given by the caller."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class ForecastResult(TypedDict):
     """A balance projection and what it rests on."""
 
     message: str
+    """The conclusion in one sentence, for the agent to relay."""
     accounts: list[str]
+    """Names of the accounts projected together."""
     start_balance: float
+    """Their total balance today."""
     assumptions: ForecastAssumptions
+    """Everything the projection assumed, to check with the user."""
     months: list[forecast.MonthProjection]
+    """The projected months."""
     first_shortfall: str | None
+    """First month whose lowest balance is below zero; null if none."""
 
 
 def _check_horizon(until: str, now: date) -> None:
@@ -297,37 +322,62 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     }
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class NewTransaction(TypedDict, total=False):
     """A transaction to create; memo and category_id are optional."""
 
     date: str
+    """Date, YYYY-MM-DD, not in the future."""
     amount: float
+    """Amount in currency units, negative for spending."""
     payee_name: str
+    """Payee as it should appear in YNAB."""
     memo: str
+    """Optional note."""
     category_id: str
+    """Optional category id."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class NewTransactionPreview(TypedDict):
     """A transaction to create, as the user sees it."""
 
     date: str
+    """Date, YYYY-MM-DD."""
     amount: float
+    """Amount in currency units."""
     payee: str
+    """Payee name."""
     category: str | None
+    """Category name; null if none was given."""
     memo: str | None
+    """Note; null if none."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class CreateResult(TypedDict):
     """The outcome of create_transactions."""
 
     status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), declined (the user said no), or nothing_to_do.
+    """
     message: str
+    """What happened and what to do next, for the agent to relay."""
     account: str
+    """Account name."""
     transactions: list[NewTransactionPreview]
+    """The transactions, as they will be (or were) created."""
     created_ids: list[str]
+    """YNAB ids of the created transactions; empty until applied."""
     duplicate_import_ids: list[str]
+    """Import ids YNAB refused as duplicates."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
     operation_id: str | None
+    """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
 def _check_new(items: list[NewTransaction], categories: dict[str, str], now: date) -> None:

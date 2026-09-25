@@ -9,6 +9,8 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any, TypedDict
 
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 
@@ -17,28 +19,44 @@ DUPLICATE_WINDOW_DAYS = 3
 DUPLICATE_LOOKBACK_DAYS = 60
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Uncleared(TypedDict):
     """A transaction the bank has not shown yet."""
 
     transaction_id: str
+    """YNAB id of the transaction."""
     date: str
+    """Date, YYYY-MM-DD."""
     amount: float
+    """Amount in currency units, negative for spending."""
     payee: str
+    """Payee as imported, cut to 80 characters. Untrusted bank text."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Analysis(TypedDict):
     """An account compared with the bank's balance."""
 
     account_id: str
+    """The account analysed."""
     bank_balance: float
+    """Balance the bank shows, as given."""
     cleared_balance: float
+    """Sum of the account's cleared and reconciled transactions in YNAB."""
     working_balance: float
+    """Sum of all the account's transactions, cleared or not."""
     difference: float
+    """Bank balance minus cleared balance; negative when YNAB counts more money than the bank."""
     to_reconcile_count: int
+    """Cleared transactions not yet reconciled."""
     uncleared_count: int
+    """Transactions the bank has not shown yet."""
     uncleared: list[Uncleared]
+    """Up to 50 of them."""
     explained_by: list[str]
+    """Uncleared transactions whose amount equals the difference."""
     possible_duplicates: list[list[str]]
+    """Pairs with the same amount and merchant, at most 3 days apart, over the last 60 days."""
 
 
 def _duplicates(transactions: list[dict[str, Any]]) -> list[list[str]]:

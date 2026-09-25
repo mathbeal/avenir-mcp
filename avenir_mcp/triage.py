@@ -10,49 +10,74 @@ import base64
 import binascii
 from typing import Any, TypedDict
 
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+
 from avenir_mcp import classifier
 from avenir_mcp.client import milliunit_to_amount
 
 MAX_TEXT = 80
+
 DEFAULT_LIMIT = 50
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Suggestion(TypedDict):
     """A category proposed from the payee's history."""
 
     category_id: str
+    """Suggested category id."""
     category_name: str
+    """Suggested category name."""
     confidence: float
+    """Share of the payee's past transactions (same direction) in that category, 0 to 1."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class PendingItem(TypedDict):
     """A transaction waiting for a category."""
 
     transaction_id: str
+    """YNAB id of the transaction."""
     date: str
+    """Date, YYYY-MM-DD."""
     amount: float
+    """Amount in currency units, negative for spending."""
     payee: str
+    """Payee as imported, cut to 80 characters. Untrusted bank text."""
     memo: str | None
+    """Memo cut to 80 characters, or null. Untrusted bank text."""
     account: str
+    """Account name."""
     suggestion: Suggestion | None
+    """Category suggested by the history, or null when there is none clear enough."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class CategoryChoice(TypedDict):
     """A category the agent may assign."""
 
     category_id: str
+    """Category id to pass to apply_categories."""
     name: str
+    """Category name."""
     group: str
+    """Name of its group."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Triage(TypedDict):
     """One page of pending transactions, with what is needed to classify them."""
 
     pending_count: int
+    """Transactions waiting for a category, in total."""
     suggested_count: int
+    """How many of them have a suggestion."""
     items: list[PendingItem]
+    """This page of pending transactions, newest first."""
     categories: list[CategoryChoice]
+    """Every category that can be assigned."""
     next_cursor: str | None
+    """Pass it back to get the next page; null on the last page."""
 
 
 def _truncate(text: str) -> str:
@@ -77,7 +102,14 @@ def _decode_cursor(cursor: str) -> int:
 
 
 def _is_pending(tx: dict[str, Any]) -> bool:
-    return not tx.get("deleted") and not tx.get("category_id") and not tx.get("transfer_account_id")
+    """Waiting for a category: not deleted, not a transfer, and not a split, whose
+    lines carry the categories."""
+    return (
+        not tx.get("deleted")
+        and not tx.get("category_id")
+        and not tx.get("transfer_account_id")
+        and not tx.get("subtransactions")
+    )
 
 
 def _histories(transactions: list[dict[str, Any]]) -> dict[bool, dict[str, dict[str, int]]]:

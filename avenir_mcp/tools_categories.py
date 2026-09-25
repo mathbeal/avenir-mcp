@@ -8,6 +8,7 @@ from typing import TypedDict
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import app, client, journal
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
@@ -16,17 +17,30 @@ from avenir_mcp.confirm import WriteStatus, gate
 logger = logging.getLogger(__name__)
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class CategoryUpdate(TypedDict):
     """The outcome of update_category."""
 
     status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), declined (the user said no), or nothing_to_do.
+    """
     message: str
+    """What happened and what to do next, for the agent to relay."""
     category_id: str
+    """The category changed."""
     from_name: str
+    """Name before."""
     to_name: str
+    """Name after."""
     from_group: str
+    """Group before."""
     to_group: str
+    """Group after."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
 
 
 @mcp.tool(
@@ -112,18 +126,32 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
     }
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class BudgetChange(TypedDict):
     """The outcome of set_category_budget."""
 
     status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), declined (the user said no), or nothing_to_do.
+    """
     message: str
+    """What happened and what to do next, for the agent to relay."""
     category_id: str
+    """The category changed."""
     category: str
+    """Category name."""
     month: str
+    """Month changed, YYYY-MM-01 ('current' is resolved)."""
     from_amount: float
+    """Amount budgeted before."""
     to_amount: float
+    """Amount budgeted after."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
     operation_id: str | None
+    """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
 @mcp.tool(
@@ -204,15 +232,26 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     }
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class NewCategory(TypedDict):
     """The outcome of create_category."""
 
     status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), declined (the user said no), or nothing_to_do.
+    """
     message: str
+    """What happened and what to do next, for the agent to relay."""
     name: str
+    """Name of the new category, trimmed."""
     group: str
+    """Group it goes in."""
     category_id: str | None
+    """YNAB id of the new category; null until applied."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
 
 
 @mcp.tool(
@@ -250,28 +289,28 @@ async def create_category(
             f"Group {category_group_id} is not in this budget: "
             "use an id from list_category_groups."
         )
-    clean = name.strip()
-    if not clean:
+    new_name = name.strip()
+    if not new_name:
         raise ToolError("The name is empty: give the new category a name.")
     taken = {
         c["name"].casefold()
         for c in await client.get_categories(budget_id)
         if c.get("category_group_id") == category_group_id
     }
-    if clean.casefold() in taken:
-        raise ToolError(f"{clean!r} already exists in {groups[category_group_id]}.")
+    if new_name.casefold() in taken:
+        raise ToolError(f"{new_name!r} already exists in {groups[category_group_id]}.")
     result: NewCategory = {
         "status": "applied",
         "message": "",
-        "name": clean,
+        "name": new_name,
         "group": groups[category_group_id],
         "category_id": None,
         "confirmation": None,
     }
-    question = f"Create category '{clean}' in {result['group']}?"
-    subject = {"group": category_group_id, "name": clean}
+    question = f"Create category '{new_name}' in {result['group']}?"
+    subject = {"group": category_group_id, "name": new_name}
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
-    created = await client.create_category(budget_id, category_group_id, clean)
+    created = await client.create_category(budget_id, category_group_id, new_name)
     return {**result, "message": "Created.", "category_id": created["id"]}

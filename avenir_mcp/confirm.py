@@ -20,6 +20,7 @@ from fastmcp.server.elicitation import (  # pylint: disable=import-error
 )
 from mcp import types  # pylint: disable=import-error
 from mcp_types.version import MODERN_PROTOCOL_VERSIONS  # pylint: disable=import-error
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import client, journal, writes
 
@@ -36,16 +37,28 @@ _QUESTION_KEY = "confirm"
 WriteStatus = Literal["applied", "confirmation_required", "declined", "nothing_to_do"]
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class WriteResult(TypedDict):
     """The outcome of a write tool."""
 
     status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), declined (the user said no), or nothing_to_do.
+    """
     message: str
+    """What happened and what to do next, for the agent to relay."""
     changes: list[writes.Change]
+    """Every transaction that changes: before and after."""
     unchanged_count: int
+    """Assignments that would change nothing and were skipped."""
     conflicts: list[str]
+    """Ids left alone because they changed since the operation (undo only)."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
     operation_id: str | None
+    """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
 def result_of(status: WriteStatus, message: str, plan: writes.Plan, **extra: Any) -> WriteResult:
@@ -177,12 +190,18 @@ async def write_plan(
     return result, operation_id
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class NotApplied(TypedDict):
     """Why a confirmed write did not happen, in a tool result's own fields."""
 
     status: WriteStatus
+    """declined or confirmation_required."""
     message: str
+    """What happened and what to do next, for the agent to relay."""
     confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
 
 
 def not_applied(decision: WriteStatus | str, question: str) -> NotApplied | None:

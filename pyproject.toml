@@ -1,7 +1,7 @@
 [project]
 name = "avenir-mcp"
 dynamic = ["version"]
-description = "An MCP server for YNAB: budgets, spending and transaction classification, built for agents."
+description = "An unofficial MCP server for YNAB: budgets, spending and transaction classification, built for agents."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -22,6 +22,9 @@ classifiers = [
 dependencies = [
     "fastmcp==4.0.9",
     "httpx>=0.28.1",
+    # Already required by fastmcp; declared because the output schemas use its
+    # with_config to turn field docstrings into descriptions agents can read.
+    "pydantic>=2.13",
 ]
 
 [project.urls]

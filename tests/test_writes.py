@@ -164,3 +164,13 @@ def test_confirmation_code_can_bind_any_json_subject() -> None:
     assert confirmations.consume(code, "b1", {"category_id": "c1", "name": "Other"}) is False
     code = confirmations.issue("b1", rename)
     assert confirmations.consume(code, "b1", dict(rename)) is True
+
+
+def test_plan_rejects_a_split_transaction() -> None:
+    """Assigning one category to a split would erase its lines."""
+    with pytest.raises(ValueError, match="split"):
+        writes.plan_categorization(
+            [_tx("t1", subtransactions=[{"category_id": "c-food"}])],
+            _CATEGORIES,
+            [{"transaction_id": "t1", "category_id": "c-fun"}],
+        )

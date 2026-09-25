@@ -12,6 +12,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastmcp.exceptions import ToolError
 
+import avenir_mcp
 from avenir_mcp import server
 
 # ---------------------------------------------------------------------------
@@ -244,6 +245,14 @@ def test_main_runs_http_on_configured_host_and_port(monkeypatch: pytest.MonkeyPa
     with patch.object(server.mcp, "run") as run:
         server.main()
     run.assert_called_once_with(transport="streamable-http", host="127.0.0.2", port=9000)
+
+
+def test_main_prints_the_version_and_stops(capsys: pytest.CaptureFixture[str]) -> None:
+    """`avenir-mcp --version` answers for bug reports and starts no server."""
+    with patch.object(server.mcp, "run") as run:
+        server.main(["--version"])
+    assert capsys.readouterr().out == f"avenir-mcp {avenir_mcp.__version__}\n"
+    run.assert_not_called()
 
 
 def test_today_is_the_real_date() -> None:

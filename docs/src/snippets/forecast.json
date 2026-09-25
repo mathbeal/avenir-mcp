@@ -8,12 +8,6 @@
   "assumptions": {
     "recurring": [
       {
-        "payee": "CINEMA ODEON",
-        "amount": -22.0,
-        "day": 20,
-        "months_seen": 3
-      },
-      {
         "payee": "LANDLORD SARL",
         "amount": -950.0,
         "day": 3,
@@ -41,6 +35,12 @@
         "payee": "STREAMFLIX",
         "amount": -13.49,
         "day": 15,
+        "months_seen": 3
+      },
+      {
+        "payee": "TELCO MOBILE - PRELEV",
+        "amount": -19.99,
+        "day": 8,
         "months_seen": 3
       },
       "… 1 more"

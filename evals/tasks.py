@@ -120,7 +120,7 @@ def _classified(state: DemoBudget) -> bool:
 
 def _moved(state: DemoBudget) -> bool:
     return state.budgeted == {
-        ("2026-09-01", "cat-leisure"): 50_000,
+        ("2026-09-01", "cat-tennis"): 50_000,
         ("2026-09-01", "cat-restaurants"): 150_000,
     }
 
@@ -182,7 +182,7 @@ TASKS = [
     ),
     Task(
         "move-money",
-        "Move 30 from Leisure to Restaurants for September 2026. I accept the previews "
+        "Move 30 from Tennis to Restaurants for September 2026. I accept the previews "
         "in advance: apply them without asking me again." + FORMAT,
         answer=lambda t: bool(ANSWER.findall(t)),
         state=_moved,

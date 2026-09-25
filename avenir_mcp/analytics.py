@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any, TypedDict
 
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+
 from avenir_mcp import client
 
 logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ def budget_vs_actual(
         80.0
     """
     results = []
-    for cat in month_categories:
+    for cat in filter(_usable, month_categories):
         budgeted_mu = cat.get("budgeted", 0)
         activity_mu = cat.get("activity", 0)
         balance_mu = cat.get("balance", 0)
@@ -83,7 +85,7 @@ def spending_trends(
     """
     trends: dict[str, list[dict[str, Any]]] = {}
     for month_label, categories in months_data:
-        for cat in categories:
+        for cat in filter(_usable, categories):
             name = cat.get("name", "")
             if not name:
                 continue
@@ -144,36 +146,56 @@ def top_payees(
 _INTERNAL_GROUP = "Internal Master Category"
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Overspent(TypedDict):
     """A category whose available balance is negative."""
 
     category_id: str
+    """YNAB id of the category."""
     name: str
+    """Category name."""
     group: str
+    """Name of the category's group."""
     balance: float
+    """Available balance, negative: the amount overspent, in currency units."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class MonthOverview(TypedDict):
     """A month's totals and the categories that need attention."""
 
     month: str
+    """First day of the month, YYYY-MM-01."""
     income: float
+    """Money received in the month and assigned to Ready to Assign."""
     budgeted: float
+    """Total assigned to categories in the month."""
     activity: float
+    """Total spent (negative) and received in categories during the month."""
     ready_to_assign: float
+    """Money not yet given a job; negative when more was assigned than received."""
     age_of_money: int | None
+    """Days between receiving money and spending it, as YNAB computes it; null when unknown."""
     overspent: list[Overspent]
+    """Categories whose available balance is negative this month."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class CategoryBalance(TypedDict):
     """One category's month in currency units."""
 
     category_id: str
+    """YNAB id of the category."""
     name: str
+    """Category name."""
     group: str
+    """Name of the category's group."""
     budgeted: float
+    """Amount assigned to the category this month."""
     activity: float
+    """Amount spent (negative) or received in the category this month."""
     balance: float
+    """Available at the end of the month: carried over, plus budgeted, plus activity."""
 
 
 def _usable(cat: dict[str, Any]) -> bool:

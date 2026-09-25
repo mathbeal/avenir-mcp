@@ -33,6 +33,7 @@ def test_expected_answers_come_from_the_demo_data() -> None:
 
 def test_demo_server_answers_like_ynab() -> None:
     """Budgets by id or by "last-used"; unknown paths get YNAB's 404."""
+    fake_ynab.STATE = fake_ynab.DemoBudget()
     server = fake_ynab.serve()
     base = f"http://127.0.0.1:{server.server_port}/v1"
     try:
@@ -40,6 +41,7 @@ def test_demo_server_answers_like_ynab() -> None:
             accounts = httpx.get(f"{base}/budgets/{budget}/accounts").json()["data"]["accounts"]
             assert {a["name"] for a in accounts} == {"Checking", "Savings"}
         assert httpx.get(f"{base}/budgets/other/accounts").status_code == 404
+        assert fake_ynab.STATE.requests == 3
     finally:
         server.shutdown()
         server.server_close()

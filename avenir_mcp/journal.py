@@ -14,24 +14,37 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, TypedDict
 
+from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
+
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Move(TypedDict):
     """One transaction's category before and after an operation."""
 
     transaction_id: str
+    """YNAB id of the transaction."""
     from_category_id: str | None
+    """Category before the operation; null for none."""
     to_category_id: str | None
+    """Category after the operation; null for none."""
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
 class Entry(TypedDict):
     """An operation as recorded in the journal."""
 
     operation_id: str
+    """Random id of the operation."""
     budget_id: str
+    """Budget the operation changed."""
     kind: str
+    """categorize, reconcile, budget or create."""
     applied_at: str
+    """When it was applied, ISO 8601 in UTC."""
     moves: list[Move]
+    """Category changes (categorize operations)."""
     details: dict[str, Any]
+    """What undoing other kinds needs, as identifiers."""
 
 
 def default_path() -> Path:
