@@ -6,6 +6,8 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import Any
 
+import pytest
+from fastmcp.exceptions import ToolError
 from fastmcp.server.elicitation import AcceptedElicitation, CancelledElicitation
 from mcp import types
 
@@ -14,9 +16,11 @@ from avenir_mcp import confirm, writes
 
 @dataclass
 class _Session:
+    can_ask: bool = True
+
     def check_client_capability(self, _capability: Any) -> bool:
-        """This client can answer questions."""
-        return True
+        """Whether this client can answer questions."""
+        return self.can_ask
 
 
 @dataclass
@@ -71,3 +75,42 @@ def test_modern_reply_of_another_kind_counts_as_no_answer() -> None:
     )
     code = _ask(ctx)
     assert code not in ("applied", "declined")
+
+
+# ---------------------------------------------------------------------------
+# AVENIR_MCP_REQUIRE_ELICITATION=1: only the user, in the client, can say yes
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(name="required")
+def _required(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AVENIR_MCP_REQUIRE_ELICITATION", "1")
+
+
+@pytest.mark.usefixtures("required")
+def test_required_client_confirmation_refuses_codes() -> None:
+    """A code could be relayed by the agent alone: it is refused."""
+    code = confirm.CONFIRMATIONS.issue("b1", "change")
+    ctx = _Ctx("2025-11-25")
+    with pytest.raises(ToolError, match="AVENIR_MCP_REQUIRE_ELICITATION"):
+        asyncio.run(confirm.ask(ctx, "b1", "change", "Apply?", code))  # type: ignore[arg-type]
+
+
+@pytest.mark.usefixtures("required")
+def test_required_client_confirmation_needs_a_client_that_can_ask() -> None:
+    """A client that cannot ask gets a refusal, not a code."""
+    ctx = _Ctx("2025-11-25", session=_Session(can_ask=False))
+    with pytest.raises(ToolError, match="cannot ask"):
+        _ask(ctx)
+
+
+@pytest.mark.usefixtures("required")
+def test_required_client_confirmation_treats_a_dismissed_question_as_no() -> None:
+    """Nobody answered: nothing is applied, and no code is issued."""
+    assert _ask(_Ctx("2025-11-25", answer=CancelledElicitation())) == "declined"
+
+
+@pytest.mark.usefixtures("required")
+def test_required_client_confirmation_still_accepts_a_yes() -> None:
+    """The user's own yes, given in the client, applies the change."""
+    assert _ask(_Ctx("2025-11-25", answer=AcceptedElicitation(data=True))) == "applied"

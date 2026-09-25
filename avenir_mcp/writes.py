@@ -182,9 +182,14 @@ class Confirmations:
         self._issued: dict[str, tuple[str, float]] = {}
 
     def issue(self, budget_id: str, subject: object) -> str:
-        """Return a new code that confirms this subject (JSON data), and nothing else."""
+        """Return a new code that confirms this subject (JSON data), and nothing else.
+
+        Expired codes are dropped first, so previews never confirmed do not pile up.
+        """
+        now = self._clock()
+        self._issued = {c: v for c, v in self._issued.items() if now - v[1] <= self._ttl}
         code = secrets.token_urlsafe(8)
-        self._issued[code] = (fingerprint(budget_id, subject), self._clock())
+        self._issued[code] = (fingerprint(budget_id, subject), now)
         return code
 
     def consume(self, code: str, budget_id: str, subject: object) -> bool:

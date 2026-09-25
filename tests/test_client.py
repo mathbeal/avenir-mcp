@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -753,3 +754,74 @@ def test_api_url_defaults_to_ynab() -> None:
             asyncio.run(client.get_budgets())
     url = ctx.__aenter__.return_value.get.call_args.args[0]
     assert url == "https://api.ynab.com/v1/budgets"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://api.example.org/v1",
+        "http://127.0.0.1:8765",
+        "http://localhost:9000/v1",
+        "http://[::1]:80",
+    ],
+)
+def test_api_url_may_be_https_or_this_machine(url: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A stand-in on this machine may use plain http; anything else must be https."""
+    monkeypatch.setenv("AVENIR_MCP_YNAB_URL", url + "/")
+    assert client._base_url() == url  # pylint: disable=protected-access
+
+
+@pytest.mark.parametrize("url", ["http://api.example.org/v1", "ftp://127.0.0.1", "api.ynab.com"])
+def test_api_url_never_sends_the_token_in_clear(url: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The token would travel in clear to another machine: refused before any request."""
+    monkeypatch.setenv("AVENIR_MCP_YNAB_URL", url)
+    with pytest.raises(RuntimeError, match="https"):
+        client._base_url()  # pylint: disable=protected-access
+
+
+def test_token_can_come_from_a_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """YNAB_API_KEY_FILE keeps the token out of client configurations."""
+    secret = tmp_path / "ynab-token"
+    secret.write_text("file-token\n", encoding="utf-8")
+    secret.chmod(0o600)
+    monkeypatch.delenv("YNAB_API_KEY", raising=False)
+    monkeypatch.setenv("YNAB_API_KEY_FILE", str(secret))
+    assert client._api_key() == "file-token"  # pylint: disable=protected-access
+
+
+def test_token_file_readable_by_others_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Like an SSH key, a token file others can read is refused, saying how to fix it."""
+    secret = tmp_path / "ynab-token"
+    secret.write_text("file-token", encoding="utf-8")
+    secret.chmod(0o644)
+    monkeypatch.delenv("YNAB_API_KEY", raising=False)
+    monkeypatch.setenv("YNAB_API_KEY_FILE", str(secret))
+    with pytest.raises(RuntimeError, match="chmod 600"):
+        client._api_key()  # pylint: disable=protected-access
+
+
+def test_missing_token_file_says_which_variable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A path that does not exist is named in the error."""
+    monkeypatch.delenv("YNAB_API_KEY", raising=False)
+    monkeypatch.setenv("YNAB_API_KEY_FILE", str(tmp_path / "absent"))
+    with pytest.raises(RuntimeError, match="YNAB_API_KEY_FILE"):
+        client._api_key()  # pylint: disable=protected-access
+
+
+def test_token_variable_wins_over_the_file(monkeypatch: pytest.MonkeyPatch) -> None:
+    """When both are set, YNAB_API_KEY is used and the file is not read."""
+    monkeypatch.setenv("YNAB_API_KEY", "env-token")
+    monkeypatch.setenv("YNAB_API_KEY_FILE", "/nonexistent")
+    assert client._api_key() == "env-token"  # pylint: disable=protected-access
+
+
+def test_no_token_at_all_names_both_ways(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Neither set: the error says both ways to give the token."""
+    monkeypatch.delenv("YNAB_API_KEY", raising=False)
+    monkeypatch.delenv("YNAB_API_KEY_FILE", raising=False)
+    with pytest.raises(RuntimeError, match="YNAB_API_KEY_FILE"):
+        client._api_key()  # pylint: disable=protected-access

@@ -10,6 +10,7 @@ that preview.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Literal, TypedDict
 
 from fastmcp import Context  # pylint: disable=import-error
@@ -107,7 +108,16 @@ async def ask(
 
     `subject` is the exact change being confirmed: a code, or an answer, only ever
     confirms it.
+
+    With AVENIR_MCP_REQUIRE_ELICITATION=1 only the user's answer in the client counts:
+    an agent could relay a code without asking, so codes are neither issued nor accepted.
     """
+    required = os.getenv("AVENIR_MCP_REQUIRE_ELICITATION") == "1"
+    if confirmation is not None and required:
+        raise ToolError(
+            "Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again "
+            "without confirmation, and the user answers in the client."
+        )
     if confirmation is not None:
         if CONFIRMATIONS.consume(confirmation, budget_id, subject):
             return "applied"
@@ -118,6 +128,12 @@ async def ask(
     can_ask = ctx.session.check_client_capability(
         types.ClientCapabilities(elicitation=types.ElicitationCapability())
     )
+    if not can_ask and required:
+        raise ToolError(
+            "This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 "
+            "forbids confirmation codes: nothing was changed. Use a client that supports MCP "
+            "elicitation, or unset the variable."
+        )
     if not can_ask:
         return CONFIRMATIONS.issue(budget_id, subject)
     rc = ctx.request_context
@@ -145,6 +161,8 @@ async def ask(
     else:
         answer = await ctx.elicit(question, bool)
         decision = _answer(answer.action, {"value": getattr(answer, "data", None)})
+    if decision is None and required:
+        return "declined"
     # Nobody said no when the question was dismissed: fall back to a code.
     return decision or CONFIRMATIONS.issue(budget_id, subject)
 

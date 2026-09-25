@@ -174,3 +174,14 @@ def test_plan_rejects_a_split_transaction() -> None:
             _CATEGORIES,
             [{"transaction_id": "t1", "category_id": "c-fun"}],
         )
+
+
+def test_expired_codes_are_forgotten() -> None:
+    """Previews never confirmed do not pile up in memory: expired codes are dropped."""
+    now = [0.0]
+    codes = writes.Confirmations(ttl_seconds=600, clock=lambda: now[0])
+    for i in range(3):
+        codes.issue("b1", i)
+    now[0] = 601.0
+    fresh = codes.issue("b1", "fresh")
+    assert list(codes._issued) == [fresh]  # pylint: disable=protected-access

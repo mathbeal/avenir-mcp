@@ -5,7 +5,9 @@ from __future__ import annotations
 import logging
 import math
 import os
+from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx  # pylint: disable=import-error
 
@@ -14,9 +16,26 @@ logger = logging.getLogger(__name__)
 _YNAB_URL = "https://api.ynab.com/v1"
 
 
+_THIS_MACHINE = {"127.0.0.1", "localhost", "::1"}
+
+
 def _base_url() -> str:
-    """YNAB's API, or AVENIR_MCP_YNAB_URL (a demo budget server for evaluations)."""
-    return os.getenv("AVENIR_MCP_YNAB_URL", _YNAB_URL).rstrip("/")
+    """YNAB's API, or AVENIR_MCP_YNAB_URL (a demo budget server for evaluations).
+
+    Every request carries the token, so it goes over https — plain http only to a
+    stand-in on this machine.
+
+    Raises:
+        RuntimeError: If AVENIR_MCP_YNAB_URL would send the token in clear.
+    """
+    url = os.getenv("AVENIR_MCP_YNAB_URL", _YNAB_URL).rstrip("/")
+    parts = urlsplit(url)
+    if parts.scheme != "https" and not (parts.scheme == "http" and parts.hostname in _THIS_MACHINE):
+        raise RuntimeError(
+            f"AVENIR_MCP_YNAB_URL must start with https:// (plain http only for "
+            f"127.0.0.1 or localhost), got {url!r}."
+        )
+    return url
 
 
 # Delta-sync cache: {budget_id: {"server_knowledge": int, "transactions": {tx_id: tx}}}
@@ -24,14 +43,30 @@ _CACHE: dict[str, dict[str, Any]] = {}
 
 
 def _api_key() -> str:
-    """Return the YNAB Personal Access Token from the environment.
+    """Return the YNAB Personal Access Token: YNAB_API_KEY, or the file YNAB_API_KEY_FILE.
+
+    The file keeps the token out of MCP client configurations. Like an SSH key, it
+    must be readable by its owner only.
 
     Raises:
-        RuntimeError: If YNAB_API_KEY is not set.
+        RuntimeError: If neither is set, or the file is missing or readable by others.
     """
     key = os.getenv("YNAB_API_KEY", "")
-    if not key:
-        raise RuntimeError("YNAB_API_KEY environment variable is not set")
+    if key:
+        return key
+    path = os.getenv("YNAB_API_KEY_FILE", "")
+    if not path:
+        raise RuntimeError(
+            "YNAB_API_KEY environment variable is not set (nor YNAB_API_KEY_FILE, a file "
+            "holding the token)"
+        )
+    try:
+        mode = os.stat(path).st_mode
+        key = Path(path).read_text(encoding="utf-8").strip()
+    except OSError as error:
+        raise RuntimeError(f"YNAB_API_KEY_FILE cannot be read: {error.strerror}") from error
+    if os.name == "posix" and mode & 0o077:
+        raise RuntimeError(f"YNAB_API_KEY_FILE is readable by other users: run chmod 600 {path}")
     return key
 
 
