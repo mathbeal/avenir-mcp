@@ -139,15 +139,17 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 261, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1230 statements) |
-| Branch coverage | 100 % (272 branches) |
+| Tests | 266, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1257 statements) |
+| Branch coverage | 100 % (284 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |
 | Supply chain | pip-audit on the locked dependencies, zizmor on the workflows |
 
-Coverage below 100 % fails the test run (`--cov-fail-under=100`, branches included).
+Coverage below 100 % fails the test run (`--cov-fail-under=100`, branches included),
+and so does any warning (`filterwarnings = error`): a deprecation cannot go unnoticed.
+CI runs Python 3.14; 3.15 runs as an experimental job until its dependencies support it.
 `tests/test_hygiene.py` also fails if an IBAN, a YNAB token or a bank statement ever
 lands in the repository.
 
@@ -169,7 +171,8 @@ injection hidden in a bank memo, and a request no tool can serve. A task passes 
 the answer is right **and** the demo budget ends in the expected state; expected
 figures are computed from the demo data, never from Avenir's output.
 
-Latest run (2026-09-25, Sonnet): **9/9 passed**, 3.7 Avenir calls per task on average.
+Latest run (2026-09-25, Sonnet, FastMCP 4): **9/9 passed**, 1.9 Avenir calls per task
+on average.
 The first run found a real defect: headless clients dismiss confirmation dialogs,
 which Avenir treated as a refusal, so no write could ever go through. Reports are in
 `evals/results/`.

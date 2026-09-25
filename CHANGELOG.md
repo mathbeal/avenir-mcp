@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- FastMCP 4 and the 2026-07-28 MCP protocol: on such connections a write returns an
+  input request (SEP-2322) and the client calls again with the user's answer, bound to
+  the preview it answers; older connections are still asked during the call.
+  Confirmation is now a yes/no form, and an accepted form left unticked is a no.
+- Python 3.14.7, latest dependencies (fastmcp 4.0.9, mypy 2.3, isort 9, pytest 9.1).
+  Tests fail on any warning; CI tries Python 3.15 without blocking.
 - Evaluation: a real agent against an invented demo budget, nine tasks, 9/9 passed.
 - Fixed: a dismissed confirmation (MCP elicitation `cancel`, as headless clients send)
   counted as a refusal, so no write could go through; it now falls back to a

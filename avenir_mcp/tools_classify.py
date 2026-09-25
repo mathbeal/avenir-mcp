@@ -6,6 +6,7 @@ import logging
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
+from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
 from avenir_mcp import client, triage, writes
 from avenir_mcp.app import WRITE_TAG, mcp
@@ -17,9 +18,9 @@ logger = logging.getLogger(__name__)
 @mcp.tool(
     annotations={
         "title": "Suggest categories for pending transactions",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def suggest_categories(
@@ -58,10 +59,10 @@ async def suggest_categories(
     tags={WRITE_TAG},
     annotations={
         "title": "Assign categories to transactions",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     },
 )
 async def apply_categories(
@@ -69,7 +70,7 @@ async def apply_categories(
     assignments: list[writes.Assignment],
     ctx: Context,
     confirmation: str | None = None,
-) -> WriteResult:
+) -> WriteResult | InputRequiredResult:
     """Assign categories to transactions, after the user confirms, and journal it for undo.
 
     Typical use: after suggest_categories, pass the suggestions the user accepted

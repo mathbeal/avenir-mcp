@@ -13,7 +13,7 @@ from avenir_mcp import server
 
 async def accept(*_: Any) -> ElicitResult[Any]:
     """A user who agrees to what the server asks."""
-    return ElicitResult(action="accept", content={})
+    return ElicitResult(action="accept", content={"value": True})
 
 
 async def decline(*_: Any) -> ElicitResult[Any]:

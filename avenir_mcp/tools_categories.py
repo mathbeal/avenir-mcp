@@ -7,10 +7,11 @@ from typing import TypedDict
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
+from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
 from avenir_mcp import app, client, journal
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
-from avenir_mcp.confirm import WriteStatus, ask, not_applied
+from avenir_mcp.confirm import WriteStatus, gate
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +33,10 @@ class CategoryUpdate(TypedDict):
     tags={WRITE_TAG},
     annotations={
         "title": "Rename or move a category",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     },
 )
 async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
@@ -46,7 +47,7 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
     name: str | None = None,
     category_group_id: str | None = None,
     confirmation: str | None = None,
-) -> CategoryUpdate:
+) -> CategoryUpdate | InputRequiredResult:
     """Rename a category and/or move it to another group, after the user confirms.
 
     Transactions and amounts stay attached to the category. Confirmation works as
@@ -95,10 +96,9 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
         f"Change category '{result['from_name']}' ({result['from_group']}) "
         f"to '{new_name}' ({result['to_group']})?"
     )
-    decision = await ask(ctx, budget_id, subject, question, confirmation)
-    outcome = not_applied(decision, question)
-    if outcome is not None:
-        return {**result, **outcome}
+    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
     await client.update_category(
         budget_id,
         category_id,
@@ -130,10 +130,10 @@ class BudgetChange(TypedDict):
     tags={WRITE_TAG},
     annotations={
         "title": "Set a category's budgeted amount",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     },
 )
 async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
@@ -143,7 +143,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     amount: float,
     ctx: Context,
     confirmation: str | None = None,
-) -> BudgetChange:
+) -> BudgetChange | InputRequiredResult:
     """Set the amount budgeted ("Assigned") in a category for a month, after the user confirms.
 
     The amount is absolute, in currency units, not a change. The result gives the
@@ -186,10 +186,9 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         f"{result['from_amount']:.2f} → {result['to_amount']:.2f}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
-    decision = await ask(ctx, budget_id, subject, question, confirmation)
-    outcome = not_applied(decision, question)
-    if outcome is not None:
-        return {**result, **outcome}
+    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
     await client.set_category_budgeted(budget_id, month, category_id, amount)
     operation_id = journal.Journal(journal.default_path()).record(
         budget_id,
@@ -220,10 +219,10 @@ class NewCategory(TypedDict):
     tags={WRITE_TAG},
     annotations={
         "title": "Create a category",
-        "readOnlyHint": False,
-        "destructiveHint": False,
-        "idempotentHint": False,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": False,
+        "idempotent_hint": False,
+        "open_world_hint": True,
     },
 )
 async def create_category(
@@ -232,7 +231,7 @@ async def create_category(
     name: str,
     ctx: Context,
     confirmation: str | None = None,
-) -> NewCategory:
+) -> NewCategory | InputRequiredResult:
     """Create a category in a group, after the user confirms.
 
     YNAB's API cannot delete a category: to undo, hide it in YNAB. A name already
@@ -271,9 +270,8 @@ async def create_category(
     }
     question = f"Create category '{clean}' in {result['group']}?"
     subject = {"group": category_group_id, "name": clean}
-    decision = await ask(ctx, budget_id, subject, question, confirmation)
-    outcome = not_applied(decision, question)
-    if outcome is not None:
-        return {**result, **outcome}
+    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
     created = await client.create_category(budget_id, category_group_id, clean)
     return {**result, "message": "Created.", "category_id": created["id"]}

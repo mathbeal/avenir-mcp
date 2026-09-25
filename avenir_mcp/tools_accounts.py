@@ -8,10 +8,11 @@ from typing import Any, Literal, TypedDict
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
+from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
 from avenir_mcp import app, client, forecast, journal, reconcile
 from avenir_mcp.app import WRITE_TAG, mcp
-from avenir_mcp.confirm import WriteStatus, ask, not_applied
+from avenir_mcp.confirm import WriteStatus, gate
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +38,10 @@ class ReconcileResult(TypedDict):
     tags={WRITE_TAG},
     annotations={
         "title": "Reconcile an account with the bank",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": False,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": False,
+        "open_world_hint": True,
     },
 )
 async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-locals
@@ -51,7 +52,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     *,
     adjust: bool = False,
     confirmation: str | None = None,
-) -> ReconcileResult:
+) -> ReconcileResult | InputRequiredResult:
     """Compare an account with the balance your bank shows, then reconcile it.
 
     Give the balance shown by the bank today (currency units). If YNAB's cleared
@@ -106,10 +107,9 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         + (f" and add a balance adjustment of {difference:.2f}?" if difference else "?")
     )
     subject = {"account": account_id, "balance": bank_balance, "adjust": difference}
-    decision = await ask(ctx, budget_id, subject, question, confirmation)
-    outcome = not_applied(decision, question)
-    if outcome is not None:
-        return {**result, **outcome}
+    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
     adjustment_id = None
     if difference:
         inflow = next(
@@ -196,9 +196,9 @@ def _check_horizon(until: str, now: date) -> None:
 @mcp.tool(
     annotations={
         "title": "Forecast the balance",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
@@ -352,10 +352,10 @@ def _check_new(items: list[NewTransaction], categories: dict[str, str], now: dat
     tags={WRITE_TAG},
     annotations={
         "title": "Create transactions",
-        "readOnlyHint": False,
-        "destructiveHint": False,
-        "idempotentHint": False,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": False,
+        "idempotent_hint": False,
+        "open_world_hint": True,
     },
 )
 async def create_transactions(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
@@ -365,7 +365,7 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
     ctx: Context,
     approved: bool = False,
     confirmation: str | None = None,
-) -> CreateResult:
+) -> CreateResult | InputRequiredResult:
     """Create transactions on an account, e.g. ones the bank import missed, after the user confirms.
 
     Each transaction: date (YYYY-MM-DD, not in the future), amount in currency
@@ -417,10 +417,9 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         lines
     )
     subject: dict[str, Any] = {"account": account_id, "items": transactions, "approved": approved}
-    decision = await ask(ctx, budget_id, subject, question, confirmation)
-    outcome = not_applied(decision, question)
-    if outcome is not None:
-        return {**result, **outcome}
+    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
     created = await client.create_transactions(
         budget_id, account_id, [dict(item) for item in transactions], approved=approved
     )

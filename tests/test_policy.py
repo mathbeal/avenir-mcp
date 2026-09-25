@@ -23,7 +23,7 @@ def _tools() -> list[Any]:
 def test_every_tool_is_annotated() -> None:
     """No tool leaves the client guessing whether it reads or writes."""
     missing = [
-        t.name for t in _tools() if t.annotations is None or t.annotations.readOnlyHint is None
+        t.name for t in _tools() if t.annotations is None or t.annotations.read_only_hint is None
     ]
     assert not missing
 
@@ -31,16 +31,16 @@ def test_every_tool_is_annotated() -> None:
 def test_every_write_tool_says_whether_it_destroys_and_can_be_repeated() -> None:
     """A write tool declares destructiveHint and idempotentHint explicitly."""
     for tool in _tools():
-        if tool.annotations.readOnlyHint is False:
-            assert tool.annotations.destructiveHint is not None, tool.name
-            assert tool.annotations.idempotentHint is not None, tool.name
+        if tool.annotations.read_only_hint is False:
+            assert tool.annotations.destructive_hint is not None, tool.name
+            assert tool.annotations.idempotent_hint is not None, tool.name
 
 
 def test_write_tag_matches_the_annotation() -> None:
     """Exactly the tools that write carry the tag that read-only mode hides."""
     for tool in _tools():
         tags = set((tool.meta or {}).get("fastmcp", {}).get("tags", []))
-        assert (server.WRITE_TAG in tags) == (tool.annotations.readOnlyHint is False), tool.name
+        assert (server.WRITE_TAG in tags) == (tool.annotations.read_only_hint is False), tool.name
 
 
 def test_read_only_mode_hides_and_refuses_writes() -> None:

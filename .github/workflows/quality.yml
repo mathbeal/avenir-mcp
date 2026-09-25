@@ -54,18 +54,29 @@ jobs:
       - run: uv run mypy
 
   tests:
-    name: pytest, 100 % line and branch coverage
+    name: pytest ${{ matrix.python-version }}, 100 % line and branch coverage
     runs-on: ubuntu-latest
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.14"]
+        experimental: [false]
+        include:
+          # 3.15 is a release candidate, and beartype (via fastmcp) does not import
+          # on it yet. Run it to learn when that changes, without blocking.
+          - python-version: "3.15"
+            experimental: true
+    continue-on-error: ${{ matrix.experimental }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          python-version: "3.14"
+          python-version: ${{ matrix.python-version }}
           enable-cache: true
       # The suite never calls YNAB: no token is needed, and none is available here.
       - run: uv run pytest

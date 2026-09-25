@@ -112,8 +112,8 @@ def test_reconcile_declares_a_write() -> None:
             return next(t for t in await mcp_client.list_tools() if t.name == "reconcile_account")
 
     annotations = asyncio.run(run()).annotations
-    assert annotations.readOnlyHint is False
-    assert annotations.destructiveHint is True
+    assert annotations.read_only_hint is False
+    assert annotations.destructive_hint is True
 
 
 def test_difference_is_diagnosed_without_writing(bank: _Bank) -> None:

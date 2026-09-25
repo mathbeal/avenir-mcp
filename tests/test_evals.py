@@ -42,3 +42,4 @@ def test_demo_server_answers_like_ynab() -> None:
         assert httpx.get(f"{base}/budgets/other/accounts").status_code == 404
     finally:
         server.shutdown()
+        server.server_close()

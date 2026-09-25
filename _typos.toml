@@ -1,0 +1,4 @@
+[files]
+# Agent replies archived by the evaluation, cut to their last characters: quoted
+# as produced, not text to correct.
+extend-exclude = ["evals/results/"]

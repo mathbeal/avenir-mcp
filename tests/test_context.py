@@ -80,7 +80,7 @@ def _named_tools(text: str) -> set[str]:
 def test_resources_and_templates_are_listed() -> None:
     """Clients can discover what context the server offers."""
     uris = {str(r.uri) for r in _run(lambda c: c.list_resources())}
-    templates = {t.uriTemplate for t in _run(lambda c: c.list_resource_templates())}
+    templates = {t.uri_template for t in _run(lambda c: c.list_resource_templates())}
     assert {"ynab://budgets", "avenir://guide"} <= uris
     assert {
         "ynab://budgets/{budget_id}/categories",

@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 @mcp.tool(
     annotations={
         "title": "List budgets",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def list_budgets() -> list[dict[str, Any]]:
@@ -32,9 +32,9 @@ async def list_budgets() -> list[dict[str, Any]]:
 @mcp.tool(
     annotations={
         "title": "Category balances for a month",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def get_category_balances(
@@ -63,9 +63,9 @@ async def get_category_balances(
 @mcp.tool(
     annotations={
         "title": "Month summary",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def get_monthly_summary(
@@ -89,9 +89,9 @@ async def get_monthly_summary(
 @mcp.tool(
     annotations={
         "title": "Budget vs actual",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def get_budget_vs_actual(
@@ -118,9 +118,9 @@ async def get_budget_vs_actual(
 @mcp.tool(
     annotations={
         "title": "Spending trends",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def get_spending_trends(
@@ -157,9 +157,9 @@ async def get_spending_trends(
 @mcp.tool(
     annotations={
         "title": "List category groups",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def list_category_groups(budget_id: str) -> list[dict[str, Any]]:
@@ -178,9 +178,9 @@ async def list_category_groups(budget_id: str) -> list[dict[str, Any]]:
 @mcp.tool(
     annotations={
         "title": "List accounts",
-        "readOnlyHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": True,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     }
 )
 async def list_accounts(budget_id: str) -> list[dict[str, Any]]:
@@ -200,10 +200,10 @@ async def list_accounts(budget_id: str) -> list[dict[str, Any]]:
     tags={WRITE_TAG},
     annotations={
         "title": "Approve transactions",
-        "readOnlyHint": False,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": False,
+        "idempotent_hint": True,
+        "open_world_hint": True,
     },
 )
 async def approve_transactions(budget_id: str, tx_ids: list[str]) -> dict[str, int]:

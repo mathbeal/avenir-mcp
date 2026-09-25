@@ -1,0 +1,73 @@
+"""ask() on paths the in-memory client does not take: older protocol, odd replies."""
+
+from __future__ import annotations
+
+import asyncio
+from dataclasses import dataclass, field
+from typing import Any
+
+from fastmcp.server.elicitation import AcceptedElicitation, CancelledElicitation
+from mcp import types
+
+from avenir_mcp import confirm, writes
+
+
+@dataclass
+class _Session:
+    def check_client_capability(self, _capability: Any) -> bool:
+        """This client can answer questions."""
+        return True
+
+
+@dataclass
+class _Request:
+    protocol_version: str
+
+
+@dataclass
+class _Ctx:
+    """Just what ask() reads from a FastMCP context."""
+
+    protocol_version: str
+    answer: Any = None
+    input_responses: dict[str, Any] | None = None
+    request_state: str | None = None
+    session: _Session = field(default_factory=_Session)
+
+    @property
+    def request_context(self) -> _Request:
+        """The negotiated protocol version."""
+        return _Request(self.protocol_version)
+
+    async def elicit(self, _question: str, _response_type: type) -> Any:
+        """The user's canned answer."""
+        return self.answer
+
+
+def _ask(ctx: _Ctx, subject: object = "change") -> Any:
+    return asyncio.run(confirm.ask(ctx, "b1", subject, "Apply?", None))  # type: ignore[arg-type]
+
+
+def test_older_protocol_asks_during_the_call() -> None:
+    """Before 2026-07-28 the server asks the client directly."""
+    assert _ask(_Ctx("2025-11-25", answer=AcceptedElicitation(data=True))) == "applied"
+    assert _ask(_Ctx("2025-11-25", answer=AcceptedElicitation(data=False))) == "declined"
+
+
+def test_older_protocol_dismissed_question_gives_a_code() -> None:
+    """A dismissed question on an older connection falls back to a code too."""
+    code = _ask(_Ctx("2025-11-25", answer=CancelledElicitation()))
+    assert code not in ("applied", "declined")
+    assert confirm.CONFIRMATIONS.consume(code, "b1", "change")
+
+
+def test_modern_reply_of_another_kind_counts_as_no_answer() -> None:
+    """A reply that is not a form answer confirms nothing: a code is issued."""
+    reply = types.ListRootsResult(roots=[])
+    ctx = _Ctx(
+        "2026-07-28",
+        input_responses={"confirm": reply},
+        request_state=writes.fingerprint("b1", "change"),
+    )
+    code = _ask(ctx)
+    assert code not in ("applied", "declined")

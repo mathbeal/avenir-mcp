@@ -67,7 +67,7 @@ def test_forecast_is_read_only() -> None:
         async with Client(server.mcp) as mcp_client:
             return next(t for t in await mcp_client.list_tools() if t.name == "forecast_balance")
 
-    assert asyncio.run(run()).annotations.readOnlyHint is True
+    assert asyncio.run(run()).annotations.read_only_hint is True
 
 
 def test_forecast_uses_open_budget_accounts_and_shows_its_assumptions() -> None:

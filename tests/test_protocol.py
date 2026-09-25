@@ -52,13 +52,13 @@ async def _call(name: str, args: dict[str, Any]) -> Any:
 def test_suggest_categories_is_declared_read_only() -> None:
     """Clients may run it without confirmation: it changes nothing."""
     tool = asyncio.run(_tool("suggest_categories"))
-    assert tool.annotations.readOnlyHint is True
-    assert tool.annotations.openWorldHint is True
+    assert tool.annotations.read_only_hint is True
+    assert tool.annotations.open_world_hint is True
 
 
 def test_suggest_categories_publishes_a_precise_output_schema() -> None:
     """The output schema names the fields, so a client can validate the answer."""
-    schema = asyncio.run(_tool("suggest_categories")).outputSchema
+    schema = asyncio.run(_tool("suggest_categories")).output_schema
     assert {"pending_count", "suggested_count", "items", "categories", "next_cursor"} <= set(
         schema["properties"]
     )

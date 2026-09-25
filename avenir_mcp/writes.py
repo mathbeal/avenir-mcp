@@ -138,7 +138,7 @@ def plan_undo(
     return {"changes": changes, "unchanged_count": 0, "conflicts": conflicts}
 
 
-def _fingerprint(budget_id: str, subject: object) -> str:
+def fingerprint(budget_id: str, subject: object) -> str:
     """Hash what is being confirmed; the order of a list of changes does not matter."""
     if isinstance(subject, list):
         subject = sorted(json.dumps(item, sort_keys=True) for item in subject)
@@ -161,7 +161,7 @@ class Confirmations:
     def issue(self, budget_id: str, subject: object) -> str:
         """Return a new code that confirms this subject (JSON data), and nothing else."""
         code = secrets.token_urlsafe(8)
-        self._issued[code] = (_fingerprint(budget_id, subject), self._clock())
+        self._issued[code] = (fingerprint(budget_id, subject), self._clock())
         return code
 
     def consume(self, code: str, budget_id: str, subject: object) -> bool:
@@ -169,6 +169,6 @@ class Confirmations:
         issued = self._issued.pop(code, None)
         if issued is None:
             return False
-        fingerprint, issued_at = issued
+        expected, issued_at = issued
         fresh = self._clock() - issued_at <= self._ttl
-        return fresh and fingerprint == _fingerprint(budget_id, subject)
+        return fresh and expected == fingerprint(budget_id, subject)

@@ -88,12 +88,12 @@ def _annotations(name: str) -> Any:
 def test_write_tools_declare_what_they_do() -> None:
     """Clients can tell these tools change the budget."""
     apply = _annotations("apply_categories")
-    assert apply.readOnlyHint is False
-    assert apply.destructiveHint is True
-    assert apply.idempotentHint is True
+    assert apply.read_only_hint is False
+    assert apply.destructive_hint is True
+    assert apply.idempotent_hint is True
     undo = _annotations("undo_operation")
-    assert undo.readOnlyHint is False
-    assert undo.destructiveHint is True
+    assert undo.read_only_hint is False
+    assert undo.destructive_hint is True
 
 
 def test_without_elicitation_first_call_only_previews(budget: _Budget) -> None:
@@ -213,7 +213,7 @@ def test_long_preview_is_summarised(budget: _Budget) -> None:
 
     async def accept_and_keep(message: str, *_: Any) -> ElicitResult[Any]:
         asked.append(message)
-        return ElicitResult(action="accept", content={})
+        return ElicitResult(action="accept", content={"value": True})
 
     assignments = [{"transaction_id": f"t{i}", "category_id": "c-food"} for i in range(21)]
     call("apply_categories", {"budget_id": "b1", "assignments": assignments}, accept_and_keep)
@@ -231,4 +231,30 @@ def test_dismissed_question_falls_back_to_a_confirmation_code(budget: _Budget) -
     data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, dismiss)
     assert data.structured_content["status"] == "confirmation_required"
     assert data.structured_content["confirmation"]
+    assert not budget.patches
+
+
+def test_accepted_form_left_unticked_is_not_a_yes(budget: _Budget) -> None:
+    """Accepting the dialog without ticking the confirmation changes nothing."""
+
+    async def unticked(*_: Any) -> ElicitResult[Any]:
+        return ElicitResult(action="accept", content={"value": False})
+
+    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, unticked)
+    assert data.structured_content["status"] == "declined"
+    assert not budget.patches
+
+
+def test_answer_to_an_outdated_preview_is_refused(budget: _Budget) -> None:
+    """If the budget changes while the user answers, the answer confirms nothing."""
+
+    async def accept_after_a_change(*_: Any) -> ElicitResult[Any]:
+        budget.transactions = [dict(budget.transactions[0], category_id="c-fun")]
+        return ElicitResult(action="accept", content={"value": True})
+
+    result = call(
+        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept_after_a_change
+    )
+    assert result.is_error
+    assert "changed between the preview and the answer" in result.content[0].text
     assert not budget.patches

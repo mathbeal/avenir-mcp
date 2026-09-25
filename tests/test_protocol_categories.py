@@ -42,7 +42,7 @@ def _update() -> Iterator[AsyncMock]:
 
 
 async def _accept(*_: Any) -> ElicitResult[Any]:
-    return ElicitResult(action="accept", content={})
+    return ElicitResult(action="accept", content={"value": True})
 
 
 def _call(args: dict[str, Any], handler: Any = None) -> Any:
@@ -61,9 +61,9 @@ def test_update_category_declares_a_reversible_write() -> None:
             return next(t for t in await mcp_client.list_tools() if t.name == "update_category")
 
     annotations = asyncio.run(run()).annotations
-    assert annotations.readOnlyHint is False
-    assert annotations.destructiveHint is True
-    assert annotations.idempotentHint is True
+    assert annotations.read_only_hint is False
+    assert annotations.destructive_hint is True
+    assert annotations.idempotent_hint is True
 
 
 def test_rename_is_previewed_then_applied_with_the_code(update: AsyncMock) -> None:

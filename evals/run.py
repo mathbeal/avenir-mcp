@@ -99,6 +99,7 @@ def run_task(task: Task, model: str) -> dict[str, Any]:
             seconds = round(time.monotonic() - started, 1)
     finally:
         server.shutdown()
+        server.server_close()
     events = _events(done.stdout)
     final = next((e for e in reversed(events) if e.get("type") == "result"), {})
     text = str(final.get("result", ""))

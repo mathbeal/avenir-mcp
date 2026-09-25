@@ -6,6 +6,7 @@ import logging
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
+from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
 from avenir_mcp import client, journal, writes
 from avenir_mcp.app import WRITE_TAG, mcp
@@ -20,10 +21,10 @@ _EMPTY: writes.Plan = {"changes": [], "unchanged_count": 0, "conflicts": []}
     tags={WRITE_TAG},
     annotations={
         "title": "Undo an operation",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": False,
-        "openWorldHint": True,
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": False,
+        "open_world_hint": True,
     },
 )
 async def undo_operation(
@@ -31,7 +32,7 @@ async def undo_operation(
     ctx: Context,
     operation_id: str | None = None,
     confirmation: str | None = None,
-) -> WriteResult:
+) -> WriteResult | InputRequiredResult:
     """Undo an operation made through this server: the latest one, or the one named.
 
     Recategorised transactions go back to their previous category; a
@@ -73,9 +74,11 @@ async def undo_operation(
 
 async def _confirm_undo(
     ctx: Context, budget_id: str, entry: journal.Entry, question: str, confirmation: str | None
-) -> WriteResult | None:
-    """None when the user agreed; otherwise the result saying why nothing happened."""
+) -> WriteResult | InputRequiredResult | None:
+    """None when the user agreed; otherwise what to return instead of undoing."""
     decision = await ask(ctx, budget_id, {"undo": entry["operation_id"]}, question, confirmation)
+    if isinstance(decision, InputRequiredResult):
+        return decision
     outcome = not_applied(decision, question)
     if outcome is None:
         return None
@@ -90,7 +93,7 @@ async def _undo_reconcile(
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
-) -> WriteResult:
+) -> WriteResult | InputRequiredResult:
     """Put reconciled transactions back to cleared and delete the adjustment, if any."""
     details = entry["details"]
     statuses = {tx["id"]: tx for tx in await client.get_transactions(budget_id)}
@@ -119,7 +122,7 @@ async def _undo_budget(
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
-) -> WriteResult:
+) -> WriteResult | InputRequiredResult:
     """Set a category's budgeted amount back to what it was, unless it moved since."""
     details = entry["details"]
     categories = await client.get_month_categories(budget_id, details["month"])
@@ -145,7 +148,7 @@ async def _undo_create(
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
-) -> WriteResult:
+) -> WriteResult | InputRequiredResult:
     """Delete the transactions an operation created, those still there."""
     created = entry["details"]["transaction_ids"]
     live = {tx["id"] for tx in await client.get_transactions(budget_id) if not tx.get("deleted")}

@@ -1,7 +1,10 @@
 """Confirm a write with the user, then apply and journal it.
 
-A client that supports elicitation asks the user directly; otherwise the first
-call returns a preview and a single-use code bound to exactly that preview.
+A client that supports elicitation asks the user: on a 2026-07-28 connection the
+tool returns an input request and the client calls again with the answer; on an
+older one the server asks during the call. Otherwise, or if the question was
+dismissed, the call returns a preview and a single-use code bound to exactly
+that preview.
 """
 
 from __future__ import annotations
@@ -11,7 +14,12 @@ from typing import Any, Literal, TypedDict
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
+from fastmcp.server.elicitation import (  # pylint: disable=import-error
+    handle_elicit_accept,
+    parse_elicit_response_type,
+)
 from mcp import types  # pylint: disable=import-error
+from mcp_types.version import MODERN_PROTOCOL_VERSIONS  # pylint: disable=import-error
 
 from avenir_mcp import client, journal, writes
 
@@ -19,6 +27,10 @@ logger = logging.getLogger(__name__)
 
 
 CONFIRMATIONS = writes.Confirmations()
+
+# A yes/no form: the client shows a checkbox the user must tick.
+_YES_NO = parse_elicit_response_type(bool)
+_QUESTION_KEY = "confirm"
 
 
 WriteStatus = Literal["applied", "confirmation_required", "declined", "nothing_to_do"]
@@ -62,12 +74,24 @@ def describe(plan: writes.Plan, action: str) -> str:
     return f"{action} {len(plan['changes'])} transaction(s)?\n" + "\n".join(lines)
 
 
+def _answer(action: str, content: dict[str, Any] | None) -> WriteStatus | None:
+    """Read the user's answer; None when nobody answered (the question was dismissed)."""
+    if action == "accept":
+        # An accepted form with the box left unticked is not a yes.
+        return "applied" if handle_elicit_accept(_YES_NO, content).data is True else "declined"
+    if action == "decline":
+        return "declined"
+    return None
+
+
 async def ask(
     ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
-) -> WriteStatus | str:
-    """Return "applied" when the user agreed, "declined", or a code to confirm later.
+) -> WriteStatus | str | types.InputRequiredResult:
+    """Return "applied" when the user agreed, "declined", a code to confirm later, or
+    an input request the tool must return so the client can ask (2026-07-28).
 
-    `subject` is the exact change being confirmed: a code only ever confirms it.
+    `subject` is the exact change being confirmed: a code, or an answer, only ever
+    confirms it.
     """
     if confirmation is not None:
         if CONFIRMATIONS.consume(confirmation, budget_id, subject):
@@ -79,15 +103,35 @@ async def ask(
     can_ask = ctx.session.check_client_capability(
         types.ClientCapabilities(elicitation=types.ElicitationCapability())
     )
-    if can_ask:
-        answer = await ctx.elicit(question, None)
-        if answer.action == "accept":
-            return "applied"
-        if answer.action == "decline":
-            return "declined"
-        # "cancel": the question was dismissed or could not be shown (a headless
-        # client). Nobody said no, so fall back to a code the user can confirm.
-    return CONFIRMATIONS.issue(budget_id, subject)
+    if not can_ask:
+        return CONFIRMATIONS.issue(budget_id, subject)
+    rc = ctx.request_context
+    if rc is not None and rc.protocol_version in MODERN_PROTOCOL_VERSIONS:
+        fingerprint = writes.fingerprint(budget_id, subject)
+        responses = ctx.input_responses
+        if not responses or _QUESTION_KEY not in responses:
+            request = types.ElicitRequest(
+                params=types.ElicitRequestFormParams(
+                    message=question, requested_schema=_YES_NO.schema
+                )
+            )
+            return types.InputRequiredResult(
+                input_requests={_QUESTION_KEY: request}, request_state=fingerprint
+            )
+        if ctx.request_state != fingerprint:
+            raise ToolError(
+                "The budget changed between the preview and the answer. "
+                "Call again without an answer to get a new preview."
+            )
+        reply = responses[_QUESTION_KEY]
+        decision = (
+            _answer(reply.action, reply.content) if isinstance(reply, types.ElicitResult) else None
+        )
+    else:
+        answer = await ctx.elicit(question, bool)
+        decision = _answer(answer.action, {"value": getattr(answer, "data", None)})
+    # Nobody said no when the question was dismissed: fall back to a code.
+    return decision or CONFIRMATIONS.issue(budget_id, subject)
 
 
 async def write_plan(
@@ -96,7 +140,7 @@ async def write_plan(
     plan: writes.Plan,
     action: str,
     confirmation: str | None,
-) -> tuple[WriteResult, str | None]:
+) -> tuple[WriteResult | types.InputRequiredResult, str | None]:
     """Confirm and apply a plan; return the result and the new operation id."""
     if not plan["changes"]:
         message = "Nothing to change." + (
@@ -106,6 +150,8 @@ async def write_plan(
         )
         return result_of("nothing_to_do", message, plan), None
     decision = await ask(ctx, budget_id, plan["changes"], describe(plan, action), confirmation)
+    if isinstance(decision, types.InputRequiredResult):
+        return decision, None
     if decision == "declined":
         return result_of("declined", "The user declined: nothing was changed.", plan), None
     if decision != "applied":
@@ -156,3 +202,17 @@ def not_applied(decision: WriteStatus | str, question: str) -> NotApplied | None
         ),
         "confirmation": decision,
     }
+
+
+async def gate(
+    ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
+) -> NotApplied | types.InputRequiredResult | None:
+    """Ask for confirmation; None when the write may proceed, otherwise what to return.
+
+    A tool returns an InputRequiredResult as is, and merges NotApplied fields
+    into its own result.
+    """
+    decision = await ask(ctx, budget_id, subject, question, confirmation)
+    if isinstance(decision, types.InputRequiredResult):
+        return decision
+    return not_applied(decision, question)
