@@ -7,9 +7,9 @@ import logging
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 
-from avenir_mcp import client, journal, triage, writes
+from avenir_mcp import client, triage, writes
 from avenir_mcp.app import WRITE_TAG, mcp
-from avenir_mcp.confirm import WriteResult, ask, result_of, write_plan
+from avenir_mcp.confirm import WriteResult, write_plan
 
 logger = logging.getLogger(__name__)
 
@@ -93,85 +93,3 @@ async def apply_categories(
         raise ToolError(str(error)) from error
     result, _ = await write_plan(ctx, budget_id, plan, "Recategorise", confirmation)
     return result
-
-
-@mcp.tool(
-    tags={WRITE_TAG},
-    annotations={
-        "title": "Undo an operation",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": False,
-        "openWorldHint": True,
-    },
-)
-async def undo_operation(
-    budget_id: str,
-    ctx: Context,
-    operation_id: str | None = None,
-    confirmation: str | None = None,
-) -> WriteResult:
-    """Undo an operation made through this server: the latest one, or the one named.
-
-    Every transaction goes back to the category it had before. A transaction whose
-    category was changed again since is left alone and listed in `conflicts`.
-    Confirmation works as for apply_categories.
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-        operation_id: Operation to undo; omit for the most recent one.
-        confirmation: Code from a previous "confirmation_required" result.
-    """
-    logger.info("Tool called: undo_operation")
-    book = journal.Journal(journal.default_path())
-    entry = book.find(budget_id, operation_id)
-    if entry is None:
-        raise ToolError(
-            "Nothing to undo: no operation of this budget is still in effect"
-            + (f" with id {operation_id}." if operation_id else ".")
-        )
-    if entry["kind"] == "reconcile":
-        return await _undo_reconcile(ctx, budget_id, book, entry, confirmation)
-    transactions = await client.get_transactions(budget_id)
-    categories = await client.get_categories(budget_id)
-    plan = writes.plan_undo(transactions, categories, entry["moves"])
-    result, new_operation = await write_plan(
-        ctx, budget_id, plan, "Undo: recategorise", confirmation
-    )
-    if new_operation is not None:
-        book.mark_undone(entry["operation_id"])
-        book.mark_undone(new_operation)
-    return result
-
-
-async def _undo_reconcile(
-    ctx: Context,
-    budget_id: str,
-    book: journal.Journal,
-    entry: journal.Entry,
-    confirmation: str | None,
-) -> WriteResult:
-    """Put reconciled transactions back to cleared and delete the adjustment, if any."""
-    details = entry["details"]
-    statuses = {tx["id"]: tx for tx in await client.get_transactions(budget_id)}
-    reverted = [
-        tx_id
-        for tx_id in details["reconciled_ids"]
-        if statuses.get(tx_id, {}).get("cleared") == "reconciled"
-    ]
-    adjustment = details.get("adjustment_id")
-    empty: writes.Plan = {"changes": [], "unchanged_count": 0, "conflicts": []}
-    question = f"Undo reconciliation: mark {len(reverted)} transaction(s) back to cleared" + (
-        " and delete the balance adjustment?" if adjustment else "?"
-    )
-    decision = await ask(ctx, budget_id, {"undo": entry["operation_id"]}, question, confirmation)
-    if decision == "declined":
-        return result_of("declined", "The user declined: nothing was changed.", empty)
-    if decision != "applied":
-        message = f"Nothing changed yet. {question} If the user agrees, call again with this code."
-        return result_of("confirmation_required", message, empty, confirmation=decision)
-    await client.set_transactions_cleared(budget_id, reverted, "cleared")
-    if adjustment:
-        await client.delete_transaction(budget_id, adjustment)
-    book.mark_undone(entry["operation_id"])
-    return result_of("applied", "Reconciliation undone.", empty)

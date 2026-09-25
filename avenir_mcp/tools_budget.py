@@ -3,25 +3,12 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
-from fastmcp.exceptions import ToolError  # pylint: disable=import-error
-
 from avenir_mcp import analytics, client
-from avenir_mcp.app import WRITE_TAG, mcp
+from avenir_mcp.app import WRITE_TAG, check_month, mcp
 
 logger = logging.getLogger(__name__)
-
-_MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-01$")
-
-
-def _check_month(month: str) -> None:
-    """Refuse a malformed month before YNAB answers with a bare 404."""
-    if month != "current" and not _MONTH.match(month):
-        raise ToolError(
-            f"month must be 'current' or the first day of a month as YYYY-MM-01, got {month!r}."
-        )
 
 
 @mcp.tool(
@@ -68,7 +55,7 @@ async def get_category_balances(
         include_empty: Also list categories with no amount at all.
     """
     logger.info("Tool called: get_category_balances(month=%r)", month)
-    _check_month(month)
+    check_month(month)
     categories = await client.get_month_categories(budget_id, month)
     return analytics.category_balances(categories, include_empty=include_empty)
 
@@ -95,7 +82,7 @@ async def get_monthly_summary(
         month: 'YYYY-MM-01' or 'current'.
     """
     logger.info("Tool called: get_monthly_summary(month=%r)", month)
-    _check_month(month)
+    check_month(month)
     return analytics.month_overview(await client.get_month(budget_id, month))
 
 
@@ -123,7 +110,7 @@ async def get_budget_vs_actual(
     - utilization_pct — percentage of budget consumed (> 100 means over-budget)
     """
     logger.info("Tool called: get_budget_vs_actual(month=%r)", month)
-    _check_month(month)
+    check_month(month)
     month_cats = await client.get_month_categories(budget_id, month)
     return analytics.budget_vs_actual(month_cats)
 
@@ -215,42 +202,6 @@ async def create_category(budget_id: str, category_group_id: str, name: str) -> 
         name,
     )
     return await client.create_category(budget_id, category_group_id, name)
-
-
-@mcp.tool(
-    tags={WRITE_TAG},
-    annotations={
-        "title": "Set a category's assigned amount",
-        "readOnlyHint": False,
-        "destructiveHint": True,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
-)
-async def set_category_budget(
-    budget_id: str, month: str, category_id: str, amount: float
-) -> dict[str, Any]:
-    """Set the amount assigned to a category for a month (YNAB "Assigned").
-
-    The amount REPLACES the current assignment for that month; it is not added
-    to it. To move money between categories, lower one and raise the other.
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-        month: ISO month 'YYYY-MM-01' or 'current'.
-        category_id: Category UUID.
-        amount: Amount to assign, in euros (e.g. 1890.0).
-
-    Returns the updated category for that month (budgeted/activity/balance in milliunits).
-    """
-    logger.info(
-        "Tool called: set_category_budget(budget_id=%r, month=%r, category_id=%r, amount=%r)",
-        budget_id,
-        month,
-        category_id,
-        amount,
-    )
-    return await client.set_category_budgeted(budget_id, month, category_id, amount)
 
 
 @mcp.tool(

@@ -13,7 +13,8 @@ What the server does:
 
 - it calls `api.ynab.com` over HTTPS, and nothing else
 - it reads the token from the environment and never writes it anywhere
-- `apply_categories` and `undo_operation` change nothing until the user confirms the
+- `apply_categories`, `reconcile_account`, `set_category_budget`, `update_category`
+  and `undo_operation` change nothing until the user confirms the
   previewed changes. A confirmation code is single-use, expires after 10 minutes and
   only confirms the exact changes it was issued for
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding

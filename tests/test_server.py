@@ -201,17 +201,6 @@ def test_create_category_delegates_to_client() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_set_category_budget_delegates_to_client() -> None:
-    """set_category_budget must call client.set_category_budgeted with correct args."""
-    updated = {"id": "c1", "budgeted": 1890000}
-    with patch(
-        "avenir_mcp.client.set_category_budgeted", new=AsyncMock(return_value=updated)
-    ) as mock_fn:
-        result = asyncio.run(server.set_category_budget("b1", "2026-09-01", "c1", 1890.0))
-    mock_fn.assert_called_once_with("b1", "2026-09-01", "c1", 1890.0)
-    assert result == updated
-
-
 def test_list_accounts_delegates_to_client() -> None:
     """list_accounts must return client.get_accounts output."""
     accounts = [{"id": "a1", "name": "Checking", "balance": 1250.0}]

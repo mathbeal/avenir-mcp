@@ -10,9 +10,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastmcp import Client
-from fastmcp.client.elicitation import ElicitResult
 
 from avenir_mcp import server
+
+from .mcp_helpers import accept, call, decline
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking"}]
 _CATS = [
@@ -99,18 +100,6 @@ def _bank(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[_Bank]:
         yield fake
 
 
-async def _accept(*_: Any) -> ElicitResult[Any]:
-    return ElicitResult(action="accept", content={})
-
-
-def _call(name: str, args: dict[str, Any], handler: Any = None) -> Any:
-    async def run() -> Any:
-        async with Client(server.mcp, elicitation_handler=handler) as mcp_client:
-            return await mcp_client.call_tool(name, args, raise_on_error=False)
-
-    return asyncio.run(run())
-
-
 def _args(balance: float, **extra: Any) -> dict[str, Any]:
     return {"budget_id": "b1", "account_id": "acc", "bank_balance": balance, **extra}
 
@@ -129,7 +118,7 @@ def test_reconcile_declares_a_write() -> None:
 
 def test_difference_is_diagnosed_without_writing(bank: _Bank) -> None:
     """A gap is explained, not silently adjusted: nothing is asked or written."""
-    data = _call("reconcile_account", _args(65.0), _accept).structured_content
+    data = call("reconcile_account", _args(65.0), accept).structured_content
     assert data["status"] == "difference_found"
     assert data["analysis"]["difference"] == -5.0
     assert data["analysis"]["explained_by"] == ["t3"]
@@ -139,11 +128,11 @@ def test_difference_is_diagnosed_without_writing(bank: _Bank) -> None:
 
 def test_matching_balance_reconciles_after_confirmation(bank: _Bank) -> None:
     """Balance matches: cleared transactions become reconciled once the code is given."""
-    preview = _call("reconcile_account", _args(70.0)).structured_content
+    preview = call("reconcile_account", _args(70.0)).structured_content
     assert preview["status"] == "confirmation_required"
     assert bank.status("t2") == "cleared"
     code = preview["confirmation"]
-    data = _call("reconcile_account", _args(70.0, confirmation=code)).structured_content
+    data = call("reconcile_account", _args(70.0, confirmation=code)).structured_content
     assert data["status"] == "applied"
     assert bank.status("t2") == "reconciled"
     assert bank.status("t3") == "uncleared"
@@ -151,13 +140,13 @@ def test_matching_balance_reconciles_after_confirmation(bank: _Bank) -> None:
 
 def test_adjustment_is_created_on_request_then_undone(bank: _Bank) -> None:
     """adjust=true records the gap as a Ready to Assign adjustment; undo removes it."""
-    data = _call("reconcile_account", _args(80.0, adjust=True), _accept).structured_content
+    data = call("reconcile_account", _args(80.0, adjust=True), accept).structured_content
     assert data["status"] == "applied"
     assert data["adjustment"] == 10.0
     assert bank.created[0]["amount"] == 10.0
     assert bank.created[0]["category_id"] == "c-inflow"
     assert bank.status("adj") == "reconciled"
-    undo = _call("undo_operation", {"budget_id": "b1"}, _accept).structured_content
+    undo = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
     assert undo["status"] == "applied"
     assert bank.deleted == ["adj"]
     assert bank.status("t2") == "cleared"
@@ -166,13 +155,13 @@ def test_adjustment_is_created_on_request_then_undone(bank: _Bank) -> None:
 def test_nothing_to_reconcile(bank: _Bank) -> None:
     """Already reconciled and matching: nothing to do."""
     bank.transactions = [bank.transactions[0]]
-    data = _call("reconcile_account", _args(100.0)).structured_content
+    data = call("reconcile_account", _args(100.0)).structured_content
     assert data["status"] == "nothing_to_do"
 
 
 def test_unknown_account_is_a_tool_error(bank: _Bank) -> None:
     """An account id that is not in the budget is refused, saying where to find one."""
-    result = _call("reconcile_account", {**_args(1.0), "account_id": "nope"})
+    result = call("reconcile_account", {**_args(1.0), "account_id": "nope"})
     assert result.is_error
     assert "list_accounts" in result.content[0].text
     assert not bank.created
@@ -181,22 +170,19 @@ def test_unknown_account_is_a_tool_error(bank: _Bank) -> None:
 def test_declined_reconciliation_changes_nothing(bank: _Bank) -> None:
     """If the user says no, statuses stay as they are."""
 
-    async def decline(*_: Any) -> ElicitResult[Any]:
-        return ElicitResult(action="decline")
-
-    data = _call("reconcile_account", _args(70.0), decline).structured_content
+    data = call("reconcile_account", _args(70.0), decline).structured_content
     assert data["status"] == "declined"
     assert bank.status("t2") == "cleared"
 
 
 def test_undo_reconcile_without_elicitation_needs_the_code(bank: _Bank) -> None:
     """Undoing a reconciliation is previewed and confirmed like any write."""
-    _call("reconcile_account", _args(70.0), _accept)
-    preview = _call("undo_operation", {"budget_id": "b1"}).structured_content
+    call("reconcile_account", _args(70.0), accept)
+    preview = call("undo_operation", {"budget_id": "b1"}).structured_content
     assert preview["status"] == "confirmation_required"
     assert bank.status("t2") == "reconciled"
     code = preview["confirmation"]
-    data = _call("undo_operation", {"budget_id": "b1", "confirmation": code}).structured_content
+    data = call("undo_operation", {"budget_id": "b1", "confirmation": code}).structured_content
     assert data["status"] == "applied"
     assert bank.status("t2") == "cleared"
 
@@ -204,10 +190,7 @@ def test_undo_reconcile_without_elicitation_needs_the_code(bank: _Bank) -> None:
 def test_declined_undo_of_a_reconciliation_changes_nothing(bank: _Bank) -> None:
     """If the user refuses the undo, the account stays reconciled."""
 
-    async def decline(*_: Any) -> ElicitResult[Any]:
-        return ElicitResult(action="decline")
-
-    _call("reconcile_account", _args(70.0), _accept)
-    data = _call("undo_operation", {"budget_id": "b1"}, decline).structured_content
+    call("reconcile_account", _args(70.0), accept)
+    data = call("undo_operation", {"budget_id": "b1"}, decline).structured_content
     assert data["status"] == "declined"
     assert bank.status("t2") == "reconciled"

@@ -1,4 +1,4 @@
-"""Change the category structure: rename or move a category."""
+"""Change categories: rename or move one, set the amount budgeted for a month."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ from typing import TypedDict
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 
-from avenir_mcp import client
-from avenir_mcp.app import WRITE_TAG, mcp
+from avenir_mcp import app, client, journal
+from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.confirm import WriteStatus, ask, not_applied
 
 logger = logging.getLogger(__name__)
@@ -109,4 +109,97 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
         **result,
         "status": "applied",
         "message": "Applied. To revert, call update_category with the previous name and group.",
+    }
+
+
+class BudgetChange(TypedDict):
+    """The outcome of set_category_budget."""
+
+    status: WriteStatus
+    message: str
+    category_id: str
+    category: str
+    month: str
+    from_amount: float
+    to_amount: float
+    confirmation: str | None
+    operation_id: str | None
+
+
+@mcp.tool(
+    tags={WRITE_TAG},
+    annotations={
+        "title": "Set a category's budgeted amount",
+        "readOnlyHint": False,
+        "destructiveHint": True,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    budget_id: str,
+    month: str,
+    category_id: str,
+    amount: float,
+    ctx: Context,
+    confirmation: str | None = None,
+) -> BudgetChange:
+    """Set the amount budgeted ("Assigned") in a category for a month, after the user confirms.
+
+    The amount is absolute, in currency units, not a change. The result gives the
+    amount before and after; undo_operation restores the previous one.
+    Confirmation works as for apply_categories.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+        month: 'YYYY-MM-01' or 'current'.
+        category_id: Category (from get_category_balances or suggest_categories).
+        amount: New budgeted amount, in currency units.
+        confirmation: Code from a previous "confirmation_required" result.
+    """
+    logger.info("Tool called: set_category_budget(month=%r)", month)
+    check_month(month)
+    month = app.resolve_month(month)
+    categories = {c["id"]: c for c in await client.get_month_categories(budget_id, month)}
+    category = categories.get(category_id)
+    if category is None:
+        raise ToolError(
+            f"Category {category_id} is not in this budget: "
+            "use a category_id from get_category_balances."
+        )
+    before, after = category["budgeted"], client.amount_to_milliunit(amount)
+    result: BudgetChange = {
+        "status": "nothing_to_do",
+        "message": "Nothing to change.",
+        "category_id": category_id,
+        "category": category["name"],
+        "month": month,
+        "from_amount": client.milliunit_to_amount(before),
+        "to_amount": client.milliunit_to_amount(after),
+        "confirmation": None,
+        "operation_id": None,
+    }
+    if before == after:
+        return result
+    question = (
+        f"Budget {category['name']} for {month}: "
+        f"{result['from_amount']:.2f} → {result['to_amount']:.2f}?"
+    )
+    subject = {"category": category_id, "month": month, "amount": after}
+    decision = await ask(ctx, budget_id, subject, question, confirmation)
+    outcome = not_applied(decision, question)
+    if outcome is not None:
+        return {**result, **outcome}
+    await client.set_category_budgeted(budget_id, month, category_id, amount)
+    operation_id = journal.Journal(journal.default_path()).record(
+        budget_id,
+        "budget",
+        [],
+        {"month": month, "category_id": category_id, "from": before, "to": after},
+    )
+    return {
+        **result,
+        "status": "applied",
+        "message": f"Applied. undo_operation with operation_id {operation_id} reverts it.",
+        "operation_id": operation_id,
     }

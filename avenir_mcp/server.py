@@ -12,6 +12,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_accounts,
     tools_categories,
     tools_classify,
+    tools_undo,
 )
 from avenir_mcp.app import WRITE_TAG, configure, mcp, today
 from avenir_mcp.tools_budget import (
@@ -25,8 +26,8 @@ from avenir_mcp.tools_budget import (
     list_accounts,
     list_budgets,
     list_category_groups,
-    set_category_budget,
 )
+from avenir_mcp.tools_categories import set_category_budget
 
 __all__ = [
     "WRITE_TAG",

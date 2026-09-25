@@ -44,7 +44,7 @@ read-only by default, previewable and undoable.
 | `update_category` | **write, confirmed** | rename a category or move it to another group; the result gives the previous name and group to revert |
 | `approve_transactions` | **write** | mark transactions as reviewed |
 | `create_category` | **write** | add a category |
-| `set_category_budget` | **write** | assign an amount to a category for a month |
+| `set_category_budget` | **write, confirmed, undoable** | set the amount budgeted in a category for a month; previewed as before → after |
 | `create_transactions` | **write** | add transactions, e.g. to fill an import gap |
 
 ## Install
@@ -99,9 +99,9 @@ Written down so that nobody discovers them the hard way:
   previewed changes.
 - **Read-only by default.** Write tools exist only with `AVENIR_MCP_WRITE=1`.
 - **Older write tools still act immediately** once writes are enabled:
-  `approve_transactions`, `create_category`,
-  `set_category_budget`, `create_transactions`.
-- Undo covers operations made with `apply_categories` and `reconcile_account`, and only on the machine whose
+  `approve_transactions`, `create_category`, `create_transactions`.
+- Undo covers operations made with `apply_categories`, `reconcile_account` and
+  `set_category_budget`, and only on the machine whose
   journal recorded them. An undo cannot itself be undone.
 - `create_transactions` creates transactions that are already approved and cleared.
 - Amounts are in currency units everywhere (YNAB's milliunits stay inside the server).
@@ -119,9 +119,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 213, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1021 statements) |
-| Branch coverage | 100 % (222 branches) |
+| Tests | 220, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1080 statements) |
+| Branch coverage | 100 % (234 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |
