@@ -1,0 +1,79 @@
+---
+title: Plan ahead
+description: Forecast your balance month by month, check its assumptions, and budget next month.
+sidebar:
+  order: 4
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import projection from '@snippets/forecast.json?raw';
+
+**Goal:** know whether the money lasts, and when it would run out, before it does.
+
+**Tools:** [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/), then
+[`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/).
+**Prompt:** `plan_next_month`.
+
+## The conversation
+
+<Steps>
+
+1. **Ask, with what you know.**
+
+   > **You:** If I earn 3,200 a month, will my accounts go below zero before the end of
+   > the year?
+
+2. **The agent projects.** `forecast_balance` with `{"until": "2026-12",
+   "monthly_income": 3200}` — two YNAB requests:
+
+   <Code code={projection} lang="json" title="forecast_balance (excerpt)" />
+
+3. **The agent reads the assumptions to you** before the conclusion:
+
+   > **Claude:** Starting from 4,112.66 across Checking and Savings, with 3,200 a month
+   > in, your recurring charges (rent 950, groceries about 182.58, electricity 64.20, the
+   > train 45, tennis 22, phone 19.99, Streamflix 13.49) and about 69 of other
+   > spending, the balance keeps growing: the lowest point, 4,112.66, is today. Anything
+   > coming I should add?
+
+4. **You correct.** Add what the history cannot know:
+
+   > **You:** The property tax, 1,426, on 15 October.
+
+   The agent calls again with `one_offs: [{"date": "2026-10-15", "amount": -1426,
+   "label": "property tax"}]`.
+
+</Steps>
+
+## What the projection assumes
+
+| Assumption | Where it comes from | Change it with |
+|---|---|---|
+| Starting balance | today's balance of the open on-budget accounts | `account_ids` |
+| Recurring charges and income | the same payee in 3 of the last 4 full months, each month within 20 % of its median | — (returned in `assumptions.recurring`) |
+| Other spending | average of the last 3 full months, recurring charges excluded | `variable_monthly` |
+| Income | what you give; otherwise the last 3 months' average | `monthly_income` |
+| One-off amounts | only what you give | `one_offs` |
+
+Details: [Forecasting](/avenir-mcp/concepts/forecasting/).
+
+## Reading the answer
+
+- `months[].start`, `inflows`, `outflows`, `end`: the month's balance and flows.
+- `months[].lowest`: the lowest point within the month, day by day — the one that tells
+  you whether a payment would bounce.
+- `first_shortfall`: the first month whose lowest point is below zero, or `null`.
+
+<Aside type="caution" title="A projection, not a prediction">
+It extends your recent months. A holiday, a yearly tax or a one-off purchase in them
+pushes the averages; a new expense is invisible until you add it. Read the assumptions
+before the conclusion.
+</Aside>
+
+## Then budget next month
+
+> **You:** Prepare October's budget from this.
+
+The agent proposes next month's amounts category by category — recurring charges first,
+then the rest from recent spending — and applies those you accept with
+`set_category_budget`, one previewed change each.

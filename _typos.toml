@@ -6,6 +6,10 @@ extend-exclude = [
   # French and Spanish pages: typos knows English only.
   "docs/src/content/docs/fr/",
   "docs/src/content/docs/es/",
+  # Labels and titles of the generated pages, in the three languages.
+  "docsgen/guide_titles.json",
+  "docsgen/labels.json",
+  "docs/src/components/home-i18n.ts",
   "docs/package-lock.json",
 ]
 

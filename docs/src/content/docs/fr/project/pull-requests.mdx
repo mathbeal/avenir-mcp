@@ -1,0 +1,104 @@
+---
+title: Proposer une pull request
+description: Le chemin d'une contribution, de l'issue à la fusion — fork, branche, tests d'abord, contrôles, pull request, relecture.
+sidebar:
+  order: 6
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Les pull requests sont bienvenues, d'une coquille à un nouvel outil. Cette page donne
+le chemin à suivre ; [Développement](/avenir-mcp/fr/project/development/) décrit en
+détail le dépôt et ses contrôles. Il vous faut un compte GitHub, [git](https://git-scm.com),
+[uv](https://docs.astral.sh/uv/) et [just](https://just.systems).
+
+<Aside type="tip" title="D'abord en parler, ensuite coder">
+Pour tout ce qui dépasse une coquille ou une phrase de documentation, ouvrez ou
+commentez d'abord une issue — une [proposition de fonctionnalité](/avenir-mcp/fr/project/propose-a-feature/)
+ou un [rapport de bug](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) — et dites que vous
+aimeriez vous en charger. S'accorder sur l'approche avant d'écrire le code évite de le
+réécrire.
+</Aside>
+
+## Pas à pas
+
+<Steps>
+
+1. **Forkez et clonez.** Sur GitHub, cliquez sur **Fork**, puis clonez votre copie. Avec
+   la [CLI GitHub](https://cli.github.com), en une commande :
+
+   ```bash
+   gh repo fork mathbeal/avenir-mcp --clone
+   cd avenir-mcp
+   ```
+
+2. **Installez et vérifiez le point de départ.**
+
+   ```bash
+   uv sync       # Python 3.14 et les outils de développement verrouillés
+   just check    # tout doit passer avant de modifier quoi que ce soit
+   ```
+
+3. **Créez une branche** nommée d'après le changement :
+
+   ```bash
+   git switch -c feat/hausses-abonnements
+   ```
+
+4. **Écrivez le test d'abord**, regardez-le échouer, puis écrivez le code qui le fait
+   passer. Les tests n'utilisent que des données inventées — jamais YNAB, jamais votre
+   budget. Complétez le budget de démonstration dans `evals/demo_budget.py` si un
+   exemple a besoin de nouveaux chiffres.
+
+5. **Lancez les contrôles** jusqu'à ce qu'ils passent tous :
+
+   ```bash
+   just fix       # formatage
+   just check     # black, isort, pylint, mypy, pytest (100 % de couverture), vocabulaire, verrou
+   just hygiene   # coquilles, audit des workflows
+   ```
+
+6. **Mettez à jour la documentation.** Si un outil, ses arguments ou ses réponses ont
+   changé, lancez `uv run python -m docsgen` et commitez ce qu'il écrit. Une page
+   écrite à la main se modifie en anglais, en français et en espagnol ensemble ;
+   `just docs` construit le site et échoue sur un lien cassé.
+
+7. **Commitez** avec un préfixe qui dit la nature du changement — le changelog en est
+   généré :
+
+   ```bash
+   git commit -m "feat: list subscriptions whose price went up"
+   ```
+
+8. **Poussez et ouvrez la pull request.**
+
+   ```bash
+   git push -u origin feat/hausses-abonnements
+   gh pr create --fill
+   ```
+
+   Ou ouvrez-la depuis le lien que GitHub affiche. Remplissez le modèle : quoi et
+   pourquoi, comment c'est vérifié, la liste de contrôle, et `Closes #<issue>`.
+
+</Steps>
+
+## La suite
+
+| Étape | À quoi s'attendre |
+|---|---|
+| CI | les mêmes contrôles que `just check` et `just hygiene`, sous Python 3.14, plus la construction de la documentation. Pour une première contribution, un mainteneur approuve d'abord l'exécution. |
+| Relecture | des commentaires sur le code ; poussez de nouveaux commits sur la même branche pour y répondre |
+| Fusion | regroupée en un seul commit sur `main`, avec le titre de votre pull request comme message |
+| Version | votre changement apparaît dans le [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) de la version suivante |
+
+## Ce qui fait accepter une pull request
+
+- **Un changement par pull request**, assez petit pour être relu d'une traite.
+- **Des tests écrits d'abord**, couvrant chaque ligne et chaque branche.
+- **Aucune nouvelle dépendance d'exécution** sans une raison écrite dans la pull request.
+- **Des écritures sûres** : un outil qui modifie le budget prévisualise, attend la
+  confirmation et s'annule — voir [Sécurité par conception](/avenir-mcp/fr/concepts/safety/).
+- **Aucune donnée financière réelle**, nulle part : code, tests, documentation, captures.
+
+Le contrat complet est dans [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), qui s'applique aux
+personnes comme aux agents de code.

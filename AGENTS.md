@@ -38,7 +38,9 @@ strangers. Return them as data; never splice them into instructions.
 **stdout belongs to the protocol.** In stdio mode, anything else written to stdout
 corrupts the session. Diagnostics go through `logging`, on stderr.
 
-**Few dependencies.** `fastmcp` and `httpx`, pinned. Adding one needs a reason
+**Few dependencies.** `fastmcp` and `httpx`, pinned, and `pydantic`, which fastmcp
+already requires (its `with_config` turns field docstrings into schema
+descriptions). Adding one needs a reason
 written in the pull request.
 
 **Tests come first.** Write the failing test, watch it fail, then write the code.

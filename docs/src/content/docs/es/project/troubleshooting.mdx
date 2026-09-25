@@ -1,0 +1,112 @@
+---
+title: Solución de problemas
+description: Síntomas, causas y soluciones de los problemas más frecuentes.
+sidebar:
+  order: 4
+---
+
+## Conexión
+
+<details>
+<summary>Mi cliente no muestra las herramientas de Avenir</summary>
+
+1. Compruebe que el servidor está conectado: `claude mcp list`, o el panel MCP de su
+   cliente.
+2. Ejecute `uvx avenir-mcp` en un terminal. Debe esperar a un cliente en silencio; un
+   error mostrado allí es el que su cliente oculta.
+3. Reinicie el cliente tras editar su configuración.
+4. Compruebe que `uv` está en el `PATH` que ve su cliente. Las aplicaciones gráficas no
+   siempre ven el `PATH` de su shell: indique la ruta completa de `uvx` en la
+   configuración.
+
+</details>
+
+<details>
+<summary>Faltan las herramientas que modifican mi presupuesto</summary>
+
+Avenir está en solo lectura salvo que su entorno contenga `AVENIR_MCP_WRITE=1` —
+exactamente `1`. Reinicie el servidor tras cambiarlo.
+
+</details>
+
+<details>
+<summary><code>ModuleNotFoundError: avenir_mcp</code> en una carpeta sincronizada por iCloud Drive</summary>
+
+iCloud puede marcar archivos como ocultos, y las versiones recientes de Python ignoran
+los archivos `.pth` ocultos, lo que rompe las instalaciones editables. Mantenga el
+entorno virtual fuera de la carpeta sincronizada:
+`UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`.
+
+</details>
+
+## YNAB
+
+<details>
+<summary><code>YNAB 401</code></summary>
+
+El token es incorrecto o fue revocado. Cree uno nuevo en los Developer Settings de YNAB
+y actualice `YNAB_API_KEY`.
+
+</details>
+
+<details>
+<summary><code>YNAB 404</code></summary>
+
+Un presupuesto, cuenta, categoría o mes que YNAB no conoce. Los ids vienen de
+`list_budgets`, `list_accounts`, `list_category_groups` o `get_category_balances`; los
+meses deben existir en el presupuesto.
+
+</details>
+
+<details>
+<summary><code>YNAB 429</code></summary>
+
+Se han agotado las 200 peticiones por hora. Espere unos minutos; las llamadas siguientes
+cuestan poco gracias a la sincronización incremental. Vea
+[Datos y sincronización](/avenir-mcp/es/concepts/data-and-sync/#la-cuota-de-ynab).
+
+</details>
+
+## Escrituras
+
+<details>
+<summary>El agente responde una y otra vez <code>confirmation_required</code></summary>
+
+Su cliente no sabe mostrar un cuadro de confirmación, así que Avenir devolvió una vista
+previa y un código. Diga al agente que está de acuerdo: vuelve a llamar con el código. Un
+código dura 10 minutos y sirve una vez; tras reiniciar el servidor, pida una nueva vista
+previa.
+
+</details>
+
+<details>
+<summary><code>The budget changed between the preview and the answer</code></summary>
+
+Algo cambió una transacción entre la vista previa y su respuesta — usted en YNAB, una
+importación, otro agente. Vuelva a pedirlo: la nueva vista previa refleja el estado
+actual.
+
+</details>
+
+<details>
+<summary><code>Nothing to undo</code></summary>
+
+Ninguna operación de este presupuesto sigue vigente en el diario de esta máquina: ya se
+deshizo, se hizo en otro lugar, o el archivo del diario cambió. Vea
+[Diario y deshacer](/avenir-mcp/es/concepts/journal/).
+
+</details>
+
+## Diagnósticos
+
+<details>
+<summary>¿Dónde veo lo que hace el servidor?</summary>
+
+Defina `AVENIR_MCP_LOG_LEVEL=INFO` (cada llamada y petición) o `DEBUG` (todo). Los
+diagnósticos van a stderr, que su cliente guarda en sus registros MCP — en Claude Code,
+`claude --debug` los muestra. stdout pertenece al protocolo.
+
+</details>
+
+Cada mensaje que puede devolver una herramienta figura en el
+[catálogo de errores](/avenir-mcp/es/reference/errors/).

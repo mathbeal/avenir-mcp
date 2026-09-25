@@ -51,7 +51,7 @@ def test_no_iban_or_token_in_repository() -> None:
     """No text file contains an IBAN or a YNAB token."""
     offenders = []
     for path in _repository_files():
-        if path.name == "test_hygiene.py":
+        if path.name == "test_hygiene.py" or not path.exists():
             continue
         try:
             text = path.read_text(encoding="utf-8")

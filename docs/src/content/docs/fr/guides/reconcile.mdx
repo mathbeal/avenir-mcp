@@ -1,0 +1,83 @@
+---
+title: Rapprocher un compte
+description: Comparer un compte au solde affiché par la banque, expliquer l'écart, puis le marquer rapproché.
+sidebar:
+  order: 2
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import gap from '@snippets/reconcile_gap.json?raw';
+
+**Objectif :** s'assurer que YNAB est d'accord avec votre banque, trouver la cause quand
+ce n'est pas le cas, et marquer le compte rapproché une fois d'accord.
+
+**Avant de commencer :** le solde que votre banque affiche aujourd'hui, et l'écriture
+activée pour marquer le compte rapproché (le diagnostic fonctionne en lecture seule).
+
+**Outil :** [`reconcile_account`](/avenir-mcp/fr/reference/tools/reconcile-account/).
+**Prompt :** `reconcile`.
+
+## La conversation
+
+<Steps>
+
+1. **Demandez, avec le solde de la banque.**
+
+   > **Vous :** Ma banque affiche 3 440,80 sur mon compte courant. YNAB est-il d'accord ?
+
+2. **L'agent compare.** Il appelle `reconcile_account` avec
+   `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
+   Avenir additionne les transactions *pointées* du compte (celles que la banque a
+   montrées) et compare. Elles diffèrent, donc **rien n'est écrit** :
+
+   <Code code={gap} lang="json" title="reconcile_account — écart trouvé" />
+
+3. **L'agent explique l'écart.**
+
+   > **Claude :** YNAB compte 71,86 de plus que la banque. Deux paiements Market Fresh
+   > identiques de 71,86 le 19 septembre ressemblent à un import arrivé deux fois.
+
+   La réponse offre trois pistes : `explained_by` (une transaction en attente dont le
+   montant est exactement l'écart), `uncleared` (ce que la banque n'a pas encore
+   montré) et `possible_duplicates` (même montant et même commerçant, à 3 jours au plus,
+   sur les 60 derniers jours).
+
+4. **Vous corrigez la cause** — ici, supprimer le doublon dans YNAB.
+
+5. **Redemandez.** Quand les soldes concordent, Avenir prévisualise le rapprochement :
+   chaque transaction pointée du compte devient *rapprochée*. Vous confirmez ; c'est
+   appliqué en une requête et inscrit au journal.
+
+</Steps>
+
+## Quand l'écart reste inexpliqué
+
+Parfois une petite différence demeure : des frais jamais importés, une ancienne erreur.
+Seulement si vous le demandez, l'agent rappelle l'outil avec `adjust=true` :
+
+- une transaction **Balance adjustment** du montant de l'écart est créée sur le compte,
+  datée du jour, dans *Ready to Assign*, avec le mémo *Entered by reconcile_account* ;
+- puis le compte est rapproché, ajustement compris.
+
+<Aside type="caution">
+Un ajustement masque un problème au lieu de le résoudre. Avenir n'en crée jamais de
+lui-même, et l'évaluation vérifie qu'un agent à qui l'on dit *« ne change rien »* n'en
+crée pas non plus.
+</Aside>
+
+## Annuler
+
+`undo_operation` remet chaque transaction rapprochée à l'état *pointé* et supprime
+l'ajustement, s'il y en a eu un. Voir [Annuler un changement](/avenir-mcp/fr/guides/undo/).
+
+## Statuts
+
+| `status` | Signification |
+|---|---|
+| `difference_found` | les soldes diffèrent ; rien d'écrit ; lire `analysis` |
+| `nothing_to_do` | les soldes concordent et rien ne reste à rapprocher |
+| `confirmation_required` | les soldes concordent (ou `adjust` a été demandé) ; en attente de votre accord |
+| `applied` | rapproché ; `operation_id` pour annuler |
+| `declined` | vous avez refusé ; rien d'écrit |
+
+Fonctionnement de la comparaison : [Rapprochement](/avenir-mcp/fr/concepts/reconciliation/).

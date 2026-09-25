@@ -1,0 +1,124 @@
+---
+title: Confirmation
+description: Comment une écriture attend l'utilisateur — élicitation sur les deux générations du protocole, codes à usage unique, et ce qui lie une réponse à son aperçu.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Chaque écriture sauf `approve_transactions` passe par une seule fonction,
+`confirm.ask`, avant de modifier quoi que ce soit. Cette page décrit exactement ce
+qu'elle fait.
+
+## Ce qui est confirmé
+
+Chaque outil construit un **sujet** : le changement exact, sous forme de données.
+
+| Outil | Sujet |
+|---|---|
+| `apply_categories` | la liste des changements (transaction, catégorie après) |
+| `set_category_budget` | catégorie, mois (résolu), montant en milliunités |
+| `update_category` | catégorie, nom après, groupe après |
+| `create_category` | groupe, nom |
+| `create_transactions` | compte, les transactions, `approved` |
+| `reconcile_account` | compte, solde bancaire, écart à ajuster |
+| `undo_operation` | l'identifiant de l'opération |
+
+Son **empreinte** est le SHA-256 du JSON `[budget_id, sujet]`, clés triées ; pour une
+liste de changements, l'ordre des éléments est indifférent. Une réponse ou un code ne
+confirme jamais que le sujet dont il porte l'empreinte.
+
+## Trois façons de demander
+
+`ask` regarde ce que le client a déclaré à la connexion et choisit :
+
+### 1. Le client gère l'élicitation, protocole 2026-07-28
+
+Dans le protocole MCP actuel, un serveur ne peut pas envoyer de requête au client en
+cours d'appel. Avenir utilise l'aller-retour *input required* :
+
+1. Le premier appel renvoie un `InputRequiredResult` au lieu de la réponse de l'outil. Il
+   contient une demande, `confirm`, un formulaire avec un seul booléen `value`, dont le
+   message est l'aperçu (jusqu'à 20 changements, puis *« … and N more »*), et un
+   `request_state` : l'empreinte.
+2. Le client affiche le formulaire. L'utilisateur coche, ou refuse.
+3. Le client rappelle l'outil avec les mêmes arguments, la réponse dans
+   `input_responses`, et le `request_state` reçu. FastMCP scelle cet état sur le réseau
+   et rejette toute altération.
+4. Avenir recalcule le plan et son empreinte. S'ils diffèrent du `request_state` —
+   quelqu'un a modifié le budget entre-temps — l'appel échoue avec *« The budget changed
+   between the preview and the answer »* et rien n'est écrit.
+
+### 2. Le client gère l'élicitation, protocole antérieur
+
+Le serveur pose la question pendant l'appel (`ctx.elicit`) avec le même formulaire
+oui/non, et attend la réponse.
+
+### 3. Le client ne gère pas l'élicitation
+
+Le premier appel renvoie `status: "confirmation_required"`, l'aperçu, et un **code de
+confirmation**. L'agent montre l'aperçu à l'utilisateur et, seulement s'il est d'accord,
+rappelle l'outil avec les mêmes arguments plus `confirmation`.
+
+## Lecture des réponses
+
+| Réponse | Résultat |
+|---|---|
+| formulaire accepté, case cochée | `applied` |
+| formulaire accepté, case **non** cochée | `declined` |
+| `decline` | `declined` — rien d'écrit |
+| `cancel` (fermé, ou client incapable de l'afficher) | repli sur un code de confirmation |
+
+Une fermeture n'est pas un refus : les clients non interactifs ferment toutes les
+questions, et les compter comme un *non* rendrait toute écriture impossible — le défaut
+qu'a trouvé la première exécution de l'[évaluation](/avenir-mcp/fr/project/evaluation/).
+
+## Codes de confirmation
+
+| Propriété | Valeur |
+|---|---|
+| Format | 11 caractères sûrs pour une URL (`secrets.token_urlsafe(8)`) |
+| Durée de vie | 600 secondes, sur une horloge monotone |
+| Usage | unique : un code est consommé à sa première utilisation, même s'il ne correspond pas |
+| Portée | l'empreinte d'un sujet dans un budget |
+| Stockage | la mémoire du serveur uniquement : un redémarrage oublie tous les codes |
+
+Un code inconnu, expiré, déjà utilisé ou émis pour d'autres changements est refusé
+avec : *« This confirmation code is unknown, expired, already used, or was issued for
+different changes. Call again without confirmation to get a new preview. »*
+
+<Aside type="caution">
+Un code prouve qu'un aperçu a été produit, pas qu'une personne l'a lu. L'agent ne doit
+le renvoyer qu'après l'accord de l'utilisateur ; les descriptions des outils et la
+ressource `avenir://guide` le disent. Les clients qui gèrent l'élicitation donnent une
+garantie plus forte : l'utilisateur répond directement au client.
+</Aside>
+
+## Exiger votre propre réponse
+
+Un code de confirmation prouve qu'un aperçu a existé, pas que vous l'avez lu. Avec
+`AVENIR_MCP_REQUIRE_ELICITATION=1` :
+
+| Situation | Sans la variable | Avec |
+|---|---|---|
+| le client sait demander, vous dites oui | `applied` | `applied` |
+| question fermée | un code de confirmation | `declined` |
+| le client ne sait pas demander | un code de confirmation | erreur : rien n'est modifié |
+| un code `confirmation` est transmis | vérifié, puis appliqué | erreur : les codes sont désactivés |
+
+Seuls les clients qui gèrent l'élicitation MCP peuvent alors écrire.
+
+## Ce que voit l'utilisateur
+
+| Outil | Question |
+|---|---|
+| `apply_categories` | *Recategorise 2 transaction(s)?* puis une ligne par changement : date, bénéficiaire, montant, avant → après |
+| `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
+| `create_category` | *Create category 'Pets' in Everyday?* |
+| `create_transactions` | *Create 1 transaction(s) on Checking?* puis une ligne par transaction |
+| `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
+| `undo_operation` | *Undo: recategorise 2 transaction(s)?*, ou la sorte d'annulation |
+
+Les questions sont en anglais, comme les réponses des outils.

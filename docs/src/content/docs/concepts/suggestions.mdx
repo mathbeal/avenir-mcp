@@ -1,0 +1,69 @@
+---
+title: Suggestions
+description: How Avenir recognises a merchant across bank labels, learns from your history, and decides when to suggest a category.
+sidebar:
+  order: 6
+---
+
+`suggest_categories` answers two questions for each pending transaction: *who is this
+merchant?* and *where did you put it before?*
+
+## What is pending
+
+A transaction is pending when it is not deleted, has no category, is not a transfer
+between your accounts (transfers take no category in YNAB), and is not a split (a split's
+lines carry its categories). Pending transactions are listed newest first.
+
+## Recognising a merchant
+
+Banks write the same shop differently every time: a date, a card number, a reference.
+Before comparing, every payee is **normalised**, in this order:
+
+| Step | Rule | Example |
+|---|---|---|
+| 1 | upper case, spaces collapsed | `Corner  Shop` → `CORNER SHOP` |
+| 2 | drop a bank account number and what follows: `- IBAN: …` | `INSURER - PRELEV - IBAN: FR00…` → `INSURER - PRELEV` |
+| 3 | drop a payment prefix: `CB`, `CARTE`, `PRLV`, `PRLV SEPA`, `VIR`, `VIREMENT`, `VIR INST`, `VIR SEPA` | `VIR INST GARAGE MARTIN` → `GARAGE MARTIN` |
+| 4 | drop an invoice date and what follows: `FACT` + 6 digits | `ACME OUTDOOR FACT 110126 525130******2` → `ACME OUTDOOR` |
+| 5 | drop masked card numbers (`525130******2`), dates (`12/01`, `12/01/26`) and references of 5 digits or more | `ONLINE STORE 1234567890` → `ONLINE STORE` |
+| 6 | collapse spaces again | |
+
+So `CB MARKET FRESH FACT 050926 525130******1` and `CB MARKET FRESH FACT 190926
+525130******1` are both `MARKET FRESH`. Dropping bank account numbers also keeps a
+creditor's IBAN out of every answer.
+
+## Learning from history
+
+The history is built from the budget's transactions that have a category, are not
+deleted and are not transfers. It counts, for each normalised payee, how many times each
+category was used — **separately for money out and money in**. A lender that once paid
+you (money in, *Ready to Assign*) does not make your repayments (money out) look like
+income.
+
+## Deciding
+
+For a pending transaction, Avenir looks at the history of its payee, in its direction,
+and keeps only the categories you can still assign: a hidden or deleted category is
+never suggested.
+
+- **confidence** = uses of the most frequent category ÷ all uses of those categories.
+- A suggestion is given when confidence ≥ the threshold, **0.90** by default
+  (`AVENIR_MCP_CONFIDENCE_THRESHOLD`).
+- No history, or no category above the threshold: no suggestion. The agent proposes one
+  from the category list and asks you.
+
+Measured on a real household budget of about 800 classified transactions, leaving each
+one out in turn, suggestions made at 0.90 were right 95 % of the time.
+
+## Paging
+
+| | |
+|---|---|
+| Page size | `limit`, 50 by default |
+| Next page | `next_cursor`, opaque: pass it back unchanged |
+| Cost | two YNAB requests per page: transactions and categories |
+| Text | payee and memo cut to 80 characters, marked `…` |
+
+A cursor is the base64 encoding of an offset. A cursor Avenir did not issue is refused:
+*“Invalid cursor: pass the next_cursor value from the previous page unchanged, or omit
+it to start from the first page.”*

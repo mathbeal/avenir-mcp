@@ -1,0 +1,105 @@
+---
+title: Troubleshooting
+description: Symptoms, causes and fixes for the problems people meet most often.
+sidebar:
+  order: 4
+---
+
+## Connection
+
+<details>
+<summary>My client does not show Avenir's tools</summary>
+
+1. Check the server is connected: `claude mcp list`, or your client's MCP panel.
+2. Run `uvx avenir-mcp` in a terminal. It should wait silently for a client; an error
+   printed there is the one your client hides.
+3. Restart the client after editing its configuration.
+4. Check `uv` is on the `PATH` your client sees. Graphical applications may not see the
+   `PATH` of your shell: give the full path to `uvx` in the configuration.
+
+</details>
+
+<details>
+<summary>The tools that change my budget are missing</summary>
+
+Avenir is read-only unless its environment contains `AVENIR_MCP_WRITE=1` — exactly `1`.
+Restart the server after changing it.
+
+</details>
+
+<details>
+<summary><code>ModuleNotFoundError: avenir_mcp</code> in a folder synced by iCloud Drive</summary>
+
+iCloud can mark files as hidden, and recent Python versions skip hidden `.pth` files,
+which breaks editable installs. Keep the virtual environment outside the synced folder:
+`UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`.
+
+</details>
+
+## YNAB
+
+<details>
+<summary><code>YNAB 401</code></summary>
+
+The token is wrong or was revoked. Create a new one in YNAB's Developer Settings and
+update `YNAB_API_KEY`.
+
+</details>
+
+<details>
+<summary><code>YNAB 404</code></summary>
+
+A budget, account, category or month that YNAB does not know. Ids come from
+`list_budgets`, `list_accounts`, `list_category_groups` or `get_category_balances`;
+months must exist in the budget.
+
+</details>
+
+<details>
+<summary><code>YNAB 429</code></summary>
+
+The 200 requests per hour are spent. Wait a few minutes; later calls are cheap thanks to
+delta sync. See [Data and sync](/avenir-mcp/concepts/data-and-sync/#ynabs-rate-limit).
+
+</details>
+
+## Writes
+
+<details>
+<summary>The agent keeps answering <code>confirmation_required</code></summary>
+
+Your client cannot show a confirmation box, so Avenir returned a preview and a code.
+Tell the agent you agree: it calls again with the code. A code lasts 10 minutes and works
+once; after a server restart, ask for a new preview.
+
+</details>
+
+<details>
+<summary><code>The budget changed between the preview and the answer</code></summary>
+
+Something changed a transaction between the preview and your answer — you in YNAB, an
+import, another agent. Ask again: the new preview reflects the current state.
+
+</details>
+
+<details>
+<summary><code>Nothing to undo</code></summary>
+
+No operation of this budget is still in effect in this machine's journal: it was already
+undone, made elsewhere, or the journal file changed. See
+[Journal and undo](/avenir-mcp/concepts/journal/).
+
+</details>
+
+## Diagnostics
+
+<details>
+<summary>Where do I see what the server does?</summary>
+
+Set `AVENIR_MCP_LOG_LEVEL=INFO` (each call and request) or `DEBUG` (everything).
+Diagnostics go to stderr, which your client keeps in its MCP logs — in Claude Code,
+`claude --debug` shows them. stdout belongs to the protocol.
+
+</details>
+
+Every message a tool can return is listed in the [error catalogue](/avenir-mcp/reference/errors/).

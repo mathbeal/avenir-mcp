@@ -1,0 +1,32 @@
+---
+title: Limitations and roadmap
+description: What Avenir does not do, or does imperfectly, and what comes next.
+sidebar:
+  order: 3
+---
+
+## Known limitations
+
+| Area | Limitation | Workaround |
+|---|---|---|
+| Confirmation codes | kept in memory: a server restart forgets them | ask again for a new preview |
+| Undo | local to the machine whose journal recorded the operation; an undo cannot be undone | redo the change |
+| `approve_transactions` | applies at once, without preview | it only clears YNAB's review flag |
+| `update_category`, `create_category` | not undoable; YNAB's API cannot delete a category | rename back; hide the category in YNAB |
+| HTTP transport | plain HTTP, one shared token, no user accounts | keep it on `127.0.0.1`, or use stdio |
+| Split transactions | never suggested nor recategorised: their lines carry the categories | change them in YNAB |
+| Suggestions | need a history: a merchant never classified gets none | the agent proposes, you decide |
+| Forecast | extends the last months; quarterly or yearly charges do not recur by its definition | pass them as `one_offs` |
+| Scheduled transactions | not read: the forecast relies on history | pass known future amounts as `one_offs` |
+| Currency | amounts are shown as numbers, without a currency symbol | — |
+| Python | 3.14 only; 3.15 waits on a dependency (beartype) | — |
+
+## Roadmap
+
+- Publish on PyPI, then a `.mcpb` bundle for one-click install in Claude Desktop.
+- Undo for `update_category`.
+- Read YNAB's scheduled transactions in the forecast.
+- Lower the Python floor once dependencies allow.
+- Run the evaluation with other models and clients: GPT, Gemini, local models.
+
+Missing something? [Propose a feature](/avenir-mcp/project/propose-a-feature/).

@@ -1,0 +1,226 @@
+---
+// A still picture of a conversation: a question, a tool call, an answer, and a
+// previewed change waiting for the user's yes. Figures are those of the demo budget.
+import { home } from './home-i18n';
+
+const t = home(Astro.locals.starlightRoute.lang);
+const rows = [
+  ['Tennis', ...t.tennis],
+  ['Restaurants', ...t.restaurants],
+];
+---
+
+<figure class="demo" role="img" aria-label={t.demoLabel}>
+  <div class="bar" aria-hidden="true">
+    <span></span><span></span><span></span>
+    <p>claude · avenir</p>
+  </div>
+  <div class="body" aria-hidden="true">
+    <div class="msg you"><p>{t.q1}</p></div>
+    <div class="call">
+      <span class="server">avenir</span>
+      <code>get_monthly_summary</code>
+      <span class="done">✓</span>
+    </div>
+    <div class="msg agent"><p set:html={t.a1} /></div>
+    <div class="msg you"><p>{t.q2}</p></div>
+    <div class="preview">
+      <div class="head">
+        <code>set_category_budget</code>
+        <span class="badge">{t.preview}</span>
+      </div>
+      {
+        rows.map(([name, before, after]) => (
+          <div class="row">
+            <span class="name">{name}</span>
+            <span class="before">{before}</span>
+            <span class="arrow">→</span>
+            <span class="after">{after}</span>
+          </div>
+        ))
+      }
+      <div class="buttons">
+        <span class="btn primary">{t.confirm}</span>
+        <span class="btn">{t.cancel}</span>
+      </div>
+    </div>
+    <p class="undo">↺ {t.undo}</p>
+  </div>
+</figure>
+
+<style>
+  .demo {
+    margin: 0;
+    min-width: 0;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 1rem;
+    background: var(--sl-color-bg-nav);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, white 6%, transparent) inset,
+      0 30px 60px -20px rgb(0 0 0 / 0.45);
+    overflow: hidden;
+    font-size: var(--sl-text-sm);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--sl-color-hairline-light);
+  }
+
+  .bar span {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--sl-color-gray-5);
+  }
+
+  .bar p {
+    margin: 0 auto;
+    padding-right: 2.3rem;
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.25rem;
+  }
+
+  .msg p {
+    margin: 0;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .you {
+    align-self: flex-end;
+    max-width: 85%;
+  }
+
+  .you p {
+    background: var(--sl-color-accent);
+    color: var(--sl-color-black);
+    border-bottom-right-radius: 0.2rem;
+  }
+
+  .agent {
+    max-width: 92%;
+  }
+
+  .agent p {
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-1);
+    border-bottom-left-radius: 0.2rem;
+  }
+
+  .call {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    padding: 0.3rem 0.7rem;
+    border: 1px dashed var(--sl-color-hairline-light);
+    border-radius: 0.5rem;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+
+  .call code,
+  .head code {
+    font-family: var(--sl-font-mono);
+    color: var(--sl-color-gray-1);
+    background: none;
+    padding: 0;
+  }
+
+  .server {
+    color: var(--sl-color-accent-high);
+  }
+
+  .done {
+    color: var(--sl-color-accent);
+  }
+
+  .preview {
+    border: 1px solid color-mix(in srgb, var(--sl-color-accent) 55%, transparent);
+    border-radius: 0.75rem;
+    padding: 0.8rem 1rem;
+    background: color-mix(in srgb, var(--sl-color-accent) 7%, transparent);
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: var(--sl-text-xs);
+  }
+
+  .badge {
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--avenir-sun) 20%, transparent);
+    color: var(--avenir-sun);
+    font-weight: 600;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 0.6rem;
+    padding-block: 0.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .name {
+    color: var(--sl-color-gray-1);
+  }
+
+  .before {
+    color: var(--sl-color-gray-3);
+    text-decoration: line-through;
+  }
+
+  .arrow {
+    color: var(--sl-color-gray-4);
+  }
+
+  .after {
+    color: var(--sl-color-accent-high);
+    font-weight: 600;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.7rem;
+  }
+
+  .btn {
+    padding: 0.3rem 0.9rem;
+    border-radius: 0.45rem;
+    border: 1px solid var(--sl-color-hairline-light);
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-xs);
+  }
+
+  .btn.primary {
+    border-color: transparent;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-black);
+    font-weight: 600;
+  }
+
+  .undo {
+    margin: 0;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+</style>

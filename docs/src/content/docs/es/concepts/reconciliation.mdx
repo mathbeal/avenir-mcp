@@ -1,0 +1,59 @@
+---
+title: Conciliación
+description: Cómo se compara una cuenta con el banco, cómo se explica una diferencia y qué cambia al conciliar.
+sidebar:
+  order: 7
+---
+
+`reconcile_account` compara una cuenta con el saldo que muestra su banco. La comparación
+es un cálculo puro sobre las transacciones de la cuenta (`reconcile.analyse`); no escribe
+nada.
+
+## La comparación
+
+Solo cuentan las transacciones de la cuenta que no están borradas.
+
+| Magnitud | Definición |
+|---|---|
+| saldo punteado | suma de las transacciones con estado *cleared* o *reconciled* |
+| saldo actual | suma de todas las transacciones |
+| diferencia | saldo bancario − saldo punteado |
+| por conciliar | transacciones *cleared* aún no *reconciled* |
+| no punteadas | transacciones que el banco aún no ha mostrado (hasta 50 listadas) |
+
+Todo se suma en miliunidades. Una diferencia **negativa** significa que YNAB cuenta más
+dinero que el banco — típicamente un duplicado o un reembolso que nunca llegó; una
+**positiva**, menos — típicamente una comisión o un ingreso no importados.
+
+## Explicar una diferencia
+
+| Pista | Regla |
+|---|---|
+| `explained_by` | transacciones no punteadas cuyo importe es exactamente la diferencia: puntear una cierra la diferencia |
+| `possible_duplicates` | pares con el mismo importe y el mismo comercio [normalizado](/avenir-mcp/es/concepts/suggestions/#reconocer-un-comercio), con **3 días** como mucho de separación, entre las transacciones de los **últimos 60 días** |
+| `uncleared` | lo que el banco aún no ha mostrado, para que el agente lo compruebe con usted |
+
+La ventana de 60 días deja fuera parecidos antiguos y legítimos — dos noches en el mismo
+hotel el invierno pasado.
+
+## Resultados
+
+| Situación | `status` | Escrito |
+|---|---|---|
+| saldos distintos, sin `adjust` | `difference_found` | nada, y nada preguntado |
+| saldos iguales, nada que conciliar | `nothing_to_do` | nada |
+| saldos iguales | `confirmation_required`, luego `applied` | punteadas → conciliadas |
+| saldos distintos, `adjust=true` | `confirmation_required`, luego `applied` | un ajuste, luego punteadas → conciliadas |
+
+## Aplicación
+
+Una vez confirmado:
+
+1. Con `adjust=true` y una diferencia, se crea una transacción en la cuenta: beneficiario
+   *Balance adjustment*, con fecha de hoy, importe = la diferencia, categoría *Inflow:
+   Ready to Assign*, memo *Entered by reconcile_account*, punteada y aprobada.
+2. Cada transacción *cleared* de la cuenta — ajuste incluido — pasa a *reconciled*, en
+   una sola petición agrupada.
+3. La operación se anota en el diario con los ids conciliados y el id del ajuste.
+
+`undo_operation` las devuelve a *cleared* y borra el ajuste.

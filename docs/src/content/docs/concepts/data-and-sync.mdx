@@ -1,0 +1,82 @@
+---
+title: Data and sync
+description: Amounts and milliunits, the local copy of transactions, delta sync, YNAB's rate limit and its errors.
+sidebar:
+  order: 5
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Amounts
+
+YNAB stores every amount as an integer number of **milliunits**: 1.00 is `1000`, −12.34
+is `-12340`. Avenir converts at the boundary and never shows milliunits to the agent:
+
+| Direction | Rule |
+|---|---|
+| YNAB → agent | `milliunits / 1000` |
+| agent → YNAB | `round(amount × 1000)`: 111.32 becomes exactly `111320` |
+
+Sums, differences and prorating are computed in milliunits, then converted once, so no
+rounding error can create or lose a cent. Amounts are in the budget's own currency;
+spending is negative, money in positive.
+
+## Talking to YNAB
+
+`client.py` is the only module that calls [YNAB's API](https://api.ynab.com/):
+
+| | |
+|---|---|
+| Base URL | `https://api.ynab.com/v1`, or `AVENIR_MCP_YNAB_URL` |
+| Authentication | `Authorization: Bearer <YNAB_API_KEY>` on every request |
+| Methods used | `GET` to read; `PATCH`, `POST` and `DELETE` on transactions, categories and month budgets |
+| Errors | any 4xx or 5xx comes back as `Error calling tool '<tool>': YNAB <status>: <detail>`, with YNAB's own explanation |
+
+`budget_id` accepts `last-used`, which YNAB resolves to the budget you used last.
+
+## The local copy of transactions
+
+Most tools need the budget's transactions: to find what is pending, to learn from
+history, to compare with the bank, to forecast. Downloading them all on every call would
+be slow and would spend YNAB's quota. Avenir keeps a copy per budget, in memory, and
+refreshes it with YNAB's **delta sync**:
+
+1. The first load asks for every transaction and keeps YNAB's `server_knowledge`, a
+   counter of changes.
+2. The next load sends `last_knowledge_of_server` and receives **only what changed
+   since**: new, modified and deleted transactions.
+3. Avenir merges them into its copy: a changed transaction replaces the old one, a
+   deleted one is removed.
+
+The copy lives as long as the server process. Filtered reads — by date or by category —
+bypass it.
+
+<Aside type="note">
+An early version kept only the counter, not the transactions: every load after the first
+returned only the changes, usually nothing, and suggestions never found any history.
+A test now checks that an empty delta leaves the full list intact.
+</Aside>
+
+## YNAB's rate limit
+
+YNAB allows **200 requests per hour** per token, over a rolling window. What each tool
+costs, on a cold cache, is measured on the demo budget and stated on its
+[reference page](/avenir-mcp/reference/tools/):
+
+| Cost | Tools |
+|---|---|
+| 0 | any call refused by validation (a malformed month, an empty name…) |
+| 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a `set_category_budget` preview |
+| 2 | `suggest_categories` (a whole page), `apply_categories`, `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 1 + N | `get_spending_trends` over N months |
+
+Applying a confirmed write adds its own request (one bulk `PATCH` for any number of
+transactions). With a warm cache, reading transactions again costs one small delta
+request. When the quota is spent YNAB answers `429`, which Avenir returns as `… YNAB 429:
+…`; waiting a few minutes is enough.
+
+## What is never stored
+
+Avenir keeps no copy on disk. The transactions live in memory while the server runs; the
+[journal](/avenir-mcp/concepts/journal/) holds identifiers only; the token stays in the
+environment and is never logged.

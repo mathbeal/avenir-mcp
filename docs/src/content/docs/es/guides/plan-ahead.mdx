@@ -1,0 +1,78 @@
+---
+title: Planificar
+description: Prever su saldo mes a mes, comprobar sus supuestos y presupuestar el mes siguiente.
+sidebar:
+  order: 4
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import projection from '@snippets/forecast.json?raw';
+
+**Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
+
+**Herramientas:** [`forecast_balance`](/avenir-mcp/es/reference/tools/forecast-balance/),
+luego [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/).
+**Prompt:** `plan_next_month`.
+
+## La conversación
+
+<Steps>
+
+1. **Pregunte, con lo que sabe.**
+
+   > **Usted:** Si gano 3.200 al mes, ¿bajarán mis cuentas de cero antes de fin de año?
+
+2. **El agente proyecta.** `forecast_balance` con `{"until": "2026-12",
+   "monthly_income": 3200}` — dos peticiones a YNAB:
+
+   <Code code={projection} lang="json" title="forecast_balance (extracto)" />
+
+3. **El agente le lee los supuestos** antes de la conclusión:
+
+   > **Claude:** Partiendo de 4.112,66 entre Checking y Savings, con 3.200 al mes de
+   > ingresos, sus cargos recurrentes (alquiler 950, supermercado unos 182,58,
+   > electricidad 64,20, el tren 45, el tenis 22, teléfono 19,99, Streamflix 13,49) y unos
+   > 69 de otros gastos, el saldo sigue creciendo: el punto más bajo, 4.112,66, es hoy.
+   > ¿Hay algo previsto que deba añadir?
+
+4. **Usted corrige.** Añada lo que el historial no puede saber:
+
+   > **Usted:** El impuesto sobre bienes inmuebles, 1.426, el 15 de octubre.
+
+   El agente vuelve a llamar con `one_offs: [{"date": "2026-10-15", "amount": -1426,
+   "label": "property tax"}]`.
+
+</Steps>
+
+## Lo que supone la proyección
+
+| Supuesto | De dónde sale | Se cambia con |
+|---|---|---|
+| Saldo inicial | el saldo de hoy de las cuentas abiertas incluidas en el presupuesto | `account_ids` |
+| Cargos e ingresos recurrentes | el mismo beneficiario en 3 de los 4 últimos meses completos, cada mes a menos del 20 % de su mediana | — (devueltos en `assumptions.recurring`) |
+| Otros gastos | media de los 3 últimos meses completos, sin cargos recurrentes | `variable_monthly` |
+| Ingresos | lo que usted indica; si no, la media de los 3 últimos meses | `monthly_income` |
+| Importes puntuales | solo los que usted indica | `one_offs` |
+
+Detalles: [Previsión](/avenir-mcp/es/concepts/forecasting/).
+
+## Leer la respuesta
+
+- `months[].start`, `inflows`, `outflows`, `end`: el saldo y los flujos del mes.
+- `months[].lowest`: el punto más bajo del mes, día a día — el que le dice si un pago
+  sería rechazado.
+- `first_shortfall`: el primer mes cuyo punto más bajo está bajo cero, o `null`.
+
+<Aside type="caution" title="Una proyección, no una predicción">
+Prolonga sus últimos meses. Unas vacaciones, un impuesto anual o una compra puntual en
+ellos empujan las medias; un gasto nuevo es invisible hasta que lo añade. Lea los
+supuestos antes de la conclusión.
+</Aside>
+
+## Después, presupuestar el mes siguiente
+
+> **Usted:** Prepara el presupuesto de octubre a partir de esto.
+
+El agente propone los importes del mes siguiente categoría por categoría — primero los
+cargos recurrentes, luego el resto según el gasto reciente — y aplica los que usted
+acepta con `set_category_budget`, un cambio previsualizado cada vez.

@@ -1,53 +1,71 @@
 ---
 title: Avenir
-description: An MCP server for YNAB, built for agents. Ask about your budget in plain words; every change is previewed, confirmed and undoable.
+description: An unofficial, open-source MCP server for YNAB, built for agents. Read-only by default; every change is previewed, confirmed and undoable.
 template: splash
 hero:
-  tagline: An MCP server for YNAB, built for agents. Ask about your budget in plain words — every change is previewed, confirmed by you, and can be undone.
+  title: Your YNAB budget, in plain words.
+  tagline: Avenir lets Claude and other AI agents read, classify, reconcile and forecast your budget. Read-only by default; every change is previewed, confirmed by you, and can be undone.
   actions:
-    - text: Install
+    - text: Get started
       link: /avenir-mcp/getting-started/install/
       icon: right-arrow
-    - text: See it at work
+    - text: See a conversation
       link: /avenir-mcp/getting-started/first-conversation/
-      variant: minimal
+      variant: secondary
 ---
 
-import { Card, CardGrid, Code, Aside } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
+import Stats from '../../components/Stats.astro';
+import WriteFlow from '../../components/WriteFlow.astro';
 import summary from '@snippets/monthly_summary.json?raw';
 
-<Aside type="caution" title="Not affiliated with YNAB">
-YNAB and You Need A Budget are registered trademarks of YNAB. Avenir is an independent
-project that uses YNAB's public API with your own access token. *Avenir* is French for
-*the future*.
-</Aside>
+<Stats />
 
-<CardGrid stagger>
+## Why Avenir
+
+<CardGrid>
+  <Card title="Tools for tasks, not endpoints" icon="rocket">
+    Classify a month of transactions, reconcile an account with the bank, forecast the
+    balance, review a month: each is one tool, not ten API calls for the agent to chain.
+  </Card>
   <Card title="Read-only by default" icon="seti:lock">
-    Tools that change your budget do not exist until you enable them.
-  </Card>
-  <Card title="Preview, confirm, undo" icon="approve-check">
-    Every write shows what will change and waits for your yes. One call reverts it.
-  </Card>
-  <Card title="Tools for tasks" icon="rocket">
-    Classify a month of transactions, reconcile an account, forecast your balance: one
-    tool each, not a wrapper of YNAB's API.
+    The eight write tools are neither listed nor callable until you set
+    `AVENIR_MCP_WRITE=1`. An agent cannot change what it cannot see.
   </Card>
   <Card title="Answers an agent can read" icon="document">
-    Currency units, short typed answers, pagination, errors that say what to fix.
+    Currency units, never milliunits. Typed output schemas with a description for every
+    field, pagination, and errors that say what to fix.
+  </Card>
+  <Card title="Light on YNAB's quota" icon="seti:clock">
+    A local copy of your transactions, refreshed by delta sync: most tools cost one or
+    two of the 200 requests YNAB allows per hour.
   </Card>
 </CardGrid>
 
-## A taste
+## Every change, on your terms
 
-> **You:** Which category is overspent in September, and by how much?
+<WriteFlow />
 
-Claude calls `get_monthly_summary`, which answers in a few lines:
+Categories, amounts, reconciliations and created transactions can all be undone. How it
+works: [Confirmation](/avenir-mcp/concepts/confirmation/) and
+[Journal and undo](/avenir-mcp/concepts/journal/).
 
-<Code code={summary} lang="json" />
+## Real answers, not prose
 
-> **Claude:** Restaurants is overspent by 22.50 in September. Want me to move 30 from
-> Leisure to cover it?
+Tools return structured data the agent can rely on. Asked how September is going, the
+agent calls [`get_monthly_summary`](/avenir-mcp/reference/tools/get-monthly-summary/)
+and gets the month's totals and only the categories that need attention:
 
-Every example in this documentation is a real answer from Avenir, run on an invented
-demo budget: no real account appears anywhere.
+<Code code={summary} lang="json" title="get_monthly_summary — demo budget" />
+
+Every example in this documentation is a real answer from Avenir on an invented demo
+budget.
+
+## Explore the documentation
+
+<CardGrid>
+  <LinkCard title="Getting started" description="Install in five minutes, then a guided first conversation." href="/avenir-mcp/getting-started/install/" />
+  <LinkCard title="Guides" description="Classify, reconcile, review a month, plan ahead — step by step." href="/avenir-mcp/guides/classify/" />
+  <LinkCard title="Concepts" description="Architecture, safety, confirmation, suggestions, forecasting." href="/avenir-mcp/concepts/architecture/" />
+  <LinkCard title="Reference" description="Every tool: parameters, returns, cost, errors, example." href="/avenir-mcp/reference/tools/" />
+</CardGrid>

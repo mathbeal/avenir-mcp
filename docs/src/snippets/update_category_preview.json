@@ -1,0 +1,10 @@
+{
+  "status": "confirmation_required",
+  "message": "Nothing changed yet. Change category 'Tennis' (Fun) to 'Sport' (Fun)? If the user agrees, call again with this code.",
+  "category_id": "cat-tennis",
+  "from_name": "Tennis",
+  "to_name": "Sport",
+  "from_group": "Fun",
+  "to_group": "Fun",
+  "confirmation": "<confirmation code>"
+}

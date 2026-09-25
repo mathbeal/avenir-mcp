@@ -1,0 +1,57 @@
+---
+title: Deshacer un cambio
+description: Revertir la última operación, o la que indique, sin sobrescribir trabajo posterior.
+sidebar:
+  order: 7
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import undo from '@snippets/undo_preview.json?raw';
+
+**Objetivo:** revertir un cambio hecho con Avenir.
+
+**Herramienta:** [`undo_operation`](/avenir-mcp/es/reference/tools/undo-operation/).
+
+## La conversación
+
+<Steps>
+
+1. **Pida.**
+
+   > **Usted:** Deshaz eso.
+
+2. **El agente previsualiza el deshacer.** `undo_operation` con
+   `{"budget_id": "last-used"}` encuentra la última operación del presupuesto aún
+   vigente y muestra lo que cambiaría deshacerla — aquí, dos transacciones que vuelven a
+   no tener categoría:
+
+   <Code code={undo} lang="json" title="undo_operation — vista previa" />
+
+3. **Usted confirma.** Se restaura el estado anterior y la operación se marca como
+   deshecha en el diario.
+
+</Steps>
+
+Para deshacer una operación más antigua, dé su id: *«deshaz la operación 3f9a…»*. La
+respuesta de cada operación aplicada lleva su `operation_id`.
+
+## Qué se puede deshacer
+
+| Operación | Deshacer restaura | Se deja igual si |
+|---|---|---|
+| `apply_categories` | la categoría anterior de cada transacción | su categoría ha vuelto a cambiar |
+| `set_category_budget` | el importe anterior | el importe ha vuelto a cambiar |
+| `reconcile_account` | el estado *cleared*; borra el ajuste | una transacción ya no está conciliada |
+| `create_transactions` | borra las transacciones creadas | una ya fue borrada |
+
+Lo que se deja igual se lista en `conflicts`: deshacer nunca sobrescribe trabajo
+posterior.
+
+**No se puede deshacer:** `update_category` (llámela de nuevo con el nombre y el grupo
+anteriores), `create_category` (oculte la categoría en YNAB), `approve_transactions` (la
+aprobación es una marca de revisión).
+
+<Aside type="note">
+Un deshacer no se puede deshacer, y deshacer funciona en la máquina cuyo
+[diario](/avenir-mcp/es/concepts/journal/) registró la operación.
+</Aside>

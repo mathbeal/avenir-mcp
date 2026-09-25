@@ -1,0 +1,186 @@
+---
+title: "get_spending_trends"
+description: "Return monthly spending trends per category over the last N months."
+---
+
+:::note[Generado]
+Generado desde el código con `python -m docsgen`; una prueba falla si deja de coincidir. Las descripciones vienen del código y se mantienen en inglés: es el idioma en que las leen los agentes.
+:::
+
+## Qué hace
+
+Return monthly spending trends per category over the last N months.
+
+## Comportamiento
+
+| | |
+|---|---|
+| Tipo | solo lectura |
+| Confirmación | no |
+| Deshacer | no |
+| Idempotente | sí |
+| Peticiones a YNAB | 4 para el ejemplo de abajo, con la caché vacía |
+
+## Parámetros
+
+| Nombre | Tipo | Obligatorio | Por defecto | Descripción |
+|---|---|---|---|---|
+| `budget_id` | string | sí | — | YNAB budget UUID or 'last-used'. |
+| `months_count` | integer | no | `3` | Number of past months to include (default 3). |
+
+## Devuelve
+
+`object`
+
+
+## Ejemplo
+
+Argumentos:
+
+```json
+{
+  "budget_id": "demo-budget",
+  "months_count": 3
+}
+```
+
+Respuesta sobre el presupuesto de demostración:
+
+```json
+{
+  "Rent": [
+    {
+      "month": "2026-07-01",
+      "amount": 950.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 950.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 950.0
+    }
+  ],
+  "Electricity": [
+    {
+      "month": "2026-07-01",
+      "amount": 64.2
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 64.2
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Phone": [
+    {
+      "month": "2026-07-01",
+      "amount": 19.99
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 19.99
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 19.99
+    }
+  ],
+  "Groceries": [
+    {
+      "month": "2026-07-01",
+      "amount": 172.89
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 192.51
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Restaurants": [
+    {
+      "month": "2026-07-01",
+      "amount": 61.5
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 89.1
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 142.5
+    }
+  ],
+  "Transport": [
+    {
+      "month": "2026-07-01",
+      "amount": 45.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 45.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Tennis": [
+    {
+      "month": "2026-07-01",
+      "amount": 22.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 22.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Subscriptions": [
+    {
+      "month": "2026-07-01",
+      "amount": 13.49
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 13.49
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Holidays": [
+    {
+      "month": "2026-07-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ]
+}
+```
+
+## Errores
+
+Esta herramienta no lanza errores propios; los errores de YNAB llegan como `Error calling tool '<tool>': YNAB <status>: <detail>`.
+
+## Ver también
+
+- [Revisar un mes](/avenir-mcp/es/guides/monthly-review/)

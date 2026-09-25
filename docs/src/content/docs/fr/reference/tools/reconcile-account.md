@@ -1,0 +1,118 @@
+---
+title: "reconcile_account"
+description: "Compare an account with the balance your bank shows, then reconcile it."
+---
+
+:::note[Généré]
+Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne correspond plus. Les descriptions viennent du code et restent en anglais : c'est la langue dans laquelle les agents les lisent.
+:::
+
+## Rôle
+
+Compare an account with the balance your bank shows, then reconcile it.
+
+Give the balance shown by the bank today (currency units). If YNAB's cleared
+balance differs, nothing is written: the result explains the gap with the
+pending transactions, the one whose amount matches the difference
+(`explained_by`) and likely duplicates. Fix those first (with the user), then
+call again. Only if the user wants to accept the remaining gap, call with
+adjust=true: a "Balance adjustment" transaction is added to Ready to Assign.
+When balances match, every cleared transaction is marked reconciled after the
+user confirms (as for apply_categories). undo_operation reverts it.
+
+## Comportement
+
+| | |
+|---|---|
+| Nature | écriture — masqué sans `AVENIR_MCP_WRITE=1` |
+| Confirmation | oui : aperçu, puis application après accord de l'utilisateur |
+| Annulation | oui, avec `undo_operation` |
+| Destructif | oui |
+| Idempotent | non |
+| Requêtes YNAB | 2 pour l'exemple ci-dessous, cache vide |
+
+## Paramètres
+
+| Nom | Type | Obligatoire | Défaut | Description |
+|---|---|---|---|---|
+| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `account_id` | string | oui | — | Account to reconcile (from list_accounts). |
+| `bank_balance` | number | oui | — | Balance shown by the bank, in currency units. |
+| `adjust` | boolean | non | `false` | Record the remaining difference as an adjustment. |
+| `confirmation` | string \| null | non | `null` | Code from a previous "confirmation_required" result. |
+
+## Retour
+
+| Champ | Type | Description |
+|---|---|---|
+| `status` | "applied" \| "confirmation_required" \| "declined" \| "nothing_to_do" \| "difference_found" | Outcome: difference_found (nothing changed; see analysis), confirmation_required, applied, declined, or nothing_to_do (already reconciled). |
+| `message` | string | What happened and what to do next, for the agent to relay. |
+| `account` | string | Account name. |
+| `analysis` | object | The comparison with the bank. |
+| `analysis.account_id` | string | The account analysed. |
+| `analysis.bank_balance` | number | Balance the bank shows, as given. |
+| `analysis.cleared_balance` | number | Sum of the account's cleared and reconciled transactions in YNAB. |
+| `analysis.working_balance` | number | Sum of all the account's transactions, cleared or not. |
+| `analysis.difference` | number | Bank balance minus cleared balance; negative when YNAB counts more money than the bank. |
+| `analysis.to_reconcile_count` | integer | Cleared transactions not yet reconciled. |
+| `analysis.uncleared_count` | integer | Transactions the bank has not shown yet. |
+| `analysis.uncleared` | array of object | Up to 50 of them. |
+| `analysis.explained_by` | array of string | Uncleared transactions whose amount equals the difference. |
+| `analysis.possible_duplicates` | array of array of string | Pairs with the same amount and merchant, at most 3 days apart, over the last 60 days. |
+| `adjustment` | number \| null | Amount of the balance adjustment created, if adjust was requested; else null. |
+| `confirmation` | string \| null | Single-use code confirming exactly this preview, valid 10 minutes; null unless status is confirmation_required. |
+| `operation_id` | string \| null | Journal id of the applied operation, for undo_operation; null unless status is applied. |
+
+## Exemple
+
+Arguments :
+
+```json
+{
+  "budget_id": "demo-budget",
+  "account_id": "acc-checking",
+  "bank_balance": 3440.8
+}
+```
+
+Réponse sur le budget de démonstration :
+
+```json
+{
+  "status": "difference_found",
+  "message": "YNAB's cleared balance differs from the bank by -71.86. Nothing was changed. Check explained_by, uncleared and possible_duplicates with the user; call again once fixed, or with adjust=true to record the gap as an adjustment.",
+  "account": "Checking",
+  "analysis": {
+    "account_id": "acc-checking",
+    "bank_balance": 3440.8,
+    "cleared_balance": 3512.66,
+    "working_balance": 3512.66,
+    "difference": -71.86,
+    "to_reconcile_count": 49,
+    "uncleared_count": 0,
+    "uncleared": [],
+    "explained_by": [],
+    "possible_duplicates": [
+      [
+        "tx-050",
+        "tx-051"
+      ]
+    ]
+  },
+  "adjustment": null,
+  "confirmation": null,
+  "operation_id": null
+}
+```
+
+## Erreurs
+
+- `Account {account_id} is not in this budget: use an id from list_accounts.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+
+Les erreurs propres à YNAB reviennent sous la forme `Error calling tool '<tool>': YNAB <status>: <detail>`.
+
+## Voir aussi
+
+- [Rapprocher un compte](/avenir-mcp/fr/guides/reconcile/)

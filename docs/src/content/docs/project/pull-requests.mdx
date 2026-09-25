@@ -1,0 +1,102 @@
+---
+title: Propose a pull request
+description: The path of a contribution, from the issue to the merge — fork, branch, tests first, checks, pull request, review.
+sidebar:
+  order: 6
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Pull requests are welcome, from a typo to a new tool. This page is the path to follow;
+[Development](/avenir-mcp/project/development/) describes the repository and its checks
+in detail. You need a GitHub account, [git](https://git-scm.com), [uv](https://docs.astral.sh/uv/)
+and [just](https://just.systems).
+
+<Aside type="tip" title="Talk first, code second">
+For anything larger than a typo or a sentence of documentation, open or comment on an
+issue first — a [feature request](/avenir-mcp/project/propose-a-feature/) or a
+[bug report](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) — and say you would like to do it.
+Agreeing on the approach before writing code saves you rewriting it.
+</Aside>
+
+## Step by step
+
+<Steps>
+
+1. **Fork and clone.** On GitHub, click **Fork**, then clone your copy. With the
+   [GitHub CLI](https://cli.github.com), in one command:
+
+   ```bash
+   gh repo fork mathbeal/avenir-mcp --clone
+   cd avenir-mcp
+   ```
+
+2. **Install and check the starting point.**
+
+   ```bash
+   uv sync       # Python 3.14 and the locked development tools
+   just check    # everything must pass before you change anything
+   ```
+
+3. **Create a branch** named after the change:
+
+   ```bash
+   git switch -c feat/subscription-increases
+   ```
+
+4. **Write the test first**, watch it fail, then write the code that makes it pass.
+   Tests use invented data only — never YNAB, never your budget. Add to the demo budget
+   in `evals/demo_budget.py` if an example needs new figures.
+
+5. **Run the checks** until they all pass:
+
+   ```bash
+   just fix       # format
+   just check     # black, isort, pylint, mypy, pytest (100 % coverage), vocabulary, lock
+   just hygiene   # typos, workflow audit
+   ```
+
+6. **Update the documentation.** If a tool, its arguments or its answers changed, run
+   `uv run python -m docsgen` and commit what it writes. A page written by hand is
+   changed in English, French and Spanish together; `just docs` builds the site and
+   fails on a broken link.
+
+7. **Commit** with a prefix that says the kind of change — the changelog is generated
+   from it:
+
+   ```bash
+   git commit -m "feat: list subscriptions whose price went up"
+   ```
+
+8. **Push and open the pull request.**
+
+   ```bash
+   git push -u origin feat/subscription-increases
+   gh pr create --fill
+   ```
+
+   Or open it from the link GitHub prints. Fill in the template: what and why, how it
+   was checked, the checklist, and `Closes #<issue>`.
+
+</Steps>
+
+## What happens next
+
+| Stage | What to expect |
+|---|---|
+| CI | the same checks as `just check` and `just hygiene`, on Python 3.14, plus the documentation build. For a first contribution, a maintainer approves the run first. |
+| Review | comments on the code; push new commits to the same branch to answer them |
+| Merge | squashed into one commit on `main`, with your pull request's title as its message |
+| Release | your change appears in the next version's [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) |
+
+## What gets a pull request merged
+
+- **One change per pull request**, small enough to review in one sitting.
+- **Tests written first**, covering every line and branch.
+- **No new runtime dependency** without a reason written in the pull request.
+- **Writes stay safe**: a tool that changes the budget previews, waits for confirmation
+  and can be undone — see [Safety by design](/avenir-mcp/concepts/safety/).
+- **No real financial data**, anywhere: code, tests, documentation, screenshots.
+
+The full contract is in [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), which applies to people
+and to coding agents alike.

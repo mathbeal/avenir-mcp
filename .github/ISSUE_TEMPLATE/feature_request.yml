@@ -1,0 +1,59 @@
+name: Feature request
+description: Propose a new tool, a better answer, or a workflow Avenir should support.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. English is preferred; French and Spanish are welcome.
+
+        **Never paste real transactions, balances, account names, payees or tokens.**
+        Invent the figures: this issue is public.
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you want to do?
+      description: The task, in your words — not the tool you imagine yet.
+      placeholder: Every month I check which subscriptions went up in price, one by one in YNAB.
+    validations:
+      required: true
+  - type: textarea
+    id: ask
+    attributes:
+      label: What would you say to the agent?
+      description: One or two sentences you would type, and the answer you would expect.
+      placeholder: |
+        "Which subscriptions cost more than three months ago?"
+        → a list of payees with the old and new monthly amount.
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: What happens today?
+      description: What the agent does with the current tools, and why it is not enough.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Does it change the budget?
+      options:
+        - No, it only reads
+        - Yes, it writes (it will need a preview, a confirmation and an undo)
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Links to YNAB's API documentation, other tools that do this, edge cases.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and the [roadmap](https://mathbeal.github.io/avenir-mcp/project/limitations/).
+          required: true
+        - label: This issue contains no real financial data and no token.
+          required: true

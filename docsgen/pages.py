@@ -28,17 +28,26 @@ def security() -> str:
 
 def generated() -> dict[Path, str]:
     """Every generated file and its expected content."""
-    files = {
-        CONTENT / "reference" / "tools.md": reference.generate(),
-        CONTENT / "security.md": security(),
-    }
-    for name, text in examples.generate().items():
-        files[SNIPPETS / f"{name}.json"] = text
+    captures = examples.capture_all()
+    files = {CONTENT / "project" / "security.md": security()}
+    for relative, text in reference.generate(captures).items():
+        files[CONTENT / relative] = text
+    for name, capture in captures.items():
+        files[SNIPPETS / f"{name}.json"] = capture.text
     return files
 
 
 def write_all() -> None:
-    """Write every generated file."""
-    for path, text in generated().items():
+    """Write every generated file, and remove generated files that no longer exist."""
+    files = generated()
+    for folder in (
+        SNIPPETS,
+        *(CONTENT / lang / "reference" / "tools" for lang in ("", "fr", "es")),
+    ):
+        if folder.exists():
+            for old in folder.iterdir():
+                if old not in files:
+                    old.unlink()
+    for path, text in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")

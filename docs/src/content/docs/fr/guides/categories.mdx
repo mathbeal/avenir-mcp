@@ -1,0 +1,67 @@
+---
+title: Organiser les catégories
+description: Créer, renommer et déplacer des catégories, et fixer ce que chacune reçoit.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import groups from '@snippets/list_category_groups.json?raw';
+import create from '@snippets/create_category_preview.json?raw';
+import rename from '@snippets/update_category_preview.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Objectif :** garder une structure de catégories fidèle à votre vie, et donner à chaque
+catégorie son montant.
+
+**Outils :** [`list_category_groups`](/avenir-mcp/fr/reference/tools/list-category-groups/),
+[`create_category`](/avenir-mcp/fr/reference/tools/create-category/),
+[`update_category`](/avenir-mcp/fr/reference/tools/update-category/),
+[`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/).
+
+## Créer une catégorie
+
+> **Vous :** Crée une catégorie Pets dans Everyday.
+
+L'agent trouve l'identifiant du groupe avec `list_category_groups` (les groupes système
+de YNAB sont écartés) :
+
+<Code code={groups} lang="json" title="list_category_groups" />
+
+puis prévisualise la création :
+
+<Code code={create} lang="json" title="create_category — aperçu" />
+
+Un nom déjà utilisé dans le groupe est refusé, quelle que soit la casse.
+
+## Renommer ou déplacer une catégorie
+
+> **Vous :** Renomme Tennis en Sport.
+
+<Code code={rename} lang="json" title="update_category — aperçu" />
+
+Passez `category_group_id` pour déplacer la catégorie vers un autre groupe, avec ou sans
+nouveau nom. Transactions et montants lui restent attachés. Pour revenir en arrière,
+rappelez l'outil avec l'ancien nom et l'ancien groupe, que donne la réponse.
+
+## Fixer le montant d'une catégorie
+
+> **Vous :** Mets 150 dans Restaurants pour septembre.
+
+<Code code={budget} lang="json" title="set_category_budget — aperçu" />
+
+Le montant est **absolu** : il remplace ce qui était budgété. `month` vaut `"current"` ou
+`YYYY-MM-01` ; `"current"` est converti en mois réel, pour qu'une annulation ultérieure
+porte sur le bon mois.
+
+## Annuler
+
+| Outil | Annulation |
+|---|---|
+| `set_category_budget` | `undo_operation` rétablit l'ancien montant, sauf s'il a changé depuis |
+| `update_category` | rappeler l'outil avec l'ancien nom et l'ancien groupe |
+| `create_category` | masquer la catégorie dans YNAB — son API ne permet pas de la supprimer |
+
+<Aside type="note">
+Chaque changement de cette page est prévisualisé et attend votre confirmation.
+</Aside>

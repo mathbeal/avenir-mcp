@@ -1,0 +1,74 @@
+---
+title: Suggestions
+description: Comment Avenir reconnaît un commerçant d'un libellé bancaire à l'autre, apprend de votre historique, et décide quand proposer une catégorie.
+sidebar:
+  order: 6
+---
+
+`suggest_categories` répond à deux questions pour chaque transaction en attente : *quel
+est ce commerçant ?* et *où l'avez-vous rangé avant ?*
+
+## Ce qui est en attente
+
+Une transaction est en attente quand elle n'est pas supprimée, n'a pas de catégorie,
+n'est pas un virement entre vos comptes (les virements ne prennent pas de catégorie dans
+YNAB), et n'est pas ventilée (ce sont les lignes d'une transaction ventilée qui portent
+ses catégories). Les transactions en attente sont listées des plus récentes aux plus
+anciennes.
+
+## Reconnaître un commerçant
+
+Les banques écrivent le même magasin différemment à chaque fois : une date, un numéro de
+carte, une référence. Avant de comparer, chaque bénéficiaire est **normalisé**, dans cet
+ordre :
+
+| Étape | Règle | Exemple |
+|---|---|---|
+| 1 | majuscules, espaces multiples réduits | `Corner  Shop` → `CORNER SHOP` |
+| 2 | retrait d'un numéro de compte et de ce qui suit : `- IBAN: …` | `INSURER - PRELEV - IBAN: FR00…` → `INSURER - PRELEV` |
+| 3 | retrait d'un préfixe de paiement : `CB`, `CARTE`, `PRLV`, `PRLV SEPA`, `VIR`, `VIREMENT`, `VIR INST`, `VIR SEPA` | `VIR INST GARAGE MARTIN` → `GARAGE MARTIN` |
+| 4 | retrait d'une date de facture et de ce qui suit : `FACT` + 6 chiffres | `ACME OUTDOOR FACT 110126 525130******2` → `ACME OUTDOOR` |
+| 5 | retrait des numéros de carte masqués (`525130******2`), des dates (`12/01`, `12/01/26`) et des références de 5 chiffres ou plus | `ONLINE STORE 1234567890` → `ONLINE STORE` |
+| 6 | espaces à nouveau réduits | |
+
+Ainsi `CB MARKET FRESH FACT 050926 525130******1` et `CB MARKET FRESH FACT 190926
+525130******1` deviennent tous deux `MARKET FRESH`. Retirer les numéros de compte évite
+aussi que l'IBAN d'un créancier apparaisse dans les réponses.
+
+## Apprendre de l'historique
+
+L'historique est construit à partir des transactions du budget qui ont une catégorie, ne
+sont pas supprimées et ne sont pas des virements. Il compte, pour chaque bénéficiaire
+normalisé, combien de fois chaque catégorie a été utilisée — **séparément pour les
+sorties et pour les entrées**. Un prêteur qui vous a versé de l'argent une fois (entrée,
+*Ready to Assign*) ne fait pas passer vos remboursements (sorties) pour un revenu.
+
+## Décider
+
+Pour une transaction en attente, Avenir regarde l'historique de son bénéficiaire, dans
+son sens, et ne garde que les catégories encore assignables : une catégorie masquée ou
+supprimée n'est jamais proposée.
+
+- **confiance** = usages de la catégorie la plus fréquente ÷ tous les usages de ces
+  catégories.
+- Une suggestion est faite quand la confiance ≥ le seuil, **0,90** par défaut
+  (`AVENIR_MCP_CONFIDENCE_THRESHOLD`).
+- Pas d'historique, ou aucune catégorie au-dessus du seuil : pas de suggestion. L'agent
+  en propose une à partir de la liste des catégories et vous demande.
+
+Mesurées sur un vrai budget de ménage d'environ 800 transactions classées, en laissant
+chacune de côté à tour de rôle, les suggestions faites à 0,90 étaient justes dans 95 %
+des cas.
+
+## Pagination
+
+| | |
+|---|---|
+| Taille de page | `limit`, 50 par défaut |
+| Page suivante | `next_cursor`, opaque : à renvoyer tel quel |
+| Coût | deux requêtes YNAB par page : transactions et catégories |
+| Texte | bénéficiaire et mémo tronqués à 80 caractères, marqués `…` |
+
+Un curseur est l'encodage base64 d'une position. Un curseur qu'Avenir n'a pas émis est
+refusé : *« Invalid cursor: pass the next_cursor value from the previous page unchanged,
+or omit it to start from the first page. »*

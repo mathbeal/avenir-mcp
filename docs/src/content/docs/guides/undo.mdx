@@ -1,0 +1,55 @@
+---
+title: Undo a change
+description: Revert the latest operation, or one you name, without overwriting later work.
+sidebar:
+  order: 7
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import undo from '@snippets/undo_preview.json?raw';
+
+**Goal:** take back a change made through Avenir.
+
+**Tool:** [`undo_operation`](/avenir-mcp/reference/tools/undo-operation/).
+
+## The conversation
+
+<Steps>
+
+1. **Ask.**
+
+   > **You:** Undo that.
+
+2. **The agent previews the undo.** `undo_operation` with `{"budget_id": "last-used"}`
+   finds the latest operation of the budget still in effect, and shows what undoing it
+   would change — here, two transactions going back to no category:
+
+   <Code code={undo} lang="json" title="undo_operation — preview" />
+
+3. **You confirm.** The previous state is restored, and the operation is marked undone
+   in the journal.
+
+</Steps>
+
+To undo an older operation, give its id: *“undo operation 3f9a…”*. Every applied
+operation's answer carries its `operation_id`.
+
+## What can be undone
+
+| Operation | Undo restores | Left alone if |
+|---|---|---|
+| `apply_categories` | each transaction's previous category | its category changed again since |
+| `set_category_budget` | the previous amount | the amount changed again since |
+| `reconcile_account` | *cleared* status; deletes the adjustment | a transaction is no longer reconciled |
+| `create_transactions` | deletes the created transactions | one was already deleted |
+
+Anything left alone is listed in `conflicts`: undo never overwrites later work.
+
+**Not undoable:** `update_category` (call it again with the previous name and group),
+`create_category` (hide the category in YNAB), `approve_transactions` (approval is a
+review flag).
+
+<Aside type="note">
+An undo cannot itself be undone, and undo works on the machine whose
+[journal](/avenir-mcp/concepts/journal/) recorded the operation.
+</Aside>

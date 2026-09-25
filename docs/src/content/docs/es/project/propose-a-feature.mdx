@@ -1,0 +1,73 @@
+---
+title: Proponer una función
+description: Cómo sugerir una nueva herramienta o flujo, qué hace que una propuesta sea fácil de aceptar, y qué pasa después.
+sidebar:
+  order: 5
+---
+
+import { Steps, Aside, LinkButton } from '@astrojs/starlight/components';
+
+Avenir crece a partir de usos reales de un presupuesto. Si hace a mano una tarea que un
+agente podría hacer por usted, o una respuesta podría ser más clara, propóngalo. Las
+propuestas se gestionan en los issues de GitHub del proyecto, en público; necesita una
+cuenta de GitHub. Puede escribir en español.
+
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml" icon="external">Proponer una función</LinkButton>
+
+## Cómo proponer
+
+<Steps>
+
+1. **Compruebe que no existe ya.** Lea la [hoja de ruta](/avenir-mcp/es/project/limitations/#hoja-de-ruta)
+   y busque entre las [propuestas abiertas](https://github.com/mathbeal/avenir-mcp/issues?q=is%3Aissue+label%3Aenhancement).
+   Si la suya existe, añada un 👍 y su caso de uso en lugar de abrir otro issue.
+
+2. **Abra una solicitud de función.** El formulario pregunta cuatro cosas:
+
+   | Pregunta | Por qué |
+   |---|---|
+   | ¿Qué quiere hacer? | la tarea, con sus palabras — no la herramienta que imagina |
+   | ¿Qué le diría al agente? | una frase que escribiría, y la respuesta que espera |
+   | ¿Qué pasa hoy? | lo que hacen las herramientas actuales, y por qué no basta |
+   | ¿Modifica el presupuesto? | una escritura necesita vista previa, confirmación y deshacer |
+
+3. **Siga la conversación.** Las preguntas llegan como comentarios en el issue; GitHub le
+   avisa.
+
+</Steps>
+
+<Aside type="danger" title="Nunca datos financieros reales">
+Los issues son públicos. No pegue transacciones, saldos, nombres de cuentas,
+beneficiarios, capturas de YNAB ni su token. Invente las cifras: *«una suscripción de
+12,99 que pasó a 14,99»* basta para entender la necesidad.
+</Aside>
+
+## Qué hace una buena propuesta
+
+Una propuesta es más fácil de aceptar cuando:
+
+- describe **una tarea**, no un endpoint de YNAB que envolver — vea
+  [Arquitectura](/avenir-mcp/es/concepts/architecture/);
+- funciona con **la API pública de YNAB** y un token de acceso personal;
+- se puede **probar sobre un presupuesto inventado**, como el resto de Avenir;
+- si escribe, se puede **previsualizar, confirmar y deshacer** — vea
+  [Seguridad por diseño](/avenir-mcp/es/concepts/safety/).
+
+Las propuestas que enviarían sus datos a otro servicio, o actuarían sin su
+confirmación, se rechazan.
+
+## Qué pasa después
+
+| Estado | Significado |
+|---|---|
+| abierto, `enhancement` | recibido; los comentarios pueden pedir detalles |
+| en la [hoja de ruta](/avenir-mcp/es/project/limitations/#hoja-de-ruta) | aceptado y previsto |
+| cerrado con una pull request | publicado: vea el [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) |
+| cerrado, `wontfix` | rechazado, con el motivo |
+
+## Otras formas de ayudar
+
+- **¿Algo no funciona?** Abra un [informe de error](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml).
+- **¿Un problema de seguridad?** Infórmelo en privado: vea [Seguridad](/avenir-mcp/es/project/security/).
+- **¿Quiere desarrollarla usted?** Dígalo primero en el issue y lea
+  [Proponer una pull request](/avenir-mcp/es/project/pull-requests/).

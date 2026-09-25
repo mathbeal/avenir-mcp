@@ -1,4 +1,4 @@
-# Avenir — an MCP server for YNAB
+# Avenir — an unofficial MCP server for YNAB
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://mathbeal.github.io/avenir-mcp/)
@@ -19,8 +19,10 @@ you, and can be undone.
 
 **📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
 
-> **Not affiliated with or endorsed by YNAB.** YNAB and You Need A Budget are
-> registered trademarks of YNAB.
+> **Unofficial project.** Avenir is not affiliated with, endorsed by or sponsored by
+> YNAB. YNAB and You Need A Budget are registered trademarks of YNAB, named here only
+> to say which service Avenir works with. Avenir uses YNAB's public API with your own
+> access token.
 
 ## Why Avenir
 
@@ -70,7 +72,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Categorise what is pending." | `suggest_categories`, then `apply_categories` after your yes |
 | "My bank shows 3,440.80. Does YNAB agree?" | `reconcile_account` — explains the gap, changes nothing until it matches |
 | "Will I go below zero before December?" | `forecast_balance` — month by month, with its assumptions |
-| "Move 30 from Leisure to Restaurants." | `set_category_budget`, previewed and undoable |
+| "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 
 Walk-throughs with real answers: [Use cases](https://mathbeal.github.io/avenir-mcp/use-cases/classify/).

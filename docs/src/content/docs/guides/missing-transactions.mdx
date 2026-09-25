@@ -1,0 +1,45 @@
+---
+title: Add missing transactions
+description: Record what the bank import missed, previewed and left for your review.
+sidebar:
+  order: 5
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import created from '@snippets/create_preview.json?raw';
+
+**Goal:** record what the bank import missed — a cash expense, a payment from a card YNAB
+does not follow, a transaction an import dropped.
+
+**Tool:** [`create_transactions`](/avenir-mcp/reference/tools/create-transactions/).
+
+## The conversation
+
+<Steps>
+
+1. **Say what happened.**
+
+   > **You:** Add a payment of 32.40 to Pharmacie Centrale on September 21, on my checking
+   > account. The bank did not import it.
+
+2. **The agent previews.** `create_transactions` checks the account, the categories and
+   the dates, then shows what it will add — two YNAB requests:
+
+   <Code code={created} lang="json" title="create_transactions — preview" />
+
+3. **You confirm.** The transactions are created **cleared** and, unless the agent passes
+   `approved: true`, left **unapproved**: YNAB shows them for review like any import.
+
+</Steps>
+
+## Rules
+
+| Field | Rule |
+|---|---|
+| `date` | `YYYY-MM-DD`, today or earlier — YNAB records what happened |
+| `amount` | currency units; negative for spending, positive for money in |
+| `payee_name` | as it should appear in YNAB |
+| `memo`, `category_id` | optional |
+
+Several transactions can be created at once; they are one operation. `undo_operation`
+deletes those still there.

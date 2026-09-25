@@ -1,0 +1,88 @@
+---
+title: Faire le point sur un mois
+description: Voir où est passé l'argent, repérer ce qui ressort, et déplacer de l'argent pour couvrir un dépassement.
+sidebar:
+  order: 3
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import usage from '@snippets/budget_vs_actual.json?raw';
+import trends from '@snippets/spending_trends.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+import badMonth from '@snippets/bad_month.json?raw';
+
+**Objectif :** comprendre un mois — revenus, dépenses, ce qui reste à assigner — et
+corriger ce qui a dérapé.
+
+**Outils :** [`get_monthly_summary`](/avenir-mcp/fr/reference/tools/get-monthly-summary/),
+[`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/),
+[`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/),
+[`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/), et
+[`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/) pour
+corriger. **Prompt :** `monthly_review`.
+
+## La conversation
+
+<Steps>
+
+1. **Demandez.**
+
+   > **Vous :** Fais le point sur septembre avec moi.
+
+2. **Le mois en un coup d'œil.** `get_monthly_summary` avec `month: "2026-09-01"` répond
+   en quelques lignes — une requête YNAB :
+
+   <Code code={summary} lang="json" title="get_monthly_summary" />
+
+   | Champ | Se lit comme |
+   |---|---|
+   | `income` | l'argent reçu ce mois dans Ready to Assign |
+   | `budgeted` | le total assigné aux catégories ce mois |
+   | `activity` | dépensé (négatif) et reçu dans les catégories |
+   | `ready_to_assign` | l'argent sans affectation — négatif si vous avez assigné plus que vous n'avez |
+   | `overspent` | les catégories dont le disponible est négatif |
+
+3. **Le détail.** `get_category_balances` liste chaque catégorie non vide :
+
+   <Code code={balances} lang="json" title="get_category_balances (premières lignes)" />
+
+   `get_budget_vs_actual` donne la part de chaque budget consommée — `utilization_pct`
+   au-dessus de 100 signifie un dépassement :
+
+   <Code code={usage} lang="json" title="get_budget_vs_actual (premières lignes)" />
+
+4. **La tendance.** Les restaurants sont-ils élevés ce mois-ci ou tous les mois ?
+   `get_spending_trends` avec `months_count: 3` donne les dépenses par catégorie, mois
+   par mois :
+
+   <Code code={trends} lang="json" title="get_spending_trends (extrait)" />
+
+5. **La correction.** Un dépassement se couvre en prenant sur une catégorie qui a de la
+   marge :
+
+   > **Claude :** Restaurants dépasse de 22,50. Tennis a 80 de disponible et rien de
+   > dépensé. Je déplace 30 de Tennis vers Restaurants ?
+   >
+   > **Vous :** Oui.
+
+   Deux appels `set_category_budget`, chacun prévisualisé avant → après :
+
+   <Code code={budget} lang="json" title="set_category_budget — aperçu" />
+
+</Steps>
+
+## Bon à savoir
+
+- `month` vaut `"current"` ou le premier jour d'un mois, `AAAA-MM-01`. Tout le reste est
+  refusé avant l'appel à YNAB, sans rien coûter :
+
+  <Code code={badMonth} lang="text" title="get_monthly_summary — mois 2026-13-01" />
+- Les catégories masquées et les catégories internes de YNAB (*Inflow: Ready to Assign*)
+  sont écartées de tous les bilans.
+- `set_category_budget` fixe un montant **absolu**, pas une variation : déplacer 30,
+  ce sont deux appels, l'un qui baisse Tennis de 80 à 50, l'autre qui monte Restaurants
+  de 120 à 150. Chacun est annulable.
+- La ressource `avenir://guide` rappelle la méthode YNAB aux agents : un dépassement se
+  corrige en déplaçant de l'argent, pas en l'ignorant.

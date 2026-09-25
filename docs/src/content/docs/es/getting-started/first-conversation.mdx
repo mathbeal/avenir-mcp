@@ -1,68 +1,120 @@
 ---
-title: Tu primera conversación
-description: Un recorrido por Avenir, con respuestas reales del presupuesto de demostración.
+title: Su primera conversación
+description: Una visita guiada, llamada a llamada, con las respuestas reales del presupuesto de demostración.
+sidebar:
+  order: 2
 ---
 
-import { Code } from '@astrojs/starlight/components';
+import { Code, Aside, Steps } from '@astrojs/starlight/components';
 import accounts from '@snippets/list_accounts.json?raw';
 import summary from '@snippets/monthly_summary.json?raw';
 import balances from '@snippets/category_balances.json?raw';
 import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 
-Un breve recorrido, en el orden en que la mayoría descubre Avenir. Cada respuesta es lo
-que Avenir devuelve de verdad sobre el presupuesto de demostración inventado.
+Esta visita sigue una conversación real sobre el presupuesto de demostración, un hogar
+inventado con una cuenta corriente y una de ahorro. En cada paso verá lo que usted dice,
+qué herramienta llama el agente y con qué argumentos, qué responde Avenir y qué le dice
+el agente. Sus propias respuestas tendrán la misma forma, con sus cifras.
 
-## 1. Echa un vistazo
+<Aside type="tip">
+Nunca nombra las herramientas usted mismo: diga lo que quiere y el agente elige la
+herramienta. Nombrarla (*«usa get_monthly_summary»*) también funciona, y ayuda cuando una
+respuesta le sorprende.
+</Aside>
 
-> **Tú:** ¿Qué cuentas tengo y cuánto hay en ellas?
+## 1. Echar un vistazo
 
-<Code code={accounts} lang="json" />
+> **Usted:** ¿Qué cuentas tengo y cuánto hay en ellas?
 
-Los importes están en la moneda de tu presupuesto, nunca en las *milliunits* internas de
-YNAB.
+El agente llama a `list_accounts` con `{"budget_id": "last-used"}`:
 
-## 2. Mira cómo va el mes
+<Code code={accounts} lang="json" title="list_accounts" />
 
-> **Tú:** ¿Cómo va septiembre?
+> **Claude:** Dos cuentas: Checking con 3.512,66, todo punteado, y Savings con 600,00.
 
-<Code code={summary} lang="json" />
+Los saldos están en la moneda de su presupuesto. `cleared_balance` es lo que el banco ya
+ha mostrado; `uncleared_balance`, lo que todavía no.
 
-Solo se listan las categorías que se han pasado. Pide el detalle cuando lo quieras:
+## 2. Ver cómo va el mes
 
-> **Tú:** Enséñame todas las categorías de septiembre.
+> **Usted:** ¿Cómo va septiembre?
 
-<Code code={balances} lang="json" />
+El agente llama a `get_monthly_summary` con `{"budget_id": "last-used", "month":
+"2026-09-01"}`:
 
-## 3. Pon orden
+<Code code={summary} lang="json" title="get_monthly_summary" />
 
-> **Tú:** ¿Qué sigue esperando una categoría?
+> **Claude:** Septiembre va según lo previsto salvo Restaurants, excedida en 22,50.
+> Quedan 1.820,00 por asignar.
 
-<Code code={pending} lang="json" />
+Solo se listan las categorías excedidas. Para el detalle, pídalo:
 
-Cuando tu historial es claro, hay una `suggestion` lista; para el resto, Claude propone
-una categoría y te pregunta. Continúa en
-[Clasificar transacciones pendientes](/avenir-mcp/es/use-cases/classify/).
+> **Usted:** Muéstrame todas las categorías de septiembre.
 
-## 4. Cambia algo, con seguridad
+<Code code={balances} lang="json" title="get_category_balances (primeras entradas)" />
 
-> **Tú:** Sí, pon la panadería en Groceries y el tren en Transport.
+`activity` es lo gastado (negativo) o recibido; `balance`, lo que sigue disponible. Las
+categorías sin nada presupuestado, gastado ni disponible se omiten salvo que el agente
+pase `include_empty`.
 
-Todavía no cambia nada. Ves exactamente lo que va a cambiar:
+## 3. Poner orden
 
-<Code code={preview} lang="json" />
+> **Usted:** ¿Qué queda sin categoría?
 
-Según tu cliente, te lo pregunta directamente (una casilla de confirmación) o te muestra
-la vista previa y espera tu visto bueno. Una vez aplicado, *«Deshaz eso»* lo revierte.
-Consulta [Seguridad desde el diseño](/avenir-mcp/es/concepts/safety/).
+El agente llama a `suggest_categories` con `{"budget_id": "last-used"}`:
 
-## 5. Usa los flujos ya preparados
+<Code code={pending} lang="json" title="suggest_categories (primera página, 3 elementos)" />
 
-| Prompt | Lo que te guía a hacer |
+> **Claude:** Seis transacciones esperan. Cinco tienen una sugerencia clara según su
+> historial: Market Fresh dos veces, Streamflix, Rail Co… La panadería es nueva para mí:
+> ¿supermercado?
+
+Cuando su historial es claro, hay una `suggestion` lista con su `confidence`. Para un
+comercio nunca visto, el agente propone una categoría de la lista `categories` y le
+pregunta.
+
+## 4. Cambiar algo — con seguridad
+
+> **Usted:** Sí, la panadería es supermercado, y el tren es transporte.
+
+El agente llama a `apply_categories` con las dos asignaciones. **Todavía no cambia
+nada:**
+
+<Code code={preview} lang="json" title="apply_categories — vista previa" />
+
+<Steps>
+
+1. Avenir ha calculado exactamente lo que cambiaría: dos transacciones, de ninguna
+   categoría a Groceries y Transport.
+2. Su cliente le muestra la pregunta — un cuadro de confirmación si admite la
+   elicitación MCP, o el agente le transmite la vista previa y espera.
+3. Usted dice que sí. El agente vuelve a llamar con su respuesta (o el código
+   `confirmation`).
+4. Avenir aplica ambos cambios en una sola petición a YNAB, los anota en su diario y
+   devuelve un `operation_id`.
+
+</Steps>
+
+> **Usted:** En realidad, deshazlo.
+
+El agente llama a `undo_operation`, que previsualiza devolver ambas transacciones a donde
+estaban, y lo aplica cuando usted acepta. Vea [Deshacer un cambio](/avenir-mcp/es/guides/undo/).
+
+## 5. Usar los flujos listos
+
+En lugar de guiar cada paso, lance un prompt: le da al agente el método completo.
+
+| Prompt | Lo que le guía a hacer |
 |---|---|
-| `classify_pending` | sugerencias, tus elecciones, un lote confirmado, el id para deshacer |
-| `monthly_review` | los totales, lo que destaca, las correcciones propuestas |
-| `reconcile` | la diferencia con el banco explicada, luego una conciliación confirmada |
-| `plan_next_month` | una proyección y sus supuestos, luego los importes del mes siguiente |
+| `classify_pending` | sugerencias, sus elecciones, un lote confirmado, el id para deshacer |
+| `monthly_review` | totales, lo que destaca, correcciones propuestas |
+| `reconcile` | la diferencia con su banco explicada, luego una conciliación confirmada |
+| `plan_next_month` | una previsión y sus supuestos, luego los importes del mes siguiente |
 
 En Claude Code aparecen entre los comandos slash del servidor `avenir`.
+
+## Siguiente
+
+- [Funciones](/avenir-mcp/es/getting-started/features/): la lista completa.
+- [Guías](/avenir-mcp/es/guides/classify/): una tarea cada vez, en profundidad.

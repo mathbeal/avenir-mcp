@@ -1,37 +1,140 @@
 ---
 title: Configuration
-description: Toutes les variables d'environnement lues par Avenir.
+description: Chaque variable d'environnement lue par Avenir, avec sa valeur par défaut, son effet et un exemple.
 sidebar:
-  order: 2
+  order: 4
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Avenir se configure par variables d'environnement, dans le bloc `env` de votre client MCP.
+Avenir lit sa configuration dans des variables d'environnement, définies dans le bloc
+`env` de votre client MCP ou dans le shell qui le lance. Rien d'autre n'est lu : pas de
+fichier de configuration.
 
-| Variable | Défaut | Rôle |
+## Résumé
+
+| Variable | Défaut | Sens |
 |---|---|---|
-| `YNAB_API_KEY` | — (**obligatoire**) | Votre jeton d'accès personnel YNAB. Accès complet, en lecture et en écriture, à vos budgets. |
+| `YNAB_API_KEY` | — (**obligatoire**, ou `YNAB_API_KEY_FILE`) | Votre jeton d'accès personnel YNAB. |
+| `YNAB_API_KEY_FILE` | absente | Un fichier contenant le jeton, utilisé quand `YNAB_API_KEY` est absente. |
 | `AVENIR_MCP_WRITE` | absente : lecture seule | `1` enregistre les outils qui modifient votre budget. |
-| `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` pour un client qui lance le serveur ; `http` pour le HTTP streamable. |
-| `AVENIR_MCP_HOST` | `127.0.0.1` | Adresse HTTP. Restez sur localhost : le transport HTTP n'a pas d'authentification. |
+| `AVENIR_MCP_REQUIRE_ELICITATION` | absente | `1` n'accepte qu'un oui donné dans le client : pas de codes de confirmation. |
+| `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` ou `http`. |
+| `AVENIR_MCP_HOST` | `127.0.0.1` | Adresse HTTP. |
 | `AVENIR_MCP_PORT` | `8103` | Port HTTP. |
-| `AVENIR_MCP_JOURNAL` | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl` | Journal des opérations appliquées, utilisé pour annuler. Identifiants seulement, lisible par vous seul. |
-| `XDG_STATE_HOME` | `~/.local/state` | Emplacement standard de l'état utilisateur ; le journal y vit sauf si `AVENIR_MCP_JOURNAL` est défini. |
-| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Part de l'historique d'un bénéficiaire qui doit concorder pour proposer une catégorie. |
-| `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Niveau des diagnostics sur stderr (`DEBUG`, `INFO`, …). |
-| `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adresse de l'API ; l'évaluation la dirige vers un serveur de démonstration. |
+| `AVENIR_MCP_HTTP_TOKEN` | absente | Jeton que les clients HTTP doivent présenter ; obligatoire avec l'écriture en HTTP. |
+| `AVENIR_MCP_JOURNAL` | voir plus bas | Fichier du journal, utilisé par l'annulation. |
+| `XDG_STATE_HOME` | `~/.local/state` | Où vit le journal par défaut. |
+| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confiance nécessaire pour proposer une catégorie. |
+| `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Niveau des diagnostics. |
+| `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adresse de l'API. |
 
-Chaque outil prend un `budget_id` : un identifiant de `list_budgets`, ou `last-used`.
+## Détails
 
-## Lancer en HTTP
+### `YNAB_API_KEY`
+
+Votre jeton d'accès personnel, dans YNAB → Account Settings → Developer Settings. Sans
+lui, tout outil qui appelle YNAB échoue avec `YNAB_API_KEY environment variable is not
+set`. Il donne un accès complet en lecture et en écriture à tous les budgets du compte.
+
+### `YNAB_API_KEY_FILE`
+
+Le chemin d'un fichier qui ne contient que le jeton, utilisé quand `YNAB_API_KEY` est
+absente : le jeton n'apparaît alors dans aucune configuration de client MCP. Le fichier
+doit être lisible par vous seul (`chmod 600`) ; sinon Avenir le refuse et le dit. Sur
+macOS, après avoir copié le jeton :
 
 ```bash
-AVENIR_MCP_TRANSPORT=http YNAB_API_KEY=votre-jeton uvx avenir-mcp
-# écoute sur http://127.0.0.1:8103/mcp
+mkdir -p ~/.config/avenir-mcp
+(umask 077; pbpaste > ~/.config/avenir-mcp/ynab-token)   # le jeton que vous venez de copier
+```
+
+Donnez ensuite à `YNAB_API_KEY_FILE` le chemin complet du fichier, dans le bloc `env` du
+client.
+
+Sur macOS, le **Trousseau** évite tout fichier : enregistrez le jeton une fois, puis
+laissez le client le lire au démarrage.
+
+```bash
+security add-generic-password -a "$USER" -s avenir-ynab -w   # demande le jeton, masqué
+```
+
+```json
+"command": "/bin/sh",
+"args": ["-c", "YNAB_API_KEY=$(security find-generic-password -s avenir-ynab -w) exec uvx avenir-mcp"]
+```
+
+macOS peut demander une fois l'autorisation de laisser `security` lire l'élément.
+
+### `AVENIR_MCP_WRITE`
+
+Exactement `1` enregistre les 8 outils d'écriture. Toute autre valeur, ou aucune, garde
+le serveur en lecture seule : ces outils ne sont alors ni listés ni appelables. Lue une
+fois, au démarrage.
+
+### `AVENIR_MCP_REQUIRE_ELICITATION`
+
+Exactement `1` : une écriture ne s'applique qu'après un oui donné dans la fenêtre de
+confirmation du client lui-même. Les codes de confirmation ne sont ni émis ni acceptés,
+une question fermée vaut un non, et un client qui ne sait pas demander reçoit une erreur.
+À utiliser quand le modèle pourrait transmettre un code sans vous demander — voir
+[Confirmation](/avenir-mcp/fr/concepts/confirmation/#exiger-votre-propre-réponse).
+
+### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
+
+`stdio` (défaut) pour un client qui lance lui-même le serveur. `http` sert du HTTP
+streamable sur `http://{HOST}:{PORT}/mcp`.
+
+```bash
+AVENIR_MCP_TRANSPORT=http AVENIR_MCP_PORT=9000 YNAB_API_KEY=… uvx avenir-mcp
 ```
 
 <Aside type="danger">
-Ne le liez jamais à `0.0.0.0` et n'exposez pas le port sur toutes les interfaces :
-quiconque l'atteint agit sur votre budget.
+Le trafic est en HTTP simple : gardez `AVENIR_MCP_HOST` sur `127.0.0.1`. `HOST` et
+`PORT` sans préfixe sont ignorées exprès : les shells règlent souvent `HOST` sur le nom
+de la machine.
 </Aside>
+
+### `AVENIR_MCP_HTTP_TOKEN`
+
+En HTTP, un secret que chaque requête doit porter en `Authorization: Bearer <jeton>` ;
+les autres reçoivent `401`. **Obligatoire avec `AVENIR_MCP_WRITE=1`** : sans lui, le
+serveur refuse de démarrer. Créez-en un avec `openssl rand -hex 32`. Ignorée en stdio.
+Quel que soit le jeton, les en-têtes `Host` et `Origin` doivent désigner cette machine.
+Voir [Lancer en HTTP](/avenir-mcp/fr/guides/run-options/#lancer-en-http).
+
+### `AVENIR_MCP_JOURNAL` et `XDG_STATE_HOME`
+
+Le journal des opérations appliquées. Par défaut :
+`$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, ou `~/.local/state/avenir-mcp/journal.jsonl`
+quand `XDG_STATE_HOME` n'est pas définie. Le dossier est créé si besoin. Voir
+[Journal et annulation](/avenir-mcp/fr/concepts/journal/).
+
+### `AVENIR_MCP_CONFIDENCE_THRESHOLD`
+
+Un nombre entre 0 et 1 : la part de l'historique d'un bénéficiaire qui doit concorder
+avant qu'une catégorie soit proposée. `0.90` propose moins souvent et se trompe moins ;
+`0.70` propose davantage. Lue au démarrage. Voir
+[Suggestions](/avenir-mcp/fr/concepts/suggestions/).
+
+### `AVENIR_MCP_LOG_LEVEL`
+
+`DEBUG`, `INFO`, `WARNING` (défaut), `ERROR`. Les diagnostics vont sur stderr. Au niveau
+`INFO`, chaque appel d'outil et chaque requête YNAB sont journalisés ; le jeton, jamais.
+
+### `AVENIR_MCP_YNAB_URL`
+
+L'adresse de base de l'API. Utile seulement pour diriger Avenir vers une doublure, comme
+le font l'évaluation et le générateur de documentation avec leur serveur de budget de
+démonstration. Elle doit commencer par `https://` — `http://` n'est accepté que pour
+`127.0.0.1` ou `localhost` — car chaque requête porte votre jeton.
+
+## Arguments d'outils fréquents
+
+| Argument | Valeurs acceptées |
+|---|---|
+| `budget_id` | un identifiant de budget donné par `list_budgets`, ou `last-used` |
+| `month` | `current`, ou le premier jour d'un mois : `AAAA-MM-01` |
+| `until` | un mois, `AAAA-MM`, jusqu'à 24 mois plus tard |
+| dates | `AAAA-MM-JJ` |
+| montants | unités monétaires ; négatifs pour les dépenses |

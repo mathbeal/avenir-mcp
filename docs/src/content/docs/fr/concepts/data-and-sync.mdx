@@ -1,0 +1,84 @@
+---
+title: Données et synchronisation
+description: Montants et milliunités, la copie locale des transactions, la synchronisation incrémentale, le quota de YNAB et ses erreurs.
+sidebar:
+  order: 5
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Montants
+
+YNAB stocke chaque montant en nombre entier de **milliunités** : 1,00 vaut `1000`,
+−12,34 vaut `-12340`. Avenir convertit à la frontière et ne montre jamais de milliunités
+à l'agent :
+
+| Sens | Règle |
+|---|---|
+| YNAB → agent | `milliunités / 1000` |
+| agent → YNAB | `round(montant × 1000)` : 111,32 devient exactement `111320` |
+
+Sommes, différences et proratas sont calculés en milliunités, puis convertis une seule
+fois : aucune erreur d'arrondi ne crée ni ne perd un centime. Les montants sont dans la
+devise du budget ; les dépenses sont négatives, les entrées positives.
+
+## Parler à YNAB
+
+`client.py` est le seul module qui appelle [l'API de YNAB](https://api.ynab.com/) :
+
+| | |
+|---|---|
+| URL de base | `https://api.ynab.com/v1`, ou `AVENIR_MCP_YNAB_URL` |
+| Authentification | `Authorization: Bearer <YNAB_API_KEY>` sur chaque requête |
+| Méthodes | `GET` pour lire ; `PATCH`, `POST` et `DELETE` sur les transactions, les catégories et les budgets mensuels |
+| Erreurs | tout 4xx ou 5xx revient en `Error calling tool '<tool>': YNAB <status>: <detail>`, avec l'explication de YNAB |
+
+`budget_id` accepte `last-used`, que YNAB résout en votre dernier budget utilisé.
+
+## La copie locale des transactions
+
+La plupart des outils ont besoin des transactions du budget : trouver ce qui attend,
+apprendre de l'historique, comparer avec la banque, prévoir. Tout télécharger à chaque
+appel serait lent et consommerait le quota de YNAB. Avenir garde une copie par budget, en
+mémoire, et la rafraîchit par la **synchronisation incrémentale** de YNAB :
+
+1. Le premier chargement demande toutes les transactions et garde le `server_knowledge`
+   de YNAB, un compteur de modifications.
+2. Le chargement suivant envoie `last_knowledge_of_server` et ne reçoit **que ce qui a
+   changé depuis** : transactions nouvelles, modifiées et supprimées.
+3. Avenir les fusionne dans sa copie : une transaction modifiée remplace l'ancienne, une
+   transaction supprimée est retirée.
+
+La copie vit aussi longtemps que le processus du serveur. Les lectures filtrées — par
+date ou par catégorie — la contournent.
+
+<Aside type="note">
+Une première version ne gardait que le compteur, pas les transactions : chaque
+chargement après le premier ne renvoyait que les changements, souvent rien, et les
+suggestions ne trouvaient jamais d'historique. Un test vérifie désormais qu'un delta
+vide laisse la liste complète intacte.
+</Aside>
+
+## Le quota de YNAB
+
+YNAB autorise **200 requêtes par heure** et par jeton, sur une fenêtre glissante. Le coût
+de chaque outil, cache froid, est mesuré sur le budget de démonstration et indiqué sur sa
+[page de référence](/avenir-mcp/fr/reference/tools/) :
+
+| Coût | Outils |
+|---|---|
+| 0 | tout appel refusé par la validation (mois mal formé, nom vide…) |
+| 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, l'aperçu de `set_category_budget` |
+| 2 | `suggest_categories` (une page entière), `apply_categories`, `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 1 + N | `get_spending_trends` sur N mois |
+
+Appliquer une écriture confirmée ajoute sa propre requête (un seul `PATCH` groupé, quel
+que soit le nombre de transactions). Avec un cache chaud, relire les transactions coûte
+une petite requête incrémentale. Quand le quota est épuisé, YNAB répond `429`, qu'Avenir
+renvoie en `… YNAB 429: …` ; il suffit d'attendre quelques minutes.
+
+## Ce qui n'est jamais stocké
+
+Avenir ne garde aucune copie sur le disque. Les transactions vivent en mémoire tant que
+le serveur tourne ; le [journal](/avenir-mcp/fr/concepts/journal/) ne contient que des
+identifiants ; le jeton reste dans l'environnement et n'est jamais journalisé.

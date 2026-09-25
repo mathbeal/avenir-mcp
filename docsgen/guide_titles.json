@@ -1,0 +1,29 @@
+{
+  "": {
+    "guides/classify": "Classify pending transactions",
+    "guides/reconcile": "Reconcile an account",
+    "guides/monthly-review": "Review a month",
+    "guides/plan-ahead": "Plan ahead",
+    "guides/categories": "Organise categories",
+    "guides/missing-transactions": "Add missing transactions",
+    "concepts/journal": "Journal and undo"
+  },
+  "fr": {
+    "guides/classify": "Classer les transactions en attente",
+    "guides/reconcile": "Rapprocher un compte",
+    "guides/monthly-review": "Faire le point sur un mois",
+    "guides/plan-ahead": "Anticiper",
+    "guides/categories": "Organiser les catégories",
+    "guides/missing-transactions": "Ajouter des transactions manquantes",
+    "concepts/journal": "Journal et annulation"
+  },
+  "es": {
+    "guides/classify": "Clasificar transacciones pendientes",
+    "guides/reconcile": "Conciliar una cuenta",
+    "guides/monthly-review": "Revisar un mes",
+    "guides/plan-ahead": "Planificar",
+    "guides/categories": "Organizar las categorías",
+    "guides/missing-transactions": "Añadir transacciones que faltan",
+    "concepts/journal": "Registro y deshacer"
+  }
+}

@@ -1,55 +1,73 @@
 ---
 title: Avenir
-description: Un servidor MCP para YNAB, pensado para agentes. Pregunta por tu presupuesto con tus propias palabras; cada cambio se previsualiza, se confirma y se puede deshacer.
+description: Un servidor MCP no oficial y de código abierto para YNAB, pensado para agentes. Solo lectura por defecto; cada cambio se previsualiza, se confirma y se puede deshacer.
 template: splash
 hero:
-  tagline: Un servidor MCP para YNAB, pensado para agentes. Pregunta por tu presupuesto con tus propias palabras — cada cambio se previsualiza, lo confirmas tú y se puede deshacer.
+  title: Su presupuesto de YNAB, en sus propias palabras.
+  tagline: Avenir permite a Claude y a otros agentes de IA leer, clasificar, conciliar y prever su presupuesto. Solo lectura por defecto; cada cambio se previsualiza, usted lo confirma, y se puede deshacer.
   actions:
-    - text: Instalar
+    - text: Empezar
       link: /avenir-mcp/es/getting-started/install/
       icon: right-arrow
-    - text: Verlo en acción
+    - text: Ver una conversación
       link: /avenir-mcp/es/getting-started/first-conversation/
-      variant: minimal
+      variant: secondary
 ---
 
-import { Card, CardGrid, Code, Aside } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
+import Stats from '../../../components/Stats.astro';
+import WriteFlow from '../../../components/WriteFlow.astro';
 import summary from '@snippets/monthly_summary.json?raw';
 
-<Aside type="caution" title="Sin relación con YNAB">
-YNAB y You Need A Budget son marcas registradas de YNAB. Avenir es un proyecto
-independiente que usa la API pública de YNAB con tu propio token de acceso. *Avenir*
-significa *el futuro* en francés.
-</Aside>
+<Stats />
 
-<CardGrid stagger>
+## Por qué Avenir
+
+<CardGrid>
+  <Card title="Herramientas para tareas, no para endpoints" icon="rocket">
+    Clasificar un mes de transacciones, conciliar una cuenta con el banco, prever el
+    saldo, revisar un mes: cada tarea es una herramienta, no diez llamadas a la API que
+    el agente deba encadenar.
+  </Card>
   <Card title="Solo lectura por defecto" icon="seti:lock">
-    Las herramientas que modifican tu presupuesto no existen hasta que las activas.
+    Las ocho herramientas de escritura no se listan ni se pueden llamar hasta que defina
+    `AVENIR_MCP_WRITE=1`. Un agente no puede cambiar lo que no ve.
   </Card>
-  <Card title="Previsualizar, confirmar, deshacer" icon="approve-check">
-    Cada escritura muestra lo que va a cambiar y espera tu sí. Una sola llamada la revierte.
+  <Card title="Respuestas que un agente puede leer" icon="document">
+    Unidades monetarias, nunca miliunidades. Esquemas de salida tipados con una
+    descripción por campo, paginación, y errores que dicen qué corregir.
   </Card>
-  <Card title="Herramientas para tareas" icon="rocket">
-    Clasificar un mes de transacciones, conciliar una cuenta, proyectar tu saldo: una
-    herramienta para cada cosa, no un simple envoltorio de la API de YNAB.
-  </Card>
-  <Card title="Respuestas legibles para un agente" icon="document">
-    Importes en unidades monetarias, respuestas breves y tipadas, paginación, errores que
-    dicen qué corregir.
+  <Card title="Ahorra la cuota de YNAB" icon="seti:clock">
+    Una copia local de sus transacciones, actualizada por sincronización incremental: la
+    mayoría de las herramientas cuestan una o dos de las 200 peticiones por hora de YNAB.
   </Card>
 </CardGrid>
 
-## Una muestra
+## Cada cambio, en sus términos
 
-> **Tú:** ¿Qué categoría se ha pasado de presupuesto en septiembre, y por cuánto?
+<WriteFlow />
 
-Claude llama a `get_monthly_summary`, que responde en pocas líneas:
+Categorías, importes, conciliaciones y transacciones creadas se pueden deshacer. Cómo
+funciona: [Confirmación](/avenir-mcp/es/concepts/confirmation/) y
+[Diario y deshacer](/avenir-mcp/es/concepts/journal/).
 
-<Code code={summary} lang="json" />
+## Respuestas estructuradas, no prosa
 
-> **Claude:** Restaurants se ha pasado 22,50 en septiembre. ¿Quieres que mueva 30 desde
-> Leisure para cubrirlo?
+Las herramientas devuelven datos estructurados en los que el agente puede confiar. Si
+pregunta cómo va septiembre, el agente llama a
+[`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/) y recibe los
+totales del mes y solo las categorías que requieren atención:
 
-Todos los ejemplos de esta documentación son respuestas reales de Avenir sobre un
-presupuesto de demostración inventado: no aparece ninguna cuenta real. Los datos de
-demostración están en inglés, como el código.
+<Code code={summary} lang="json" title="get_monthly_summary — presupuesto de demostración" />
+
+Cada ejemplo de esta documentación es una respuesta real de Avenir sobre un presupuesto
+de demostración inventado.
+
+## Explorar la documentación
+
+<CardGrid>
+  <LinkCard title="Primeros pasos" description="Instalar en cinco minutos y una primera conversación guiada." href="/avenir-mcp/es/getting-started/install/" />
+  <LinkCard title="Guías" description="Clasificar, conciliar, revisar un mes, planificar — paso a paso." href="/avenir-mcp/es/guides/classify/" />
+  <LinkCard title="Conceptos" description="Arquitectura, seguridad, confirmación, sugerencias, previsión." href="/avenir-mcp/es/concepts/architecture/" />
+  <LinkCard title="Referencia" description="Cada herramienta: parámetros, respuesta, coste, errores, ejemplo." href="/avenir-mcp/es/reference/tools/" />
+</CardGrid>

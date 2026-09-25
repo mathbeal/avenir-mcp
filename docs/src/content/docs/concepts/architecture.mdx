@@ -1,0 +1,99 @@
+---
+title: Architecture
+description: How the server is organised, what each module does, and what happens during a call.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Avenir is a Python package built on [FastMCP](https://gofastmcp.com). Its design keeps
+three things apart: **what talks to YNAB**, **what computes**, and **what the agent
+sees**.
+
+## Modules
+
+<FileTree>
+- avenir_mcp/
+  - server.py — entry point: transport, log level, read-only policy
+  - app.py — the FastMCP instance, the `write` tag, month validation, log filter
+  - tools_budget.py — read tools close to YNAB, and `approve_transactions`
+  - tools_classify.py — `suggest_categories`, `apply_categories`
+  - tools_accounts.py — `reconcile_account`, `forecast_balance`, `create_transactions`
+  - tools_categories.py — `create_category`, `update_category`, `set_category_budget`
+  - tools_undo.py — `undo_operation`, for every kind of operation
+  - context.py — resources and prompts
+  - confirm.py — preview, confirmation, apply, journal
+  - client.py — the only code that talks to YNAB
+  - journal.py — the only code that writes to disk
+  - triage.py — pending transactions and suggestions, pure
+  - classifier.py — payee normalisation and scoring, pure
+  - writes.py — plans, undo plans, confirmation codes, pure
+  - reconcile.py — account analysis, pure
+  - forecast.py — recurring charges and projection, pure
+  - analytics.py — month overview, balances, trends, pure
+</FileTree>
+
+| Layer | Modules | Rule |
+|---|---|---|
+| Tools | `tools_*.py`, `context.py` | declare what the agent sees; orchestrate; never compute |
+| Confirmation | `confirm.py` | the single path every confirmed write goes through |
+| Logic | `triage`, `classifier`, `writes`, `reconcile`, `forecast`, `analytics` | pure functions: no network, no disk, fully unit-tested |
+| I/O | `client.py` (HTTP), `journal.py` (disk) | the only side effects |
+
+Amounts cross the I/O boundary in YNAB's *milliunits* and leave the logic in currency
+units: no tool ever returns milliunits.
+
+## A read call
+
+<Steps>
+
+1. The client calls `get_monthly_summary` with `{"budget_id": "last-used", "month":
+   "2026-09-01"}`.
+2. FastMCP validates the arguments against the tool's input schema.
+3. The tool checks `month` (`app.check_month`) before any request: a malformed month is
+   refused with a message, at no cost.
+4. `client.get_month` sends one `GET /budgets/last-used/months/2026-09-01` to YNAB.
+5. `analytics.month_overview` keeps the totals and the overspent categories, in currency
+   units.
+6. FastMCP validates the answer against the output schema and returns it as
+   `structuredContent`, with its JSON text for older clients.
+
+</Steps>
+
+## A write call
+
+<Steps>
+
+1. The client calls `apply_categories` with assignments.
+2. The tool reads the current state (`client.get_transactions`, `client.get_categories`)
+   and asks `writes.plan_categorization` what would change. Invalid assignments are
+   refused here, before anything is asked.
+3. `confirm.write_plan` asks the user through the channel the client supports — see
+   [Confirmation](/avenir-mcp/concepts/confirmation/). Until the answer is yes, it
+   returns the preview.
+4. On yes, one bulk `PATCH /budgets/{id}/transactions` applies every change.
+5. `journal.Journal.record` appends the operation to the journal; its id comes back to the
+   agent for [undo](/avenir-mcp/concepts/journal/).
+
+</Steps>
+
+## Registration and read-only mode
+
+Every tool is registered at import time with MCP annotations (`readOnlyHint`,
+`destructiveHint`, `idempotentHint`, `openWorldHint`); write tools also carry the tag
+`write`. At start-up, `server.main` calls `app.configure(enable_writes=...)`, which
+disables every tool tagged `write` unless `AVENIR_MCP_WRITE=1`. A disabled tool is
+neither listed nor callable. A test fails if a tool lacks annotations or if its tag and
+its `readOnlyHint` disagree.
+
+## Dependencies
+
+| Package | Why |
+|---|---|
+| `fastmcp` | the MCP server: protocol, schemas, transports |
+| `httpx` | HTTP requests to YNAB |
+| `pydantic` | already required by fastmcp; turns field docstrings into schema descriptions |
+
+Nothing else at run time. Adding a dependency needs a written reason
+([AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md)).

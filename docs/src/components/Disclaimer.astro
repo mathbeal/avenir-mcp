@@ -1,0 +1,19 @@
+---
+// The notice that Avenir is unofficial, at the foot of every page.
+import { home } from './home-i18n';
+
+const t = home(Astro.locals.starlightRoute.lang);
+---
+
+<p class="disclaimer not-content" set:html={t.disclaimer} />
+
+<style>
+  .disclaimer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--sl-color-hairline-light);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    text-align: center;
+  }
+</style>

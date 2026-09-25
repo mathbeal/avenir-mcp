@@ -1,0 +1,60 @@
+---
+title: Rapprochement
+description: Comment un compte est comparé à la banque, comment un écart s'explique, et ce que change le rapprochement.
+sidebar:
+  order: 7
+---
+
+`reconcile_account` compare un compte avec le solde affiché par votre banque. La
+comparaison est un calcul pur sur les transactions du compte (`reconcile.analyse`) ; elle
+n'écrit rien.
+
+## La comparaison
+
+Seules les transactions non supprimées du compte comptent.
+
+| Grandeur | Définition |
+|---|---|
+| solde pointé | somme des transactions au statut *cleared* ou *reconciled* |
+| solde courant | somme de toutes les transactions |
+| écart | solde bancaire − solde pointé |
+| à rapprocher | transactions *cleared* mais pas encore *reconciled* |
+| non pointées | transactions que la banque n'a pas encore montrées (50 listées au plus) |
+
+Tout est additionné en milliunités. Un écart **négatif** signifie que YNAB compte plus
+d'argent que la banque — typiquement un doublon ou un remboursement jamais arrivé ; un
+écart **positif**, moins — typiquement des frais ou une rentrée non importés.
+
+## Expliquer un écart
+
+| Piste | Règle |
+|---|---|
+| `explained_by` | transactions non pointées dont le montant égale exactement l'écart : en pointer une ferme l'écart |
+| `possible_duplicates` | paires de même montant et de même commerçant [normalisé](/avenir-mcp/fr/concepts/suggestions/#reconnaître-un-commerçant), datées d'au plus **3 jours** d'écart, parmi les transactions des **60 derniers jours** |
+| `uncleared` | ce que la banque n'a pas encore montré, à vérifier avec vous par l'agent |
+
+La fenêtre de 60 jours écarte les ressemblances anciennes et légitimes — deux nuits dans
+le même hôtel l'hiver dernier.
+
+## Issues
+
+| Situation | `status` | Écrit |
+|---|---|---|
+| soldes différents, sans `adjust` | `difference_found` | rien, et rien demandé |
+| soldes égaux, rien à rapprocher | `nothing_to_do` | rien |
+| soldes égaux | `confirmation_required`, puis `applied` | pointées → rapprochées |
+| soldes différents, `adjust=true` | `confirmation_required`, puis `applied` | un ajustement, puis pointées → rapprochées |
+
+## Application
+
+Une fois confirmé :
+
+1. Avec `adjust=true` et un écart, une transaction est créée sur le compte : bénéficiaire
+   *Balance adjustment*, datée d'aujourd'hui, montant = l'écart, catégorie *Inflow:
+   Ready to Assign*, mémo *Entered by reconcile_account*, pointée et approuvée.
+2. Chaque transaction *cleared* du compte — ajustement compris — passe en *reconciled*,
+   en une seule requête groupée.
+3. L'opération est inscrite au journal avec les identifiants rapprochés et celui de
+   l'ajustement.
+
+`undo_operation` les remet en *cleared* et supprime l'ajustement.

@@ -1,0 +1,82 @@
+---
+title: Conciliar una cuenta
+description: Comparar una cuenta con el saldo que muestra su banco, explicar cualquier diferencia y marcarla como conciliada.
+sidebar:
+  order: 2
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import gap from '@snippets/reconcile_gap.json?raw';
+
+**Objetivo:** asegurarse de que YNAB coincide con su banco, encontrar la causa cuando no,
+y marcar la cuenta como conciliada cuando sí.
+
+**Antes de empezar:** el saldo que muestra hoy su banco, y las escrituras activadas para
+marcar la cuenta como conciliada (el diagnóstico funciona en solo lectura).
+
+**Herramienta:** [`reconcile_account`](/avenir-mcp/es/reference/tools/reconcile-account/).
+**Prompt:** `reconcile`.
+
+## La conversación
+
+<Steps>
+
+1. **Pregunte, con el saldo del banco.**
+
+   > **Usted:** Mi banco muestra 3.440,80 en la cuenta corriente. ¿Coincide YNAB?
+
+2. **El agente compara.** Llama a `reconcile_account` con
+   `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
+   Avenir suma las transacciones *cleared* de la cuenta (las que el banco ya ha mostrado)
+   y compara. Difieren, así que **no se escribe nada**:
+
+   <Code code={gap} lang="json" title="reconcile_account — diferencia encontrada" />
+
+3. **El agente explica la diferencia.**
+
+   > **Claude:** YNAB cuenta 71,86 más que el banco. Dos pagos idénticos de 71,86 a
+   > Market Fresh el 19 de septiembre parecen una importación que llegó dos veces.
+
+   La respuesta ofrece tres pistas: `explained_by` (una transacción pendiente cuyo
+   importe es exactamente la diferencia), `uncleared` (lo que el banco aún no ha
+   mostrado) y `possible_duplicates` (mismo importe y comercio, a 3 días como mucho, en
+   los últimos 60 días).
+
+4. **Usted corrige la causa** — aquí, borrar el duplicado en YNAB.
+
+5. **Vuelva a preguntar.** Cuando los saldos coinciden, Avenir previsualiza la
+   conciliación: cada transacción *cleared* de la cuenta pasa a *reconciled*. Usted
+   confirma; se aplica en una petición y se anota en el diario.
+
+</Steps>
+
+## Cuando la diferencia no se explica
+
+A veces queda una pequeña diferencia: una comisión nunca importada, un error antiguo.
+Solo si usted lo pide, el agente vuelve a llamar con `adjust=true`:
+
+- se crea en la cuenta una transacción **Balance adjustment** por la diferencia, con
+  fecha de hoy, en *Ready to Assign*, con el memo *Entered by reconcile_account*;
+- después se concilia la cuenta, ajuste incluido.
+
+<Aside type="caution">
+Un ajuste oculta un problema en lugar de resolverlo. Avenir nunca lo hace por su cuenta,
+y la evaluación comprueba que un agente al que se pide *«no cambies nada»* tampoco.
+</Aside>
+
+## Deshacer
+
+`undo_operation` devuelve a *cleared* cada transacción que concilió y borra el ajuste, si
+se hizo. Vea [Deshacer un cambio](/avenir-mcp/es/guides/undo/).
+
+## Estados
+
+| `status` | Significado |
+|---|---|
+| `difference_found` | los saldos difieren; nada escrito; lea `analysis` |
+| `nothing_to_do` | los saldos coinciden y no queda nada por conciliar |
+| `confirmation_required` | los saldos coinciden (o se pidió `adjust`); espera su sí |
+| `applied` | conciliada; `operation_id` para deshacer |
+| `declined` | usted dijo que no; nada escrito |
+
+Cómo funciona la comparación: [Conciliación](/avenir-mcp/es/concepts/reconciliation/).

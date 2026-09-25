@@ -13,6 +13,12 @@ token in `.env` (ignored by git, see `.env.example`) and point an MCP client or 
 [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) at
 `uv run avenir-mcp`.
 
+## Proposing a pull request
+
+The path, from the issue to the merge, is in the
+[documentation](https://mathbeal.github.io/avenir-mcp/project/pull-requests/): fork, branch,
+tests first, `just check`, then `gh pr create --fill` and the template's checklist.
+
 ## What gets merged
 
 Read [AGENTS.md](AGENTS.md) first. It states the rules the code holds to.
@@ -36,6 +42,13 @@ from a real one.
 A page written by hand exists in the three languages: a test fails when an English
 page has no French or Spanish counterpart. Change the three together. Generated pages
 stay in English, and the other languages show them with a "not translated" notice.
+
+## Proposing a feature
+
+Open a [feature request](https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml):
+describe the task and what you would say to the agent, not the tool you imagine. The
+[documentation](https://mathbeal.github.io/avenir-mcp/project/propose-a-feature/) says what makes
+a proposal easy to accept.
 
 ## Reporting a bad suggestion or a confusing tool
 

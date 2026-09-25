@@ -1,0 +1,72 @@
+---
+title: Propose a feature
+description: How to suggest a new tool or workflow, what makes a proposal easy to accept, and what happens next.
+sidebar:
+  order: 5
+---
+
+import { Steps, Aside, LinkButton } from '@astrojs/starlight/components';
+
+Avenir grows from real uses of a budget. If you find yourself doing a task by hand that
+an agent could do for you, or an answer that could be clearer, propose it. Proposals
+are handled in the project's GitHub issues, in public; you need a GitHub account.
+
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml" icon="external">Open a feature request</LinkButton>
+
+## How to propose
+
+<Steps>
+
+1. **Check it is not already there.** Read the [roadmap](/avenir-mcp/project/limitations/#roadmap)
+   and search the [open proposals](https://github.com/mathbeal/avenir-mcp/issues?q=is%3Aissue+label%3Aenhancement). If
+   yours exists, add a 👍 and your use case to it rather than a new issue.
+
+2. **Open a feature request.** The form asks four things:
+
+   | Question | Why |
+   |---|---|
+   | What do you want to do? | the task, in your words — not the tool you imagine |
+   | What would you say to the agent? | a sentence you would type, and the answer you expect |
+   | What happens today? | what the current tools do, and why it is not enough |
+   | Does it change the budget? | a write needs a preview, a confirmation and an undo |
+
+3. **Follow the discussion.** Questions come as comments on the issue; you are notified
+   by GitHub.
+
+</Steps>
+
+<Aside type="danger" title="Never paste real financial data">
+Issues are public. Do not paste transactions, balances, account names, payees,
+screenshots of YNAB or your token. Invent the figures: *“a 12.99 subscription that
+became 14.99”* is enough to understand the need.
+</Aside>
+
+## What makes a good fit
+
+A proposal is easier to accept when it:
+
+- describes **a task**, not a YNAB endpoint to wrap — see
+  [Architecture](/avenir-mcp/concepts/architecture/);
+- works with **YNAB's public API** and a personal access token;
+- can be **tested on an invented budget**, like the rest of Avenir;
+- if it writes, can be **previewed, confirmed and undone** — see
+  [Safety by design](/avenir-mcp/concepts/safety/).
+
+Proposals that would send your data to another service, or act without your
+confirmation, are declined.
+
+## What happens next
+
+| Status | Meaning |
+|---|---|
+| open, `enhancement` | received; comments may ask for details |
+| on the [roadmap](/avenir-mcp/project/limitations/#roadmap) | accepted and planned |
+| closed with a pull request | shipped: see the [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) |
+| closed, `wontfix` | declined, with the reason |
+
+## Other ways to help
+
+- **Something is broken?** Open a [bug report](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml).
+- **A security problem?** Report it privately: see [Security](/avenir-mcp/project/security/).
+- **Want to build it yourself?** Say so on the issue first, then read
+  [Propose a pull request](/avenir-mcp/project/pull-requests/).

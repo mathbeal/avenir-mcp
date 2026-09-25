@@ -1,0 +1,72 @@
+---
+title: Sugerencias
+description: Cómo Avenir reconoce un comercio entre etiquetas bancarias, aprende de su historial y decide cuándo sugerir una categoría.
+sidebar:
+  order: 6
+---
+
+`suggest_categories` responde a dos preguntas por cada transacción pendiente: *¿quién es
+este comercio?* y *¿dónde lo puso antes?*
+
+## Qué está pendiente
+
+Una transacción está pendiente cuando no está borrada, no tiene categoría, no es una
+transferencia entre sus cuentas (las transferencias no llevan categoría en YNAB) y no
+está dividida (las líneas de una transacción dividida llevan sus categorías). Las
+pendientes se listan de la más reciente a la más antigua.
+
+## Reconocer un comercio
+
+Los bancos escriben la misma tienda de forma distinta cada vez: una fecha, un número de
+tarjeta, una referencia. Antes de comparar, cada beneficiario se **normaliza**, en este
+orden:
+
+| Paso | Regla | Ejemplo |
+|---|---|---|
+| 1 | mayúsculas, espacios repetidos reducidos | `Corner  Shop` → `CORNER SHOP` |
+| 2 | quitar un número de cuenta y lo que sigue: `- IBAN: …` | `INSURER - PRELEV - IBAN: FR00…` → `INSURER - PRELEV` |
+| 3 | quitar un prefijo de pago: `CB`, `CARTE`, `PRLV`, `PRLV SEPA`, `VIR`, `VIREMENT`, `VIR INST`, `VIR SEPA` | `VIR INST GARAGE MARTIN` → `GARAGE MARTIN` |
+| 4 | quitar una fecha de factura y lo que sigue: `FACT` + 6 dígitos | `ACME OUTDOOR FACT 110126 525130******2` → `ACME OUTDOOR` |
+| 5 | quitar números de tarjeta enmascarados (`525130******2`), fechas (`12/01`, `12/01/26`) y referencias de 5 dígitos o más | `ONLINE STORE 1234567890` → `ONLINE STORE` |
+| 6 | reducir de nuevo los espacios | |
+
+Así `CB MARKET FRESH FACT 050926 525130******1` y `CB MARKET FRESH FACT 190926
+525130******1` son ambas `MARKET FRESH`. Quitar los números de cuenta también evita que
+el IBAN de un acreedor aparezca en las respuestas.
+
+## Aprender del historial
+
+El historial se construye con las transacciones del presupuesto que tienen categoría, no
+están borradas y no son transferencias. Cuenta, para cada beneficiario normalizado,
+cuántas veces se usó cada categoría — **por separado para salidas y entradas de
+dinero**. Un prestamista que una vez le pagó (entrada, *Ready to Assign*) no hace que sus
+devoluciones (salidas) parezcan ingresos.
+
+## Decidir
+
+Para una transacción pendiente, Avenir mira el historial de su beneficiario, en su
+sentido, y solo conserva las categorías que aún se pueden asignar: una categoría oculta o
+borrada nunca se sugiere.
+
+- **confianza** = usos de la categoría más frecuente ÷ todos los usos de esas categorías.
+- Se hace una sugerencia cuando la confianza ≥ el umbral, **0,90** por defecto
+  (`AVENIR_MCP_CONFIDENCE_THRESHOLD`).
+- Sin historial, o ninguna categoría por encima del umbral: sin sugerencia. El agente
+  propone una de la lista de categorías y le pregunta.
+
+Medido sobre un presupuesto doméstico real de unas 800 transacciones clasificadas,
+dejando cada una fuera por turnos, las sugerencias hechas con 0,90 acertaron el 95 % de
+las veces.
+
+## Paginación
+
+| | |
+|---|---|
+| Tamaño de página | `limit`, 50 por defecto |
+| Página siguiente | `next_cursor`, opaco: devuélvalo sin cambios |
+| Coste | dos peticiones a YNAB por página: transacciones y categorías |
+| Texto | beneficiario y memo truncados a 80 caracteres, marcados con `…` |
+
+Un cursor es la codificación base64 de una posición. Un cursor que Avenir no emitió se
+rechaza: *«Invalid cursor: pass the next_cursor value from the previous page unchanged,
+or omit it to start from the first page.»*

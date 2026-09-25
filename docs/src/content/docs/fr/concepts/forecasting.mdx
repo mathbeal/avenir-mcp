@@ -1,0 +1,75 @@
+---
+title: Prévision
+description: Comment forecast_balance repère les charges récurrentes, moyenne le reste, et projette le solde jour par jour.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`forecast_balance` projette le solde de vos comptes mois par mois, jusqu'à 24 mois. Il
+sépare **ce qui revient**, placé à son jour, de **ce qui varie**, réparti sur les jours,
+et renvoie chaque hypothèse.
+
+## Comptes et point de départ
+
+Les comptes sont ceux donnés dans `account_ids`, sinon tous les comptes ouverts inclus au
+budget. Le solde de départ est la somme de leurs soldes aujourd'hui ; l'historique, leurs
+transactions, hors virements et suppressions.
+
+## Charges et revenus récurrents
+
+Sur les **4 derniers mois complets** (le mois en cours est incomplet et laissé de côté),
+les transactions sont regroupées par [bénéficiaire normalisé](/avenir-mcp/fr/concepts/suggestions/#reconnaître-un-commerçant)
+et par sens. Un groupe est **récurrent** quand :
+
+- il apparaît dans au moins **3** des 4 mois, et
+- le total de chaque mois est à **20 %** près du total mensuel médian.
+
+Il est alors projeté chaque mois pour son montant mensuel **médian**, au **jour médian**
+où il est tombé (le dernier jour d'un mois plus court si besoin).
+
+## Tout le reste
+
+| Hypothèse | Défaut | Remplacement |
+|---|---|---|
+| Autres dépenses | la moyenne des sorties des **3** derniers mois complets, charges récurrentes exclues | `variable_monthly` |
+| Revenus | la moyenne des entrées des 3 derniers mois complets, revenus récurrents exclus | `monthly_income` |
+| Montants ponctuels | aucun | `one_offs` : `{date, amount, label}` |
+
+Quand vous donnez `monthly_income`, il **remplace** les revenus trouvés dans
+l'historique, salaire récurrent compris : un salaire n'est jamais compté deux fois.
+
+## La projection
+
+Mois par mois, jour par jour à partir de demain :
+
+- Les **montants récurrents** tombent à leur jour ; dans le mois en cours, seulement ceux
+  encore à venir.
+- Les **autres dépenses et revenus** sont répartis également sur les jours restants, en
+  centimes entiers. Pour le mois en cours, ce qui a déjà été dépensé ou reçu depuis le 1er
+  (hors bénéficiaires récurrents) est déduit des moyennes mensuelles : seul le reste est
+  projeté.
+- Les **montants ponctuels** tombent à leur date, si elle est après aujourd'hui et dans
+  l'horizon.
+
+Pour chaque mois, la réponse donne `start`, `inflows`, `outflows`, `end` et `lowest`, le
+solde le plus bas d'un jour du mois. `first_shortfall` est le premier mois dont `lowest`
+passe sous zéro.
+
+## Limites
+
+<Aside type="caution">
+Une prévision prolonge votre passé récent. Gardez en tête que :
+
+- les moyennes incluent ce qui était inhabituel ces 3 derniers mois — vacances, impôt
+  annuel, gros achat ;
+- une charge trimestrielle ou annuelle n'est pas récurrente au sens de cette définition :
+  ajoutez-la en montant ponctuel ;
+- un revenu versé irrégulièrement est moyenné : donnez `monthly_income` si vous en savez
+  plus ;
+- seuls les comptes choisis sont projetés ; l'argent déplacé vers d'autres comptes semble
+  dépensé.
+</Aside>
+
+L'horizon `until` est un mois, `AAAA-MM`, du mois en cours à 24 mois plus tard.

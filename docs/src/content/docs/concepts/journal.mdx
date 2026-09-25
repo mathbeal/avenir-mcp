@@ -1,0 +1,74 @@
+---
+title: Journal and undo
+description: The local record of applied operations, its format, and exactly what undo restores.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Every confirmed write is recorded in a local journal, so that `undo_operation` can revert
+it later — even after the server restarted.
+
+## Where
+
+| | |
+|---|---|
+| Default file | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, else `~/.local/state/avenir-mcp/journal.jsonl` |
+| Chosen file | `AVENIR_MCP_JOURNAL` |
+| Permissions | created `0600`: readable and writable by you only |
+| Contents | identifiers only — no amount, no payee, no memo, no token |
+
+## Format
+
+JSON Lines, append-only. An applied operation is one line:
+
+```json
+{"operation_id":"5f2c9a1e7b30","budget_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+```
+
+Undoing it appends a marker; nothing is ever rewritten:
+
+```json
+{"undone":"5f2c9a1e7b30"}
+```
+
+| Field | Meaning |
+|---|---|
+| `operation_id` | 12 random hexadecimal characters |
+| `budget_id` | the budget changed |
+| `kind` | `categorize`, `budget`, `reconcile` or `create` |
+| `applied_at` | ISO 8601, UTC, to the second |
+| `moves` | for `categorize`: each transaction's category before and after |
+| `details` | for the other kinds, what undoing needs (below) |
+
+| `kind` | `details` |
+|---|---|
+| `budget` | `month`, `category_id`, `from` and `to` in milliunits |
+| `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (or `null`) |
+| `create` | `transaction_ids` |
+
+## Which operation undo picks
+
+`undo_operation` without an id takes the **most recent operation of the budget that is
+still in effect**: not undone, and not itself an undo. With an id, that operation, if it
+is still in effect. Otherwise: *“Nothing to undo: no operation of this budget is still in
+effect.”*
+
+## What undo restores
+
+| `kind` | Undo | Checked first | If the check fails |
+|---|---|---|---|
+| `categorize` | each transaction back to its previous category | its category is still the one the operation set | that transaction is left alone and listed in `conflicts` |
+| `budget` | the previous amount | the amount is still the one the operation set | nothing written; `conflicts` names the category |
+| `reconcile` | *reconciled* transactions back to *cleared*; the adjustment deleted | each is still *reconciled* | those no longer reconciled are skipped |
+| `create` | the created transactions deleted | each still exists | those already deleted are listed in `conflicts` |
+
+Undo is previewed and confirmed like any write. Undoing a `categorize` operation records
+the undo itself as an operation and marks both undone, so an undo cannot be undone.
+
+<Aside type="note">
+The journal is local: an operation made from another machine, or before the journal file
+was changed or deleted, cannot be undone from here. Deleting the file forgets the history
+and nothing else.
+</Aside>

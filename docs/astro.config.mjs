@@ -16,7 +16,21 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Avenir',
-      description: 'An MCP server for YNAB, built for agents.',
+      description: 'An unofficial MCP server for YNAB, built for agents.',
+      logo: { src: './src/assets/logo.svg' },
+      favicon: '/favicon.svg',
+      // Fonts are served with the site: no request to a third-party font service.
+      customCss: [
+        '@fontsource-variable/source-sans-3',
+        '@fontsource-variable/source-serif-4',
+        './src/styles/theme.css',
+      ],
+      // The home pages get their own hero: install command and a conversation preview.
+      components: {
+        Hero: './src/components/Hero.astro',
+        // Every page ends with the notice that Avenir is unofficial.
+        Footer: './src/components/Footer.astro',
+      },
       defaultLocale: 'root',
       locales: {
         root: { label: 'English', lang: 'en' },
@@ -35,12 +49,16 @@ export default defineConfig({
         {
           label: 'Getting started',
           translations: { fr: 'Premiers pas', es: 'Primeros pasos' },
-          items: ['getting-started/install', 'getting-started/first-conversation'],
+          items: [
+            'getting-started/install',
+            'getting-started/first-conversation',
+            'getting-started/features',
+          ],
         },
         {
-          label: 'Use cases',
-          translations: { fr: "Cas d'usage", es: 'Casos de uso' },
-          items: [{ autogenerate: { directory: 'use-cases' } }],
+          label: 'Guides',
+          translations: { fr: 'Guides', es: 'Guías' },
+          items: [{ autogenerate: { directory: 'guides' } }],
         },
         {
           label: 'Concepts',
@@ -50,12 +68,22 @@ export default defineConfig({
         {
           label: 'Reference',
           translations: { fr: 'Référence', es: 'Referencia' },
-          items: [{ autogenerate: { directory: 'reference' } }],
+          items: [
+            {
+              label: 'Tools',
+              translations: { fr: 'Outils', es: 'Herramientas' },
+              collapsed: true,
+              items: [{ autogenerate: { directory: 'reference/tools' } }],
+            },
+            'reference/resources-and-prompts',
+            'reference/configuration',
+            'reference/errors',
+          ],
         },
         {
           label: 'Project',
           translations: { fr: 'Projet', es: 'Proyecto' },
-          items: ['security', 'evaluation', 'troubleshooting'],
+          items: [{ autogenerate: { directory: 'project' } }],
         },
       ],
     }),

@@ -1,0 +1,94 @@
+---
+title: Development
+description: Repository layout, setup, the checks CI runs, tests, generated documentation, and releases.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Aside } from '@astrojs/starlight/components';
+
+## Layout
+
+<FileTree>
+- avenir_mcp/ — the server (see [Architecture](/avenir-mcp/concepts/architecture/))
+- tests/ — unit tests, protocol tests, documentation and hygiene tests
+- evals/ — the demo budget, a stand-in for YNAB's API, the agent evaluation
+- docsgen/ — generates the tool reference, the error catalogue and the examples
+- docs/ — this site (Astro Starlight, English, French, Spanish)
+- AGENTS.md — the contract for contributors, human or not
+- justfile — every command below
+- pyproject.toml, uv.lock — the Python project, locked
+</FileTree>
+
+## Set up
+
+```bash
+git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
+uv sync            # Python 3.14 and the locked dependencies
+just check         # every gate CI runs
+```
+
+<Aside type="tip">
+If the project sits in a folder synced by iCloud Drive, keep the virtual environment
+outside it: `UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`. iCloud can
+hide the `.pth` file of an editable install, which Python then ignores.
+</Aside>
+
+## The checks
+
+`just check` runs, in CI's order:
+
+| Check | Command | Fails when |
+|---|---|---|
+| format | `black --check`, `isort --check` | a file is not formatted |
+| lint | `pylint` | the score is below 10.00 |
+| types | `mypy` (strict) | any type error |
+| tests | `pytest` | a test fails, **any warning** is raised, or coverage of lines **or branches** is below 100 % |
+| vocabulary | `lexdrift check avenir_mcp --baseline lexdrift.lock` | a new word appears for an idea already named |
+| lock | `uv lock --check` | `uv.lock` does not match `pyproject.toml` |
+
+CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked dependencies,
+the test suite on Python 3.15 (allowed to fail until its dependencies support it), and
+the documentation build.
+
+## Tests
+
+| Kind | Files | What they check |
+|---|---|---|
+| Unit | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | the pure logic and the HTTP client, with invented data |
+| Protocol | `test_protocol*`, `test_context`, `test_policy` | tools through an in-memory MCP client: schemas, annotations, confirmation paths, undo |
+| Documentation | `test_docs` | generated pages and examples match the code; every page exists in French and Spanish; every environment variable is documented |
+| Hygiene | `test_hygiene` | no IBAN, token, statement, home path or Finder copy in the repository |
+| Evaluation | `test_evals` | the evaluation's own checks are right |
+
+Tests are written first. No test calls YNAB.
+
+## Documentation
+
+```bash
+uv run python -m docsgen   # tool pages, error catalogue, examples
+just docs                  # build the site in three languages; broken links fail
+just docs-serve            # live preview on http://localhost:4321/avenir-mcp/
+```
+
+`docsgen` runs Avenir on the demo budget and writes what it really answers, with the
+date fixed and random ids replaced. Hand-written pages exist in English, French and
+Spanish; a test fails when one is missing.
+
+## Evaluation
+
+```bash
+just evaluate    # all tasks, Sonnet, about 1 USD of your Claude plan
+uv run python -m evals.run --task classify --model haiku
+```
+
+See [Evaluation](/avenir-mcp/project/evaluation/).
+
+## Commits and releases
+
+- Commit messages start with a type — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
+  `build:`, `ci:`, `chore:` — because `CHANGELOG.md` is generated from them by
+  git-cliff.
+- To release: `just changelog`, commit, tag `vX.Y.Z` matching `avenir_mcp.__version__`,
+  and publish a GitHub release. The `publish` workflow builds, runs `twine check
+  --strict` and uploads to PyPI through Trusted Publishing: no token is stored.

@@ -1,101 +1,348 @@
 ---
 title: Installer
-description: Ajouter Avenir à Claude Code, Claude Desktop, Cursor ou VS Code.
+description: Pas à pas, de zéro à Avenir qui fonctionne dans votre client MCP — installer uv, obtenir un jeton YNAB, ajouter Avenir, vérifier, puis autoriser les modifications.
+sidebar:
+  order: 1
 ---
 
 import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
 import budgets from '@snippets/list_budgets.json?raw';
 
-## Ce qu'il vous faut
-
-- **[uv](https://docs.astral.sh/uv/getting-started/installation/)**, qui lance Avenir
-  sans rien installer globalement.
-- **Un jeton d'accès personnel YNAB** :
+Cette page vous mène de zéro à Avenir qui fonctionne, en une dizaine de minutes. Chaque
+étape se termine par une vérification : vous savez qu'elle a marché avant de passer à
+la suivante.
 
 <Steps>
 
-1. Ouvrez YNAB sur le web, puis **Account Settings → Developer Settings**.
-2. Sous *Personal Access Tokens*, choisissez **New Token** et confirmez avec votre mot de passe.
-3. Copiez le jeton : YNAB ne l'affiche qu'une fois.
+1. [Installer uv](#installer-uv), l'outil qui lance Avenir.
+2. [Obtenir un jeton YNAB](#obtenir-un-jeton-ynab), l'accès d'Avenir à vos budgets.
+3. [Premier lancement à la main](#premier-lancement-à-la-main), une seule fois.
+4. [Ajouter Avenir à votre client](#ajouter-avenir-à-votre-client).
+5. [Vérifier que tout fonctionne](#vérifier-que-tout-fonctionne) avec une première question.
+6. [Autoriser les modifications](#autoriser-les-modifications), si vous voulez que l'agent range pour vous.
+
+</Steps>
+
+<Aside type="caution" title="Avant la première version sur PyPI">
+Avenir n'est pas encore publié sur PyPI. D'ici là, remplacez **`uvx avenir-mcp`** par
+**`uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp`** dans chaque
+commande et configuration de cette page (en JSON : `"args": ["--from",
+"git+https://github.com/mathbeal/avenir-mcp", "avenir-mcp"]`). Rien d'autre ne change.
+</Aside>
+
+## Ce qu'il vous faut
+
+| | Pourquoi | Où l'obtenir |
+|---|---|---|
+| **Un compte YNAB** | Avenir lit et modifie *vos* budgets | [app.ynab.com](https://app.ynab.com) |
+| **Un client MCP** | l'application avec laquelle vous parlez ; c'est elle qui lance Avenir | Claude Code, Claude Desktop, Cursor, VS Code… |
+| **uv** | télécharge et lance Avenir, et le Python dont il a besoin, dans un environnement isolé | l'étape suivante |
+
+Vous n'avez **pas** besoin d'installer Python, de cloner le dépôt ni de créer un
+environnement virtuel : uv s'en charge.
+
+## Installer uv
+
+<Tabs syncKey="os">
+  <TabItem label="macOS / Linux">
+    Dans un terminal :
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+    Ou, avec Homebrew : `brew install uv`.
+  </TabItem>
+  <TabItem label="Windows">
+    Dans PowerShell :
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+    Ou, avec WinGet : `winget install --id=astral-sh.uv -e`.
+  </TabItem>
+</Tabs>
+
+**Fermez et rouvrez le terminal**, puis vérifiez :
+
+```bash
+uv --version
+```
+
+Une version s'affiche, par exemple `uv 0.12.19`. *Commande introuvable* ? L'installeur
+ajoute uv au `PATH` des nouveaux terminaux seulement : ouvrez-en un nouveau. Détails dans
+la [documentation d'uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+## Obtenir un jeton YNAB
+
+<Steps>
+
+1. Connectez-vous à YNAB **dans un navigateur**, sur [app.ynab.com](https://app.ynab.com)
+   — les applications mobiles n'affichent pas les réglages développeur.
+2. Cliquez sur votre nom en haut à gauche, puis **Account Settings**.
+3. Ouvrez **Developer Settings**.
+4. Sous **Personal Access Tokens**, cliquez sur **New Token**, saisissez votre mot de
+   passe YNAB, puis **Generate**.
+5. Copiez le jeton affiché en haut de la page : une longue suite de lettres, de chiffres
+   et de tirets. **YNAB ne l'affiche qu'une fois.** Si vous le perdez, créez-en un autre
+   et révoquez l'ancien.
 
 </Steps>
 
 <Aside type="danger" title="Traitez le jeton comme un mot de passe">
-Un jeton personnel peut **lire et modifier tous les budgets** de votre compte ; YNAB ne
-propose pas de jeton en lecture seule. Ne le mettez jamais dans un fichier partagé ou
-commité.
+Un jeton d'accès personnel peut **lire et modifier tous les budgets** de votre compte ;
+YNAB ne propose pas de jeton en lecture seule. Ne le collez jamais dans une conversation
+avec une IA, un fichier partagé, une issue ou un dépôt. Avenir ne le journalise jamais et
+ne le renvoie jamais dans une réponse.
 </Aside>
 
-## Ajouter Avenir à votre client MCP
+## Premier lancement à la main
 
-Les exemples activent les outils qui modifient votre budget (`AVENIR_MCP_WRITE=1`).
-Retirez cette ligne pour garder Avenir strictement en lecture seule.
+Avant de configurer un client, lancez Avenir une fois à la main. Cela le télécharge et
+prouve qu'il démarre.
 
-<Tabs syncKey="client">
-  <TabItem label="Claude Code">
+<Tabs syncKey="os">
+  <TabItem label="macOS / Linux">
     ```bash
-    claude mcp add avenir \
-      --env YNAB_API_KEY=votre-jeton \
-      --env AVENIR_MCP_WRITE=1 \
-      -- uvx avenir-mcp
-    ```
-    Vérifiez la connexion avec `claude mcp list`, ou `/mcp` dans une session.
-  </TabItem>
-  <TabItem label="Claude Desktop">
-    Ouvrez **Settings → Developer → Edit Config**, ajoutez le serveur, puis redémarrez :
-    ```json
-    {
-      "mcpServers": {
-        "avenir": {
-          "command": "uvx",
-          "args": ["avenir-mcp"],
-          "env": { "YNAB_API_KEY": "votre-jeton", "AVENIR_MCP_WRITE": "1" }
-        }
-      }
-    }
+    YNAB_API_KEY=votre-jeton uvx avenir-mcp
     ```
   </TabItem>
-  <TabItem label="Cursor">
-    Dans `~/.cursor/mcp.json` (tous les projets) ou `.cursor/mcp.json` (un projet) :
-    ```json
-    {
-      "mcpServers": {
-        "avenir": {
-          "command": "uvx",
-          "args": ["avenir-mcp"],
-          "env": { "YNAB_API_KEY": "votre-jeton", "AVENIR_MCP_WRITE": "1" }
-        }
-      }
-    }
-    ```
-  </TabItem>
-  <TabItem label="VS Code">
-    Dans `.vscode/mcp.json` :
-    ```json
-    {
-      "servers": {
-        "avenir": {
-          "type": "stdio",
-          "command": "uvx",
-          "args": ["avenir-mcp"],
-          "env": { "YNAB_API_KEY": "votre-jeton", "AVENIR_MCP_WRITE": "1" }
-        }
-      }
-    }
+  <TabItem label="Windows">
+    ```powershell
+    $env:YNAB_API_KEY = "votre-jeton"; uvx avenir-mcp
     ```
   </TabItem>
 </Tabs>
 
-<Aside type="tip" title="Avant la première version sur PyPI">
-Remplacez `uvx avenir-mcp` par `uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp`.
+Le premier lancement télécharge Avenir et Python : de quelques secondes à une minute.
+Ensuite **rien ne s'affiche et la commande ne rend pas la main** — c'est normal : Avenir
+attend qu'un client lui parle. Appuyez sur **Ctrl+C** pour l'arrêter.
+
+Une erreur s'affiche à la place ? Voir le [dépannage](/avenir-mcp/fr/project/troubleshooting/).
+
+## Ajouter Avenir à votre client
+
+Choisissez votre client. Ces configurations sont **en lecture seule** : Avenir répond
+aux questions mais ne modifie rien. [Autoriser les modifications](#autoriser-les-modifications)
+vient après.
+
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    Dans un terminal :
+    ```bash
+    claude mcp add avenir --scope user \
+      --env YNAB_API_KEY=votre-jeton \
+      -- uvx avenir-mcp
+    ```
+
+    | Élément | Sens |
+    |---|---|
+    | `claude mcp add avenir` | enregistre un serveur MCP nommé `avenir` |
+    | `--scope user` | pour tous vos projets ; sans lui, seulement pour le dossier courant |
+    | `--env YNAB_API_KEY=…` | l'environnement avec lequel Avenir démarre |
+    | `--` | ce qui suit est la commande qui lance le serveur |
+    | `uvx avenir-mcp` | cette commande |
+
+    Claude Code garde cela, jeton compris, dans `~/.claude.json`, lisible par vous seul.
+  </TabItem>
+  <TabItem label="Claude Desktop">
+    1. Ouvrez Claude Desktop, puis **Settings → Developer → Edit Config**. Cela ouvre
+       `claude_desktop_config.json` :
+       - macOS : `~/Library/Application Support/Claude/claude_desktop_config.json`
+       - Windows : `%APPDATA%\Claude\claude_desktop_config.json`
+    2. Si le fichier est vide, collez tout ceci. S'il liste déjà des serveurs, ajoutez
+       seulement le bloc `"avenir": { … }` dans le `mcpServers` existant, avec une
+       virgule après l'entrée précédente.
+       ```json
+       {
+         "mcpServers": {
+           "avenir": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "votre-jeton" }
+           }
+         }
+       }
+       ```
+    3. Enregistrez, puis **quittez complètement Claude Desktop** — ⌘Q sur macOS, ou
+       depuis l'icône de la barre des tâches sous Windows — et rouvrez-le.
+  </TabItem>
+  <TabItem label="Cursor">
+    1. Créez ou ouvrez `~/.cursor/mcp.json` (tous les projets) ou `.cursor/mcp.json`
+       dans un projet, et ajoutez :
+       ```json
+       {
+         "mcpServers": {
+           "avenir": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "votre-jeton" }
+           }
+         }
+       }
+       ```
+    2. Ouvrez **Cursor Settings → MCP** et vérifiez que `avenir` est activé.
+  </TabItem>
+  <TabItem label="VS Code">
+    1. Créez `.vscode/mcp.json` dans votre espace de travail :
+       ```json
+       {
+         "servers": {
+           "avenir": {
+             "type": "stdio",
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "votre-jeton" }
+           }
+         }
+       }
+       ```
+    2. Lancez la commande **MCP: List Servers**, choisissez `avenir`, puis
+       **Start Server**.
+    3. Utilisez-le dans Copilot Chat en mode **Agent**.
+  </TabItem>
+  <TabItem label="Gemini CLI">
+    1. Ouvrez `~/.gemini/settings.json` (créez-le si besoin) et ajoutez :
+       ```json
+       {
+         "mcpServers": {
+           "avenir": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "votre-jeton" }
+           }
+         }
+       }
+       ```
+    2. Lancez `gemini` et tapez `/mcp` : `avenir` apparaît avec ses outils. Le modèle est celui qu'utilise Gemini CLI.
+  </TabItem>
+  <TabItem label="Codex CLI">
+    1. Ouvrez `~/.codex/config.toml` (créez-le si besoin) et ajoutez :
+       ```toml
+       [mcp_servers.avenir]
+       command = "uvx"
+       args = ["avenir-mcp"]
+       env = { YNAB_API_KEY = "votre-jeton" }
+       ```
+    2. Lancez `codex` et tapez `/mcp` : `avenir` apparaît avec ses outils. Le modèle est celui qu'utilise Codex.
+  </TabItem>
+  <TabItem label="LM Studio">
+    Pour un modèle qui tourne sur votre propre machine — voir [Choisir un modèle](/avenir-mcp/fr/guides/choose-a-model/#modèles-locaux).
+
+    1. Dans LM Studio, ouvrez l'onglet **Program** de la barre latérale droite, puis **Install → Edit mcp.json**, et ajoutez :
+       ```json
+       {
+         "mcpServers": {
+           "avenir": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "votre-jeton" }
+           }
+         }
+       }
+       ```
+    2. Enregistrez, chargez un modèle qui gère l'appel d'outils, et ouvrez une conversation : LM Studio demande avant chaque appel d'outil.
+  </TabItem>
+  <TabItem label="Autres clients">
+    Tout client MCP qui lance ses serveurs en **stdio** fonctionne. Indiquez-lui :
+
+    | Réglage | Valeur |
+    |---|---|
+    | commande | `uvx` |
+    | arguments | `avenir-mcp` |
+    | environnement | `YNAB_API_KEY` = votre jeton |
+
+    Pour les clients qui se connectent à une URL, voir
+    [Lancer en HTTP](/avenir-mcp/fr/guides/run-options/#lancer-en-http).
+  </TabItem>
+</Tabs>
+
+<Aside type="tip" title="« uvx introuvable » dans une application de bureau">
+Les applications graphiques ne voient pas toujours le `PATH` de votre terminal. Si le
+client ne trouve pas `uvx`, remplacez `"uvx"` par son chemin complet, donné par
+`which uvx` (macOS, Linux) ou `where uvx` (Windows) — par exemple
+`"/Users/<vous>/.local/bin/uvx"`.
 </Aside>
 
-## Vérifier que ça marche
+## Vérifier que tout fonctionne
 
-Demandez à votre client : *« Liste mes budgets YNAB. »* Il doit appeler `list_budgets` et
-répondre avec le nom de vos budgets — ici, le budget de démonstration utilisé dans toute
-cette documentation :
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    ```bash
+    claude mcp list
+    ```
+    Avenir doit être connecté :
+    ```text
+    avenir: uvx avenir-mcp - ✔ Connected
+    ```
+    Lancez ensuite `claude` et tapez `/mcp` : `avenir` affiche ses 9 outils.
+  </TabItem>
+  <TabItem label="Autres clients">
+    Ouvrez la liste des serveurs MCP ou des outils du client : `avenir` doit être actif,
+    avec 9 outils.
+  </TabItem>
+</Tabs>
 
-<Code code={budgets} lang="json" />
+Demandez maintenant, dans une nouvelle conversation : *« Liste mes budgets YNAB. »*
+L'agent appelle [`list_budgets`](/avenir-mcp/fr/reference/tools/list-budgets/) — votre
+client peut vous demander l'autorisation — et répond avec leurs noms. Ici, le budget de
+démonstration utilisé dans toute cette documentation :
 
-Si rien ne se passe, voyez le [dépannage](/avenir-mcp/fr/troubleshooting/).
+<Code code={budgets} lang="json" title="list_budgets" />
+
+Avenir fonctionne. Continuez avec [votre première conversation](/avenir-mcp/fr/getting-started/first-conversation/),
+ou autorisez d'abord les modifications.
+
+## Autoriser les modifications
+
+Pour que l'agent puisse classer des transactions, déplacer de l'argent entre catégories
+ou rapprocher des comptes, ajoutez `AVENIR_MCP_WRITE=1` à l'environnement d'Avenir.
+
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    Retirez Avenir et ajoutez-le à nouveau avec la variable en plus :
+    ```bash
+    claude mcp remove avenir --scope user
+    claude mcp add avenir --scope user \
+      --env YNAB_API_KEY=votre-jeton \
+      --env AVENIR_MCP_WRITE=1 \
+      -- uvx avenir-mcp
+    ```
+  </TabItem>
+  <TabItem label="Configurations JSON">
+    Ajoutez la variable à côté du jeton, enregistrez, puis redémarrez le client :
+    ```json
+    "env": { "YNAB_API_KEY": "votre-jeton", "AVENIR_MCP_WRITE": "1" }
+    ```
+  </TabItem>
+  <TabItem label="Codex CLI (TOML)">
+    Ajoutez la variable à côté du jeton dans `~/.codex/config.toml`, puis relancez Codex :
+    ```toml
+    env = { YNAB_API_KEY = "votre-jeton", AVENIR_MCP_WRITE = "1" }
+    ```
+  </TabItem>
+</Tabs>
+
+La valeur doit être exactement `1`. Vérification : le client liste maintenant **17**
+outils au lieu de 9.
+
+| | Lecture seule (défaut) | Avec `AVENIR_MCP_WRITE=1` |
+|---|---|---|
+| Outils listés | 9 | 17 |
+| Classer, budgéter, rapprocher, créer | — | prévisualisé, confirmé par vous, annulable |
+| Si l'agent comprend mal | rien ne peut changer | un changement que vous avez confirmé, et que vous pouvez annuler |
+
+Chaque changement vous est montré avant d'être appliqué : voir
+[Sécurité par conception](/avenir-mcp/fr/concepts/safety/).
+
+## Mettre à jour, retirer, révoquer
+
+| Pour | Faire |
+|---|---|
+| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp` |
+| **Retirer** | `claude mcp remove avenir --scope user`, ou supprimez l'entrée `avenir` de la configuration du client |
+| **Nettoyer** | le seul fichier d'Avenir sur votre machine est son [journal](/avenir-mcp/fr/concepts/journal/), dans `~/.local/state/avenir-mcp/` |
+| **Révoquer le jeton** | YNAB → Account Settings → Developer Settings → **Revoke** à côté du jeton |
+
+## Et ensuite
+
+- [Votre première conversation](/avenir-mcp/fr/getting-started/first-conversation/) : une visite guidée.
+- [Fonctionnalités](/avenir-mcp/fr/getting-started/features/) : tout ce qu'Avenir sait faire.
+- [Configuration](/avenir-mcp/fr/reference/configuration/) : chaque variable d'environnement.

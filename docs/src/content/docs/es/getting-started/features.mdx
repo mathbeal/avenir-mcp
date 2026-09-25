@@ -1,0 +1,121 @@
+---
+title: Funciones
+description: Todo lo que Avenir sabe hacer, con qué pedir y qué herramienta responde.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir da a un agente 17 herramientas, 4 recursos y 4 prompts sobre sus presupuestos de
+YNAB. Esta página los lista según lo que quiera hacer. Cada fila da una frase que puede
+decir al agente; el agente elige la herramienta.
+
+<Aside type="note">
+**L** = solo lectura, siempre disponible. **E** = escritura, disponible con
+`AVENIR_MCP_WRITE=1`, previsualizada y confirmada. **↺** = se puede deshacer con
+`undo_operation`.
+</Aside>
+
+## Echar un vistazo
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«¿Qué presupuestos tengo?»* | [`list_budgets`](/avenir-mcp/es/reference/tools/list-budgets/) | L |
+| *«¿Qué hay en mis cuentas?»* | [`list_accounts`](/avenir-mcp/es/reference/tools/list-accounts/) | L |
+| *«¿Qué grupos de categorías existen?»* | [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/) | L |
+
+Los presupuestos, cuentas y categorías también se sirven como
+[recursos](/avenir-mcp/es/reference/resources-and-prompts/) que su cliente puede adjuntar
+a una conversación sin llamar a una herramienta.
+
+## Entender un mes
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«¿Cómo va septiembre?»* | [`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/) — ingresos, presupuestado, gastado, Ready to Assign, categorías excedidas | L |
+| *«Muéstrame todas las categorías.»* | [`get_category_balances`](/avenir-mcp/es/reference/tools/get-category-balances/) — presupuestado, gastado y disponible por categoría | L |
+| *«¿Qué presupuestos están casi agotados?»* | [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/) — parte consumida de cada presupuesto | L |
+| *«¿Restaurants está alto todos los meses?»* | [`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/) — gasto por categoría durante N meses | L |
+
+Guía: [Revisar un mes](/avenir-mcp/es/guides/monthly-review/).
+
+## Clasificar transacciones
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«¿Qué queda sin categoría?»* | [`suggest_categories`](/avenir-mcp/es/reference/tools/suggest-categories/) — transacciones pendientes, con una sugerencia cuando su historial es claro | L |
+| *«Sí, aplícalo.»* | [`apply_categories`](/avenir-mcp/es/reference/tools/apply-categories/) — un lote confirmado | E ↺ |
+| *«Márcalas como revisadas.»* | [`approve_transactions`](/avenir-mcp/es/reference/tools/approve-transactions/) — quita la marca *unapproved* de YNAB | E |
+
+Las sugerencias reconocen un comercio a través de sus etiquetas bancarias (`CB MARKET
+FRESH FACT 050926 525130******1` y `… 190926 …` son la misma tienda), aprenden por
+separado entradas y salidas de dinero, y nunca apuntan a una categoría oculta. Guía:
+[Clasificar transacciones pendientes](/avenir-mcp/es/guides/classify/). Cómo funciona:
+[Sugerencias](/avenir-mcp/es/concepts/suggestions/).
+
+## Comprobar con el banco
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«Mi banco muestra 3.440,80. ¿Coincide YNAB?»* | [`reconcile_account`](/avenir-mcp/es/reference/tools/reconcile-account/) — explica una diferencia sin escribir; concilia cuando cuadra | E ↺ |
+| *«Añade el pago de la farmacia que faltó en la importación.»* | [`create_transactions`](/avenir-mcp/es/reference/tools/create-transactions/) | E ↺ |
+
+Una diferencia se explica por las transacciones pendientes, la que tiene exactamente el
+importe de la diferencia, y los probables duplicados (mismo importe y comercio, a 3 días
+como mucho). Guías: [Conciliar una cuenta](/avenir-mcp/es/guides/reconcile/),
+[Añadir transacciones que faltan](/avenir-mcp/es/guides/missing-transactions/).
+
+## Planificar
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«¿Bajaré de cero antes de diciembre?»* | [`forecast_balance`](/avenir-mcp/es/reference/tools/forecast-balance/) — mes a mes, con sus supuestos | L |
+| *«Pon 150 en Restaurants para septiembre.»* | [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) | E ↺ |
+
+La previsión encuentra los cargos recurrentes en su historial, promedia el resto y le
+deja indicar sus ingresos e importes puntuales. Guía:
+[Planificar](/avenir-mcp/es/guides/plan-ahead/). Cómo funciona:
+[Previsión](/avenir-mcp/es/concepts/forecasting/).
+
+## Organizar categorías
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«Crea una categoría Pets en Everyday.»* | [`create_category`](/avenir-mcp/es/reference/tools/create-category/) | E |
+| *«Renombra Tennis a Sport.»* | [`update_category`](/avenir-mcp/es/reference/tools/update-category/) — también mueve una categoría a otro grupo | E |
+
+Guía: [Organizar categorías](/avenir-mcp/es/guides/categories/).
+
+## Deshacer
+
+| Usted dice | Herramienta | |
+|---|---|---|
+| *«Deshaz eso.»* | [`undo_operation`](/avenir-mcp/es/reference/tools/undo-operation/) — la última operación, o la indicada | E |
+
+Guía: [Deshacer un cambio](/avenir-mcp/es/guides/undo/). Cómo funciona:
+[Diario y deshacer](/avenir-mcp/es/concepts/journal/).
+
+## Flujos listos
+
+Cuatro [prompts](/avenir-mcp/es/reference/resources-and-prompts/#prompts) guían al agente
+por una tarea completa. En Claude Code son comandos slash del servidor `avenir`.
+
+| Prompt | Argumentos | Qué hace |
+|---|---|---|
+| `classify_pending` | presupuesto | sugerencias, sus elecciones, un lote confirmado, el id para deshacer |
+| `monthly_review` | presupuesto, mes | totales, lo que destaca, correcciones propuestas |
+| `reconcile` | presupuesto, cuenta, saldo bancario | la diferencia explicada, luego una conciliación confirmada |
+| `plan_next_month` | presupuesto | previsión y supuestos, luego los importes del mes siguiente |
+
+## Incluido
+
+- **Seguridad:** solo lectura por defecto, confirmación ligada a la vista previa exacta,
+  un diario local para deshacer, texto bancario tratado como no fiable. Vea
+  [Seguridad por diseño](/avenir-mcp/es/concepts/safety/).
+- **Economía:** una copia local de sus transacciones actualizada por sincronización
+  incremental; la mayoría de las herramientas cuestan una o dos peticiones a YNAB. Vea
+  [Datos y sincronización](/avenir-mcp/es/concepts/data-and-sync/).
+- **Claridad para agentes:** unidades monetarias, esquemas de salida tipados con una
+  descripción por campo, paginación, [errores](/avenir-mcp/es/reference/errors/) útiles.
+- **Protocolo:** MCP 2026-07-28 y versiones anteriores; stdio o HTTP streamable.

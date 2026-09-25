@@ -1,0 +1,96 @@
+---
+title: Développement
+description: Organisation du dépôt, installation, contrôles de la CI, tests, documentation générée et publication.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Aside } from '@astrojs/starlight/components';
+
+## Organisation
+
+<FileTree>
+- avenir_mcp/ — le serveur (voir [Architecture](/avenir-mcp/fr/concepts/architecture/))
+- tests/ — tests unitaires, tests du protocole, de la documentation et d'hygiène
+- evals/ — le budget de démonstration, une doublure de l'API YNAB, l'évaluation par agent
+- docsgen/ — génère la référence des outils, le catalogue des erreurs et les exemples
+- docs/ — ce site (Astro Starlight, anglais, français, espagnol)
+- AGENTS.md — le contrat des contributeurs, humains ou non
+- justfile — toutes les commandes ci-dessous
+- pyproject.toml, uv.lock — le projet Python, verrouillé
+</FileTree>
+
+## Installation
+
+```bash
+git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
+uv sync            # Python 3.14 et les dépendances verrouillées
+just check         # tous les contrôles de la CI
+```
+
+<Aside type="tip">
+Si le projet est dans un dossier synchronisé par iCloud Drive, gardez l'environnement
+virtuel en dehors : `UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`.
+iCloud peut masquer le fichier `.pth` d'une installation éditable, que Python ignore
+alors.
+</Aside>
+
+## Les contrôles
+
+`just check` lance, dans l'ordre de la CI :
+
+| Contrôle | Commande | Échoue quand |
+|---|---|---|
+| format | `black --check`, `isort --check` | un fichier n'est pas formaté |
+| lint | `pylint` | la note est sous 10,00 |
+| types | `mypy` (strict) | une erreur de type |
+| tests | `pytest` | un test échoue, **un avertissement** est émis, ou la couverture des lignes **ou des branches** est sous 100 % |
+| vocabulaire | `lexdrift check avenir_mcp --baseline lexdrift.lock` | un nouveau mot apparaît pour une idée déjà nommée |
+| verrou | `uv lock --check` | `uv.lock` ne correspond pas à `pyproject.toml` |
+
+La CI lance aussi `typos`, `zizmor` sur les workflows, `pip-audit` sur les dépendances
+verrouillées, la suite de tests sous Python 3.15 (autorisée à échouer tant que ses
+dépendances ne le gèrent pas), et la construction de la documentation.
+
+## Tests
+
+| Sorte | Fichiers | Ce qu'ils vérifient |
+|---|---|---|
+| Unitaires | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | la logique pure et le client HTTP, sur des données inventées |
+| Protocole | `test_protocol*`, `test_context`, `test_policy` | les outils via un client MCP en mémoire : schémas, annotations, chemins de confirmation, annulation |
+| Documentation | `test_docs` | les pages et exemples générés correspondent au code ; chaque page existe en français et en espagnol ; chaque variable d'environnement est documentée |
+| Hygiène | `test_hygiene` | ni IBAN, ni jeton, ni relevé, ni chemin personnel, ni copie du Finder dans le dépôt |
+| Évaluation | `test_evals` | les vérifications de l'évaluation sont justes |
+
+Les tests sont écrits d'abord. Aucun test n'appelle YNAB.
+
+## Documentation
+
+```bash
+uv run python -m docsgen   # pages des outils, catalogue des erreurs, exemples
+just docs                  # construit le site en trois langues ; un lien cassé échoue
+just docs-serve            # aperçu en direct sur http://localhost:4321/avenir-mcp/
+```
+
+`docsgen` fait tourner Avenir sur le budget de démonstration et écrit ce qu'il répond
+réellement, date fixée et identifiants aléatoires remplacés. Les pages écrites à la main
+existent en anglais, en français et en espagnol ; un test échoue s'il en manque une.
+
+## Évaluation
+
+```bash
+just evaluate    # toutes les tâches, Sonnet, environ 1 USD de votre forfait Claude
+uv run python -m evals.run --task classify --model haiku
+```
+
+Voir [Évaluation](/avenir-mcp/fr/project/evaluation/).
+
+## Commits et versions
+
+- Les messages de commit commencent par un type — `feat:`, `fix:`, `docs:`,
+  `refactor:`, `test:`, `build:`, `ci:`, `chore:` — car `CHANGELOG.md` en est généré par
+  git-cliff.
+- Pour publier : `just changelog`, commit, étiquette `vX.Y.Z` égale à
+  `avenir_mcp.__version__`, puis une release GitHub. Le workflow `publish` construit,
+  lance `twine check --strict` et envoie sur PyPI par Trusted Publishing : aucun jeton
+  n'est stocké.

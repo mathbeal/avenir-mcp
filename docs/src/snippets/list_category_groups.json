@@ -1,0 +1,18 @@
+[
+  {
+    "id": "grp-bills",
+    "name": "Bills"
+  },
+  {
+    "id": "grp-everyday",
+    "name": "Everyday"
+  },
+  {
+    "id": "grp-fun",
+    "name": "Fun"
+  },
+  {
+    "id": "grp-savings-goals",
+    "name": "Savings goals"
+  }
+]

@@ -1,0 +1,101 @@
+---
+title: Elegir cómo se ejecuta Avenir
+description: Solo lectura o escrituras, stdio o HTTP, dónde vive el diario y cuánto registra.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir se configura con variables de entorno, definidas en el bloque `env` de su cliente
+MCP. La lista completa está en [Configuración](/avenir-mcp/es/reference/configuration/).
+
+## Solo lectura o escrituras
+
+| Ajuste | Efecto |
+|---|---|
+| nada (por defecto) | 9 herramientas de solo lectura; las 8 de escritura no se listan ni se pueden llamar |
+| `AVENIR_MCP_WRITE=1` | las 17 herramientas; cada escritura salvo `approve_transactions` se previsualiza y confirma |
+
+Cualquier otro valor (`0`, `true`, `yes`) mantiene el servidor en solo lectura: solo `1`
+activa las escrituras.
+
+## Ejecutar por stdio (por defecto)
+
+Su cliente arranca Avenir como subproceso y le habla por su entrada y salida estándar.
+Nada escucha en la red. Es lo que hacen todos los ejemplos de
+[Instalación](/avenir-mcp/es/getting-started/install/).
+
+## Ejecutar por HTTP
+
+Para un cliente que se conecta a una URL, o para compartir un servidor entre varios
+clientes de su máquina. Cree primero un token aleatorio largo, que los clientes tendrán
+que presentar:
+
+```bash
+export AVENIR_MCP_HTTP_TOKEN=$(openssl rand -hex 32)
+```
+
+Después arranque el servidor:
+
+```bash
+AVENIR_MCP_TRANSPORT=http \
+AVENIR_MCP_HOST=127.0.0.1 \
+AVENIR_MCP_PORT=8103 \
+YNAB_API_KEY=su-token \
+uvx avenir-mcp
+```
+
+Escucha en `http://127.0.0.1:8103/mcp` (HTTP streamable). Apunte su cliente allí con el
+token en una cabecera `Authorization` — con Claude Code:
+
+```bash
+claude mcp add --transport http avenir http://127.0.0.1:8103/mcp \
+  --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
+```
+
+Por HTTP, cada petición se comprueba antes de llegar a una herramienta:
+
+| Comprobación | Rechazo | Lo que impide |
+|---|---|---|
+| la cabecera `Host` designa esta máquina (`127.0.0.1`, `localhost`, `::1`) | `421` | una página web que llegara al servidor por DNS rebinding |
+| una cabecera `Origin`, si existe, es la de este servidor | `403` | una página de otro sitio, abierta en su navegador |
+| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, si hay un token definido | `401` | cualquier otro programa de su máquina o de su red |
+
+Con `AVENIR_MCP_WRITE=1`, el token es **obligatorio**: sin él, el servidor se niega a
+arrancar. El modo de solo lectura por HTTP funciona sin token, solo con las dos primeras
+comprobaciones.
+
+<Aside type="danger" title="Manténgalo en su máquina">
+Mantenga `AVENIR_MCP_HOST=127.0.0.1`: el tráfico es HTTP simple, sin cifrar. Nunca use
+`0.0.0.0`, nunca publique el puerto en todas las interfaces con Docker o un router, y
+nunca ponga el servidor en Internet.
+</Aside>
+
+## Dónde vive el diario
+
+Las operaciones aplicadas se registran para poder deshacerlas. Por defecto el diario es
+`$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, o `~/.local/state/avenir-mcp/journal.jsonl`
+cuando `XDG_STATE_HOME` no está definida. Elija otro archivo con `AVENIR_MCP_JOURNAL`.
+Vea [Diario y deshacer](/avenir-mcp/es/concepts/journal/).
+
+## Diagnósticos
+
+Avenir escribe sus diagnósticos en **stderr** — nunca en stdout, que pertenece al
+protocolo en modo stdio — al nivel de `AVENIR_MCP_LOG_LEVEL`, `WARNING` por defecto:
+
+| Nivel | Verá |
+|---|---|
+| `WARNING` (por defecto) | solo los problemas |
+| `INFO` | cada llamada a herramienta y cada petición a YNAB |
+| `DEBUG` | todo, incluidos los mensajes de la propia biblioteca MCP |
+
+Un error esperado (un mes mal formado, una cuenta desconocida) se registra en una línea;
+un fallo real conserva su traza. El token nunca se registra.
+
+## Umbral de sugerencias
+
+`AVENIR_MCP_CONFIDENCE_THRESHOLD` (por defecto `0.90`) es la parte del historial de un
+beneficiario que debe coincidir antes de sugerir una categoría. Bájelo para obtener más
+sugerencias, acertadas con menos frecuencia. Vea
+[Sugerencias](/avenir-mcp/es/concepts/suggestions/).

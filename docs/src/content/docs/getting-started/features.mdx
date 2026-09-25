@@ -1,0 +1,119 @@
+---
+title: Features
+description: Everything Avenir can do, with what to ask and which tool answers.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir gives an agent 17 tools, 4 resources and 4 prompts over your YNAB budgets. This
+page lists them by what you want to do. Each row gives a sentence you can say to the
+agent; the agent chooses the tool.
+
+<Aside type="note">
+**R** = read-only, always available. **W** = write, available with
+`AVENIR_MCP_WRITE=1`, previewed and confirmed. **↺** = can be undone with
+`undo_operation`.
+</Aside>
+
+## Look around
+
+| You say | Tool | |
+|---|---|---|
+| *“Which budgets do I have?”* | [`list_budgets`](/avenir-mcp/reference/tools/list-budgets/) | R |
+| *“What's on my accounts?”* | [`list_accounts`](/avenir-mcp/reference/tools/list-accounts/) | R |
+| *“Which category groups exist?”* | [`list_category_groups`](/avenir-mcp/reference/tools/list-category-groups/) | R |
+
+The budgets, accounts and categories are also served as
+[resources](/avenir-mcp/reference/resources-and-prompts/) your client can attach to a
+conversation without a tool call.
+
+## Understand a month
+
+| You say | Tool | |
+|---|---|---|
+| *“How is September going?”* | [`get_monthly_summary`](/avenir-mcp/reference/tools/get-monthly-summary/) — income, budgeted, spent, Ready to Assign, overspent categories | R |
+| *“Show me every category.”* | [`get_category_balances`](/avenir-mcp/reference/tools/get-category-balances/) — budgeted, spent, available per category | R |
+| *“Which budgets are almost spent?”* | [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/) — share of each budget consumed | R |
+| *“Is Restaurants high every month?”* | [`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/) — spending per category over N months | R |
+
+Guide: [Review a month](/avenir-mcp/guides/monthly-review/).
+
+## Classify transactions
+
+| You say | Tool | |
+|---|---|---|
+| *“What still needs a category?”* | [`suggest_categories`](/avenir-mcp/reference/tools/suggest-categories/) — pending transactions, with a suggestion when your history is clear | R |
+| *“Yes, apply that.”* | [`apply_categories`](/avenir-mcp/reference/tools/apply-categories/) — one confirmed batch | W ↺ |
+| *“Mark them as reviewed.”* | [`approve_transactions`](/avenir-mcp/reference/tools/approve-transactions/) — clears YNAB's *unapproved* flag | W |
+
+Suggestions recognise a merchant across its bank labels (`CB MARKET FRESH FACT 050926
+525130******1` and `… 190926 …` are the same shop), learn money in and money out apart,
+and never point to a hidden category. Guide:
+[Classify pending transactions](/avenir-mcp/guides/classify/). How it works:
+[Suggestions](/avenir-mcp/concepts/suggestions/).
+
+## Check against the bank
+
+| You say | Tool | |
+|---|---|---|
+| *“My bank shows 3,440.80. Does YNAB agree?”* | [`reconcile_account`](/avenir-mcp/reference/tools/reconcile-account/) — explains a gap without writing; reconciles once it matches | W ↺ |
+| *“Add the pharmacy payment the import missed.”* | [`create_transactions`](/avenir-mcp/reference/tools/create-transactions/) | W ↺ |
+
+A gap is explained by pending transactions, the one whose amount equals the difference,
+and likely duplicates (same amount and merchant, at most 3 days apart). Guides:
+[Reconcile an account](/avenir-mcp/guides/reconcile/),
+[Add missing transactions](/avenir-mcp/guides/missing-transactions/).
+
+## Plan
+
+| You say | Tool | |
+|---|---|---|
+| *“Will I go below zero before December?”* | [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/) — month by month, with its assumptions | R |
+| *“Put 150 in Restaurants for September.”* | [`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/) | W ↺ |
+
+The forecast finds recurring charges in your history, averages the rest, and lets you
+give your income and one-off amounts. Guide: [Plan ahead](/avenir-mcp/guides/plan-ahead/).
+How it works: [Forecasting](/avenir-mcp/concepts/forecasting/).
+
+## Organise categories
+
+| You say | Tool | |
+|---|---|---|
+| *“Create a Pets category in Everyday.”* | [`create_category`](/avenir-mcp/reference/tools/create-category/) | W |
+| *“Rename Tennis to Sport.”* | [`update_category`](/avenir-mcp/reference/tools/update-category/) — also moves a category to another group | W |
+
+Guide: [Organise categories](/avenir-mcp/guides/categories/).
+
+## Undo
+
+| You say | Tool | |
+|---|---|---|
+| *“Undo that.”* | [`undo_operation`](/avenir-mcp/reference/tools/undo-operation/) — the latest operation, or the one named | W |
+
+Guide: [Undo a change](/avenir-mcp/guides/undo/). How it works:
+[Journal and undo](/avenir-mcp/concepts/journal/).
+
+## Ready-made workflows
+
+Four [prompts](/avenir-mcp/reference/resources-and-prompts/#prompts) walk the agent
+through a whole task. In Claude Code they are slash commands of the `avenir` server.
+
+| Prompt | Arguments | What it does |
+|---|---|---|
+| `classify_pending` | budget | suggestions, your choices, one confirmed batch, the undo id |
+| `monthly_review` | budget, month | totals, what stands out, proposed fixes |
+| `reconcile` | budget, account, bank balance | the gap explained, then a confirmed reconciliation |
+| `plan_next_month` | budget | forecast and assumptions, then next month's amounts |
+
+## Built in
+
+- **Safety:** read-only by default, confirmation bound to the exact preview, a local
+  journal for undo, bank text treated as untrusted. See
+  [Safety by design](/avenir-mcp/concepts/safety/).
+- **Economy:** a local copy of your transactions refreshed with delta sync; most tools
+  cost one or two YNAB requests. See [Data and sync](/avenir-mcp/concepts/data-and-sync/).
+- **Clarity for agents:** currency units, typed output schemas with a description per
+  field, pagination, actionable [errors](/avenir-mcp/reference/errors/).
+- **Protocol:** MCP 2026-07-28 and earlier versions; stdio or streamable HTTP.

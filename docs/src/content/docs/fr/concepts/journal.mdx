@@ -1,0 +1,75 @@
+---
+title: Journal et annulation
+description: L'enregistrement local des opérations appliquées, son format, et ce que rétablit exactement une annulation.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Chaque écriture confirmée est inscrite dans un journal local, pour que `undo_operation`
+puisse la défaire plus tard — même après un redémarrage du serveur.
+
+## Où
+
+| | |
+|---|---|
+| Fichier par défaut | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, sinon `~/.local/state/avenir-mcp/journal.jsonl` |
+| Fichier choisi | `AVENIR_MCP_JOURNAL` |
+| Permissions | créé en `0600` : lisible et modifiable par vous seul |
+| Contenu | des identifiants uniquement — ni montant, ni bénéficiaire, ni mémo, ni jeton |
+
+## Format
+
+JSON Lines, en ajout seul. Une opération appliquée tient sur une ligne :
+
+```json
+{"operation_id":"5f2c9a1e7b30","budget_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+```
+
+L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
+
+```json
+{"undone":"5f2c9a1e7b30"}
+```
+
+| Champ | Sens |
+|---|---|
+| `operation_id` | 12 caractères hexadécimaux aléatoires |
+| `budget_id` | le budget modifié |
+| `kind` | `categorize`, `budget`, `reconcile` ou `create` |
+| `applied_at` | ISO 8601, UTC, à la seconde |
+| `moves` | pour `categorize` : la catégorie de chaque transaction avant et après |
+| `details` | pour les autres sortes, ce qu'exige l'annulation (ci-dessous) |
+
+| `kind` | `details` |
+|---|---|
+| `budget` | `month`, `category_id`, `from` et `to` en milliunités |
+| `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (ou `null`) |
+| `create` | `transaction_ids` |
+
+## Quelle opération est annulée
+
+Sans identifiant, `undo_operation` prend **l'opération la plus récente du budget encore
+en vigueur** : non annulée, et qui n'est pas elle-même une annulation. Avec un
+identifiant, cette opération, si elle est encore en vigueur. Sinon : *« Nothing to
+undo: no operation of this budget is still in effect. »*
+
+## Ce que rétablit l'annulation
+
+| `kind` | Annulation | Vérifié d'abord | Si la vérification échoue |
+|---|---|---|---|
+| `categorize` | chaque transaction retrouve sa catégorie précédente | sa catégorie est toujours celle que l'opération a mise | cette transaction est laissée telle quelle et listée dans `conflicts` |
+| `budget` | l'ancien montant | le montant est toujours celui que l'opération a mis | rien d'écrit ; `conflicts` nomme la catégorie |
+| `reconcile` | les transactions *rapprochées* repassent *pointées* ; l'ajustement est supprimé | chacune est toujours *rapprochée* | celles qui ne le sont plus sont ignorées |
+| `create` | les transactions créées sont supprimées | chacune existe encore | celles déjà supprimées sont listées dans `conflicts` |
+
+L'annulation est prévisualisée et confirmée comme toute écriture. Annuler une opération
+`categorize` enregistre l'annulation comme une opération et les marque toutes deux
+annulées : une annulation ne s'annule pas.
+
+<Aside type="note">
+Le journal est local : une opération faite depuis une autre machine, ou avant que le
+fichier du journal ne change ou ne soit supprimé, ne peut pas être annulée d'ici.
+Supprimer le fichier efface l'historique, et rien d'autre.
+</Aside>

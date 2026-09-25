@@ -1,0 +1,101 @@
+---
+title: Choisir comment Avenir tourne
+description: Lecture seule ou écriture, stdio ou HTTP, emplacement du journal, et niveau des diagnostics.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir se configure par variables d'environnement, dans le bloc `env` de votre client
+MCP. La liste complète est dans [Configuration](/avenir-mcp/fr/reference/configuration/).
+
+## Lecture seule ou écriture
+
+| Réglage | Effet |
+|---|---|
+| rien (défaut) | 9 outils de lecture ; les 8 outils d'écriture ne sont ni listés ni appelables |
+| `AVENIR_MCP_WRITE=1` | les 17 outils ; chaque écriture sauf `approve_transactions` est prévisualisée et confirmée |
+
+Toute autre valeur (`0`, `true`, `yes`) laisse le serveur en lecture seule : seul `1`
+active l'écriture.
+
+## Lancer en stdio (défaut)
+
+Votre client démarre Avenir comme sous-processus et dialogue avec lui par son entrée et sa
+sortie standard. Rien n'écoute sur le réseau. C'est ce que font tous les exemples de la
+page [Installer](/avenir-mcp/fr/getting-started/install/).
+
+## Lancer en HTTP
+
+Pour un client qui se connecte à une URL, ou pour partager un serveur entre plusieurs
+clients de votre machine. Créez d'abord un long jeton aléatoire, que les clients devront
+présenter :
+
+```bash
+export AVENIR_MCP_HTTP_TOKEN=$(openssl rand -hex 32)
+```
+
+Puis lancez le serveur :
+
+```bash
+AVENIR_MCP_TRANSPORT=http \
+AVENIR_MCP_HOST=127.0.0.1 \
+AVENIR_MCP_PORT=8103 \
+YNAB_API_KEY=votre-jeton \
+uvx avenir-mcp
+```
+
+Il écoute sur `http://127.0.0.1:8103/mcp` (HTTP streamable). Dirigez-y votre client avec
+le jeton dans un en-tête `Authorization` — avec Claude Code :
+
+```bash
+claude mcp add --transport http avenir http://127.0.0.1:8103/mcp \
+  --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
+```
+
+En HTTP, chaque requête est vérifiée avant d'atteindre un outil :
+
+| Vérification | Refus | Ce que ça arrête |
+|---|---|---|
+| l'en-tête `Host` désigne cette machine (`127.0.0.1`, `localhost`, `::1`) | `421` | une page web qui atteindrait le serveur par DNS rebinding |
+| un en-tête `Origin`, s'il est présent, est celui de ce serveur | `403` | une page d'un autre site, ouverte dans votre navigateur |
+| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, si un jeton est défini | `401` | tout autre programme de votre machine ou de votre réseau |
+
+Avec `AVENIR_MCP_WRITE=1`, le jeton est **obligatoire** : sans lui, le serveur refuse de
+démarrer. La lecture seule en HTTP fonctionne sans jeton, avec les deux premières
+vérifications seulement.
+
+<Aside type="danger" title="Gardez-le sur votre machine">
+Gardez `AVENIR_MCP_HOST=127.0.0.1` : le trafic est en HTTP simple, non chiffré. Ne liez
+jamais `0.0.0.0`, ne publiez jamais le port sur toutes les interfaces avec Docker ou une
+box, et ne mettez jamais le serveur sur Internet.
+</Aside>
+
+## Où vit le journal
+
+Les opérations appliquées sont enregistrées pour pouvoir être annulées. Par défaut, le
+journal est `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, ou
+`~/.local/state/avenir-mcp/journal.jsonl` si `XDG_STATE_HOME` n'est pas défini.
+Choisissez un autre fichier avec `AVENIR_MCP_JOURNAL`. Voir
+[Journal et annulation](/avenir-mcp/fr/concepts/journal/).
+
+## Diagnostics
+
+Avenir écrit ses diagnostics sur **stderr** — jamais sur stdout, qui appartient au
+protocole en mode stdio — au niveau de `AVENIR_MCP_LOG_LEVEL`, `WARNING` par défaut :
+
+| Niveau | Vous voyez |
+|---|---|
+| `WARNING` (défaut) | seulement les problèmes |
+| `INFO` | chaque appel d'outil et chaque requête YNAB |
+| `DEBUG` | tout, y compris les messages de la bibliothèque MCP |
+
+Une erreur attendue (un mois mal formé, un compte inconnu) tient sur une ligne ; une
+vraie panne garde sa trace complète. Le jeton n'est jamais journalisé.
+
+## Seuil des propositions
+
+`AVENIR_MCP_CONFIDENCE_THRESHOLD` (défaut `0.90`) est la part de l'historique d'un
+bénéficiaire qui doit concorder pour proposer une catégorie. Baissez-le pour plus de
+propositions, moins souvent justes. Voir [Suggestions](/avenir-mcp/fr/concepts/suggestions/).

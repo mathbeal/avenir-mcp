@@ -1,0 +1,46 @@
+---
+title: Añadir transacciones que faltan
+description: Registrar lo que la importación bancaria no trajo, previsualizado y pendiente de su revisión.
+sidebar:
+  order: 5
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import created from '@snippets/create_preview.json?raw';
+
+**Objetivo:** registrar lo que la importación bancaria no trajo — un gasto en efectivo, un
+pago con una tarjeta que YNAB no sigue, una transacción que una importación perdió.
+
+**Herramienta:** [`create_transactions`](/avenir-mcp/es/reference/tools/create-transactions/).
+
+## La conversación
+
+<Steps>
+
+1. **Diga qué pasó.**
+
+   > **Usted:** Añade un pago de 32,40 a Pharmacie Centrale el 21 de septiembre, en mi
+   > cuenta corriente. El banco no lo importó.
+
+2. **El agente previsualiza.** `create_transactions` comprueba la cuenta, las categorías
+   y las fechas, y muestra lo que va a añadir — dos peticiones a YNAB:
+
+   <Code code={created} lang="json" title="create_transactions — vista previa" />
+
+3. **Usted confirma.** Las transacciones se crean **cleared** y, salvo que el agente pase
+   `approved: true`, quedan **unapproved**: YNAB las muestra para revisión como
+   cualquier importación.
+
+</Steps>
+
+## Reglas
+
+| Campo | Regla |
+|---|---|
+| `date` | `AAAA-MM-DD`, hoy o antes — YNAB registra lo que ocurrió |
+| `amount` | unidades monetarias; negativo para un gasto, positivo para una entrada |
+| `payee_name` | tal como debe aparecer en YNAB |
+| `memo`, `category_id` | opcionales |
+
+Se pueden crear varias transacciones a la vez; forman una sola operación.
+`undo_operation` borra las que sigan existiendo.

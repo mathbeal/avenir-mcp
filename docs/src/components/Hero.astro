@@ -1,0 +1,153 @@
+---
+// Replaces Starlight's hero on the home pages: the promise, the actions, the install
+// command, and a conversation showing Avenir at work.
+import { Code, LinkButton } from '@astrojs/starlight/components';
+import Default from '@astrojs/starlight/components/Hero.astro';
+import ChatDemo from './ChatDemo.astro';
+import { home } from './home-i18n';
+
+const route = Astro.locals.starlightRoute;
+const { data } = route.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+const t = home(route.lang);
+const clients = ['Claude Code', 'Claude Desktop', 'Cursor', 'VS Code', 'Gemini CLI', 'Codex CLI', 'LM Studio'];
+// Only the home page of each language; other pages with a hero (404) keep Starlight's.
+const isHome = ['', 'fr', 'es'].includes(route.id.replace(/\/$/, ''));
+---
+
+{!isHome && <Default />}
+{isHome && (
+
+<div class="home-hero">
+  <div class="copy">
+    <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>{t.eyebrow}</p>
+    <h1 id="_top" data-page-title set:html={title} />
+    {tagline && <p class="tagline" set:html={tagline} />}
+    <div class="actions">
+      {
+        actions.map(({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }) => (
+          <LinkButton {href} {variant} icon={icon?.name} class:list={[className]} {...attrs}>
+            {text}
+          </LinkButton>
+        ))
+      }
+    </div>
+    <div class="install"><Code code={t.install} lang="bash" title="Terminal" /></div>
+    <p class="clients">
+      {t.worksWith}
+      {clients.map((name) => <span>{name}</span>)}
+    </p>
+  </div>
+  <ChatDemo />
+</div>
+)}
+
+<style>
+  .home-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+    align-items: center;
+    padding-block: 2rem 1rem;
+  }
+
+  .home-hero::before {
+    content: '';
+    position: absolute;
+    inset: -6rem -20vw auto;
+    height: 36rem;
+    background:
+      radial-gradient(40% 50% at 75% 35%, var(--avenir-glow), transparent 70%),
+      radial-gradient(30% 40% at 20% 10%, color-mix(in srgb, var(--avenir-sun) 12%, transparent), transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    margin: 0;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 999px;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
+  }
+
+  .pulse {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--sl-color-accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--sl-color-accent) 25%, transparent);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--avenir-font-heading);
+    font-size: clamp(2.1rem, calc(1rem + 3vw), 3.2rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    color: var(--sl-color-white);
+  }
+
+  .tagline {
+    margin: 0;
+    max-width: 38rem;
+    font-size: clamp(var(--sl-text-base), calc(0.5rem + 1vw), var(--sl-text-xl));
+    line-height: 1.55;
+    color: var(--sl-color-gray-2);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    align-items: center;
+  }
+
+  .install {
+    max-width: 38rem;
+  }
+
+  .install :global(.expressive-code) {
+    margin: 0;
+  }
+
+  .clients {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+
+  .clients span {
+    padding: 0.15rem 0.6rem;
+    border-radius: 0.4rem;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+  }
+
+  @media (min-width: 64rem) {
+    .home-hero {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 4rem;
+      padding-block: 4rem 2rem;
+    }
+  }
+</style>

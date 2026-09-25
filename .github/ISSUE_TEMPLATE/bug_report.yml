@@ -1,0 +1,84 @@
+name: Bug report
+description: A tool fails, answers wrongly, or an agent is misled by an answer.
+title: "fix: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste real transactions, balances, account names, payees or tokens.**
+        Replace them with invented ones before posting: this issue is public.
+        A security problem? Report it privately instead — see
+        [SECURITY.md](https://github.com/mathbeal/avenir-mcp/blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you asked, which tool the agent called with which arguments, and what came back.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Avenir version
+      description: The output of `uvx avenir-mcp --version`.
+      placeholder: avenir-mcp 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run Avenir?
+      options:
+        - uvx avenir-mcp (PyPI)
+        - uvx --from git+https://github.com/mathbeal/avenir-mcp (GitHub)
+        - From a clone of the repository
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport
+      options:
+        - stdio (default)
+        - HTTP
+  - type: input
+    id: client
+    attributes:
+      label: MCP client and its version
+      placeholder: Claude Code 2.1.3, Claude Desktop 1.4, Cursor 2.0, LM Studio 0.3…
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: AI model
+      description: The model and its version, as your client shows it — answers depend on it.
+      placeholder: a Claude, GPT or Gemini model, or a local model through LM Studio…
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 26, Windows 11, Ubuntu 24.04…
+  - type: textarea
+    id: logs
+    attributes:
+      label: Diagnostics
+      description: Output with AVENIR_MCP_LOG_LEVEL=INFO, anonymised.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: This issue contains no real financial data and no token.
+          required: true

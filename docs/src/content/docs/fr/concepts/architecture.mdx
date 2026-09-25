@@ -1,0 +1,100 @@
+---
+title: Architecture
+description: L'organisation du serveur, le rôle de chaque module, et ce qui se passe pendant un appel.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+Avenir est un paquet Python construit sur [FastMCP](https://gofastmcp.com). Sa conception
+sépare trois choses : **ce qui parle à YNAB**, **ce qui calcule**, et **ce que voit
+l'agent**.
+
+## Modules
+
+<FileTree>
+- avenir_mcp/
+  - server.py — point d'entrée : transport, niveau de journal, politique de lecture seule
+  - app.py — l'instance FastMCP, l'étiquette `write`, la validation des mois, le filtre de journal
+  - tools_budget.py — outils de lecture proches de YNAB, et `approve_transactions`
+  - tools_classify.py — `suggest_categories`, `apply_categories`
+  - tools_accounts.py — `reconcile_account`, `forecast_balance`, `create_transactions`
+  - tools_categories.py — `create_category`, `update_category`, `set_category_budget`
+  - tools_undo.py — `undo_operation`, pour chaque sorte d'opération
+  - context.py — ressources et prompts
+  - confirm.py — aperçu, confirmation, application, journal
+  - client.py — le seul code qui parle à YNAB
+  - journal.py — le seul code qui écrit sur le disque
+  - triage.py — transactions en attente et propositions, pur
+  - classifier.py — normalisation et score des bénéficiaires, pur
+  - writes.py — plans, plans d'annulation, codes de confirmation, pur
+  - reconcile.py — analyse d'un compte, pur
+  - forecast.py — charges récurrentes et projection, pur
+  - analytics.py — bilan du mois, soldes, tendances, pur
+</FileTree>
+
+| Couche | Modules | Règle |
+|---|---|---|
+| Outils | `tools_*.py`, `context.py` | déclarent ce que voit l'agent ; orchestrent ; ne calculent jamais |
+| Confirmation | `confirm.py` | le passage unique de toute écriture confirmée |
+| Logique | `triage`, `classifier`, `writes`, `reconcile`, `forecast`, `analytics` | fonctions pures : ni réseau ni disque, entièrement testées |
+| Entrées-sorties | `client.py` (HTTP), `journal.py` (disque) | les seuls effets de bord |
+
+Les montants franchissent la frontière des entrées-sorties en *milliunités* YNAB et
+sortent de la logique en unités monétaires : aucun outil ne renvoie de milliunités.
+
+## Un appel en lecture
+
+<Steps>
+
+1. Le client appelle `get_monthly_summary` avec `{"budget_id": "last-used", "month":
+   "2026-09-01"}`.
+2. FastMCP valide les arguments contre le schéma d'entrée de l'outil.
+3. L'outil vérifie `month` (`app.check_month`) avant toute requête : un mois mal formé
+   est refusé avec un message, sans rien coûter.
+4. `client.get_month` envoie un `GET /budgets/last-used/months/2026-09-01` à YNAB.
+5. `analytics.month_overview` garde les totaux et les catégories en dépassement, en
+   unités monétaires.
+6. FastMCP valide la réponse contre le schéma de sortie et la renvoie en
+   `structuredContent`, avec son texte JSON pour les clients plus anciens.
+
+</Steps>
+
+## Un appel en écriture
+
+<Steps>
+
+1. Le client appelle `apply_categories` avec des affectations.
+2. L'outil lit l'état actuel (`client.get_transactions`, `client.get_categories`) et
+   demande à `writes.plan_categorization` ce qui changerait. Les affectations invalides
+   sont refusées ici, avant toute question.
+3. `confirm.write_plan` interroge l'utilisateur par le canal que le client gère — voir
+   [Confirmation](/avenir-mcp/fr/concepts/confirmation/). Tant que la réponse n'est pas
+   oui, il renvoie l'aperçu.
+4. Sur un oui, un seul `PATCH /budgets/{id}/transactions` groupé applique chaque
+   changement.
+5. `journal.Journal.record` ajoute l'opération au journal ; son identifiant revient à
+   l'agent pour [l'annulation](/avenir-mcp/fr/concepts/journal/).
+
+</Steps>
+
+## Enregistrement et lecture seule
+
+Chaque outil est enregistré à l'import avec ses annotations MCP (`readOnlyHint`,
+`destructiveHint`, `idempotentHint`, `openWorldHint`) ; les outils d'écriture portent en
+plus l'étiquette `write`. Au démarrage, `server.main` appelle
+`app.configure(enable_writes=...)`, qui désactive chaque outil étiqueté `write` sauf si
+`AVENIR_MCP_WRITE=1`. Un outil désactivé n'est ni listé ni appelable. Un test échoue si
+un outil n'a pas d'annotations ou si son étiquette et son `readOnlyHint` se contredisent.
+
+## Dépendances
+
+| Paquet | Pourquoi |
+|---|---|
+| `fastmcp` | le serveur MCP : protocole, schémas, transports |
+| `httpx` | les requêtes HTTP vers YNAB |
+| `pydantic` | déjà requis par fastmcp ; transforme les docstrings des champs en descriptions de schéma |
+
+Rien d'autre à l'exécution. Ajouter une dépendance exige une justification écrite
+([AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md)).

@@ -1,0 +1,124 @@
+---
+title: Fonctionnalités
+description: Tout ce que fait Avenir, avec quoi demander et quel outil répond.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir donne à un agent 17 outils, 4 ressources et 4 prompts sur vos budgets YNAB. Cette
+page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
+l'agent ; c'est lui qui choisit l'outil.
+
+<Aside type="note">
+**L** = lecture seule, toujours disponible. **É** = écriture, disponible avec
+`AVENIR_MCP_WRITE=1`, prévisualisée et confirmée. **↺** = annulable avec
+`undo_operation`.
+</Aside>
+
+## Faire le tour
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Quels budgets ai-je ? »* | [`list_budgets`](/avenir-mcp/fr/reference/tools/list-budgets/) | L |
+| *« Qu'y a-t-il sur mes comptes ? »* | [`list_accounts`](/avenir-mcp/fr/reference/tools/list-accounts/) | L |
+| *« Quels groupes de catégories existent ? »* | [`list_category_groups`](/avenir-mcp/fr/reference/tools/list-category-groups/) | L |
+
+Budgets, comptes et catégories sont aussi servis comme
+[ressources](/avenir-mcp/fr/reference/resources-and-prompts/), que votre client peut
+joindre à une conversation sans appel d'outil.
+
+## Comprendre un mois
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Comment se passe septembre ? »* | [`get_monthly_summary`](/avenir-mcp/fr/reference/tools/get-monthly-summary/) — revenus, budgété, dépensé, Ready to Assign, catégories en dépassement | L |
+| *« Montre-moi toutes les catégories. »* | [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/) — budgété, dépensé, disponible par catégorie | L |
+| *« Quels budgets sont presque épuisés ? »* | [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/) — part de chaque budget consommée | L |
+| *« Les restaurants sont-ils élevés tous les mois ? »* | [`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/) — dépenses par catégorie sur N mois | L |
+
+Guide : [Faire le point sur un mois](/avenir-mcp/fr/guides/monthly-review/).
+
+## Classer les transactions
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Qu'est-ce qui attend une catégorie ? »* | [`suggest_categories`](/avenir-mcp/fr/reference/tools/suggest-categories/) — transactions en attente, avec une proposition quand votre historique est clair | L |
+| *« Oui, applique. »* | [`apply_categories`](/avenir-mcp/fr/reference/tools/apply-categories/) — un lot confirmé | É ↺ |
+| *« Marque-les comme revues. »* | [`approve_transactions`](/avenir-mcp/fr/reference/tools/approve-transactions/) — lève le marqueur *unapproved* de YNAB | É |
+
+Les propositions reconnaissent un commerçant à travers ses libellés bancaires
+(`CB MARKET FRESH FACT 050926 525130******1` et `… 190926 …` sont la même boutique),
+apprennent séparément les entrées et les sorties d'argent, et ne proposent jamais de
+catégorie masquée. Guide :
+[Classer les transactions en attente](/avenir-mcp/fr/guides/classify/). Fonctionnement :
+[Suggestions](/avenir-mcp/fr/concepts/suggestions/).
+
+## Vérifier avec la banque
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Ma banque affiche 3 440,80. YNAB est-il d'accord ? »* | [`reconcile_account`](/avenir-mcp/fr/reference/tools/reconcile-account/) — explique un écart sans rien écrire ; rapproche une fois d'accord | É ↺ |
+| *« Ajoute le paiement de la pharmacie que l'import a manqué. »* | [`create_transactions`](/avenir-mcp/fr/reference/tools/create-transactions/) | É ↺ |
+
+Un écart s'explique par les transactions en attente, celle dont le montant égale la
+différence, et les doublons probables (même montant et même commerçant, à 3 jours au
+plus). Guides : [Rapprocher un compte](/avenir-mcp/fr/guides/reconcile/),
+[Ajouter des transactions manquantes](/avenir-mcp/fr/guides/missing-transactions/).
+
+## Anticiper
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Vais-je passer sous zéro avant décembre ? »* | [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/) — mois par mois, avec ses hypothèses | L |
+| *« Mets 150 dans Restaurants pour septembre. »* | [`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/) | É ↺ |
+
+La projection repère les charges récurrentes de votre historique, fait la moyenne du
+reste, et vous laisse indiquer revenus et montants ponctuels. Guide :
+[Anticiper](/avenir-mcp/fr/guides/plan-ahead/). Fonctionnement :
+[Projection](/avenir-mcp/fr/concepts/forecasting/).
+
+## Organiser les catégories
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Crée une catégorie Pets dans Everyday. »* | [`create_category`](/avenir-mcp/fr/reference/tools/create-category/) | É |
+| *« Renomme Tennis en Sport. »* | [`update_category`](/avenir-mcp/fr/reference/tools/update-category/) — déplace aussi une catégorie vers un autre groupe | É |
+
+Guide : [Organiser les catégories](/avenir-mcp/fr/guides/categories/).
+
+## Annuler
+
+| Vous dites | Outil | |
+|---|---|---|
+| *« Annule ça. »* | [`undo_operation`](/avenir-mcp/fr/reference/tools/undo-operation/) — la dernière opération, ou celle désignée | É |
+
+Guide : [Annuler un changement](/avenir-mcp/fr/guides/undo/). Fonctionnement :
+[Journal et annulation](/avenir-mcp/fr/concepts/journal/).
+
+## Procédures toutes prêtes
+
+Quatre [prompts](/avenir-mcp/fr/reference/resources-and-prompts/#prompts) guident
+l'agent dans une tâche complète. Dans Claude Code, ce sont des commandes slash du serveur
+`avenir`.
+
+| Prompt | Arguments | Ce qu'il fait |
+|---|---|---|
+| `classify_pending` | budget | propositions, vos choix, un lot confirmé, l'identifiant pour annuler |
+| `monthly_review` | budget, mois | les totaux, ce qui ressort, les corrections proposées |
+| `reconcile` | budget, compte, solde bancaire | l'écart expliqué, puis un rapprochement confirmé |
+| `plan_next_month` | budget | projection et hypothèses, puis les montants du mois suivant |
+
+## Intégré
+
+- **Sécurité :** lecture seule par défaut, confirmation liée à l'aperçu exact, journal
+  local pour annuler, texte bancaire traité comme non fiable. Voir
+  [Sécurité par conception](/avenir-mcp/fr/concepts/safety/).
+- **Économie :** une copie locale des transactions mise à jour par synchronisation
+  incrémentale ; la plupart des outils coûtent une ou deux requêtes YNAB. Voir
+  [Données et synchronisation](/avenir-mcp/fr/concepts/data-and-sync/).
+- **Clarté pour les agents :** unités monétaires, schémas de sortie typés avec une
+  description par champ, pagination, [erreurs](/avenir-mcp/fr/reference/errors/)
+  exploitables.
+- **Protocole :** MCP 2026-07-28 et versions antérieures ; stdio ou HTTP streamable.

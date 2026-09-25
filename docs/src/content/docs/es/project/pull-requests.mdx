@@ -1,0 +1,103 @@
+---
+title: Proponer una pull request
+description: El camino de una contribución, del issue a la fusión — fork, rama, pruebas primero, controles, pull request, revisión.
+sidebar:
+  order: 6
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Las pull requests son bienvenidas, de una errata a una nueva herramienta. Esta página
+da el camino a seguir; [Desarrollo](/avenir-mcp/es/project/development/) describe en
+detalle el repositorio y sus controles. Necesita una cuenta de GitHub,
+[git](https://git-scm.com), [uv](https://docs.astral.sh/uv/) y [just](https://just.systems).
+
+<Aside type="tip" title="Primero hablar, después programar">
+Para todo lo que vaya más allá de una errata o una frase de documentación, abra o
+comente primero un issue — una [propuesta de función](/avenir-mcp/es/project/propose-a-feature/)
+o un [informe de error](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) — y diga que le gustaría
+encargarse. Acordar el enfoque antes de escribir el código evita reescribirlo.
+</Aside>
+
+## Paso a paso
+
+<Steps>
+
+1. **Haga un fork y clónelo.** En GitHub, pulse **Fork** y clone su copia. Con la
+   [CLI de GitHub](https://cli.github.com), en un solo comando:
+
+   ```bash
+   gh repo fork mathbeal/avenir-mcp --clone
+   cd avenir-mcp
+   ```
+
+2. **Instale y compruebe el punto de partida.**
+
+   ```bash
+   uv sync       # Python 3.14 y las herramientas de desarrollo bloqueadas
+   just check    # todo debe pasar antes de cambiar nada
+   ```
+
+3. **Cree una rama** con el nombre del cambio:
+
+   ```bash
+   git switch -c feat/subidas-suscripciones
+   ```
+
+4. **Escriba primero la prueba**, véala fallar y escriba el código que la hace pasar. Las
+   pruebas solo usan datos inventados — nunca YNAB, nunca su presupuesto. Amplíe el
+   presupuesto de demostración en `evals/demo_budget.py` si un ejemplo necesita
+   cifras nuevas.
+
+5. **Ejecute los controles** hasta que pasen todos:
+
+   ```bash
+   just fix       # formato
+   just check     # black, isort, pylint, mypy, pytest (100 % de cobertura), vocabulario, bloqueo
+   just hygiene   # erratas, auditoría de workflows
+   ```
+
+6. **Actualice la documentación.** Si cambió una herramienta, sus argumentos o sus
+   respuestas, ejecute `uv run python -m docsgen` y haga commit de lo que escribe. Una
+   página escrita a mano se cambia en inglés, francés y español a la vez; `just docs`
+   construye el sitio y falla ante un enlace roto.
+
+7. **Haga commit** con un prefijo que indique el tipo de cambio — el changelog se genera
+   a partir de él:
+
+   ```bash
+   git commit -m "feat: list subscriptions whose price went up"
+   ```
+
+8. **Suba la rama y abra la pull request.**
+
+   ```bash
+   git push -u origin feat/subidas-suscripciones
+   gh pr create --fill
+   ```
+
+   O ábrala desde el enlace que muestra GitHub. Rellene la plantilla: qué y por qué,
+   cómo se comprobó, la lista de control, y `Closes #<issue>`.
+
+</Steps>
+
+## Qué pasa después
+
+| Etapa | Qué esperar |
+|---|---|
+| CI | los mismos controles que `just check` y `just hygiene`, en Python 3.14, más la construcción de la documentación. En una primera contribución, un mantenedor aprueba antes la ejecución. |
+| Revisión | comentarios sobre el código; suba nuevos commits a la misma rama para responder |
+| Fusión | agrupada en un solo commit en `main`, con el título de su pull request como mensaje |
+| Versión | su cambio aparece en el [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) de la siguiente versión |
+
+## Qué hace aceptar una pull request
+
+- **Un cambio por pull request**, lo bastante pequeño para revisarlo de una vez.
+- **Pruebas escritas primero**, que cubren cada línea y cada rama.
+- **Ninguna dependencia nueva de ejecución** sin un motivo escrito en la pull request.
+- **Escrituras seguras**: una herramienta que modifica el presupuesto previsualiza,
+  espera la confirmación y se puede deshacer — vea [Seguridad por diseño](/avenir-mcp/es/concepts/safety/).
+- **Ningún dato financiero real**, en ningún sitio: código, pruebas, documentación, capturas.
+
+El contrato completo está en [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), que se aplica tanto a
+las personas como a los agentes de código.

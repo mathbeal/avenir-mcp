@@ -1,0 +1,67 @@
+---
+title: Organise categories
+description: Create, rename and move categories, and set how much each receives.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import groups from '@snippets/list_category_groups.json?raw';
+import create from '@snippets/create_category_preview.json?raw';
+import rename from '@snippets/update_category_preview.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Goal:** keep the category structure in line with your life, and give each category its
+amount.
+
+**Tools:** [`list_category_groups`](/avenir-mcp/reference/tools/list-category-groups/),
+[`create_category`](/avenir-mcp/reference/tools/create-category/),
+[`update_category`](/avenir-mcp/reference/tools/update-category/),
+[`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/).
+
+## Create a category
+
+> **You:** Create a Pets category in Everyday.
+
+The agent finds the group's id with `list_category_groups` (YNAB's system groups are left
+out):
+
+<Code code={groups} lang="json" title="list_category_groups" />
+
+then previews the creation:
+
+<Code code={create} lang="json" title="create_category — preview" />
+
+A name already used in the group is refused, whatever its case.
+
+## Rename or move a category
+
+> **You:** Rename Tennis to Sport.
+
+<Code code={rename} lang="json" title="update_category — preview" />
+
+Pass `category_group_id` to move the category to another group, with or without a new
+name. Transactions and amounts stay attached to it. To go back, call again with the
+previous name and group, which the answer gives.
+
+## Set a category's amount
+
+> **You:** Put 150 in Restaurants for September.
+
+<Code code={budget} lang="json" title="set_category_budget — preview" />
+
+The amount is **absolute**: it replaces what was budgeted. `month` is `"current"` or
+`YYYY-MM-01`; `"current"` is resolved to the actual month so that an undo later acts on
+the right one.
+
+## Undo
+
+| Tool | Undo |
+|---|---|
+| `set_category_budget` | `undo_operation` restores the previous amount, unless it changed since |
+| `update_category` | call again with the previous name and group |
+| `create_category` | hide the category in YNAB — its API cannot delete one |
+
+<Aside type="note">
+Every change on this page is previewed and waits for your confirmation.
+</Aside>

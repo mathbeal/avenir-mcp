@@ -2,7 +2,8 @@
 
 Every example in the docs is what Avenir actually returns on the invented demo
 budget, with the date fixed and random identifiers replaced by placeholders, so
-the files only change when the behaviour does.
+the files only change when the behaviour does. Each capture also records how
+many requests the call sent to YNAB, measured on a cold cache.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ import asyncio
 import json
 import os
 import tempfile
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -22,6 +24,111 @@ from evals import fake_ynab
 
 TODAY = date(2026, 9, 25)
 BUDGET = "demo-budget"
+
+
+@dataclass(frozen=True)
+class Call:
+    """One documented call: a snippet name, a tool, its arguments."""
+
+    name: str
+    tool: str
+    args: dict[str, Any]
+    keep: int = 4
+    # Apply the first confirmation code returned, then make this call: shows undo.
+    after_applying: tuple[str, dict[str, Any]] | None = None
+
+
+@dataclass(frozen=True)
+class Capture:
+    """What a call sent and received."""
+
+    tool: str
+    args: dict[str, Any]
+    text: str
+    is_error: bool
+    requests: int
+
+
+_APPLY = {
+    "budget_id": BUDGET,
+    "assignments": [
+        {"transaction_id": "tx-048", "category_id": "cat-groceries"},
+        {"transaction_id": "tx-049", "category_id": "cat-transport"},
+    ],
+}
+
+CALLS: list[Call] = [
+    Call("list_budgets", "list_budgets", {}),
+    Call("list_accounts", "list_accounts", {"budget_id": BUDGET}),
+    Call("list_category_groups", "list_category_groups", {"budget_id": BUDGET}),
+    Call("monthly_summary", "get_monthly_summary", {"budget_id": BUDGET, "month": "2026-09-01"}),
+    Call(
+        "category_balances", "get_category_balances", {"budget_id": BUDGET, "month": "2026-09-01"}
+    ),
+    Call("budget_vs_actual", "get_budget_vs_actual", {"budget_id": BUDGET, "month": "2026-09-01"}),
+    Call("spending_trends", "get_spending_trends", {"budget_id": BUDGET, "months_count": 3}, 3),
+    Call("suggest_categories", "suggest_categories", {"budget_id": BUDGET, "limit": 3}, 3),
+    Call("apply_preview", "apply_categories", _APPLY),
+    Call(
+        "reconcile_gap",
+        "reconcile_account",
+        {"budget_id": BUDGET, "account_id": "acc-checking", "bank_balance": 3440.80},
+    ),
+    Call(
+        "forecast",
+        "forecast_balance",
+        {"budget_id": BUDGET, "until": "2026-12", "monthly_income": 3200},
+        6,
+    ),
+    Call(
+        "budget_preview",
+        "set_category_budget",
+        {
+            "budget_id": BUDGET,
+            "month": "2026-09-01",
+            "category_id": "cat-restaurants",
+            "amount": 150,
+        },
+    ),
+    Call(
+        "create_preview",
+        "create_transactions",
+        {
+            "budget_id": BUDGET,
+            "account_id": "acc-checking",
+            "transactions": [
+                {
+                    "date": "2026-09-21",
+                    "amount": -32.4,
+                    "payee_name": "Pharmacie Centrale",
+                    "memo": "not imported by the bank",
+                }
+            ],
+        },
+    ),
+    Call(
+        "create_category_preview",
+        "create_category",
+        {"budget_id": BUDGET, "category_group_id": "grp-everyday", "name": "Pets"},
+    ),
+    Call(
+        "update_category_preview",
+        "update_category",
+        {"budget_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},
+    ),
+    Call(
+        "approve",
+        "approve_transactions",
+        {"budget_id": BUDGET, "tx_ids": ["tx-048", "tx-049"]},
+    ),
+    Call(
+        "undo_preview",
+        "undo_operation",
+        {"budget_id": BUDGET},
+        after_applying=("apply_categories", _APPLY),
+    ),
+    Call("bad_month", "get_monthly_summary", {"budget_id": BUDGET, "month": "2026-13-01"}),
+]
 
 
 def _placeholders(data: Any) -> Any:
@@ -53,89 +160,42 @@ def _trim(data: Any, items: int = 4) -> Any:
     return data
 
 
-# (snippet name, tool, arguments, how many list entries to keep)
-CALLS: list[tuple[str, str, dict[str, Any], int]] = [
-    ("list_budgets", "list_budgets", {}, 4),
-    ("list_accounts", "list_accounts", {"budget_id": BUDGET}, 4),
-    ("monthly_summary", "get_monthly_summary", {"budget_id": BUDGET, "month": "2026-09-01"}, 4),
-    ("category_balances", "get_category_balances", {"budget_id": BUDGET, "month": "2026-09-01"}, 4),
-    ("suggest_categories", "suggest_categories", {"budget_id": BUDGET, "limit": 3}, 3),
-    (
-        "apply_preview",
-        "apply_categories",
-        {
-            "budget_id": BUDGET,
-            "assignments": [
-                {"transaction_id": "tx-048", "category_id": "cat-groceries"},
-                {"transaction_id": "tx-049", "category_id": "cat-transport"},
-            ],
-        },
-        4,
-    ),
-    (
-        "reconcile_gap",
-        "reconcile_account",
-        {"budget_id": BUDGET, "account_id": "acc-checking", "bank_balance": 3440.80},
-        4,
-    ),
-    (
-        "forecast",
-        "forecast_balance",
-        {"budget_id": BUDGET, "until": "2026-12", "monthly_income": 3200},
-        6,
-    ),
-    (
-        "budget_preview",
-        "set_category_budget",
-        {
-            "budget_id": BUDGET,
-            "month": "2026-09-01",
-            "category_id": "cat-restaurants",
-            "amount": 150,
-        },
-        4,
-    ),
-    (
-        "create_preview",
-        "create_transactions",
-        {
-            "budget_id": BUDGET,
-            "account_id": "acc-checking",
-            "transactions": [
-                {
-                    "date": "2026-09-21",
-                    "amount": -32.4,
-                    "payee_name": "Pharmacie Centrale",
-                    "memo": "not imported by the bank",
-                }
-            ],
-        },
-        4,
-    ),
-    ("bad_month", "get_monthly_summary", {"budget_id": BUDGET, "month": "2026-13-01"}, 4),
-]
+async def _apply_first(mcp_client: Client[Any], tool: str, args: dict[str, Any]) -> None:
+    """Preview then apply with the returned code, as a client without elicitation does."""
+    preview = await mcp_client.call_tool(tool, args, raise_on_error=False)
+    code = (preview.structured_content or {}).get("confirmation")
+    await mcp_client.call_tool(tool, {**args, "confirmation": code}, raise_on_error=False)
 
 
-async def _capture() -> dict[str, str]:
-    from avenir_mcp import server  # pylint: disable=import-outside-toplevel
+async def _capture() -> dict[str, Capture]:
+    from avenir_mcp import client, server  # pylint: disable=import-outside-toplevel
 
-    snippets: dict[str, str] = {}
+    server.configure(enable_writes=True)
+    captures: dict[str, Capture] = {}
     async with Client(server.mcp) as mcp_client:
-        for name, tool, args, keep in CALLS:
-            result = await mcp_client.call_tool(tool, args, raise_on_error=False)
+        for call in CALLS:
+            if call.after_applying:
+                await _apply_first(mcp_client, *call.after_applying)
+            client._CACHE.clear()  # pylint: disable=protected-access
+            before = fake_ynab.STATE.requests
+            result = await mcp_client.call_tool(call.tool, call.args, raise_on_error=False)
+            requests = fake_ynab.STATE.requests - before
             if result.is_error:
-                snippets[name] = result.content[0].text + "\n"
-                continue
-            data = result.structured_content
-            if isinstance(data, dict) and set(data) == {"result"}:
-                data = data["result"]
-            text = json.dumps(_trim(_placeholders(data), keep), indent=2, ensure_ascii=False)
-            snippets[name] = text + "\n"
-    return snippets
+                text = result.content[0].text + "\n"
+            else:
+                data = result.structured_content
+                if isinstance(data, dict) and set(data) == {"result"}:
+                    data = data["result"]
+                text = json.dumps(
+                    _trim(_placeholders(data), call.keep), indent=2, ensure_ascii=False
+                )
+                text += "\n"
+            captures[call.name] = Capture(call.tool, call.args, text, result.is_error, requests)
+    return captures
 
 
-def generate() -> dict[str, str]:
-    """Run the calls against a fresh demo budget; return snippet name -> text."""
+def capture_all() -> dict[str, Capture]:
+    """Run every documented call against a fresh demo budget."""
     fake_ynab.STATE = fake_ynab.DemoBudget()
     demo = fake_ynab.serve()
     try:
@@ -146,10 +206,12 @@ def generate() -> dict[str, str]:
                 "AVENIR_MCP_JOURNAL": str(Path(work) / "journal.jsonl"),
             }
             with patch.dict(os.environ, env), patch("avenir_mcp.app.today", lambda: TODAY):
-                from avenir_mcp import client  # pylint: disable=import-outside-toplevel
-
-                client._CACHE.clear()  # pylint: disable=protected-access
                 return asyncio.run(_capture())
     finally:
         demo.shutdown()
         demo.server_close()
+
+
+def generate() -> dict[str, str]:
+    """Snippet name -> JSON (or error) text, for the guides."""
+    return {name: c.text for name, c in capture_all().items()}

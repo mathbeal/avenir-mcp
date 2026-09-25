@@ -1,0 +1,67 @@
+---
+title: Organizar categorías
+description: Crear, renombrar y mover categorías, y fijar cuánto recibe cada una.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import groups from '@snippets/list_category_groups.json?raw';
+import create from '@snippets/create_category_preview.json?raw';
+import rename from '@snippets/update_category_preview.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Objetivo:** mantener la estructura de categorías acorde con su vida, y dar a cada
+categoría su importe.
+
+**Herramientas:** [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/),
+[`create_category`](/avenir-mcp/es/reference/tools/create-category/),
+[`update_category`](/avenir-mcp/es/reference/tools/update-category/),
+[`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/).
+
+## Crear una categoría
+
+> **Usted:** Crea una categoría Pets en Everyday.
+
+El agente encuentra el id del grupo con `list_category_groups` (los grupos de sistema de
+YNAB se omiten):
+
+<Code code={groups} lang="json" title="list_category_groups" />
+
+y previsualiza la creación:
+
+<Code code={create} lang="json" title="create_category — vista previa" />
+
+Un nombre ya usado en el grupo se rechaza, sin importar mayúsculas y minúsculas.
+
+## Renombrar o mover una categoría
+
+> **Usted:** Renombra Tennis a Sport.
+
+<Code code={rename} lang="json" title="update_category — vista previa" />
+
+Pase `category_group_id` para mover la categoría a otro grupo, con o sin nombre nuevo.
+Las transacciones y los importes siguen vinculados a ella. Para volver atrás, llame de
+nuevo con el nombre y el grupo anteriores, que da la respuesta.
+
+## Fijar el importe de una categoría
+
+> **Usted:** Pon 150 en Restaurants para septiembre.
+
+<Code code={budget} lang="json" title="set_category_budget — vista previa" />
+
+El importe es **absoluto**: sustituye lo presupuestado. `month` es `"current"` o
+`AAAA-MM-01`; `"current"` se resuelve al mes real para que un deshacer posterior actúe
+sobre el correcto.
+
+## Deshacer
+
+| Herramienta | Deshacer |
+|---|---|
+| `set_category_budget` | `undo_operation` restaura el importe anterior, salvo que haya cambiado desde entonces |
+| `update_category` | llamar de nuevo con el nombre y el grupo anteriores |
+| `create_category` | ocultar la categoría en YNAB — su API no puede borrar una |
+
+<Aside type="note">
+Cada cambio de esta página se previsualiza y espera su confirmación.
+</Aside>

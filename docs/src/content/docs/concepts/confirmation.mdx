@@ -1,0 +1,121 @@
+---
+title: Confirmation
+description: How a write waits for the user — elicitation on both protocol generations, single-use codes, and what binds an answer to its preview.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Every write except `approve_transactions` goes through one function,
+`confirm.ask`, before it changes anything. This page describes exactly what it does.
+
+## What is being confirmed
+
+Each tool builds a **subject**: the exact change, as data.
+
+| Tool | Subject |
+|---|---|
+| `apply_categories` | the list of changes (transaction, category after) |
+| `set_category_budget` | category, month (resolved), amount in milliunits |
+| `update_category` | category, name after, group after |
+| `create_category` | group, name |
+| `create_transactions` | account, the transactions, `approved` |
+| `reconcile_account` | account, bank balance, difference to adjust |
+| `undo_operation` | the operation id |
+
+Its **fingerprint** is the SHA-256 of the JSON `[budget_id, subject]`, keys sorted; for
+a list of changes, the order of the elements does not matter. An answer or a code only
+ever confirms the subject whose fingerprint it carries.
+
+## Three ways to ask
+
+`ask` checks what the client declared at connection and picks one:
+
+### 1. The client supports elicitation, protocol 2026-07-28
+
+In the current MCP protocol a server cannot send the client a request of its own during
+a call. Avenir uses the *input required* round trip:
+
+1. The first call returns an `InputRequiredResult` instead of the tool's answer. It holds
+   one request, `confirm`, a form with a single boolean `value`, whose message is the
+   preview (up to 20 changes, then *“… and N more”*), and a `request_state`: the
+   fingerprint.
+2. The client shows the form. The user ticks, or refuses.
+3. The client calls the tool again with the same arguments, the answer in
+   `input_responses`, and the `request_state` it received. FastMCP seals that state on
+   the wire and rejects tampering.
+4. Avenir recomputes the plan and its fingerprint. If they differ from `request_state` —
+   someone changed the budget in between — the call fails with *“The budget changed
+   between the preview and the answer”* and nothing is written.
+
+### 2. The client supports elicitation, older protocol
+
+The server asks during the call (`ctx.elicit`) with the same yes/no form, and waits for
+the answer.
+
+### 3. The client does not support elicitation
+
+The first call returns `status: "confirmation_required"`, the preview, and a
+**confirmation code**. The agent shows the preview to the user and, only if they agree,
+calls again with the same arguments plus `confirmation`.
+
+## How answers are read
+
+| Answer | Result |
+|---|---|
+| form accepted, box ticked | `applied` |
+| form accepted, box **not** ticked | `declined` |
+| `decline` | `declined` — nothing written |
+| `cancel` (dismissed, or a client that cannot show it) | falls back to a confirmation code |
+
+A dismissal is not a refusal: headless clients dismiss every question, and treating that
+as *no* would make every write impossible — the defect Avenir's
+[evaluation](/avenir-mcp/project/evaluation/) found on its first run.
+
+## Confirmation codes
+
+| Property | Value |
+|---|---|
+| Format | 11 URL-safe characters (`secrets.token_urlsafe(8)`) |
+| Lifetime | 600 seconds, on a monotonic clock |
+| Use | once: a code is spent on its first use, even if it does not match |
+| Scope | the fingerprint of one subject in one budget |
+| Storage | the server's memory only: a restart forgets every code |
+
+A code that is unknown, expired, already used, or issued for other changes is refused
+with: *“This confirmation code is unknown, expired, already used, or was issued for
+different changes. Call again without confirmation to get a new preview.”*
+
+<Aside type="caution">
+A code proves that a preview was produced, not that a person read it. The agent must
+pass it back only after the user agreed; the tool descriptions and the `avenir://guide`
+resource say so. Clients that support elicitation give a stronger guarantee: the user
+answers the client directly.
+</Aside>
+
+## Requiring the user's own answer
+
+A confirmation code proves that a preview existed, not that you read it. With
+`AVENIR_MCP_REQUIRE_ELICITATION=1`:
+
+| Situation | Without the variable | With it |
+|---|---|---|
+| client can ask, you say yes | `applied` | `applied` |
+| question dismissed | a confirmation code | `declined` |
+| client cannot ask | a confirmation code | error: nothing changed |
+| a `confirmation` code is passed | checked, then applied | error: codes are disabled |
+
+Only clients that support MCP elicitation can then write.
+
+## What the user sees
+
+| Tool | Question |
+|---|---|
+| `apply_categories` | *Recategorise 2 transaction(s)?* then one line per change: date, payee, amount, before → after |
+| `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
+| `create_category` | *Create category 'Pets' in Everyday?* |
+| `create_transactions` | *Create 1 transaction(s) on Checking?* then one line per transaction |
+| `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
+| `undo_operation` | *Undo: recategorise 2 transaction(s)?*, or the kind of undo |

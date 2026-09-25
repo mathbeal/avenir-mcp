@@ -1,0 +1,8 @@
+{
+  "status": "confirmation_required",
+  "message": "Nothing changed yet. Create category 'Pets' in Everyday? If the user agrees, call again with this code.",
+  "name": "Pets",
+  "group": "Everyday",
+  "category_id": null,
+  "confirmation": "<confirmation code>"
+}

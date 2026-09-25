@@ -1,0 +1,48 @@
+---
+// The figures behind the claims, each measured by the test suite or the evaluation.
+import { home } from './home-i18n';
+
+const t = home(Astro.locals.starlightRoute.lang);
+---
+
+<dl class="stats not-content">
+  {
+    t.stats.map(([value, label]) => (
+      <div>
+        <dt>{value}</dt>
+        <dd>{label}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    margin: 1rem 0 0;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .stats div {
+    padding: 1.25rem 1.5rem;
+    border-inline-start: 1px solid var(--sl-color-hairline-light);
+    margin-inline-start: -1px;
+  }
+
+  dt {
+    font-size: var(--sl-text-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--sl-color-white);
+    font-variant-numeric: tabular-nums;
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+title: Limites et feuille de route
+description: Ce qu'Avenir ne fait pas, ou fait imparfaitement, et ce qui vient ensuite.
+sidebar:
+  order: 3
+---
+
+## Limites connues
+
+| Domaine | Limite | Contournement |
+|---|---|---|
+| Codes de confirmation | gardés en mémoire : un redémarrage du serveur les oublie | redemander un aperçu |
+| Annulation | locale à la machine dont le journal a enregistré l'opération ; une annulation ne s'annule pas | refaire le changement |
+| `approve_transactions` | s'applique aussitôt, sans aperçu | il ne lève que le drapeau de revue de YNAB |
+| `update_category`, `create_category` | non annulables ; l'API YNAB ne peut pas supprimer une catégorie | renommer à nouveau ; masquer la catégorie dans YNAB |
+| Transport HTTP | HTTP simple, un seul jeton partagé, pas de comptes | le garder sur `127.0.0.1`, ou utiliser stdio |
+| Transactions ventilées | jamais proposées ni recatégorisées : leurs lignes portent les catégories | les modifier dans YNAB |
+| Suggestions | exigent un historique : un commerçant jamais classé n'en reçoit pas | l'agent propose, vous décidez |
+| Prévision | prolonge les derniers mois ; les charges trimestrielles ou annuelles ne sont pas récurrentes à ses yeux | les passer en `one_offs` |
+| Transactions planifiées | non lues : la prévision s'appuie sur l'historique | passer les montants futurs connus en `one_offs` |
+| Devise | montants affichés en nombres, sans symbole monétaire | — |
+| Python | 3.14 seulement ; 3.15 attend une dépendance (beartype) | — |
+
+## Feuille de route
+
+- Publier sur PyPI, puis un paquet `.mcpb` pour une installation en un clic dans Claude
+  Desktop.
+- L'annulation pour `update_category`.
+- Lire les transactions planifiées de YNAB dans la prévision.
+- Abaisser la version minimale de Python dès que les dépendances le permettent.
+- Lancer l'évaluation avec d'autres modèles et clients : GPT, Gemini, modèles locaux.
+
+Il vous manque quelque chose ? [Proposez une fonctionnalité](/avenir-mcp/fr/project/propose-a-feature/).

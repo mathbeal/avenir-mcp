@@ -1,0 +1,97 @@
+---
+title: Choose how Avenir runs
+description: Read-only or writes, stdio or HTTP, where the journal lives, and how much it logs.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir is configured with environment variables, set in your MCP client's `env` block.
+The full list is in [Configuration](/avenir-mcp/reference/configuration/).
+
+## Read-only or writes
+
+| Setting | Effect |
+|---|---|
+| nothing (default) | 9 read-only tools; the 8 write tools are neither listed nor callable |
+| `AVENIR_MCP_WRITE=1` | all 17 tools; every write but `approve_transactions` is previewed and confirmed |
+
+Any other value (`0`, `true`, `yes`) keeps the server read-only: only `1` enables writes.
+
+## Run over stdio (default)
+
+Your client starts Avenir as a subprocess and talks to it over its standard input and
+output. Nothing listens on the network. This is what every example in
+[Install](/avenir-mcp/getting-started/install/) does.
+
+## Run over HTTP
+
+For a client that connects to a URL, or to share one server between several clients on
+your machine. First create a long random token, which clients will have to present:
+
+```bash
+export AVENIR_MCP_HTTP_TOKEN=$(openssl rand -hex 32)
+```
+
+Then start the server:
+
+```bash
+AVENIR_MCP_TRANSPORT=http \
+AVENIR_MCP_HOST=127.0.0.1 \
+AVENIR_MCP_PORT=8103 \
+YNAB_API_KEY=your-token \
+uvx avenir-mcp
+```
+
+It listens on `http://127.0.0.1:8103/mcp` (streamable HTTP). Point your client there
+with the token in an `Authorization` header — with Claude Code:
+
+```bash
+claude mcp add --transport http avenir http://127.0.0.1:8103/mcp \
+  --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
+```
+
+Over HTTP, every request is checked before it reaches a tool:
+
+| Check | Refused with | Stops |
+|---|---|---|
+| the `Host` header names this machine (`127.0.0.1`, `localhost`, `::1`) | `421` | a web page reaching the server through DNS rebinding |
+| an `Origin` header, when present, is this server's | `403` | a page from another site, running in your browser |
+| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, when a token is set | `401` | any other program on your machine or network |
+
+With `AVENIR_MCP_WRITE=1`, the token is **required**: without it the server refuses to
+start. Read-only over HTTP works without a token, with the first two checks only.
+
+<Aside type="danger" title="Keep it on your machine">
+Keep `AVENIR_MCP_HOST=127.0.0.1`: the traffic is plain HTTP, not encrypted. Never bind
+`0.0.0.0` or publish the port on all interfaces with Docker or a router, and never put
+the server on the internet.
+</Aside>
+
+## Where the journal lives
+
+Applied operations are recorded so they can be undone. By default the journal is
+`$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, or `~/.local/state/avenir-mcp/journal.jsonl`
+when `XDG_STATE_HOME` is not set. Choose another file with `AVENIR_MCP_JOURNAL`. See
+[Journal and undo](/avenir-mcp/concepts/journal/).
+
+## Diagnostics
+
+Avenir writes diagnostics to **stderr** — never stdout, which belongs to the protocol in
+stdio mode — at the level of `AVENIR_MCP_LOG_LEVEL`, `WARNING` by default:
+
+| Level | You see |
+|---|---|
+| `WARNING` (default) | only problems |
+| `INFO` | each tool call and each YNAB request |
+| `DEBUG` | everything, including the MCP library's own messages |
+
+An expected error (a malformed month, an unknown account) is logged on one line; a real
+failure keeps its traceback. The token is never logged.
+
+## Suggestions threshold
+
+`AVENIR_MCP_CONFIDENCE_THRESHOLD` (default `0.90`) is the share of a payee's history that
+must agree before a category is suggested. Lower it to get more suggestions, less often
+right. See [Suggestions](/avenir-mcp/concepts/suggestions/).

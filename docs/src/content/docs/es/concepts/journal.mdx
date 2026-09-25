@@ -1,0 +1,74 @@
+---
+title: Diario y deshacer
+description: El registro local de las operaciones aplicadas, su formato y lo que restaura exactamente un deshacer.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Cada escritura confirmada se anota en un diario local, para que `undo_operation` pueda
+deshacerla más tarde — incluso tras reiniciar el servidor.
+
+## Dónde
+
+| | |
+|---|---|
+| Archivo por defecto | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, si no `~/.local/state/avenir-mcp/journal.jsonl` |
+| Archivo elegido | `AVENIR_MCP_JOURNAL` |
+| Permisos | creado en `0600`: solo usted puede leerlo y modificarlo |
+| Contenido | solo identificadores — ni importes, ni beneficiarios, ni memos, ni token |
+
+## Formato
+
+JSON Lines, solo añadir. Una operación aplicada ocupa una línea:
+
+```json
+{"operation_id":"5f2c9a1e7b30","budget_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+```
+
+Deshacerla añade un marcador; nunca se reescribe nada:
+
+```json
+{"undone":"5f2c9a1e7b30"}
+```
+
+| Campo | Significado |
+|---|---|
+| `operation_id` | 12 caracteres hexadecimales aleatorios |
+| `budget_id` | el presupuesto modificado |
+| `kind` | `categorize`, `budget`, `reconcile` o `create` |
+| `applied_at` | ISO 8601, UTC, al segundo |
+| `moves` | para `categorize`: la categoría de cada transacción antes y después |
+| `details` | para los demás tipos, lo que necesita el deshacer (abajo) |
+
+| `kind` | `details` |
+|---|---|
+| `budget` | `month`, `category_id`, `from` y `to` en miliunidades |
+| `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (o `null`) |
+| `create` | `transaction_ids` |
+
+## Qué operación se deshace
+
+Sin id, `undo_operation` toma **la operación más reciente del presupuesto aún vigente**:
+no deshecha, y que no sea ella misma un deshacer. Con un id, esa operación, si sigue
+vigente. Si no: *«Nothing to undo: no operation of this budget is still in effect.»*
+
+## Qué restaura el deshacer
+
+| `kind` | Deshacer | Se comprueba antes | Si la comprobación falla |
+|---|---|---|---|
+| `categorize` | cada transacción recupera su categoría anterior | su categoría sigue siendo la que puso la operación | esa transacción se deja igual y se lista en `conflicts` |
+| `budget` | el importe anterior | el importe sigue siendo el que puso la operación | nada escrito; `conflicts` nombra la categoría |
+| `reconcile` | las transacciones *reconciled* vuelven a *cleared*; se borra el ajuste | cada una sigue *reconciled* | las que ya no lo están se omiten |
+| `create` | se borran las transacciones creadas | cada una sigue existiendo | las ya borradas se listan en `conflicts` |
+
+El deshacer se previsualiza y confirma como cualquier escritura. Deshacer una operación
+`categorize` registra el deshacer como una operación y marca ambas como deshechas: un
+deshacer no se deshace.
+
+<Aside type="note">
+El diario es local: una operación hecha desde otra máquina, o antes de que el archivo del
+diario cambiara o se borrara, no se puede deshacer desde aquí. Borrar el archivo borra el
+historial, y nada más.
+</Aside>

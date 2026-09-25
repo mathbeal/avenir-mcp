@@ -1,0 +1,59 @@
+---
+title: Reconciliation
+description: How an account is compared with the bank, how a gap is explained, and what reconciling changes.
+sidebar:
+  order: 7
+---
+
+`reconcile_account` compares an account with the balance your bank shows. The
+comparison is a pure computation on the account's transactions (`reconcile.analyse`); it
+writes nothing.
+
+## The comparison
+
+Only the account's transactions that are not deleted count.
+
+| Quantity | Definition |
+|---|---|
+| cleared balance | sum of transactions whose status is *cleared* or *reconciled* |
+| working balance | sum of all transactions |
+| difference | bank balance − cleared balance |
+| to reconcile | transactions *cleared* but not yet *reconciled* |
+| uncleared | transactions the bank has not shown yet (up to 50 listed) |
+
+Everything is summed in milliunits. A **negative** difference means YNAB counts more
+money than the bank — typically a duplicate or a refund that never came; a **positive**
+one, less — typically a fee or an income not imported.
+
+## Explaining a gap
+
+| Lead | Rule |
+|---|---|
+| `explained_by` | uncleared transactions whose amount equals the difference exactly: clearing one closes the gap |
+| `possible_duplicates` | pairs with the same amount and the same [normalised](/avenir-mcp/concepts/suggestions/#recognising-a-merchant) merchant, dated at most **3 days** apart, among the last **60 days** of transactions |
+| `uncleared` | what the bank has not shown yet, for the agent to check with you |
+
+The 60-day window keeps old, legitimate lookalikes — two nights at the same hotel last
+winter — out of the answer.
+
+## Outcomes
+
+| Situation | `status` | Written |
+|---|---|---|
+| balances differ, no `adjust` | `difference_found` | nothing, and nothing asked |
+| balances match, nothing left to reconcile | `nothing_to_do` | nothing |
+| balances match | `confirmation_required`, then `applied` | cleared → reconciled |
+| balances differ, `adjust=true` | `confirmation_required`, then `applied` | an adjustment, then cleared → reconciled |
+
+## Applying
+
+Once confirmed:
+
+1. With `adjust=true` and a difference, one transaction is created on the account:
+   payee *Balance adjustment*, dated today, amount = the difference, category *Inflow:
+   Ready to Assign*, memo *Entered by reconcile_account*, cleared and approved.
+2. Every *cleared* transaction of the account — the adjustment included — is set to
+   *reconciled*, in one bulk request.
+3. The operation is journaled with the reconciled ids and the adjustment id.
+
+`undo_operation` sets them back to *cleared* and deletes the adjustment.

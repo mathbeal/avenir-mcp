@@ -1,0 +1,57 @@
+---
+title: Annuler un changement
+description: Défaire la dernière opération, ou celle que vous désignez, sans écraser un travail plus récent.
+sidebar:
+  order: 7
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import undo from '@snippets/undo_preview.json?raw';
+
+**Objectif :** revenir sur un changement fait par Avenir.
+
+**Outil :** [`undo_operation`](/avenir-mcp/fr/reference/tools/undo-operation/).
+
+## La conversation
+
+<Steps>
+
+1. **Demandez.**
+
+   > **Vous :** Annule ça.
+
+2. **L'agent prévisualise l'annulation.** `undo_operation` avec
+   `{"budget_id": "last-used"}` trouve la dernière opération du budget encore en vigueur
+   et montre ce que l'annuler changerait — ici, deux transactions qui repartent sans
+   catégorie :
+
+   <Code code={undo} lang="json" title="undo_operation — aperçu" />
+
+3. **Vous confirmez.** L'état précédent est rétabli, et l'opération est marquée annulée
+   dans le journal.
+
+</Steps>
+
+Pour annuler une opération plus ancienne, donnez son identifiant : *« annule
+l'opération 3f9a… »*. La réponse de chaque opération appliquée porte son `operation_id`.
+
+## Ce qui s'annule
+
+| Opération | L'annulation rétablit | Laissé tel quel si |
+|---|---|---|
+| `apply_categories` | la catégorie précédente de chaque transaction | sa catégorie a de nouveau changé depuis |
+| `set_category_budget` | l'ancien montant | le montant a de nouveau changé depuis |
+| `reconcile_account` | l'état *pointé* ; supprime l'ajustement | une transaction n'est plus rapprochée |
+| `create_transactions` | supprime les transactions créées | l'une a déjà été supprimée |
+
+Ce qui est laissé tel quel est listé dans `conflicts` : une annulation n'écrase jamais un
+travail plus récent.
+
+**Ne s'annulent pas :** `update_category` (rappelez-le avec l'ancien nom et l'ancien
+groupe), `create_category` (masquez la catégorie dans YNAB), `approve_transactions`
+(l'approbation n'est qu'un marqueur de revue).
+
+<Aside type="note">
+Une annulation ne s'annule pas elle-même, et l'annulation fonctionne sur la machine dont
+le [journal](/avenir-mcp/fr/concepts/journal/) a enregistré l'opération.
+</Aside>

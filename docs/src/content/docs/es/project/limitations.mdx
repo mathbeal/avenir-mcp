@@ -1,0 +1,33 @@
+---
+title: Limitaciones y hoja de ruta
+description: Lo que Avenir no hace, o hace de forma imperfecta, y lo que viene después.
+sidebar:
+  order: 3
+---
+
+## Limitaciones conocidas
+
+| Área | Limitación | Alternativa |
+|---|---|---|
+| Códigos de confirmación | se guardan en memoria: un reinicio del servidor los olvida | pedir una nueva vista previa |
+| Deshacer | local a la máquina cuyo diario registró la operación; un deshacer no se deshace | rehacer el cambio |
+| `approve_transactions` | se aplica al momento, sin vista previa | solo quita la marca de revisión de YNAB |
+| `update_category`, `create_category` | no se pueden deshacer; la API de YNAB no puede borrar una categoría | renombrar de nuevo; ocultar la categoría en YNAB |
+| Transporte HTTP | HTTP simple, un solo token compartido, sin cuentas | mantenerlo en `127.0.0.1`, o usar stdio |
+| Transacciones divididas | nunca se sugieren ni se recategorizan: sus líneas llevan las categorías | cambiarlas en YNAB |
+| Sugerencias | necesitan historial: un comercio nunca clasificado no recibe ninguna | el agente propone, usted decide |
+| Previsión | prolonga los últimos meses; los cargos trimestrales o anuales no son recurrentes según su definición | pasarlos como `one_offs` |
+| Transacciones programadas | no se leen: la previsión se basa en el historial | pasar los importes futuros conocidos como `one_offs` |
+| Moneda | los importes se muestran como números, sin símbolo de moneda | — |
+| Python | solo 3.14; 3.15 espera a una dependencia (beartype) | — |
+
+## Hoja de ruta
+
+- Publicar en PyPI, y después un paquete `.mcpb` para instalar con un clic en Claude
+  Desktop.
+- Deshacer para `update_category`.
+- Leer las transacciones programadas de YNAB en la previsión.
+- Bajar la versión mínima de Python cuando las dependencias lo permitan.
+- Ejecutar la evaluación con otros modelos y clientes: GPT, Gemini, modelos locales.
+
+¿Le falta algo? [Proponga una función](/avenir-mcp/es/project/propose-a-feature/).

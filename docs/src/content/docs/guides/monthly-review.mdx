@@ -1,0 +1,87 @@
+---
+title: Review a month
+description: See where the money went, spot what stands out, and move money to fix overspending.
+sidebar:
+  order: 3
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import usage from '@snippets/budget_vs_actual.json?raw';
+import trends from '@snippets/spending_trends.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+import badMonth from '@snippets/bad_month.json?raw';
+
+**Goal:** understand a month — income, spending, what is left to assign — and correct
+what went off track.
+
+**Tools:** [`get_monthly_summary`](/avenir-mcp/reference/tools/get-monthly-summary/),
+[`get_category_balances`](/avenir-mcp/reference/tools/get-category-balances/),
+[`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/),
+[`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/), and
+[`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/) to fix.
+**Prompt:** `monthly_review`.
+
+## The conversation
+
+<Steps>
+
+1. **Ask.**
+
+   > **You:** Review September with me.
+
+2. **The month at a glance.** `get_monthly_summary` with `month: "2026-09-01"` answers in
+   a few lines — one YNAB request:
+
+   <Code code={summary} lang="json" title="get_monthly_summary" />
+
+   | Field | Reads as |
+   |---|---|
+   | `income` | money received this month into Ready to Assign |
+   | `budgeted` | total assigned to categories this month |
+   | `activity` | spent (negative) and received in categories |
+   | `ready_to_assign` | money with no job yet — negative if you assigned more than you have |
+   | `overspent` | categories whose available balance is negative |
+
+3. **The detail.** `get_category_balances` lists each category with something in it:
+
+   <Code code={balances} lang="json" title="get_category_balances (first entries)" />
+
+   `get_budget_vs_actual` gives the share of each budget consumed — `utilization_pct`
+   above 100 means overspent:
+
+   <Code code={usage} lang="json" title="get_budget_vs_actual (first entries)" />
+
+4. **The trend.** Is Restaurants high this month or every month?
+   `get_spending_trends` with `months_count: 3` gives spending per category, month by
+   month:
+
+   <Code code={trends} lang="json" title="get_spending_trends (excerpt)" />
+
+5. **The fix.** Overspending is covered by moving money from a category with room:
+
+   > **Claude:** Restaurants is 22.50 over. Tennis has 80 available and nothing spent yet. Move
+   > 30 from Tennis to Restaurants?
+   >
+   > **You:** Yes.
+
+   Two `set_category_budget` calls, each previewed before → after:
+
+   <Code code={budget} lang="json" title="set_category_budget — preview" />
+
+</Steps>
+
+## Good to know
+
+- `month` is `"current"` or the first day of a month, `YYYY-MM-01`. Anything else is
+  refused before YNAB is called, at no cost:
+
+  <Code code={badMonth} lang="text" title="get_monthly_summary — month 2026-13-01" />
+- Hidden categories and YNAB's internal ones (*Inflow: Ready to Assign*) are left out of
+  every review.
+- `set_category_budget` sets an **absolute** amount, not a change: moving 30 is two
+  calls, one lowering Tennis from 80 to 50, one raising Restaurants from 120 to 150.
+  Each can be undone.
+- The `avenir://guide` resource reminds agents of the YNAB method: overspending is fixed
+  by moving money, not ignored.
