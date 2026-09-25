@@ -1,0 +1,44 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+
+  # Formatters and linters come from the lockfile, not from separately pinned
+  # mirrors: two versions of a tool give two verdicts.
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: uv run isort
+        language: system
+        types: [python]
+        require_serial: true
+      - id: black
+        name: black
+        entry: uv run black
+        language: system
+        types: [python]
+        require_serial: true
+      - id: lexdrift
+        name: lexdrift
+        entry: uvx lexdrift check avenir_mcp --baseline lexdrift.lock
+        language: system
+        types: [python]
+        pass_filenames: false
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.28.4
+    hooks:
+      - id: typos
+
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: v1.0.1
+    hooks:
+      - id: zizmor

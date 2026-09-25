@@ -164,3 +164,23 @@ def test_current_month_deducts_what_already_happened() -> None:
         data = _call({"budget_id": "b1", "until": "2026-09"}).structured_content
     assert data["assumptions"]["variable_monthly"] == -100.0
     assert data["months"][0]["outflows"] == -400.0
+
+
+def test_given_income_replaces_income_found_in_history() -> None:
+    """A salary recurring in the history is not counted on top of monthly_income."""
+    salary = [
+        {
+            "payee_name": "EMPLOYER",
+            "amount": 3200000,
+            "date": f"2026-{m:02d}-28",
+            "deleted": False,
+            "transfer_account_id": None,
+            "account_id": "acc",
+        }
+        for m in (5, 6, 7, 8)
+    ]
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=_TXS + salary)):
+        data = _call({"budget_id": "b1", "until": "2026-10", "monthly_income": 3200.0})
+    content = data.structured_content
+    assert content["months"][1]["inflows"] == 3200.0
+    assert all(r["amount"] < 0 for r in content["assumptions"]["recurring"])

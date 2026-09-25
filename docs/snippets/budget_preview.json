@@ -1,0 +1,11 @@
+{
+  "status": "confirmation_required",
+  "message": "Nothing changed yet. Budget Restaurants for 2026-09-01: 120.00 → 150.00? If the user agrees, call again with this code.",
+  "category_id": "cat-restaurants",
+  "category": "Restaurants",
+  "month": "2026-09-01",
+  "from_amount": 120.0,
+  "to_amount": 150.0,
+  "confirmation": "<confirmation code>",
+  "operation_id": null
+}

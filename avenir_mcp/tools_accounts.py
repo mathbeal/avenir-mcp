@@ -228,8 +228,8 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         until: Last month to project, YYYY-MM, at most 24 months ahead.
         account_ids: Accounts to include (from list_accounts); default all open
             on-budget accounts.
-        monthly_income: Income expected each month from next month on; default:
-            the last 3 months' average.
+        monthly_income: Income expected each month, replacing the income found in
+            the history (recurring or average); default: what the history shows.
         variable_monthly: Monthly spending besides recurring charges (negative);
             default: the last 3 months' average.
         one_offs: Expected one-off amounts: {date YYYY-MM-DD, amount, label}.
@@ -248,6 +248,9 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     ids = {a["id"] for a in chosen}
     history = [tx for tx in await client.get_transactions(budget_id) if tx.get("account_id") in ids]
     charges = forecast.recurring(history, now)
+    if monthly_income is not None:
+        # The income given replaces what the history suggests, recurring salary included.
+        charges = [r for r in charges if r["amount"] < 0]
     variable = (
         variable_monthly
         if variable_monthly is not None

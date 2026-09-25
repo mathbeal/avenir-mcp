@@ -1,6 +1,7 @@
 # Avenir — an MCP server for YNAB
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
+[![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://mathbeal.github.io/avenir-mcp/)
 [![python](https://img.shields.io/badge/python-3.14-blue)](https://github.com/mathbeal/avenir-mcp)
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/mathbeal/avenir-mcp)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
@@ -11,190 +12,82 @@
 > 🇫🇷 **Avenir** permet à un agent IA de lire votre budget YNAB et de vous aider
 > à préparer la suite.
 
-Give an AI agent your budget — the balances, the trends, the transactions waiting
-to be classified — and let it help you plan what comes next.
+Ask Claude — or any [MCP](https://modelcontextprotocol.io) client — about your budget
+in plain words: where the money went, what still needs a category, whether an account
+matches the bank, when money would run out. Every change is previewed, confirmed by
+you, and can be undone.
 
-Avenir is a [Model Context Protocol](https://modelcontextprotocol.io) server for
-[YNAB](https://www.ynab.com). It works with Claude Desktop, Claude Code, Cursor and
-any MCP client.
+**📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
 
 > **Not affiliated with or endorsed by YNAB.** YNAB and You Need A Budget are
 > registered trademarks of YNAB.
 
-**Status: alpha (0.1).** The tools work and are tested, but they are still close to
-the YNAB API. The [roadmap](ROADMAP.md) turns them into task-level tools that are
-read-only by default, previewable and undoable.
+## Why Avenir
 
-## What it does
-
-| Tool | Kind | What for |
-|---|---|---|
-| `list_budgets` | read | the budgets your token can see |
-| `list_accounts` | read | accounts and balances |
-| `list_category_groups` | read | where a new category can go |
-| `get_monthly_summary` | read | the month at a glance: income, budgeted, spent, Ready to Assign, overspent categories |
-| `get_category_balances` | read | budgeted, spent and available per category, empty ones left out unless asked |
-| `get_budget_vs_actual` | read | how much of each category's budget is spent |
-| `get_spending_trends` | read | spending per category over the last N months |
-| `suggest_categories` | read | **start here to classify**: pending transactions, newest first, paginated, with a suggestion when the payee's history allows, and the category list, in two YNAB requests |
-| `forecast_balance` | read | project the balance month by month up to 24 months ahead and name the first month it goes below zero; every assumption (recurring charges found in your history, average spending and income, your one-off amounts) is returned so you can correct it |
-| `apply_categories` | **write, confirmed, undoable** | assign categories to many transactions: previewed, confirmed by the user, then journaled |
-| `undo_operation` | **write, confirmed** | revert the latest operation (or a named one); never overwrites a later change |
-| `reconcile_account` | **write, confirmed, undoable** | compare an account with the balance your bank shows; explain a gap (pending transactions, the one matching the difference, likely duplicates) without writing; once it matches, mark cleared transactions reconciled; an adjustment only on explicit request |
-| `update_category` | **write, confirmed** | rename a category or move it to another group; the result gives the previous name and group to revert |
-| `approve_transactions` | **write** | mark transactions as reviewed |
-| `create_category` | **write, confirmed** | add a category to a group; a name already in the group is refused |
-| `set_category_budget` | **write, confirmed, undoable** | set the amount budgeted in a category for a month; previewed as before → after |
-| `create_transactions` | **write, confirmed, undoable** | add transactions an import missed; previewed, left for review in YNAB unless `approved`; undo deletes them |
-
-## Resources and prompts
-
-Besides tools, the server offers context an application can attach without a tool
-call, and workflows you start yourself.
-
-| Resource | What it holds |
-|---|---|
-| `avenir://guide` | how to use the tools, and the YNAB method in brief |
-| `ynab://budgets` | your budgets and their ids |
-| `ynab://budgets/{budget_id}/categories` | assignable categories by group, with ids |
-| `ynab://budgets/{budget_id}/accounts` | open accounts and their balances |
-
-| Prompt | Arguments | What it walks through |
-|---|---|---|
-| `classify_pending` | budget_id | suggestions, your choices, a confirmed batch, the undo id |
-| `monthly_review` | budget_id, month | totals, what stands out, proposed fixes |
-| `reconcile` | budget_id, account_id, bank_balance | the gap explained, then a confirmed reconciliation |
-| `plan_next_month` | budget_id | forecast and its assumptions, then next month's amounts |
+- **Tools for tasks, not endpoints.** Classify a month of transactions, reconcile an
+  account, forecast your balance: one tool each, not a wrapper of YNAB's API.
+- **Read-only by default.** Tools that change your budget exist only when you enable
+  them.
+- **Preview, confirm, undo.** Every write shows what will change and waits for your
+  yes; `undo_operation` reverts it.
+- **Answers an agent can read.** Currency units, short typed answers, pagination,
+  errors that say what to fix, bank text treated as untrusted.
+- **Verified.** 100 % line and branch coverage, and an evaluation where a real agent
+  works on an invented budget: 9/9 tasks.
 
 ## Install
 
-The examples enable write tools (`AVENIR_MCP_WRITE=1`); drop it to keep the server
-read-only.
-
 You need [uv](https://docs.astral.sh/uv/) and a YNAB personal access token
-(YNAB → Account Settings → Developer Settings).
+(YNAB → Account Settings → Developer Settings → New Token).
 
-Until the first PyPI release, install from GitHub:
+```bash
+# Claude Code
+claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- uvx avenir-mcp
+```
 
-```json
+```jsonc
+// Claude Desktop, Cursor: the mcpServers block of the client's configuration
 {
   "mcpServers": {
     "avenir": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/mathbeal/avenir-mcp", "avenir-mcp"],
+      "args": ["avenir-mcp"],
       "env": { "YNAB_API_KEY": "your-token", "AVENIR_MCP_WRITE": "1" }
     }
   }
 }
 ```
 
-With Claude Code:
+Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
+[Install](https://mathbeal.github.io/avenir-mcp/getting-started/install/) ·
+[Configuration](https://mathbeal.github.io/avenir-mcp/reference/configuration/).
 
-```bash
-claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp
-```
+## What you can ask
 
-## Environment variables
-
-| Variable | Required | Default | Used by | Meaning |
-|---|---|---|---|---|
-| `YNAB_API_KEY` | **yes** | — | every tool | YNAB personal access token. It grants full read and write access to your budgets: keep it in your MCP client's `env` block or in a `.env` file, never in the repository. |
-| `AVENIR_MCP_WRITE` | no | unset (read-only) | write tools | `1` registers the tools that change your budget. Without it the server is read-only: write tools are neither listed nor callable. |
-| `AVENIR_MCP_TRANSPORT` | no | `stdio` | `avenir-mcp` command | `stdio` for a client that launches the server itself (Claude Desktop, Claude Code, Cursor); `http` to serve streamable HTTP. |
-| `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
-| `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
-| `AVENIR_MCP_JOURNAL` | no | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, else `~/.local/state/avenir-mcp/journal.jsonl` | `apply_categories`, `reconcile_account`, `undo_operation` | File recording applied operations so they can be undone. Holds identifiers only (transaction and category ids), no amounts or payees; created with owner-only permissions. |
-| `AVENIR_MCP_YNAB_URL` | no | `https://api.ynab.com/v1` | every tool | API base URL; the evaluation points it at its demo budget server. |
-| `AVENIR_MCP_LOG_LEVEL` | no | `WARNING` | diagnostics | Level of the diagnostics written to stderr (`DEBUG`, `INFO`, …). An expected tool error is logged on one line, a real failure with its traceback. |
-| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
-
-Every tool takes a `budget_id`: a budget UUID from `list_budgets`, or `last-used`.
-
-## Limits
-
-Written down so that nobody discovers them the hard way:
-
-- **Confirmed writes.** `apply_categories` and `undo_operation` show what will change
-  and wait for the user: through the client's confirmation dialog (MCP elicitation)
-  when it has one, otherwise through a single-use code valid 10 minutes for exactly the
-  previewed changes.
-- **Read-only by default.** Write tools exist only with `AVENIR_MCP_WRITE=1`.
-- **`approve_transactions` acts immediately** once writes are enabled: it only marks
-  transactions as reviewed. Every other write is previewed and confirmed.
-- Undo covers `apply_categories`, `reconcile_account`, `set_category_budget` and
-  `create_transactions`, on the machine whose journal recorded them. YNAB's API cannot
-  delete a category, so `create_category` is undone by hiding it in YNAB. An undo cannot itself be undone.
-- Amounts are in currency units everywhere (YNAB's milliunits stay inside the server).
-- Suggestions come from your own history, learnt separately for money in and money
-  out, and only point to categories you can still assign. A merchant never classified
-  before gets no suggestion, and the agent chooses from the category list. YNAB allows 200 requests
-  per hour; `suggest_categories` uses two per page.
-- `forecast_balance` extrapolates your last months: recurring charges must appear in
-  3 of the last 4 months at a stable amount, and averages include one-off money
-  (a capital injection, a yearly tax). Read its assumptions before its conclusion.
-- Transaction memos and payee names come from your bank and are untrusted text. See
-  [SECURITY.md](SECURITY.md).
-
-## Tests and coverage
-
-| Measure | Value |
+| You ask | Avenir |
 |---|---|
-| Tests | 266, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1257 statements) |
-| Branch coverage | 100 % (284 branches) |
-| Type checking | mypy `strict` |
-| Lint | pylint 10.00/10, black, isort |
-| Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |
-| Supply chain | pip-audit on the locked dependencies, zizmor on the workflows |
+| "Which category is overspent this month?" | `get_monthly_summary` — totals and overspent categories |
+| "Categorise what is pending." | `suggest_categories`, then `apply_categories` after your yes |
+| "My bank shows 3,440.80. Does YNAB agree?" | `reconcile_account` — explains the gap, changes nothing until it matches |
+| "Will I go below zero before December?" | `forecast_balance` — month by month, with its assumptions |
+| "Move 30 from Leisure to Restaurants." | `set_category_budget`, previewed and undoable |
+| "Undo that." | `undo_operation` |
 
-Coverage below 100 % fails the test run (`--cov-fail-under=100`, branches included),
-and so does any warning (`filterwarnings = error`): a deprecation cannot go unnoticed.
-CI runs Python 3.14; 3.15 runs as an experimental job until its dependencies support it.
-`tests/test_hygiene.py` also fails if an IBAN, a YNAB token or a bank statement ever
-lands in the repository.
-
-## Evaluation
-
-Unit tests check the code; they cannot tell whether an agent picks the right tool,
-reads its answer correctly or respects a confirmation. `evals/` runs a real Claude
-agent (Claude Code in non-interactive mode) against an invented demo budget served by
-a local stand-in for YNAB's API, one fresh budget per task:
-
-```bash
-uv run python -m evals.run            # all tasks, Sonnet; --model and --task to narrow
-```
-
-Nine tasks cover reading (spending, overspending, balances, pending count, a phone
-bill), reconciliation (find a transaction imported twice without changing anything),
-writes (classify pending transactions, move money between categories), a prompt
-injection hidden in a bank memo, and a request no tool can serve. A task passes when
-the answer is right **and** the demo budget ends in the expected state; expected
-figures are computed from the demo data, never from Avenir's output.
-
-Latest run (2026-09-25, Sonnet, FastMCP 4): **9/9 passed**, 1.9 Avenir calls per task
-on average.
-The first run found a real defect: headless clients dismiss confirmation dialogs,
-which Avenir treated as a refusal, so no write could ever go through. Reports are in
-`evals/results/`.
+Walk-throughs with real answers: [Use cases](https://mathbeal.github.io/avenir-mcp/use-cases/classify/).
+Every tool, resource and prompt: [Reference](https://mathbeal.github.io/avenir-mcp/reference/tools/).
 
 ## Development
 
 ```bash
-git clone https://github.com/mathbeal/avenir-mcp
-cd avenir-mcp
+git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
 uv sync
-uv run pytest            # fails under 100 % line and branch coverage
-uv run mypy
-uv run black --check avenir_mcp tests && uv run isort --check avenir_mcp tests
-uv run pylint avenir_mcp tests
-uvx lexdrift check avenir_mcp --baseline lexdrift.lock
+just check        # lint, types, tests at 100 % coverage, vocabulary, lockfile
+just docs-serve   # the documentation, live
+just evaluate     # a real agent on the demo budget (uses your Claude plan)
 ```
 
-CI (`.github/workflows/quality.yml`) runs the same, plus the lockfile check, typos,
-zizmor and pip-audit.
-
 Read [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md) before opening a
-pull request.
+pull request. Security reports: [SECURITY.md](SECURITY.md).
 
 ## Licence
 

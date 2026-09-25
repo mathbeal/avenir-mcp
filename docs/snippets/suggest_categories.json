@@ -1,0 +1,64 @@
+{
+  "pending_count": 6,
+  "suggested_count": 5,
+  "items": [
+    {
+      "transaction_id": "tx-050",
+      "date": "2026-09-19",
+      "amount": -71.86,
+      "payee": "CB MARKET FRESH FACT 190926 525130******1",
+      "memo": null,
+      "account": "Checking",
+      "suggestion": {
+        "category_id": "cat-groceries",
+        "category_name": "Groceries",
+        "confidence": 1.0
+      }
+    },
+    {
+      "transaction_id": "tx-051",
+      "date": "2026-09-19",
+      "amount": -71.86,
+      "payee": "CB MARKET FRESH FACT 190926 525130******1",
+      "memo": null,
+      "account": "Checking",
+      "suggestion": {
+        "category_id": "cat-groceries",
+        "category_name": "Groceries",
+        "confidence": 1.0
+      }
+    },
+    {
+      "transaction_id": "tx-049",
+      "date": "2026-09-18",
+      "amount": -45.0,
+      "payee": "RAIL CO",
+      "memo": null,
+      "account": "Checking",
+      "suggestion": {
+        "category_id": "cat-transport",
+        "category_name": "Transport",
+        "confidence": 1.0
+      }
+    }
+  ],
+  "categories": [
+    {
+      "category_id": "cat-inflow",
+      "name": "Inflow: Ready to Assign",
+      "group": "Internal Master Category"
+    },
+    {
+      "category_id": "cat-rent",
+      "name": "Rent",
+      "group": "Bills"
+    },
+    {
+      "category_id": "cat-power",
+      "name": "Electricity",
+      "group": "Bills"
+    },
+    "… 7 more"
+  ],
+  "next_cursor": "b2Zmc2V0OjM="
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommitsDisabled",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "timezone": "Europe/Paris",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 3,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Development tools and CI actions move together: one pull request to review.",
+      "matchManagers": ["pep621", "github-actions", "pre-commit"],
+      "matchDepTypes": ["dependency-groups", "action", "repository"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "development tooling",
+      "automerge": false
+    },
+    {
+      "description": "fastmcp and httpx run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp update.",
+      "matchPackageNames": ["fastmcp", "httpx"],
+      "groupName": null,
+      "automerge": false
+    },
+    {
+      "description": "Linters change what the build accepts. Their major versions are reviewed one at a time.",
+      "matchPackageNames": ["black", "isort", "pylint", "mypy"],
+      "matchUpdateTypes": ["major"],
+      "groupName": null
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"],
+    "automerge": false
+  },
+  "pre-commit": {"enabled": true}
+}

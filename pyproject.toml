@@ -10,6 +10,8 @@ requires-python = ">=3.14"
 keywords = ["mcp", "model-context-protocol", "ynab", "budget", "personal-finance", "agents"]
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
@@ -23,8 +25,11 @@ dependencies = [
 ]
 
 [project.urls]
+Homepage = "https://github.com/mathbeal/avenir-mcp"
+Documentation = "https://mathbeal.github.io/avenir-mcp/"
 Repository = "https://github.com/mathbeal/avenir-mcp"
 Issues = "https://github.com/mathbeal/avenir-mcp/issues"
+Changelog = "https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 avenir-mcp = "avenir_mcp.server:main"
@@ -37,6 +42,10 @@ dev = [
     "isort==9.0.1",
     "mypy==2.3.1",
     "pylint==4.0.9",
+]
+
+docs = [
+    "mkdocs-material==9.7.7",
 ]
 
 [build-system]
@@ -60,7 +69,7 @@ line_length = 100
 [tool.mypy]
 strict = true
 python_version = "3.14"
-files = ["avenir_mcp", "tests", "evals"]
+files = ["avenir_mcp", "tests", "evals", "docsgen"]
 
 [tool.pylint.format]
 max-line-length = 100

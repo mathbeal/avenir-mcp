@@ -23,9 +23,9 @@ def budget_vs_actual(
         List of dicts with human-readable amounts and utilisation percentage:
 
         - ``id``, ``name`` — category identifiers
-        - ``budgeted`` — budgeted amount (€)
-        - ``actual`` — amount spent, always positive for display (€)
-        - ``balance`` — remaining budget (€)
+        - ``budgeted`` — budgeted amount (currency units)
+        - ``actual`` — amount spent, always positive for display (currency units)
+        - ``balance`` — remaining budget (currency units)
         - ``utilization_pct`` — 0–100+ (> 100 means over-budget); 0 if budgeted=0
 
     Examples:
@@ -74,7 +74,7 @@ def spending_trends(
 
     Returns:
         Dict mapping category name to a chronological list of
-        ``{"month": label, "amount": spending_in_euros}`` dicts.
+        ``{"month": label, "amount": spending}`` dicts.
 
     Examples:
         >>> cats = [{"id": "c1", "name": "AWS", "budgeted": 0, "activity": -100000, "balance": 0}]
@@ -109,7 +109,7 @@ def top_payees(
         List of dicts ordered by total spending (descending):
 
         - ``payee_name`` — name of the payee
-        - ``total`` — total amount spent in euros (positive)
+        - ``total`` — total amount spent in currency units (positive)
         - ``count`` — number of transactions
 
     Examples:

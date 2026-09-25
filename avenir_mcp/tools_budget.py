@@ -106,7 +106,7 @@ async def get_budget_vs_actual(
 
     Each item in the returned list contains:
     - id, name — category identifiers
-    - budgeted, actual, balance — amounts in euros
+    - budgeted, actual, balance — amounts in currency units
     - utilization_pct — percentage of budget consumed (> 100 means over-budget)
     """
     logger.info("Tool called: get_budget_vs_actual(month=%r)", month)
@@ -134,7 +134,7 @@ async def get_spending_trends(
         months_count: Number of past months to include (default 3).
 
     Returns a dict mapping category name to a chronological list of
-    {month, amount} dicts (amounts in euros).
+    {month, amount} dicts (amounts in currency units).
     """
     logger.info(
         "Tool called: get_spending_trends(budget_id=%r, months_count=%d)",
@@ -184,7 +184,7 @@ async def list_category_groups(budget_id: str) -> list[dict[str, Any]]:
     }
 )
 async def list_accounts(budget_id: str) -> list[dict[str, Any]]:
-    """List the budget's accounts with their current balances (in euros).
+    """List the budget's accounts with their current balances (in currency units).
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.

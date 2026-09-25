@@ -1,0 +1,18 @@
+{
+  "status": "confirmation_required",
+  "message": "Nothing changed yet. Create 1 transaction(s) on Checking?\n- 2026-09-21 Pharmacie Centrale -32.40 (no category) If the user agrees, call again with this code.",
+  "account": "Checking",
+  "transactions": [
+    {
+      "date": "2026-09-21",
+      "amount": -32.4,
+      "payee": "Pharmacie Centrale",
+      "category": null,
+      "memo": "not imported by the bank"
+    }
+  ],
+  "created_ids": [],
+  "duplicate_import_ids": [],
+  "confirmation": "<confirmation code>",
+  "operation_id": null
+}

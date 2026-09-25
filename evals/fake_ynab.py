@@ -64,12 +64,26 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             )
         income = sum(tx["amount"] for tx in live if tx["category_id"] == "cat-inflow")
         budgeted_total = sum(c["budgeted"] for c in cats)
+        # Ready to Assign carries over: all income so far minus all money budgeted so far.
+        earned = sum(
+            tx["amount"]
+            for tx in self.transactions.values()
+            if not tx["deleted"]
+            and tx["category_id"] == "cat-inflow"
+            and tx["date"][:7] <= month[:7]
+        )
+        assigned = sum(
+            self.budgeted.get((m, cat_id), demo.BUDGETED.get(cat_id, 0))
+            for m in demo.MONTHS
+            if m <= month
+            for cat_id in demo.BUDGETED
+        )
         return {
             "month": month,
             "income": income,
             "budgeted": budgeted_total,
             "activity": sum(c["activity"] for c in cats),
-            "to_be_budgeted": income - budgeted_total,
+            "to_be_budgeted": earned - assigned,
             "age_of_money": 18,
             "note": None,
             "deleted": False,

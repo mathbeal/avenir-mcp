@@ -20,7 +20,9 @@ budgets. It is never logged, printed, returned in a tool result or committed.
 `tests/test_hygiene.py` fails on an IBAN, a token or a bank statement in the tree.
 
 **No real financial data.** Fixtures use invented accounts, payees and amounts.
-A test that needs realistic data gets invented realistic data.
+A test that needs realistic data gets invented realistic data. Documentation
+examples come only from `python -m docsgen`, which runs Avenir on the invented demo
+budget in `evals/`: never paste an answer from a real budget.
 
 **Tool output is for an agent.** Keep it short, name things plainly, and say in the
 docstring when to use the tool and what unit its amounts are in. A tool description
@@ -46,11 +48,11 @@ Coverage is enforced at 100 %, branches included.
 
 ```bash
 uv sync
-uv run pytest
-uv run mypy
-uv run black --check avenir_mcp tests
-uv run isort --check avenir_mcp tests
-uv run pylint avenir_mcp tests
+just check              # lint, types, tests at 100 %, vocabulary, lockfile
+uv run python -m docsgen  # when a tool, resource, prompt or answer changed
+just docs               # the site builds without warnings
 ```
 
-All must pass.
+A test fails when `docs/reference/tools.md` or an example in `docs/snippets/` no
+longer matches the code. When a change affects how an agent uses the tools, run
+`just evaluate` (a real agent on the demo budget) and commit its report.

@@ -24,6 +24,13 @@ tests were written to pass.
 **Never paste real transactions, balances, account names or tokens** into an issue,
 a fixture or a log. Invent them.
 
+## Documentation
+
+The site lives in `docs/` (MkDocs Material). The tool reference and every JSON
+example are generated: run `uv run python -m docsgen` after changing a tool, and
+`just docs-serve` to read the result. Examples come from the invented demo budget
+in `evals/demo_budget.py`, never from a real one.
+
 ## Reporting a bad suggestion or a confusing tool
 
 The most useful report shows what the agent asked, which tool it called with which
