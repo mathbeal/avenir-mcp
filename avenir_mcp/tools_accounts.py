@@ -49,6 +49,10 @@ class ReconcileResult(TypedDict):
     """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
+# YNAB's own group, which holds the single "Inflow: Ready to Assign" category.
+READY_TO_ASSIGN_GROUP = "Internal Master Category"
+
+
 @mcp.tool(
     tags={WRITE_TAG},
     annotations={
@@ -121,7 +125,21 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         "cleared transaction(s) reconciled"
         + (f" and add a balance adjustment of {difference:.2f}?" if difference else "?")
     )
-    subject = {"account": account_id, "balance": bank_balance, "adjust": difference}
+    # The code confirms these exact transactions: any cleared after the preview
+    # changes the subject, so the code no longer applies.
+    to_reconcile = sorted(
+        tx["id"]
+        for tx in transactions
+        if tx.get("account_id") == account_id
+        and not tx.get("deleted")
+        and tx.get("cleared") == "cleared"
+    )
+    subject = {
+        "account": account_id,
+        "balance": bank_balance,
+        "adjust": difference,
+        "transactions": to_reconcile,
+    }
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
@@ -131,7 +149,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
             (
                 c["id"]
                 for c in await client.get_categories(budget_id)
-                if c["name"].startswith("Inflow")
+                if c.get("category_group_name") == READY_TO_ASSIGN_GROUP
             ),
             None,
         )
@@ -140,7 +158,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
             account_id,
             [
                 {
-                    "date": date.today().isoformat(),
+                    "date": app.today().isoformat(),
                     "amount": difference,
                     "payee_name": "Balance adjustment",
                     "memo": "Entered by reconcile_account",
@@ -149,13 +167,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
             ],
         )
         adjustment_id = created["transaction_ids"][0]
-    to_reconcile = [
-        tx["id"]
-        for tx in await client.get_transactions(budget_id)
-        if tx.get("account_id") == account_id
-        and not tx.get("deleted")
-        and tx.get("cleared") == "cleared"
-    ]
+        to_reconcile.append(adjustment_id)
     await client.set_transactions_cleared(budget_id, to_reconcile, "reconciled")
     operation_id = journal.Journal(journal.default_path()).record(
         budget_id,

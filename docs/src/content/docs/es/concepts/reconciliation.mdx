@@ -52,8 +52,10 @@ Una vez confirmado:
 1. Con `adjust=true` y una diferencia, se crea una transacción en la cuenta: beneficiario
    *Balance adjustment*, con fecha de hoy, importe = la diferencia, categoría *Inflow:
    Ready to Assign*, memo *Entered by reconcile_account*, punteada y aprobada.
-2. Cada transacción *cleared* de la cuenta — ajuste incluido — pasa a *reconciled*, en
-   una sola petición agrupada.
+2. Las transacciones *cleared* mostradas en la vista previa — y el ajuste — pasan a
+   *reconciled*, en una sola petición agrupada. La confirmación cubre exactamente esas
+   transacciones: una punteada después de la vista previa cambia lo que se confirma, y
+   hace falta una nueva vista previa.
 3. La operación se anota en el diario con los ids conciliados y el id del ajuste.
 
 `undo_operation` las devuelve a *cleared* y borra el ajuste.

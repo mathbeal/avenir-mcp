@@ -52,8 +52,10 @@ Une fois confirmé :
 1. Avec `adjust=true` et un écart, une transaction est créée sur le compte : bénéficiaire
    *Balance adjustment*, datée d'aujourd'hui, montant = l'écart, catégorie *Inflow:
    Ready to Assign*, mémo *Entered by reconcile_account*, pointée et approuvée.
-2. Chaque transaction *cleared* du compte — ajustement compris — passe en *reconciled*,
-   en une seule requête groupée.
+2. Les transactions *cleared* montrées dans l'aperçu — et l'ajustement — passent en
+   *reconciled*, en une seule requête groupée. La confirmation porte exactement sur ces
+   transactions : une transaction pointée après l'aperçu change ce qui est confirmé, et
+   un nouvel aperçu est nécessaire.
 3. L'opération est inscrite au journal avec les identifiants rapprochés et celui de
    l'ajustement.
 

@@ -52,8 +52,10 @@ Once confirmed:
 1. With `adjust=true` and a difference, one transaction is created on the account:
    payee *Balance adjustment*, dated today, amount = the difference, category *Inflow:
    Ready to Assign*, memo *Entered by reconcile_account*, cleared and approved.
-2. Every *cleared* transaction of the account — the adjustment included — is set to
-   *reconciled*, in one bulk request.
+2. The *cleared* transactions shown in the preview — and the adjustment — are set to
+   *reconciled*, in one bulk request. The confirmation covers exactly those
+   transactions: one cleared after the preview changes what is confirmed, and a new
+   preview is needed.
 3. The operation is journaled with the reconciled ids and the adjustment id.
 
 `undo_operation` sets them back to *cleared* and deletes the adjustment.

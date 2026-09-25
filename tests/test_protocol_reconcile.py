@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Iterator
+from datetime import date
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, patch
@@ -194,3 +195,27 @@ def test_declined_undo_of_a_reconciliation_changes_nothing(bank: _Bank) -> None:
     data = call("undo_operation", {"budget_id": "b1"}, decline).structured_content
     assert data["status"] == "declined"
     assert bank.status("t2") == "reconciled"
+
+
+def test_confirmation_covers_exactly_the_previewed_transactions(bank: _Bank) -> None:
+    """Transactions cleared after the preview are not reconciled by its code."""
+    code = call("reconcile_account", _args(70.0)).structured_content["confirmation"]
+    # pylint: disable-next=protected-access
+    later = [bank._tx("t4", 10000, "cleared"), bank._tx("t5", -10000, "cleared")]
+    bank.transactions += later
+    result = call("reconcile_account", _args(70.0, confirmation=code))
+    assert result.is_error
+    assert bank.status("t4") == "cleared"
+    assert bank.status("t2") == "cleared"
+
+
+def test_adjustment_goes_to_ready_to_assign_dated_today(bank: _Bank) -> None:
+    """A user category named like YNAB's inflow is not mistaken for Ready to Assign."""
+    lookalike = {"id": "c-bonus", "name": "Inflow bonus", "category_group_name": "Everyday"}
+    with (
+        patch("avenir_mcp.client.get_categories", AsyncMock(return_value=[lookalike, *_CATS])),
+        patch("avenir_mcp.app.today", return_value=date(2026, 9, 25)),
+    ):
+        call("reconcile_account", _args(80.0, adjust=True), accept)
+    assert bank.created[0]["category_id"] == "c-inflow"
+    assert bank.created[0]["date"] == "2026-09-25"
