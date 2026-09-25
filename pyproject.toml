@@ -21,10 +21,10 @@ classifiers = [
 ]
 dependencies = [
     "fastmcp==4.0.9",
-    "httpx>=0.28.1",
+    "httpx>=0.28.1,<1",
     # Already required by fastmcp; declared because the output schemas use its
     # with_config to turn field docstrings into descriptions agents can read.
-    "pydantic>=2.13",
+    "pydantic>=2.13,<3",
 ]
 
 [project.urls]

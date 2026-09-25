@@ -157,8 +157,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastmcp", specifier = "==4.0.9" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pydantic", specifier = ">=2.13" },
+    { name = "httpx", specifier = ">=0.28.1,<1" },
+    { name = "pydantic", specifier = ">=2.13,<3" },
 ]
 
 [package.metadata.requires-dev]
