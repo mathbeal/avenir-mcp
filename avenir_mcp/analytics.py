@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, TypedDict
 
 from avenir_mcp import client
 
@@ -29,7 +29,7 @@ def budget_vs_actual(
         - ``utilization_pct`` — 0–100+ (> 100 means over-budget); 0 if budgeted=0
 
     Examples:
-        >>> cat = {"id": "c1", "name": "Loyer", "budgeted": 500000,
+        >>> cat = {"id": "c1", "name": "Rent", "budgeted": 500000,
         ...        "activity": -400000, "balance": 100000}
         >>> budget_vs_actual([cat])[0]["utilization_pct"]
         80.0
@@ -138,4 +138,91 @@ def top_payees(
             "count": data["count"],
         }
         for name, data in sorted_payees[:limit]
+    ]
+
+
+_INTERNAL_GROUP = "Internal Master Category"
+
+
+class Overspent(TypedDict):
+    """A category whose available balance is negative."""
+
+    category_id: str
+    name: str
+    group: str
+    balance: float
+
+
+class MonthOverview(TypedDict):
+    """A month's totals and the categories that need attention."""
+
+    month: str
+    income: float
+    budgeted: float
+    activity: float
+    ready_to_assign: float
+    age_of_money: int | None
+    overspent: list[Overspent]
+
+
+class CategoryBalance(TypedDict):
+    """One category's month in currency units."""
+
+    category_id: str
+    name: str
+    group: str
+    budgeted: float
+    activity: float
+    balance: float
+
+
+def _usable(cat: dict[str, Any]) -> bool:
+    """Visible, not deleted, and not one of YNAB's internal categories."""
+    return (
+        not cat.get("hidden")
+        and not cat.get("deleted")
+        and cat.get("category_group_name") != _INTERNAL_GROUP
+    )
+
+
+def month_overview(month: dict[str, Any]) -> MonthOverview:
+    """Summarise a YNAB month: totals in currency units and overspent categories."""
+    amount = client.milliunit_to_amount
+    return {
+        "month": month["month"],
+        "income": amount(month.get("income", 0)),
+        "budgeted": amount(month.get("budgeted", 0)),
+        "activity": amount(month.get("activity", 0)),
+        "ready_to_assign": amount(month.get("to_be_budgeted", 0)),
+        "age_of_money": month.get("age_of_money"),
+        "overspent": [
+            {
+                "category_id": cat["id"],
+                "name": cat["name"],
+                "group": cat.get("category_group_name", ""),
+                "balance": amount(cat["balance"]),
+            }
+            for cat in month.get("categories", [])
+            if _usable(cat) and cat.get("balance", 0) < 0
+        ],
+    }
+
+
+def category_balances(
+    categories: list[dict[str, Any]], include_empty: bool = False
+) -> list[CategoryBalance]:
+    """One line per usable category; categories with nothing at all only if asked."""
+    amount = client.milliunit_to_amount
+    return [
+        {
+            "category_id": cat["id"],
+            "name": cat["name"],
+            "group": cat.get("category_group_name", ""),
+            "budgeted": amount(cat.get("budgeted", 0)),
+            "activity": amount(cat.get("activity", 0)),
+            "balance": amount(cat.get("balance", 0)),
+        }
+        for cat in categories
+        if _usable(cat)
+        and (include_empty or any(cat.get(key, 0) for key in ("budgeted", "activity", "balance")))
     ]

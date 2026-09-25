@@ -3,12 +3,25 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
+
+from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 
 from avenir_mcp import analytics, client
 from avenir_mcp.app import WRITE_TAG, mcp
 
 logger = logging.getLogger(__name__)
+
+_MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-01$")
+
+
+def _check_month(month: str) -> None:
+    """Refuse a malformed month before YNAB answers with a bare 404."""
+    if month != "current" and not _MONTH.match(month):
+        raise ToolError(
+            f"month must be 'current' or the first day of a month as YYYY-MM-01, got {month!r}."
+        )
 
 
 @mcp.tool(
@@ -40,19 +53,24 @@ async def list_budgets() -> list[dict[str, Any]]:
 async def get_category_balances(
     budget_id: str,
     month: str = "current",
-) -> list[dict[str, Any]]:
-    """Return budgeted / actual / available balance per category for a month.
+    include_empty: bool = False,
+) -> list[analytics.CategoryBalance]:
+    """Budgeted, spent (activity) and available (balance) per category for a month.
+
+    Amounts in currency units; activity is negative for spending. Hidden and
+    internal categories are left out, and so are categories with nothing
+    budgeted, spent or available unless include_empty is true. Use
+    get_budget_vs_actual for the share of each budget consumed.
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
-        month: ISO month 'YYYY-MM-01' or the literal 'current'.
-
-    Returns a list of category dicts with budgeted, activity and balance in
-    milliunits alongside formatted amounts.  Use get_budget_vs_actual for a
-    pre-computed percentage breakdown.
+        month: 'YYYY-MM-01' or 'current'.
+        include_empty: Also list categories with no amount at all.
     """
-    logger.info("Tool called: get_category_balances(budget_id=%r, month=%r)", budget_id, month)
-    return await client.get_month_categories(budget_id, month)
+    logger.info("Tool called: get_category_balances(month=%r)", month)
+    _check_month(month)
+    categories = await client.get_month_categories(budget_id, month)
+    return analytics.category_balances(categories, include_empty=include_empty)
 
 
 @mcp.tool(
@@ -66,18 +84,19 @@ async def get_category_balances(
 async def get_monthly_summary(
     budget_id: str,
     month: str = "current",
-) -> dict[str, Any]:
-    """Return the top-level financial summary for a budget month.
+) -> analytics.MonthOverview:
+    """A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories.
+
+    Amounts in currency units; activity is negative for spending. Only
+    overspent categories are listed; use get_category_balances for all of them.
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
-        month: ISO month 'YYYY-MM-01' or 'current'.
-
-    Returns a dict with total budgeted, activity, balance, income, and
-    overspend for the requested month (all amounts in milliunits).
+        month: 'YYYY-MM-01' or 'current'.
     """
-    logger.info("Tool called: get_monthly_summary(budget_id=%r, month=%r)", budget_id, month)
-    return await client.get_month(budget_id, month)
+    logger.info("Tool called: get_monthly_summary(month=%r)", month)
+    _check_month(month)
+    return analytics.month_overview(await client.get_month(budget_id, month))
 
 
 @mcp.tool(
@@ -103,7 +122,8 @@ async def get_budget_vs_actual(
     - budgeted, actual, balance — amounts in euros
     - utilization_pct — percentage of budget consumed (> 100 means over-budget)
     """
-    logger.info("Tool called: get_budget_vs_actual(budget_id=%r, month=%r)", budget_id, month)
+    logger.info("Tool called: get_budget_vs_actual(month=%r)", month)
+    _check_month(month)
     month_cats = await client.get_month_categories(budget_id, month)
     return analytics.budget_vs_actual(month_cats)
 

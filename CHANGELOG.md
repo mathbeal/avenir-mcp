@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `get_monthly_summary` and `get_category_balances` answer in currency units with only
+  what an agent needs (135 and 4,794 characters on a real month, instead of about
+  92,000 each). A malformed `month` is refused with the expected format instead of
+  YNAB's 404.
 - Removed `get_uncategorized_transactions`, `suggest_category` and
   `classify_transaction`: `suggest_categories` and `apply_categories` do the same,
   paginated, previewed and undoable. The catalog is 17 tools.

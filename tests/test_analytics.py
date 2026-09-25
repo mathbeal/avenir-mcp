@@ -179,3 +179,86 @@ def test_top_payees_doctest() -> None:
         {"payee_name": "Rent", "amount": -500_000},
     ]
     assert analytics.top_payees(txs, limit=1)[0]["payee_name"] == "Rent"
+
+
+# ---------------------------------------------------------------------------
+# month_overview / category_balances — compact answers in currency units
+# ---------------------------------------------------------------------------
+
+
+def _month_cat(cat_id: str, name: str, balance: int, **extra: Any) -> dict[str, Any]:
+    cat: dict[str, Any] = {
+        "id": cat_id,
+        "name": name,
+        "category_group_name": "Everyday",
+        "budgeted": 100000,
+        "activity": -50000,
+        "balance": balance,
+        "hidden": False,
+        "deleted": False,
+        "goal_type": "NEED",
+        "note": "long note that the agent does not need",
+    }
+    cat.update(extra)
+    return cat
+
+
+_MONTH: dict[str, Any] = {
+    "month": "2026-09-01",
+    "income": 5250000,
+    "budgeted": 8000000,
+    "activity": -7500500,
+    "to_be_budgeted": 1894000,
+    "age_of_money": 12,
+    "note": None,
+    "categories": [
+        _month_cat("c1", "Groceries", 50000),
+        _month_cat("c2", "Restaurants", -12340),
+        _month_cat("c3", "Old", -5000, hidden=True),
+        _month_cat("c4", "Gone", -5000, deleted=True),
+        _month_cat(
+            "c5", "Inflow: Ready to Assign", -1, category_group_name="Internal Master Category"
+        ),
+    ],
+}
+
+
+def test_month_overview_gives_totals_in_currency_and_only_overspent_categories() -> None:
+    """A summary is a few totals plus what needs attention, not the whole month."""
+    assert analytics.month_overview(_MONTH) == {
+        "month": "2026-09-01",
+        "income": 5250.0,
+        "budgeted": 8000.0,
+        "activity": -7500.5,
+        "ready_to_assign": 1894.0,
+        "age_of_money": 12,
+        "overspent": [
+            {"category_id": "c2", "name": "Restaurants", "group": "Everyday", "balance": -12.34}
+        ],
+    }
+
+
+def test_category_balances_are_compact_and_skip_hidden_internal_and_empty() -> None:
+    """One short line per usable category; empty ones only on request."""
+    empty = _month_cat("c6", "Unused", 0, budgeted=0, activity=0)
+    cats = _MONTH["categories"] + [empty]
+    assert analytics.category_balances(cats) == [
+        {
+            "category_id": "c1",
+            "name": "Groceries",
+            "group": "Everyday",
+            "budgeted": 100.0,
+            "activity": -50.0,
+            "balance": 50.0,
+        },
+        {
+            "category_id": "c2",
+            "name": "Restaurants",
+            "group": "Everyday",
+            "budgeted": 100.0,
+            "activity": -50.0,
+            "balance": -12.34,
+        },
+    ]
+    names = [c["name"] for c in analytics.category_balances(cats, include_empty=True)]
+    assert names == ["Groceries", "Restaurants", "Unused"]

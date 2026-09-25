@@ -32,8 +32,8 @@ read-only by default, previewable and undoable.
 | `list_budgets` | read | the budgets your token can see |
 | `list_accounts` | read | accounts and balances |
 | `list_category_groups` | read | where a new category can go |
-| `get_monthly_summary` | read | the month as YNAB reports it |
-| `get_category_balances` | read | assigned, activity and available per category |
+| `get_monthly_summary` | read | the month at a glance: income, budgeted, spent, Ready to Assign, overspent categories |
+| `get_category_balances` | read | budgeted, spent and available per category, empty ones left out unless asked |
 | `get_budget_vs_actual` | read | how much of each category's budget is spent |
 | `get_spending_trends` | read | spending per category over the last N months |
 | `suggest_categories` | read | **start here to classify**: pending transactions, newest first, paginated, with a suggestion when the payee's history allows, and the category list, in two YNAB requests |
@@ -104,8 +104,7 @@ Written down so that nobody discovers them the hard way:
 - Undo covers operations made with `apply_categories` and `reconcile_account`, and only on the machine whose
   journal recorded them. An undo cannot itself be undone.
 - `create_transactions` creates transactions that are already approved and cleared.
-- Some tools return amounts in milliunits (YNAB's unit: 1.00 = 1000), others in currency
-  units. Each tool's description says which.
+- Amounts are in currency units everywhere (YNAB's milliunits stay inside the server).
 - Suggestions come from your own history, learnt separately for money in and money
   out, and only point to categories you can still assign. A merchant never classified
   before gets no suggestion, and the agent chooses from the category list. YNAB allows 200 requests
@@ -120,9 +119,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 206, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (982 statements) |
-| Branch coverage | 100 % (220 branches) |
+| Tests | 213, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1021 statements) |
+| Branch coverage | 100 % (222 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |

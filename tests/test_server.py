@@ -10,6 +10,7 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastmcp.exceptions import ToolError
 
 from avenir_mcp import server
 
@@ -92,12 +93,43 @@ def test_get_category_balances_explicit_month() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_get_monthly_summary_delegates_to_client() -> None:
-    """get_monthly_summary should return whatever client.get_month() returns."""
-    month = {"month": "2026-04-01", "budgeted": 5_000_000, "activity": -3_200_000}
+def test_get_monthly_summary_is_compact_and_in_currency() -> None:
+    """The summary is totals in currency units, not YNAB's raw month."""
+    month = {
+        "month": "2026-04-01",
+        "income": 1_000_000,
+        "budgeted": 5_000_000,
+        "activity": -3_200_000,
+        "to_be_budgeted": 0,
+        "categories": [{"id": "c1", "name": "Rent", "balance": 1_000, "note": "x" * 5000}],
+    }
     with patch("avenir_mcp.client.get_month", new=AsyncMock(return_value=month)):
         result = asyncio.run(server.get_monthly_summary("b1", "2026-04-01"))
-    assert result["month"] == "2026-04-01"
+    assert result["activity"] == -3200.0
+    assert "categories" not in result
+    assert result["overspent"] == []
+
+
+def test_get_category_balances_are_in_currency() -> None:
+    """Category lines carry currency amounts, not milliunits."""
+    cats = [{"id": "c1", "name": "Rent", "budgeted": 500_000, "activity": 0, "balance": 500_000}]
+    with patch("avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)):
+        result = asyncio.run(server.get_category_balances("b1"))
+    assert result[0]["budgeted"] == 500.0
+
+
+@pytest.mark.parametrize("month", ["2026-13-01", "2026-04", "april", "2026-04-15"])
+def test_month_tools_reject_a_malformed_month_with_a_way_forward(month: str) -> None:
+    """A bad month is refused before calling YNAB, saying the expected format."""
+    for tool in (
+        server.get_monthly_summary,
+        server.get_category_balances,
+        server.get_budget_vs_actual,
+    ):
+        with patch("avenir_mcp.client.get_month", new=AsyncMock()) as fetch:
+            with pytest.raises(ToolError, match="YYYY-MM-01"):
+                asyncio.run(tool("b1", month))
+        fetch.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------
