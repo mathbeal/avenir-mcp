@@ -101,8 +101,7 @@ Written down so that nobody discovers them the hard way:
 - **Older write tools still act immediately** once writes are enabled:
   `approve_transactions`, `create_category`, `create_transactions`.
 - Undo covers operations made with `apply_categories`, `reconcile_account` and
-  `set_category_budget`, and only on the machine whose
-  journal recorded them. An undo cannot itself be undone.
+  `set_category_budget`, on the machine whose journal recorded them. An undo cannot itself be undone.
 - `create_transactions` creates transactions that are already approved and cleared.
 - Amounts are in currency units everywhere (YNAB's milliunits stay inside the server).
 - Suggestions come from your own history, learnt separately for money in and money
