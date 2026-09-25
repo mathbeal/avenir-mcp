@@ -12,11 +12,14 @@ What the server does:
   with `AVENIR_MCP_WRITE=1`
 
 - it calls `api.ynab.com` over HTTPS, and nothing else
-- it reads the token from the environment and never writes it anywhere
+- it reads the token from the environment, or from `YNAB_API_KEY_FILE` (a file readable
+  by its owner only, else refused), and never writes it anywhere
 - `apply_categories`, `reconcile_account`, `set_category_budget`, `update_category`,
   `create_transactions`, `create_category` and `undo_operation` change nothing until the user confirms the
   previewed changes. A confirmation code is single-use, expires after 10 minutes and
   only confirms the exact changes it was issued for
+- with `AVENIR_MCP_REQUIRE_ELICITATION=1`, only the user's yes given in the client
+  confirms a write: codes, which an agent could relay alone, are disabled
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
   identifiers only, readable by its owner only
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
@@ -33,9 +36,19 @@ can send data elsewhere without reviewing each call.
 
 The default transport is stdio: no network port is opened. With
 `AVENIR_MCP_TRANSPORT=http`, the server listens on `AVENIR_MCP_HOST`, `127.0.0.1` by default. **Do not bind it to
-`0.0.0.0`** or expose it through a container port on all interfaces: anyone who can
-reach it can act on your budget. HTTP mode has no authentication and no `Origin`
-validation yet (see the roadmap).
+`0.0.0.0`** or expose it through a container port on all interfaces: the traffic is
+plain HTTP. Over HTTP, requests whose `Host` or `Origin` header does not name this
+machine are refused (against DNS rebinding), and with `AVENIR_MCP_HTTP_TOKEN` set every
+request must carry `Authorization: Bearer <token>`. Writes over HTTP require the token:
+without it the server refuses to start.
+
+## Untrusted text in answers
+
+Payee names and memos are shown on one line, without control, zero-width or
+direction-override characters, and cut at 80 characters: bank text cannot add a forged
+line to a confirmation question. Amounts passed by an agent must be finite and within a
+billion either way. `AVENIR_MCP_YNAB_URL` must use `https://`, except for `127.0.0.1` and
+`localhost`, so the token never travels in clear.
 
 ## Reporting a vulnerability
 

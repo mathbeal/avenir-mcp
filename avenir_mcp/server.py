@@ -8,10 +8,12 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from typing import Any
 
 from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     __version__,
     context,
+    http_auth,
     tools_accounts,
     tools_categories,
     tools_classify,
@@ -44,6 +46,7 @@ __all__ = [
     "list_accounts",
     "list_budgets",
     "list_category_groups",
+    "http_options",
     "main",
     "mcp",
     "set_category_budget",
@@ -51,6 +54,15 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+
+def http_options(token: str | None) -> dict[str, Any]:
+    """What guards the HTTP transport, besides listening on 127.0.0.1.
+
+    The Host and Origin headers must name this machine, so a web page cannot reach
+    the server through DNS rebinding; with a token, every request must carry it.
+    """
+    return {"host_origin_protection": True, "middleware": http_auth.middleware(token)}
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -65,6 +77,8 @@ def main(argv: list[str] | None = None) -> None:
 
     The HTTP address comes from AVENIR_MCP_HOST and AVENIR_MCP_PORT and defaults to
     127.0.0.1:8103, so the server is never reachable from the network by accident.
+    Over HTTP, requests must name this machine (see http_options); writes also need
+    AVENIR_MCP_HTTP_TOKEN, which every request must then carry.
     """
     if (sys.argv[1:] if argv is None else argv) == ["--version"]:
         print(f"avenir-mcp {__version__}")
@@ -72,12 +86,19 @@ def main(argv: list[str] | None = None) -> None:
     level = os.getenv("AVENIR_MCP_LOG_LEVEL", "WARNING").upper()
     logging.basicConfig(level=level, stream=sys.stderr)
     logging.getLogger().setLevel(level)
-    configure(enable_writes=os.getenv("AVENIR_MCP_WRITE") == "1")
+    writes = os.getenv("AVENIR_MCP_WRITE") == "1"
+    configure(enable_writes=writes)
     if os.getenv("AVENIR_MCP_TRANSPORT", "stdio") == "http":
         host = os.getenv("AVENIR_MCP_HOST", "127.0.0.1")
         port = int(os.getenv("AVENIR_MCP_PORT", "8103"))
+        token = os.getenv("AVENIR_MCP_HTTP_TOKEN") or None
+        if writes and token is None:
+            sys.exit(
+                "AVENIR_MCP_WRITE=1 over HTTP needs AVENIR_MCP_HTTP_TOKEN: set it to a long "
+                "random value and send it as Authorization: Bearer <token>."
+            )
         logger.info("Starting avenir-mcp on %s:%d", host, port)
-        mcp.run(transport="streamable-http", host=host, port=port)
+        mcp.run(transport="streamable-http", host=host, port=port, **http_options(token))
     else:
         mcp.run(transport="stdio")
 
