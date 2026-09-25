@@ -13,6 +13,7 @@ from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
+from avenir_mcp.text import untrusted
 
 MAX_LISTED = 50
 DUPLICATE_WINDOW_DAYS = 3
@@ -108,7 +109,7 @@ def analyse(
                 "transaction_id": tx["id"],
                 "date": tx["date"],
                 "amount": milliunit_to_amount(tx["amount"]),
-                "payee": (tx.get("payee_name") or "")[:80],
+                "payee": untrusted(tx.get("payee_name")),
             }
             for tx in uncleared[:MAX_LISTED]
         ],

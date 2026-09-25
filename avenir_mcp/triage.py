@@ -14,8 +14,7 @@ from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import classifier
 from avenir_mcp.client import milliunit_to_amount
-
-MAX_TEXT = 80
+from avenir_mcp.text import untrusted
 
 DEFAULT_LIMIT = 50
 
@@ -78,10 +77,6 @@ class Triage(TypedDict):
     """Every category that can be assigned."""
     next_cursor: str | None
     """Pass it back to get the next page; null on the last page."""
-
-
-def _truncate(text: str) -> str:
-    return text if len(text) <= MAX_TEXT else text[: MAX_TEXT - 1] + "…"
 
 
 def _encode_cursor(offset: int) -> str:
@@ -175,8 +170,8 @@ def prepare(
             "transaction_id": tx["id"],
             "date": tx["date"],
             "amount": milliunit_to_amount(tx["amount"]),
-            "payee": _truncate(tx.get("payee_name") or ""),
-            "memo": _truncate(tx["memo"]) if tx.get("memo") else None,
+            "payee": untrusted(tx.get("payee_name")),
+            "memo": untrusted(tx["memo"]) if tx.get("memo") else None,
             "account": tx.get("account_name") or "",
             "suggestion": _suggestion(tx, histories, categories, threshold),
         }

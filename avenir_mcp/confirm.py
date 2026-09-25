@@ -23,6 +23,7 @@ from mcp_types.version import MODERN_PROTOCOL_VERSIONS  # pylint: disable=import
 from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import client, journal, writes
+from avenir_mcp.text import untrusted
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +78,9 @@ def result_of(status: WriteStatus, message: str, plan: writes.Plan, **extra: Any
 def describe(plan: writes.Plan, action: str) -> str:
     """The question put to the user: the first 20 changes, and how many more."""
     lines = [
-        f"- {c['date']} {c['payee']} {c['amount']:.2f}: "
-        f"{c['from_category'] or 'no category'} → {c['to_category'] or 'no category'}"
+        f"- {c['date']} {untrusted(c['payee'])} {c['amount']:.2f}: "
+        f"{untrusted(c['from_category']) or 'no category'} → "
+        f"{untrusted(c['to_category']) or 'no category'}"
         for c in plan["changes"][:20]
     ]
     more = len(plan["changes"]) - len(lines)

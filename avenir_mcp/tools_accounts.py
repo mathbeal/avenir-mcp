@@ -12,8 +12,10 @@ from mcp.types import InputRequiredResult  # pylint: disable=import-error
 from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import app, client, forecast, journal, reconcile
+from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteStatus, gate
+from avenir_mcp.text import untrusted
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ class ReconcileResult(TypedDict):
 async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-locals
     budget_id: str,
     account_id: str,
-    bank_balance: float,
+    bank_balance: Amount,
     ctx: Context,
     *,
     adjust: bool = False,
@@ -230,8 +232,8 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     budget_id: str,
     until: str,
     account_ids: list[str] | None = None,
-    monthly_income: float | None = None,
-    variable_monthly: float | None = None,
+    monthly_income: Amount | None = None,
+    variable_monthly: Amount | None = None,
     one_offs: list[forecast.OneOff] | None = None,
 ) -> ForecastResult:
     """Project the balance month by month and say when money would run out.
@@ -328,7 +330,7 @@ class NewTransaction(TypedDict, total=False):
 
     date: str
     """Date, YYYY-MM-DD, not in the future."""
-    amount: float
+    amount: Amount
     """Amount in currency units, negative for spending."""
     payee_name: str
     """Payee as it should appear in YNAB."""
@@ -446,7 +448,7 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         {
             "date": item["date"],
             "amount": item["amount"],
-            "payee": item.get("payee_name", ""),
+            "payee": untrusted(item.get("payee_name")),
             "category": categories.get(item.get("category_id", "")),
             "memo": item.get("memo"),
         }

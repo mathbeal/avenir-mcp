@@ -11,6 +11,7 @@ from mcp.types import InputRequiredResult  # pylint: disable=import-error
 from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import app, client, journal
+from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.confirm import WriteStatus, gate
 
@@ -168,7 +169,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     budget_id: str,
     month: str,
     category_id: str,
-    amount: float,
+    amount: Amount,
     ctx: Context,
     confirmation: str | None = None,
 ) -> BudgetChange | InputRequiredResult:

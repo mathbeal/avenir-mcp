@@ -83,3 +83,10 @@ def test_old_look_alike_transactions_are_not_flagged() -> None:
     ]
     result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 24))
     assert result["possible_duplicates"] == [["t3", "t4"]]
+
+
+def test_uncleared_payees_are_shown_on_one_line() -> None:
+    """Bank text in the answer loses its line breaks and invisible characters."""
+    txs = [_tx("t1", -5000, "uncleared", payee_name="SHOP\nRENT\u202e")]
+    item = reconcile.analyse("acc", txs, 0.0)["uncleared"][0]
+    assert item["payee"] == "SHOP RENT"

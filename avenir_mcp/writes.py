@@ -18,6 +18,7 @@ from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move
+from avenir_mcp.text import untrusted
 
 CONFIRMATION_TTL_SECONDS = 600
 
@@ -115,7 +116,7 @@ def plan_categorization(
                 "transaction_id": tx_id,
                 "date": tx["date"],
                 "amount": milliunit_to_amount(tx["amount"]),
-                "payee": tx.get("payee_name") or "",
+                "payee": untrusted(tx.get("payee_name")),
                 "from_category_id": current,
                 "from_category": names.get(current) if current else None,
                 "to_category_id": category_id,
@@ -150,7 +151,7 @@ def plan_undo(
                 "transaction_id": tx["id"],
                 "date": tx["date"],
                 "amount": milliunit_to_amount(tx["amount"]),
-                "payee": tx.get("payee_name") or "",
+                "payee": untrusted(tx.get("payee_name")),
                 "from_category_id": move["to_category_id"],
                 "from_category": names.get(move["to_category_id"] or ""),
                 "to_category_id": before,

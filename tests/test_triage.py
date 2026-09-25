@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 from typing import Any
 
-from avenir_mcp import triage
+from avenir_mcp import text, triage
 
 _CATEGORIES: list[dict[str, Any]] = [
     {"id": "c-food", "name": "Groceries", "category_group_name": "Everyday", "deleted": False},
@@ -106,9 +106,9 @@ def test_items_are_newest_first_and_paginated_with_a_cursor() -> None:
 def test_long_bank_text_is_truncated() -> None:
     """Payee and memo are untrusted and bounded, so one label cannot flood the context."""
     item = triage.prepare([_tx("p1", "X" * 300, memo="Y" * 300)], _CATEGORIES)["items"][0]
-    assert len(item["payee"]) == triage.MAX_TEXT
+    assert len(item["payee"]) == text.MAX_TEXT
     assert item["payee"].endswith("…")
-    assert len(item["memo"] or "") == triage.MAX_TEXT
+    assert len(item["memo"] or "") == text.MAX_TEXT
 
 
 def test_invalid_cursor_is_rejected_with_an_actionable_message() -> None:

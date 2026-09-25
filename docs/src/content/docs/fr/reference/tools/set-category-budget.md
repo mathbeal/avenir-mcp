@@ -33,7 +33,7 @@ Confirmation works as for apply_categories.
 | `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
 | `month` | string | oui | — | 'YYYY-MM-01' or 'current'. |
 | `category_id` | string | oui | — | Category (from get_category_balances or suggest_categories). |
-| `amount` | number | oui | — | New budgeted amount, in currency units. |
+| `amount` | number | oui | — | In currency units, negative for money out; at most a billion either way. |
 | `confirmation` | string \| null | non | `null` | Code from a previous "confirmation_required" result. |
 
 ## Retour

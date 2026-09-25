@@ -15,8 +15,10 @@ from typing import Any, TypedDict
 
 from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
+from avenir_mcp.amounts import Amount
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
+from avenir_mcp.text import untrusted
 
 LOOKBACK_MONTHS = 4
 MIN_MONTHS_SEEN = 3
@@ -44,7 +46,7 @@ class OneOff(TypedDict):
 
     date: str
     """Day it is expected, YYYY-MM-DD."""
-    amount: float
+    amount: Amount
     """Amount, negative for a payment, positive for money received."""
     label: str
     """What it is, for the reader."""
@@ -114,7 +116,7 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
         if all(abs(v - median) <= abs(median) * AMOUNT_TOLERANCE for v in per_month.values()):
             found.append(
                 {
-                    "payee": payee,
+                    "payee": untrusted(payee),
                     "amount": milliunit_to_amount(round(median)),
                     "day": int(statistics.median(int(tx["date"][8:10]) for tx in txs)),
                     "months_seen": len(per_month),

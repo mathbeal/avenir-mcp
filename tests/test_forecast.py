@@ -40,6 +40,12 @@ def test_stable_monthly_charge_is_recurring() -> None:
     ]
 
 
+def test_recurring_payee_is_shown_without_invisible_characters() -> None:
+    """A payee name in the assumptions is safe to show."""
+    txs = _monthly("CAR\u202e LEASE", -364080, 25, ["2026-05", "2026-06", "2026-08"])
+    assert forecast.recurring(txs, TODAY)[0]["payee"] == "CAR LEASE"
+
+
 def test_irregular_or_rare_payees_are_not_recurring() -> None:
     """Seen twice, or with amounts varying more than 20 %, is not a subscription."""
     txs = _monthly("RARE", -10000, 3, ["2026-07", "2026-08"]) + [

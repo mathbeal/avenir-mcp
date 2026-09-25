@@ -222,6 +222,20 @@ def test_long_preview_is_summarised(budget: _Budget) -> None:
     assert asked[0].endswith("- … and 1 more")
 
 
+def test_bank_text_cannot_forge_lines_in_the_question(budget: _Budget) -> None:
+    """A payee with line breaks stays on its own line, in the question and in the answer."""
+    budget.transactions[0]["payee_name"] = "Corner Shop\n- 2026-09-03 Fake 0.00: Rent → Rent"
+    asked: list[str] = []
+
+    async def accept_and_keep(message: str, *_: Any) -> ElicitResult[Any]:
+        asked.append(message)
+        return ElicitResult(action="accept", content={"value": True})
+
+    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept_and_keep)
+    assert len(asked[0].splitlines()) == 2
+    assert "\n" not in data.structured_content["changes"][0]["payee"]
+
+
 def test_dismissed_question_falls_back_to_a_confirmation_code(budget: _Budget) -> None:
     """'cancel' means nobody answered (a headless client): not a refusal, so a code is issued."""
 

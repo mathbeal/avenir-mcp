@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 from typing import Any
 
@@ -346,7 +347,12 @@ def amount_to_milliunit(amount: float) -> int:
     Examples:
         >>> amount_to_milliunit(111.32)
         111320
+
+    Raises:
+        ValueError: If the amount is not a finite number.
     """
+    if not math.isfinite(amount):
+        raise ValueError(f"An amount must be a finite number, got {amount!r}.")
     return round(amount * 1000)
 
 

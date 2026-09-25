@@ -37,7 +37,7 @@ user confirms (as for apply_categories). undo_operation reverts it.
 |---|---|---|---|---|
 | `budget_id` | string | sí | — | YNAB budget UUID or 'last-used'. |
 | `account_id` | string | sí | — | Account to reconcile (from list_accounts). |
-| `bank_balance` | number | sí | — | Balance shown by the bank, in currency units. |
+| `bank_balance` | number | sí | — | In currency units, negative for money out; at most a billion either way. |
 | `adjust` | boolean | no | `false` | Record the remaining difference as an adjustment. |
 | `confirmation` | string \| null | no | `null` | Code from a previous "confirmation_required" result. |
 

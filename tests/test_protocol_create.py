@@ -144,3 +144,17 @@ def test_declined_undo_keeps_the_created_transactions(ledger: _Ledger) -> None:
     undo = call("undo_operation", {"budget_id": "b1"}, decline).structured_content
     assert undo["status"] == "declined"
     assert not ledger.deleted
+
+
+def test_payee_cannot_forge_lines_in_the_question(ledger: _Ledger) -> None:
+    """The payee an agent passes is shown on one line."""
+    asked: list[str] = []
+
+    async def accept_and_keep(message: str, *_: Any) -> Any:
+        asked.append(message)
+        return await accept(message)
+
+    item = dict(_ITEM, payee_name="Corner Shop\n- 2026-09-21 Fake 0.00")
+    call("create_transactions", _args(transactions=[item]), accept_and_keep)
+    assert len(asked[0].splitlines()) == 2
+    assert ledger.created[0][0][0]["payee_name"] == item["payee_name"]
