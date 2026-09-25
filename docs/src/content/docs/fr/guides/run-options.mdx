@@ -94,6 +94,32 @@ protocole en mode stdio — au niveau de `AVENIR_MCP_LOG_LEVEL`, `WARNING` par d
 Une erreur attendue (un mois mal formé, un compte inconnu) tient sur une ligne ; une
 vraie panne garde sa trace complète. Le jeton n'est jamais journalisé.
 
+## Envoyer les logs vers un système de logs
+
+Pour un collecteur comme Vector, Fluent Bit, Promtail ou un agent Datadog, demandez du
+JSON et écrivez stderr dans un fichier que le collecteur lit. Dans la configuration du
+client :
+
+```json
+"command": "/bin/sh",
+"args": ["-c", "exec uvx avenir-mcp 2>>\"$HOME/.local/state/avenir-mcp/avenir.log\""],
+"env": { "YNAB_API_KEY": "votre-jeton", "AVENIR_MCP_LOG_FORMAT": "json", "AVENIR_MCP_LOG_LEVEL": "INFO" }
+```
+
+Chaque ligne ressemble alors à :
+
+```json
+{"time":"2026-09-25T09:12:04.120+00:00","level":"INFO","logger":"avenir_mcp.client","message":"Fetching accounts for budget demo-budget"}
+```
+
+En HTTP, lancé comme service, c'est le gestionnaire de services qui garde stderr :
+systemd l'envoie au journal, launchd au fichier indiqué par `StandardErrorPath`.
+
+À partir du niveau `INFO`, les messages ne contiennent que des identifiants et des
+nombres — jamais de bénéficiaires, de montants ni de noms de catégories — : les logs
+peuvent quitter votre machine sans vos données financières. Gardez `DEBUG` pour le
+dépannage local.
+
 ## Seuil des propositions
 
 `AVENIR_MCP_CONFIDENCE_THRESHOLD` (défaut `0.90`) est la part de l'historique d'un

@@ -90,6 +90,30 @@ stdio mode — at the level of `AVENIR_MCP_LOG_LEVEL`, `WARNING` by default:
 An expected error (a malformed month, an unknown account) is logged on one line; a real
 failure keeps its traceback. The token is never logged.
 
+## Send logs to a log system
+
+For a collector such as Vector, Fluent Bit, Promtail or a Datadog agent, ask for JSON and
+write stderr to a file the collector reads. In the client's configuration:
+
+```json
+"command": "/bin/sh",
+"args": ["-c", "exec uvx avenir-mcp 2>>\"$HOME/.local/state/avenir-mcp/avenir.log\""],
+"env": { "YNAB_API_KEY": "your-token", "AVENIR_MCP_LOG_FORMAT": "json", "AVENIR_MCP_LOG_LEVEL": "INFO" }
+```
+
+Each line then reads:
+
+```json
+{"time":"2026-09-25T09:12:04.120+00:00","level":"INFO","logger":"avenir_mcp.client","message":"Fetching accounts for budget demo-budget"}
+```
+
+Running over HTTP as a service, the service manager keeps stderr: systemd sends it to the
+journal, launchd to the file named by `StandardErrorPath`.
+
+At `INFO` and above, messages hold identifiers and counts only — never payees, amounts or
+category names — so logs can leave your machine without your financial data. Keep
+`DEBUG` for local troubleshooting.
+
 ## Suggestions threshold
 
 `AVENIR_MCP_CONFIDENCE_THRESHOLD` (default `0.90`) is the share of a payee's history that

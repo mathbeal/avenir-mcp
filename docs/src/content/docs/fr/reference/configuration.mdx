@@ -27,6 +27,7 @@ fichier de configuration.
 | `XDG_STATE_HOME` | `~/.local/state` | Où vit le journal par défaut. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confiance nécessaire pour proposer une catégorie. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Niveau des diagnostics. |
+| `AVENIR_MCP_LOG_FORMAT` | `text` | `json` écrit un objet JSON par ligne. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adresse de l'API. |
 
 ## Détails
@@ -120,7 +121,16 @@ avant qu'une catégorie soit proposée. `0.90` propose moins souvent et se tromp
 ### `AVENIR_MCP_LOG_LEVEL`
 
 `DEBUG`, `INFO`, `WARNING` (défaut), `ERROR`. Les diagnostics vont sur stderr. Au niveau
-`INFO`, chaque appel d'outil et chaque requête YNAB sont journalisés ; le jeton, jamais.
+`INFO`, chaque appel d'outil et chaque requête YNAB sont journalisés — identifiants et
+nombres seulement, jamais de bénéficiaires, de montants ni de noms ; le jeton, jamais.
+`DEBUG` ajoute les messages de la bibliothèque MCP, qui peuvent contenir les requêtes
+elles-mêmes.
+
+### `AVENIR_MCP_LOG_FORMAT`
+
+`text` (défaut) : une ligne lisible par événement. `json` : un objet JSON par ligne, pour
+un collecteur de logs — voir
+[Envoyer les logs vers un système de logs](/avenir-mcp/fr/guides/run-options/#envoyer-les-logs-vers-un-système-de-logs).
 
 ### `AVENIR_MCP_YNAB_URL`
 

@@ -117,7 +117,7 @@ def score_payee(
     # would be suggested as a bare id.
     counts = {cat_id: n for cat_id, n in history.get(payee, {}).items() if cat_id in cat_index}
     if not counts:
-        logger.info("No usable history for payee %r — no suggestion", payee)
+        logger.info("No usable history for this payee: no suggestion")
         return {"confidence": 0.0, "auto_classify": False, "candidates": []}
 
     total = sum(counts.values())
@@ -126,13 +126,7 @@ def score_payee(
     confidence = top_count / total
 
     if confidence >= threshold:
-        logger.info(
-            "Payee %r → category %r (confidence=%.2f ≥ %.2f)",
-            payee_name,
-            top_cat_id,
-            confidence,
-            threshold,
-        )
+        logger.info("Suggestion found (confidence=%.2f ≥ %.2f)", confidence, threshold)
         return {
             "confidence": confidence,
             "auto_classify": True,
@@ -140,12 +134,7 @@ def score_payee(
             "category_name": cat_index[top_cat_id],
         }
 
-    logger.info(
-        "Payee %r → ambiguous (confidence=%.2f < %.2f) — returning top-3 candidates",
-        payee_name,
-        confidence,
-        threshold,
-    )
+    logger.info("Ambiguous payee (confidence=%.2f < %.2f): top-3 candidates", confidence, threshold)
     candidates = [
         {
             "category_id": cat_id,

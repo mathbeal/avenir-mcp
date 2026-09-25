@@ -361,7 +361,7 @@ async def create_category(budget_id: str, category_group_id: str, name: str) -> 
     Returns:
         The created category dict from the YNAB API response.
     """
-    logger.info("Creating category %r in group %s", name, category_group_id)
+    logger.info("Creating a category in group %s", category_group_id)
     body = {"category": {"name": name, "category_group_id": category_group_id}}
     data = await _post(f"/budgets/{budget_id}/categories", body)
     return data["data"]["category"]  # type: ignore[no-any-return]
@@ -396,7 +396,7 @@ async def set_category_budgeted(
     Returns:
         The updated month-category dict from the YNAB API response.
     """
-    logger.info("Assigning %.2f to category %s for %s", amount, category_id, month)
+    logger.info("Setting the budgeted amount of category %s for %s", category_id, month)
     body = {"category": {"budgeted": amount_to_milliunit(amount)}}
     data = await _patch(f"/budgets/{budget_id}/months/{month}/categories/{category_id}", body)
     return data["data"]["category"]  # type: ignore[no-any-return]

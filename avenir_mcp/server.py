@@ -14,6 +14,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     __version__,
     context,
     http_auth,
+    logs,
     tools_accounts,
     tools_categories,
     tools_classify,
@@ -73,7 +74,8 @@ def main(argv: list[str] | None = None) -> None:
 
     Read-only unless AVENIR_MCP_WRITE=1: write tools are then registered too.
     Diagnostics go to stderr (stdout belongs to the protocol in stdio mode), at
-    AVENIR_MCP_LOG_LEVEL, WARNING by default.
+    AVENIR_MCP_LOG_LEVEL, WARNING by default, as text or, with
+    AVENIR_MCP_LOG_FORMAT=json, one JSON object per line.
 
     The HTTP address comes from AVENIR_MCP_HOST and AVENIR_MCP_PORT and defaults to
     127.0.0.1:8103, so the server is never reachable from the network by accident.
@@ -83,9 +85,10 @@ def main(argv: list[str] | None = None) -> None:
     if (sys.argv[1:] if argv is None else argv) == ["--version"]:
         print(f"avenir-mcp {__version__}")
         return
-    level = os.getenv("AVENIR_MCP_LOG_LEVEL", "WARNING").upper()
-    logging.basicConfig(level=level, stream=sys.stderr)
-    logging.getLogger().setLevel(level)
+    logs.configure(
+        os.getenv("AVENIR_MCP_LOG_LEVEL", "WARNING").upper(),
+        os.getenv("AVENIR_MCP_LOG_FORMAT", "text"),
+    )
     writes = os.getenv("AVENIR_MCP_WRITE") == "1"
     configure(enable_writes=writes)
     if os.getenv("AVENIR_MCP_TRANSPORT", "stdio") == "http":

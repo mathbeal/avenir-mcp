@@ -26,6 +26,7 @@ block or in the shell that starts it. Nothing else is read: no configuration fil
 | `XDG_STATE_HOME` | `~/.local/state` | Where the journal lives by default. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confidence needed to suggest a category. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Diagnostics level. |
+| `AVENIR_MCP_LOG_FORMAT` | `text` | `json` writes one JSON object per line. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | API address. |
 
 ## Details
@@ -113,7 +114,15 @@ suggests more. Read at start-up. See [Suggestions](/avenir-mcp/concepts/suggesti
 ### `AVENIR_MCP_LOG_LEVEL`
 
 `DEBUG`, `INFO`, `WARNING` (default), `ERROR`. Diagnostics go to stderr. At `INFO`, each
-tool call and each YNAB request is logged; the token never is.
+tool call and each YNAB request is logged — identifiers and counts only, never payees,
+amounts or names; the token never is. `DEBUG` adds the MCP library's own messages, which
+can contain the requests themselves.
+
+### `AVENIR_MCP_LOG_FORMAT`
+
+`text` (default): one readable line per event. `json`: one JSON object per line, for a log
+collector — see
+[Send logs to a log system](/avenir-mcp/guides/run-options/#send-logs-to-a-log-system).
 
 ### `AVENIR_MCP_YNAB_URL`
 

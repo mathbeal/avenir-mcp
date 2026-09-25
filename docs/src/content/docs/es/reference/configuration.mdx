@@ -27,6 +27,7 @@ configuración.
 | `XDG_STATE_HOME` | `~/.local/state` | Dónde vive el diario por defecto. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confianza necesaria para sugerir una categoría. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Nivel de los diagnósticos. |
+| `AVENIR_MCP_LOG_FORMAT` | `text` | `json` escribe un objeto JSON por línea. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Dirección de la API. |
 
 ## Detalles
@@ -120,7 +121,16 @@ más. Se lee al arrancar. Vea [Sugerencias](/avenir-mcp/es/concepts/suggestions/
 ### `AVENIR_MCP_LOG_LEVEL`
 
 `DEBUG`, `INFO`, `WARNING` (por defecto), `ERROR`. Los diagnósticos van a stderr. En
-`INFO` se registra cada llamada a herramienta y cada petición a YNAB; el token, nunca.
+`INFO` se registra cada llamada a herramienta y cada petición a YNAB — solo
+identificadores y cantidades, nunca beneficiarios, importes ni nombres; el token, nunca.
+`DEBUG` añade los mensajes de la biblioteca MCP, que pueden contener las propias
+peticiones.
+
+### `AVENIR_MCP_LOG_FORMAT`
+
+`text` (por defecto): una línea legible por evento. `json`: un objeto JSON por línea,
+para un recolector de logs — vea
+[Enviar los logs a un sistema de logs](/avenir-mcp/es/guides/run-options/#enviar-los-logs-a-un-sistema-de-logs).
 
 ### `AVENIR_MCP_YNAB_URL`
 

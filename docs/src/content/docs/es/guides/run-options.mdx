@@ -93,6 +93,30 @@ protocolo en modo stdio — al nivel de `AVENIR_MCP_LOG_LEVEL`, `WARNING` por de
 Un error esperado (un mes mal formado, una cuenta desconocida) se registra en una línea;
 un fallo real conserva su traza. El token nunca se registra.
 
+## Enviar los logs a un sistema de logs
+
+Para un recolector como Vector, Fluent Bit, Promtail o un agente de Datadog, pida JSON y
+escriba stderr en un archivo que el recolector lea. En la configuración del cliente:
+
+```json
+"command": "/bin/sh",
+"args": ["-c", "exec uvx avenir-mcp 2>>\"$HOME/.local/state/avenir-mcp/avenir.log\""],
+"env": { "YNAB_API_KEY": "su-token", "AVENIR_MCP_LOG_FORMAT": "json", "AVENIR_MCP_LOG_LEVEL": "INFO" }
+```
+
+Cada línea queda así:
+
+```json
+{"time":"2026-09-25T09:12:04.120+00:00","level":"INFO","logger":"avenir_mcp.client","message":"Fetching accounts for budget demo-budget"}
+```
+
+Por HTTP, como servicio, el gestor de servicios guarda stderr: systemd lo envía al
+journal, launchd al archivo indicado en `StandardErrorPath`.
+
+Desde el nivel `INFO`, los mensajes solo contienen identificadores y cantidades — nunca
+beneficiarios, importes ni nombres de categorías —: los logs pueden salir de su máquina
+sin sus datos financieros. Deje `DEBUG` para depurar en local.
+
 ## Umbral de sugerencias
 
 `AVENIR_MCP_CONFIDENCE_THRESHOLD` (por defecto `0.90`) es la parte del historial de un
