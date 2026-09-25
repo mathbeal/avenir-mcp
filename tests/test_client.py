@@ -732,3 +732,24 @@ def test_create_transactions_can_leave_them_for_review() -> None:
             asyncio.run(client.create_transactions("b1", "a1", [item], approved=False))
     sent = ctx.__aenter__.return_value.post.call_args.kwargs["json"]["transactions"][0]
     assert sent["approved"] is False
+
+
+def test_api_url_can_point_to_another_server() -> None:
+    """AVENIR_MCP_YNAB_URL sends requests elsewhere, e.g. to a demo budget server."""
+    ctx = _async_client_returning({"data": {"budgets": []}})
+    env = {"YNAB_API_KEY": "tok", "AVENIR_MCP_YNAB_URL": "http://127.0.0.1:9999/v1"}
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", env):
+            asyncio.run(client.get_budgets())
+    url = ctx.__aenter__.return_value.get.call_args.args[0]
+    assert url == "http://127.0.0.1:9999/v1/budgets"
+
+
+def test_api_url_defaults_to_ynab() -> None:
+    """Without configuration, requests go to YNAB's API."""
+    ctx = _async_client_returning({"data": {"budgets": []}})
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}, clear=True):
+            asyncio.run(client.get_budgets())
+    url = ctx.__aenter__.return_value.get.call_args.args[0]
+    assert url == "https://api.ynab.com/v1/budgets"

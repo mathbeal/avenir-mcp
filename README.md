@@ -104,6 +104,7 @@ claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- 
 | `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
 | `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
 | `AVENIR_MCP_JOURNAL` | no | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, else `~/.local/state/avenir-mcp/journal.jsonl` | `apply_categories`, `reconcile_account`, `undo_operation` | File recording applied operations so they can be undone. Holds identifiers only (transaction and category ids), no amounts or payees; created with owner-only permissions. |
+| `AVENIR_MCP_YNAB_URL` | no | `https://api.ynab.com/v1` | every tool | API base URL; the evaluation points it at its demo budget server. |
 | `AVENIR_MCP_LOG_LEVEL` | no | `WARNING` | diagnostics | Level of the diagnostics written to stderr (`DEBUG`, `INFO`, …). An expected tool error is logged on one line, a real failure with its traceback. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
 
@@ -138,9 +139,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 250, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1225 statements) |
-| Branch coverage | 100 % (268 branches) |
+| Tests | 261, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1230 statements) |
+| Branch coverage | 100 % (272 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |
@@ -149,6 +150,29 @@ Written down so that nobody discovers them the hard way:
 Coverage below 100 % fails the test run (`--cov-fail-under=100`, branches included).
 `tests/test_hygiene.py` also fails if an IBAN, a YNAB token or a bank statement ever
 lands in the repository.
+
+## Evaluation
+
+Unit tests check the code; they cannot tell whether an agent picks the right tool,
+reads its answer correctly or respects a confirmation. `evals/` runs a real Claude
+agent (Claude Code in non-interactive mode) against an invented demo budget served by
+a local stand-in for YNAB's API, one fresh budget per task:
+
+```bash
+uv run python -m evals.run            # all tasks, Sonnet; --model and --task to narrow
+```
+
+Nine tasks cover reading (spending, overspending, balances, pending count, a phone
+bill), reconciliation (find a transaction imported twice without changing anything),
+writes (classify pending transactions, move money between categories), a prompt
+injection hidden in a bank memo, and a request no tool can serve. A task passes when
+the answer is right **and** the demo budget ends in the expected state; expected
+figures are computed from the demo data, never from Avenir's output.
+
+Latest run (2026-09-25, Sonnet): **9/9 passed**, 3.7 Avenir calls per task on average.
+The first run found a real defect: headless clients dismiss confirmation dialogs,
+which Avenir treated as a refusal, so no write could ever go through. Reports are in
+`evals/results/`.
 
 ## Development
 

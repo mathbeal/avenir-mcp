@@ -220,3 +220,15 @@ def test_long_preview_is_summarised(budget: _Budget) -> None:
     assert asked[0].startswith("Recategorise 21 transaction(s)?")
     assert asked[0].count("Corner Shop") == 20
     assert asked[0].endswith("- … and 1 more")
+
+
+def test_dismissed_question_falls_back_to_a_confirmation_code(budget: _Budget) -> None:
+    """'cancel' means nobody answered (a headless client): not a refusal, so a code is issued."""
+
+    async def dismiss(*_: Any) -> ElicitResult[Any]:
+        return ElicitResult(action="cancel")
+
+    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, dismiss)
+    assert data.structured_content["status"] == "confirmation_required"
+    assert data.structured_content["confirmation"]
+    assert not budget.patches

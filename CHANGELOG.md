@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Evaluation: a real agent against an invented demo budget, nine tasks, 9/9 passed.
+- Fixed: a dismissed confirmation (MCP elicitation `cancel`, as headless clients send)
+  counted as a refusal, so no write could go through; it now falls back to a
+  confirmation code. An explicit `decline` still refuses.
+- `AVENIR_MCP_YNAB_URL` points the server at another API, such as the demo budget.
 - Resources: a usage guide, the budgets, and each budget's categories and accounts.
 - Prompts: `classify_pending`, `monthly_review`, `reconcile`, `plan_next_month`.
   Tests keep the guide and the prompts from naming a tool that does not exist.

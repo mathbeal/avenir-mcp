@@ -10,7 +10,13 @@ import httpx  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
-_BASE_URL = "https://api.ynab.com/v1"
+_YNAB_URL = "https://api.ynab.com/v1"
+
+
+def _base_url() -> str:
+    """YNAB's API, or AVENIR_MCP_YNAB_URL (a demo budget server for evaluations)."""
+    return os.getenv("AVENIR_MCP_YNAB_URL", _YNAB_URL).rstrip("/")
+
 
 # Delta-sync cache: {budget_id: {"server_knowledge": int, "transactions": {tx_id: tx}}}
 _CACHE: dict[str, dict[str, Any]] = {}
@@ -81,7 +87,7 @@ async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any
     headers = {"Authorization": f"Bearer {_api_key()}"}
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{_BASE_URL}{path}",
+            f"{_base_url()}{path}",
             headers=headers,
             params=params or {},
         )
@@ -104,7 +110,7 @@ async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
     headers = {"Authorization": f"Bearer {_api_key()}"}
     async with httpx.AsyncClient() as client:
         response = await client.patch(
-            f"{_BASE_URL}{path}",
+            f"{_base_url()}{path}",
             headers=headers,
             json=body,
         )
@@ -119,7 +125,7 @@ async def _delete(path: str) -> dict[str, Any]:
     """
     headers = {"Authorization": f"Bearer {_api_key()}"}
     async with httpx.AsyncClient() as client:
-        response = await client.delete(f"{_BASE_URL}{path}", headers=headers)
+        response = await client.delete(f"{_base_url()}{path}", headers=headers)
         return _check(response)
 
 
@@ -139,7 +145,7 @@ async def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
     headers = {"Authorization": f"Bearer {_api_key()}"}
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{_BASE_URL}{path}",
+            f"{_base_url()}{path}",
             headers=headers,
             json=body,
         )

@@ -60,7 +60,7 @@ line_length = 100
 [tool.mypy]
 strict = true
 python_version = "3.14"
-files = ["avenir_mcp", "tests"]
+files = ["avenir_mcp", "tests", "evals"]
 
 [tool.pylint.format]
 max-line-length = 100

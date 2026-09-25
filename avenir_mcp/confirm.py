@@ -81,7 +81,12 @@ async def ask(
     )
     if can_ask:
         answer = await ctx.elicit(question, None)
-        return "applied" if answer.action == "accept" else "declined"
+        if answer.action == "accept":
+            return "applied"
+        if answer.action == "decline":
+            return "declined"
+        # "cancel": the question was dismissed or could not be shown (a headless
+        # client). Nobody said no, so fall back to a code the user can confirm.
     return CONFIRMATIONS.issue(budget_id, subject)
 
 
