@@ -47,6 +47,25 @@ read-only by default, previewable and undoable.
 | `set_category_budget` | **write, confirmed, undoable** | set the amount budgeted in a category for a month; previewed as before → after |
 | `create_transactions` | **write, confirmed, undoable** | add transactions an import missed; previewed, left for review in YNAB unless `approved`; undo deletes them |
 
+## Resources and prompts
+
+Besides tools, the server offers context an application can attach without a tool
+call, and workflows you start yourself.
+
+| Resource | What it holds |
+|---|---|
+| `avenir://guide` | how to use the tools, and the YNAB method in brief |
+| `ynab://budgets` | your budgets and their ids |
+| `ynab://budgets/{budget_id}/categories` | assignable categories by group, with ids |
+| `ynab://budgets/{budget_id}/accounts` | open accounts and their balances |
+
+| Prompt | Arguments | What it walks through |
+|---|---|---|
+| `classify_pending` | budget_id | suggestions, your choices, a confirmed batch, the undo id |
+| `monthly_review` | budget_id, month | totals, what stands out, proposed fixes |
+| `reconcile` | budget_id, account_id, bank_balance | the gap explained, then a confirmed reconciliation |
+| `plan_next_month` | budget_id | forecast and its assumptions, then next month's amounts |
+
 ## Install
 
 The examples enable write tools (`AVENIR_MCP_WRITE=1`); drop it to keep the server
@@ -119,9 +138,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 240, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1186 statements) |
-| Branch coverage | 100 % (264 branches) |
+| Tests | 250, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1225 statements) |
+| Branch coverage | 100 % (268 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |

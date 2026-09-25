@@ -34,7 +34,7 @@ previewed, confirmed and undoable; short, structured answers.
 - `reconcile_account`: bank balance in, discrepancy and adjustment out, with a preview. *Done.*
 - Better category suggestions: normalised payee names, learning from past decisions.
 - MCP resources (categories, accounts, a YNAB method guide) and prompts (monthly review,
-  classify pending transactions, reconcile an account, plan next month).
+  classify pending transactions, reconcile an account, plan next month). *Done.*
 
 ## Done since 0.5
 

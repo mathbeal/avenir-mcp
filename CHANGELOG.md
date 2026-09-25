@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Resources: a usage guide, the budgets, and each budget's categories and accounts.
+- Prompts: `classify_pending`, `monthly_review`, `reconcile`, `plan_next_month`.
+  Tests keep the guide and the prompts from naming a tool that does not exist.
 - `create_transactions` validates account, categories and dates, previews the
   transactions, confirms, leaves them for review in YNAB unless `approved`, and
   `undo_operation` deletes them. `create_category` confirms and refuses a name already

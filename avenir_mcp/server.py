@@ -10,6 +10,7 @@ import os
 import sys
 
 from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
+    context,
     tools_accounts,
     tools_categories,
     tools_classify,
