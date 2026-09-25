@@ -1,0 +1,55 @@
+---
+title: Avenir
+description: Un servidor MCP para YNAB, pensado para agentes. Pregunta por tu presupuesto con tus propias palabras; cada cambio se previsualiza, se confirma y se puede deshacer.
+template: splash
+hero:
+  tagline: Un servidor MCP para YNAB, pensado para agentes. Pregunta por tu presupuesto con tus propias palabras — cada cambio se previsualiza, lo confirmas tú y se puede deshacer.
+  actions:
+    - text: Instalar
+      link: /avenir-mcp/es/getting-started/install/
+      icon: right-arrow
+    - text: Verlo en acción
+      link: /avenir-mcp/es/getting-started/first-conversation/
+      variant: minimal
+---
+
+import { Card, CardGrid, Code, Aside } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+
+<Aside type="caution" title="Sin relación con YNAB">
+YNAB y You Need A Budget son marcas registradas de YNAB. Avenir es un proyecto
+independiente que usa la API pública de YNAB con tu propio token de acceso. *Avenir*
+significa *el futuro* en francés.
+</Aside>
+
+<CardGrid stagger>
+  <Card title="Solo lectura por defecto" icon="seti:lock">
+    Las herramientas que modifican tu presupuesto no existen hasta que las activas.
+  </Card>
+  <Card title="Previsualizar, confirmar, deshacer" icon="approve-check">
+    Cada escritura muestra lo que va a cambiar y espera tu sí. Una sola llamada la revierte.
+  </Card>
+  <Card title="Herramientas para tareas" icon="rocket">
+    Clasificar un mes de transacciones, conciliar una cuenta, proyectar tu saldo: una
+    herramienta para cada cosa, no un simple envoltorio de la API de YNAB.
+  </Card>
+  <Card title="Respuestas legibles para un agente" icon="document">
+    Importes en unidades monetarias, respuestas breves y tipadas, paginación, errores que
+    dicen qué corregir.
+  </Card>
+</CardGrid>
+
+## Una muestra
+
+> **Tú:** ¿Qué categoría se ha pasado de presupuesto en septiembre, y por cuánto?
+
+Claude llama a `get_monthly_summary`, que responde en pocas líneas:
+
+<Code code={summary} lang="json" />
+
+> **Claude:** Restaurants se ha pasado 22,50 en septiembre. ¿Quieres que mueva 30 desde
+> Leisure para cubrirlo?
+
+Todos los ejemplos de esta documentación son respuestas reales de Avenir sobre un
+presupuesto de demostración inventado: no aparece ninguna cuenta real. Los datos de
+demostración están en inglés, como el código.

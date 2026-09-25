@@ -1,0 +1,69 @@
+---
+title: Votre première conversation
+description: Un tour d'Avenir, avec de vraies réponses du budget de démonstration.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import accounts from '@snippets/list_accounts.json?raw';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import pending from '@snippets/suggest_categories.json?raw';
+import preview from '@snippets/apply_preview.json?raw';
+
+Un petit tour, dans l'ordre où l'on découvre Avenir le plus souvent. Chaque réponse
+montrée est ce qu'Avenir renvoie réellement sur le budget de démonstration inventé.
+
+## 1. Faire le tour
+
+> **Vous :** Quels comptes ai-je, et combien y a-t-il dessus ?
+
+<Code code={accounts} lang="json" />
+
+Les montants sont dans la devise de votre budget, jamais dans les *milliunités* internes
+de YNAB.
+
+## 2. Voir où en est le mois
+
+> **Vous :** Comment se passe septembre ?
+
+<Code code={summary} lang="json" />
+
+Seules les catégories en dépassement sont listées. Demandez le détail quand vous le
+voulez :
+
+> **Vous :** Montre-moi toutes les catégories de septembre.
+
+<Code code={balances} lang="json" />
+
+## 3. Faire du rangement
+
+> **Vous :** Qu'est-ce qui attend encore une catégorie ?
+
+<Code code={pending} lang="json" />
+
+Quand votre historique est clair, une `suggestion` est prête ; pour le reste, Claude
+propose une catégorie et vous demande. La suite dans
+[Classer les transactions en attente](/avenir-mcp/fr/use-cases/classify/).
+
+## 4. Modifier quelque chose, en sécurité
+
+> **Vous :** Oui, mets la boulangerie dans Groceries et le train dans Transport.
+
+Rien ne change encore. Vous voyez exactement ce qui va changer :
+
+<Code code={preview} lang="json" />
+
+Selon votre client, il vous le demande directement (une case à cocher) ou vous montre
+l'aperçu et attend votre accord. Une fois appliqué, *« Annule ça »* le défait. Voir
+[Sécurité par conception](/avenir-mcp/fr/concepts/safety/).
+
+## 5. Utiliser les procédures toutes prêtes
+
+| Prompt | Ce qu'il déroule |
+|---|---|
+| `classify_pending` | propositions, vos choix, un lot confirmé, l'identifiant pour annuler |
+| `monthly_review` | les totaux, ce qui ressort, les corrections proposées |
+| `reconcile` | l'écart avec la banque expliqué, puis un rapprochement confirmé |
+| `plan_next_month` | une projection et ses hypothèses, puis les montants du mois suivant |
+
+Dans Claude Code, ils apparaissent parmi les commandes slash du serveur `avenir`.

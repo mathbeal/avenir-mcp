@@ -1,0 +1,40 @@
+---
+title: Anticiper
+description: Savoir si l'argent tiendra, et préparer le budget du mois suivant.
+sidebar:
+  order: 4
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import projection from '@snippets/forecast.json?raw';
+
+**Objectif :** savoir si l'argent tiendra, et préparer le budget du mois suivant.
+
+**Demandez :** *« Si je gagne 3 200 par mois, mes comptes passeront-ils sous zéro avant la
+fin de l'année ? »* — ou lancez le prompt `plan_next_month`.
+
+## Ce qui se passe
+
+**`forecast_balance`** projette le solde mois par mois, jusqu'à 24 mois, et renvoie les
+hypothèses utilisées pour que vous puissiez les corriger :
+
+<Code code={projection} lang="json" />
+
+- **Les charges récurrentes** viennent de votre historique : même bénéficiaire 3 mois sur
+  les 4 derniers, montant stable. Elles tombent à leur date habituelle.
+- **Les autres dépenses** sont la moyenne des 3 derniers mois, répartie sur les jours.
+- **Le revenu** est celui que vous donnez (`monthly_income`), qui remplace ce que montre
+  l'historique ; sans lui, la moyenne de l'historique.
+- **Les montants ponctuels** — un impôt annuel, un remboursement — sont à ajouter par vous.
+- Pour le mois en cours, ce qui a déjà été dépensé ou reçu est déduit.
+
+`lowest` est le point le plus bas de chaque mois ; `first_shortfall` nomme le premier
+mois où le solde passe sous zéro.
+
+<Aside type="caution" title="Une projection, pas une prédiction">
+Elle prolonge vos derniers mois. Lisez les hypothèses avant la conclusion, et ajoutez ce
+que vous savez venir.
+</Aside>
+
+Avec la projection en tête, Claude propose les montants du mois suivant catégorie par
+catégorie et applique ceux que vous acceptez avec `set_category_budget`.

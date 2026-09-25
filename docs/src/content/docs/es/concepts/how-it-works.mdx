@@ -1,0 +1,56 @@
+---
+title: Cómo funciona
+description: Importes, peticiones y límites, errores, sugerencias, versiones del protocolo.
+sidebar:
+  order: 2
+---
+
+import { Code } from '@astrojs/starlight/components';
+import badMonth from '@snippets/bad_month.json?raw';
+
+## Importes
+
+YNAB guarda los importes en *milliunits* (1,00 = 1000). Avenir convierte en la frontera:
+cada herramienta recibe y devuelve **unidades monetarias**, con los gastos en negativo.
+Las sumas se hacen en milliunits dentro del servidor, así que ningún redondeo inventa un
+céntimo.
+
+## Peticiones y límite de YNAB
+
+YNAB permite **200 peticiones por hora** y por token. Avenir guarda una copia local de tus
+transacciones y solo pide a YNAB lo que ha cambiado desde la última llamada
+(*sincronización incremental*). La mayoría de herramientas cuestan una o dos peticiones;
+`suggest_categories` cuesta dos por página completa, sea cual sea el número de
+transacciones.
+
+## Errores que dicen qué corregir
+
+Un argumento mal formado se rechaza antes de llamar a YNAB, con un mensaje que el agente
+puede usar en lugar de un error HTTP en bruto:
+
+<Code code={badMonth} lang="text" />
+
+## Sugerencias
+
+Se sugiere una categoría cuando un beneficiario se ha clasificado igual con suficiente
+frecuencia — el 90 % de las veces por defecto (`AVENIR_MCP_CONFIDENCE_THRESHOLD`):
+
+- las etiquetas bancarias se **normalizan** — se quitan prefijos de tarjeta, fechas de
+  factura, números de tarjeta enmascarados, referencias y números de cuenta — para
+  reconocer un comercio a través de sus etiquetas;
+- las **entradas** y **salidas** de dinero se aprenden por separado;
+- solo se sugieren categorías que aún puedes usar.
+
+Un comercio nunca clasificado no recibe sugerencia: el agente propone una y te pregunta.
+
+## Proyección
+
+`forecast_balance` separa lo que se repite de lo que varía. Consulta
+[Planificar](/avenir-mcp/es/use-cases/plan-ahead/) para ver sus supuestos.
+
+## Versiones del protocolo
+
+Avenir habla la versión actual del protocolo MCP (2026-07-28), en la que un servidor pide
+confirmación devolviendo una *solicitud de entrada* que el cliente responde en una
+segunda llamada, y también las versiones anteriores, en las que la pide durante la
+llamada. Los clientes no tienen que hacer nada especial.

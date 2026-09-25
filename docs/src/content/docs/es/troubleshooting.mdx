@@ -1,0 +1,63 @@
+---
+title: Solución de problemas
+description: Problemas frecuentes y cómo resolverlos.
+---
+
+<details>
+<summary>Mi cliente no muestra las herramientas de Avenir</summary>
+
+- Comprueba que el servidor está conectado: `claude mcp list`, o el panel MCP de tu cliente.
+- Ejecuta `uvx avenir-mcp` en un terminal: debe esperar a un cliente en silencio. Un
+  error ahí es el que tu cliente te oculta.
+- Reinicia el cliente después de editar su configuración.
+
+</details>
+
+<details>
+<summary>Faltan las herramientas que modifican mi presupuesto</summary>
+
+Avenir está en solo lectura mientras `AVENIR_MCP_WRITE=1` no esté en su entorno.
+
+</details>
+
+<details>
+<summary><code>YNAB 401</code></summary>
+
+El token es incorrecto o se ha revocado. Crea uno nuevo en las Developer Settings de YNAB.
+
+</details>
+
+<details>
+<summary><code>YNAB 429</code></summary>
+
+YNAB permite 200 peticiones por hora y por token. Espera unos minutos; la sincronización
+incremental de Avenir abarata las llamadas siguientes.
+
+</details>
+
+<details>
+<summary>El agente repite <code>confirmation_required</code></summary>
+
+Tu cliente no puede mostrar una casilla de confirmación, así que Avenir devolvió una
+vista previa y un código. Dile al agente que estás de acuerdo: volverá a llamar con el
+código. Un código dura 10 minutos y sirve una sola vez.
+
+</details>
+
+<details>
+<summary><code>ModuleNotFoundError: avenir_mcp</code> en una carpeta sincronizada con iCloud Drive</summary>
+
+iCloud puede marcar archivos como ocultos, y las versiones recientes de Python ignoran
+los archivos `.pth` ocultos, lo que rompe las instalaciones editables. Mantén el entorno
+virtual fuera de la carpeta sincronizada:
+`UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`.
+
+</details>
+
+<details>
+<summary>¿Dónde veo lo que hace el servidor?</summary>
+
+Define `AVENIR_MCP_LOG_LEVEL=DEBUG`. Los diagnósticos van a stderr, que tu cliente suele
+guardar en sus registros MCP; stdout pertenece al protocolo.
+
+</details>

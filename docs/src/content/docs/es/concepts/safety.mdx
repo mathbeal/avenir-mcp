@@ -1,0 +1,69 @@
+---
+title: Seguridad desde el diseño
+description: Solo lectura por defecto, vista previa y confirmación, deshacer, texto bancario no fiable.
+sidebar:
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Un agente que puede modificar tu presupuesto nunca debería sorprenderte. Avenir tiene
+cuatro capas de protección.
+
+## 1. Solo lectura por defecto
+
+Las herramientas que modifican tu presupuesto llevan la etiqueta `write`. Sin
+`AVENIR_MCP_WRITE=1`, **no se listan ni se pueden llamar**: el agente ni siquiera puede
+intentarlo. Cada herramienta declara además anotaciones MCP — de solo lectura o no,
+destructiva o no, repetible o no — para que tu cliente decida cuánto preguntarte.
+Consulta la [referencia](/avenir-mcp/es/reference/tools/).
+
+## 2. Vista previa, y después confirmación
+
+<Steps>
+
+1. Pides: *«Pon la panadería en Groceries.»*
+2. El agente llama a `apply_categories`. Avenir lee el estado actual en YNAB y calcula
+   los cambios — **sin aplicarlos**.
+3. Ves la vista previa: *«¿Recategorizar 1 transacción? Panadería −8,40 → Groceries»*.
+4. Respondes que sí. El agente vuelve a llamar con tu respuesta.
+5. Avenir aplica los cambios en YNAB en una sola petición, los anota en su registro y
+   devuelve un id de operación que puedes deshacer.
+
+</Steps>
+
+Cómo te llega la pregunta depende de tu cliente:
+
+| Tu cliente | Lo que ves |
+|---|---|
+| Admite la *elicitation* de MCP | Una casilla de confirmación que marcar, mostrada por el propio cliente. |
+| No la admite, o funciona sin supervisión | La vista previa en la conversación y un **código de un solo uso** que el agente devuelve solo tras tu acuerdo. |
+
+Una confirmación está **ligada a la vista previa exacta**: un código caduca a los 10
+minutos, sirve una sola vez y solo confirma esos cambios. Si el presupuesto cambia entre
+la vista previa y tu respuesta, la respuesta se rechaza y hace falta una nueva vista
+previa. No marcar nada, o negarse, no cambia nada.
+
+## 3. Deshacer
+
+Las operaciones aplicadas se anotan en un registro local — solo identificadores, sin
+importes ni nombres, legible solo por ti. `undo_operation` revierte la última operación,
+o la que indiques:
+
+| Operación | Deshacer |
+|---|---|
+| `apply_categories` | cada transacción recupera su categoría anterior |
+| `set_category_budget` | se restablece el importe anterior |
+| `reconcile_account` | las transacciones vuelven a *punteadas*; se elimina el ajuste |
+| `create_transactions` | se eliminan las transacciones creadas |
+
+Lo que haya cambiado después de la operación **se deja como está** y se indica: deshacer
+nunca sobrescribe un trabajo posterior.
+
+## 4. El texto bancario no es de fiar
+
+Los nombres de beneficiarios y los memos vienen de bancos, comercios y cualquiera que
+pueda enviarte dinero. Un memo puede llevar un texto escrito para manipular a un agente.
+Avenir devuelve ese texto como un dato, recortado, y nunca lo convierte en instrucciones.
+Su [evaluación](/avenir-mcp/es/evaluation/) esconde una instrucción en un memo y
+comprueba que el agente la ignora.

@@ -1,0 +1,56 @@
+---
+title: Fonctionnement
+description: Montants, requêtes et limites, erreurs, suggestions, versions du protocole.
+sidebar:
+  order: 2
+---
+
+import { Code } from '@astrojs/starlight/components';
+import badMonth from '@snippets/bad_month.json?raw';
+
+## Montants
+
+YNAB stocke les montants en *milliunités* (1,00 = 1000). Avenir convertit à la frontière :
+chaque outil reçoit et renvoie des **unités monétaires**, dépenses négatives. Les sommes
+sont faites en milliunités dans le serveur, pour qu'aucun arrondi n'invente un centime.
+
+## Requêtes et limite de YNAB
+
+YNAB autorise **200 requêtes par heure** et par jeton. Avenir garde une copie locale de
+vos transactions et ne demande à YNAB que ce qui a changé depuis le dernier appel
+(*synchronisation incrémentale*). La plupart des outils coûtent une ou deux requêtes ;
+`suggest_categories` en coûte deux pour une page entière, quel que soit le nombre de
+transactions.
+
+## Des erreurs qui disent quoi corriger
+
+Un argument mal formé est refusé avant tout appel à YNAB, avec un message exploitable
+par l'agent plutôt qu'une erreur HTTP brute :
+
+<Code code={badMonth} lang="text" />
+
+## Suggestions
+
+Une catégorie est proposée quand un bénéficiaire a été classé de la même façon assez
+souvent — 90 % des fois par défaut (`AVENIR_MCP_CONFIDENCE_THRESHOLD`) :
+
+- les libellés bancaires sont **normalisés** — préfixes de carte, dates de facture,
+  numéros de carte masqués, références et numéros de compte retirés — pour reconnaître un
+  commerçant à travers ses libellés ;
+- les **entrées** et les **sorties** d'argent sont apprises séparément ;
+- seules les catégories encore utilisables sont proposées.
+
+Un commerçant jamais classé n'a pas de proposition : l'agent en propose une et vous
+demande.
+
+## Projection
+
+`forecast_balance` sépare ce qui revient de ce qui varie. Voir
+[Anticiper](/avenir-mcp/fr/use-cases/plan-ahead/) pour ses hypothèses.
+
+## Versions du protocole
+
+Avenir parle la version actuelle du protocole MCP (2026-07-28), où un serveur demande une
+confirmation en renvoyant une *demande de saisie* à laquelle le client répond dans un
+second appel, ainsi que les versions précédentes, où il la demande pendant l'appel. Les
+clients n'ont rien de particulier à faire.

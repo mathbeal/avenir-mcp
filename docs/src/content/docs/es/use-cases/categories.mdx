@@ -1,0 +1,28 @@
+---
+title: Organizar las categorías
+description: Crear, renombrar y mover categorías, y fijar sus importes.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Objetivo:** mantener ordenadas las categorías a medida que cambia tu vida.
+
+| Pide | Herramienta |
+|---|---|
+| *«Crea una categoría Mascotas en Everyday.»* | `create_category` |
+| *«Renombra Gym como Sport.»* | `update_category` |
+| *«Mueve Books de Fun a Education.»* | `update_category` |
+| *«Pon 150 en Restaurants para septiembre.»* | `set_category_budget` |
+
+Cada una previsualiza el cambio y espera tu confirmación. Un nombre ya usado en el grupo
+se rechaza.
+
+<Code code={budget} lang="json" />
+
+<Aside type="note" title="Eliminar una categoría">
+La API de YNAB no permite eliminar categorías. Para deshacer una creación, oculta la
+categoría en YNAB.
+</Aside>

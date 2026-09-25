@@ -1,0 +1,27 @@
+---
+title: Organise categories
+description: Create, rename, move categories and set their amounts.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Goal:** keep the category structure tidy as your life changes.
+
+| Ask | Tool |
+|---|---|
+| *“Create a Pets category in Everyday.”* | `create_category` |
+| *“Rename Gym to Sport.”* | `update_category` |
+| *“Move Books from Fun to Education.”* | `update_category` |
+| *“Put 150 in Restaurants for September.”* | `set_category_budget` |
+
+Each one previews the change and waits for your confirmation. A name already used in
+the group is refused.
+
+<Code code={budget} lang="json" />
+
+<Aside type="note" title="Deleting a category">
+YNAB's API cannot delete a category. To undo a creation, hide the category in YNAB.
+</Aside>

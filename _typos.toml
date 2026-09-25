@@ -1,4 +1,15 @@
 [files]
 # Agent replies archived by the evaluation, cut to their last characters: quoted
 # as produced, not text to correct.
-extend-exclude = ["evals/results/"]
+extend-exclude = [
+  "evals/results/",
+  # French and Spanish pages: typos knows English only.
+  "docs/src/content/docs/fr/",
+  "docs/src/content/docs/es/",
+  "docs/package-lock.json",
+]
+
+[default.extend-words]
+# Sidebar labels translated in docs/astro.config.mjs.
+Conceptos = "Conceptos"
+Projet = "Projet"

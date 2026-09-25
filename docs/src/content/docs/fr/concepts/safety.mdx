@@ -1,0 +1,69 @@
+---
+title: Sécurité par conception
+description: Lecture seule par défaut, aperçu et confirmation, annulation, texte bancaire non fiable.
+sidebar:
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Un agent capable de modifier votre budget ne doit jamais vous surprendre. Avenir a quatre
+niveaux de protection.
+
+## 1. Lecture seule par défaut
+
+Les outils qui modifient votre budget portent une étiquette `write`. Sans
+`AVENIR_MCP_WRITE=1`, ils ne sont **ni listés ni appelables** : l'agent ne peut même pas
+essayer. Chaque outil déclare aussi des annotations MCP — lecture seule ou non,
+destructif ou non, rejouable ou non — pour que votre client décide combien vous
+demander. Voir la [référence](/avenir-mcp/fr/reference/tools/).
+
+## 2. Aperçu, puis confirmation
+
+<Steps>
+
+1. Vous demandez : *« Mets la boulangerie dans Groceries. »*
+2. L'agent appelle `apply_categories`. Avenir lit l'état actuel dans YNAB et calcule les
+   changements — **sans les appliquer**.
+3. Vous voyez l'aperçu : *« Recatégoriser 1 transaction ? Boulangerie −8,40 → Groceries »*.
+4. Vous répondez oui. L'agent rappelle l'outil avec votre réponse.
+5. Avenir applique les changements dans YNAB en une requête, les inscrit au journal et
+   renvoie un identifiant d'opération annulable.
+
+</Steps>
+
+La façon dont la question vous parvient dépend de votre client :
+
+| Votre client | Ce que vous voyez |
+|---|---|
+| Gère l'*élicitation* MCP | Une case de confirmation à cocher, affichée par le client lui-même. |
+| Ne la gère pas, ou tourne sans surveillance | L'aperçu dans la conversation, et un **code à usage unique** que l'agent ne renvoie qu'après votre accord. |
+
+Une confirmation est **liée à l'aperçu exact** : un code expire après 10 minutes, ne sert
+qu'une fois, et ne confirme que ces changements-là. Si le budget change entre l'aperçu et
+votre réponse, la réponse est refusée et un nouvel aperçu est nécessaire. Ne rien cocher,
+ou refuser, ne change rien.
+
+## 3. Annuler
+
+Les opérations appliquées sont inscrites dans un journal local — des identifiants
+seulement, ni montants ni noms, lisible par vous seul. `undo_operation` annule la
+dernière opération, ou celle que vous désignez :
+
+| Opération | Annulation |
+|---|---|
+| `apply_categories` | chaque transaction retrouve sa catégorie précédente |
+| `set_category_budget` | l'ancien montant est rétabli |
+| `reconcile_account` | les transactions redeviennent *pointées* ; l'ajustement est supprimé |
+| `create_transactions` | les transactions créées sont supprimées |
+
+Ce qui a été modifié depuis l'opération est **laissé tel quel** et signalé : une
+annulation n'écrase jamais un travail plus récent.
+
+## 4. Le texte bancaire n'est pas fiable
+
+Les noms de bénéficiaires et les mémos viennent des banques, des commerçants et de
+quiconque peut vous envoyer de l'argent. Un mémo peut contenir un texte écrit pour
+manipuler un agent. Avenir renvoie ce texte comme une donnée, tronquée, et n'en fait
+jamais une consigne. Son [évaluation](/avenir-mcp/fr/evaluation/) cache une consigne dans
+un mémo et vérifie que l'agent l'ignore.

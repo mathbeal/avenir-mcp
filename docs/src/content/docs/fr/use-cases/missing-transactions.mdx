@@ -1,0 +1,24 @@
+---
+title: Ajouter des transactions manquantes
+description: Enregistrer ce que l'import bancaire a manqué.
+sidebar:
+  order: 5
+---
+
+import { Code } from '@astrojs/starlight/components';
+import created from '@snippets/create_preview.json?raw';
+
+**Objectif :** enregistrer ce que l'import bancaire a manqué — une pharmacie, une dépense
+en espèces.
+
+**Demandez :** *« Ajoute un paiement de 32,40 à la Pharmacie Centrale le 21 septembre,
+non importé par la banque. »*
+
+**`create_transactions`** vérifie le compte, les catégories et les dates (pas dans le
+futur), puis montre ce qu'il va ajouter :
+
+<Code code={created} lang="json" />
+
+Après votre confirmation, les transactions sont créées **pointées** et, sauf si vous
+demandez `approved`, laissées à revoir dans YNAB comme n'importe quel import.
+`undo_operation` les supprime.

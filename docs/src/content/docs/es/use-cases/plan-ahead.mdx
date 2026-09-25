@@ -1,0 +1,40 @@
+---
+title: Planificar
+description: Saber si el dinero alcanza, y preparar el presupuesto del mes siguiente.
+sidebar:
+  order: 4
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import projection from '@snippets/forecast.json?raw';
+
+**Objetivo:** saber si el dinero alcanza, y preparar el presupuesto del mes siguiente.
+
+**Pide:** *«Si gano 3.200 al mes, ¿bajarán mis cuentas de cero antes de fin de año?»* —
+o ejecuta el prompt `plan_next_month`.
+
+## Qué ocurre
+
+**`forecast_balance`** proyecta el saldo mes a mes, hasta 24 meses, y devuelve los
+supuestos que usó para que puedas corregirlos:
+
+<Code code={projection} lang="json" />
+
+- **Los cargos recurrentes** salen de tu historial: el mismo beneficiario 3 de los
+  últimos 4 meses, con importe estable. Caen en su día habitual.
+- **El resto del gasto** es la media de los últimos 3 meses, repartida por días.
+- **Los ingresos** son los que indicas (`monthly_income`), que sustituyen lo que muestra
+  el historial; sin ellos, la media del historial.
+- **Los importes puntuales** — un impuesto anual, un reembolso — los añades tú.
+- En el mes en curso se descuenta lo ya gastado o recibido.
+
+`lowest` es el punto más bajo de cada mes; `first_shortfall` indica el primer mes en que
+baja de cero.
+
+<Aside type="caution" title="Una proyección, no una predicción">
+Prolonga tus últimos meses. Lee los supuestos antes que la conclusión, y añade lo que
+sabes que va a llegar.
+</Aside>
+
+Con la proyección en mente, Claude propone los importes del mes siguiente categoría por
+categoría y aplica los que aceptas con `set_category_budget`.

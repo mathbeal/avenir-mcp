@@ -1,0 +1,62 @@
+---
+title: Troubleshooting
+description: Common problems and how to solve them.
+---
+
+<details>
+<summary>My client does not show Avenir's tools</summary>
+
+- Check the server is connected: `claude mcp list`, or your client's MCP panel.
+- Run `uvx avenir-mcp` in a terminal: it should wait silently for a client. An error
+  there is the one your client hides.
+- Restart the client after editing its configuration.
+
+</details>
+
+<details>
+<summary>The tools that change my budget are missing</summary>
+
+Avenir is read-only unless `AVENIR_MCP_WRITE=1` is in its environment.
+
+</details>
+
+<details>
+<summary><code>YNAB 401</code></summary>
+
+The token is wrong or revoked. Create a new one in YNAB's Developer Settings.
+
+</details>
+
+<details>
+<summary><code>YNAB 429</code></summary>
+
+YNAB allows 200 requests per hour per token. Wait a few minutes; Avenir's delta sync
+keeps later calls cheap.
+
+</details>
+
+<details>
+<summary>The agent keeps saying <code>confirmation_required</code></summary>
+
+Your client cannot show a confirmation box, so Avenir returned a preview and a code.
+Tell the agent you agree: it calls the tool again with the code. A code lasts 10 minutes
+and works once.
+
+</details>
+
+<details>
+<summary><code>ModuleNotFoundError: avenir_mcp</code> in a folder synced by iCloud Drive</summary>
+
+iCloud can mark files as hidden, and recent Python versions skip hidden `.pth` files,
+which breaks editable installs. Keep the virtual environment outside the synced folder:
+`UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`.
+
+</details>
+
+<details>
+<summary>Where do I see what the server does?</summary>
+
+Set `AVENIR_MCP_LOG_LEVEL=DEBUG`. Diagnostics go to stderr, which your client usually
+keeps in its MCP logs; stdout belongs to the protocol.
+
+</details>

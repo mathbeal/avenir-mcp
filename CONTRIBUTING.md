@@ -26,10 +26,16 @@ a fixture or a log. Invent them.
 
 ## Documentation
 
-The site lives in `docs/` (MkDocs Material). The tool reference and every JSON
-example are generated: run `uv run python -m docsgen` after changing a tool, and
-`just docs-serve` to read the result. Examples come from the invented demo budget
-in `evals/demo_budget.py`, never from a real one.
+The site lives in `docs/`: [Starlight](https://starlight.astro.build), in English,
+French and Spanish. The tool reference, the security page and every JSON example are
+generated: run `uv run python -m docsgen` after changing a tool, then `just docs` (a
+broken internal link in any language fails the build) or `just docs-serve` to read the
+result. Examples come from the invented demo budget in `evals/demo_budget.py`, never
+from a real one.
+
+A page written by hand exists in the three languages: a test fails when an English
+page has no French or Spanish counterpart. Change the three together. Generated pages
+stay in English, and the other languages show them with a "not translated" notice.
 
 ## Reporting a bad suggestion or a confusing tool
 

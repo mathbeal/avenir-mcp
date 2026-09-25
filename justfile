@@ -61,10 +61,12 @@ changelog-check:
 evaluate:
     uv run python -m evals.run
 
-# Build the documentation site, failing on any warning.
+# Regenerate the tool reference and the examples, then build the site (EN, FR, ES).
 docs:
-    uv run --group docs mkdocs build --strict
+    uv run python -m docsgen
+    npm --prefix docs ci
+    npm --prefix docs run build
 
 # Serve the documentation locally with live reload.
 docs-serve:
-    uv run --group docs mkdocs serve
+    npm --prefix docs run dev

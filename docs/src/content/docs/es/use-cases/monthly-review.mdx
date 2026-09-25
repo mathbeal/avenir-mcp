@@ -1,0 +1,38 @@
+---
+title: Revisar un mes
+description: Adónde fue el dinero, y cómo corregir lo que se desvió.
+sidebar:
+  order: 3
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Objetivo:** entender adónde fue el dinero y corregir lo que se desvió.
+
+**Pide:** *«Revisa septiembre conmigo.»* — o ejecuta el prompt `monthly_review`.
+
+<Steps>
+
+1. **`get_monthly_summary`** da el mes de un vistazo — ingresos, presupuestado, gastado,
+   Ready to Assign — y solo las categorías que se han pasado:
+
+   <Code code={summary} lang="json" />
+
+2. **`get_category_balances`** y **`get_spending_trends`** explican lo que destaca:
+   ¿los restaurantes están altos este mes, o todos los meses?
+
+   <Code code={balances} lang="json" />
+
+3. Claude propone correcciones — normalmente mover dinero de una categoría con margen a
+   la que se ha pasado — y las aplica con `set_category_budget` cuando estás de acuerdo:
+
+   <Code code={budget} lang="json" />
+
+</Steps>
+
+Un exceso se corrige moviendo dinero entre categorías, no ignorándolo: es el método YNAB,
+y el recurso `avenir://guide` se lo recuerda a los agentes. Las categorías sin nada
+presupuestado, gastado ni disponible quedan fuera, salvo que pidas `include_empty`.

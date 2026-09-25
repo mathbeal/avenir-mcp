@@ -1,0 +1,68 @@
+---
+title: Tu primera conversación
+description: Un recorrido por Avenir, con respuestas reales del presupuesto de demostración.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import accounts from '@snippets/list_accounts.json?raw';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import pending from '@snippets/suggest_categories.json?raw';
+import preview from '@snippets/apply_preview.json?raw';
+
+Un breve recorrido, en el orden en que la mayoría descubre Avenir. Cada respuesta es lo
+que Avenir devuelve de verdad sobre el presupuesto de demostración inventado.
+
+## 1. Echa un vistazo
+
+> **Tú:** ¿Qué cuentas tengo y cuánto hay en ellas?
+
+<Code code={accounts} lang="json" />
+
+Los importes están en la moneda de tu presupuesto, nunca en las *milliunits* internas de
+YNAB.
+
+## 2. Mira cómo va el mes
+
+> **Tú:** ¿Cómo va septiembre?
+
+<Code code={summary} lang="json" />
+
+Solo se listan las categorías que se han pasado. Pide el detalle cuando lo quieras:
+
+> **Tú:** Enséñame todas las categorías de septiembre.
+
+<Code code={balances} lang="json" />
+
+## 3. Pon orden
+
+> **Tú:** ¿Qué sigue esperando una categoría?
+
+<Code code={pending} lang="json" />
+
+Cuando tu historial es claro, hay una `suggestion` lista; para el resto, Claude propone
+una categoría y te pregunta. Continúa en
+[Clasificar transacciones pendientes](/avenir-mcp/es/use-cases/classify/).
+
+## 4. Cambia algo, con seguridad
+
+> **Tú:** Sí, pon la panadería en Groceries y el tren en Transport.
+
+Todavía no cambia nada. Ves exactamente lo que va a cambiar:
+
+<Code code={preview} lang="json" />
+
+Según tu cliente, te lo pregunta directamente (una casilla de confirmación) o te muestra
+la vista previa y espera tu visto bueno. Una vez aplicado, *«Deshaz eso»* lo revierte.
+Consulta [Seguridad desde el diseño](/avenir-mcp/es/concepts/safety/).
+
+## 5. Usa los flujos ya preparados
+
+| Prompt | Lo que te guía a hacer |
+|---|---|
+| `classify_pending` | sugerencias, tus elecciones, un lote confirmado, el id para deshacer |
+| `monthly_review` | los totales, lo que destaca, las correcciones propuestas |
+| `reconcile` | la diferencia con el banco explicada, luego una conciliación confirmada |
+| `plan_next_month` | una proyección y sus supuestos, luego los importes del mes siguiente |
+
+En Claude Code aparecen entre los comandos slash del servidor `avenir`.

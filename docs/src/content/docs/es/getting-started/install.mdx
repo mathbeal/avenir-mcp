@@ -1,0 +1,100 @@
+---
+title: Instalar
+description: Añade Avenir a Claude Code, Claude Desktop, Cursor o VS Code.
+---
+
+import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
+import budgets from '@snippets/list_budgets.json?raw';
+
+## Lo que necesitas
+
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)**, que ejecuta Avenir
+  sin instalar nada de forma global.
+- **Un token de acceso personal de YNAB**:
+
+<Steps>
+
+1. Abre YNAB en la web y ve a **Account Settings → Developer Settings**.
+2. En *Personal Access Tokens*, elige **New Token** y confirma con tu contraseña.
+3. Copia el token: YNAB solo lo muestra una vez.
+
+</Steps>
+
+<Aside type="danger" title="Trata el token como una contraseña">
+Un token personal puede **leer y modificar todos los presupuestos** de tu cuenta; YNAB no
+ofrece tokens de solo lectura. No lo pongas nunca en archivos compartidos o versionados.
+</Aside>
+
+## Añade Avenir a tu cliente MCP
+
+Los ejemplos activan las herramientas que modifican tu presupuesto (`AVENIR_MCP_WRITE=1`).
+Quita esa línea para mantener Avenir estrictamente en solo lectura.
+
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    ```bash
+    claude mcp add avenir \
+      --env YNAB_API_KEY=tu-token \
+      --env AVENIR_MCP_WRITE=1 \
+      -- uvx avenir-mcp
+    ```
+    Comprueba la conexión con `claude mcp list`, o `/mcp` dentro de una sesión.
+  </TabItem>
+  <TabItem label="Claude Desktop">
+    Abre **Settings → Developer → Edit Config**, añade el servidor y reinicia:
+    ```json
+    {
+      "mcpServers": {
+        "avenir": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "tu-token", "AVENIR_MCP_WRITE": "1" }
+        }
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Cursor">
+    En `~/.cursor/mcp.json` (todos los proyectos) o `.cursor/mcp.json` (un proyecto):
+    ```json
+    {
+      "mcpServers": {
+        "avenir": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "tu-token", "AVENIR_MCP_WRITE": "1" }
+        }
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="VS Code">
+    En `.vscode/mcp.json`:
+    ```json
+    {
+      "servers": {
+        "avenir": {
+          "type": "stdio",
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "tu-token", "AVENIR_MCP_WRITE": "1" }
+        }
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="tip" title="Antes de la primera versión en PyPI">
+Sustituye `uvx avenir-mcp` por `uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp`.
+</Aside>
+
+## Comprueba que funciona
+
+Pide a tu cliente: *«Lista mis presupuestos de YNAB.»* Debe llamar a `list_budgets` y
+responder con los nombres de tus presupuestos — aquí, el presupuesto de demostración que
+se usa en toda esta documentación:
+
+<Code code={budgets} lang="json" />
+
+Si no ocurre nada, consulta la [solución de problemas](/avenir-mcp/es/troubleshooting/).

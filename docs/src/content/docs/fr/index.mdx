@@ -1,0 +1,54 @@
+---
+title: Avenir
+description: Un serveur MCP pour YNAB, pensé pour les agents. Posez vos questions sur votre budget en langage courant ; chaque modification est prévisualisée, confirmée et annulable.
+template: splash
+hero:
+  tagline: Un serveur MCP pour YNAB, pensé pour les agents. Posez vos questions sur votre budget en langage courant — chaque modification est prévisualisée, confirmée par vous, et annulable.
+  actions:
+    - text: Installer
+      link: /avenir-mcp/fr/getting-started/install/
+      icon: right-arrow
+    - text: Le voir à l'œuvre
+      link: /avenir-mcp/fr/getting-started/first-conversation/
+      variant: minimal
+---
+
+import { Card, CardGrid, Code, Aside } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+
+<Aside type="caution" title="Sans lien avec YNAB">
+YNAB et You Need A Budget sont des marques déposées de YNAB. Avenir est un projet
+indépendant qui utilise l'API publique de YNAB avec votre propre jeton d'accès.
+</Aside>
+
+<CardGrid stagger>
+  <Card title="Lecture seule par défaut" icon="seti:lock">
+    Les outils qui modifient votre budget n'existent pas tant que vous ne les activez pas.
+  </Card>
+  <Card title="Aperçu, confirmation, annulation" icon="approve-check">
+    Chaque écriture montre ce qui va changer et attend votre accord. Un seul appel l'annule.
+  </Card>
+  <Card title="Des outils par tâche" icon="rocket">
+    Classer un mois de transactions, rapprocher un compte, projeter votre solde : un outil
+    chacun, pas une simple enveloppe de l'API YNAB.
+  </Card>
+  <Card title="Des réponses lisibles par un agent" icon="document">
+    Montants en unités monétaires, réponses courtes et typées, pagination, erreurs qui
+    disent quoi corriger.
+  </Card>
+</CardGrid>
+
+## Un aperçu
+
+> **Vous :** Quelle catégorie est en dépassement en septembre, et de combien ?
+
+Claude appelle `get_monthly_summary`, qui répond en quelques lignes :
+
+<Code code={summary} lang="json" />
+
+> **Claude :** Restaurants dépasse de 22,50 en septembre. Voulez-vous que je prenne 30
+> sur Loisirs pour couvrir ?
+
+Tous les exemples de cette documentation sont de vraies réponses d'Avenir, obtenues sur
+un budget de démonstration inventé : aucun compte réel n'y apparaît. Les données de
+démonstration sont en anglais, comme le code.

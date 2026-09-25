@@ -1,0 +1,41 @@
+---
+title: Conciliar una cuenta
+description: Comprueba que YNAB coincide con tu banco, y averigua por qué cuando no.
+sidebar:
+  order: 2
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import gap from '@snippets/reconcile_gap.json?raw';
+
+**Objetivo:** asegurarte de que YNAB coincide con tu banco, y averiguar por qué cuando no.
+
+**Pide:** *«Mi banco muestra 3.440,80 en mi cuenta corriente. ¿Coincide YNAB?»* — o
+ejecuta el prompt `reconcile` con la cuenta y el saldo.
+
+## Qué ocurre
+
+**`reconcile_account`** compara el saldo que das con el saldo *punteado* de YNAB. Si
+difieren, **no se escribe nada**: la respuesta explica la diferencia.
+
+<Code code={gap} lang="json" />
+
+Aquí YNAB cuenta 71,86 más que el banco, y `possible_duplicates` señala dos pagos
+idénticos en Market Fresh el mismo día: una importación que llegó dos veces. La respuesta
+también puede señalar una transacción pendiente cuyo importe iguala la diferencia
+(`explained_by`) y listar lo que el banco aún no ha mostrado (`uncleared`).
+
+Corrige la causa con Claude y vuelve a preguntar. Cuando los saldos coinciden, Avenir
+previsualiza la conciliación: cada transacción punteada se marca como *conciliada* tras
+tu confirmación.
+
+<Aside type="note" title="¿Y si la diferencia no tiene explicación?">
+Pídelo explícitamente: `adjust=true` registra la diferencia restante como un *ajuste de
+saldo* en Ready to Assign. Nunca se hace por sí solo, porque un ajuste oculta un problema
+en lugar de resolverlo.
+</Aside>
+
+## Deshacer
+
+`undo_operation` devuelve las transacciones conciliadas a *punteadas* y elimina el
+ajuste, si lo hubo.

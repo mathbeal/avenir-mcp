@@ -1,0 +1,37 @@
+---
+title: Configuration
+description: Toutes les variables d'environnement lues par Avenir.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Avenir se configure par variables d'environnement, dans le bloc `env` de votre client MCP.
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `YNAB_API_KEY` | — (**obligatoire**) | Votre jeton d'accès personnel YNAB. Accès complet, en lecture et en écriture, à vos budgets. |
+| `AVENIR_MCP_WRITE` | absente : lecture seule | `1` enregistre les outils qui modifient votre budget. |
+| `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` pour un client qui lance le serveur ; `http` pour le HTTP streamable. |
+| `AVENIR_MCP_HOST` | `127.0.0.1` | Adresse HTTP. Restez sur localhost : le transport HTTP n'a pas d'authentification. |
+| `AVENIR_MCP_PORT` | `8103` | Port HTTP. |
+| `AVENIR_MCP_JOURNAL` | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl` | Journal des opérations appliquées, utilisé pour annuler. Identifiants seulement, lisible par vous seul. |
+| `XDG_STATE_HOME` | `~/.local/state` | Emplacement standard de l'état utilisateur ; le journal y vit sauf si `AVENIR_MCP_JOURNAL` est défini. |
+| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Part de l'historique d'un bénéficiaire qui doit concorder pour proposer une catégorie. |
+| `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Niveau des diagnostics sur stderr (`DEBUG`, `INFO`, …). |
+| `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adresse de l'API ; l'évaluation la dirige vers un serveur de démonstration. |
+
+Chaque outil prend un `budget_id` : un identifiant de `list_budgets`, ou `last-used`.
+
+## Lancer en HTTP
+
+```bash
+AVENIR_MCP_TRANSPORT=http YNAB_API_KEY=votre-jeton uvx avenir-mcp
+# écoute sur http://127.0.0.1:8103/mcp
+```
+
+<Aside type="danger">
+Ne le liez jamais à `0.0.0.0` et n'exposez pas le port sur toutes les interfaces :
+quiconque l'atteint agit sur votre budget.
+</Aside>

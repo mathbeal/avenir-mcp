@@ -80,11 +80,17 @@ async def _collect() -> str:
         templates = await mcp_client.list_resource_templates()
         prompts = await mcp_client.list_prompts()
     lines = [
-        "# Tools, resources and prompts",
+        "---",
+        "title: Tools, resources and prompts",
+        "description: Every tool, resource and prompt Avenir declares, generated from the server.",
+        "sidebar:",
+        "  order: 1",
+        "---",
         "",
-        '!!! note "Generated"',
-        "    This page is generated from the server by `python -m docsgen`; a test fails",
-        "    when it no longer matches the code.",
+        ":::note[Generated]",
+        "This page is generated from the server by `python -m docsgen`; a test fails when it",
+        "no longer matches the code.",
+        ":::",
         "",
         "## Tools",
         "",
