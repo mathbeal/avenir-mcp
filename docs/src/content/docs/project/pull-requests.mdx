@@ -65,8 +65,12 @@ Agreeing on the approach before writing code saves you rewriting it.
    from it:
 
    ```bash
-   git commit -m "feat: list subscriptions whose price went up"
+   git commit -s -m "feat: list subscriptions whose price went up"
    ```
+
+   `-s` signs the commit off: you certify the
+   [Developer Certificate of Origin](https://developercertificate.org) — you wrote the
+   change, or have the right to submit it under the MIT licence.
 
 8. **Push and open the pull request.**
 
@@ -97,6 +101,7 @@ Agreeing on the approach before writing code saves you rewriting it.
 - **Writes stay safe**: a tool that changes the budget previews, waits for confirmation
   and can be undone — see [Safety by design](/avenir-mcp/concepts/safety/).
 - **No real financial data**, anywhere: code, tests, documentation, screenshots.
+- **Every commit signed off** (`git commit -s`).
 
 The full contract is in [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), which applies to people
 and to coding agents alike.

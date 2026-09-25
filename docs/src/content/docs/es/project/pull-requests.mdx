@@ -66,8 +66,12 @@ encargarse. Acordar el enfoque antes de escribir el código evita reescribirlo.
    a partir de él:
 
    ```bash
-   git commit -m "feat: list subscriptions whose price went up"
+   git commit -s -m "feat: list subscriptions whose price went up"
    ```
+
+   `-s` firma el commit: usted certifica el
+   [Developer Certificate of Origin](https://developercertificate.org) — escribió el
+   cambio, o tiene derecho a proponerlo bajo licencia MIT.
 
 8. **Suba la rama y abra la pull request.**
 
@@ -98,6 +102,7 @@ encargarse. Acordar el enfoque antes de escribir el código evita reescribirlo.
 - **Escrituras seguras**: una herramienta que modifica el presupuesto previsualiza,
   espera la confirmación y se puede deshacer — vea [Seguridad por diseño](/avenir-mcp/es/concepts/safety/).
 - **Ningún dato financiero real**, en ningún sitio: código, pruebas, documentación, capturas.
+- **Cada commit firmado** (`git commit -s`).
 
 El contrato completo está en [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), que se aplica tanto a
 las personas como a los agentes de código.

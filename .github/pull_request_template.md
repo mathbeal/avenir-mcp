@@ -20,3 +20,4 @@ invent them, as the demo budget does.
 - [ ] Pages written by hand were changed in English, French and Spanish
 - [ ] The commit messages start with `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `build:`, `ci:` or `chore:`
 - [ ] No real financial data and no token, in code, tests, docs or screenshots
+- [ ] Every commit is signed off (`git commit -s`), certifying the [Developer Certificate of Origin](https://developercertificate.org)

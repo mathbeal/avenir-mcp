@@ -55,6 +55,13 @@ a proposal easy to accept.
 The most useful report shows what the agent asked, which tool it called with which
 arguments, and what it should have done instead. Anonymise the amounts and payees.
 
+## Developer Certificate of Origin
+
+Every commit of a pull request is signed off: `git commit -s` adds the line
+`Signed-off-by: Your Name <you@example.org>`. It certifies the
+[Developer Certificate of Origin](https://developercertificate.org): you wrote the change,
+or have the right to submit it under the project's MIT licence.
+
 ## Commit messages
 
 Prefix the first line with the kind of change. The changelog will be generated

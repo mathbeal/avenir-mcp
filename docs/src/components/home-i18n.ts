@@ -27,7 +27,7 @@ const texts = {
       ['Undo', 'Every applied change is journaled; undo restores it without overwriting later work.'],
     ],
     disclaimer:
-      '<strong>Unofficial project.</strong> Avenir is not affiliated with, endorsed by or sponsored by YNAB. YNAB and You Need A Budget are registered trademarks of YNAB, used here only to say which service Avenir works with. Avenir uses YNAB’s public API with your own access token.',
+      '<strong>Unofficial project.</strong> We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget are registered trademarks of YNAB. Avenir is provided as is, without warranty, and is not financial advice. <a href="/avenir-mcp/project/legal/">Legal notice</a>',
   },
   fr: {
     eyebrow: 'Serveur MCP open source non officiel pour YNAB',
@@ -56,7 +56,7 @@ const texts = {
       ['Annulation', 'Chaque changement appliqué est journalisé ; l’annulation le défait sans écraser le travail fait depuis.'],
     ],
     disclaimer:
-      '<strong>Projet non officiel.</strong> Avenir n’est ni affilié à YNAB, ni approuvé, ni soutenu par YNAB. YNAB et You Need A Budget sont des marques déposées de YNAB, citées ici uniquement pour indiquer le service avec lequel Avenir fonctionne. Avenir utilise l’API publique de YNAB avec votre propre jeton d’accès.',
+      '<strong>Projet non officiel.</strong> « We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. » Nous ne sommes ni affiliés, ni associés, ni liés officiellement à YNAB. YNAB et You Need A Budget sont des marques déposées de YNAB. Avenir est fourni tel quel, sans garantie, et n’est pas un conseil financier. <a href="/avenir-mcp/fr/project/legal/">Mentions légales</a>',
   },
   es: {
     eyebrow: 'Servidor MCP no oficial y de código abierto para YNAB',
@@ -85,7 +85,7 @@ const texts = {
       ['Deshacer', 'Cada cambio aplicado se anota en el diario; deshacer lo revierte sin sobrescribir el trabajo posterior.'],
     ],
     disclaimer:
-      '<strong>Proyecto no oficial.</strong> Avenir no está afiliado a YNAB, ni respaldado ni patrocinado por YNAB. YNAB y You Need A Budget son marcas registradas de YNAB, citadas aquí solo para indicar con qué servicio funciona Avenir. Avenir usa la API pública de YNAB con su propio token de acceso.',
+      '<strong>Proyecto no oficial.</strong> «We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.» No estamos afiliados, asociados ni conectados oficialmente con YNAB. YNAB y You Need A Budget son marcas registradas de YNAB. Avenir se ofrece tal cual, sin garantía, y no es asesoramiento financiero. <a href="/avenir-mcp/es/project/legal/">Aviso legal</a>',
   },
 } as const;
 

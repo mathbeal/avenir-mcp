@@ -19,10 +19,15 @@ you, and can be undone.
 
 **📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
 
-> **Unofficial project.** Avenir is not affiliated with, endorsed by or sponsored by
-> YNAB. YNAB and You Need A Budget are registered trademarks of YNAB, named here only
-> to say which service Avenir works with. Avenir uses YNAB's public API with your own
-> access token.
+> **Unofficial project.** We are not affiliated, associated, or in any way officially
+> connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget
+> are registered trademarks of YNAB, named here only to say which service Avenir works
+> with.
+>
+> Avenir is for **personal use on your own machine, with your own YNAB token**. Running it
+> as a public or shared server is not supported. It is provided as is, without warranty,
+> and is not financial advice: you remain responsible for the changes you confirm. See the
+> [legal notice](https://mathbeal.github.io/avenir-mcp/project/legal/).
 
 ## Why Avenir
 

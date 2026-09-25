@@ -14,6 +14,7 @@ sidebar:
 | `approve_transactions` | applies at once, without preview | it only clears YNAB's review flag |
 | `update_category`, `create_category` | not undoable; YNAB's API cannot delete a category | rename back; hide the category in YNAB |
 | HTTP transport | plain HTTP, one shared token, no user accounts | keep it on `127.0.0.1`, or use stdio |
+| Public or shared server | not supported: no user accounts, and YNAB's terms require OAuth for others' budgets | each person runs their own Avenir — see the [legal notice](/avenir-mcp/project/legal/) |
 | Split transactions | never suggested nor recategorised: their lines carry the categories | change them in YNAB |
 | Suggestions | need a history: a merchant never classified gets none | the agent proposes, you decide |
 | Forecast | extends the last months; quarterly or yearly charges do not recur by its definition | pass them as `one_offs` |

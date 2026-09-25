@@ -1,0 +1,65 @@
+---
+title: Aviso legal
+description: Quién publica Avenir, para qué está pensado, qué no promete y adónde van sus datos.
+sidebar:
+  order: 7
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Sin relación con YNAB
+
+«We are not affiliated, associated, or in any way officially connected with YNAB or any
+of its subsidiaries or affiliates.» — No estamos afiliados, asociados ni conectados
+oficialmente de ninguna manera con YNAB ni con sus filiales o empresas afiliadas. YNAB y
+You Need A Budget son marcas registradas de YNAB, citadas aquí solo para indicar con qué
+servicio funciona Avenir. Avenir usa la API pública de YNAB con el token de acceso propio
+de cada usuario.
+
+## Para qué está pensado Avenir
+
+Avenir está pensado para un **uso personal**: una persona lo ejecuta **en su propia
+máquina**, con **su propio token de YNAB**, para sus propios presupuestos.
+
+<Aside type="caution" title="No compatible: un servidor público o compartido">
+Ejecutar Avenir como servidor MCP público o compartido — alojarlo para otras personas,
+exponer su transporte HTTP en Internet o recoger tokens de YNAB de otras personas — **no
+es un uso previsto** y no está soportado:
+
+- las condiciones de la API de YNAB reservan el token de acceso personal a su titular;
+  una aplicación usada por otros debe usar OAuth, con una política de datos publicada.
+  Avenir no tiene ni lo uno ni lo otro;
+- Avenir no tiene cuentas de usuario ni aislamiento entre usuarios, y su transporte HTTP
+  está hecho solo para esta máquina.
+
+Hacerlo sería bajo su propia responsabilidad, y podría infringir las condiciones de YNAB.
+</Aside>
+
+## Sin garantía, sin asesoramiento financiero
+
+Avenir se ofrece **tal cual**, sin garantía de ningún tipo, bajo
+[licencia MIT](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE). **No es
+asesoramiento financiero**: una previsión prolonga su pasado reciente y puede fallar.
+
+Los agentes de IA se equivocan. Cada cambio de Avenir se previsualiza y espera su
+confirmación: **usted sigue siendo responsable de los cambios que confirma**. Lea cada
+vista previa y use [deshacer](/avenir-mcp/es/concepts/journal/) si algo sale mal.
+
+## Adónde van sus datos
+
+- Avenir solo envía sus datos de presupuesto a **YNAB** y al **proveedor del modelo** que
+  usa su cliente MCP (ninguno, con un [modelo local](/avenir-mcp/es/guides/choose-a-model/#modelos-locales)).
+- Quien publica Avenir no recibe **nada**: ni telemetría, ni cuenta, ni servidor.
+- Este sitio de documentación no instala **ninguna cookie** ni hace **ninguna medición
+  de audiencia**; sus fuentes las sirve el propio sitio.
+
+## Editor y alojamiento
+
+| | |
+|---|---|
+| Editor | el usuario de GitHub [mathbeal](https://github.com/mathbeal), a título personal y no profesional |
+| Contacto | [issues de GitHub](https://github.com/mathbeal/avenir-mcp/issues); fallos de seguridad en privado, vea [Seguridad](/avenir-mcp/es/project/security/) |
+| Alojamiento | GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, Estados Unidos |
+
+Los demás nombres — Claude, GPT, Gemini, Cursor, VS Code, LM Studio — son marcas de sus
+propietarios, citadas solo para indicar con qué funciona Avenir.

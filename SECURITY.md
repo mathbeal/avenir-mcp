@@ -42,6 +42,13 @@ machine are refused (against DNS rebinding), and with `AVENIR_MCP_HTTP_TOKEN` se
 request must carry `Authorization: Bearer <token>`. Writes over HTTP require the token:
 without it the server refuses to start.
 
+## Intended use
+
+Avenir runs for one person, on their machine, with their own YNAB token. Running it as
+a public or shared server is not supported: it has no user accounts, and YNAB's API terms
+require OAuth for an application used by others. Reports about such deployments are
+out of scope.
+
 ## Untrusted text in answers
 
 Payee names and memos are shown on one line, without control, zero-width or

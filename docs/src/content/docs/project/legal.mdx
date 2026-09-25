@@ -1,0 +1,62 @@
+---
+title: Legal notice
+description: Who publishes Avenir, what it is meant for, what it does not promise, and where your data goes.
+sidebar:
+  order: 7
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Not affiliated with YNAB
+
+We are not affiliated, associated, or in any way officially connected with YNAB or any of
+its subsidiaries or affiliates. YNAB and You Need A Budget are registered trademarks of
+YNAB, named here only to say which service Avenir works with. Avenir uses YNAB's public
+API with each user's own access token.
+
+## What Avenir is meant for
+
+Avenir is meant for **personal use**: one person runs it **on their own machine**, with
+**their own YNAB token**, for their own budgets.
+
+<Aside type="caution" title="Not supported: a public or shared server">
+Running Avenir as a public or shared MCP server — hosting it for other people, putting
+its HTTP transport on the internet, or collecting other people's YNAB tokens — is **not
+an intended use** and is not supported:
+
+- YNAB's API terms reserve personal access tokens to their owner; an application used by
+  others must use OAuth, with a published data policy. Avenir has neither.
+- Avenir has no user accounts, no isolation between users, and its HTTP transport is
+  built for this machine only.
+
+Doing so would be at your own risk, and could breach YNAB's terms.
+</Aside>
+
+## No warranty, no financial advice
+
+Avenir is provided **as is**, without warranty of any kind, under the
+[MIT licence](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE). It is **not
+financial advice**: forecasts extend your recent past and can be wrong.
+
+AI agents make mistakes. Every change Avenir makes is previewed and waits for your
+confirmation: **you remain responsible for the changes you confirm**. Read each preview,
+and use [undo](/avenir-mcp/concepts/journal/) when something went wrong.
+
+## Where your data goes
+
+- Avenir sends your budget data only to **YNAB**, and to the **model provider** your MCP
+  client uses (none, with a [local model](/avenir-mcp/guides/choose-a-model/#local-models)).
+- The publisher of Avenir receives **nothing**: no telemetry, no account, no server.
+- This documentation site sets **no cookies** and runs **no analytics**; its fonts are
+  served by the site itself.
+
+## Publisher and host
+
+| | |
+|---|---|
+| Publisher | the GitHub user [mathbeal](https://github.com/mathbeal), as a private individual, on a non-professional basis |
+| Contact | [GitHub issues](https://github.com/mathbeal/avenir-mcp/issues); security reports privately, see [Security](/avenir-mcp/project/security/) |
+| Host | GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, United States |
+
+Other names — Claude, GPT, Gemini, Cursor, VS Code, LM Studio — are trademarks of their
+owners and are named only to say what Avenir works with.

@@ -67,8 +67,12 @@ réécrire.
    généré :
 
    ```bash
-   git commit -m "feat: list subscriptions whose price went up"
+   git commit -s -m "feat: list subscriptions whose price went up"
    ```
+
+   `-s` signe le commit : vous certifiez le
+   [Developer Certificate of Origin](https://developercertificate.org) — vous avez écrit
+   le changement, ou avez le droit de le proposer sous licence MIT.
 
 8. **Poussez et ouvrez la pull request.**
 
@@ -99,6 +103,7 @@ réécrire.
 - **Des écritures sûres** : un outil qui modifie le budget prévisualise, attend la
   confirmation et s'annule — voir [Sécurité par conception](/avenir-mcp/fr/concepts/safety/).
 - **Aucune donnée financière réelle**, nulle part : code, tests, documentation, captures.
+- **Chaque commit signé** (`git commit -s`).
 
 Le contrat complet est dans [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), qui s'applique aux
 personnes comme aux agents de code.
