@@ -176,35 +176,6 @@ async def list_category_groups(budget_id: str) -> list[dict[str, Any]]:
 
 
 @mcp.tool(
-    tags={WRITE_TAG},
-    annotations={
-        "title": "Create a category",
-        "readOnlyHint": False,
-        "destructiveHint": False,
-        "idempotentHint": False,
-        "openWorldHint": True,
-    },
-)
-async def create_category(budget_id: str, category_group_id: str, name: str) -> dict[str, Any]:
-    """Create a new category in a YNAB budget.
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-        category_group_id: Group UUID, from list_category_groups.
-        name: Name of the new category.
-
-    Returns the created category dict (its id can be used with apply_categories).
-    """
-    logger.info(
-        "Tool called: create_category(budget_id=%r, category_group_id=%r, name=%r)",
-        budget_id,
-        category_group_id,
-        name,
-    )
-    return await client.create_category(budget_id, category_group_id, name)
-
-
-@mcp.tool(
     annotations={
         "title": "List accounts",
         "readOnlyHint": True,
@@ -223,40 +194,6 @@ async def list_accounts(budget_id: str) -> list[dict[str, Any]]:
     """
     logger.info("Tool called: list_accounts(budget_id=%r)", budget_id)
     return await client.get_accounts(budget_id)
-
-
-@mcp.tool(
-    tags={WRITE_TAG},
-    annotations={
-        "title": "Create transactions",
-        "readOnlyHint": False,
-        "destructiveHint": False,
-        "idempotentHint": False,
-        "openWorldHint": True,
-    },
-)
-async def create_transactions(
-    budget_id: str, account_id: str, transactions: list[dict[str, Any]]
-) -> dict[str, Any]:
-    """Create cleared transactions on an account (e.g. to fill a bank-import gap).
-
-    Args:
-        budget_id: YNAB budget UUID or 'last-used'.
-        account_id: Account UUID, from list_accounts.
-        transactions: Items with date ('YYYY-MM-DD'), amount (euros, negative
-            for outflows), payee_name, and optional memo, category_id and
-            import_id (max 36 chars; items whose import_id already exists are
-            skipped, so re-running is safe).
-
-    Returns {created, transaction_ids, duplicate_import_ids}.
-    """
-    logger.info(
-        "Tool called: create_transactions(budget_id=%r, account_id=%r, n=%d)",
-        budget_id,
-        account_id,
-        len(transactions),
-    )
-    return await client.create_transactions(budget_id, account_id, transactions)
 
 
 @mcp.tool(

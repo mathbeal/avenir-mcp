@@ -396,9 +396,9 @@ _OPTIONAL_TX_FIELDS = ("memo", "category_id", "import_id")
 
 
 async def create_transactions(
-    budget_id: str, account_id: str, items: list[dict[str, Any]]
+    budget_id: str, account_id: str, items: list[dict[str, Any]], approved: bool = True
 ) -> dict[str, Any]:
-    """Create cleared, approved transactions on one account.
+    """Create cleared transactions on one account, approved unless told otherwise.
 
     Each item needs date ("YYYY-MM-DD"), amount (currency units, negative for
     outflows) and payee_name; memo, category_id and import_id are optional.
@@ -408,6 +408,7 @@ async def create_transactions(
         budget_id: YNAB budget UUID or "last-used".
         account_id: Account UUID the transactions belong to.
         items: Transactions to create.
+        approved: False leaves them for the user to review in YNAB.
 
     Returns:
         {"created", "transaction_ids", "duplicate_import_ids"}.
@@ -421,7 +422,7 @@ async def create_transactions(
             "payee_name": item["payee_name"],
         }
         tx.update({key: item[key] for key in _OPTIONAL_TX_FIELDS if item.get(key)})
-        tx.update({"cleared": "cleared", "approved": True})
+        tx.update({"cleared": "cleared", "approved": approved})
         transactions.append(tx)
     logger.info("Creating %d transactions on account %s", len(transactions), account_id)
     data = await _post(f"/budgets/{budget_id}/transactions", {"transactions": transactions})

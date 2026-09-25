@@ -1,4 +1,4 @@
-"""Change categories: rename or move one, set the amount budgeted for a month."""
+"""Change categories: create, rename or move one, set the amount budgeted for a month."""
 
 from __future__ import annotations
 
@@ -203,3 +203,77 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         "message": f"Applied. undo_operation with operation_id {operation_id} reverts it.",
         "operation_id": operation_id,
     }
+
+
+class NewCategory(TypedDict):
+    """The outcome of create_category."""
+
+    status: WriteStatus
+    message: str
+    name: str
+    group: str
+    category_id: str | None
+    confirmation: str | None
+
+
+@mcp.tool(
+    tags={WRITE_TAG},
+    annotations={
+        "title": "Create a category",
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": True,
+    },
+)
+async def create_category(
+    budget_id: str,
+    category_group_id: str,
+    name: str,
+    ctx: Context,
+    confirmation: str | None = None,
+) -> NewCategory:
+    """Create a category in a group, after the user confirms.
+
+    YNAB's API cannot delete a category: to undo, hide it in YNAB. A name already
+    used in the group is refused. Confirmation works as for apply_categories.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+        category_group_id: Group to create it in (from list_category_groups).
+        name: Name of the new category.
+        confirmation: Code from a previous "confirmation_required" result.
+    """
+    logger.info("Tool called: create_category")
+    groups = {g["id"]: g["name"] for g in await client.get_category_groups(budget_id)}
+    if category_group_id not in groups:
+        raise ToolError(
+            f"Group {category_group_id} is not in this budget: "
+            "use an id from list_category_groups."
+        )
+    clean = name.strip()
+    if not clean:
+        raise ToolError("The name is empty: give the new category a name.")
+    taken = {
+        c["name"].casefold()
+        for c in await client.get_categories(budget_id)
+        if c.get("category_group_id") == category_group_id
+    }
+    if clean.casefold() in taken:
+        raise ToolError(f"{clean!r} already exists in {groups[category_group_id]}.")
+    result: NewCategory = {
+        "status": "applied",
+        "message": "",
+        "name": clean,
+        "group": groups[category_group_id],
+        "category_id": None,
+        "confirmation": None,
+    }
+    question = f"Create category '{clean}' in {result['group']}?"
+    subject = {"group": category_group_id, "name": clean}
+    decision = await ask(ctx, budget_id, subject, question, confirmation)
+    outcome = not_applied(decision, question)
+    if outcome is not None:
+        return {**result, **outcome}
+    created = await client.create_category(budget_id, category_group_id, clean)
+    return {**result, "message": "Created.", "category_id": created["id"]}

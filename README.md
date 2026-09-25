@@ -43,9 +43,9 @@ read-only by default, previewable and undoable.
 | `reconcile_account` | **write, confirmed, undoable** | compare an account with the balance your bank shows; explain a gap (pending transactions, the one matching the difference, likely duplicates) without writing; once it matches, mark cleared transactions reconciled; an adjustment only on explicit request |
 | `update_category` | **write, confirmed** | rename a category or move it to another group; the result gives the previous name and group to revert |
 | `approve_transactions` | **write** | mark transactions as reviewed |
-| `create_category` | **write** | add a category |
+| `create_category` | **write, confirmed** | add a category to a group; a name already in the group is refused |
 | `set_category_budget` | **write, confirmed, undoable** | set the amount budgeted in a category for a month; previewed as before → after |
-| `create_transactions` | **write** | add transactions, e.g. to fill an import gap |
+| `create_transactions` | **write, confirmed, undoable** | add transactions an import missed; previewed, left for review in YNAB unless `approved`; undo deletes them |
 
 ## Install
 
@@ -85,6 +85,7 @@ claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- 
 | `AVENIR_MCP_HOST` | no | `127.0.0.1` | HTTP transport | Address to listen on. Keep it on localhost: the HTTP transport has no authentication yet. |
 | `AVENIR_MCP_PORT` | no | `8103` | HTTP transport | Port to listen on. |
 | `AVENIR_MCP_JOURNAL` | no | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, else `~/.local/state/avenir-mcp/journal.jsonl` | `apply_categories`, `reconcile_account`, `undo_operation` | File recording applied operations so they can be undone. Holds identifiers only (transaction and category ids), no amounts or payees; created with owner-only permissions. |
+| `AVENIR_MCP_LOG_LEVEL` | no | `WARNING` | diagnostics | Level of the diagnostics written to stderr (`DEBUG`, `INFO`, …). An expected tool error is logged on one line, a real failure with its traceback. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | no | `0.90` | `suggest_categories` | Share of a payee's past transactions that must fall in one category (0 to 1) before a single category is proposed with `auto_classify: true`. Below it, the top three candidates are returned for review. |
 
 Every tool takes a `budget_id`: a budget UUID from `list_budgets`, or `last-used`.
@@ -98,11 +99,11 @@ Written down so that nobody discovers them the hard way:
   when it has one, otherwise through a single-use code valid 10 minutes for exactly the
   previewed changes.
 - **Read-only by default.** Write tools exist only with `AVENIR_MCP_WRITE=1`.
-- **Older write tools still act immediately** once writes are enabled:
-  `approve_transactions`, `create_category`, `create_transactions`.
-- Undo covers operations made with `apply_categories`, `reconcile_account` and
-  `set_category_budget`, on the machine whose journal recorded them. An undo cannot itself be undone.
-- `create_transactions` creates transactions that are already approved and cleared.
+- **`approve_transactions` acts immediately** once writes are enabled: it only marks
+  transactions as reviewed. Every other write is previewed and confirmed.
+- Undo covers `apply_categories`, `reconcile_account`, `set_category_budget` and
+  `create_transactions`, on the machine whose journal recorded them. YNAB's API cannot
+  delete a category, so `create_category` is undone by hiding it in YNAB. An undo cannot itself be undone.
 - Amounts are in currency units everywhere (YNAB's milliunits stay inside the server).
 - Suggestions come from your own history, learnt separately for money in and money
   out, and only point to categories you can still assign. A merchant never classified
@@ -118,9 +119,9 @@ Written down so that nobody discovers them the hard way:
 
 | Measure | Value |
 |---|---|
-| Tests | 220, none of which calls the YNAB API; some go through the MCP protocol itself |
-| Line coverage | 100 % (1080 statements) |
-| Branch coverage | 100 % (234 branches) |
+| Tests | 240, none of which calls the YNAB API; some go through the MCP protocol itself |
+| Line coverage | 100 % (1186 statements) |
+| Branch coverage | 100 % (264 branches) |
 | Type checking | mypy `strict` |
 | Lint | pylint 10.00/10, black, isort |
 | Vocabulary | lexdrift, against the accepted baseline `lexdrift.lock` |

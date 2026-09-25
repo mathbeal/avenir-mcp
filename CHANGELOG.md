@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `create_transactions` validates account, categories and dates, previews the
+  transactions, confirms, leaves them for review in YNAB unless `approved`, and
+  `undo_operation` deletes them. `create_category` confirms and refuses a name already
+  in the group.
+- Diagnostics: WARNING by default (`AVENIR_MCP_LOG_LEVEL`), and an expected tool
+  error is logged on one line instead of a full traceback.
 - `set_category_budget` previews the amount before and after, waits for confirmation,
   is journaled, and `undo_operation` restores the previous amount unless it moved
   since. Undo lives in its own module and handles every journaled kind.

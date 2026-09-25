@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from datetime import date
 
@@ -42,3 +43,22 @@ def check_month(month: str) -> None:
 def resolve_month(month: str) -> str:
     """The actual YYYY-MM-01 for 'current', so a journaled change names its month."""
     return f"{today():%Y-%m}-01" if month == "current" else month
+
+
+class QuietToolErrors(logging.Filter):  # pylint: disable=too-few-public-methods
+    """Log an expected ToolError on one line; keep tracebacks for real failures.
+
+    FastMCP logs every tool error with its traceback. A ToolError is a message
+    written for the agent (a malformed month, an unknown account), not a crash.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.exc_info and isinstance(record.exc_info[1], ToolError):
+            record.msg = f"{record.getMessage()}: {record.exc_info[1]}"
+            record.args = None
+            record.exc_info = None
+            record.exc_text = None
+        return True
+
+
+logging.getLogger("fastmcp.server.server").addFilter(QuietToolErrors())

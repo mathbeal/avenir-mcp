@@ -127,3 +127,70 @@ def test_declined_update_changes_nothing(update: AsyncMock) -> None:
     ).structured_content
     assert data["status"] == "declined"
     update.assert_not_awaited()
+
+
+# ---------------------------------------------------------------------------
+# create_category
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(name="create")
+def _create() -> Iterator[AsyncMock]:
+    created = AsyncMock(return_value={"id": "c-new", "name": "Gym"})
+    with (
+        patch("avenir_mcp.client.get_categories", AsyncMock(return_value=_CATS)),
+        patch("avenir_mcp.client.get_category_groups", AsyncMock(return_value=_GROUPS)),
+        patch("avenir_mcp.client.create_category", created),
+    ):
+        yield created
+
+
+def _create_call(args: dict[str, Any], handler: Any = None) -> Any:
+    async def run() -> Any:
+        async with Client(server.mcp, elicitation_handler=handler) as mcp_client:
+            return await mcp_client.call_tool("create_category", args, raise_on_error=False)
+
+    return asyncio.run(run())
+
+
+_NEW = {"budget_id": "b1", "category_group_id": "g-health", "name": "Gym"}
+
+
+def test_new_category_is_previewed_then_created_with_the_code(create: AsyncMock) -> None:
+    """The preview names the group; the code creates it and returns its id."""
+    preview = _create_call(_NEW).structured_content
+    assert preview["status"] == "confirmation_required"
+    assert (preview["name"], preview["group"]) == ("Gym", "Health")
+    create.assert_not_awaited()
+    done = _create_call({**_NEW, "confirmation": preview["confirmation"]}).structured_content
+    assert done["status"] == "applied"
+    assert done["category_id"] == "c-new"
+    create.assert_awaited_once_with("b1", "g-health", "Gym")
+
+
+def test_declined_category_is_not_created(create: AsyncMock) -> None:
+    """If the user says no, nothing is created."""
+
+    async def decline(*_: Any) -> ElicitResult[Any]:
+        return ElicitResult(action="decline")
+
+    assert _create_call(_NEW, decline).structured_content["status"] == "declined"
+    create.assert_not_awaited()
+
+
+@pytest.mark.parametrize(
+    ("change", "expected"),
+    [
+        ({"category_group_id": "g-404"}, "list_category_groups"),
+        ({"name": " "}, "empty"),
+        ({"name": "drugstore"}, "already"),
+    ],
+)
+def test_invalid_new_category_is_a_tool_error(
+    create: AsyncMock, change: dict[str, Any], expected: str
+) -> None:
+    """Unknown group, blank name or a name already in the group is refused."""
+    result = _create_call({**_NEW, **change})
+    assert result.is_error
+    assert expected in result.content[0].text
+    create.assert_not_awaited()

@@ -36,9 +36,9 @@ async def undo_operation(
 
     Recategorised transactions go back to their previous category; a
     reconciliation is reverted (statuses and adjustment); a budgeted amount goes
-    back to its previous value. Anything changed again since the operation is
-    left alone and listed in `conflicts`. Confirmation works as for
-    apply_categories.
+    back to its previous value; created transactions are deleted. Anything
+    changed again since the operation is left alone and listed in `conflicts`.
+    Confirmation works as for apply_categories.
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
@@ -57,6 +57,8 @@ async def undo_operation(
         return await _undo_reconcile(ctx, budget_id, book, entry, confirmation)
     if entry["kind"] == "budget":
         return await _undo_budget(ctx, budget_id, book, entry, confirmation)
+    if entry["kind"] == "create":
+        return await _undo_create(ctx, budget_id, book, entry, confirmation)
     transactions = await client.get_transactions(budget_id)
     categories = await client.get_categories(budget_id)
     plan = writes.plan_undo(transactions, categories, entry["moves"])
@@ -135,3 +137,28 @@ async def _undo_budget(
     )
     book.mark_undone(entry["operation_id"])
     return result_of("applied", "Budgeted amount restored.", _EMPTY)
+
+
+async def _undo_create(
+    ctx: Context,
+    budget_id: str,
+    book: journal.Journal,
+    entry: journal.Entry,
+    confirmation: str | None,
+) -> WriteResult:
+    """Delete the transactions an operation created, those still there."""
+    created = entry["details"]["transaction_ids"]
+    live = {tx["id"] for tx in await client.get_transactions(budget_id) if not tx.get("deleted")}
+    present = [tx_id for tx_id in created if tx_id in live]
+    gone = [tx_id for tx_id in created if tx_id not in live]
+    if not present:
+        conflict: writes.Plan = {**_EMPTY, "conflicts": gone}
+        return result_of("nothing_to_do", "Already deleted: nothing to undo.", conflict)
+    question = f"Undo: delete the {len(present)} transaction(s) this operation created?"
+    refused = await _confirm_undo(ctx, budget_id, entry, question, confirmation)
+    if refused is not None:
+        return refused
+    for tx_id in present:
+        await client.delete_transaction(budget_id, tx_id)
+    book.mark_undone(entry["operation_id"])
+    return result_of("applied", "Created transactions deleted.", {**_EMPTY, "conflicts": gone})

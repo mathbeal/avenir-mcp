@@ -719,3 +719,16 @@ def test_delete_transaction_sends_delete() -> None:
             asyncio.run(client.delete_transaction("b1", "t1"))
     http = ctx.__aenter__.return_value
     assert http.delete.call_args.args[0].endswith("/budgets/b1/transactions/t1")
+
+
+def test_create_transactions_can_leave_them_for_review() -> None:
+    """approved=False creates transactions the user still has to approve in YNAB."""
+    payload = {"data": {"transaction_ids": ["t1"], "duplicate_import_ids": []}}
+    ctx = _async_client_returning(payload)
+    ctx.__aenter__.return_value.post = AsyncMock(return_value=_mock_response(payload))
+    item = {"date": "2026-07-01", "amount": -1.0, "payee_name": "Shop"}
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            asyncio.run(client.create_transactions("b1", "a1", [item], approved=False))
+    sent = ctx.__aenter__.return_value.post.call_args.kwargs["json"]["transactions"][0]
+    assert sent["approved"] is False

@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import logging
 from datetime import date
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 
 from avenir_mcp import app, client, forecast, journal, reconcile
 from avenir_mcp.app import WRITE_TAG, mcp
-from avenir_mcp.confirm import ask, not_applied
+from avenir_mcp.confirm import WriteStatus, ask, not_applied
 
 logger = logging.getLogger(__name__)
 
@@ -291,4 +291,146 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         },
         "months": projection["months"],
         "first_shortfall": shortfall,
+    }
+
+
+class NewTransaction(TypedDict, total=False):
+    """A transaction to create; memo and category_id are optional."""
+
+    date: str
+    amount: float
+    payee_name: str
+    memo: str
+    category_id: str
+
+
+class NewTransactionPreview(TypedDict):
+    """A transaction to create, as the user sees it."""
+
+    date: str
+    amount: float
+    payee: str
+    category: str | None
+    memo: str | None
+
+
+class CreateResult(TypedDict):
+    """The outcome of create_transactions."""
+
+    status: WriteStatus
+    message: str
+    account: str
+    transactions: list[NewTransactionPreview]
+    created_ids: list[str]
+    duplicate_import_ids: list[str]
+    confirmation: str | None
+    operation_id: str | None
+
+
+def _check_new(items: list[NewTransaction], categories: dict[str, str], now: date) -> None:
+    """Refuse what YNAB would refuse, or what cannot be what the user meant."""
+    if not items:
+        raise ToolError("Give at least one transaction to create.")
+    for item in items:
+        try:
+            when = date.fromisoformat(item["date"])
+        except ValueError as error:
+            raise ToolError(f"date must be YYYY-MM-DD, got {item['date']!r}.") from error
+        if when > now:
+            raise ToolError(
+                f"{item['date']} is in the future: YNAB only records transactions that happened."
+            )
+        category = item.get("category_id")
+        if category and category not in categories:
+            raise ToolError(
+                f"Category {category} is not in this budget: "
+                "use a category_id from get_category_balances."
+            )
+
+
+@mcp.tool(
+    tags={WRITE_TAG},
+    annotations={
+        "title": "Create transactions",
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": True,
+    },
+)
+async def create_transactions(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    budget_id: str,
+    account_id: str,
+    transactions: list[NewTransaction],
+    ctx: Context,
+    approved: bool = False,
+    confirmation: str | None = None,
+) -> CreateResult:
+    """Create transactions on an account, e.g. ones the bank import missed, after the user confirms.
+
+    Each transaction: date (YYYY-MM-DD, not in the future), amount in currency
+    units (negative for spending), payee_name, and optionally memo and
+    category_id. They are created cleared and, unless approved is true, left for
+    the user to approve in YNAB. undo_operation deletes them. Confirmation works
+    as for apply_categories.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+        account_id: Account to add them to (from list_accounts).
+        transactions: The transactions to create.
+        approved: Skip YNAB's review step.
+        confirmation: Code from a previous "confirmation_required" result.
+    """
+    logger.info("Tool called: create_transactions(n=%d)", len(transactions))
+    accounts = {a["id"]: a["name"] for a in await client.get_accounts(budget_id)}
+    if account_id not in accounts:
+        raise ToolError(
+            f"Account {account_id} is not in this budget: use an id from list_accounts."
+        )
+    categories = {c["id"]: c["name"] for c in await client.get_categories(budget_id)}
+    _check_new(transactions, categories, app.today())
+    preview: list[NewTransactionPreview] = [
+        {
+            "date": item["date"],
+            "amount": item["amount"],
+            "payee": item.get("payee_name", ""),
+            "category": categories.get(item.get("category_id", "")),
+            "memo": item.get("memo"),
+        }
+        for item in transactions
+    ]
+    result: CreateResult = {
+        "status": "applied",
+        "message": "",
+        "account": accounts[account_id],
+        "transactions": preview,
+        "created_ids": [],
+        "duplicate_import_ids": [],
+        "confirmation": None,
+        "operation_id": None,
+    }
+    lines = [
+        f"- {p['date']} {p['payee']} {p['amount']:.2f} ({p['category'] or 'no category'})"
+        for p in preview[:20]
+    ]
+    question = f"Create {len(preview)} transaction(s) on {accounts[account_id]}?\n" + "\n".join(
+        lines
+    )
+    subject: dict[str, Any] = {"account": account_id, "items": transactions, "approved": approved}
+    decision = await ask(ctx, budget_id, subject, question, confirmation)
+    outcome = not_applied(decision, question)
+    if outcome is not None:
+        return {**result, **outcome}
+    created = await client.create_transactions(
+        budget_id, account_id, [dict(item) for item in transactions], approved=approved
+    )
+    operation_id = journal.Journal(journal.default_path()).record(
+        budget_id, "create", [], {"transaction_ids": created["transaction_ids"]}
+    )
+    return {
+        **result,
+        "message": f"Created. undo_operation with operation_id {operation_id} deletes them.",
+        "created_ids": created["transaction_ids"],
+        "duplicate_import_ids": created["duplicate_import_ids"],
+        "operation_id": operation_id,
     }

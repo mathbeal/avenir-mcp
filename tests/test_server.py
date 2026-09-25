@@ -187,15 +187,6 @@ def test_list_category_groups_delegates_to_client() -> None:
     assert result == groups
 
 
-def test_create_category_delegates_to_client() -> None:
-    """create_category must call client.create_category with correct args."""
-    created = {"id": "c42", "name": "Miscellaneous"}
-    with patch("avenir_mcp.client.create_category", new=AsyncMock(return_value=created)) as mock_fn:
-        result = asyncio.run(server.create_category("b1", "g1", "Miscellaneous"))
-    mock_fn.assert_called_once_with("b1", "g1", "Miscellaneous")
-    assert result == created
-
-
 # ---------------------------------------------------------------------------
 # set_category_budget / list_accounts
 # ---------------------------------------------------------------------------
@@ -208,20 +199,6 @@ def test_list_accounts_delegates_to_client() -> None:
         result = asyncio.run(server.list_accounts("b1"))
     mock_fn.assert_called_once_with("b1")
     assert result == accounts
-
-
-def test_create_transactions_delegates_to_client() -> None:
-    """create_transactions must call client.create_transactions with correct args."""
-    items = [{"date": "2026-07-01", "amount": -16.0, "payee_name": "X"}]
-    summary = {"created": 1, "transaction_ids": ["t1"], "duplicate_import_ids": []}
-    with patch(
-        "avenir_mcp.client.create_transactions", new=AsyncMock(return_value=summary)
-    ) as mock_fn:
-        result = asyncio.run(server.create_transactions("b1", "a1", items))
-    mock_fn.assert_called_once_with("b1", "a1", items)
-    assert result == summary
-    tool_names = [t.name for t in asyncio.run(server.mcp.list_tools())]
-    assert "create_transactions" in tool_names
 
 
 def test_approve_transactions_delegates_to_client() -> None:
