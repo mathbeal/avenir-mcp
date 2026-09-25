@@ -20,6 +20,8 @@ GUIDE = """# Avenir: how to work with this YNAB server
 
 ## Conventions
 - Amounts are in currency units; spending is negative.
+- With several budgets, call `list_budgets` and pass the budget's id: `last-used`
+  follows whichever budget the user last opened in YNAB.
 - The server is read-only unless its operator enabled writes.
 - Every write shows a preview and waits for the user's confirmation: through the
   client's dialog, or through a single-use code the user must agree to. Never pass

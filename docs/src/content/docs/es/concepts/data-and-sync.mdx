@@ -49,6 +49,12 @@ presupuesto, en memoria, y la actualiza con la **sincronización incremental** d
 3. Avenir las fusiona en su copia: una transacción modificada sustituye a la anterior,
    una borrada se elimina.
 
+Con el id de un presupuesto, la copia se actualiza por sincronización incremental.
+Con `last-used`, que designa el último presupuesto abierto en YNAB y puede cambiar de
+una llamada a otra, las transacciones se cargan completas cada vez — sigue siendo una
+sola petición — para no mezclar nunca dos presupuestos. Con varios presupuestos, pase
+el id que da `list_budgets`.
+
 La copia vive tanto como el proceso del servidor. Las lecturas filtradas — por fecha o
 por categoría — no la usan.
 

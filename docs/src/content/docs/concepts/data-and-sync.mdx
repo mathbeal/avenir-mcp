@@ -48,6 +48,11 @@ refreshes it with YNAB's **delta sync**:
 3. Avenir merges them into its copy: a changed transaction replaces the old one, a
    deleted one is removed.
 
+With a budget's id, the copy is refreshed by delta sync. With `last-used`, which
+names whichever budget you last opened in YNAB and may change between two calls,
+transactions are loaded in full every time — still one request — so two budgets are
+never mixed. With several budgets, pass the id from `list_budgets`.
+
 The copy lives as long as the server process. Filtered reads — by date or by category —
 bypass it.
 

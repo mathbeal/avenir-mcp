@@ -12,7 +12,8 @@ Generated from the code by `python -m docsgen`; a test fails when it no longer m
 List all YNAB budgets accessible with the current API key.
 
 Returns a list of budget dicts with id, name, first_month, last_month.
-Use the budget id (or 'last-used') in subsequent tool calls.
+Use the budget id in subsequent tool calls. 'last-used' also works, but names
+whichever budget was last opened in YNAB: with several budgets, pass the id.
 
 ## Behaviour
 

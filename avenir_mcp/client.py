@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import math
 import os
+import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -37,6 +38,32 @@ def _base_url() -> str:
         )
     return url
 
+
+# One path segment of a YNAB id, month or resource name: UUIDs, "last-used",
+# "2026-09-01". Nothing that could add a segment, climb one, or start a query.
+_SEGMENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+
+
+def _url(path: str) -> str:
+    """The full URL of an API path whose every segment is a plain id or name.
+
+    Ids come from agents, and an agent may have read a malicious memo: an id such
+    as "x/../../user" must not steer a request to another endpoint.
+
+    Raises:
+        ValueError: If a segment is not a YNAB id.
+    """
+    for segment in path.strip("/").split("/"):
+        if not _SEGMENT.fullmatch(segment):
+            raise ValueError(
+                f"{segment!r} is not a YNAB id: use the ids returned by list_budgets, "
+                "list_accounts or the other tools."
+            )
+    return f"{_base_url()}{path}"
+
+
+# The budget YNAB last opened: a moving target, never cached.
+LAST_USED = "last-used"
 
 # Delta-sync cache: {budget_id: {"server_knowledge": int, "transactions": {tx_id: tx}}}
 _CACHE: dict[str, dict[str, Any]] = {}
@@ -107,85 +134,47 @@ def _check(response: Any) -> dict[str, Any]:
     return response.json()  # type: ignore[no-any-return]
 
 
-async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Get a YNAB API path with an authenticated GET request.
+# YNAB answers in well under a second; a stuck request should fail, not hang the agent.
+_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
-    Args:
-        path: API path relative to the base URL (e.g. "/budgets").
-        params: Optional query parameters.
 
-    Returns:
-        Parsed JSON response body as a dict.
+async def _request(method: str, path: str, **kwargs: Any) -> dict[str, Any]:
+    """Send an authenticated request to a YNAB API path and return its JSON body.
+
+    `method` is get, patch, post or delete.
+
+    The path is checked before anything is opened: a bad id never reaches the network.
 
     Raises:
+        ValueError: If a path segment is not a YNAB id.
         RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
     """
+    url = _url(path)
     headers = {"Authorization": f"Bearer {_api_key()}"}
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{_base_url()}{path}",
-            headers=headers,
-            params=params or {},
-        )
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+        send = getattr(client, method)  # client.get, .patch, .post or .delete
+        response = await send(url, headers=headers, **kwargs)
         return _check(response)
+
+
+async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    """GET a YNAB API path, with optional query parameters."""
+    return await _request("get", path, params=params or {})
 
 
 async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """Patch a YNAB API path with an authenticated PATCH request.
-
-    Args:
-        path: API path relative to the base URL.
-        body: JSON body to send.
-
-    Returns:
-        Parsed JSON response body as a dict.
-
-    Raises:
-        RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
-    """
-    headers = {"Authorization": f"Bearer {_api_key()}"}
-    async with httpx.AsyncClient() as client:
-        response = await client.patch(
-            f"{_base_url()}{path}",
-            headers=headers,
-            json=body,
-        )
-        return _check(response)
-
-
-async def _delete(path: str) -> dict[str, Any]:
-    """Delete a YNAB API path with an authenticated DELETE request.
-
-    Raises:
-        RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
-    """
-    headers = {"Authorization": f"Bearer {_api_key()}"}
-    async with httpx.AsyncClient() as client:
-        response = await client.delete(f"{_base_url()}{path}", headers=headers)
-        return _check(response)
+    """PATCH a YNAB API path with a JSON body."""
+    return await _request("patch", path, json=body)
 
 
 async def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """Post a YNAB API path with an authenticated POST request.
+    """POST a JSON body to a YNAB API path."""
+    return await _request("post", path, json=body)
 
-    Args:
-        path: API path relative to the base URL.
-        body: JSON body to send.
 
-    Returns:
-        Parsed JSON response body as a dict.
-
-    Raises:
-        RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
-    """
-    headers = {"Authorization": f"Bearer {_api_key()}"}
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{_base_url()}{path}",
-            headers=headers,
-            json=body,
-        )
-        return _check(response)
+async def _delete(path: str) -> dict[str, Any]:
+    """DELETE a YNAB API path."""
+    return await _request("delete", path)
 
 
 async def get_budgets() -> list[dict[str, Any]]:
@@ -286,9 +275,11 @@ async def get_transactions(
     if uncategorized_only:
         params["type"] = "uncategorized"
 
-    # Delta sync: use cached server_knowledge when no date filter is applied
+    # Delta sync, only for a named budget and no filter: "last-used" may name another
+    # budget from one call to the next, and changes are counted per budget.
     cache_key = budget_id
-    if not since_date and not uncategorized_only and cache_key in _CACHE:
+    cached = not since_date and not uncategorized_only and budget_id != LAST_USED
+    if cached and cache_key in _CACHE:
         params["last_knowledge_of_server"] = _CACHE[cache_key]["server_knowledge"]
         logger.info(
             "Delta sync: fetching transactions for %s since knowledge=%s",
@@ -301,8 +292,8 @@ async def get_transactions(
     data = await _get(f"/budgets/{budget_id}/transactions", params=params)
     payload = data["data"]
     transactions: list[dict[str, Any]] = payload["transactions"]
-    if since_date or uncategorized_only:
-        return transactions
+    if not cached:
+        return [tx for tx in transactions if not tx.get("deleted")]
 
     # A delta only holds what changed since the last load: merge it into the
     # cached transactions, dropping the deleted ones.

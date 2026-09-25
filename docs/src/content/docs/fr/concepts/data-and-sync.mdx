@@ -49,6 +49,12 @@ mémoire, et la rafraîchit par la **synchronisation incrémentale** de YNAB :
 3. Avenir les fusionne dans sa copie : une transaction modifiée remplace l'ancienne, une
    transaction supprimée est retirée.
 
+Avec l'identifiant d'un budget, la copie est rafraîchie par synchronisation
+incrémentale. Avec `last-used`, qui désigne le dernier budget ouvert dans YNAB et peut
+changer d'un appel à l'autre, les transactions sont chargées en entier à chaque fois —
+toujours une seule requête — pour ne jamais mélanger deux budgets. Avec plusieurs
+budgets, passez l'identifiant donné par `list_budgets`.
+
 La copie vit aussi longtemps que le processus du serveur. Les lectures filtrées — par
 date ou par catégorie — la contournent.
 

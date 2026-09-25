@@ -23,7 +23,8 @@ async def list_budgets() -> list[dict[str, Any]]:
     """List all YNAB budgets accessible with the current API key.
 
     Returns a list of budget dicts with id, name, first_month, last_month.
-    Use the budget id (or 'last-used') in subsequent tool calls.
+    Use the budget id in subsequent tool calls. 'last-used' also works, but names
+    whichever budget was last opened in YNAB: with several budgets, pass the id.
     """
     logger.info("Tool called: list_budgets()")
     return await client.get_budgets()

@@ -825,3 +825,49 @@ def test_no_token_at_all_names_both_ways(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.delenv("YNAB_API_KEY_FILE", raising=False)
     with pytest.raises(RuntimeError, match="YNAB_API_KEY_FILE"):
         client._api_key()  # pylint: disable=protected-access
+
+
+@pytest.mark.parametrize(
+    "budget_id",
+    ["x/../../user", "b1/transactions/tx-9?", "..", "", "-flag", "b1 b2", "b1%2F..", "b1#frag"],
+)
+def test_ids_that_would_change_the_request_are_refused(
+    budget_id: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An id is one path segment: slashes, dots, queries or escapes never reach YNAB."""
+    monkeypatch.setenv("YNAB_API_KEY", "tok")
+    request = client.get_accounts(budget_id)
+    with patch("httpx.AsyncClient") as http, pytest.raises(ValueError, match="not a YNAB id"):
+        asyncio.run(request)
+    http.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "budget_id", ["last-used", "demo-budget", "0f9c2a1e-6b5d-4c3a-9e8f-1a2b3c4d5e6f", "b_1"]
+)
+def test_real_ids_reach_ynab_unchanged(budget_id: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    """UUIDs, last-used and the demo budget's ids pass as they are."""
+    monkeypatch.setenv("YNAB_API_KEY", "tok")
+    response = MagicMock(status_code=200)
+    response.json.return_value = {"data": {"accounts": []}}
+    with patch("httpx.AsyncClient") as http:
+        http.return_value.__aenter__.return_value.get = AsyncMock(return_value=response)
+        asyncio.run(client.get_accounts(budget_id))
+        url = http.return_value.__aenter__.return_value.get.call_args.args[0]
+    assert url.endswith(f"/budgets/{budget_id}/accounts")
+
+
+def test_last_used_is_never_merged_across_budgets() -> None:
+    """'last-used' can name another budget between two calls: each call loads in full.
+
+    Delta sync counts changes per budget; merging one budget's changes into
+    another's transactions would mix two households silently.
+    """
+    budget_a = {"data": {"transactions": [{"id": "a1", "amount": -1000}], "server_knowledge": 100}}
+    budget_b = {"data": {"transactions": [{"id": "b1", "amount": -2000}], "server_knowledge": 7}}
+    get = AsyncMock(side_effect=[budget_a, budget_b])
+    with patch("avenir_mcp.client._get", get):
+        asyncio.run(client.get_transactions("last-used"))
+        second = asyncio.run(client.get_transactions("last-used"))
+    assert second == budget_b["data"]["transactions"]
+    assert "last_knowledge_of_server" not in get.call_args.kwargs["params"]
