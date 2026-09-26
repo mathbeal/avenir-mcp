@@ -26,7 +26,7 @@ marcar la cuenta como conciliada (el diagnóstico funciona en solo lectura).
    > **Usted:** Mi banco muestra 3.440,80 en la cuenta corriente. ¿Coincide YNAB?
 
 2. **El agente compara.** Llama a `reconcile_account` con
-   `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
+   `{"plan_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
    avenir-mcp suma las transacciones *cleared* de la cuenta (las que el banco ya ha mostrado)
    y compara. Difieren, así que **no se escribe nada**:
 

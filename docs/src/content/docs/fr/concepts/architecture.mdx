@@ -48,12 +48,12 @@ sortent de la logique en unités monétaires : aucun outil ne renvoie de milliun
 
 <Steps>
 
-1. Le client appelle `get_monthly_summary` avec `{"budget_id": "last-used", "month":
+1. Le client appelle `get_monthly_summary` avec `{"plan_id": "last-used", "month":
    "2026-09-01"}`.
 2. FastMCP valide les arguments contre le schéma d'entrée de l'outil.
 3. L'outil vérifie `month` (`app.check_month`) avant toute requête : un mois mal formé
    est refusé avec un message, sans rien coûter.
-4. `client.get_month` envoie un `GET /budgets/last-used/months/2026-09-01` à YNAB.
+4. `client.get_month` envoie un `GET /plans/last-used/months/2026-09-01` à YNAB.
 5. `analytics.month_overview` garde les totaux et les catégories en dépassement, en
    unités monétaires.
 6. FastMCP valide la réponse contre le schéma de sortie et la renvoie en
@@ -72,7 +72,7 @@ sortent de la logique en unités monétaires : aucun outil ne renvoie de milliun
 3. `confirm.write_plan` interroge l'utilisateur par le canal que le client gère — voir
    [Confirmation](/avenir-mcp/fr/concepts/confirmation/). Tant que la réponse n'est pas
    oui, il renvoie l'aperçu.
-4. Sur un oui, un seul `PATCH /budgets/{id}/transactions` groupé applique chaque
+4. Sur un oui, un seul `PATCH /plans/{id}/transactions` groupé applique chaque
    changement.
 5. `journal.Journal.record` ajoute l'opération au journal ; son identifiant revient à
    l'agent pour [l'annulation](/avenir-mcp/fr/concepts/journal/).

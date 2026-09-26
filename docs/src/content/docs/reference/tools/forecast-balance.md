@@ -37,7 +37,7 @@ first month it goes below zero. Changes nothing.
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `budget_id` | string | yes | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | yes | — | YNAB plan id or 'last-used'. |
 | `until` | string | yes | — | Last month to project, YYYY-MM, at most 24 months ahead. |
 | `account_ids` | array of string \| null | no | `null` | Accounts to include (from list_accounts); default all open on-budget accounts. |
 | `monthly_income` | number \| null | no | `null` | Income expected each month, replacing the income found in the history (recurring or average); default: what the history shows. |
@@ -71,7 +71,7 @@ Arguments:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "until": "2026-12",
   "monthly_income": 3200
 }

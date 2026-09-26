@@ -33,7 +33,7 @@ devise du budget ; les dépenses sont négatives, les entrées positives.
 | Méthodes | `GET` pour lire ; `PATCH`, `POST` et `DELETE` sur les transactions, les catégories et les budgets mensuels |
 | Erreurs | tout 4xx ou 5xx revient en `Error calling tool '<tool>': YNAB <status>: <detail>`, avec l'explication de YNAB |
 
-`budget_id` accepte `last-used`, que YNAB résout en votre dernier budget utilisé.
+`plan_id` accepte `last-used`, que YNAB résout en votre dernier budget utilisé.
 
 ## La copie locale des transactions
 
@@ -53,7 +53,7 @@ Avec l'identifiant d'un budget, la copie est rafraîchie par synchronisation
 incrémentale. Avec `last-used`, qui désigne le dernier budget ouvert dans YNAB et peut
 changer d'un appel à l'autre, les transactions sont chargées en entier à chaque fois —
 toujours une seule requête — pour ne jamais mélanger deux budgets. Avec plusieurs
-budgets, passez l'identifiant donné par `list_budgets`.
+budgets, passez l'identifiant donné par `list_plans`.
 
 La copie vit aussi longtemps que le processus du serveur. Les lectures filtrées — par
 date ou par catégorie — la contournent.
@@ -74,7 +74,7 @@ de chaque outil, cache froid, est mesuré sur le budget de démonstration et ind
 | Coût | Outils |
 |---|---|
 | 0 | tout appel refusé par la validation (mois mal formé, nom vide…) |
-| 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, l'aperçu de `set_category_budget` |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, l'aperçu de `set_category_budget` |
 | 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
 | 3 | `suggest_categories` (une page entière), `apply_categories` |
 | 1 + N | `get_spending_trends` sur N mois |

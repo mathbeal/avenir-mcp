@@ -27,7 +27,7 @@ vous surprend.
 
 > **Vous :** Quels comptes ai-je, et combien y a-t-il dessus ?
 
-L'agent appelle `list_accounts` avec `{"budget_id": "last-used"}` :
+L'agent appelle `list_accounts` avec `{"plan_id": "last-used"}` :
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
@@ -41,7 +41,7 @@ déjà montré ; `uncleared_balance`, ce qu'elle n'a pas encore montré.
 
 > **Vous :** Comment se passe septembre ?
 
-L'agent appelle `get_monthly_summary` avec `{"budget_id": "last-used", "month":
+L'agent appelle `get_monthly_summary` avec `{"plan_id": "last-used", "month":
 "2026-09-01"}` :
 
 <Code code={summary} lang="json" title="get_monthly_summary" />
@@ -63,7 +63,7 @@ sauf si l'agent passe `include_empty`.
 
 > **Vous :** Qu'est-ce qui attend encore une catégorie ?
 
-L'agent appelle `suggest_categories` avec `{"budget_id": "last-used"}` :
+L'agent appelle `suggest_categories` avec `{"plan_id": "last-used"}` :
 
 <Code code={pending} lang="json" title="suggest_categories (première page, 3 lignes)" />
 

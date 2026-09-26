@@ -26,7 +26,7 @@ account reconciled (the diagnosis works read-only).
    > **You:** My bank shows 3,440.80 on my checking account. Does YNAB agree?
 
 2. **The agent compares.** It calls `reconcile_account` with
-   `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
+   `{"plan_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
    avenir-mcp sums the account's *cleared* transactions (those the bank has shown) and
    compares. They differ, so **nothing is written**:
 

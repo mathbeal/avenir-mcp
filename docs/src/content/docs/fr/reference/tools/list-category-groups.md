@@ -28,7 +28,7 @@ create_category.
 
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
-| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 
 ## Retour
 
@@ -45,7 +45,7 @@ Arguments :
 
 ```json
 {
-  "budget_id": "demo-budget"
+  "plan_id": "demo-budget"
 }
 ```
 

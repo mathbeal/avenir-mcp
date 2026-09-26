@@ -29,7 +29,7 @@ used in the group is refused. Confirmation works as for apply_categories.
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `budget_id` | string | yes | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | yes | — | YNAB plan id or 'last-used'. |
 | `category_group_id` | string | yes | — | Group to create it in (from list_category_groups). |
 | `name` | string | yes | — | Name of the new category. |
 | `confirmation` | string \| null | no | `null` | Code from a previous "confirmation_required" result. |
@@ -51,7 +51,7 @@ Arguments:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "category_group_id": "grp-everyday",
   "name": "Pets"
 }
@@ -72,13 +72,13 @@ Answer on the demo budget:
 
 ## Errors
 
-- `Group {category_group_id} is not in this budget: use an id from list_category_groups.`
+- `Group {category_group_id} is not in this plan: use an id from list_category_groups.`
 - `The name is empty: give the new category a name.`
 - `'{new_name}' already exists in {group}.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 YNAB's own errors come back as `Error calling tool '<tool>': YNAB <status>: <detail>`.
 

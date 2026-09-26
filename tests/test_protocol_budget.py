@@ -54,7 +54,7 @@ def _month(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[_Month]:
         yield fake
 
 
-_ARGS = {"budget_id": "b1", "month": "2026-10-01", "category_id": "c-food", "amount": 150.0}
+_ARGS = {"plan_id": "b1", "month": "2026-10-01", "category_id": "c-food", "amount": 150.0}
 
 
 def test_budget_change_is_previewed_in_currency_then_applied_with_the_code(month: _Month) -> None:
@@ -75,7 +75,7 @@ def test_budget_change_is_previewed_in_currency_then_applied_with_the_code(month
 def test_budget_change_is_undone_to_the_previous_amount(month: _Month) -> None:
     """undo_operation puts the category back to what it had."""
     call("set_category_budget", _ARGS, accept)
-    undo = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
+    undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert undo["status"] == "applied"
     assert month.sets[-1] == ("2026-10-01", "c-food", 200.0)
 
@@ -84,7 +84,7 @@ def test_undo_leaves_a_budget_changed_since_alone(month: _Month) -> None:
     """If the amount moved again after the operation, undo does not overwrite it."""
     call("set_category_budget", _ARGS, accept)
     month.budgeted["c-food"] = 999000
-    undo = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
+    undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert undo["status"] == "nothing_to_do"
     assert undo["conflicts"] == ["c-food"]
     assert len(month.sets) == 1
@@ -124,6 +124,6 @@ def test_invalid_budget_change_is_a_tool_error(
 def test_declined_undo_keeps_the_new_amount(month: _Month) -> None:
     """If the user refuses the undo, the budget keeps its new amount."""
     call("set_category_budget", _ARGS, accept)
-    undo = call("undo_operation", {"budget_id": "b1"}, decline).structured_content
+    undo = call("undo_operation", {"plan_id": "b1"}, decline).structured_content
     assert undo["status"] == "declined"
     assert month.sets == [("2026-10-01", "c-food", 150.0)]

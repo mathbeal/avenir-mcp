@@ -68,7 +68,7 @@ def test_update_category_declares_a_reversible_write() -> None:
 
 def test_rename_is_previewed_then_applied_with_the_code(update: AsyncMock) -> None:
     """Without elicitation the first call previews; the code applies the rename only."""
-    args = {"budget_id": "b1", "category_id": "c-pharma", "name": "Pharmacy"}
+    args = {"plan_id": "b1", "category_id": "c-pharma", "name": "Pharmacy"}
     preview = _call(args).structured_content
     assert preview["status"] == "confirmation_required"
     assert (preview["from_name"], preview["to_name"]) == ("Drugstore", "Pharmacy")
@@ -81,7 +81,7 @@ def test_rename_is_previewed_then_applied_with_the_code(update: AsyncMock) -> No
 def test_move_to_another_group_after_elicitation(update: AsyncMock) -> None:
     """Moving names the groups before and after, and sends only the group."""
     data = _call(
-        {"budget_id": "b1", "category_id": "c-child", "category_group_id": "g-health"}, _accept
+        {"plan_id": "b1", "category_id": "c-child", "category_group_id": "g-health"}, _accept
     ).structured_content
     assert data["status"] == "applied"
     assert (data["from_group"], data["to_group"]) == ("Care", "Health")
@@ -92,7 +92,7 @@ def test_move_to_another_group_after_elicitation(update: AsyncMock) -> None:
 def test_nothing_to_change_writes_nothing(update: AsyncMock) -> None:
     """Same name and same group: no question, no write."""
     data = _call(
-        {"budget_id": "b1", "category_id": "c-pharma", "name": "Drugstore"}
+        {"plan_id": "b1", "category_id": "c-pharma", "name": "Drugstore"}
     ).structured_content
     assert data["status"] == "nothing_to_do"
     update.assert_not_awaited()
@@ -110,7 +110,7 @@ def test_invalid_update_is_a_tool_error(
     update: AsyncMock, args: dict[str, Any], expected: str
 ) -> None:
     """Unknown category or group, or a blank name, is refused before anything is asked."""
-    result = _call({"budget_id": "b1", **args})
+    result = _call({"plan_id": "b1", **args})
     assert result.is_error
     assert expected in result.content[0].text
     update.assert_not_awaited()
@@ -123,7 +123,7 @@ def test_declined_update_changes_nothing(update: AsyncMock) -> None:
         return ElicitResult(action="decline")
 
     data = _call(
-        {"budget_id": "b1", "category_id": "c-pharma", "name": "Pharmacy"}, decline
+        {"plan_id": "b1", "category_id": "c-pharma", "name": "Pharmacy"}, decline
     ).structured_content
     assert data["status"] == "declined"
     update.assert_not_awaited()
@@ -153,7 +153,7 @@ def _create_call(args: dict[str, Any], handler: Any = None) -> Any:
     return asyncio.run(run())
 
 
-_NEW = {"budget_id": "b1", "category_group_id": "g-health", "name": "Gym"}
+_NEW = {"plan_id": "b1", "category_group_id": "g-health", "name": "Gym"}
 
 
 def test_new_category_is_previewed_then_created_with_the_code(create: AsyncMock) -> None:

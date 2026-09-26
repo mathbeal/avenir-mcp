@@ -28,7 +28,7 @@ Only approve transactions whose category has been checked.
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `budget_id` | string | yes | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | yes | — | YNAB plan id or 'last-used'. |
 | `tx_ids` | array of string | yes | — | Transaction UUIDs to approve. |
 
 ## Returns
@@ -43,7 +43,7 @@ Arguments:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "tx_ids": [
     "tx-048",
     "tx-049"

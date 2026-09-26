@@ -53,7 +53,7 @@ class CategoryUpdate(Model):
     },
 )
 async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
-    budget_id: str,
+    plan_id: str,
     category_id: str,
     ctx: Context,
     *,
@@ -68,7 +68,7 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
     which the result gives.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         category_id: Category to change (from suggest_categories or list_category_groups).
         ctx: The MCP context, used to ask the user.
         name: New name; omit to keep it.
@@ -80,21 +80,21 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
         user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the category or group is not in the budget, the new name is empty,
+        ToolError: If the category or group is not in the plan, the new name is empty,
             or the confirmation code is refused.
     """
     logger.info("Tool called: update_category")
-    categories = {c["id"]: c for c in await client.get_categories(budget_id)}
-    groups = {g["id"]: g["name"] for g in await client.get_category_groups(budget_id)}
+    categories = {c["id"]: c for c in await client.get_categories(plan_id)}
+    groups = {g["id"]: g["name"] for g in await client.get_category_groups(plan_id)}
     category = categories.get(category_id)
     if category is None:
         raise ToolError(
-            f"Category {category_id} is not in this budget: "
+            f"Category {category_id} is not in this plan: "
             "use a category_id from suggest_categories."
         )
     if category_group_id is not None and category_group_id not in groups:
         raise ToolError(
-            f"Group {category_group_id} is not in this budget: "
+            f"Group {category_group_id} is not in this plan: "
             "use an id from list_category_groups."
         )
     if name is not None and not name.strip():
@@ -118,11 +118,11 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
         f"Change category '{result.from_name}' ({result.from_group}) "
         f"to '{new_name}' ({result.to_group})?"
     )
-    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.update_category(
-        budget_id,
+        plan_id,
         category_id,
         name=new_name if new_name != category["name"] else None,
         category_group_id=new_group if new_group != category["category_group_id"] else None,
@@ -173,7 +173,7 @@ class BudgetChange(Model):
     },
 )
 async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
-    budget_id: str,
+    plan_id: str,
     month: str,
     category_id: str,
     amount: Amount,
@@ -187,7 +187,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     Confirmation works as for apply_categories.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         month: 'YYYY-MM-01' or 'current'.
         category_id: Category (from get_category_balances or suggest_categories).
         amount: New budgeted amount, in currency units.
@@ -199,17 +199,17 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the month is malformed, the category is not in the budget, or the
+        ToolError: If the month is malformed, the category is not in the plan, or the
             confirmation code is refused.
     """
     logger.info("Tool called: set_category_budget(month=%r)", month)
     check_month(month)
     month = app.resolve_month(month)
-    categories = {c["id"]: c for c in await client.get_month_categories(budget_id, month)}
+    categories = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
     category = categories.get(category_id)
     if category is None:
         raise ToolError(
-            f"Category {category_id} is not in this budget: "
+            f"Category {category_id} is not in this plan: "
             "use a category_id from get_category_balances."
         )
     before, after = category["budgeted"], client.amount_to_milliunit(amount)
@@ -231,12 +231,12 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         f"{result.from_amount:.2f} → {result.to_amount:.2f}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
-    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
-    await client.set_category_budgeted(budget_id, month, category_id, amount)
+    await client.set_category_budgeted(plan_id, month, category_id, amount)
     operation_id = journal.Journal(journal.default_path()).record(
-        budget_id,
+        plan_id,
         "budget",
         [],
         {"month": month, "category_id": category_id, "from": before, "to": after},
@@ -282,7 +282,7 @@ class NewCategory(Model):
     },
 )
 async def create_category(
-    budget_id: str,
+    plan_id: str,
     category_group_id: str,
     name: str,
     ctx: Context,
@@ -294,7 +294,7 @@ async def create_category(
     used in the group is refused. Confirmation works as for apply_categories.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         category_group_id: Group to create it in (from list_category_groups).
         name: Name of the new category.
         ctx: The MCP context, used to ask the user.
@@ -305,14 +305,14 @@ async def create_category(
         user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the group is not in the budget, the name is empty or already used in
+        ToolError: If the group is not in the plan, the name is empty or already used in
             the group, or the confirmation code is refused.
     """
     logger.info("Tool called: create_category")
-    groups = {g["id"]: g["name"] for g in await client.get_category_groups(budget_id)}
+    groups = {g["id"]: g["name"] for g in await client.get_category_groups(plan_id)}
     if category_group_id not in groups:
         raise ToolError(
-            f"Group {category_group_id} is not in this budget: "
+            f"Group {category_group_id} is not in this plan: "
             "use an id from list_category_groups."
         )
     new_name = name.strip()
@@ -320,7 +320,7 @@ async def create_category(
         raise ToolError("The name is empty: give the new category a name.")
     taken = {
         c["name"].casefold()
-        for c in await client.get_categories(budget_id)
+        for c in await client.get_categories(plan_id)
         if c.get("category_group_id") == category_group_id
     }
     if new_name.casefold() in taken:
@@ -335,8 +335,8 @@ async def create_category(
     )
     question = f"Create category '{new_name}' in {result.group}?"
     subject = {"group": category_group_id, "name": new_name}
-    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
-    created = await client.create_category(budget_id, category_group_id, new_name)
+    created = await client.create_category(plan_id, category_group_id, new_name)
     return result.model_copy(update={"message": "Created.", "category_id": created["id"]})

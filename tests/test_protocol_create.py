@@ -67,7 +67,7 @@ def _ledger(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[_Ledger
 
 
 def _args(**extra: Any) -> dict[str, Any]:
-    return {"budget_id": "b1", "account_id": "acc", "transactions": [_ITEM], **extra}
+    return {"plan_id": "b1", "account_id": "acc", "transactions": [_ITEM], **extra}
 
 
 def test_creation_is_previewed_readably_then_applied_for_review(ledger: _Ledger) -> None:
@@ -97,7 +97,7 @@ def test_approved_creation_on_request(ledger: _Ledger) -> None:
 def test_undo_deletes_what_was_created(ledger: _Ledger) -> None:
     """undo_operation deletes the created transactions still there."""
     call("create_transactions", _args(), accept)
-    undo = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
+    undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert undo["status"] == "applied"
     assert ledger.deleted == ["new0"]
 
@@ -106,7 +106,7 @@ def test_undo_skips_transactions_already_deleted(ledger: _Ledger) -> None:
     """A created transaction deleted since is reported, not deleted twice."""
     call("create_transactions", _args(), accept)
     ledger.transactions[0]["deleted"] = True
-    undo = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
+    undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert undo["status"] == "nothing_to_do"
     assert undo["conflicts"] == ["new0"]
     assert not ledger.deleted
@@ -142,7 +142,7 @@ def test_invalid_creation_is_a_tool_error(
 def test_declined_undo_keeps_the_created_transactions(ledger: _Ledger) -> None:
     """If the user refuses the undo, the transactions stay."""
     call("create_transactions", _args(), accept)
-    undo = call("undo_operation", {"budget_id": "b1"}, decline).structured_content
+    undo = call("undo_operation", {"plan_id": "b1"}, decline).structured_content
     assert undo["status"] == "declined"
     assert not ledger.deleted
 

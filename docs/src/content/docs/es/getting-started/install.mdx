@@ -6,7 +6,7 @@ sidebar:
 ---
 
 import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
-import budgets from '@snippets/list_budgets.json?raw';
+import budgets from '@snippets/list_plans.json?raw';
 
 Esta página le lleva de cero a avenir-mcp funcionando, en unos diez minutos. Cada paso
 termina con una comprobación: sabrá que ha funcionado antes de seguir.
@@ -276,11 +276,11 @@ Linux) o `where uvx` (Windows) — por ejemplo `"/Users/<usted>/.local/bin/uvx"`
 </Tabs>
 
 Pregunte ahora, en una conversación nueva: *«Lista mis presupuestos de YNAB.»* El agente
-llama a [`list_budgets`](/avenir-mcp/es/reference/tools/list-budgets/) — su cliente puede
+llama a [`list_plans`](/avenir-mcp/es/reference/tools/list-plans/) — su cliente puede
 pedirle permiso — y responde con sus nombres. Aquí, el presupuesto de demostración usado
 en toda esta documentación:
 
-<Code code={budgets} lang="json" title="list_budgets" />
+<Code code={budgets} lang="json" title="list_plans" />
 
 avenir-mcp funciona. Siga con [su primera conversación](/avenir-mcp/es/getting-started/first-conversation/),
 o permita antes los cambios.

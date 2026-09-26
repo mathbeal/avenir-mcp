@@ -63,7 +63,7 @@ READY_TO_ASSIGN_GROUP = "Internal Master Category"
     },
 )
 async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-locals
-    budget_id: str,
+    plan_id: str,
     account_id: str,
     bank_balance: Amount,
     ctx: Context,
@@ -83,7 +83,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     user confirms (as for apply_categories). undo_operation reverts it.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         account_id: Account to reconcile (from list_accounts).
         bank_balance: Balance shown by the bank, in currency units.
         ctx: The MCP context, used to ask the user.
@@ -95,15 +95,13 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         asking the user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the account is not in the budget, or the confirmation code is refused.
+        ToolError: If the account is not in the plan, or the confirmation code is refused.
     """
     logger.info("Tool called: reconcile_account(adjust=%s)", adjust)
-    accounts = {a["id"]: a["name"] for a in await client.get_accounts(budget_id)}
+    accounts = {a["id"]: a["name"] for a in await client.get_accounts(plan_id)}
     if account_id not in accounts:
-        raise ToolError(
-            f"Account {account_id} is not in this budget: use an id from list_accounts."
-        )
-    transactions = await client.get_transactions(budget_id)
+        raise ToolError(f"Account {account_id} is not in this plan: use an id from list_accounts.")
+    transactions = await client.get_transactions(plan_id)
     analysis = reconcile.analyse(account_id, transactions, bank_balance)
     difference = analysis.difference
     result = ReconcileResult(
@@ -149,7 +147,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         "adjust": difference,
         "transactions": to_reconcile,
     }
-    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     adjustment_id = None
@@ -157,13 +155,13 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         inflow = next(
             (
                 c["id"]
-                for c in await client.get_categories(budget_id)
+                for c in await client.get_categories(plan_id)
                 if c.get("category_group_name") == READY_TO_ASSIGN_GROUP
             ),
             None,
         )
         created = await client.create_transactions(
-            budget_id,
+            plan_id,
             account_id,
             [
                 {
@@ -177,9 +175,9 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         )
         adjustment_id = created["transaction_ids"][0]
         to_reconcile.append(adjustment_id)
-    await client.set_transactions_cleared(budget_id, to_reconcile, "reconciled")
+    await client.set_transactions_cleared(plan_id, to_reconcile, "reconciled")
     operation_id = journal.Journal(journal.default_path()).record(
-        budget_id,
+        plan_id,
         "reconcile",
         [],
         {"account_id": account_id, "reconciled_ids": to_reconcile, "adjustment_id": adjustment_id},
@@ -259,7 +257,7 @@ def _check_horizon(until: str, now: date) -> None:
     }
 )
 async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
-    budget_id: str,
+    plan_id: str,
     until: str,
     account_ids: list[str] | None = None,
     monthly_income: Amount | None = None,
@@ -281,7 +279,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     first month it goes below zero. Changes nothing.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         until: Last month to project, YYYY-MM, at most 24 months ahead.
         account_ids: Accounts to include (from list_accounts); default all open
             on-budget accounts.
@@ -300,7 +298,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     logger.info("Tool called: forecast_balance")
     now = app.today()
     _check_horizon(until, now)
-    accounts = await client.get_accounts(budget_id)
+    accounts = await client.get_accounts(plan_id)
     if account_ids is not None:
         unknown = sorted(set(account_ids) - {a["id"] for a in accounts})
         if unknown:
@@ -309,7 +307,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     else:
         chosen = [a for a in accounts if a["on_budget"] and not a["closed"]]
     ids = {a["id"] for a in chosen}
-    history = [tx for tx in await client.get_transactions(budget_id) if tx.get("account_id") in ids]
+    history = [tx for tx in await client.get_transactions(plan_id) if tx.get("account_id") in ids]
     charges = forecast.recurring(history, now)
     if monthly_income is not None:
         # The income given replaces what the history suggests, recurring salary included.
@@ -420,12 +418,12 @@ def _check_new(items: list[NewTransaction], categories: dict[str, str], now: dat
 
     Args:
         items: The transactions to create.
-        categories: The budget's category names by id.
+        categories: The plan's category names by id.
         now: Today.
 
     Raises:
         ToolError: If the list is empty, a date is in the future, or a category is not
-            in the budget.
+            in the plan.
     """
     if not items:
         raise ToolError("Give at least one transaction to create.")
@@ -437,7 +435,7 @@ def _check_new(items: list[NewTransaction], categories: dict[str, str], now: dat
         category = item.category_id
         if category and category not in categories:
             raise ToolError(
-                f"Category {category} is not in this budget: "
+                f"Category {category} is not in this plan: "
                 "use a category_id from get_category_balances."
             )
 
@@ -453,7 +451,7 @@ def _check_new(items: list[NewTransaction], categories: dict[str, str], now: dat
     },
 )
 async def create_transactions(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
-    budget_id: str,
+    plan_id: str,
     account_id: str,
     transactions: list[NewTransaction],
     ctx: Context,
@@ -469,7 +467,7 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
     as for apply_categories.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         account_id: Account to add them to (from list_accounts).
         transactions: The transactions to create.
         ctx: The MCP context, used to ask the user.
@@ -481,16 +479,14 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         by asking the user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the account or a category is not in the budget, a date is in the
+        ToolError: If the account or a category is not in the plan, a date is in the
             future, the list is empty, or the confirmation code is refused.
     """
     logger.info("Tool called: create_transactions(n=%d)", len(transactions))
-    accounts = {a["id"]: a["name"] for a in await client.get_accounts(budget_id)}
+    accounts = {a["id"]: a["name"] for a in await client.get_accounts(plan_id)}
     if account_id not in accounts:
-        raise ToolError(
-            f"Account {account_id} is not in this budget: use an id from list_accounts."
-        )
-    categories = {c["id"]: c["name"] for c in await client.get_categories(budget_id)}
+        raise ToolError(f"Account {account_id} is not in this plan: use an id from list_accounts.")
+    categories = {c["id"]: c["name"] for c in await client.get_categories(plan_id)}
     _check_new(transactions, categories, app.today())
     preview = [
         NewTransactionPreview(
@@ -519,17 +515,17 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         lines
     )
     subject = {"account": account_id, "items": transactions, "approved": approved}
-    stop = await gate(ctx, budget_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     created = await client.create_transactions(
-        budget_id,
+        plan_id,
         account_id,
         [item.model_dump(mode="json", exclude_none=True) for item in transactions],
         approved=approved,
     )
     operation_id = journal.Journal(journal.default_path()).record(
-        budget_id, "create", [], {"transaction_ids": created["transaction_ids"]}
+        plan_id, "create", [], {"transaction_ids": created["transaction_ids"]}
     )
     return result.model_copy(
         update={

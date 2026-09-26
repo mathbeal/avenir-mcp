@@ -33,7 +33,7 @@ user is told before confirming. Confirmation works as for apply_categories.
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `budget_id` | string | yes | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | yes | — | YNAB plan id or 'last-used'. |
 | `transaction_id` | string | yes | — | Transaction to split (from suggest_categories). |
 | `lines` | array of object | yes | — | The lines, at least two, adding up to the transaction's amount. |
 | `confirmation` | string \| null | no | `null` | Code from a previous "confirmation_required" result. |
@@ -57,7 +57,7 @@ user is told before confirming. Confirmation works as for apply_categories.
 
 ## Errors
 
-- `Transaction {transaction_id} is not in this budget: use a transaction_id returned by suggest_categories.`
+- `Transaction {transaction_id} is not in this plan: use a transaction_id returned by suggest_categories.`
 - `Transaction {tx_id} was deleted in YNAB: there is nothing to split.`
 - `Transaction {tx_id} is already split: YNAB's API cannot change its lines, change them in YNAB.`
 - `Transaction {tx_id} is a transfer between accounts: it cannot be split.`
@@ -66,10 +66,10 @@ user is told before confirming. Confirmation works as for apply_categories.
 - `The lines add up to {total}, the transaction is {amount}: they must match to the cent.`
 - `A line is zero: leave it out.`
 - `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
-- `Category {category_id} is not in this budget: use a category_id from suggest_categories or get_category_balances.`
+- `Category {category_id} is not in this plan: use a category_id from suggest_categories or get_category_balances.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 YNAB's own errors come back as `Error calling tool '<tool>': YNAB <status>: <detail>`.

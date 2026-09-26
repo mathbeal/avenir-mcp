@@ -1,6 +1,6 @@
 """Compare an account with the balance the bank shows, and explain the gap.
 
-Pure computation on the budget's transactions: no request to YNAB. Sums are
+Pure computation on the plan's transactions: no request to YNAB. Sums are
 made in milliunits, so no rounding error can invent a difference.
 """
 
@@ -94,7 +94,7 @@ def analyse(
 
     Args:
         account_id: The account to analyse.
-        transactions: The budget's transactions, amounts in milliunits.
+        transactions: The plan's transactions, amounts in milliunits.
         bank_balance: The balance the bank shows, in currency units.
         today: The day of the analysis; defaults to today.
 

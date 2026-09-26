@@ -30,7 +30,7 @@ still get the suggestions; you then apply them in YNAB.
    > **You:** Categorise everything that is waiting for a category.
 
 2. **The agent reads what is pending.** It calls `suggest_categories` with
-   `{"budget_id": "last-used"}`. avenir-mcp downloads the budget's transactions once (three
+   `{"plan_id": "last-used"}`. avenir-mcp downloads the budget's transactions once (three
    YNAB requests, whatever their number) and answers with a page of pending
    transactions, newest first:
 

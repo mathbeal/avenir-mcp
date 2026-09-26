@@ -134,12 +134,12 @@ def _answer(action: str, content: dict[str, Any] | None) -> WriteStatus | None:
     return None
 
 
-def _spend_code(confirmation: str, budget_id: str, subject: object, required: bool) -> WriteStatus:
+def _spend_code(confirmation: str, plan_id: str, subject: object, required: bool) -> WriteStatus:
     """Spend a confirmation code.
 
     Args:
         confirmation: The code from a previous preview.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         subject: The exact change being confirmed, as JSON data.
         required: True when only an answer in the client may confirm.
 
@@ -155,7 +155,7 @@ def _spend_code(confirmation: str, budget_id: str, subject: object, required: bo
             "Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again "
             "without confirmation, and the user answers in the client."
         )
-    if CONFIRMATIONS.consume(confirmation, budget_id, subject):
+    if CONFIRMATIONS.consume(confirmation, plan_id, subject):
         return "applied"
     raise ToolError(
         "This confirmation code is unknown, expired, already used, or was issued for "
@@ -164,7 +164,7 @@ def _spend_code(confirmation: str, budget_id: str, subject: object, required: bo
 
 
 def _modern_answer(
-    ctx: Context, budget_id: str, subject: object, question: str
+    ctx: Context, plan_id: str, subject: object, question: str
 ) -> WriteStatus | None | types.InputRequiredResult:
     """Protocol 2026-07-28: request the answer, or read the one the client sends back.
 
@@ -173,7 +173,7 @@ def _modern_answer(
 
     Args:
         ctx: The MCP context of the call.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         subject: The exact change being confirmed, as JSON data.
         question: What the user is asked.
 
@@ -184,7 +184,7 @@ def _modern_answer(
     Raises:
         ToolError: If the answer was given to a preview of other changes.
     """
-    fingerprint = writes.fingerprint(budget_id, subject)
+    fingerprint = writes.fingerprint(plan_id, subject)
     responses = ctx.input_responses
     if not responses or _QUESTION_KEY not in responses:
         request = types.ElicitRequest(
@@ -195,7 +195,7 @@ def _modern_answer(
         )
     if ctx.request_state != fingerprint:
         raise ToolError(
-            "The budget changed between the preview and the answer. "
+            "The plan changed between the preview and the answer. "
             "Call again without an answer to get a new preview."
         )
     reply = responses[_QUESTION_KEY]
@@ -203,13 +203,13 @@ def _modern_answer(
 
 
 async def _answer_in_client(
-    ctx: Context, budget_id: str, subject: object, question: str
+    ctx: Context, plan_id: str, subject: object, question: str
 ) -> WriteStatus | None | types.InputRequiredResult:
     """Ask the user in the client, the way the connection's protocol version allows.
 
     Args:
         ctx: The MCP context of the call.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         subject: The exact change being confirmed, as JSON data.
         question: What the user is asked.
 
@@ -219,13 +219,13 @@ async def _answer_in_client(
     """
     rc = ctx.request_context
     if rc is not None and rc.protocol_version in MODERN_PROTOCOL_VERSIONS:
-        return _modern_answer(ctx, budget_id, subject, question)
+        return _modern_answer(ctx, plan_id, subject, question)
     answer = await ctx.elicit(question, bool)
     return _answer(answer.action, {"value": getattr(answer, "data", None)})
 
 
 async def ask(
-    ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
+    ctx: Context, plan_id: str, subject: object, question: str, confirmation: str | None
 ) -> WriteStatus | str | types.InputRequiredResult:
     """Confirm a write with the user.
 
@@ -236,7 +236,7 @@ async def ask(
 
     Args:
         ctx: The MCP context of the call.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         subject: The exact change being confirmed, as JSON data.
         question: What the user is asked.
         confirmation: A code from a previous preview, or None.
@@ -251,7 +251,7 @@ async def ask(
     """
     required = os.getenv("AVENIR_MCP_REQUIRE_ELICITATION") == "1"
     if confirmation is not None:
-        return _spend_code(confirmation, budget_id, subject, required)
+        return _spend_code(confirmation, plan_id, subject, required)
     can_ask = ctx.session.check_client_capability(
         types.ClientCapabilities(elicitation=types.ElicitationCapability())
     )
@@ -262,18 +262,18 @@ async def ask(
             "elicitation, or unset the variable."
         )
     if not can_ask:
-        return CONFIRMATIONS.issue(budget_id, subject)
-    decision = await _answer_in_client(ctx, budget_id, subject, question)
+        return CONFIRMATIONS.issue(plan_id, subject)
+    decision = await _answer_in_client(ctx, plan_id, subject, question)
     if decision is not None:
         return decision
     # Nobody said no when the question was dismissed: fall back to a code, unless
     # only an answer in the client may confirm.
-    return "declined" if required else CONFIRMATIONS.issue(budget_id, subject)
+    return "declined" if required else CONFIRMATIONS.issue(plan_id, subject)
 
 
 async def write_plan(
     ctx: Context,
-    budget_id: str,
+    plan_id: str,
     plan: writes.Plan,
     action: str,
     confirmation: str | None,
@@ -282,7 +282,7 @@ async def write_plan(
 
     Args:
         ctx: The MCP context of the call.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         plan: The changes to make.
         action: What is done to them, e.g. "Recategorise", for the question.
         confirmation: A code from a previous preview, or None.
@@ -298,7 +298,7 @@ async def write_plan(
             else ""
         )
         return result_of("nothing_to_do", message, plan), None
-    decision = await ask(ctx, budget_id, plan.changes, describe(plan, action), confirmation)
+    decision = await ask(ctx, plan_id, plan.changes, describe(plan, action), confirmation)
     if isinstance(decision, types.InputRequiredResult):
         return decision, None
     if decision == "declined":
@@ -310,7 +310,7 @@ async def write_plan(
         )
         return result_of("confirmation_required", message, plan, confirmation=decision), None
     await client.set_transaction_categories(
-        budget_id, [(c.transaction_id, c.to_category_id) for c in plan.changes]
+        plan_id, [(c.transaction_id, c.to_category_id) for c in plan.changes]
     )
     moves = [
         journal.Move(
@@ -320,7 +320,7 @@ async def write_plan(
         )
         for c in plan.changes
     ]
-    operation_id = journal.Journal(journal.default_path()).record(budget_id, "categorize", moves)
+    operation_id = journal.Journal(journal.default_path()).record(plan_id, "categorize", moves)
     message = f"Applied. undo_operation with operation_id {operation_id} reverts it."
     result = result_of("applied", message, plan, operation_id=operation_id)
     return result, operation_id
@@ -366,7 +366,7 @@ def not_applied(decision: WriteStatus | str, question: str) -> NotApplied | None
 
 
 async def gate(
-    ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
+    ctx: Context, plan_id: str, subject: object, question: str, confirmation: str | None
 ) -> NotApplied | types.InputRequiredResult | None:
     """Ask for confirmation before a write.
 
@@ -375,7 +375,7 @@ async def gate(
 
     Args:
         ctx: The MCP context of the call.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         subject: The exact change being confirmed, as JSON data.
         question: What the user is asked.
         confirmation: A code from a previous preview, or None.
@@ -383,7 +383,7 @@ async def gate(
     Returns:
         None when the write may proceed; otherwise what to return instead.
     """
-    decision = await ask(ctx, budget_id, subject, question, confirmation)
+    decision = await ask(ctx, plan_id, subject, question, confirmation)
     if isinstance(decision, types.InputRequiredResult):
         return decision
     return not_applied(decision, question)

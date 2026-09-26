@@ -50,7 +50,7 @@ class Capture:
 
 
 _APPLY = {
-    "budget_id": BUDGET,
+    "plan_id": BUDGET,
     "assignments": [
         {"transaction_id": "tx-048", "category_id": "cat-groceries"},
         {"transaction_id": "tx-049", "category_id": "cat-transport"},
@@ -58,40 +58,38 @@ _APPLY = {
 }
 
 CALLS: list[Call] = [
-    Call("list_budgets", "list_budgets", {}),
-    Call("list_accounts", "list_accounts", {"budget_id": BUDGET}),
-    Call("list_category_groups", "list_category_groups", {"budget_id": BUDGET}),
-    Call("monthly_summary", "get_monthly_summary", {"budget_id": BUDGET, "month": "2026-09-01"}),
-    Call(
-        "category_balances", "get_category_balances", {"budget_id": BUDGET, "month": "2026-09-01"}
-    ),
-    Call("budget_vs_actual", "get_budget_vs_actual", {"budget_id": BUDGET, "month": "2026-09-01"}),
+    Call("list_plans", "list_plans", {}),
+    Call("list_accounts", "list_accounts", {"plan_id": BUDGET}),
+    Call("list_category_groups", "list_category_groups", {"plan_id": BUDGET}),
+    Call("monthly_summary", "get_monthly_summary", {"plan_id": BUDGET, "month": "2026-09-01"}),
+    Call("category_balances", "get_category_balances", {"plan_id": BUDGET, "month": "2026-09-01"}),
+    Call("budget_vs_actual", "get_budget_vs_actual", {"plan_id": BUDGET, "month": "2026-09-01"}),
     # Every category of a full month, for the chart on the home page.
     Call(
         "august_categories",
         "get_budget_vs_actual",
-        {"budget_id": BUDGET, "month": "2026-08-01"},
+        {"plan_id": BUDGET, "month": "2026-08-01"},
         keep=100,
     ),
-    Call("spending_trends", "get_spending_trends", {"budget_id": BUDGET, "months_count": 3}, 3),
-    Call("suggest_categories", "suggest_categories", {"budget_id": BUDGET, "limit": 3}, 3),
+    Call("spending_trends", "get_spending_trends", {"plan_id": BUDGET, "months_count": 3}, 3),
+    Call("suggest_categories", "suggest_categories", {"plan_id": BUDGET, "limit": 3}, 3),
     Call("apply_preview", "apply_categories", _APPLY),
     Call(
         "reconcile_gap",
         "reconcile_account",
-        {"budget_id": BUDGET, "account_id": "acc-checking", "bank_balance": 3440.80},
+        {"plan_id": BUDGET, "account_id": "acc-checking", "bank_balance": 3440.80},
     ),
     Call(
         "forecast",
         "forecast_balance",
-        {"budget_id": BUDGET, "until": "2026-12", "monthly_income": 3200},
+        {"plan_id": BUDGET, "until": "2026-12", "monthly_income": 3200},
         6,
     ),
     Call(
         "budget_preview",
         "set_category_budget",
         {
-            "budget_id": BUDGET,
+            "plan_id": BUDGET,
             "month": "2026-09-01",
             "category_id": "cat-restaurants",
             "amount": 150,
@@ -101,7 +99,7 @@ CALLS: list[Call] = [
         "create_preview",
         "create_transactions",
         {
-            "budget_id": BUDGET,
+            "plan_id": BUDGET,
             "account_id": "acc-checking",
             "transactions": [
                 {
@@ -116,25 +114,25 @@ CALLS: list[Call] = [
     Call(
         "create_category_preview",
         "create_category",
-        {"budget_id": BUDGET, "category_group_id": "grp-everyday", "name": "Pets"},
+        {"plan_id": BUDGET, "category_group_id": "grp-everyday", "name": "Pets"},
     ),
     Call(
         "update_category_preview",
         "update_category",
-        {"budget_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},
+        {"plan_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},
     ),
     Call(
         "approve",
         "approve_transactions",
-        {"budget_id": BUDGET, "tx_ids": ["tx-048", "tx-049"]},
+        {"plan_id": BUDGET, "tx_ids": ["tx-048", "tx-049"]},
     ),
     Call(
         "undo_preview",
         "undo_operation",
-        {"budget_id": BUDGET},
+        {"plan_id": BUDGET},
         after_applying=("apply_categories", _APPLY),
     ),
-    Call("bad_month", "get_monthly_summary", {"budget_id": BUDGET, "month": "2026-13-01"}),
+    Call("bad_month", "get_monthly_summary", {"plan_id": BUDGET, "month": "2026-13-01"}),
 ]
 
 

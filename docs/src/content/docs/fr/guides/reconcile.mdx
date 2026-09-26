@@ -26,7 +26,7 @@ activée pour marquer le compte rapproché (le diagnostic fonctionne en lecture 
    > **Vous :** Ma banque affiche 3 440,80 sur mon compte courant. YNAB est-il d'accord ?
 
 2. **L'agent compare.** Il appelle `reconcile_account` avec
-   `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
+   `{"plan_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
    avenir-mcp additionne les transactions *pointées* du compte (celles que la banque a
    montrées) et compare. Elles diffèrent, donc **rien n'est écrit** :
 

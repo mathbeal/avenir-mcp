@@ -1,6 +1,6 @@
 """Prepare the classification of pending transactions in one pass.
 
-One download of the budget's transactions serves both as history and as the
+One download of the plan's transactions serves both as history and as the
 list of what is pending: no request per transaction.
 """
 
@@ -148,10 +148,10 @@ def internal_uncategorized(categories: list[dict[str, Any]]) -> set[str]:
     """Find YNAB's internal "Uncategorized" category: no choice, and no category.
 
     Args:
-        categories: The budget's categories.
+        categories: The plan's categories.
 
     Returns:
-        Its ids; empty when the budget has none.
+        Its ids; empty when the plan has none.
     """
     return {
         c["id"]
@@ -213,7 +213,7 @@ def _histories(transactions: list[dict[str, Any]]) -> dict[bool, dict[str, dict[
     A lender that once paid you does not make your repayments income.
 
     Args:
-        transactions: The budget's transactions.
+        transactions: The plan's transactions.
 
     Returns:
         Payee histories keyed by direction: True for money out, False for money in.
@@ -240,7 +240,7 @@ def _suggestion(
     Args:
         tx: The pending transaction.
         histories: Payee histories from :func:`_histories`.
-        categories: The budget's categories.
+        categories: The plan's categories.
         threshold: Confidence needed; None for the classifier's default.
 
     Returns:
@@ -269,8 +269,8 @@ def prepare(  # pylint: disable=too-many-arguments
     """Return one page of pending transactions, newest first, with suggestions.
 
     Args:
-        transactions: All the budget's transactions (history and pending).
-        categories: The budget's categories.
+        transactions: All the plan's transactions (history and pending).
+        categories: The plan's categories.
         limit: Maximum number of items in the page.
         cursor: ``next_cursor`` of the previous page, or None for the first page.
         threshold: Confidence needed for a suggestion; defaults to the classifier's.

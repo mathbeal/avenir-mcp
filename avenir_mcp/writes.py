@@ -1,4 +1,4 @@
-"""Plan a change to the budget and confirm it before it happens.
+"""Plan a change to a plan and confirm it before it happens.
 
 Nothing here talks to YNAB. A plan says exactly what would change; a
 confirmation code, issued for one plan, lets a client without elicitation
@@ -77,8 +77,8 @@ def plan_categorization(
     """Work out what assigning these categories would change.
 
     Args:
-        transactions: The budget's transactions.
-        categories: The budget's categories.
+        transactions: The plan's transactions.
+        categories: The plan's categories.
         assignments: The categories to give, one per transaction.
         off_budget: Ids of the tracking accounts.
 
@@ -105,7 +105,7 @@ def plan_categorization(
         tx = by_id.get(tx_id)
         if tx is None:
             raise ValueError(
-                f"Transaction {tx_id} is not in this budget: "
+                f"Transaction {tx_id} is not in this plan: "
                 "use the transaction_id values returned by suggest_categories."
             )
         if category_id in uncategorized:
@@ -114,7 +114,7 @@ def plan_categorization(
             )
         if category_id not in names:
             raise ValueError(
-                f"Category {category_id} is not in this budget: "
+                f"Category {category_id} is not in this plan: "
                 "use a category_id from the categories returned by suggest_categories."
             )
         if tx.get("subtransactions"):
@@ -159,8 +159,8 @@ def plan_undo(
     alone and listed in ``conflicts``, so that undo never overwrites later work.
 
     Args:
-        transactions: The budget's transactions.
-        categories: The budget's categories.
+        transactions: The plan's transactions.
+        categories: The plan's categories.
         moves: The operation's moves, from the journal.
 
     Returns:
@@ -191,11 +191,11 @@ def plan_undo(
     return Plan(changes=changes, conflicts=conflicts)
 
 
-def fingerprint(budget_id: str, subject: object) -> str:
+def fingerprint(plan_id: str, subject: object) -> str:
     """Hash what is being confirmed; the order of a list of changes does not matter.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         subject: The exact change, as JSON data or models.
 
     Returns:
@@ -204,7 +204,7 @@ def fingerprint(budget_id: str, subject: object) -> str:
     subject = _JSON.dump_python(subject, mode="json")
     if isinstance(subject, list):
         subject = sorted(json.dumps(item, sort_keys=True) for item in subject)
-    payload = json.dumps([budget_id, subject], sort_keys=True, separators=(",", ":"))
+    payload = json.dumps([plan_id, subject], sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
@@ -226,13 +226,13 @@ class Confirmations:
         self._clock = clock
         self._issued: dict[str, tuple[str, float]] = {}
 
-    def issue(self, budget_id: str, subject: object) -> str:
+    def issue(self, plan_id: str, subject: object) -> str:
         """Issue a code that confirms this subject, and nothing else.
 
         Expired codes are dropped first, so previews never confirmed do not pile up.
 
         Args:
-            budget_id: YNAB budget UUID or 'last-used'.
+            plan_id: YNAB plan id or 'last-used'.
             subject: The exact change previewed, as JSON data or models.
 
         Returns:
@@ -241,15 +241,15 @@ class Confirmations:
         now = self._clock()
         self._issued = {c: v for c, v in self._issued.items() if now - v[1] <= self._ttl}
         code = secrets.token_urlsafe(8)
-        self._issued[code] = (fingerprint(budget_id, subject), now)
+        self._issued[code] = (fingerprint(plan_id, subject), now)
         return code
 
-    def consume(self, code: str, budget_id: str, subject: object) -> bool:
+    def consume(self, code: str, plan_id: str, subject: object) -> bool:
         """Spend a code.
 
         Args:
             code: The code the agent passed back.
-            budget_id: YNAB budget UUID or 'last-used'.
+            plan_id: YNAB plan id or 'last-used'.
             subject: The exact change the agent wants to make now.
 
         Returns:
@@ -260,4 +260,4 @@ class Confirmations:
             return False
         expected, issued_at = issued
         fresh = self._clock() - issued_at <= self._ttl
-        return fresh and expected == fingerprint(budget_id, subject)
+        return fresh and expected == fingerprint(plan_id, subject)

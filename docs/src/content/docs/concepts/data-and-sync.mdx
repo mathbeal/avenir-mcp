@@ -32,7 +32,7 @@ spending is negative, money in positive.
 | Methods used | `GET` to read; `PATCH`, `POST` and `DELETE` on transactions, categories and month budgets |
 | Errors | any 4xx or 5xx comes back as `Error calling tool '<tool>': YNAB <status>: <detail>`, with YNAB's own explanation |
 
-`budget_id` accepts `last-used`, which YNAB resolves to the budget you used last.
+`plan_id` accepts `last-used`, which YNAB resolves to the budget you used last.
 
 ## The local copy of transactions
 
@@ -51,7 +51,7 @@ refreshes it with YNAB's **delta sync**:
 With a budget's id, the copy is refreshed by delta sync. With `last-used`, which
 names whichever budget you last opened in YNAB and may change between two calls,
 transactions are loaded in full every time — still one request — so two budgets are
-never mixed. With several budgets, pass the id from `list_budgets`.
+never mixed. With several budgets, pass the id from `list_plans`.
 
 The copy lives as long as the server process. Filtered reads — by date or by category —
 bypass it.
@@ -71,7 +71,7 @@ costs, on a cold cache, is measured on the demo budget and stated on its
 | Cost | Tools |
 |---|---|
 | 0 | any call refused by validation (a malformed month, an empty name…) |
-| 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a `set_category_budget` preview |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a `set_category_budget` preview |
 | 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
 | 3 | `suggest_categories` (a whole page), `apply_categories` |
 | 1 + N | `get_spending_trends` over N months |

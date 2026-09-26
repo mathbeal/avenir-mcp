@@ -64,7 +64,7 @@ def test_tools_refuse_impossible_amounts_without_calling_ynab(
     """The argument schema stops the call: YNAB is never asked."""
     monkeypatch.setenv("AVENIR_MCP_WRITE", "1")
     with patch("avenir_mcp.client._get", AsyncMock()) as get:
-        result = call(tool, {"budget_id": "b1", **args})
+        result = call(tool, {"plan_id": "b1", **args})
     assert result.is_error
     assert "less than or equal" in str(result.content) or "greater than or equal" in str(
         result.content

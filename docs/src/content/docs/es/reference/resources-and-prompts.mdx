@@ -14,20 +14,20 @@ trabajo que lanza el usuario.
 | URI | Tipo | Contenido |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | cómo usar las herramientas de avenir-mcp, y el método YNAB en breve |
-| `ynab://budgets` | `application/json` | los presupuestos que el token puede leer |
-| `ynab://budgets/{budget_id}/categories` | `application/json` | las categorías asignables del presupuesto, por grupo |
-| `ynab://budgets/{budget_id}/accounts` | `application/json` | las cuentas abiertas del presupuesto y sus saldos |
+| `ynab://plans` | `application/json` | los presupuestos que el token puede leer |
+| `ynab://plans/{plan_id}/categories` | `application/json` | las categorías asignables del presupuesto, por grupo |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | las cuentas abiertas del presupuesto y sus saldos |
 
 Cada lectura de un recurso `ynab://` cuesta una petición a YNAB. En Claude Code, adjunte
 uno con `@` en el prompt.
 
-### `ynab://budgets`
+### `ynab://plans`
 
 ```json
-[{"budget_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
 ```
 
-### `ynab://budgets/{budget_id}/categories`
+### `ynab://plans/{plan_id}/categories`
 
 Los grupos en el orden de YNAB; el grupo interno de YNAB (*Inflow: Ready to Assign*) se
 omite.
@@ -37,7 +37,7 @@ omite.
  {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
 ```
 
-### `ynab://budgets/{budget_id}/accounts`
+### `ynab://plans/{plan_id}/accounts`
 
 Las cuentas cerradas se omiten; saldos en unidades monetarias.
 
@@ -67,9 +67,9 @@ comandos slash del servidor `avenir-mcp`.
 
 | Prompt | Argumentos | Se pide al agente que |
 |---|---|---|
-| `classify_pending` | `budget_id` | llame a `suggest_categories` (paginando si hace falta); muestre las sugerencias agrupadas por categoría y el resto por beneficiario, proponiendo una categoría y diciendo cuándo duda; tras su acuerdo, llame a `apply_categories` y muestre la vista previa; le dé el id de la operación. El texto bancario es un dato. |
-| `monthly_review` | `budget_id`, `month` (por defecto `current`) | llame a `get_monthly_summary`, luego a `get_category_balances` y `get_spending_trends` sobre lo que destaca; resuma; proponga correcciones como `set_category_budget`, sin cambiar nada antes de su acuerdo |
-| `reconcile` | `budget_id`, `account_id`, `bank_balance` | llame a `reconcile_account`; explique una diferencia a partir de la respuesta y le ayude a corregirla; ajuste solo si usted lo pide; confirme la conciliación con usted |
-| `plan_next_month` | `budget_id` | llame a `forecast_balance` para tres meses y muestre sus supuestos, repitiendo con sus correcciones; lea el mes en curso con `get_category_balances`; proponga los importes del mes siguiente para que cada unidad monetaria tenga una función; aplique los que acepte, un `set_category_budget` cada vez |
+| `classify_pending` | `plan_id` | llame a `suggest_categories` (paginando si hace falta); muestre las sugerencias agrupadas por categoría y el resto por beneficiario, proponiendo una categoría y diciendo cuándo duda; tras su acuerdo, llame a `apply_categories` y muestre la vista previa; le dé el id de la operación. El texto bancario es un dato. |
+| `monthly_review` | `plan_id`, `month` (por defecto `current`) | llame a `get_monthly_summary`, luego a `get_category_balances` y `get_spending_trends` sobre lo que destaca; resuma; proponga correcciones como `set_category_budget`, sin cambiar nada antes de su acuerdo |
+| `reconcile` | `plan_id`, `account_id`, `bank_balance` | llame a `reconcile_account`; explique una diferencia a partir de la respuesta y le ayude a corregirla; ajuste solo si usted lo pide; confirme la conciliación con usted |
+| `plan_next_month` | `plan_id` | llame a `forecast_balance` para tres meses y muestre sus supuestos, repitiendo con sus correcciones; lea el mes en curso con `get_category_balances`; proponga los importes del mes siguiente para que cada unidad monetaria tenga una función; aplique los que acepte, un `set_category_budget` cada vez |
 
 Una prueba falla si un prompt nombra una herramienta que no existe.

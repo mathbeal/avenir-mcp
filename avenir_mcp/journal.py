@@ -14,7 +14,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from pydantic import ConfigDict, ValidationError  # pylint: disable=import-error
+from pydantic import (  # pylint: disable=import-error
+    AliasChoices,
+    ConfigDict,
+    Field,
+    ValidationError,
+)
 
 from avenir_mcp.model import Model
 
@@ -38,8 +43,9 @@ class Entry(Model):
 
     operation_id: str
     """Random id of the operation."""
-    budget_id: str
-    """Budget the operation changed."""
+    # Lines written before YNAB named budgets "plans" say budget_id.
+    plan_id: str = Field(validation_alias=AliasChoices("plan_id", "budget_id"))
+    """Plan the operation changed."""
     kind: str
     """categorize, reconcile, budget or create."""
     applied_at: str
@@ -114,7 +120,7 @@ class Journal:
 
     def record(
         self,
-        budget_id: str,
+        plan_id: str,
         kind: str,
         moves: list[Move],
         details: dict[str, Any] | None = None,
@@ -122,7 +128,7 @@ class Journal:
         """Append an applied operation.
 
         Args:
-            budget_id: The budget it changed.
+            plan_id: The plan it changed.
             kind: categorize, reconcile, budget or create.
             moves: Category changes, for a recategorisation.
             details: What undoing another kind needs, as identifiers only.
@@ -133,7 +139,7 @@ class Journal:
         operation_id = secrets.token_hex(6)
         entry = Entry(
             operation_id=operation_id,
-            budget_id=budget_id,
+            plan_id=plan_id,
             kind=kind,
             applied_at=datetime.now(UTC).isoformat(timespec="seconds"),
             moves=moves,
@@ -150,11 +156,11 @@ class Journal:
         """
         self._append({"undone": operation_id})
 
-    def find(self, budget_id: str, operation_id: str | None = None) -> Entry | None:
-        """Find an operation of this budget still in effect.
+    def find(self, plan_id: str, operation_id: str | None = None) -> Entry | None:
+        """Find an operation of this plan still in effect.
 
         Args:
-            budget_id: The budget the operation changed.
+            plan_id: The plan the operation changed.
             operation_id: The operation wanted; None for the most recent one.
 
         Returns:
@@ -165,7 +171,7 @@ class Journal:
         """
         entries, undone = self._lines()
         for entry in reversed(entries):
-            if entry.operation_id in undone or entry.budget_id != budget_id:
+            if entry.operation_id in undone or entry.plan_id != plan_id:
                 continue
             if operation_id is None or entry.operation_id == operation_id:
                 return entry

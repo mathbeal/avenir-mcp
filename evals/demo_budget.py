@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-BUDGET_ID = "demo-budget"
+PLAN_ID = "demo-budget"
 CHECKING = "acc-checking"
 SAVINGS = "acc-savings"
 

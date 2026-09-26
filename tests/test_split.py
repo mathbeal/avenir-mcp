@@ -92,7 +92,7 @@ def test_a_line_may_go_the_other_way() -> None:
     [
         (None, _lines((-86.40, "c-food")), "at least two lines"),
         (None, _lines((-86.40, "c-food"), (0, "c-home")), "zero"),
-        (None, _lines((-81.15, "c-food"), (-5.25, "c-gone")), "not in this budget"),
+        (None, _lines((-81.15, "c-food"), (-5.25, "c-gone")), "not in this plan"),
         (None, _lines((-81.15, "c-food"), (-5.25, "c-none")), "Uncategorized"),
         (_tx(subtransactions=[{"id": "s1"}]), _GOOD, "already split"),
         (_tx(transfer_account_id="acc2"), _GOOD, "transfer"),

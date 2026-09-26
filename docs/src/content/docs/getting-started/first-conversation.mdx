@@ -26,7 +26,7 @@ tool (*“use get_monthly_summary”*) works too, and helps when an answer surpr
 
 > **You:** What accounts do I have, and how much is on them?
 
-The agent calls `list_accounts` with `{"budget_id": "last-used"}`:
+The agent calls `list_accounts` with `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
@@ -39,7 +39,7 @@ shown; `uncleared_balance` is what it has not.
 
 > **You:** How is September going?
 
-The agent calls `get_monthly_summary` with `{"budget_id": "last-used", "month":
+The agent calls `get_monthly_summary` with `{"plan_id": "last-used", "month":
 "2026-09-01"}`:
 
 <Code code={summary} lang="json" title="get_monthly_summary" />
@@ -61,7 +61,7 @@ agent passes `include_empty`.
 
 > **You:** What still needs a category?
 
-The agent calls `suggest_categories` with `{"budget_id": "last-used"}`:
+The agent calls `suggest_categories` with `{"plan_id": "last-used"}`:
 
 <Code code={pending} lang="json" title="suggest_categories (first page, 3 items)" />
 

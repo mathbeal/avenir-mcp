@@ -100,7 +100,7 @@ def test_write_tools_declare_what_they_do() -> None:
 
 def test_without_elicitation_first_call_only_previews(budget: _Budget) -> None:
     """A client that cannot ask the user gets a preview and a code; nothing changes."""
-    result = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN})
+    result = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN})
     data = result.structured_content
     assert data["status"] == "confirmation_required"
     assert data["confirmation"]
@@ -112,7 +112,7 @@ def test_without_elicitation_first_call_only_previews(budget: _Budget) -> None:
 def test_a_code_comes_with_a_warning_that_only_the_user_can_agree(budget: _Budget) -> None:
     """A recategorisation preview tells the agent only the user, in the conversation, agrees."""
     message = call(
-        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}
     ).structured_content["message"]
     assert confirm.ONLY_THE_USER in message
     assert not budget.patches
@@ -120,7 +120,7 @@ def test_a_code_comes_with_a_warning_that_only_the_user_can_agree(budget: _Budge
 
 def test_confirmation_code_applies_the_previewed_change(budget: _Budget) -> None:
     """Calling again with the code applies exactly the preview, once, and journals it."""
-    args = {"budget_id": "b1", "assignments": _ASSIGN}
+    args = {"plan_id": "b1", "assignments": _ASSIGN}
     code = call("apply_categories", args).structured_content["confirmation"]
     data = call("apply_categories", {**args, "confirmation": code}).structured_content
     assert data["status"] == "applied"
@@ -131,7 +131,7 @@ def test_confirmation_code_applies_the_previewed_change(budget: _Budget) -> None
 def test_wrong_confirmation_code_is_a_tool_error(budget: _Budget) -> None:
     """A code that does not match is refused with a way forward."""
     result = call(
-        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN, "confirmation": "nope"}
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN, "confirmation": "nope"}
     )
     assert result.is_error
     assert "without confirmation" in result.content[0].text
@@ -141,7 +141,7 @@ def test_wrong_confirmation_code_is_a_tool_error(budget: _Budget) -> None:
 def test_elicitation_accept_applies_in_one_call(budget: _Budget) -> None:
     """A client that can ask the user confirms in the same call."""
     data = call(
-        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, accept
     ).structured_content
     assert data["status"] == "applied"
     assert budget.patches == [[("t1", "c-food")]]
@@ -150,7 +150,7 @@ def test_elicitation_accept_applies_in_one_call(budget: _Budget) -> None:
 def test_elicitation_decline_changes_nothing(budget: _Budget) -> None:
     """If the user says no, nothing is written or journaled."""
     data = call(
-        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, decline
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, decline
     ).structured_content
     assert data["status"] == "declined"
     assert not budget.patches
@@ -159,7 +159,7 @@ def test_elicitation_decline_changes_nothing(budget: _Budget) -> None:
 def test_nothing_to_change_asks_nothing(budget: _Budget) -> None:
     """Assignments that change nothing are reported without confirmation or write."""
     budget.transactions = _txs("c-food")
-    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}).structured_content
+    data = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}).structured_content
     assert data["status"] == "nothing_to_do"
     assert data["unchanged_count"] == 1
     assert not budget.patches
@@ -169,7 +169,7 @@ def test_invalid_assignment_is_a_tool_error(budget: _Budget) -> None:
     """An unknown transaction is refused before anything is asked or written."""
     result = call(
         "apply_categories",
-        {"budget_id": "b1", "assignments": [{"transaction_id": "t404", "category_id": "c-food"}]},
+        {"plan_id": "b1", "assignments": [{"transaction_id": "t404", "category_id": "c-food"}]},
     )
     assert result.is_error
     assert "t404" in result.content[0].text
@@ -183,20 +183,20 @@ def test_invalid_assignment_is_a_tool_error(budget: _Budget) -> None:
 
 def test_undo_restores_previous_categories(budget: _Budget) -> None:
     """Undo puts every moved transaction back where it was, then cannot run twice."""
-    call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept)
-    data = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
+    call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, accept)
+    data = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert data["status"] == "applied"
     assert budget.patches[-1] == [("t1", None)]
-    again = call("undo_operation", {"budget_id": "b1"}, accept)
+    again = call("undo_operation", {"plan_id": "b1"}, accept)
     assert again.is_error
     assert "Nothing to undo" in again.content[0].text
 
 
 def test_undo_leaves_alone_what_was_changed_since(budget: _Budget) -> None:
     """A transaction recategorised after the operation is reported, not overwritten."""
-    call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept)
+    call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, accept)
     budget.transactions[0]["category_id"] = "c-fun"
-    data = call("undo_operation", {"budget_id": "b1"}, accept).structured_content
+    data = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert data["status"] == "nothing_to_do"
     assert data["conflicts"] == ["t1"]
     assert len(budget.patches) == 1
@@ -205,7 +205,7 @@ def test_undo_leaves_alone_what_was_changed_since(budget: _Budget) -> None:
 def test_undo_with_a_damaged_journal_says_which_line(budget: _Budget, tmp_path: Path) -> None:
     """A damaged journal is a tool error naming the line, not a crash; nothing is written."""
     (tmp_path / "journal.jsonl").write_text("not json\n", encoding="utf-8")
-    result = call("undo_operation", {"budget_id": "b1"}, accept)
+    result = call("undo_operation", {"plan_id": "b1"}, accept)
     assert result.is_error
     assert "line 1, is not a journal entry" in result.content[0].text
     assert not budget.patches
@@ -214,13 +214,13 @@ def test_undo_with_a_damaged_journal_says_which_line(budget: _Budget, tmp_path: 
 def test_undo_without_elicitation_needs_the_code(budget: _Budget) -> None:
     """Undo is a write too: previewed, then confirmed with its own code."""
     op_id = call(
-        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, accept
     ).structured_content["operation_id"]
-    preview = call("undo_operation", {"budget_id": "b1", "operation_id": op_id})
+    preview = call("undo_operation", {"plan_id": "b1", "operation_id": op_id})
     code = preview.structured_content["confirmation"]
     assert len(budget.patches) == 1
     data = call(
-        "undo_operation", {"budget_id": "b1", "operation_id": op_id, "confirmation": code}
+        "undo_operation", {"plan_id": "b1", "operation_id": op_id, "confirmation": code}
     ).structured_content
     assert data["status"] == "applied"
     assert budget.patches[-1] == [("t1", None)]
@@ -236,7 +236,7 @@ def test_long_preview_is_summarised(budget: _Budget) -> None:
         return ElicitResult(action="accept", content={"value": True})
 
     assignments = [{"transaction_id": f"t{i}", "category_id": "c-food"} for i in range(21)]
-    call("apply_categories", {"budget_id": "b1", "assignments": assignments}, accept_and_keep)
+    call("apply_categories", {"plan_id": "b1", "assignments": assignments}, accept_and_keep)
     assert asked[0].startswith("Recategorise 21 transaction(s)?")
     assert asked[0].count("Corner Shop") == 20
     assert asked[0].endswith("- … and 1 more")
@@ -251,7 +251,7 @@ def test_bank_text_cannot_forge_lines_in_the_question(budget: _Budget) -> None:
         asked.append(message)
         return ElicitResult(action="accept", content={"value": True})
 
-    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept_and_keep)
+    data = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, accept_and_keep)
     assert len(asked[0].splitlines()) == 2
     assert "\n" not in data.structured_content["changes"][0]["payee"]
 
@@ -262,7 +262,7 @@ def test_dismissed_question_falls_back_to_a_confirmation_code(budget: _Budget) -
     async def dismiss(*_: Any) -> ElicitResult[Any]:
         return ElicitResult(action="cancel")
 
-    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, dismiss)
+    data = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, dismiss)
     assert data.structured_content["status"] == "confirmation_required"
     assert data.structured_content["confirmation"]
     assert not budget.patches
@@ -274,7 +274,7 @@ def test_accepted_form_left_unticked_is_not_a_yes(budget: _Budget) -> None:
     async def unticked(*_: Any) -> ElicitResult[Any]:
         return ElicitResult(action="accept", content={"value": False})
 
-    data = call("apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, unticked)
+    data = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, unticked)
     assert data.structured_content["status"] == "declined"
     assert not budget.patches
 
@@ -287,7 +287,7 @@ def test_answer_to_an_outdated_preview_is_refused(budget: _Budget) -> None:
         return ElicitResult(action="accept", content={"value": True})
 
     result = call(
-        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}, accept_after_a_change
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}, accept_after_a_change
     )
     assert result.is_error
     assert "changed between the preview and the answer" in result.content[0].text

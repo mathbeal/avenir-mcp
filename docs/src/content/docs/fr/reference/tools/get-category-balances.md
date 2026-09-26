@@ -30,7 +30,7 @@ get_budget_vs_actual for the share of each budget consumed.
 
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
-| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 | `month` | string | non | `"current"` | 'YYYY-MM-01' or 'current'. |
 | `include_empty` | boolean | non | `false` | Also list categories with no amount at all. |
 
@@ -53,7 +53,7 @@ Arguments :
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "month": "2026-09-01"
 }
 ```

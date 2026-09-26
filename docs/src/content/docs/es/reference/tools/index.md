@@ -17,9 +17,9 @@ avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles
 | [`get_category_balances`](/avenir-mcp/es/reference/tools/get-category-balances/) | Budgeted, spent (activity) and available (balance) per category for a month. |
 | [`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/) | A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories. |
 | [`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/) | Return monthly spending trends per category over the last N months. |
-| [`list_accounts`](/avenir-mcp/es/reference/tools/list-accounts/) | List the budget's accounts with their current balances (in currency units). |
-| [`list_budgets`](/avenir-mcp/es/reference/tools/list-budgets/) | List all YNAB budgets accessible with the current API key. |
+| [`list_accounts`](/avenir-mcp/es/reference/tools/list-accounts/) | List the plan's accounts with their current balances (in currency units). |
 | [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/) | List the category groups a new category can be created in. |
+| [`list_plans`](/avenir-mcp/es/reference/tools/list-plans/) | List all YNAB plans accessible with the current API key. |
 | [`suggest_categories`](/avenir-mcp/es/reference/tools/suggest-categories/) | List the transactions waiting for a category, with a suggestion when history allows. |
 
 ## Escritura
@@ -41,15 +41,15 @@ avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles
 | URI | Descripción |
 |---|---|
 | `avenir-mcp://guide` | How to use this server's tools, and the YNAB method in brief. |
-| `ynab://budgets` | The budgets the token can read, with the ids tools need. |
-| `ynab://budgets/{budget_id}/categories` | A budget's assignable categories by group, with their ids. |
-| `ynab://budgets/{budget_id}/accounts` | A budget's open accounts, balances in currency units. |
+| `ynab://plans` | The plans (budgets) the token can read, with the ids tools need. |
+| `ynab://plans/{plan_id}/categories` | A plan's assignable categories by group, with their ids. |
+| `ynab://plans/{plan_id}/accounts` | A plan's open accounts, balances in currency units. |
 
 ## Prompts
 
 | Prompt | Argumentos | Descripción |
 |---|---|---|
-| `classify_pending` | `budget_id` | Classify the transactions waiting for a category. |
-| `monthly_review` | `budget_id`, `month` (opcional) | Review a budget month: where the money went and what needs attention. |
-| `reconcile` | `budget_id`, `account_id`, `bank_balance` | Reconcile an account with the balance the bank shows. |
-| `plan_next_month` | `budget_id` | Prepare next month's budget from the forecast and this month's categories. |
+| `classify_pending` | `plan_id` | Classify the transactions waiting for a category. |
+| `monthly_review` | `plan_id`, `month` (opcional) | Review a budget month: where the money went and what needs attention. |
+| `reconcile` | `plan_id`, `account_id`, `bank_balance` | Reconcile an account with the balance the bank shows. |
+| `plan_next_month` | `plan_id` | Prepare next month's budget from the forecast and this month's categories. |

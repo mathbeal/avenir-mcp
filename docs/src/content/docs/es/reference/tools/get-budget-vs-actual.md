@@ -27,7 +27,7 @@ Amounts in currency units; utilization_pct above 100 means over budget.
 
 | Nombre | Tipo | Obligatorio | Por defecto | Descripción |
 |---|---|---|---|---|
-| `budget_id` | string | sí | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | sí | — | YNAB plan id or 'last-used'. |
 | `month` | string | no | `"current"` | ISO month 'YYYY-MM-01' or 'current'. |
 
 ## Devuelve
@@ -50,7 +50,7 @@ Argumentos:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "month": "2026-09-01"
 }
 ```

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
     },
 )
 async def undo_operation(
-    budget_id: str,
+    plan_id: str,
     ctx: Context,
     operation_id: str | None = None,
     confirmation: str | None = None,
@@ -40,7 +40,7 @@ async def undo_operation(
     Confirmation works as for apply_categories.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         ctx: The MCP context, used to ask the user.
         operation_id: Operation to undo; omit for the most recent one.
         confirmation: Code from a previous "confirmation_required" result.
@@ -50,32 +50,30 @@ async def undo_operation(
         the user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the journal is damaged, no operation of the budget is still in
+        ToolError: If the journal is damaged, no operation of the plan is still in
             effect (with that id), or the confirmation code is refused.
     """
     logger.info("Tool called: undo_operation")
     book = journal.Journal(journal.default_path())
     try:
-        entry = book.find(budget_id, operation_id)
+        entry = book.find(plan_id, operation_id)
     except ValueError as error:
         raise ToolError(str(error)) from error
     if entry is None:
         raise ToolError(
-            "Nothing to undo: no operation of this budget is still in effect"
+            "Nothing to undo: no operation of this plan is still in effect"
             + (f" with id {operation_id}." if operation_id else ".")
         )
     if entry.kind == "reconcile":
-        return await _undo_reconcile(ctx, budget_id, book, entry, confirmation)
+        return await _undo_reconcile(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "budget":
-        return await _undo_budget(ctx, budget_id, book, entry, confirmation)
+        return await _undo_budget(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "create":
-        return await _undo_create(ctx, budget_id, book, entry, confirmation)
-    transactions = await client.get_transactions(budget_id)
-    categories = await client.get_categories(budget_id)
+        return await _undo_create(ctx, plan_id, book, entry, confirmation)
+    transactions = await client.get_transactions(plan_id)
+    categories = await client.get_categories(plan_id)
     plan = writes.plan_undo(transactions, categories, entry.moves)
-    result, new_operation = await write_plan(
-        ctx, budget_id, plan, "Undo: recategorise", confirmation
-    )
+    result, new_operation = await write_plan(ctx, plan_id, plan, "Undo: recategorise", confirmation)
     if new_operation is not None:
         book.mark_undone(entry.operation_id)
         book.mark_undone(new_operation)
@@ -83,13 +81,13 @@ async def undo_operation(
 
 
 async def _confirm_undo(
-    ctx: Context, budget_id: str, entry: journal.Entry, question: str, confirmation: str | None
+    ctx: Context, plan_id: str, entry: journal.Entry, question: str, confirmation: str | None
 ) -> WriteResult | InputRequiredResult | None:
     """Ask the user to confirm an undo.
 
     Args:
         ctx: The MCP context, used to ask the user.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         entry: The operation to undo.
         question: What the user is asked.
         confirmation: A code from a previous preview, or None.
@@ -97,7 +95,7 @@ async def _confirm_undo(
     Returns:
         None when the user agreed; otherwise what to return instead of undoing.
     """
-    decision = await ask(ctx, budget_id, {"undo": entry.operation_id}, question, confirmation)
+    decision = await ask(ctx, plan_id, {"undo": entry.operation_id}, question, confirmation)
     if isinstance(decision, InputRequiredResult):
         return decision
     outcome = not_applied(decision, question)
@@ -110,7 +108,7 @@ async def _confirm_undo(
 
 async def _undo_reconcile(
     ctx: Context,
-    budget_id: str,
+    plan_id: str,
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
@@ -119,7 +117,7 @@ async def _undo_reconcile(
 
     Args:
         ctx: The MCP context, used to ask the user.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         book: The journal, to mark the operation undone.
         entry: The operation to undo.
         confirmation: A code from a previous preview, or None.
@@ -128,7 +126,7 @@ async def _undo_reconcile(
         What was done, or what to return instead when the user did not agree.
     """
     details = entry.details
-    statuses = {tx["id"]: tx for tx in await client.get_transactions(budget_id)}
+    statuses = {tx["id"]: tx for tx in await client.get_transactions(plan_id)}
     reverted = [
         tx_id
         for tx_id in details["reconciled_ids"]
@@ -138,19 +136,19 @@ async def _undo_reconcile(
     question = f"Undo reconciliation: mark {len(reverted)} transaction(s) back to cleared" + (
         " and delete the balance adjustment?" if adjustment else "?"
     )
-    refused = await _confirm_undo(ctx, budget_id, entry, question, confirmation)
+    refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
     if refused is not None:
         return refused
-    await client.set_transactions_cleared(budget_id, reverted, "cleared")
+    await client.set_transactions_cleared(plan_id, reverted, "cleared")
     if adjustment:
-        await client.delete_transaction(budget_id, adjustment)
+        await client.delete_transaction(plan_id, adjustment)
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Reconciliation undone.", writes.Plan())
 
 
 async def _undo_budget(
     ctx: Context,
-    budget_id: str,
+    plan_id: str,
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
@@ -159,7 +157,7 @@ async def _undo_budget(
 
     Args:
         ctx: The MCP context, used to ask the user.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         book: The journal, to mark the operation undone.
         entry: The operation to undo.
         confirmation: A code from a previous preview, or None.
@@ -168,26 +166,24 @@ async def _undo_budget(
         What was done, or what to return instead when the user did not agree.
     """
     details = entry.details
-    categories = await client.get_month_categories(budget_id, details["month"])
+    categories = await client.get_month_categories(plan_id, details["month"])
     current = next((c for c in categories if c["id"] == details["category_id"]), None)
     if current is None or current["budgeted"] != details["to"]:
         conflict = writes.Plan(conflicts=[details["category_id"]])
         return result_of("nothing_to_do", "The amount changed since: left alone.", conflict)
     previous = client.milliunit_to_amount(details["from"])
     question = f"Undo: set {current['name']} for {details['month']} back to {previous:.2f}?"
-    refused = await _confirm_undo(ctx, budget_id, entry, question, confirmation)
+    refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
     if refused is not None:
         return refused
-    await client.set_category_budgeted(
-        budget_id, details["month"], details["category_id"], previous
-    )
+    await client.set_category_budgeted(plan_id, details["month"], details["category_id"], previous)
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Budgeted amount restored.", writes.Plan())
 
 
 async def _undo_create(
     ctx: Context,
-    budget_id: str,
+    plan_id: str,
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
@@ -196,7 +192,7 @@ async def _undo_create(
 
     Args:
         ctx: The MCP context, used to ask the user.
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         book: The journal, to mark the operation undone.
         entry: The operation to undo.
         confirmation: A code from a previous preview, or None.
@@ -206,7 +202,7 @@ async def _undo_create(
         when the user did not agree.
     """
     created = entry.details["transaction_ids"]
-    live = {tx["id"] for tx in await client.get_transactions(budget_id) if not tx.get("deleted")}
+    live = {tx["id"] for tx in await client.get_transactions(plan_id) if not tx.get("deleted")}
     present = [tx_id for tx_id in created if tx_id in live]
     gone = [tx_id for tx_id in created if tx_id not in live]
     if not present:
@@ -214,10 +210,10 @@ async def _undo_create(
             "nothing_to_do", "Already deleted: nothing to undo.", writes.Plan(conflicts=gone)
         )
     question = f"Undo: delete the {len(present)} transaction(s) this operation created?"
-    refused = await _confirm_undo(ctx, budget_id, entry, question, confirmation)
+    refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
     if refused is not None:
         return refused
     for tx_id in present:
-        await client.delete_transaction(budget_id, tx_id)
+        await client.delete_transaction(plan_id, tx_id)
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Created transactions deleted.", writes.Plan(conflicts=gone))

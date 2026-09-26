@@ -79,7 +79,7 @@ def test_plan_skips_assignments_that_change_nothing() -> None:
 
 
 def test_plan_rejects_an_unknown_transaction() -> None:
-    """An id that is not in the budget is refused, naming it."""
+    """An id that is not in the plan is refused, naming it."""
     with pytest.raises(ValueError, match="t404.*suggest_categories"):
         writes.plan_categorization(
             [], _CATEGORIES, [writes.Assignment(transaction_id="t404", category_id="c-food")]
@@ -87,7 +87,7 @@ def test_plan_rejects_an_unknown_transaction() -> None:
 
 
 def test_plan_rejects_an_unknown_category() -> None:
-    """A category id that is not in the budget is refused, naming it."""
+    """A category id that is not in the plan is refused, naming it."""
     with pytest.raises(ValueError, match="c-404.*categories"):
         writes.plan_categorization(
             [_tx("t1")], _CATEGORIES, [writes.Assignment(transaction_id="t1", category_id="c-404")]

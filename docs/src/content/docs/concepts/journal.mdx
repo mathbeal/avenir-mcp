@@ -24,7 +24,7 @@ it later — even after the server restarted.
 JSON Lines, append-only. An applied operation is one line:
 
 ```json
-{"operation_id":"5f2c9a1e7b30","budget_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+{"operation_id":"5f2c9a1e7b30","plan_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
 ```
 
 Undoing it appends a marker; nothing is ever rewritten:
@@ -36,7 +36,7 @@ Undoing it appends a marker; nothing is ever rewritten:
 | Field | Meaning |
 |---|---|
 | `operation_id` | 12 random hexadecimal characters |
-| `budget_id` | the budget changed |
+| `plan_id` | the budget changed |
 | `kind` | `categorize`, `budget`, `reconcile` or `create` |
 | `applied_at` | ISO 8601, UTC, to the second |
 | `moves` | for `categorize`: each transaction's category before and after |

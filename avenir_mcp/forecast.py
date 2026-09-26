@@ -111,7 +111,7 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
     """Find the payees seen in 3 of the last 4 full months, each month within 20 % of the median.
 
     Args:
-        transactions: The budget's transactions, amounts in milliunits.
+        transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made; its month is incomplete and not looked at.
 
     Returns:
@@ -150,7 +150,7 @@ def _other_average(
     """Average one direction of money over the last 3 full months, recurring amounts excluded.
 
     Args:
-        transactions: The budget's transactions, amounts in milliunits.
+        transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
         outflow: True for money out, False for money in.
@@ -177,7 +177,7 @@ def variable_average(
     """Average the monthly outflow over the last 3 full months, recurring charges excluded.
 
     Args:
-        transactions: The budget's transactions, amounts in milliunits.
+        transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
 
@@ -193,7 +193,7 @@ def income_average(
     """Average the monthly inflow over the last 3 full months, recurring income excluded.
 
     Args:
-        transactions: The budget's transactions, amounts in milliunits.
+        transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
 
@@ -209,7 +209,7 @@ def month_to_date(
     """Sum what was spent and received since the 1st of this month, recurring amounts excluded.
 
     Args:
-        transactions: The budget's transactions, amounts in milliunits.
+        transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
 

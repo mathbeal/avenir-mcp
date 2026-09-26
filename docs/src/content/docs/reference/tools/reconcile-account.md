@@ -35,7 +35,7 @@ user confirms (as for apply_categories). undo_operation reverts it.
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `budget_id` | string | yes | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | yes | — | YNAB plan id or 'last-used'. |
 | `account_id` | string | yes | — | Account to reconcile (from list_accounts). |
 | `bank_balance` | number | yes | — | In currency units, negative for money out; at most a billion either way. |
 | `adjust` | boolean | no | `false` | Record the remaining difference as an adjustment. |
@@ -69,7 +69,7 @@ Arguments:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "account_id": "acc-checking",
   "bank_balance": 3440.8
 }
@@ -107,11 +107,11 @@ Answer on the demo budget:
 
 ## Errors
 
-- `Account {account_id} is not in this budget: use an id from list_accounts.`
+- `Account {account_id} is not in this plan: use an id from list_accounts.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 YNAB's own errors come back as `Error calling tool '<tool>': YNAB <status>: <detail>`.
 

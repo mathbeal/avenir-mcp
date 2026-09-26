@@ -27,7 +27,7 @@ respuesta le sorprende.
 
 > **Usted:** ¿Qué cuentas tengo y cuánto hay en ellas?
 
-El agente llama a `list_accounts` con `{"budget_id": "last-used"}`:
+El agente llama a `list_accounts` con `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
@@ -40,7 +40,7 @@ ha mostrado; `uncleared_balance`, lo que todavía no.
 
 > **Usted:** ¿Cómo va septiembre?
 
-El agente llama a `get_monthly_summary` con `{"budget_id": "last-used", "month":
+El agente llama a `get_monthly_summary` con `{"plan_id": "last-used", "month":
 "2026-09-01"}`:
 
 <Code code={summary} lang="json" title="get_monthly_summary" />
@@ -62,7 +62,7 @@ pase `include_empty`.
 
 > **Usted:** ¿Qué queda sin categoría?
 
-El agente llama a `suggest_categories` con `{"budget_id": "last-used"}`:
+El agente llama a `suggest_categories` con `{"plan_id": "last-used"}`:
 
 <Code code={pending} lang="json" title="suggest_categories (primera página, 3 elementos)" />
 

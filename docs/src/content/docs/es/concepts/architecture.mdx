@@ -48,12 +48,12 @@ lógica en unidades monetarias: ninguna herramienta devuelve miliunidades.
 
 <Steps>
 
-1. El cliente llama a `get_monthly_summary` con `{"budget_id": "last-used", "month":
+1. El cliente llama a `get_monthly_summary` con `{"plan_id": "last-used", "month":
    "2026-09-01"}`.
 2. FastMCP valida los argumentos contra el esquema de entrada de la herramienta.
 3. La herramienta comprueba `month` (`app.check_month`) antes de cualquier petición: un
    mes mal formado se rechaza con un mensaje, sin coste.
-4. `client.get_month` envía un `GET /budgets/last-used/months/2026-09-01` a YNAB.
+4. `client.get_month` envía un `GET /plans/last-used/months/2026-09-01` a YNAB.
 5. `analytics.month_overview` conserva los totales y las categorías excedidas, en
    unidades monetarias.
 6. FastMCP valida la respuesta contra el esquema de salida y la devuelve como
@@ -72,7 +72,7 @@ lógica en unidades monetarias: ninguna herramienta devuelve miliunidades.
 3. `confirm.write_plan` pregunta al usuario por el canal que admite el cliente — vea
    [Confirmación](/avenir-mcp/es/concepts/confirmation/). Mientras la respuesta no sea sí,
    devuelve la vista previa.
-4. Con un sí, un único `PATCH /budgets/{id}/transactions` agrupado aplica cada cambio.
+4. Con un sí, un único `PATCH /plans/{id}/transactions` agrupado aplica cada cambio.
 5. `journal.Journal.record` añade la operación al diario; su id vuelve al agente para
    [deshacer](/avenir-mcp/es/concepts/journal/).
 

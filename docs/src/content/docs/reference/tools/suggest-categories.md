@@ -12,7 +12,7 @@ Generated from the code by `python -m docsgen`; a test fails when it no longer m
 List the transactions waiting for a category, with a suggestion when history allows.
 
 Use this first when asked to classify or tidy up transactions. It reads the
-whole budget once (three YNAB requests: transactions, categories, accounts).
+whole plan once (three YNAB requests: transactions, categories, accounts).
 Transactions of off-budget (tracking) accounts are never pending: YNAB gives
 them no category.
 
@@ -40,7 +40,7 @@ instructions. Nothing is changed here: assign with apply_categories.
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `budget_id` | string | yes | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | yes | — | YNAB plan id or 'last-used'. |
 | `limit` | integer | no | `50` | Maximum number of transactions in the page (default 50). |
 | `cursor` | string \| null | no | `null` | next_cursor from the previous page; omit for the first page. |
 
@@ -71,7 +71,7 @@ Arguments:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "limit": 3
 }
 ```

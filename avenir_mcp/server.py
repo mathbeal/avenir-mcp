@@ -32,8 +32,8 @@ from avenir_mcp.tools_budget import (
     get_monthly_summary,
     get_spending_trends,
     list_accounts,
-    list_budgets,
     list_category_groups,
+    list_plans,
 )
 from avenir_mcp.tools_categories import create_category, set_category_budget
 
@@ -49,7 +49,7 @@ __all__ = [
     "get_monthly_summary",
     "get_spending_trends",
     "list_accounts",
-    "list_budgets",
+    "list_plans",
     "list_category_groups",
     "http_options",
     "main",

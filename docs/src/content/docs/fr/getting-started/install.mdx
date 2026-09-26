@@ -6,7 +6,7 @@ sidebar:
 ---
 
 import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
-import budgets from '@snippets/list_budgets.json?raw';
+import budgets from '@snippets/list_plans.json?raw';
 
 Cette page vous mène de zéro à avenir-mcp qui fonctionne, en une dizaine de minutes. Chaque
 étape se termine par une vérification : vous savez qu'elle a marché avant de passer à
@@ -281,11 +281,11 @@ client ne trouve pas `uvx`, remplacez `"uvx"` par son chemin complet, donné par
 </Tabs>
 
 Demandez maintenant, dans une nouvelle conversation : *« Liste mes budgets YNAB. »*
-L'agent appelle [`list_budgets`](/avenir-mcp/fr/reference/tools/list-budgets/) — votre
+L'agent appelle [`list_plans`](/avenir-mcp/fr/reference/tools/list-plans/) — votre
 client peut vous demander l'autorisation — et répond avec leurs noms. Ici, le budget de
 démonstration utilisé dans toute cette documentation :
 
-<Code code={budgets} lang="json" title="list_budgets" />
+<Code code={budgets} lang="json" title="list_plans" />
 
 avenir-mcp fonctionne. Continuez avec [votre première conversation](/avenir-mcp/fr/getting-started/first-conversation/),
 ou autorisez d'abord les modifications.
