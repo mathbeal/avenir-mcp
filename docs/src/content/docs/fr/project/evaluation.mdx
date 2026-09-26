@@ -33,6 +33,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | `restaurants-budget` | le budget Restaurants de septembre : un montant, pas un plan | 120,00 ; rien de modifié |
 | `restaurants-detail` | quels paiements ont fait dépasser Restaurants en septembre | Chez Lucie et Sushi Go ; rien de modifié |
 | `due-early-october` | quels paiements planifiés tombent du 1er au 10 octobre, au total | 969,99 (loyer et téléphone) ; rien de modifié |
+| `forecast-yearly` | quel paiement annuel la prévision jusqu'à novembre attend en octobre | l'assurance, 420,00 ; rien de modifié |
 | `spent-restaurants` | les dépenses de restaurant en août | la réponse est 89,10 ; rien de modifié |
 | `overspent` | quelle catégorie dépasse en septembre, de combien | Restaurants, 22,50 ; rien de modifié |
 | `checking-balance` | le solde du compte courant | 3 512,66 ; rien de modifié |
@@ -59,6 +60,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | 2026-09-26 | Sonnet | 14/14 | 2,1 | les plans de YNAB : le client appelle `/plans`, les outils disent plan ; trois tâches vérifient les mots budget et plan, dans leurs deux sens |
 | 2026-09-26 | Sonnet | 15/15 | 2,1 | `find_transactions` filtre par catégorie et par bénéficiaire ; une tâche demande quels paiements ont fait dépasser Restaurants |
 | 2026-09-26 | Sonnet | 16/16 | 2,0 | `list_scheduled_transactions` ; une tâche demande quels paiements planifiés tombent du 1er au 10 octobre |
+| 2026-09-26 | Sonnet | 17/17 | 1,9 | `forecast_balance` projette les transactions planifiées de YNAB ; une tâche demande quel paiement annuel la prévision attend en octobre |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
 les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien

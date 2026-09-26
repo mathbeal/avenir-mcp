@@ -32,6 +32,7 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 | `restaurants-budget` | the budget for Restaurants in September: an amount, not a plan | 120.00; nothing changed |
 | `restaurants-detail` | which payments made Restaurants overspent in September | Chez Lucie and Sushi Go; nothing changed |
 | `due-early-october` | which scheduled payments fall between 1 and 10 October, in total | 969.99 (rent and phone); nothing changed |
+| `forecast-yearly` | which yearly payment the forecast to November expects in October | the insurance, 420.00; nothing changed |
 | `spent-restaurants` | spending on restaurants in August | the answer is 89.10; nothing changed |
 | `overspent` | which category is overspent in September, by how much | Restaurants, 22.50; nothing changed |
 | `checking-balance` | the checking account's balance | 3,512.66; nothing changed |
@@ -58,6 +59,7 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-26 | Sonnet | 14/14 | 2.1 | YNAB's plans: the client calls `/plans`, the tools say plan; three tasks check the words budget and plan, in both senses |
 | 2026-09-26 | Sonnet | 15/15 | 2.1 | `find_transactions` filters by category and payee; a task asks which payments made Restaurants overspent |
 | 2026-09-26 | Sonnet | 16/16 | 2.0 | `list_scheduled_transactions`; a task asks which scheduled payments fall between 1 and 10 October |
+| 2026-09-26 | Sonnet | 17/17 | 1.9 | `forecast_balance` projects YNAB's scheduled transactions; a task asks which yearly payment the forecast expects in October |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A
