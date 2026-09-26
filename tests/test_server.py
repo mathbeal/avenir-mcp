@@ -38,6 +38,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "get_budget_vs_actual",
             "get_spending_trends",
             "suggest_categories",
+            "find_transactions",
             "forecast_balance",
             "apply_categories",
             "split_transaction",
