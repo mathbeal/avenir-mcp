@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -151,3 +152,32 @@ def test_without_a_key_the_runner_says_where_to_put_one(
     monkeypatch.setenv("AVENIR_EVAL_API_KEY_FILE", str(tmp_path / "none"))
     with pytest.raises(SystemExit, match="AVENIR_EVAL_API_KEY"):
         run_openai.api_key()
+
+
+def _api(*answers: httpx.Response) -> tuple[httpx.AsyncClient, list[int]]:
+    """A model API that gives these answers in turn, and counts the requests."""
+    calls: list[int] = []
+
+    def handler(_: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        return answers[min(len(calls), len(answers)) - 1]
+
+    return httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://api"), calls
+
+
+def test_a_spent_budget_stops_the_run_at_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A 429 saying the budget is spent is final: no pause, no retry, a clear stop."""
+    monkeypatch.setattr(run_openai, "RETRY_PAUSES", (0, 0, 0))
+    spent = httpx.Response(429, json={"error": {"type": "budget_exceeded", "message": "over"}})
+    http, calls = _api(spent)
+    with pytest.raises(run_openai.OutOfBudget, match="budget"):
+        asyncio.run(run_openai.chat(http, "m", [], []))
+    assert len(calls) == 1
+
+
+def test_a_busy_model_is_tried_again(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A plain 429 is passing: the request is sent again and its answer used."""
+    monkeypatch.setattr(run_openai, "RETRY_PAUSES", (0, 0, 0))
+    http, calls = _api(httpx.Response(429, json={}), httpx.Response(200, json={"ok": True}))
+    assert asyncio.run(run_openai.chat(http, "m", [], [])) == {"ok": True}
+    assert len(calls) == 2

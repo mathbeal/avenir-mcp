@@ -39,6 +39,10 @@ MAX_TURNS = 25
 RETRY_PAUSES = (5, 15, 30)
 
 
+class OutOfBudget(SystemExit):
+    """The API account has no budget left: every further request would be refused."""
+
+
 def api_key() -> SecretStr:
     """Read the API key, masked from here on.
 
@@ -93,7 +97,7 @@ def tool_text(result: Any) -> str:
     return "\n".join(getattr(block, "text", "") for block in result.content)
 
 
-async def _chat(
+async def chat(
     http: httpx.AsyncClient, model: str, messages: list[dict[str, Any]], tools: list[Any]
 ) -> dict[str, Any]:
     """Ask the model for its next message.
@@ -108,6 +112,7 @@ async def _chat(
         The API's JSON answer.
 
     Raises:
+        OutOfBudget: If the account's budget is spent, which no retry can fix.
         RuntimeError: If the API refuses the request, with its answer; a busy model
             (429) or a server error (5xx) is tried again first, after a pause.
     """
@@ -117,6 +122,10 @@ async def _chat(
         )
         if response.status_code < 400:
             return response.json()  # type: ignore[no-any-return]
+        if response.status_code == 429 and "budget" in response.text.lower():
+            raise OutOfBudget(
+                "The API account has no budget left: nothing more can run until it is topped up."
+            )
         if pause is None or response.status_code not in (429, 500, 502, 503, 504):
             break
         await asyncio.sleep(pause)
@@ -188,7 +197,7 @@ async def _agent(task: Task, model: str, url: str, journal: Path) -> dict[str, A
     async with Client(_server(url, journal)) as mcp, _api() as http:
         tools = openai_tools(await mcp.list_tools())
         for turn in range(1, MAX_TURNS + 1):
-            answer = await _chat(http, model, messages, tools)
+            answer = await chat(http, model, messages, tools)
             usage = answer.get("usage") or {}
             outcome["input_tokens"] += usage.get("prompt_tokens", 0)
             outcome["output_tokens"] += usage.get("completion_tokens", 0)
