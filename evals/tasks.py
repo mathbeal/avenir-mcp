@@ -172,6 +172,15 @@ TASKS = [
         tags=["read", "vocabulary"],
     ),
     Task(
+        "restaurants-detail",
+        "Which payments made my Restaurants category overspent in September 2026? "
+        "Name their payees." + FORMAT,
+        answer=_words("lucie", "sushi"),
+        state=_unchanged,
+        notes="The totals say Restaurants is over; only a search by category names why.",
+        tags=["read"],
+    ),
+    Task(
         "spent-restaurants",
         "How much did I spend on restaurants in August 2026?" + FORMAT,
         answer=_number(RESTAURANTS_AUGUST),
