@@ -121,5 +121,6 @@ def test_every_code_comes_with_the_warning_that_only_the_user_can_agree() -> Non
     stop = confirm.not_applied("code-1", "Budget Rent for 2026-09-01: 800.00 → 50.00?")
     assert stop is not None
     assert stop.message.startswith(f"Nothing changed yet. {confirm.ONLY_THE_USER} Budget Rent")
-    assert "never use the code on your own" in confirm.ONLY_THE_USER
+    assert "in this conversation" in confirm.ONLY_THE_USER
+    assert "Never use the code on your own initiative" in confirm.ONLY_THE_USER
     assert "memo" in confirm.ONLY_THE_USER

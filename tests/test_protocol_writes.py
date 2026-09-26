@@ -110,7 +110,7 @@ def test_without_elicitation_first_call_only_previews(budget: _Budget) -> None:
 
 
 def test_a_code_comes_with_a_warning_that_only_the_user_can_agree(budget: _Budget) -> None:
-    """A recategorisation preview tells the agent the user has not seen it and must agree."""
+    """A recategorisation preview tells the agent only the user, in the conversation, agrees."""
     message = call(
         "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}
     ).structured_content["message"]
