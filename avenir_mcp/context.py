@@ -16,7 +16,7 @@ from avenir_mcp.app import mcp
 
 _INTERNAL_GROUP = "Internal Master Category"
 
-GUIDE = """# Avenir: how to work with this YNAB server
+GUIDE = """# avenir-mcp: how to work with this YNAB server
 
 ## Conventions
 - Amounts are in currency units; spending is negative.
@@ -54,7 +54,7 @@ def _dump(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
 
 
-@mcp.resource("avenir://guide", name="guide", mime_type="text/markdown")
+@mcp.resource("avenir-mcp://guide", name="guide", mime_type="text/markdown")
 def guide() -> str:
     """How to use this server's tools, and the YNAB method in brief."""
     return GUIDE

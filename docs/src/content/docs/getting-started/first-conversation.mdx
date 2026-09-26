@@ -14,7 +14,7 @@ import preview from '@snippets/apply_preview.json?raw';
 
 This tour follows a real conversation on the demo budget, an invented household with a
 checking and a savings account. For each step you see what you say, which tool the agent
-calls with which arguments, what Avenir answers, and what the agent tells you. Your own
+calls with which arguments, what avenir-mcp answers, and what the agent tells you. Your own
 answers will have the same shape, with your own figures.
 
 <Aside type="tip">
@@ -82,12 +82,12 @@ The agent calls `apply_categories` with the two assignments. **Nothing changes y
 
 <Steps>
 
-1. Avenir computed exactly what would change: two transactions, from no category to
+1. avenir-mcp computed exactly what would change: two transactions, from no category to
    Groceries and Transport.
 2. Your client shows you the question — a confirmation box if it supports MCP
    elicitation, or the agent relays the preview and waits.
 3. You say yes. The agent calls again with your answer (or the `confirmation` code).
-4. Avenir applies both changes in one YNAB request, records them in its journal, and
+4. avenir-mcp applies both changes in one YNAB request, records them in its journal, and
    returns an `operation_id`.
 
 </Steps>
@@ -108,7 +108,7 @@ Instead of steering each step, start a prompt: it tells the agent the whole meth
 | `reconcile` | the gap with your bank explained, then a confirmed reconciliation |
 | `plan_next_month` | a forecast and its assumptions, then next month's amounts |
 
-In Claude Code they appear among the slash commands of the `avenir` server.
+In Claude Code they appear among the slash commands of the `avenir-mcp` server.
 
 ## Next
 

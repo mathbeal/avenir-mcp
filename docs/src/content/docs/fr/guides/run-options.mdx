@@ -1,5 +1,5 @@
 ---
-title: Choisir comment Avenir tourne
+title: Choisir comment avenir-mcp tourne
 description: Lecture seule ou écriture, stdio ou HTTP, emplacement du journal, et niveau des diagnostics.
 sidebar:
   order: 8
@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-Avenir se configure par variables d'environnement, dans le bloc `env` de votre client
+avenir-mcp se configure par variables d'environnement, dans le bloc `env` de votre client
 MCP. La liste complète est dans [Configuration](/avenir-mcp/fr/reference/configuration/).
 
 ## Lecture seule ou écriture
@@ -22,7 +22,7 @@ active l'écriture.
 
 ## Lancer en stdio (défaut)
 
-Votre client démarre Avenir comme sous-processus et dialogue avec lui par son entrée et sa
+Votre client démarre avenir-mcp comme sous-processus et dialogue avec lui par son entrée et sa
 sortie standard. Rien n'écoute sur le réseau. C'est ce que font tous les exemples de la
 page [Installer](/avenir-mcp/fr/getting-started/install/).
 
@@ -50,7 +50,7 @@ Il écoute sur `http://127.0.0.1:8103/mcp` (HTTP streamable). Dirigez-y votre cl
 le jeton dans un en-tête `Authorization` — avec Claude Code :
 
 ```bash
-claude mcp add --transport http avenir http://127.0.0.1:8103/mcp \
+claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
   --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
 ```
 
@@ -82,7 +82,7 @@ Choisissez un autre fichier avec `AVENIR_MCP_JOURNAL`. Voir
 
 ## Diagnostics
 
-Avenir écrit ses diagnostics sur **stderr** — jamais sur stdout, qui appartient au
+avenir-mcp écrit ses diagnostics sur **stderr** — jamais sur stdout, qui appartient au
 protocole en mode stdio — au niveau de `AVENIR_MCP_LOG_LEVEL`, `WARNING` par défaut :
 
 | Niveau | Vous voyez |

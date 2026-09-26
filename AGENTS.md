@@ -21,7 +21,7 @@ budgets. It is never logged, printed, returned in a tool result or committed.
 
 **No real financial data.** Fixtures use invented accounts, payees and amounts.
 A test that needs realistic data gets invented realistic data. Documentation
-examples come only from `python -m docsgen`, which runs Avenir on the invented demo
+examples come only from `python -m docsgen`, which runs avenir-mcp on the invented demo
 budget in `evals/`: never paste an answer from a real budget.
 
 **Tool output is for an agent.** Keep it short, name things plainly, and say in the

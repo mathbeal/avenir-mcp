@@ -1,11 +1,11 @@
 ---
 title: "Outils"
-description: "Tous les outils déclarés par Avenir : rôle, lecture ou écriture, coût."
+description: "Tous les outils déclarés par avenir-mcp : rôle, lecture ou écriture, coût."
 sidebar:
   order: 1
 ---
 
-Avenir déclare ces outils. Les outils de lecture sont toujours disponibles ; les outils d'écriture n'existent qu'avec `AVENIR_MCP_WRITE=1`, et tous sauf `approve_transactions` sont prévisualisés et confirmés.
+avenir-mcp déclare ces outils. Les outils de lecture sont toujours disponibles ; les outils d'écriture n'existent qu'avec `AVENIR_MCP_WRITE=1`, et tous sauf `approve_transactions` sont prévisualisés et confirmés.
 
 ## Lecture
 
@@ -38,7 +38,7 @@ Avenir déclare ces outils. Les outils de lecture sont toujours disponibles ; le
 
 | URI | Description |
 |---|---|
-| `avenir://guide` | How to use this server's tools, and the YNAB method in brief. |
+| `avenir-mcp://guide` | How to use this server's tools, and the YNAB method in brief. |
 | `ynab://budgets` | The budgets the token can read, with the ids tools need. |
 | `ynab://budgets/{budget_id}/categories` | A budget's assignable categories by group, with their ids. |
 | `ynab://budgets/{budget_id}/accounts` | A budget's open accounts, balances in currency units. |

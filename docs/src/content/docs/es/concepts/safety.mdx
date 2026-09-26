@@ -8,7 +8,7 @@ sidebar:
 import { Aside } from '@astrojs/starlight/components';
 
 Un agente capaz de modificar su presupuesto nunca debe sorprenderle. Esta página dice de
-qué protege Avenir, y cómo.
+qué protege avenir-mcp, y cómo.
 
 ## Qué está en juego
 
@@ -50,11 +50,11 @@ Las escrituras confirmadas se anotan en el diario y se pueden deshacer con
 ## El texto bancario es un dato
 
 Los nombres de beneficiarios y los memos los escriben bancos, comercios y cualquiera que
-pueda enviarle dinero. Avenir los devuelve en campos propios,
+pueda enviarle dinero. avenir-mcp los devuelve en campos propios,
 en una sola línea, sin caracteres de control, invisibles ni de inversión de dirección,
 truncados a 80 caracteres — así no pueden añadir una línea falsa a una pregunta de
 confirmación — y nunca los coloca en una descripción de herramienta, un prompt o una instrucción. El
-recurso `avenir://guide` y el prompt `classify_pending` piden a los agentes tratarlos
+recurso `avenir-mcp://guide` y el prompt `classify_pending` piden a los agentes tratarlos
 como datos. La [evaluación](/avenir-mcp/es/project/evaluation/) esconde una instrucción
 en un memo y comprueba que el agente la ignora.
 
@@ -62,7 +62,7 @@ en un memo y comprueba que el agente la ignora.
 
 | Transporte | Exposición |
 |---|---|
-| stdio (por defecto) | ninguna: el cliente arranca Avenir como subproceso |
+| stdio (por defecto) | ninguna: el cliente arranca avenir-mcp como subproceso |
 | HTTP | escucha en `127.0.0.1:8103` por defecto; las peticiones deben designar esta máquina (`Host`, `Origin`) y llevar `AVENIR_MCP_HTTP_TOKEN` si está definido — obligatorio con escrituras. HTTP simple: manténgalo en localhost |
 
 ## Lo que se queda en su máquina
@@ -82,7 +82,7 @@ en un memo y comprueba que el agente la ignora.
 - Las dependencias están fijadas y auditadas en CI; las acciones de GitHub están fijadas
   por commit y auditadas con zizmor.
 
-<Aside type="caution" title="Lo que Avenir no puede proteger">
+<Aside type="caution" title="Lo que avenir-mcp no puede proteger">
 Un código de confirmación demuestra que existió una vista previa, no que usted la leyó:
 un agente que lo devuelve sin preguntarle lo vuelve inútil. Prefiera un cliente que
 admita la elicitación MCP, y lea lo que confirma. Informe de vulnerabilidades en privado:

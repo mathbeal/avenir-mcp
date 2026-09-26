@@ -26,7 +26,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Avenir version
+      label: avenir-mcp version
       description: The output of `uvx avenir-mcp --version`.
       placeholder: avenir-mcp 0.1.0
     validations:
@@ -34,7 +34,7 @@ body:
   - type: dropdown
     id: install
     attributes:
-      label: How do you run Avenir?
+      label: How do you run avenir-mcp?
       options:
         - uvx avenir-mcp (PyPI)
         - uvx --from git+https://github.com/mathbeal/avenir-mcp (GitHub)

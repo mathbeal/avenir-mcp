@@ -6,7 +6,7 @@ sidebar:
 ---
 
 Les tests unitaires vérifient le code. Ils ne disent pas si un agent choisit le bon
-outil, lit correctement la réponse ou respecte une confirmation. Pour cela, Avenir met un
+outil, lit correctement la réponse ou respecte une confirmation. Pour cela, avenir-mcp met un
 vrai agent Claude au travail sur un budget inventé.
 
 ## Déroulement
@@ -16,11 +16,11 @@ vrai agent Claude au travail sur un budget inventé.
 | `evals/demo_budget.py` | un ménage inventé : compte courant et épargne, loyer, salaire, abonnements, courses aux libellés bancaires réalistes, six transactions en attente, une transaction importée deux fois, une catégorie en dépassement, et un mémo porteur d'une injection de prompt |
 | `evals/fake_ynab.py` | une doublure locale de l'API YNAB qui le sert, avec synchronisation incrémentale et `last-used`, et compte les requêtes |
 | `evals/tasks.py` | les tâches et leurs vérifications |
-| `evals/run.py` | lance Claude Code sans interface sur chaque tâche : Avenir comme seul outil, écritures activées, un budget neuf, un dossier de travail vide, aucune session enregistrée |
+| `evals/run.py` | lance Claude Code sans interface sur chaque tâche : avenir-mcp comme seul outil, écritures activées, un budget neuf, un dossier de travail vide, aucune session enregistrée |
 
 Une tâche **réussit** quand la réponse finale est juste **et** que le budget finit dans
 l'état attendu. Les chiffres attendus sont calculés à partir des données de démonstration,
-jamais copiés des réponses d'Avenir. Les montants sont lus comme on les écrit :
+jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les écrit :
 `3,512.66`, `3 512,66`, `-22.5`.
 
 ## Tâches
@@ -39,14 +39,14 @@ jamais copiés des réponses d'Avenir. Les montants sont lus comme on les écrit
 
 ## Résultats
 
-| Exécution | Modèle | Réussies | Appels Avenir par tâche | Note |
+| Exécution | Modèle | Réussies | Appels avenir-mcp par tâche | Note |
 |---|---|---:|---:|---|
 | 2026-09-25 | Sonnet | 7/9 | 3,7 | les deux écritures ont échoué : voir plus bas |
 | 2026-09-25 | Sonnet | 9/9 | 3,7 | après correction |
 | 2026-09-25 | Sonnet | 9/9 | 1,9 | FastMCP 4 ; la doublure accepte `last-used` |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
-les questions de confirmation, et Avenir comptait une fermeture comme un refus, si bien
+les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien
 qu'aucune écriture ne pouvait passer. Une question fermée se replie désormais sur un code
 de confirmation ; un refus explicite reste un refus. Les rapports sont gardés dans
 `evals/results/`.

@@ -1,6 +1,6 @@
 ---
 title: Resources and prompts
-description: The context Avenir offers besides tools, and the workflows you can start.
+description: The context avenir-mcp offers besides tools, and the workflows you can start.
 sidebar:
   order: 3
 ---
@@ -14,7 +14,7 @@ conversation without a tool call — and **prompts** — workflows the user star
 
 | URI | Type | Content |
 |---|---|---|
-| `avenir://guide` | `text/markdown` | how to use Avenir's tools, and the YNAB method in brief |
+| `avenir-mcp://guide` | `text/markdown` | how to use avenir-mcp's tools, and the YNAB method in brief |
 | `ynab://budgets` | `application/json` | the budgets the token can read |
 | `ynab://budgets/{budget_id}/categories` | `application/json` | the budget's assignable categories, by group |
 | `ynab://budgets/{budget_id}/accounts` | `application/json` | the budget's open accounts and balances |
@@ -46,7 +46,7 @@ Closed accounts are left out; balances in currency units.
  {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
 ```
 
-### `avenir://guide`
+### `avenir-mcp://guide`
 
 About 1,600 characters in three sections:
 
@@ -62,7 +62,7 @@ A test fails if the guide names a tool that does not exist.
 ## Prompts
 
 A prompt fills your values into instructions for the agent. In Claude Code they are
-slash commands of the `avenir` server.
+slash commands of the `avenir-mcp` server.
 
 | Prompt | Arguments | The agent is asked to |
 |---|---|---|

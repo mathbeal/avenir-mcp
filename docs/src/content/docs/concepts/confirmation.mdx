@@ -35,7 +35,7 @@ ever confirms the subject whose fingerprint it carries.
 ### 1. The client supports elicitation, protocol 2026-07-28
 
 In the current MCP protocol a server cannot send the client a request of its own during
-a call. Avenir uses the *input required* round trip:
+a call. avenir-mcp uses the *input required* round trip:
 
 1. The first call returns an `InputRequiredResult` instead of the tool's answer. It holds
    one request, `confirm`, a form with a single boolean `value`, whose message is the
@@ -45,7 +45,7 @@ a call. Avenir uses the *input required* round trip:
 3. The client calls the tool again with the same arguments, the answer in
    `input_responses`, and the `request_state` it received. FastMCP seals that state on
    the wire and rejects tampering.
-4. Avenir recomputes the plan and its fingerprint. If they differ from `request_state` —
+4. avenir-mcp recomputes the plan and its fingerprint. If they differ from `request_state` —
    someone changed the budget in between — the call fails with *“The budget changed
    between the preview and the answer”* and nothing is written.
 
@@ -70,7 +70,7 @@ calls again with the same arguments plus `confirmation`.
 | `cancel` (dismissed, or a client that cannot show it) | falls back to a confirmation code |
 
 A dismissal is not a refusal: headless clients dismiss every question, and treating that
-as *no* would make every write impossible — the defect Avenir's
+as *no* would make every write impossible — the defect avenir-mcp's
 [evaluation](/avenir-mcp/project/evaluation/) found on its first run.
 
 ## Confirmation codes
@@ -89,7 +89,7 @@ different changes. Call again without confirmation to get a new preview.”*
 
 <Aside type="caution">
 A code proves that a preview was produced, not that a person read it. The agent must
-pass it back only after the user agreed; the tool descriptions and the `avenir://guide`
+pass it back only after the user agreed; the tool descriptions and the `avenir-mcp://guide`
 resource say so. Clients that support elicitation give a stronger guarantee: the user
 answers the client directly.
 </Aside>

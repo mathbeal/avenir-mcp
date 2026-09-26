@@ -2,7 +2,7 @@
   "name": "avenir-mcp-docs",
   "private": true,
   "type": "module",
-  "description": "Documentation site of Avenir, an MCP server for YNAB",
+  "description": "Documentation site of avenir-mcp, an MCP server for YNAB",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

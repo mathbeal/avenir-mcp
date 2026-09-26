@@ -1,11 +1,11 @@
 ---
 title: "Tools"
-description: "Every tool Avenir declares: what it does, whether it reads or writes, what it costs."
+description: "Every tool avenir-mcp declares: what it does, whether it reads or writes, what it costs."
 sidebar:
   order: 1
 ---
 
-Avenir declares these tools. Read-only tools are always available; write tools exist only with `AVENIR_MCP_WRITE=1`, and every one of them but `approve_transactions` is previewed and confirmed.
+avenir-mcp declares these tools. Read-only tools are always available; write tools exist only with `AVENIR_MCP_WRITE=1`, and every one of them but `approve_transactions` is previewed and confirmed.
 
 ## Read
 
@@ -38,7 +38,7 @@ Avenir declares these tools. Read-only tools are always available; write tools e
 
 | URI | Description |
 |---|---|
-| `avenir://guide` | How to use this server's tools, and the YNAB method in brief. |
+| `avenir-mcp://guide` | How to use this server's tools, and the YNAB method in brief. |
 | `ynab://budgets` | The budgets the token can read, with the ids tools need. |
 | `ynab://budgets/{budget_id}/categories` | A budget's assignable categories by group, with their ids. |
 | `ynab://budgets/{budget_id}/accounts` | A budget's open accounts, balances in currency units. |

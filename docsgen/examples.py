@@ -1,6 +1,6 @@
 """Capture real tool answers on the demo budget, for the documentation.
 
-Every example in the docs is what Avenir actually returns on the invented demo
+Every example in the docs is what avenir-mcp actually returns on the invented demo
 budget, with the date fixed and random identifiers replaced by placeholders, so
 the files only change when the behaviour does. Each capture also records how
 many requests the call sent to YNAB, measured on a cold cache.

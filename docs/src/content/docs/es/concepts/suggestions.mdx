@@ -1,6 +1,6 @@
 ---
 title: Sugerencias
-description: Cómo Avenir reconoce un comercio entre etiquetas bancarias, aprende de su historial y decide cuándo sugerir una categoría.
+description: Cómo avenir-mcp reconoce un comercio entre etiquetas bancarias, aprende de su historial y decide cuándo sugerir una categoría.
 sidebar:
   order: 6
 ---
@@ -44,7 +44,7 @@ devoluciones (salidas) parezcan ingresos.
 
 ## Decidir
 
-Para una transacción pendiente, Avenir mira el historial de su beneficiario, en su
+Para una transacción pendiente, avenir-mcp mira el historial de su beneficiario, en su
 sentido, y solo conserva las categorías que aún se pueden asignar: una categoría oculta o
 borrada nunca se sugiere.
 
@@ -67,6 +67,6 @@ las veces.
 | Coste | dos peticiones a YNAB por página: transacciones y categorías |
 | Texto | beneficiario y memo truncados a 80 caracteres, marcados con `…` |
 
-Un cursor es la codificación base64 de una posición. Un cursor que Avenir no emitió se
+Un cursor es la codificación base64 de una posición. Un cursor que avenir-mcp no emitió se
 rechaza: *«Invalid cursor: pass the next_cursor value from the previous page unchanged,
 or omit it to start from the first page.»*

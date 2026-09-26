@@ -8,7 +8,7 @@ sidebar:
 ## Connection
 
 <details>
-<summary>My client does not show Avenir's tools</summary>
+<summary>My client does not show avenir-mcp's tools</summary>
 
 1. Check the server is connected: `claude mcp list`, or your client's MCP panel.
 2. Run `uvx avenir-mcp` in a terminal. It should wait silently for a client; an error
@@ -22,7 +22,7 @@ sidebar:
 <details>
 <summary>The tools that change my budget are missing</summary>
 
-Avenir is read-only unless its environment contains `AVENIR_MCP_WRITE=1` — exactly `1`.
+avenir-mcp is read-only unless its environment contains `AVENIR_MCP_WRITE=1` — exactly `1`.
 Restart the server after changing it.
 
 </details>
@@ -68,7 +68,7 @@ delta sync. See [Data and sync](/avenir-mcp/concepts/data-and-sync/#ynabs-rate-l
 <details>
 <summary>The agent keeps answering <code>confirmation_required</code></summary>
 
-Your client cannot show a confirmation box, so Avenir returned a preview and a code.
+Your client cannot show a confirmation box, so avenir-mcp returned a preview and a code.
 Tell the agent you agree: it calls again with the code. A code lasts 10 minutes and works
 once; after a server restart, ask for a new preview.
 

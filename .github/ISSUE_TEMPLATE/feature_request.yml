@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a new tool, a better answer, or a workflow Avenir should support.
+description: Propose a new tool, a better answer, or a workflow avenir-mcp should support.
 title: "feat: "
 labels: [enhancement]
 body:

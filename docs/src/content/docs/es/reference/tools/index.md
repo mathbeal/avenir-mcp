@@ -1,11 +1,11 @@
 ---
 title: "Herramientas"
-description: "Todas las herramientas que declara Avenir: qué hacen, si leen o escriben, cuánto cuestan."
+description: "Todas las herramientas que declara avenir-mcp: qué hacen, si leen o escriben, cuánto cuestan."
 sidebar:
   order: 1
 ---
 
-Avenir declara estas herramientas. Las de lectura están siempre disponibles; las de escritura solo existen con `AVENIR_MCP_WRITE=1`, y todas salvo `approve_transactions` se previsualizan y se confirman.
+avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles; las de escritura solo existen con `AVENIR_MCP_WRITE=1`, y todas salvo `approve_transactions` se previsualizan y se confirman.
 
 ## Lectura
 
@@ -38,7 +38,7 @@ Avenir declara estas herramientas. Las de lectura están siempre disponibles; la
 
 | URI | Descripción |
 |---|---|
-| `avenir://guide` | How to use this server's tools, and the YNAB method in brief. |
+| `avenir-mcp://guide` | How to use this server's tools, and the YNAB method in brief. |
 | `ynab://budgets` | The budgets the token can read, with the ids tools need. |
 | `ynab://budgets/{budget_id}/categories` | A budget's assignable categories by group, with their ids. |
 | `ynab://budgets/{budget_id}/accounts` | A budget's open accounts, balances in currency units. |

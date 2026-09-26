@@ -1,4 +1,4 @@
-"""Entry point of the Avenir MCP server.
+"""Entry point of the avenir-mcp MCP server.
 
 Importing the tool modules registers their tools on the shared server instance.
 """

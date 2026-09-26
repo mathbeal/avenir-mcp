@@ -1,6 +1,6 @@
 ---
 title: "Errores"
-description: "Todos los mensajes de error que puede devolver Avenir, herramienta por herramienta."
+description: "Todos los mensajes de error que puede devolver avenir-mcp, herramienta por herramienta."
 sidebar:
   order: 2
 ---

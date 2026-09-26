@@ -2,7 +2,7 @@
 
 ## Scope
 
-Avenir holds a YNAB personal access token. That token gives **full read and write
+avenir-mcp holds a YNAB personal access token. That token gives **full read and write
 access to every budget of the account**. YNAB offers no read-only scope for personal
 tokens. Treat the token like a bank password.
 
@@ -44,7 +44,7 @@ without it the server refuses to start.
 
 ## Intended use
 
-Avenir runs for one person, on their machine, with their own YNAB token. Running it as
+avenir-mcp runs for one person, on their machine, with their own YNAB token. Running it as
 a public or shared server is not supported: it has no user accounts, and YNAB's API terms
 require OAuth for an application used by others. Reports about such deployments are
 out of scope.

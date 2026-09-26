@@ -14,7 +14,7 @@ import preview from '@snippets/apply_preview.json?raw';
 
 Cette visite suit une vraie conversation sur le budget de démonstration, un foyer inventé
 avec un compte courant et un compte d'épargne. Pour chaque étape : ce que vous dites,
-l'outil que l'agent appelle et avec quels arguments, ce qu'Avenir répond, et ce que
+l'outil que l'agent appelle et avec quels arguments, ce qu'avenir-mcp répond, et ce que
 l'agent vous dit. Vos propres réponses auront la même forme, avec vos chiffres.
 
 <Aside type="tip">
@@ -85,13 +85,13 @@ L'agent appelle `apply_categories` avec les deux affectations. **Rien ne change 
 
 <Steps>
 
-1. Avenir a calculé exactement ce qui changerait : deux transactions, d'aucune catégorie
+1. avenir-mcp a calculé exactement ce qui changerait : deux transactions, d'aucune catégorie
    vers Groceries et Transport.
 2. Votre client vous pose la question — une case à cocher s'il gère l'élicitation MCP,
    ou l'agent vous relaie l'aperçu et attend.
 3. Vous dites oui. L'agent rappelle l'outil avec votre réponse (ou le code
    `confirmation`).
-4. Avenir applique les deux changements en une requête YNAB, les inscrit au journal et
+4. avenir-mcp applique les deux changements en une requête YNAB, les inscrit au journal et
    renvoie un `operation_id`.
 
 </Steps>
@@ -113,7 +113,7 @@ Au lieu de piloter chaque étape, lancez un prompt : il donne à l'agent toute l
 | `reconcile` | l'écart avec la banque expliqué, puis un rapprochement confirmé |
 | `plan_next_month` | une projection et ses hypothèses, puis les montants du mois suivant |
 
-Dans Claude Code, ils apparaissent parmi les commandes slash du serveur `avenir`.
+Dans Claude Code, ils apparaissent parmi les commandes slash du serveur `avenir-mcp`.
 
 ## Ensuite
 

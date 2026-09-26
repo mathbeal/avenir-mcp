@@ -27,7 +27,7 @@ marcar la cuenta como conciliada (el diagnóstico funciona en solo lectura).
 
 2. **El agente compara.** Llama a `reconcile_account` con
    `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
-   Avenir suma las transacciones *cleared* de la cuenta (las que el banco ya ha mostrado)
+   avenir-mcp suma las transacciones *cleared* de la cuenta (las que el banco ya ha mostrado)
    y compara. Difieren, así que **no se escribe nada**:
 
    <Code code={gap} lang="json" title="reconcile_account — diferencia encontrada" />
@@ -44,7 +44,7 @@ marcar la cuenta como conciliada (el diagnóstico funciona en solo lectura).
 
 4. **Usted corrige la causa** — aquí, borrar el duplicado en YNAB.
 
-5. **Vuelva a preguntar.** Cuando los saldos coinciden, Avenir previsualiza la
+5. **Vuelva a preguntar.** Cuando los saldos coinciden, avenir-mcp previsualiza la
    conciliación: cada transacción *cleared* de la cuenta pasa a *reconciled*. Usted
    confirma; se aplica en una petición y se anota en el diario.
 
@@ -60,7 +60,7 @@ Solo si usted lo pide, el agente vuelve a llamar con `adjust=true`:
 - después se concilia la cuenta, ajuste incluido.
 
 <Aside type="caution">
-Un ajuste oculta un problema en lugar de resolverlo. Avenir nunca lo hace por su cuenta,
+Un ajuste oculta un problema en lugar de resolverlo. avenir-mcp nunca lo hace por su cuenta,
 y la evaluación comprueba que un agente al que se pide *«no cambies nada»* tampoco.
 </Aside>
 

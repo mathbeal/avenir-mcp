@@ -1,6 +1,6 @@
 ---
 title: Instalación
-description: Paso a paso, de cero a Avenir funcionando en su cliente MCP — instalar uv, obtener un token de YNAB, añadir Avenir, comprobar, y luego permitir cambios.
+description: Paso a paso, de cero a avenir-mcp funcionando en su cliente MCP — instalar uv, obtener un token de YNAB, añadir avenir-mcp, comprobar, y luego permitir cambios.
 sidebar:
   order: 1
 ---
@@ -8,22 +8,22 @@ sidebar:
 import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
 import budgets from '@snippets/list_budgets.json?raw';
 
-Esta página le lleva de cero a Avenir funcionando, en unos diez minutos. Cada paso
+Esta página le lleva de cero a avenir-mcp funcionando, en unos diez minutos. Cada paso
 termina con una comprobación: sabrá que ha funcionado antes de seguir.
 
 <Steps>
 
-1. [Instalar uv](#instalar-uv), la herramienta que ejecuta Avenir.
-2. [Obtener un token de YNAB](#obtener-un-token-de-ynab), el acceso de Avenir a sus presupuestos.
+1. [Instalar uv](#instalar-uv), la herramienta que ejecuta avenir-mcp.
+2. [Obtener un token de YNAB](#obtener-un-token-de-ynab), el acceso de avenir-mcp a sus presupuestos.
 3. [Primer arranque a mano](#primer-arranque-a-mano), una sola vez.
-4. [Añadir Avenir a su cliente](#añadir-avenir-a-su-cliente).
+4. [Añadir avenir-mcp a su cliente](#añadir-avenir-mcp-a-su-cliente).
 5. [Comprobar que funciona](#comprobar-que-funciona) con una primera pregunta.
 6. [Permitir cambios](#permitir-cambios), si quiere que el agente ordene por usted.
 
 </Steps>
 
 <Aside type="caution" title="Antes de la primera versión en PyPI">
-Avenir aún no está publicado en PyPI. Hasta entonces, sustituya **`uvx avenir-mcp`** por
+avenir-mcp aún no está publicado en PyPI. Hasta entonces, sustituya **`uvx avenir-mcp`** por
 **`uvx --from git+https://github.com/mathbeal/avenir-mcp avenir-mcp`** en cada comando y
 configuración de esta página (en JSON: `"args": ["--from",
 "git+https://github.com/mathbeal/avenir-mcp", "avenir-mcp"]`). Nada más cambia.
@@ -33,9 +33,9 @@ configuración de esta página (en JSON: `"args": ["--from",
 
 | | Por qué | Dónde conseguirlo |
 |---|---|---|
-| **Una cuenta de YNAB** | Avenir lee y modifica *sus* presupuestos | [app.ynab.com](https://app.ynab.com) |
-| **Un cliente MCP** | la aplicación con la que habla; es la que arranca Avenir | Claude Code, Claude Desktop, Cursor, VS Code… |
-| **uv** | descarga y ejecuta Avenir, y el Python que necesita, en un entorno aislado | el paso siguiente |
+| **Una cuenta de YNAB** | avenir-mcp lee y modifica *sus* presupuestos | [app.ynab.com](https://app.ynab.com) |
+| **Un cliente MCP** | la aplicación con la que habla; es la que arranca avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
+| **uv** | descarga y ejecuta avenir-mcp, y el Python que necesita, en un entorno aislado | el paso siguiente |
 
 **No** necesita instalar Python, clonar el repositorio ni crear un entorno virtual: uv
 se encarga de todo.
@@ -87,13 +87,13 @@ añade uv al `PATH` de los terminales nuevos: abra uno nuevo. Detalles en la
 <Aside type="danger" title="Trate el token como una contraseña">
 Un token de acceso personal puede **leer y modificar todos los presupuestos** de su
 cuenta; YNAB no ofrece tokens de solo lectura. No lo pegue nunca en un chat con una IA,
-un archivo compartido, un issue o un repositorio. Avenir nunca lo registra ni lo
+un archivo compartido, un issue o un repositorio. avenir-mcp nunca lo registra ni lo
 devuelve en una respuesta.
 </Aside>
 
 ## Primer arranque a mano
 
-Antes de configurar un cliente, ejecute Avenir una vez a mano. Así se descarga y se
+Antes de configurar un cliente, ejecute avenir-mcp una vez a mano. Así se descarga y se
 comprueba que arranca.
 
 <Tabs syncKey="os">
@@ -109,31 +109,31 @@ comprueba que arranca.
   </TabItem>
 </Tabs>
 
-La primera ejecución descarga Avenir y Python: de unos segundos a un minuto. Después
-**no se muestra nada y el comando no termina** — es lo esperado: Avenir espera a que un
+La primera ejecución descarga avenir-mcp y Python: de unos segundos a un minuto. Después
+**no se muestra nada y el comando no termina** — es lo esperado: avenir-mcp espera a que un
 cliente le hable. Pulse **Ctrl+C** para detenerlo.
 
 ¿Aparece un error? Vea [Solución de problemas](/avenir-mcp/es/project/troubleshooting/).
 
-## Añadir Avenir a su cliente
+## Añadir avenir-mcp a su cliente
 
-Elija su cliente. Estas configuraciones son **de solo lectura**: Avenir responde
+Elija su cliente. Estas configuraciones son **de solo lectura**: avenir-mcp responde
 preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene después.
 
 <Tabs syncKey="client">
   <TabItem label="Claude Code">
     En un terminal:
     ```bash
-    claude mcp add avenir --scope user \
+    claude mcp add avenir-mcp --scope user \
       --env YNAB_API_KEY=su-token \
       -- uvx avenir-mcp
     ```
 
     | Parte | Significado |
     |---|---|
-    | `claude mcp add avenir` | registra un servidor MCP llamado `avenir` |
+    | `claude mcp add avenir-mcp` | registra un servidor MCP llamado `avenir-mcp` |
     | `--scope user` | para todos sus proyectos; sin él, solo para la carpeta actual |
-    | `--env YNAB_API_KEY=…` | el entorno con el que arranca Avenir |
+    | `--env YNAB_API_KEY=…` | el entorno con el que arranca avenir-mcp |
     | `--` | lo que sigue es el comando que arranca el servidor |
     | `uvx avenir-mcp` | ese comando |
 
@@ -145,12 +145,12 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
     2. Si el archivo está vacío, pegue todo esto. Si ya lista servidores, añada solo el
-       bloque `"avenir": { … }` dentro del `mcpServers` existente, con una coma tras la
+       bloque `"avenir-mcp": { … }` dentro del `mcpServers` existente, con una coma tras la
        entrada anterior.
        ```json
        {
          "mcpServers": {
-           "avenir": {
+           "avenir-mcp": {
              "command": "uvx",
              "args": ["avenir-mcp"],
              "env": { "YNAB_API_KEY": "su-token" }
@@ -167,7 +167,7 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
        ```json
        {
          "mcpServers": {
-           "avenir": {
+           "avenir-mcp": {
              "command": "uvx",
              "args": ["avenir-mcp"],
              "env": { "YNAB_API_KEY": "su-token" }
@@ -175,14 +175,14 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
          }
        }
        ```
-    2. Abra **Cursor Settings → MCP** y compruebe que `avenir` está activado.
+    2. Abra **Cursor Settings → MCP** y compruebe que `avenir-mcp` está activado.
   </TabItem>
   <TabItem label="VS Code">
     1. Cree `.vscode/mcp.json` en su espacio de trabajo:
        ```json
        {
          "servers": {
-           "avenir": {
+           "avenir-mcp": {
              "type": "stdio",
              "command": "uvx",
              "args": ["avenir-mcp"],
@@ -191,7 +191,7 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
          }
        }
        ```
-    2. Ejecute el comando **MCP: List Servers**, elija `avenir` y luego **Start Server**.
+    2. Ejecute el comando **MCP: List Servers**, elija `avenir-mcp` y luego **Start Server**.
     3. Úselo en Copilot Chat en modo **Agent**.
   </TabItem>
   <TabItem label="Gemini CLI">
@@ -199,7 +199,7 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
        ```json
        {
          "mcpServers": {
-           "avenir": {
+           "avenir-mcp": {
              "command": "uvx",
              "args": ["avenir-mcp"],
              "env": { "YNAB_API_KEY": "su-token" }
@@ -207,7 +207,7 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
          }
        }
        ```
-    2. Arranque `gemini` y escriba `/mcp`: `avenir` aparece con sus herramientas. El modelo es el que usa Gemini CLI.
+    2. Arranque `gemini` y escriba `/mcp`: `avenir-mcp` aparece con sus herramientas. El modelo es el que usa Gemini CLI.
   </TabItem>
   <TabItem label="Codex CLI">
     1. Abra `~/.codex/config.toml` (créelo si hace falta) y añada:
@@ -217,7 +217,7 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
        args = ["avenir-mcp"]
        env = { YNAB_API_KEY = "su-token" }
        ```
-    2. Arranque `codex` y escriba `/mcp`: `avenir` aparece con sus herramientas. El modelo es el que usa Codex.
+    2. Arranque `codex` y escriba `/mcp`: `avenir-mcp` aparece con sus herramientas. El modelo es el que usa Codex.
   </TabItem>
   <TabItem label="LM Studio">
     Para un modelo que se ejecuta en su propia máquina — vea [Elegir un modelo](/avenir-mcp/es/guides/choose-a-model/#modelos-locales).
@@ -226,7 +226,7 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
        ```json
        {
          "mcpServers": {
-           "avenir": {
+           "avenir-mcp": {
              "command": "uvx",
              "args": ["avenir-mcp"],
              "env": { "YNAB_API_KEY": "su-token" }
@@ -263,14 +263,14 @@ Linux) o `where uvx` (Windows) — por ejemplo `"/Users/<usted>/.local/bin/uvx"`
     ```bash
     claude mcp list
     ```
-    Avenir debe estar conectado:
+    avenir-mcp debe estar conectado:
     ```text
-    avenir: uvx avenir-mcp - ✔ Connected
+    avenir-mcp: uvx avenir-mcp - ✔ Connected
     ```
-    Después arranque `claude` y escriba `/mcp`: `avenir` muestra sus 9 herramientas.
+    Después arranque `claude` y escriba `/mcp`: `avenir-mcp` muestra sus 9 herramientas.
   </TabItem>
   <TabItem label="Otros clientes">
-    Abra la lista de servidores MCP o de herramientas del cliente: `avenir` debe estar
+    Abra la lista de servidores MCP o de herramientas del cliente: `avenir-mcp` debe estar
     activo, con 9 herramientas.
   </TabItem>
 </Tabs>
@@ -282,20 +282,20 @@ en toda esta documentación:
 
 <Code code={budgets} lang="json" title="list_budgets" />
 
-Avenir funciona. Siga con [su primera conversación](/avenir-mcp/es/getting-started/first-conversation/),
+avenir-mcp funciona. Siga con [su primera conversación](/avenir-mcp/es/getting-started/first-conversation/),
 o permita antes los cambios.
 
 ## Permitir cambios
 
 Para que el agente pueda clasificar transacciones, mover dinero entre categorías o
-conciliar cuentas, añada `AVENIR_MCP_WRITE=1` al entorno de Avenir.
+conciliar cuentas, añada `AVENIR_MCP_WRITE=1` al entorno de avenir-mcp.
 
 <Tabs syncKey="client">
   <TabItem label="Claude Code">
-    Quite Avenir y vuelva a añadirlo con la variable adicional:
+    Quite avenir-mcp y vuelva a añadirlo con la variable adicional:
     ```bash
-    claude mcp remove avenir --scope user
-    claude mcp add avenir --scope user \
+    claude mcp remove avenir-mcp --scope user
+    claude mcp add avenir-mcp --scope user \
       --env YNAB_API_KEY=su-token \
       --env AVENIR_MCP_WRITE=1 \
       -- uvx avenir-mcp
@@ -332,12 +332,12 @@ Cada cambio se le muestra antes de aplicarse: vea
 | Para | Haga |
 |---|---|
 | **Actualizar** | `uvx` descarga las nuevas versiones por sí mismo de vez en cuando; fuércelo con `uvx --refresh avenir-mcp` |
-| **Quitar** | `claude mcp remove avenir --scope user`, o borre la entrada `avenir` de la configuración del cliente |
-| **Limpiar** | el único archivo de Avenir en su máquina es su [diario](/avenir-mcp/es/concepts/journal/), en `~/.local/state/avenir-mcp/` |
+| **Quitar** | `claude mcp remove avenir-mcp --scope user`, o borre la entrada `avenir-mcp` de la configuración del cliente |
+| **Limpiar** | el único archivo de avenir-mcp en su máquina es su [diario](/avenir-mcp/es/concepts/journal/), en `~/.local/state/avenir-mcp/` |
 | **Revocar el token** | YNAB → Account Settings → Developer Settings → **Revoke** junto al token |
 
 ## Siguiente
 
 - [Su primera conversación](/avenir-mcp/es/getting-started/first-conversation/): una visita guiada.
-- [Funciones](/avenir-mcp/es/getting-started/features/): todo lo que Avenir sabe hacer.
+- [Funciones](/avenir-mcp/es/getting-started/features/): todo lo que avenir-mcp sabe hacer.
 - [Configuración](/avenir-mcp/es/reference/configuration/): cada variable de entorno.

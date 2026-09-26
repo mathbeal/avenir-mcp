@@ -1,10 +1,10 @@
-"""Run the evaluation: a real Claude agent, Avenir, and the demo budget.
+"""Run the evaluation: a real Claude agent, avenir-mcp, and the demo budget.
 
 Usage: uv run python -m evals.run [--model sonnet] [--task ID ...]
 
 Each task gets a fresh demo budget, a fresh journal and an empty working
 directory, so no memory or project file from this machine leaks in. Only
-Avenir's tools are allowed. Results go to evals/results/.
+avenir-mcp's tools are allowed. Results go to evals/results/.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ def _mcp_config(url: str, journal: Path) -> dict[str, Any]:
     if "UV_PROJECT_ENVIRONMENT" in os.environ:
         env["UV_PROJECT_ENVIRONMENT"] = os.environ["UV_PROJECT_ENVIRONMENT"]
     args = ["run", "--quiet", "--no-dev", "--directory", str(ROOT), "avenir-mcp"]
-    return {"mcpServers": {"avenir": {"command": "uv", "args": args, "env": env}}}
+    return {"mcpServers": {"avenir-mcp": {"command": "uv", "args": args, "env": env}}}
 
 
 def _events(stdout: str) -> list[dict[str, Any]]:
@@ -57,7 +57,7 @@ def _tool_calls(events: list[dict[str, Any]]) -> list[str]:
             continue
         for block in event.get("message", {}).get("content", []):
             if block.get("type") == "tool_use":
-                calls.append(str(block.get("name", "")).removeprefix("mcp__avenir__"))
+                calls.append(str(block.get("name", "")).removeprefix("mcp__avenir-mcp__"))
     return calls
 
 
@@ -85,7 +85,7 @@ def run_task(task: Task, model: str) -> dict[str, Any]:
                     str(config),
                     "--strict-mcp-config",
                     "--allowedTools",
-                    "mcp__avenir",
+                    "mcp__avenir-mcp",
                     "--permission-mode",
                     "dontAsk",
                     "--no-session-persistence",

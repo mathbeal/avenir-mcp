@@ -1,6 +1,6 @@
 ---
 title: Suggestions
-description: How Avenir recognises a merchant across bank labels, learns from your history, and decides when to suggest a category.
+description: How avenir-mcp recognises a merchant across bank labels, learns from your history, and decides when to suggest a category.
 sidebar:
   order: 6
 ---
@@ -42,7 +42,7 @@ income.
 
 ## Deciding
 
-For a pending transaction, Avenir looks at the history of its payee, in its direction,
+For a pending transaction, avenir-mcp looks at the history of its payee, in its direction,
 and keeps only the categories you can still assign: a hidden or deleted category is
 never suggested.
 
@@ -64,6 +64,6 @@ one out in turn, suggestions made at 0.90 were right 95 % of the time.
 | Cost | two YNAB requests per page: transactions and categories |
 | Text | payee and memo cut to 80 characters, marked `…` |
 
-A cursor is the base64 encoding of an offset. A cursor Avenir did not issue is refused:
+A cursor is the base64 encoding of an offset. A cursor avenir-mcp did not issue is refused:
 *“Invalid cursor: pass the next_cursor value from the previous page unchanged, or omit
 it to start from the first page.”*

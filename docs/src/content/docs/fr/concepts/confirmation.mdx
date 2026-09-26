@@ -36,7 +36,7 @@ confirme jamais que le sujet dont il porte l'empreinte.
 ### 1. Le client gère l'élicitation, protocole 2026-07-28
 
 Dans le protocole MCP actuel, un serveur ne peut pas envoyer de requête au client en
-cours d'appel. Avenir utilise l'aller-retour *input required* :
+cours d'appel. avenir-mcp utilise l'aller-retour *input required* :
 
 1. Le premier appel renvoie un `InputRequiredResult` au lieu de la réponse de l'outil. Il
    contient une demande, `confirm`, un formulaire avec un seul booléen `value`, dont le
@@ -46,7 +46,7 @@ cours d'appel. Avenir utilise l'aller-retour *input required* :
 3. Le client rappelle l'outil avec les mêmes arguments, la réponse dans
    `input_responses`, et le `request_state` reçu. FastMCP scelle cet état sur le réseau
    et rejette toute altération.
-4. Avenir recalcule le plan et son empreinte. S'ils diffèrent du `request_state` —
+4. avenir-mcp recalcule le plan et son empreinte. S'ils diffèrent du `request_state` —
    quelqu'un a modifié le budget entre-temps — l'appel échoue avec *« The budget changed
    between the preview and the answer »* et rien n'est écrit.
 
@@ -91,7 +91,7 @@ different changes. Call again without confirmation to get a new preview. »*
 <Aside type="caution">
 Un code prouve qu'un aperçu a été produit, pas qu'une personne l'a lu. L'agent ne doit
 le renvoyer qu'après l'accord de l'utilisateur ; les descriptions des outils et la
-ressource `avenir://guide` le disent. Les clients qui gèrent l'élicitation donnent une
+ressource `avenir-mcp://guide` le disent. Les clients qui gèrent l'élicitation donnent une
 garantie plus forte : l'utilisateur répond directement au client.
 </Aside>
 

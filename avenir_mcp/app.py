@@ -9,7 +9,7 @@ from datetime import date
 from fastmcp import FastMCP  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 
-mcp = FastMCP("avenir")
+mcp = FastMCP("avenir-mcp")
 
 
 # Tools that change the budget carry this tag; read-only mode hides them.

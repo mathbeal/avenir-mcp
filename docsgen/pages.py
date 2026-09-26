@@ -17,7 +17,7 @@ def security() -> str:
     front = (
         "---\n"
         "title: Security\n"
-        "description: What Avenir can read and change, and how to report a vulnerability.\n"
+        "description: What avenir-mcp can read and change, and how to report a vulnerability.\n"
         "---\n\n"
         ":::note[Generated]\n"
         "Copied from `SECURITY.md` by `python -m docsgen`.\n"

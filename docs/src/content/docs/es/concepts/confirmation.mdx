@@ -35,7 +35,7 @@ solo confirma el sujeto cuya huella lleva.
 ### 1. El cliente admite elicitación, protocolo 2026-07-28
 
 En el protocolo MCP actual, un servidor no puede enviar peticiones al cliente durante una
-llamada. Avenir usa el ida y vuelta *input required*:
+llamada. avenir-mcp usa el ida y vuelta *input required*:
 
 1. La primera llamada devuelve un `InputRequiredResult` en lugar de la respuesta de la
    herramienta. Contiene una petición, `confirm`, un formulario con un único booleano
@@ -45,7 +45,7 @@ llamada. Avenir usa el ida y vuelta *input required*:
 3. El cliente vuelve a llamar a la herramienta con los mismos argumentos, la respuesta en
    `input_responses` y el `request_state` recibido. FastMCP sella ese estado en la red y
    rechaza cualquier alteración.
-4. Avenir recalcula el plan y su huella. Si difieren del `request_state` — alguien
+4. avenir-mcp recalcula el plan y su huella. Si difieren del `request_state` — alguien
    modificó el presupuesto entretanto — la llamada falla con *«The budget changed between
    the preview and the answer»* y no se escribe nada.
 
@@ -90,7 +90,7 @@ changes. Call again without confirmation to get a new preview.»*
 <Aside type="caution">
 Un código demuestra que se produjo una vista previa, no que una persona la leyó. El agente
 solo debe devolverlo tras el acuerdo del usuario; lo dicen las descripciones de las
-herramientas y el recurso `avenir://guide`. Los clientes que admiten elicitación dan una
+herramientas y el recurso `avenir-mcp://guide`. Los clientes que admiten elicitación dan una
 garantía más fuerte: el usuario responde directamente al cliente.
 </Aside>
 

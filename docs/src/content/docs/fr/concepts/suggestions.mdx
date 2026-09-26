@@ -1,6 +1,6 @@
 ---
 title: Suggestions
-description: Comment Avenir reconnaît un commerçant d'un libellé bancaire à l'autre, apprend de votre historique, et décide quand proposer une catégorie.
+description: Comment avenir-mcp reconnaît un commerçant d'un libellé bancaire à l'autre, apprend de votre historique, et décide quand proposer une catégorie.
 sidebar:
   order: 6
 ---
@@ -45,7 +45,7 @@ sorties et pour les entrées**. Un prêteur qui vous a versé de l'argent une fo
 
 ## Décider
 
-Pour une transaction en attente, Avenir regarde l'historique de son bénéficiaire, dans
+Pour une transaction en attente, avenir-mcp regarde l'historique de son bénéficiaire, dans
 son sens, et ne garde que les catégories encore assignables : une catégorie masquée ou
 supprimée n'est jamais proposée.
 
@@ -69,6 +69,6 @@ des cas.
 | Coût | deux requêtes YNAB par page : transactions et catégories |
 | Texte | bénéficiaire et mémo tronqués à 80 caractères, marqués `…` |
 
-Un curseur est l'encodage base64 d'une position. Un curseur qu'Avenir n'a pas émis est
+Un curseur est l'encodage base64 d'une position. Un curseur qu'avenir-mcp n'a pas émis est
 refusé : *« Invalid cursor: pass the next_cursor value from the previous page unchanged,
 or omit it to start from the first page. »*

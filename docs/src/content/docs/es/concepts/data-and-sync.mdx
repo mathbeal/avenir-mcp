@@ -10,7 +10,7 @@ import { Aside } from '@astrojs/starlight/components';
 ## Importes
 
 YNAB guarda cada importe como un número entero de **miliunidades**: 1,00 es `1000`,
-−12,34 es `-12340`. Avenir convierte en la frontera y nunca muestra miliunidades al
+−12,34 es `-12340`. avenir-mcp convierte en la frontera y nunca muestra miliunidades al
 agente:
 
 | Sentido | Regla |
@@ -39,14 +39,14 @@ presupuesto; los gastos son negativos, las entradas positivas.
 
 La mayoría de las herramientas necesitan las transacciones del presupuesto: encontrar lo
 pendiente, aprender del historial, comparar con el banco, prever. Descargarlo todo en
-cada llamada sería lento y gastaría la cuota de YNAB. Avenir guarda una copia por
+cada llamada sería lento y gastaría la cuota de YNAB. avenir-mcp guarda una copia por
 presupuesto, en memoria, y la actualiza con la **sincronización incremental** de YNAB:
 
 1. La primera carga pide todas las transacciones y guarda el `server_knowledge` de YNAB,
    un contador de cambios.
 2. La carga siguiente envía `last_knowledge_of_server` y recibe **solo lo que cambió
    desde entonces**: transacciones nuevas, modificadas y borradas.
-3. Avenir las fusiona en su copia: una transacción modificada sustituye a la anterior,
+3. avenir-mcp las fusiona en su copia: una transacción modificada sustituye a la anterior,
    una borrada se elimina.
 
 Con el id de un presupuesto, la copia se actualiza por sincronización incremental.
@@ -80,10 +80,10 @@ y se indica en su [página de referencia](/avenir-mcp/es/reference/tools/):
 Aplicar una escritura confirmada añade su propia petición (un único `PATCH` agrupado, sea
 cual sea el número de transacciones). Con la caché caliente, releer las transacciones
 cuesta una pequeña petición incremental. Cuando se agota la cuota, YNAB responde `429`,
-que Avenir devuelve como `… YNAB 429: …`; basta con esperar unos minutos.
+que avenir-mcp devuelve como `… YNAB 429: …`; basta con esperar unos minutos.
 
 ## Lo que nunca se guarda
 
-Avenir no guarda ninguna copia en disco. Las transacciones viven en memoria mientras el
+avenir-mcp no guarda ninguna copia en disco. Las transacciones viven en memoria mientras el
 servidor se ejecuta; el [diario](/avenir-mcp/es/concepts/journal/) solo contiene
 identificadores; el token se queda en el entorno y nunca se registra.

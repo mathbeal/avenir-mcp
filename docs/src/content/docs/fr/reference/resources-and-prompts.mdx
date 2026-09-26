@@ -1,6 +1,6 @@
 ---
 title: Ressources et prompts
-description: Le contexte qu'Avenir offre en plus des outils, et les flux de travail que vous pouvez lancer.
+description: Le contexte qu'avenir-mcp offre en plus des outils, et les flux de travail que vous pouvez lancer.
 sidebar:
   order: 3
 ---
@@ -13,7 +13,7 @@ travail que l'utilisateur lance.
 
 | URI | Type | Contenu |
 |---|---|---|
-| `avenir://guide` | `text/markdown` | comment utiliser les outils d'Avenir, et la méthode YNAB en bref |
+| `avenir-mcp://guide` | `text/markdown` | comment utiliser les outils d'avenir-mcp, et la méthode YNAB en bref |
 | `ynab://budgets` | `application/json` | les budgets que le jeton peut lire |
 | `ynab://budgets/{budget_id}/categories` | `application/json` | les catégories assignables du budget, par groupe |
 | `ynab://budgets/{budget_id}/accounts` | `application/json` | les comptes ouverts du budget et leurs soldes |
@@ -46,7 +46,7 @@ Les comptes clôturés sont laissés de côté ; soldes en unités monétaires.
  {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
 ```
 
-### `avenir://guide`
+### `avenir-mcp://guide`
 
 Environ 1 600 caractères en trois sections, en anglais :
 
@@ -63,7 +63,7 @@ Un test échoue si le guide nomme un outil qui n'existe pas.
 ## Prompts
 
 Un prompt insère vos valeurs dans des consignes pour l'agent. Dans Claude Code, ce sont
-des commandes slash du serveur `avenir`.
+des commandes slash du serveur `avenir-mcp`.
 
 | Prompt | Arguments | Il est demandé à l'agent de |
 |---|---|---|

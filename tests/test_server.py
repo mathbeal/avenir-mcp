@@ -22,7 +22,7 @@ from avenir_mcp import server
 
 def test_mcp_instance_name() -> None:
     """The FastMCP instance must be named 'avenir'."""
-    assert server.mcp.name == "avenir"
+    assert server.mcp.name == "avenir-mcp"
 
 
 def test_catalog_is_exactly_the_published_tools() -> None:

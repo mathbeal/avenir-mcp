@@ -1,6 +1,6 @@
 # Roadmap
 
-Avenir starts as a thin layer over the YNAB API. The goal is a server designed
+avenir-mcp starts as a thin layer over the YNAB API. The goal is a server designed
 for agents: fewer tools, each one a task; read-only by default; every write
 previewed, confirmed and undoable; short, structured answers.
 

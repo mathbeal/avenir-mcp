@@ -1,5 +1,5 @@
 ---
-title: Elegir cómo se ejecuta Avenir
+title: Elegir cómo se ejecuta avenir-mcp
 description: Solo lectura o escrituras, stdio o HTTP, dónde vive el diario y cuánto registra.
 sidebar:
   order: 8
@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-Avenir se configura con variables de entorno, definidas en el bloque `env` de su cliente
+avenir-mcp se configura con variables de entorno, definidas en el bloque `env` de su cliente
 MCP. La lista completa está en [Configuración](/avenir-mcp/es/reference/configuration/).
 
 ## Solo lectura o escrituras
@@ -22,7 +22,7 @@ activa las escrituras.
 
 ## Ejecutar por stdio (por defecto)
 
-Su cliente arranca Avenir como subproceso y le habla por su entrada y salida estándar.
+Su cliente arranca avenir-mcp como subproceso y le habla por su entrada y salida estándar.
 Nada escucha en la red. Es lo que hacen todos los ejemplos de
 [Instalación](/avenir-mcp/es/getting-started/install/).
 
@@ -50,7 +50,7 @@ Escucha en `http://127.0.0.1:8103/mcp` (HTTP streamable). Apunte su cliente all�
 token en una cabecera `Authorization` — con Claude Code:
 
 ```bash
-claude mcp add --transport http avenir http://127.0.0.1:8103/mcp \
+claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
   --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
 ```
 
@@ -81,7 +81,7 @@ Vea [Diario y deshacer](/avenir-mcp/es/concepts/journal/).
 
 ## Diagnósticos
 
-Avenir escribe sus diagnósticos en **stderr** — nunca en stdout, que pertenece al
+avenir-mcp escribe sus diagnósticos en **stderr** — nunca en stdout, que pertenece al
 protocolo en modo stdio — al nivel de `AVENIR_MCP_LOG_LEVEL`, `WARNING` por defecto:
 
 | Nivel | Verá |

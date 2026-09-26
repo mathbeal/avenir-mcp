@@ -81,7 +81,7 @@ def test_resources_and_templates_are_listed() -> None:
     """Clients can discover what context the server offers."""
     uris = {str(r.uri) for r in _run(lambda c: c.list_resources())}
     templates = {t.uri_template for t in _run(lambda c: c.list_resource_templates())}
-    assert {"ynab://budgets", "avenir://guide"} <= uris
+    assert {"ynab://budgets", "avenir-mcp://guide"} <= uris
     assert {
         "ynab://budgets/{budget_id}/categories",
         "ynab://budgets/{budget_id}/accounts",
@@ -118,7 +118,7 @@ def test_accounts_resource_lists_open_accounts_in_currency() -> None:
 
 def test_guide_only_names_tools_that_exist() -> None:
     """The guide cannot drift from the catalog."""
-    guide = _read("avenir://guide")
+    guide = _read("avenir-mcp://guide")
     named = _named_tools(guide)
     assert named, "the guide should name the tools it explains"
     assert named <= _tool_names() | PROMPTS

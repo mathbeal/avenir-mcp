@@ -1,6 +1,6 @@
 ---
 title: Limitaciones y hoja de ruta
-description: Lo que Avenir no hace, o hace de forma imperfecta, y lo que viene después.
+description: Lo que avenir-mcp no hace, o hace de forma imperfecta, y lo que viene después.
 sidebar:
   order: 3
 ---
@@ -14,7 +14,7 @@ sidebar:
 | `approve_transactions` | se aplica al momento, sin vista previa | solo quita la marca de revisión de YNAB |
 | `update_category`, `create_category` | no se pueden deshacer; la API de YNAB no puede borrar una categoría | renombrar de nuevo; ocultar la categoría en YNAB |
 | Transporte HTTP | HTTP simple, un solo token compartido, sin cuentas | mantenerlo en `127.0.0.1`, o usar stdio |
-| Servidor público o compartido | no compatible: sin cuentas, y las condiciones de YNAB exigen OAuth para presupuestos ajenos | cada persona ejecuta su propio Avenir — vea el [aviso legal](/avenir-mcp/es/project/legal/) |
+| Servidor público o compartido | no compatible: sin cuentas, y las condiciones de YNAB exigen OAuth para presupuestos ajenos | cada persona ejecuta su propio avenir-mcp — vea el [aviso legal](/avenir-mcp/es/project/legal/) |
 | Transacciones divididas | nunca se sugieren ni se recategorizan: sus líneas llevan las categorías | cambiarlas en YNAB |
 | Sugerencias | necesitan historial: un comercio nunca clasificado no recibe ninguna | el agente propone, usted decide |
 | Previsión | prolonga los últimos meses; los cargos trimestrales o anuales no son recurrentes según su definición | pasarlos como `one_offs` |

@@ -14,7 +14,7 @@ import preview from '@snippets/apply_preview.json?raw';
 
 Esta visita sigue una conversación real sobre el presupuesto de demostración, un hogar
 inventado con una cuenta corriente y una de ahorro. En cada paso verá lo que usted dice,
-qué herramienta llama el agente y con qué argumentos, qué responde Avenir y qué le dice
+qué herramienta llama el agente y con qué argumentos, qué responde avenir-mcp y qué le dice
 el agente. Sus propias respuestas tendrán la misma forma, con sus cifras.
 
 <Aside type="tip">
@@ -85,13 +85,13 @@ nada:**
 
 <Steps>
 
-1. Avenir ha calculado exactamente lo que cambiaría: dos transacciones, de ninguna
+1. avenir-mcp ha calculado exactamente lo que cambiaría: dos transacciones, de ninguna
    categoría a Groceries y Transport.
 2. Su cliente le muestra la pregunta — un cuadro de confirmación si admite la
    elicitación MCP, o el agente le transmite la vista previa y espera.
 3. Usted dice que sí. El agente vuelve a llamar con su respuesta (o el código
    `confirmation`).
-4. Avenir aplica ambos cambios en una sola petición a YNAB, los anota en su diario y
+4. avenir-mcp aplica ambos cambios en una sola petición a YNAB, los anota en su diario y
    devuelve un `operation_id`.
 
 </Steps>
@@ -112,7 +112,7 @@ En lugar de guiar cada paso, lance un prompt: le da al agente el método complet
 | `reconcile` | la diferencia con su banco explicada, luego una conciliación confirmada |
 | `plan_next_month` | una previsión y sus supuestos, luego los importes del mes siguiente |
 
-En Claude Code aparecen entre los comandos slash del servidor `avenir`.
+En Claude Code aparecen entre los comandos slash del servidor `avenir-mcp`.
 
 ## Siguiente
 

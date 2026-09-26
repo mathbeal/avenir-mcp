@@ -1,4 +1,4 @@
-# Avenir — an unofficial MCP server for YNAB
+# avenir-mcp — an unofficial MCP server for YNAB
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://mathbeal.github.io/avenir-mcp/)
@@ -6,10 +6,10 @@
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/mathbeal/avenir-mcp)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
 
-> 🇬🇧 **Avenir** (French for *the future*) lets an AI agent read your YNAB budget
+> 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB budget
 > and help you plan what comes next.
 >
-> 🇫🇷 **Avenir** permet à un agent IA de lire votre budget YNAB et de vous aider
+> 🇫🇷 **avenir-mcp** permet à un agent IA de lire votre budget YNAB et de vous aider
 > à préparer la suite.
 
 Ask Claude — or any [MCP](https://modelcontextprotocol.io) client — about your budget
@@ -21,15 +21,15 @@ you, and can be undone.
 
 > **Unofficial project.** We are not affiliated, associated, or in any way officially
 > connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget
-> are registered trademarks of YNAB, named here only to say which service Avenir works
+> are registered trademarks of YNAB, named here only to say which service avenir-mcp works
 > with.
 >
-> Avenir is for **personal use on your own machine, with your own YNAB token**. Running it
+> avenir-mcp is for **personal use on your own machine, with your own YNAB token**. Running it
 > as a public or shared server is not supported. It is provided as is, without warranty,
 > and is not financial advice: you remain responsible for the changes you confirm. See the
 > [legal notice](https://mathbeal.github.io/avenir-mcp/project/legal/).
 
-## Why Avenir
+## Why avenir-mcp
 
 - **Tools for tasks, not endpoints.** Classify a month of transactions, reconcile an
   account, forecast your balance: one tool each, not a wrapper of YNAB's API.
@@ -49,14 +49,14 @@ You need [uv](https://docs.astral.sh/uv/) and a YNAB personal access token
 
 ```bash
 # Claude Code
-claude mcp add avenir --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- uvx avenir-mcp
+claude mcp add avenir-mcp --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1 -- uvx avenir-mcp
 ```
 
 ```jsonc
 // Claude Desktop, Cursor: the mcpServers block of the client's configuration
 {
   "mcpServers": {
-    "avenir": {
+    "avenir-mcp": {
       "command": "uvx",
       "args": ["avenir-mcp"],
       "env": { "YNAB_API_KEY": "your-token", "AVENIR_MCP_WRITE": "1" }
@@ -71,7 +71,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 
 ## What you can ask
 
-| You ask | Avenir |
+| You ask | avenir-mcp |
 |---|---|
 | "Which category is overspent this month?" | `get_monthly_summary` — totals and overspent categories |
 | "Categorise what is pending." | `suggest_categories`, then `apply_categories` after your yes |

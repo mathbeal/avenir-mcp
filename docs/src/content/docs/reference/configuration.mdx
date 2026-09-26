@@ -1,13 +1,13 @@
 ---
 title: Configuration
-description: Every environment variable Avenir reads, with its default, its effect and an example.
+description: Every environment variable avenir-mcp reads, with its default, its effect and an example.
 sidebar:
   order: 4
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Avenir reads its configuration from environment variables, set in your MCP client's `env`
+avenir-mcp reads its configuration from environment variables, set in your MCP client's `env`
 block or in the shell that starts it. Nothing else is read: no configuration file.
 
 ## Summary
@@ -41,7 +41,7 @@ It grants full read and write access to every budget of the account.
 
 The path of a file that holds only the token, used when `YNAB_API_KEY` is unset: the
 token then appears in no MCP client configuration. The file must be readable by you only
-(`chmod 600`); otherwise Avenir refuses it and says so. On macOS, after copying the token:
+(`chmod 600`); otherwise avenir-mcp refuses it and says so. On macOS, after copying the token:
 
 ```bash
 mkdir -p ~/.config/avenir-mcp
@@ -126,7 +126,7 @@ collector — see
 
 ### `AVENIR_MCP_YNAB_URL`
 
-The API's base address. Only useful to point Avenir at a stand-in, as the evaluation and
+The API's base address. Only useful to point avenir-mcp at a stand-in, as the evaluation and
 the documentation generator do with their demo budget server. It must start with
 `https://` — plain `http://` is accepted only for `127.0.0.1` or `localhost` — because
 every request carries your token.

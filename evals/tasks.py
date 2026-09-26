@@ -1,7 +1,7 @@
 """Evaluation tasks: what a user asks, and how to tell the agent got it right.
 
 Expected figures are computed from the demo data directly, never copied from
-what Avenir returns, so a tool that computes wrongly fails its task.
+what avenir-mcp returns, so a tool that computes wrongly fails its task.
 """
 
 from __future__ import annotations

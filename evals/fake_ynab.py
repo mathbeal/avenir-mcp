@@ -1,6 +1,6 @@
 """A local stand-in for YNAB's API, serving the demo budget.
 
-Only what Avenir calls is implemented, with YNAB's response shapes. State lives
+Only what avenir-mcp calls is implemented, with YNAB's response shapes. State lives
 in memory so an evaluation can check what an agent changed.
 """
 
@@ -182,7 +182,7 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(length) or b"{}")
 
-    # One route per YNAB endpoint Avenir calls: a flat dispatch reads best here.
+    # One route per YNAB endpoint avenir-mcp calls: a flat dispatch reads best here.
     # pylint: disable-next=too-many-return-statements,too-many-branches,too-many-locals
     def _route(self, method: str) -> None:
         url = urlparse(self.path)

@@ -8,7 +8,7 @@ sidebar:
 import { Aside } from '@astrojs/starlight/components';
 
 Un agent capable de modifier votre budget ne doit jamais vous surprendre. Cette page dit
-contre quoi Avenir protège, et comment.
+contre quoi avenir-mcp protège, et comment.
 
 ## Ce qui est en jeu
 
@@ -48,11 +48,11 @@ Les écritures confirmées sont inscrites au journal et peuvent être défaites 
 ## Le texte bancaire est une donnée
 
 Les noms de bénéficiaires et les mémos sont écrits par les banques, les commerçants et
-quiconque peut vous envoyer de l'argent. Avenir les renvoie dans des champs dédiés,
+quiconque peut vous envoyer de l'argent. avenir-mcp les renvoie dans des champs dédiés,
 sur une seule ligne, sans caractères de contrôle, invisibles ou d'inversion de sens,
 tronqués à 80 caractères — ils ne peuvent donc pas ajouter une fausse ligne à une
 question de confirmation — et ne les place jamais dans une description d'outil, un prompt
-ou une consigne. La ressource `avenir://guide` et le prompt `classify_pending` demandent
+ou une consigne. La ressource `avenir-mcp://guide` et le prompt `classify_pending` demandent
 aux agents de les traiter comme des données. L'[évaluation](/avenir-mcp/fr/project/evaluation/)
 cache une consigne dans un mémo et vérifie que l'agent l'ignore.
 
@@ -60,7 +60,7 @@ cache une consigne dans un mémo et vérifie que l'agent l'ignore.
 
 | Transport | Exposition |
 |---|---|
-| stdio (défaut) | aucune : le client démarre Avenir comme sous-processus |
+| stdio (défaut) | aucune : le client démarre avenir-mcp comme sous-processus |
 | HTTP | écoute sur `127.0.0.1:8103` par défaut ; les requêtes doivent désigner cette machine (`Host`, `Origin`) et porter `AVENIR_MCP_HTTP_TOKEN` s'il est défini — obligatoire avec l'écriture. HTTP simple : gardez-le sur localhost |
 
 ## Ce qui reste sur votre machine
@@ -80,7 +80,7 @@ cache une consigne dans un mémo et vérifie que l'agent l'ignore.
 - Les dépendances sont épinglées et auditées en CI ; les actions GitHub sont épinglées
   par commit et auditées avec zizmor.
 
-<Aside type="caution" title="Ce qu'Avenir ne peut pas protéger">
+<Aside type="caution" title="Ce qu'avenir-mcp ne peut pas protéger">
 Un code de confirmation prouve qu'un aperçu a existé, pas que vous l'avez lu : un agent
 qui le renvoie sans vous demander le rend inutile. Préférez un client qui gère
 l'élicitation MCP, et lisez ce que vous confirmez. Signalez les vulnérabilités en privé :

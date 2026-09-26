@@ -6,7 +6,7 @@ sidebar:
 ---
 
 Las pruebas unitarias comprueban el código. No pueden decir si un agente elige la
-herramienta correcta, lee bien la respuesta o respeta una confirmación. Para eso, Avenir
+herramienta correcta, lee bien la respuesta o respeta una confirmación. Para eso, avenir-mcp
 pone a trabajar a un agente Claude real sobre un presupuesto inventado.
 
 ## Cómo funciona
@@ -16,11 +16,11 @@ pone a trabajar a un agente Claude real sobre un presupuesto inventado.
 | `evals/demo_budget.py` | un hogar inventado: cuenta corriente y de ahorro, alquiler, nómina, suscripciones, compras con etiquetas bancarias realistas, seis transacciones pendientes, una transacción importada dos veces, una categoría excedida, y un memo con una inyección de prompt |
 | `evals/fake_ynab.py` | un sustituto local de la API de YNAB que lo sirve, con sincronización incremental y `last-used`, y cuenta las peticiones |
 | `evals/tasks.py` | las tareas y sus comprobaciones |
-| `evals/run.py` | arranca Claude Code sin interfaz en cada tarea: Avenir como única herramienta, escrituras activadas, un presupuesto nuevo, una carpeta de trabajo vacía, sin guardar la sesión |
+| `evals/run.py` | arranca Claude Code sin interfaz en cada tarea: avenir-mcp como única herramienta, escrituras activadas, un presupuesto nuevo, una carpeta de trabajo vacía, sin guardar la sesión |
 
 Una tarea **se supera** cuando la respuesta final es correcta **y** el presupuesto acaba
 en el estado esperado. Las cifras esperadas se calculan a partir de los datos de
-demostración, nunca se copian de las respuestas de Avenir. Los importes se leen como se
+demostración, nunca se copian de las respuestas de avenir-mcp. Los importes se leen como se
 escriben: `3,512.66`, `3 512,66`, `-22.5`.
 
 ## Tareas
@@ -39,14 +39,14 @@ escriben: `3,512.66`, `3 512,66`, `-22.5`.
 
 ## Resultados
 
-| Ejecución | Modelo | Superadas | Llamadas a Avenir por tarea | Nota |
+| Ejecución | Modelo | Superadas | Llamadas a avenir-mcp por tarea | Nota |
 |---|---|---:|---:|---|
 | 2026-09-25 | Sonnet | 7/9 | 3,7 | las dos escrituras fallaron: vea abajo |
 | 2026-09-25 | Sonnet | 9/9 | 3,7 | tras la corrección |
 | 2026-09-25 | Sonnet | 9/9 | 1,9 | FastMCP 4; el sustituto acepta `last-used` |
 
 La primera ejecución encontró un defecto real: los clientes sin interfaz cierran todas
-las preguntas de confirmación, y Avenir contaba un cierre como un rechazo, así que ninguna
+las preguntas de confirmación, y avenir-mcp contaba un cierre como un rechazo, así que ninguna
 escritura podía pasar. Una pregunta cerrada recurre ahora a un código de confirmación; un
 rechazo explícito sigue siendo un rechazo. Los informes se guardan en `evals/results/`.
 

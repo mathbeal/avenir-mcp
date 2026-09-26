@@ -1,6 +1,6 @@
 ---
 title: "Erreurs"
-description: "Tous les messages d'erreur qu'Avenir peut renvoyer, outil par outil."
+description: "Tous les messages d'erreur qu'avenir-mcp peut renvoyer, outil par outil."
 sidebar:
   order: 2
 ---

@@ -6,7 +6,7 @@ sidebar:
 ---
 
 Unit tests check the code. They cannot tell whether an agent picks the right tool, reads
-the answer correctly, or respects a confirmation. For that, Avenir puts a real Claude
+the answer correctly, or respects a confirmation. For that, avenir-mcp puts a real Claude
 agent to work on an invented budget.
 
 ## How it runs
@@ -16,10 +16,10 @@ agent to work on an invented budget.
 | `evals/demo_budget.py` | an invented household: checking and savings, rent, salary, subscriptions, groceries with realistic bank labels, six pending transactions, a transaction imported twice, an overspent category, and a memo carrying a prompt injection |
 | `evals/fake_ynab.py` | a local stand-in for YNAB's API serving it, with delta sync and `last-used`, counting requests |
 | `evals/tasks.py` | the tasks and their checks |
-| `evals/run.py` | starts Claude Code headless on each task: Avenir as its only tool, writes enabled, a fresh budget, an empty working directory, no session saved |
+| `evals/run.py` | starts Claude Code headless on each task: avenir-mcp as its only tool, writes enabled, a fresh budget, an empty working directory, no session saved |
 
 A task **passes** when the final answer is right **and** the budget ends in the expected
-state. Expected figures are computed from the demo data, never copied from Avenir's
+state. Expected figures are computed from the demo data, never copied from avenir-mcp's
 answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 
 ## Tasks
@@ -38,14 +38,14 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 
 ## Results
 
-| Run | Model | Passed | Avenir calls per task | Note |
+| Run | Model | Passed | avenir-mcp calls per task | Note |
 |---|---|---:|---:|---|
 | 2026-09-25 | Sonnet | 7/9 | 3.7 | the two writes failed: see below |
 | 2026-09-25 | Sonnet | 9/9 | 3.7 | after the fix |
 | 2026-09-25 | Sonnet | 9/9 | 1.9 | FastMCP 4; the stand-in accepts `last-used` |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
-and Avenir counted a dismissal as a refusal, so no write could ever go through. A
+and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A
 dismissed question now falls back to a confirmation code; an explicit refusal still
 refuses. Reports are kept in `evals/results/`.
 

@@ -1,21 +1,21 @@
 ---
 title: Choisir un modèle
-description: Avenir fonctionne avec le modèle de votre client MCP — Claude, GPT, Gemini ou un modèle qui tourne sur votre machine. Ce qui change de l'un à l'autre, et comment installer un modèle local.
+description: avenir-mcp fonctionne avec le modèle de votre client MCP — Claude, GPT, Gemini ou un modèle qui tourne sur votre machine. Ce qui change de l'un à l'autre, et comment installer un modèle local.
 sidebar:
   order: 9
 ---
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-Avenir est un serveur : il ne contient aucun modèle et n'en choisit aucun. Le modèle est
+avenir-mcp est un serveur : il ne contient aucun modèle et n'en choisit aucun. Le modèle est
 celui qu'utilise votre client MCP. Tout modèle capable d'appeler des outils peut utiliser
-Avenir ; ce qui change, c'est sa fiabilité, et l'endroit où vont vos données.
+avenir-mcp ; ce qui change, c'est sa fiabilité, et l'endroit où vont vos données.
 
 ## Quel client donne accès à quels modèles
 
 | Client | Modèles | Installation |
 |---|---|---|
-| Claude Code, Claude Desktop | Claude (Anthropic) | [Installer](/avenir-mcp/fr/getting-started/install/#ajouter-avenir-à-votre-client) |
+| Claude Code, Claude Desktop | Claude (Anthropic) | [Installer](/avenir-mcp/fr/getting-started/install/#ajouter-avenir-mcp-à-votre-client) |
 | Cursor | les modèles de son menu : Claude, GPT, Gemini… | même page, onglet *Cursor* |
 | VS Code (Copilot Chat) | les modèles de son sélecteur : GPT, Claude, Gemini… | onglet *VS Code* |
 | Gemini CLI | Gemini (Google) | onglet *Gemini CLI* |
@@ -26,7 +26,7 @@ Avenir ; ce qui change, c'est sa fiabilité, et l'endroit où vont vos données.
 Les modèles proposés par chaque client changent souvent : choisissez dans le menu du
 client lui-même.
 
-## Ce qui fait un bon modèle pour Avenir
+## Ce qui fait un bon modèle pour avenir-mcp
 
 - **Des appels d'outils fiables.** Il choisit le bon parmi 17 outils et remplit les
   arguments exactement : identifiants recopiés d'une réponse précédente, mois au format
@@ -51,10 +51,10 @@ clients est sur la [feuille de route](/avenir-mcp/fr/project/limitations/#feuill
 
 <Aside type="caution" title="La sécurité ne dépend pas du modèle — presque">
 Le mode lecture seule, les aperçus et le lien entre une confirmation et son aperçu exact
-sont garantis par Avenir, quel que soit le modèle. Une chose ne l'est pas : dans un
+sont garantis par avenir-mcp, quel que soit le modèle. Une chose ne l'est pas : dans un
 client sans élicitation MCP, c'est le **modèle** qui vous transmet l'aperçu et le code
 de confirmation, et un modèle négligent pourrait renvoyer le code sans vous demander.
-Avec un modèle dont vous n'êtes pas encore sûr, gardez Avenir en lecture seule (sans
+Avec un modèle dont vous n'êtes pas encore sûr, gardez avenir-mcp en lecture seule (sans
 `AVENIR_MCP_WRITE`), ou définissez `AVENIR_MCP_REQUIRE_ELICITATION=1` pour que seule
 votre réponse, dans le client, puisse confirmer.
 </Aside>
@@ -65,7 +65,7 @@ votre réponse, dans le client, puisse confirmer.
 |---|---|---|
 | Transactions, bénéficiaires, montants lus par l'agent | envoyés au fournisseur du modèle, avec la conversation | restent sur votre machine |
 | Votre jeton YNAB | jamais envoyé à un modèle | jamais envoyé à un modèle |
-| YNAB | Avenir appelle l'API de YNAB | Avenir appelle l'API de YNAB |
+| YNAB | avenir-mcp appelle l'API de YNAB | avenir-mcp appelle l'API de YNAB |
 
 Avec un modèle dans le cloud, la politique de données du fournisseur s'applique à vos
 conversations.
@@ -91,8 +91,8 @@ fiablement que les plus grands modèles du cloud.
 1. **Installez LM Studio et téléchargez un modèle** dont la fiche indique qu'il gère
    l'appel d'outils — par exemple un modèle Qwen, gpt-oss ou Mistral récent.
 
-2. **Ajoutez Avenir** au `mcp.json` de LM Studio, comme dans l'onglet *LM Studio* de
-   [Installer](/avenir-mcp/fr/getting-started/install/#ajouter-avenir-à-votre-client).
+2. **Ajoutez avenir-mcp** au `mcp.json` de LM Studio, comme dans l'onglet *LM Studio* de
+   [Installer](/avenir-mcp/fr/getting-started/install/#ajouter-avenir-mcp-à-votre-client).
 
 3. **Chargez le modèle avec une longueur de contexte d'au moins 32 000 tokens**, dans
    les réglages affichés au chargement.
@@ -110,13 +110,13 @@ fiablement que les plus grands modèles du cloud.
 
 Ollama fait tourner des modèles mais n'est pas un client MCP. Utilisez-le à travers un
 client MCP capable de parler à Ollama, comme [goose](https://block.github.io/goose/) ;
-configurez-y Avenir comme dans l'onglet *Autres clients* de
-[Installer](/avenir-mcp/fr/getting-started/install/#ajouter-avenir-à-votre-client).
+configurez-y avenir-mcp comme dans l'onglet *Autres clients* de
+[Installer](/avenir-mcp/fr/getting-started/install/#ajouter-avenir-mcp-à-votre-client).
 
 ## ChatGPT
 
 ChatGPT ne se connecte qu'à des serveurs MCP **distants**, joignables depuis Internet en
-HTTPS. Avenir tourne sur votre machine, et son transport HTTP est fait pour cette machine
+HTTPS. avenir-mcp tourne sur votre machine, et son transport HTTP est fait pour cette machine
 seulement : HTTP simple, et les requêtes doivent désigner `127.0.0.1` ou `localhost`.
 L'exposer sur Internet mettrait en jeu votre budget et votre jeton.
 ChatGPT n'est donc pas pris en charge. Pour utiliser les modèles d'OpenAI, passez par
@@ -124,6 +124,6 @@ Codex CLI, Cursor ou VS Code.
 
 ## Dites-nous comment se comporte un modèle
 
-Vous avez essayé Avenir avec un autre modèle ? Ouvrez une
+Vous avez essayé avenir-mcp avec un autre modèle ? Ouvrez une
 [issue](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) avec le client, le modèle et sa version,
 et ce qui a marché ou non — avec des chiffres inventés uniquement.

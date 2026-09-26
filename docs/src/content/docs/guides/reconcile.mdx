@@ -27,7 +27,7 @@ account reconciled (the diagnosis works read-only).
 
 2. **The agent compares.** It calls `reconcile_account` with
    `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
-   Avenir sums the account's *cleared* transactions (those the bank has shown) and
+   avenir-mcp sums the account's *cleared* transactions (those the bank has shown) and
    compares. They differ, so **nothing is written**:
 
    <Code code={gap} lang="json" title="reconcile_account — difference found" />
@@ -44,7 +44,7 @@ account reconciled (the diagnosis works read-only).
 
 4. **You fix the cause** — here, delete the duplicate in YNAB.
 
-5. **Ask again.** When the balances match, Avenir previews the reconciliation: every
+5. **Ask again.** When the balances match, avenir-mcp previews the reconciliation: every
    cleared transaction of the account becomes *reconciled*. You confirm; it is applied in
    one request and journaled.
 
@@ -60,7 +60,7 @@ for it, the agent calls again with `adjust=true`:
 - then the account is reconciled, adjustment included.
 
 <Aside type="caution">
-An adjustment hides a problem instead of solving it. Avenir never makes one on its own,
+An adjustment hides a problem instead of solving it. avenir-mcp never makes one on its own,
 and the evaluation checks that an agent asked *“don't change anything”* does not either.
 </Aside>
 

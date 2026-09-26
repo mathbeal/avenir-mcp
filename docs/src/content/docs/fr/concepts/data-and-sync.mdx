@@ -10,7 +10,7 @@ import { Aside } from '@astrojs/starlight/components';
 ## Montants
 
 YNAB stocke chaque montant en nombre entier de **milliunités** : 1,00 vaut `1000`,
-−12,34 vaut `-12340`. Avenir convertit à la frontière et ne montre jamais de milliunités
+−12,34 vaut `-12340`. avenir-mcp convertit à la frontière et ne montre jamais de milliunités
 à l'agent :
 
 | Sens | Règle |
@@ -39,14 +39,14 @@ devise du budget ; les dépenses sont négatives, les entrées positives.
 
 La plupart des outils ont besoin des transactions du budget : trouver ce qui attend,
 apprendre de l'historique, comparer avec la banque, prévoir. Tout télécharger à chaque
-appel serait lent et consommerait le quota de YNAB. Avenir garde une copie par budget, en
+appel serait lent et consommerait le quota de YNAB. avenir-mcp garde une copie par budget, en
 mémoire, et la rafraîchit par la **synchronisation incrémentale** de YNAB :
 
 1. Le premier chargement demande toutes les transactions et garde le `server_knowledge`
    de YNAB, un compteur de modifications.
 2. Le chargement suivant envoie `last_knowledge_of_server` et ne reçoit **que ce qui a
    changé depuis** : transactions nouvelles, modifiées et supprimées.
-3. Avenir les fusionne dans sa copie : une transaction modifiée remplace l'ancienne, une
+3. avenir-mcp les fusionne dans sa copie : une transaction modifiée remplace l'ancienne, une
    transaction supprimée est retirée.
 
 Avec l'identifiant d'un budget, la copie est rafraîchie par synchronisation
@@ -80,11 +80,11 @@ de chaque outil, cache froid, est mesuré sur le budget de démonstration et ind
 
 Appliquer une écriture confirmée ajoute sa propre requête (un seul `PATCH` groupé, quel
 que soit le nombre de transactions). Avec un cache chaud, relire les transactions coûte
-une petite requête incrémentale. Quand le quota est épuisé, YNAB répond `429`, qu'Avenir
+une petite requête incrémentale. Quand le quota est épuisé, YNAB répond `429`, qu'avenir-mcp
 renvoie en `… YNAB 429: …` ; il suffit d'attendre quelques minutes.
 
 ## Ce qui n'est jamais stocké
 
-Avenir ne garde aucune copie sur le disque. Les transactions vivent en mémoire tant que
+avenir-mcp ne garde aucune copie sur le disque. Les transactions vivent en mémoire tant que
 le serveur tourne ; le [journal](/avenir-mcp/fr/concepts/journal/) ne contient que des
 identifiants ; le jeton reste dans l'environnement et n'est jamais journalisé.

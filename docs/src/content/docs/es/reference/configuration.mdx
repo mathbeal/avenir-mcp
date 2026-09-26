@@ -1,13 +1,13 @@
 ---
 title: Configuración
-description: Cada variable de entorno que lee Avenir, con su valor por defecto, su efecto y un ejemplo.
+description: Cada variable de entorno que lee avenir-mcp, con su valor por defecto, su efecto y un ejemplo.
 sidebar:
   order: 4
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Avenir lee su configuración de variables de entorno, definidas en el bloque `env` de su
+avenir-mcp lee su configuración de variables de entorno, definidas en el bloque `env` de su
 cliente MCP o en el shell que lo arranca. No se lee nada más: no hay archivo de
 configuración.
 
@@ -43,7 +43,7 @@ cuenta.
 
 La ruta de un archivo que solo contiene el token, usado cuando `YNAB_API_KEY` no está
 definida: el token no aparece entonces en ninguna configuración de cliente MCP. El
-archivo debe ser legible solo por usted (`chmod 600`); si no, Avenir lo rechaza y lo
+archivo debe ser legible solo por usted (`chmod 600`); si no, avenir-mcp lo rechaza y lo
 dice. En macOS, tras copiar el token:
 
 ```bash
@@ -134,7 +134,7 @@ para un recolector de logs — vea
 
 ### `AVENIR_MCP_YNAB_URL`
 
-La dirección base de la API. Solo sirve para dirigir Avenir a un sustituto, como hacen la
+La dirección base de la API. Solo sirve para dirigir avenir-mcp a un sustituto, como hacen la
 evaluación y el generador de documentación con su servidor de presupuesto de
 demostración. Debe empezar por `https://` — `http://` solo se acepta para `127.0.0.1` o
 `localhost` — porque cada petición lleva su token.

@@ -1,6 +1,6 @@
 ---
 title: "Errors"
-description: "Every error message Avenir can return, tool by tool."
+description: "Every error message avenir-mcp can return, tool by tool."
 sidebar:
   order: 2
 ---

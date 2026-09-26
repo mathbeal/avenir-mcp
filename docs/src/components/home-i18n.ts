@@ -2,9 +2,9 @@
 const texts = {
   en: {
     eyebrow: 'Unofficial open-source MCP server for YNAB',
-    install: 'claude mcp add avenir \\\n  --env YNAB_API_KEY=your-token \\\n  -- uvx avenir-mcp',
+    install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=your-token \\\n  -- uvx avenir-mcp',
     worksWith: 'Works with',
-    demoLabel: 'A conversation with Claude using Avenir',
+    demoLabel: 'A conversation with Claude using avenir-mcp',
     you: 'You',
     q1: 'Which category is overspent this month?',
     a1: 'Restaurants is <strong>22.50 over</strong>. Tennis still has 80.00 available — move 30 to cover it?',
@@ -22,18 +22,18 @@ const texts = {
       ['1–2', 'YNAB requests per call, most tools'],
     ],
     flow: [
-      ['Preview', 'Avenir computes the exact change and shows it. Nothing is written yet.'],
+      ['Preview', 'avenir-mcp computes the exact change and shows it. Nothing is written yet.'],
       ['Confirm', 'You say yes in your client, or with a one-time code bound to that preview.'],
       ['Undo', 'Every applied change is journaled; undo restores it without overwriting later work.'],
     ],
     disclaimer:
-      '<strong>Unofficial project.</strong> We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget are registered trademarks of YNAB. Avenir is provided as is, without warranty, and is not financial advice. <a href="/avenir-mcp/project/legal/">Legal notice</a>',
+      '<strong>Unofficial project.</strong> We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget are registered trademarks of YNAB. avenir-mcp is provided as is, without warranty, and is not financial advice. <a href="/avenir-mcp/project/legal/">Legal notice</a>',
   },
   fr: {
     eyebrow: 'Serveur MCP open source non officiel pour YNAB',
-    install: 'claude mcp add avenir \\\n  --env YNAB_API_KEY=votre-jeton \\\n  -- uvx avenir-mcp',
+    install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=votre-jeton \\\n  -- uvx avenir-mcp',
     worksWith: 'Fonctionne avec',
-    demoLabel: 'Une conversation avec Claude qui utilise Avenir',
+    demoLabel: 'Une conversation avec Claude qui utilise avenir-mcp',
     you: 'Vous',
     q1: 'Quelle catégorie est en dépassement ce mois-ci ?',
     a1: 'Restaurants dépasse de <strong>22,50</strong>. Il reste 80,00 dans Tennis — j’en déplace 30 pour couvrir ?',
@@ -51,18 +51,18 @@ const texts = {
       ['1–2', 'requêtes YNAB par appel, pour la plupart des outils'],
     ],
     flow: [
-      ['Aperçu', 'Avenir calcule le changement exact et vous le montre. Rien n’est encore écrit.'],
+      ['Aperçu', 'avenir-mcp calcule le changement exact et vous le montre. Rien n’est encore écrit.'],
       ['Confirmation', 'Vous dites oui dans votre client, ou avec un code à usage unique lié à cet aperçu.'],
       ['Annulation', 'Chaque changement appliqué est journalisé ; l’annulation le défait sans écraser le travail fait depuis.'],
     ],
     disclaimer:
-      '<strong>Projet non officiel.</strong> « We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. » Nous ne sommes ni affiliés, ni associés, ni liés officiellement à YNAB. YNAB et You Need A Budget sont des marques déposées de YNAB. Avenir est fourni tel quel, sans garantie, et n’est pas un conseil financier. <a href="/avenir-mcp/fr/project/legal/">Mentions légales</a>',
+      '<strong>Projet non officiel.</strong> « We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. » Nous ne sommes ni affiliés, ni associés, ni liés officiellement à YNAB. YNAB et You Need A Budget sont des marques déposées de YNAB. avenir-mcp est fourni tel quel, sans garantie, et n’est pas un conseil financier. <a href="/avenir-mcp/fr/project/legal/">Mentions légales</a>',
   },
   es: {
     eyebrow: 'Servidor MCP no oficial y de código abierto para YNAB',
-    install: 'claude mcp add avenir \\\n  --env YNAB_API_KEY=su-token \\\n  -- uvx avenir-mcp',
+    install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=su-token \\\n  -- uvx avenir-mcp',
     worksWith: 'Funciona con',
-    demoLabel: 'Una conversación con Claude usando Avenir',
+    demoLabel: 'Una conversación con Claude usando avenir-mcp',
     you: 'Usted',
     q1: '¿Qué categoría se ha pasado este mes?',
     a1: 'Restaurants se ha pasado <strong>22,50</strong>. A Tennis le quedan 80,00 — ¿muevo 30 para cubrirlo?',
@@ -80,12 +80,12 @@ const texts = {
       ['1–2', 'peticiones a YNAB por llamada, en la mayoría'],
     ],
     flow: [
-      ['Vista previa', 'Avenir calcula el cambio exacto y se lo muestra. Todavía no se escribe nada.'],
+      ['Vista previa', 'avenir-mcp calcula el cambio exacto y se lo muestra. Todavía no se escribe nada.'],
       ['Confirmación', 'Usted dice que sí en su cliente, o con un código de un solo uso ligado a esa vista previa.'],
       ['Deshacer', 'Cada cambio aplicado se anota en el diario; deshacer lo revierte sin sobrescribir el trabajo posterior.'],
     ],
     disclaimer:
-      '<strong>Proyecto no oficial.</strong> «We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.» No estamos afiliados, asociados ni conectados oficialmente con YNAB. YNAB y You Need A Budget son marcas registradas de YNAB. Avenir se ofrece tal cual, sin garantía, y no es asesoramiento financiero. <a href="/avenir-mcp/es/project/legal/">Aviso legal</a>',
+      '<strong>Proyecto no oficial.</strong> «We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.» No estamos afiliados, asociados ni conectados oficialmente con YNAB. YNAB y You Need A Budget son marcas registradas de YNAB. avenir-mcp se ofrece tal cual, sin garantía, y no es asesoramiento financiero. <a href="/avenir-mcp/es/project/legal/">Aviso legal</a>',
   },
 } as const;
 

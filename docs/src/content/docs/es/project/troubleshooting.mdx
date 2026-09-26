@@ -8,7 +8,7 @@ sidebar:
 ## Conexión
 
 <details>
-<summary>Mi cliente no muestra las herramientas de Avenir</summary>
+<summary>Mi cliente no muestra las herramientas de avenir-mcp</summary>
 
 1. Compruebe que el servidor está conectado: `claude mcp list`, o el panel MCP de su
    cliente.
@@ -24,7 +24,7 @@ sidebar:
 <details>
 <summary>Faltan las herramientas que modifican mi presupuesto</summary>
 
-Avenir está en solo lectura salvo que su entorno contenga `AVENIR_MCP_WRITE=1` —
+avenir-mcp está en solo lectura salvo que su entorno contenga `AVENIR_MCP_WRITE=1` —
 exactamente `1`. Reinicie el servidor tras cambiarlo.
 
 </details>
@@ -72,7 +72,7 @@ cuestan poco gracias a la sincronización incremental. Vea
 <details>
 <summary>El agente responde una y otra vez <code>confirmation_required</code></summary>
 
-Su cliente no sabe mostrar un cuadro de confirmación, así que Avenir devolvió una vista
+Su cliente no sabe mostrar un cuadro de confirmación, así que avenir-mcp devolvió una vista
 previa y un código. Diga al agente que está de acuerdo: vuelve a llamar con el código. Un
 código dura 10 minutos y sirve una vez; tras reiniciar el servidor, pida una nueva vista
 previa.

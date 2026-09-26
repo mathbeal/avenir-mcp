@@ -10,7 +10,7 @@ import { Aside } from '@astrojs/starlight/components';
 ## Amounts
 
 YNAB stores every amount as an integer number of **milliunits**: 1.00 is `1000`, −12.34
-is `-12340`. Avenir converts at the boundary and never shows milliunits to the agent:
+is `-12340`. avenir-mcp converts at the boundary and never shows milliunits to the agent:
 
 | Direction | Rule |
 |---|---|
@@ -38,14 +38,14 @@ spending is negative, money in positive.
 
 Most tools need the budget's transactions: to find what is pending, to learn from
 history, to compare with the bank, to forecast. Downloading them all on every call would
-be slow and would spend YNAB's quota. Avenir keeps a copy per budget, in memory, and
+be slow and would spend YNAB's quota. avenir-mcp keeps a copy per budget, in memory, and
 refreshes it with YNAB's **delta sync**:
 
 1. The first load asks for every transaction and keeps YNAB's `server_knowledge`, a
    counter of changes.
 2. The next load sends `last_knowledge_of_server` and receives **only what changed
    since**: new, modified and deleted transactions.
-3. Avenir merges them into its copy: a changed transaction replaces the old one, a
+3. avenir-mcp merges them into its copy: a changed transaction replaces the old one, a
    deleted one is removed.
 
 With a budget's id, the copy is refreshed by delta sync. With `last-used`, which
@@ -77,11 +77,11 @@ costs, on a cold cache, is measured on the demo budget and stated on its
 
 Applying a confirmed write adds its own request (one bulk `PATCH` for any number of
 transactions). With a warm cache, reading transactions again costs one small delta
-request. When the quota is spent YNAB answers `429`, which Avenir returns as `… YNAB 429:
+request. When the quota is spent YNAB answers `429`, which avenir-mcp returns as `… YNAB 429:
 …`; waiting a few minutes is enough.
 
 ## What is never stored
 
-Avenir keeps no copy on disk. The transactions live in memory while the server runs; the
+avenir-mcp keeps no copy on disk. The transactions live in memory while the server runs; the
 [journal](/avenir-mcp/concepts/journal/) holds identifiers only; the token stays in the
 environment and is never logged.

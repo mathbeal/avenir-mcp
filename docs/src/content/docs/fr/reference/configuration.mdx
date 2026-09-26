@@ -1,13 +1,13 @@
 ---
 title: Configuration
-description: Chaque variable d'environnement lue par Avenir, avec sa valeur par défaut, son effet et un exemple.
+description: Chaque variable d'environnement lue par avenir-mcp, avec sa valeur par défaut, son effet et un exemple.
 sidebar:
   order: 4
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Avenir lit sa configuration dans des variables d'environnement, définies dans le bloc
+avenir-mcp lit sa configuration dans des variables d'environnement, définies dans le bloc
 `env` de votre client MCP ou dans le shell qui le lance. Rien d'autre n'est lu : pas de
 fichier de configuration.
 
@@ -42,7 +42,7 @@ set`. Il donne un accès complet en lecture et en écriture à tous les budgets 
 
 Le chemin d'un fichier qui ne contient que le jeton, utilisé quand `YNAB_API_KEY` est
 absente : le jeton n'apparaît alors dans aucune configuration de client MCP. Le fichier
-doit être lisible par vous seul (`chmod 600`) ; sinon Avenir le refuse et le dit. Sur
+doit être lisible par vous seul (`chmod 600`) ; sinon avenir-mcp le refuse et le dit. Sur
 macOS, après avoir copié le jeton :
 
 ```bash
@@ -134,7 +134,7 @@ un collecteur de logs — voir
 
 ### `AVENIR_MCP_YNAB_URL`
 
-L'adresse de base de l'API. Utile seulement pour diriger Avenir vers une doublure, comme
+L'adresse de base de l'API. Utile seulement pour diriger avenir-mcp vers une doublure, comme
 le font l'évaluation et le générateur de documentation avec leur serveur de budget de
 démonstration. Elle doit commencer par `https://` — `http://` n'est accepté que pour
 `127.0.0.1` ou `localhost` — car chaque requête porte votre jeton.

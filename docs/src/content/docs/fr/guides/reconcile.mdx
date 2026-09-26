@@ -27,7 +27,7 @@ activée pour marquer le compte rapproché (le diagnostic fonctionne en lecture 
 
 2. **L'agent compare.** Il appelle `reconcile_account` avec
    `{"budget_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
-   Avenir additionne les transactions *pointées* du compte (celles que la banque a
+   avenir-mcp additionne les transactions *pointées* du compte (celles que la banque a
    montrées) et compare. Elles diffèrent, donc **rien n'est écrit** :
 
    <Code code={gap} lang="json" title="reconcile_account — écart trouvé" />
@@ -44,7 +44,7 @@ activée pour marquer le compte rapproché (le diagnostic fonctionne en lecture 
 
 4. **Vous corrigez la cause** — ici, supprimer le doublon dans YNAB.
 
-5. **Redemandez.** Quand les soldes concordent, Avenir prévisualise le rapprochement :
+5. **Redemandez.** Quand les soldes concordent, avenir-mcp prévisualise le rapprochement :
    chaque transaction pointée du compte devient *rapprochée*. Vous confirmez ; c'est
    appliqué en une requête et inscrit au journal.
 
@@ -60,7 +60,7 @@ Seulement si vous le demandez, l'agent rappelle l'outil avec `adjust=true` :
 - puis le compte est rapproché, ajustement compris.
 
 <Aside type="caution">
-Un ajustement masque un problème au lieu de le résoudre. Avenir n'en crée jamais de
+Un ajustement masque un problème au lieu de le résoudre. avenir-mcp n'en crée jamais de
 lui-même, et l'évaluation vérifie qu'un agent à qui l'on dit *« ne change rien »* n'en
 crée pas non plus.
 </Aside>

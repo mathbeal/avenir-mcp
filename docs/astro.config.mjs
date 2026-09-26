@@ -9,13 +9,13 @@ export default defineConfig({
   base: '/avenir-mcp',
   vite: {
     resolve: {
-      // Real answers from Avenir on the invented demo budget, written by `python -m docsgen`.
+      // Real answers from avenir-mcp on the invented demo budget, written by `python -m docsgen`.
       alias: { '@snippets': fileURLToPath(new URL('./src/snippets', import.meta.url)) },
     },
   },
   integrations: [
     starlight({
-      title: 'Avenir',
+      title: 'avenir-mcp',
       description: 'An unofficial MCP server for YNAB, built for agents.',
       logo: { src: './src/assets/logo.svg' },
       favicon: '/favicon.svg',
@@ -28,7 +28,7 @@ export default defineConfig({
       // The home pages get their own hero: install command and a conversation preview.
       components: {
         Hero: './src/components/Hero.astro',
-        // Every page ends with the notice that Avenir is unofficial.
+        // Every page ends with the notice that avenir-mcp is unofficial.
         Footer: './src/components/Footer.astro',
       },
       defaultLocale: 'root',
