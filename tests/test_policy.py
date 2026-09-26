@@ -50,6 +50,7 @@ def test_read_only_mode_hides_and_refuses_writes() -> None:
     assert "suggest_categories" in names
     assert "apply_categories" not in names
     assert "create_transactions" not in names
+    assert "split_transaction" not in names
 
     async def call() -> Any:
         async with Client(server.mcp) as mcp_client:

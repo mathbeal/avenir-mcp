@@ -40,6 +40,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "suggest_categories",
             "forecast_balance",
             "apply_categories",
+            "split_transaction",
             "undo_operation",
             "reconcile_account",
             "update_category",

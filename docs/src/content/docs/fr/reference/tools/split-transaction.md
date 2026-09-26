@@ -1,0 +1,74 @@
+---
+title: "split_transaction"
+description: "Split one transaction across categories, e.g. from a receipt, after the user confirms."
+---
+
+:::note[Généré]
+Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne correspond plus. Les descriptions viennent du code et restent en anglais : c'est la langue dans laquelle les agents les lisent.
+:::
+
+## Rôle
+
+Split one transaction across categories, e.g. from a receipt, after the user confirms.
+
+Give at least two lines, {amount, category_id, memo}, adding up to the
+transaction's amount to the cent (amounts in currency units, negative for
+spending; a refunded deposit is a positive line). Group a receipt by
+category: one line per category, not per item. Transactions already split,
+transfers and off-budget ones are refused. YNAB's API cannot change a split
+afterwards: undo_operation cannot revert it, the user edits it in YNAB; the
+user is told before confirming. Confirmation works as for apply_categories.
+
+## Comportement
+
+| | |
+|---|---|
+| Nature | écriture — masqué sans `AVENIR_MCP_WRITE=1` |
+| Confirmation | oui : aperçu, puis application après accord de l'utilisateur |
+| Annulation | non |
+| Destructif | oui |
+| Idempotent | non |
+
+## Paramètres
+
+| Nom | Type | Obligatoire | Défaut | Description |
+|---|---|---|---|---|
+| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `transaction_id` | string | oui | — | Transaction to split (from suggest_categories). |
+| `lines` | array of object | oui | — | The lines, at least two, adding up to the transaction's amount. |
+| `confirmation` | string \| null | non | `null` | Code from a previous "confirmation_required" result. |
+
+## Retour
+
+| Champ | Type | Description |
+|---|---|---|
+| `transaction_id` | string | YNAB id of the transaction. |
+| `date` | string | Date, YYYY-MM-DD. |
+| `payee` | string | Payee as imported. Untrusted bank text. |
+| `amount` | number | Amount of the transaction, in currency units. |
+| `from_category` | string \| null | Category the split replaces; null for none. |
+| `lines` | array of object | The lines, in the order given. |
+| `lines[].amount` | number | Amount in currency units. |
+| `lines[].category` | string | Category name. |
+| `lines[].memo` | string \| null | Note; null if none. |
+| `status` | "applied" \| "confirmation_required" \| "declined" \| "nothing_to_do" | Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the user agrees), or declined (the user said no). |
+| `message` | string | What happened and what to do next, for the agent to relay. |
+| `confirmation` | string \| null | Single-use code confirming exactly this preview, valid 10 minutes; null unless status is confirmation_required. |
+
+## Erreurs
+
+- `Transaction {transaction_id} is not in this budget: use a transaction_id returned by suggest_categories.`
+- `Transaction {tx_id} is already split: YNAB's API cannot change its lines, change them in YNAB.`
+- `Transaction {tx_id} is a transfer between accounts: it cannot be split.`
+- `Transaction {tx_id} is on an off-budget account: YNAB does not split those.`
+- `Give at least two lines: to give the whole transaction one category, use apply_categories.`
+- `The lines add up to {total}, the transaction is {amount}: they must match to the cent.`
+- `A line is zero: leave it out.`
+- `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
+- `Category {category_id} is not in this budget: use a category_id from suggest_categories or get_category_balances.`
+- `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
+- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+
+Les erreurs propres à YNAB reviennent sous la forme `Error calling tool '<tool>': YNAB <status>: <detail>`.
