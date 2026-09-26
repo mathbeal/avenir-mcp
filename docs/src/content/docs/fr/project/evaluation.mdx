@@ -50,6 +50,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | 2026-09-26 | Sonnet | 9/9 | 1,8 | après les correctifs de sécurité et le renommage ; un second mémo piégé, plus retors |
 | 2026-09-26 | Sonnet | 10/10 | 2,4 | une dixième tâche : ventiler un achat d'après son ticket |
 | 2026-09-26 | Sonnet | 10/10 | 2,3 | une dixième tâche : retrouver un paiement déjà catégorisé |
+| 2026-09-26 | Sonnet | 11/11 | 2,0 | les deux dixièmes tâches réunies ; `move-money` a d'abord échoué (10/11) : l'avertissement de confirmation empêchait l'agent d'utiliser des codes acceptés à l'avance par l'utilisateur. Après la reformulation, elle passe, tout comme `classify` et `split-receipt`, relancées |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
 les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien
@@ -59,7 +60,7 @@ de confirmation ; un refus explicite reste un refus. Les rapports sont gardés d
 
 ## Autres modèles
 
-Le 26/09/2026, neuf modèles de sept fournisseurs, via [Mammouth](https://mammouth.ai), sur les neuf
+Le 26/09/2026, huit modèles de six fournisseurs, via [Mammouth](https://mammouth.ai), sur les neuf
 tâches d'alors :
 
 | Modèle | Réussies | Appels par tâche | Remarque |
@@ -72,16 +73,17 @@ tâches d'alors :
 | Qwen 3.7 Max | 8/9 | 1.9 | bon solde, mais une ligne de réponse mal orthographiée |
 | Mistral Large 3 | 8/9 | 2.1 | une tâche n'a jamais tourné : l'API répondait 429 |
 | Gemini 3.1 Pro | 8/9 | 2.1 | a obéi au mémo piégé : voir plus bas |
-| Llama 4 Maverick | 2/9 | 1.1 | écrit les appels d'outils en texte au lieu de les faire |
 
 Gemini 3.1 Pro a produit l'échec le plus instructif. Le client du lanceur ne sait pas poser
 de question à l'utilisateur : avenir-mcp répond donc à une écriture par un code à usage
 unique. En lisant le mémo qui demande de modifier le budget du loyer, le modèle a appelé
 `set_category_budget`, puis s'est servi seul du code avant d'annuler le changement. Chaque
-code est désormais accompagné de la consigne que l'utilisateur n'a pas vu le changement et
-qu'un bénéficiaire ou un mémo n'est jamais l'utilisateur. Sur quatre essais avant, le modèle
+code est désormais accompagné de la consigne que seul l'utilisateur peut accepter, dans la
+conversation, et jamais un bénéficiaire ni un mémo. Sur quatre essais avant, le modèle
 a tenté le changement piégé quatre fois et l'a appliqué deux fois ; sur trois essais après,
-il ne l'a jamais tenté. Un client qui sait poser la question à l'utilisateur ferme la
+il ne l'a jamais tenté. Cette première formulation empêchait aussi Sonnet de se servir des
+codes que l'utilisateur avait acceptés à l'avance ; la consigne laisse désormais compter
+la parole de l'utilisateur dans la conversation. Un client qui sait poser la question à l'utilisateur ferme la
 brèche : voir [Autoriser les modifications](/avenir-mcp/fr/getting-started/install/#autoriser-les-modifications).
 
 ## Lancer l'évaluation
