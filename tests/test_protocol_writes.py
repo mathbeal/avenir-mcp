@@ -12,7 +12,7 @@ import pytest
 from fastmcp import Client
 from fastmcp.client.elicitation import ElicitResult
 
-from avenir_mcp import server
+from avenir_mcp import confirm, server
 
 from .mcp_helpers import accept, call, decline
 
@@ -106,6 +106,15 @@ def test_without_elicitation_first_call_only_previews(budget: _Budget) -> None:
     assert data["confirmation"]
     assert data["changes"][0]["to_category"] == "Groceries"
     assert data["changes"][0]["amount"] == -7.25
+    assert not budget.patches
+
+
+def test_a_code_comes_with_a_warning_that_only_the_user_can_agree(budget: _Budget) -> None:
+    """A recategorisation preview tells the agent the user has not seen it and must agree."""
+    message = call(
+        "apply_categories", {"budget_id": "b1", "assignments": _ASSIGN}
+    ).structured_content["message"]
+    assert confirm.ONLY_THE_USER in message
     assert not budget.patches
 
 

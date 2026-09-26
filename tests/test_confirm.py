@@ -114,3 +114,12 @@ def test_required_client_confirmation_treats_a_dismissed_question_as_no() -> Non
 def test_required_client_confirmation_still_accepts_a_yes() -> None:
     """The user's own yes, given in the client, applies the change."""
     assert _ask(_Ctx("2025-11-25", answer=AcceptedElicitation(data=True))) == "applied"
+
+
+def test_every_code_comes_with_the_warning_that_only_the_user_can_agree() -> None:
+    """Writes other than recategorisation say it too, before their question."""
+    stop = confirm.not_applied("code-1", "Budget Rent for 2026-09-01: 800.00 → 50.00?")
+    assert stop is not None
+    assert stop.message.startswith(f"Nothing changed yet. {confirm.ONLY_THE_USER} Budget Rent")
+    assert "never use the code on your own" in confirm.ONLY_THE_USER
+    assert "memo" in confirm.ONLY_THE_USER

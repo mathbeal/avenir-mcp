@@ -27,6 +27,11 @@ What the server does:
   only confirms the exact changes it was issued for
 - with `AVENIR_MCP_REQUIRE_ELICITATION=1`, only the user's yes given in the client
   confirms a write: codes, which an agent could relay alone, are disabled
+- a client that cannot ask the user (no MCP elicitation) leaves the code to the agent.
+  Every code comes with the instruction that only the user can agree, never a payee or
+  a memo, but a model can still be misled: in the evaluation, one model out of nine
+  used a code on its own after reading a planted memo, then undid the change. Use a
+  client that supports elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
   identifiers only, readable by its owner only
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
