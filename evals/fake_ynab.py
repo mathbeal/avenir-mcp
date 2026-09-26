@@ -129,13 +129,18 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         self.changed_at[tx_id] = self.knowledge
 
     def patch_transactions(self, updates: list[dict[str, Any]]) -> list[str]:
-        """Apply category, cleared or approved changes."""
+        """Apply category, cleared, approved or split changes."""
         names = {c["id"]: c["name"] for c in self.categories()}
         for update in updates:
             tx = self.transactions[update["id"]]
             for key in ("category_id", "cleared", "approved"):
                 if key in update:
                     tx[key] = update[key]
+            if "subtransactions" in update:
+                tx["subtransactions"] = [
+                    {"id": f"{tx['id']}-{i}", "deleted": False, **sub}
+                    for i, sub in enumerate(update["subtransactions"])
+                ]
             tx["category_name"] = names.get(tx["category_id"] or "")
             self.touch(tx["id"])
         return [u["id"] for u in updates]

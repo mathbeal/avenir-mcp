@@ -119,6 +119,27 @@ def _classified(state: DemoBudget) -> bool:
     return not state.budgeted and len(state.transactions) == len(demo.transactions())
 
 
+RECEIPT_DATE = "2026-09-05"
+RECEIPT_LINES = {("cat-groceries", -51_130), ("cat-tennis", -14_990)}
+
+
+def _split(state: DemoBudget) -> bool:
+    """The receipt's purchase is split in two lines; nothing else changed."""
+    receipt = [
+        tx
+        for tx in state.transactions.values()
+        if tx["date"] == RECEIPT_DATE and "MARKET FRESH" in str(tx["payee_name"])
+    ]
+    lines = {(sub["category_id"], sub["amount"]) for sub in receipt[0].get("subtransactions", [])}
+    others = [tx for tx in state.transactions.values() if tx not in receipt]
+    return (
+        lines == RECEIPT_LINES
+        and all(not tx.get("subtransactions") for tx in others)
+        and not state.budgeted
+        and len(state.transactions) == len(demo.transactions())
+    )
+
+
 def _moved(state: DemoBudget) -> bool:
     return state.budgeted == {
         ("2026-09-01", "cat-tennis"): 50_000,
@@ -190,6 +211,15 @@ TASKS = [
         "in advance: apply them without asking me again." + FORMAT,
         answer=lambda t: bool(ANSWER.findall(t)),
         state=_moved,
+        tags=["write"],
+    ),
+    Task(
+        "split-receipt",
+        "My receipt for the Market Fresh purchase of 5 September 2026 says 51.13 of "
+        "groceries and 14.99 of tennis balls. Split that transaction accordingly. I accept "
+        "the preview in advance: apply it without asking me again." + FORMAT,
+        answer=lambda t: bool(ANSWER.findall(t)),
+        state=_split,
         tags=["write"],
     ),
     Task(
