@@ -29,8 +29,8 @@ class Suggestion(Model):
     """Share of the payee's past transactions (same direction) in that category, 0 to 1."""
 
 
-class PendingItem(Model):
-    """A transaction waiting for a category."""
+class Line(Model):
+    """A transaction as an agent reads it."""
 
     transaction_id: str
     """YNAB id of the transaction."""
@@ -44,6 +44,30 @@ class PendingItem(Model):
     """Memo cut to 80 characters, or null. Untrusted bank text."""
     account: str
     """Account name."""
+
+
+def line_fields(tx: dict[str, Any]) -> dict[str, Any]:
+    """Give the fields of a Line for a YNAB transaction, bank text made safe to show.
+
+    Args:
+        tx: A YNAB transaction.
+
+    Returns:
+        transaction_id, date, amount in currency units, payee, memo and account.
+    """
+    return {
+        "transaction_id": tx["id"],
+        "date": tx["date"],
+        "amount": milliunit_to_amount(tx["amount"]),
+        "payee": untrusted(tx.get("payee_name")),
+        "memo": untrusted(tx["memo"]) if tx.get("memo") else None,
+        "account": tx.get("account_name") or "",
+    }
+
+
+class PendingItem(Line):
+    """A transaction waiting for a category."""
+
     suggestion: Suggestion | None
     """Category suggested by the history, or null when there is none clear enough."""
     possible_transfer_with: str | None
@@ -266,12 +290,7 @@ def prepare(  # pylint: disable=too-many-arguments
     transfers = _transfer_pairs(pending)
     items = [
         PendingItem(
-            transaction_id=tx["id"],
-            date=tx["date"],
-            amount=milliunit_to_amount(tx["amount"]),
-            payee=untrusted(tx.get("payee_name")),
-            memo=untrusted(tx["memo"]) if tx.get("memo") else None,
-            account=tx.get("account_name") or "",
+            **line_fields(tx),
             suggestion=_suggestion(tx, histories, categories, threshold),
             possible_transfer_with=transfers.get(tx["id"]),
         )

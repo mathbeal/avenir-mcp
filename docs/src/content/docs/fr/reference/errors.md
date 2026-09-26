@@ -11,6 +11,12 @@ Une erreur revient comme un résultat d'outil marqué `isError`, avec un message
 
 Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool '<tool>': YNAB <status>: <detail>` — par exemple `YNAB 401` pour un jeton faux ou révoqué, `YNAB 429` quand les 200 requêtes par heure sont épuisées. Sans `YNAB_API_KEY`, le serveur refuse d'appeler YNAB : `YNAB_API_KEY environment variable is not set`.
 
+## [`find_transactions`](/avenir-mcp/fr/reference/tools/find-transactions/)
+
+- `Account {0} is not in this budget: use an id from list_accounts.`
+- `until_date {until} is before since_date {since}: swap them.`
+- `The dates span more than 366 days: search a shorter period.`
+
 ## [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/)
 
 - `Unknown account(s) {unknown}: use ids from list_accounts.`

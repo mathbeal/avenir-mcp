@@ -26,6 +26,7 @@ from avenir_mcp.app import WRITE_TAG, configure, mcp, today
 from avenir_mcp.tools_accounts import create_transactions
 from avenir_mcp.tools_budget import (
     approve_transactions,
+    find_transactions,
     get_budget_vs_actual,
     get_category_balances,
     get_monthly_summary,
@@ -42,6 +43,7 @@ __all__ = [
     "configure",
     "create_category",
     "create_transactions",
+    "find_transactions",
     "get_budget_vs_actual",
     "get_category_balances",
     "get_monthly_summary",
