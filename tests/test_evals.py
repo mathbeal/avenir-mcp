@@ -181,3 +181,16 @@ def test_a_busy_model_is_tried_again(monkeypatch: pytest.MonkeyPatch) -> None:
     http, calls = _api(httpx.Response(429, json={}), httpx.Response(200, json={"ok": True}))
     assert asyncio.run(run_openai.chat(http, "m", [], [])) == {"ok": True}
     assert len(calls) == 2
+
+
+def test_demo_server_lists_the_scheduled_transactions() -> None:
+    """The stand-in serves the demo schedules as YNAB would."""
+    fake_ynab.STATE = fake_ynab.DemoBudget()
+    server = fake_ynab.serve()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/v1/plans/demo-budget/scheduled_transactions"
+        found = httpx.get(url).json()["data"]["scheduled_transactions"]
+        assert {s["id"] for s in found} == {row[0] for row in demo_budget.SCHEDULED}
+    finally:
+        server.shutdown()
+        server.server_close()

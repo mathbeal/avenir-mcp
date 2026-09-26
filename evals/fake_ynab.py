@@ -248,6 +248,9 @@ class Handler(BaseHTTPRequestHandler):
                     ]
                 data = {"transactions": txs, "server_knowledge": STATE.knowledge}
                 return self._send(200, {"data": data})
+            if method == "GET" and rest == "/scheduled_transactions":
+                data = {"scheduled_transactions": demo.scheduled(), "server_knowledge": 1}
+                return self._send(200, {"data": data})
             if method == "PATCH" and rest == "/transactions":
                 ids = STATE.patch_transactions(self._body()["transactions"])
                 return self._send(200, {"data": {"transaction_ids": ids}})
