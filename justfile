@@ -14,6 +14,7 @@ lint:
     uv run isort --check avenir_mcp tests evals docsgen
     uv run pylint avenir_mcp tests evals docsgen
     uv run ruff check avenir_mcp
+    uv run deptry .
 
 types:
     uv run mypy

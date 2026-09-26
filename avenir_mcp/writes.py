@@ -14,7 +14,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from pydantic_core import to_jsonable_python  # pylint: disable=import-error
+from pydantic import TypeAdapter  # pylint: disable=import-error
 
 from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move
@@ -23,6 +23,8 @@ from avenir_mcp.text import untrusted
 from avenir_mcp.triage import internal_uncategorized
 
 CONFIRMATION_TTL_SECONDS = 600
+# Turns what is confirmed, models included, into plain JSON data before hashing it.
+_JSON: TypeAdapter[Any] = TypeAdapter(Any)
 
 
 class Assignment(Model):
@@ -199,7 +201,7 @@ def fingerprint(budget_id: str, subject: object) -> str:
     Returns:
         A SHA-256 hex digest.
     """
-    subject = to_jsonable_python(subject)
+    subject = _JSON.dump_python(subject, mode="json")
     if isinstance(subject, list):
         subject = sorted(json.dumps(item, sort_keys=True) for item in subject)
     payload = json.dumps([budget_id, subject], sort_keys=True, separators=(",", ":"))

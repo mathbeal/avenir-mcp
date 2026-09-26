@@ -28,6 +28,11 @@ dependencies = [
     # journal entries are pydantic models, whose field docstrings become the
     # descriptions agents read.
     "pydantic>=2.13,<3",
+    # Imported directly, though fastmcp brings them: declared so that a change in
+    # fastmcp's own dependencies cannot remove them unnoticed. deptry checks it.
+    "mcp>=2.2.0,<3",
+    "mcp-types>=2.2.0,<3",
+    "starlette>=1.7.0,<2",
 ]
 
 [project.urls]
@@ -49,6 +54,7 @@ dev = [
     "mypy==2.3.1",
     "pylint==4.0.9",
     "ruff==0.16.9",
+    "deptry==0.25.1",
 ]
 
 [build-system]

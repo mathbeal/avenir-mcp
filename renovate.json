@@ -67,9 +67,12 @@
       "automerge": true
     },
     {
-      "description": "fastmcp, httpx and pydantic run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp update.",
+      "description": "fastmcp, the MCP SDK it builds on, httpx and pydantic run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp or mcp update.",
       "matchPackageNames": [
         "fastmcp",
+        "mcp",
+        "mcp-types",
+        "starlette",
         "httpx",
         "pydantic"
       ],
