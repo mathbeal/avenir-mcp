@@ -50,7 +50,8 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | lock | `uv lock --check` | `uv.lock` does not match `pyproject.toml` |
 
 CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked dependencies,
-the documentation build with the tests of its own code, and the official MCP Inspector
+the documentation build with the tests of its own code, CodeQL and the OpenSSF Scorecard
+(once the repository is public), and the official MCP Inspector
 (`just inspect`), which checks the server as a client sees it on the demo budget: its
 lists, the portability of its tool schemas, and one call of each kind. The test suite runs on Linux and macOS with Python 3.12,
 3.13 and 3.14, and on Windows with Python 3.14; coverage is enforced on Linux and macOS,

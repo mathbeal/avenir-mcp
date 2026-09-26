@@ -54,3 +54,22 @@ jobs:
           name: distributions
           path: dist/
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+
+  sbom:
+    name: attach the SBOM to the release
+    # What avenir-mcp runs with, exactly as locked: a CycloneDX bill of materials, for
+    # users who audit their dependencies.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - run: uv export --no-dev --format cyclonedx1.5 -o avenir-mcp.cdx.json
+      - run: gh release upload "$TAG" avenir-mcp.cdx.json --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
