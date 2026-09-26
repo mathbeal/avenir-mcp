@@ -45,7 +45,7 @@ you, and can be undone.
 - **Answers an agent can read.** Currency units, short typed answers, pagination,
   errors that say what to fix, bank text treated as untrusted.
 - **Verified.** 100 % line and branch coverage, and an evaluation where a real agent
-  works on an invented budget: 9/9 tasks.
+  works on an invented budget: 10/10 tasks.
 
 ## Install
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import httpx
 import pytest
@@ -78,6 +79,26 @@ def test_one_memo_forges_a_preview_line_and_hides_direction_marks() -> None:
     memos = [tx["memo"] for tx in demo_budget.transactions() if tx["memo"]]
     assert len(memos) == 2
     assert any("\n" in memo and "\u202e" in memo for memo in memos)
+
+
+def test_split_receipt_passes_only_for_the_receipt_lines() -> None:
+    """The task passes when the 5 September purchase carries the two lines, not otherwise."""
+    split = next(task for task in tasks.TASKS if task.task_id == "split-receipt")
+    state = fake_ynab.DemoBudget()
+    receipt = next(
+        tx
+        for tx in state.transactions.values()
+        if tx["date"] == tasks.RECEIPT_DATE and "MARKET FRESH" in tx["payee_name"]
+    )
+    assert not split.state(state)
+    lines: list[dict[str, Any]] = [
+        {"amount": a, "category_id": c} for c, a in sorted(tasks.RECEIPT_LINES)
+    ]
+    state.patch_transactions([{"id": receipt["id"], "category_id": None, "subtransactions": lines}])
+    assert receipt["amount"] == sum(a for _, a in tasks.RECEIPT_LINES)
+    assert split.state(state)
+    state.budgeted[("2026-09-01", "cat-tennis")] = 1
+    assert not split.state(state)
 
 
 # ---------------------------------------------------------------------------

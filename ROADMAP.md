@@ -9,7 +9,7 @@ Newest first.
 ## 1.0: verified and published
 
 - Contract tests through the MCP protocol, and an MCP Inspector session in CI.
-- An evaluation suite run by a real agent on a demo budget. *Done: 9 tasks, 9/9.*
+- An evaluation suite run by a real agent on a demo budget. *Done: 10 tasks, 10/10.*
 - Tooling: ruff, 100 % branch coverage, mutation testing, hardened GitHub Actions,
   pip-audit, Python 3.11–3.14.
 - PyPI release through Trusted Publishing, a generated changelog, a `.mcpb` bundle for
