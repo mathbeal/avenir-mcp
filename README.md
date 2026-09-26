@@ -81,6 +81,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Which category is overspent this month?" | `get_monthly_summary` — totals and overspent categories |
 | "Categorise what is pending." | `suggest_categories`, then `apply_categories` after your yes |
 | "Split this receipt: 81.15 groceries, 5.25 household." | `split_transaction` — one transaction across categories, after your yes |
+| "Which transaction is my 86.40 receipt from the 12th?" | `find_transactions` — by dates, exact amount and account, categorised or not |
 | "My bank shows 3,440.80. Does YNAB agree?" | `reconcile_account` — explains the gap, changes nothing until it matches |
 | "Will I go below zero before December?" | `forecast_balance` — month by month, with its assumptions |
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
