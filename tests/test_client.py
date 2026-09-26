@@ -73,10 +73,17 @@ def test_api_key_raises_when_missing() -> None:
             client._api_key()  # pylint: disable=protected-access
 
 
+def test_api_key_never_shows_when_printed() -> None:
+    """The key read from the environment prints as a mask, in a repr or an f-string."""
+    with patch.dict("os.environ", {"YNAB_API_KEY": "tok_abc"}):
+        key = client._api_key()  # pylint: disable=protected-access
+    assert "tok_abc" not in f"{key!r} {key}"
+
+
 def test_api_key_returns_env_value() -> None:
     """Should return the value of YNAB_API_KEY."""
     with patch.dict("os.environ", {"YNAB_API_KEY": "tok_abc"}):
-        assert client._api_key() == "tok_abc"  # pylint: disable=protected-access
+        assert client._api_key().get_secret_value() == "tok_abc"  # pylint: disable=protected-access
 
 
 # ---------------------------------------------------------------------------
@@ -787,7 +794,7 @@ def test_token_can_come_from_a_file(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     secret.chmod(0o600)
     monkeypatch.delenv("YNAB_API_KEY", raising=False)
     monkeypatch.setenv("YNAB_API_KEY_FILE", str(secret))
-    assert client._api_key() == "file-token"  # pylint: disable=protected-access
+    assert client._api_key().get_secret_value() == "file-token"  # pylint: disable=protected-access
 
 
 @pytest.mark.skipif(os.name != "posix", reason="POSIX permissions; Windows uses ACLs")
@@ -818,7 +825,7 @@ def test_token_variable_wins_over_the_file(monkeypatch: pytest.MonkeyPatch) -> N
     """When both are set, YNAB_API_KEY is used and the file is not read."""
     monkeypatch.setenv("YNAB_API_KEY", "env-token")
     monkeypatch.setenv("YNAB_API_KEY_FILE", "/nonexistent")
-    assert client._api_key() == "env-token"  # pylint: disable=protected-access
+    assert client._api_key().get_secret_value() == "env-token"  # pylint: disable=protected-access
 
 
 def test_no_token_at_all_names_both_ways(monkeypatch: pytest.MonkeyPatch) -> None:

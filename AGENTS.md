@@ -49,6 +49,11 @@ entries derive from `avenir_mcp.model.Model`: unknown fields are refused, and ea
 field's docstring becomes its description in the schema. Data from the YNAB API
 stays a dict until a tool turns it into a result.
 
+**A secret is never a plain string.** The YNAB token and AVENIR_MCP_HTTP_TOKEN
+become a pydantic `SecretStr` where they are read, and `get_secret_value()` is
+called only where the value is sent or compared. A secret field of a model is a
+`SecretStr` too. Printed, logged or in a repr, a secret shows as `**********`.
+
 **Few dependencies.** `fastmcp` and `httpx`, pinned, and `pydantic`, which fastmcp
 already requires. Adding one needs a reason written in the pull request.
 

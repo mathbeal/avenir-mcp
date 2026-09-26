@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import httpx
 import pytest
+from pydantic import SecretStr
 
 from avenir_mcp import http_auth, server
 
@@ -26,7 +27,7 @@ _GOOD = {"Authorization": f"Bearer {_TOKEN}"}
 
 def _post(headers: dict[str, str], token: str | None = _TOKEN) -> int:
     """POST an initialize request to the app main() would serve; return the status."""
-    app = server.mcp.http_app(**server.http_options(token))
+    app = server.mcp.http_app(**server.http_options(SecretStr(token) if token else None))
 
     async def run() -> int:
         async with app.lifespan(app):
@@ -108,6 +109,18 @@ def test_messages_other_than_requests_pass_through() -> None:
     async def inner(scope: dict[str, object], _receive: object, _send: object) -> None:
         seen.append(str(scope["type"]))
 
-    guard = http_auth.BearerToken(inner, _TOKEN)  # type: ignore[arg-type]
+    guard = http_auth.BearerToken(inner, SecretStr(_TOKEN))  # type: ignore[arg-type]
     asyncio.run(guard({"type": "lifespan"}, None, None))  # type: ignore[arg-type]
     assert seen == ["lifespan"]
+
+
+def test_the_token_never_shows_when_printed_or_logged(monkeypatch: pytest.MonkeyPatch) -> None:
+    """What main() hands to FastMCP, and the guard itself, print a mask, not the token."""
+    monkeypatch.setenv("AVENIR_MCP_TRANSPORT", "http")
+    monkeypatch.setenv("AVENIR_MCP_HTTP_TOKEN", _TOKEN)
+    with patch.object(server.mcp, "run") as run:
+        server.main([])
+    options = run.call_args.kwargs
+    guard_options = options["middleware"][0].kwargs
+    for shown in (repr(options), str(options), repr(guard_options)):
+        assert _TOKEN not in shown

@@ -11,6 +11,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import httpx  # pylint: disable=import-error
+from pydantic import SecretStr  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
@@ -78,18 +79,21 @@ LAST_USED = "last-used"
 _CACHE: dict[str, dict[str, Any]] = {}
 
 
-def _api_key() -> str:
+def _api_key() -> SecretStr:
     """Return the YNAB Personal Access Token: YNAB_API_KEY, or the file YNAB_API_KEY_FILE.
 
     The file keeps the token out of MCP client configurations. Like an SSH key, it
     must be readable by its owner only.
+
+    Returns:
+        The token, shown as a mask when printed or logged.
 
     Raises:
         RuntimeError: If neither is set, or the file is missing or readable by others.
     """
     key = os.getenv("YNAB_API_KEY", "")
     if key:
-        return key
+        return SecretStr(key)
     path = os.getenv("YNAB_API_KEY_FILE", "")
     if not path:
         raise RuntimeError(
@@ -103,7 +107,7 @@ def _api_key() -> str:
         raise RuntimeError(f"YNAB_API_KEY_FILE cannot be read: {error.strerror}") from error
     if os.name == "posix" and mode & 0o077:
         raise RuntimeError(f"YNAB_API_KEY_FILE is readable by other users: run chmod 600 {path}")
-    return key
+    return SecretStr(key)
 
 
 def milliunit_to_amount(milliunit: int) -> float:
@@ -171,7 +175,7 @@ async def _request(method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         RuntimeError: On 4xx/5xx responses, with YNAB's error detail.
     """
     url = _url(path)
-    headers = {"Authorization": f"Bearer {_api_key()}"}
+    headers = {"Authorization": f"Bearer {_api_key().get_secret_value()}"}
     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
         send = getattr(client, method)  # client.get, .patch, .post or .delete
         response = await send(url, headers=headers, **kwargs)

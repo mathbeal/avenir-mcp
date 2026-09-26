@@ -10,6 +10,8 @@ import os
 import sys
 from typing import Any
 
+from pydantic import SecretStr  # pylint: disable=import-error
+
 from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     __version__,
     context,
@@ -57,7 +59,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def http_options(token: str | None) -> dict[str, Any]:
+def http_options(token: SecretStr | None) -> dict[str, Any]:
     """Say what guards the HTTP transport, besides listening on 127.0.0.1.
 
     The Host and Origin headers must name this machine, so a web page cannot reach
@@ -106,7 +108,9 @@ def main(argv: list[str] | None = None) -> None:
     if os.getenv("AVENIR_MCP_TRANSPORT", "stdio") == "http":
         host = os.getenv("AVENIR_MCP_HOST", "127.0.0.1")
         port = int(os.getenv("AVENIR_MCP_PORT", "8103"))
-        token = os.getenv("AVENIR_MCP_HTTP_TOKEN") or None
+        configured = os.getenv("AVENIR_MCP_HTTP_TOKEN")
+        # Masked from here on: a repr of the options, logged or printed, shows no token.
+        token = SecretStr(configured) if configured else None
         if writes and token is None:
             sys.exit(
                 "AVENIR_MCP_WRITE=1 over HTTP needs AVENIR_MCP_HTTP_TOKEN: set it to a long "
