@@ -8,9 +8,9 @@ from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
-from avenir_mcp import client, triage, writes
+from avenir_mcp import client, split, triage, writes
 from avenir_mcp.app import WRITE_TAG, mcp
-from avenir_mcp.confirm import WriteResult, write_plan
+from avenir_mcp.confirm import WriteResult, WriteStatus, gate, merged, write_plan
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +131,99 @@ async def apply_categories(
         raise ToolError(str(error)) from error
     result, _ = await write_plan(ctx, budget_id, plan, "Recategorise", confirmation)
     return result
+
+
+class SplitResult(split.SplitPlan):
+    """The outcome of split_transaction."""
+
+    status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), or declined (the user said no).
+    """
+    message: str
+    """What happened and what to do next, for the agent to relay."""
+    confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
+
+
+_UNDO_IN_YNAB = "undo_operation cannot revert a split: to undo it, edit the transaction in YNAB."
+
+
+def _question(plan: split.SplitPlan) -> str:
+    """Write the question put to the user: the transaction, then each line.
+
+    Args:
+        plan: The split to confirm.
+
+    Returns:
+        The question, with the warning that only YNAB can undo it.
+    """
+    lines = [
+        f"- {line.amount:.2f} {line.category}" + (f" ({line.memo})" if line.memo else "")
+        for line in plan.lines
+    ]
+    head = f"Split {plan.date} {plan.payee} {plan.amount:.2f} into {len(plan.lines)} lines?"
+    return "\n".join([head, *lines, _UNDO_IN_YNAB])
+
+
+@mcp.tool(
+    tags={WRITE_TAG},
+    annotations={
+        "title": "Split a transaction across categories",
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": False,
+        "open_world_hint": True,
+    },
+)
+async def split_transaction(
+    budget_id: str,
+    transaction_id: str,
+    lines: list[split.SplitLine],
+    ctx: Context,
+    confirmation: str | None = None,
+) -> SplitResult | InputRequiredResult:
+    """Split one transaction across categories, e.g. from a receipt, after the user confirms.
+
+    Give at least two lines, {amount, category_id, memo}, adding up to the
+    transaction's amount to the cent (amounts in currency units, negative for
+    spending; a refunded deposit is a positive line). Group a receipt by
+    category: one line per category, not per item. Transactions already split,
+    transfers and off-budget ones are refused. YNAB's API cannot change a split
+    afterwards: undo_operation cannot revert it, the user edits it in YNAB; the
+    user is told before confirming. Confirmation works as for apply_categories.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+        transaction_id: Transaction to split (from suggest_categories).
+        lines: The lines, at least two, adding up to the transaction's amount.
+        ctx: The MCP context, used to ask the user.
+        confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        The transaction and its lines, as they will be (or were) split, or an input request the
+        client answers by asking the user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the transaction cannot be split, the lines do not add up or name an
+            unknown category, or the confirmation code is refused.
+    """
+    logger.info("Tool called: split_transaction(lines=%d)", len(lines))
+    transactions = await client.get_transactions(budget_id)
+    categories = await client.get_categories(budget_id)
+    off_budget = await _off_budget(budget_id)
+    try:
+        plan = split.plan_split(transactions, categories, transaction_id, lines, off_budget)
+    except ValueError as error:
+        raise ToolError(str(error)) from error
+    result = SplitResult(**plan.model_dump(), status="applied", message="", confirmation=None)
+    subject = {"transaction": transaction_id, "lines": lines}
+    stop = await gate(ctx, budget_id, subject, _question(plan), confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
+    await client.split_transaction(
+        budget_id, transaction_id, [line.model_dump(mode="json") for line in lines]
+    )
+    return result.model_copy(update={"message": f"Split. {_UNDO_IN_YNAB}"})

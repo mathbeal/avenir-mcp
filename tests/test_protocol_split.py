@@ -1,0 +1,111 @@
+"""split_transaction through the MCP protocol: validate, preview, confirm, apply."""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from typing import Any
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from fastmcp.client.elicitation import ElicitResult
+
+from .mcp_helpers import accept, call, decline
+
+_ACCOUNTS = [{"id": "acc", "name": "Checking", "on_budget": True}]
+_CATS = [{"id": "c-food", "name": "Groceries"}, {"id": "c-home", "name": "Household"}]
+_TX = {"id": "t1", "account_id": "acc", "date": "2026-09-12", "amount": -86400}
+_TX |= {"payee_name": "Organic Market", "category_id": None}
+_LINES = [
+    {"amount": -81.15, "category_id": "c-food"},
+    {"amount": -5.25, "category_id": "c-home", "memo": "Dish soap"},
+]
+
+
+@pytest.fixture(name="ynab")
+def _ynab() -> Iterator[AsyncMock]:
+    """A fake YNAB; the mock it yields records the splits it is asked to make."""
+    splits = AsyncMock(return_value=None)
+    with (
+        patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
+        patch("avenir_mcp.client.get_categories", AsyncMock(return_value=_CATS)),
+        patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=[_TX])),
+        patch("avenir_mcp.client.split_transaction", splits),
+    ):
+        yield splits
+
+
+def _args(**extra: Any) -> dict[str, Any]:
+    return {"budget_id": "b1", "transaction_id": "t1", "lines": _LINES, **extra}
+
+
+def test_split_is_previewed_then_applied_with_the_code(ynab: AsyncMock) -> None:
+    """Without elicitation: a preview and a code first, the split only with the code."""
+    preview = call("split_transaction", _args()).structured_content
+    assert preview["status"] == "confirmation_required"
+    assert preview["payee"] == "Organic Market"
+    assert preview["amount"] == -86.40
+    assert preview["lines"] == [
+        {"amount": -81.15, "category": "Groceries", "memo": None},
+        {"amount": -5.25, "category": "Household", "memo": "Dish soap"},
+    ]
+    ynab.assert_not_called()
+    done = call("split_transaction", _args(confirmation=preview["confirmation"]))
+    assert done.structured_content["status"] == "applied"
+    ynab.assert_called_once_with(
+        "b1",
+        "t1",
+        [
+            {"amount": -81.15, "category_id": "c-food", "memo": None},
+            {"amount": -5.25, "category_id": "c-home", "memo": "Dish soap"},
+        ],
+    )
+
+
+def test_the_question_warns_that_undo_happens_in_ynab(ynab: AsyncMock) -> None:
+    """The user is told, before saying yes, that undo_operation cannot revert a split."""
+    asked: list[str] = []
+
+    async def remember(message: str, *_: Any) -> ElicitResult[Any]:
+        asked.append(message)
+        return ElicitResult(action="accept", content={"value": True})
+
+    result = call("split_transaction", _args(), remember).structured_content
+    assert "Organic Market" in asked[0]
+    assert "Groceries" in asked[0]
+    assert "in YNAB" in asked[0]
+    assert result["status"] == "applied"
+    assert "in YNAB" in result["message"]
+    ynab.assert_called_once()
+
+
+def test_accepted_split_is_applied(ynab: AsyncMock) -> None:
+    """A yes in the client applies it at once."""
+    assert call("split_transaction", _args(), accept).structured_content["status"] == "applied"
+    ynab.assert_called_once()
+
+
+def test_declined_split_changes_nothing(ynab: AsyncMock) -> None:
+    """If the user says no, nothing is split."""
+    assert call("split_transaction", _args(), decline).structured_content["status"] == "declined"
+    ynab.assert_not_called()
+
+
+def test_a_code_for_other_lines_is_refused(ynab: AsyncMock) -> None:
+    """A code confirms the lines previewed, not different ones."""
+    code = call("split_transaction", _args()).structured_content["confirmation"]
+    other = [
+        {"amount": -80.0, "category_id": "c-food"},
+        {"amount": -6.40, "category_id": "c-home"},
+    ]
+    result = call("split_transaction", _args(lines=other, confirmation=code))
+    assert result.is_error
+    ynab.assert_not_called()
+
+
+def test_lines_that_do_not_add_up_are_refused_before_asking(ynab: AsyncMock) -> None:
+    """The totals are checked first: the user is never asked about a wrong split."""
+    wrong = [{"amount": -81.15, "category_id": "c-food"}, {"amount": -4.0, "category_id": "c-home"}]
+    result = call("split_transaction", _args(lines=wrong), accept)
+    assert result.is_error
+    assert "-85.15" in result.content[0].text
+    ynab.assert_not_called()

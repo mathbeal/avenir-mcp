@@ -656,6 +656,33 @@ def test_set_transaction_categories_bulk_patches_category_ids() -> None:
     }
 
 
+def test_split_transaction_sends_lines_in_milliunits_and_clears_the_category() -> None:
+    """A split is one PATCH: no category on the parent, one subtransaction per line."""
+    payload = {"data": {"transaction_ids": ["t1"], "transactions": []}}
+    ctx = _async_client_returning(payload)
+    lines = [
+        {"amount": -81.15, "category_id": "c1", "memo": None},
+        {"amount": -5.25, "category_id": "c2", "memo": "Soap"},
+    ]
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            asyncio.run(client.split_transaction("b1", "t1", lines))
+    http = ctx.__aenter__.return_value
+    assert http.patch.call_args.args[0].endswith("/budgets/b1/transactions")
+    assert http.patch.call_args.kwargs["json"] == {
+        "transactions": [
+            {
+                "id": "t1",
+                "category_id": None,
+                "subtransactions": [
+                    {"amount": -81150, "category_id": "c1"},
+                    {"amount": -5250, "category_id": "c2", "memo": "Soap"},
+                ],
+            }
+        ]
+    }
+
+
 def test_set_transaction_categories_empty_list_makes_no_call() -> None:
     """Nothing to change must not hit the API."""
     with patch("httpx.AsyncClient") as mock_client:

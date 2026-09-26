@@ -572,6 +572,31 @@ async def set_transaction_categories(
     return list(data["data"].get("transaction_ids", []))
 
 
+async def split_transaction(budget_id: str, tx_id: str, lines: list[dict[str, Any]]) -> None:
+    """Split one transaction across categories; YNAB's API cannot change the lines afterwards.
+
+    Args:
+        budget_id: YNAB budget UUID or "last-used".
+        tx_id: Transaction UUID; it must not be split already.
+        lines: {amount (currency units), category_id, memo or None}, adding up to the
+            transaction's amount.
+    """
+    subtransactions = []
+    for line in lines:
+        sub: dict[str, Any] = {
+            "amount": amount_to_milliunit(line["amount"]),
+            "category_id": line["category_id"],
+        }
+        if line.get("memo"):
+            sub["memo"] = line["memo"]
+        subtransactions.append(sub)
+    logger.info("Splitting transaction %s into %d lines", tx_id, len(subtransactions))
+    body = {
+        "transactions": [{"id": tx_id, "category_id": None, "subtransactions": subtransactions}]
+    }
+    await _patch(f"/budgets/{budget_id}/transactions", body)
+
+
 async def update_category(
     budget_id: str,
     category_id: str,

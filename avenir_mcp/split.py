@@ -1,0 +1,189 @@
+"""Plan how one transaction is split across categories, e.g. from a receipt.
+
+Nothing here talks to YNAB. The plan checks what YNAB would refuse, and what
+cannot be what the user meant: lines that do not add up to the transaction to
+the cent.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import Field  # pylint: disable=import-error
+
+from avenir_mcp.amounts import Amount
+from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
+from avenir_mcp.model import Model
+from avenir_mcp.text import untrusted
+from avenir_mcp.triage import internal_uncategorized
+
+MAX_MEMO = 500
+
+
+class SplitLine(Model):
+    """One line of a split: an amount and its category."""
+
+    amount: Amount
+    """Amount in currency units, negative for spending; the lines add up to the transaction."""
+    category_id: str
+    """Category of this line."""
+    memo: str | None = Field(default=None, max_length=MAX_MEMO)
+    """Optional note for this line, e.g. what the receipt lists; at most 500 characters."""
+
+
+class SplitLinePreview(Model):
+    """A line of a split, as the user sees it."""
+
+    amount: float
+    """Amount in currency units."""
+    category: str
+    """Category name."""
+    memo: str | None
+    """Note; null if none."""
+
+
+class SplitPlan(Model):
+    """The transaction to split and the lines it would get."""
+
+    transaction_id: str
+    """YNAB id of the transaction."""
+    date: str
+    """Date, YYYY-MM-DD."""
+    payee: str
+    """Payee as imported. Untrusted bank text."""
+    amount: float
+    """Amount of the transaction, in currency units."""
+    from_category: str | None
+    """Category the split replaces; null for none."""
+    lines: list[SplitLinePreview]
+    """The lines, in the order given."""
+
+
+def _is_split(tx: dict[str, Any]) -> bool:
+    """Tell whether a transaction already has live split lines.
+
+    Args:
+        tx: A YNAB transaction.
+
+    Returns:
+        True when one of its subtransactions is not deleted.
+    """
+    return any(not sub.get("deleted") for sub in tx.get("subtransactions") or [])
+
+
+def _check_transaction(tx: dict[str, Any], off_budget: set[str] | frozenset[str]) -> None:
+    """Refuse a transaction YNAB cannot split.
+
+    Args:
+        tx: The transaction.
+        off_budget: Ids of the tracking accounts.
+
+    Raises:
+        ValueError: If it is already split, a transfer, or on an off-budget account.
+    """
+    tx_id = tx["id"]
+    if _is_split(tx):
+        raise ValueError(
+            f"Transaction {tx_id} is already split: YNAB's API cannot change its lines, "
+            "change them in YNAB."
+        )
+    if tx.get("transfer_account_id"):
+        raise ValueError(f"Transaction {tx_id} is a transfer between accounts: it cannot be split.")
+    if tx.get("account_id") in off_budget:
+        raise ValueError(
+            f"Transaction {tx_id} is on an off-budget account: YNAB does not split those."
+        )
+
+
+def _check_lines(
+    tx: dict[str, Any], names: dict[str, str], uncategorized: set[str], lines: list[SplitLine]
+) -> None:
+    """Refuse lines that name no real category or do not add up to the transaction.
+
+    Args:
+        tx: The transaction.
+        names: The budget's category names by id.
+        uncategorized: Ids of YNAB's internal Uncategorized.
+        lines: The lines proposed.
+
+    Raises:
+        ValueError: If there are fewer than two lines, a line is zero, a category is
+            unknown or internal, or the sum differs from the transaction.
+    """
+    if len(lines) < 2:
+        raise ValueError(
+            "Give at least two lines: to give the whole transaction one category, "
+            "use apply_categories."
+        )
+    total = 0
+    for line in lines:
+        milliunits = amount_to_milliunit(line.amount)
+        if milliunits == 0:
+            raise ValueError("A line is zero: leave it out.")
+        if line.category_id in uncategorized:
+            raise ValueError(
+                f"Category {line.category_id} is YNAB's internal Uncategorized: "
+                "choose a real category."
+            )
+        if line.category_id not in names:
+            raise ValueError(
+                f"Category {line.category_id} is not in this budget: "
+                "use a category_id from suggest_categories or get_category_balances."
+            )
+        total += milliunits
+    if total != tx["amount"]:
+        raise ValueError(
+            f"The lines add up to {milliunit_to_amount(total):.2f}, the transaction is "
+            f"{milliunit_to_amount(tx['amount']):.2f}: they must match to the cent."
+        )
+
+
+def plan_split(
+    transactions: list[dict[str, Any]],
+    categories: list[dict[str, Any]],
+    transaction_id: str,
+    lines: list[SplitLine],
+    off_budget: set[str] | frozenset[str] = frozenset(),
+) -> SplitPlan:
+    """Work out the split of one transaction, refusing what cannot be meant.
+
+    Args:
+        transactions: The budget's transactions.
+        categories: The budget's categories.
+        transaction_id: The transaction to split.
+        lines: Its lines, at least two, adding up to its amount.
+        off_budget: Ids of the tracking accounts.
+
+    Returns:
+        The transaction and its lines, as the user will see them.
+
+    Raises:
+        ValueError: With a message saying what to fix, if the transaction is unknown,
+            already split, a transfer or off-budget, or if the lines are fewer than
+            two, zero, in an unknown or internal category, or do not add up.
+    """
+    tx = next((t for t in transactions if t["id"] == transaction_id), None)
+    if tx is None:
+        raise ValueError(
+            f"Transaction {transaction_id} is not in this budget: "
+            "use a transaction_id returned by suggest_categories."
+        )
+    _check_transaction(tx, off_budget)
+    names = {c["id"]: c["name"] for c in categories}
+    _check_lines(tx, names, internal_uncategorized(categories), lines)
+    current = tx.get("category_id")
+    return SplitPlan(
+        transaction_id=transaction_id,
+        date=tx["date"],
+        payee=untrusted(tx.get("payee_name")),
+        amount=milliunit_to_amount(tx["amount"]),
+        from_category=names.get(current) if current else None,
+        lines=[
+            SplitLinePreview(
+                amount=line.amount,
+                category=names[line.category_id],
+                memo=untrusted(line.memo) if line.memo else None,
+            )
+            for line in lines
+        ],
+    )
