@@ -57,8 +57,9 @@ de sus herramientas y una llamada de cada tipo. La batería de pruebas se
 ejecuta en Linux y macOS con Python 3.12, 3.13 y 3.14, y en Windows con Python 3.14; la
 cobertura se exige en Linux y macOS, donde se aplican los controles de permisos de
 archivos. Python 3.15 también se ejecuta, como experimento que aún no bloquea. En una pull request, cada commit debe estar firmado y el
-título debe empezar por el tipo de cambio. Un único control, **CI passed**, resume todos
-los jobs obligatorios.
+título debe empezar por el tipo de cambio. Dos controles deben estar en verde:
+**CI passed**, que resume todos los jobs del workflow de calidad, y **MCP Inspector**, un
+workflow aparte para que su badge lo muestre solo.
 
 ## Dependencias
 

@@ -173,30 +173,11 @@ jobs:
       - run: uv export --frozen --no-emit-project --all-groups -o requirements.txt
       - run: uvx pip-audit --strict --disable-pip -r requirements.txt
 
-  inspector:
-    name: MCP Inspector, as a client sees the server
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-        with:
-          enable-cache: true
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: docs/.nvmrc
-      # Lists, schema portability (--strict) and one call of each kind, on the demo budget.
-      - run: uv run python -m evals.inspector
-
   passed:
     name: CI passed
     # The one check branch protection requires: it stands for every job above.
     if: always()
-    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, inspector]
+    needs: [lock, lint, types, tests, vocabulary, hygiene, audit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
