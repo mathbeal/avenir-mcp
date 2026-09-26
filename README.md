@@ -2,7 +2,7 @@
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://mathbeal.github.io/avenir-mcp/)
-[![python](https://img.shields.io/badge/python-3.14-blue)](https://github.com/mathbeal/avenir-mcp)
+[![python](https://img.shields.io/badge/python-3.12%20%7C%203.13%20%7C%203.14-blue)](https://github.com/mathbeal/avenir-mcp)
 [![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/mathbeal/avenir-mcp)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
 

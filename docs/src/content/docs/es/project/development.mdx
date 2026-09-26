@@ -48,7 +48,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | bloqueo | `uv lock --check` | `uv.lock` no corresponde a `pyproject.toml` |
 
 La CI ejecuta además `typos`, `zizmor` sobre los workflows, `pip-audit` sobre las
-dependencias bloqueadas, la batería de pruebas en Python 3.15 (se permite que falle hasta
+dependencias bloqueadas, la batería de pruebas en Python 3.12, 3.13 y 3.14, y en 3.15 (se permite que falle hasta
 que sus dependencias lo admitan) y la construcción de la documentación.
 
 ## Pruebas

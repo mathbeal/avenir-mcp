@@ -6,7 +6,7 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Mathieu Beal" }]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 keywords = ["mcp", "model-context-protocol", "ynab", "budget", "personal-finance", "agents"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -15,6 +15,8 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Office/Business :: Financial",
     "Typing :: Typed",
@@ -59,7 +61,7 @@ version = { attr = "avenir_mcp.__version__" }
 
 [tool.black]
 line-length = 100
-target-version = ["py314"]
+target-version = ["py312", "py313", "py314"]
 
 [tool.isort]
 profile = "black"
@@ -67,7 +69,7 @@ line_length = 100
 
 [tool.mypy]
 strict = true
-python_version = "3.14"
+python_version = "3.12"
 files = ["avenir_mcp", "tests", "evals", "docsgen"]
 
 [tool.pylint.format]

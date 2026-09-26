@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.12", "3.13", "3.14"]
         experimental: [false]
         include:
           # 3.15 is a release candidate, and beartype (via fastmcp) does not import

@@ -48,7 +48,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | lock | `uv lock --check` | `uv.lock` does not match `pyproject.toml` |
 
 CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked dependencies,
-the test suite on Python 3.15 (allowed to fail until its dependencies support it), and
+the test suite on Python 3.12, 3.13 and 3.14, and on 3.15 (allowed to fail until its dependencies support it), and
 the documentation build.
 
 ## Tests
