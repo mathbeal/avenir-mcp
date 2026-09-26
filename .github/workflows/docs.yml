@@ -7,6 +7,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   UV_FROZEN: "1"
 
@@ -14,6 +18,7 @@ jobs:
   build:
     name: build the site in English, French and Spanish
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -40,6 +45,7 @@ jobs:
     if: github.event_name == 'push' && github.event.repository.visibility == 'public'
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write

@@ -4,6 +4,11 @@ on: [push, pull_request]
 
 permissions: {}
 
+# A new push to a pull request makes the previous run obsolete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   UV_FROZEN: "1"
 
@@ -11,6 +16,7 @@ jobs:
   lock:
     name: lockfile is in sync
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
@@ -24,6 +30,7 @@ jobs:
   lint:
     name: black, isort, pylint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
@@ -46,6 +53,7 @@ jobs:
     # changelog of a released version is exactly that version's history.
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -63,6 +71,7 @@ jobs:
   types:
     name: mypy --strict
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
@@ -76,20 +85,28 @@ jobs:
       - run: uv run mypy
 
   tests:
-    name: pytest ${{ matrix.python-version }}, 100 % line and branch coverage
-    runs-on: ubuntu-latest
+    name: pytest ${{ matrix.python-version }} on ${{ matrix.os }}, 100 % coverage
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
+        # avenir-mcp runs on its users' machines: Linux and macOS are required.
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.12", "3.13", "3.14"]
         experimental: [false]
         include:
+          # Windows runs to learn what breaks there, without blocking yet.
+          - os: windows-latest
+            python-version: "3.14"
+            experimental: true
           # 3.15 is a release candidate, and beartype (via fastmcp) does not import
           # on it yet. Run it to learn when that changes, without blocking.
-          - python-version: "3.15"
+          - os: ubuntu-latest
+            python-version: "3.15"
             experimental: true
     continue-on-error: ${{ matrix.experimental }}
     steps:
@@ -106,6 +123,7 @@ jobs:
   vocabulary:
     name: lexdrift against its baseline
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
@@ -120,6 +138,7 @@ jobs:
   hygiene:
     name: typos and workflow audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
@@ -134,6 +153,7 @@ jobs:
   audit:
     name: known vulnerabilities
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
@@ -148,3 +168,24 @@ jobs:
       # vulnerable dependency is a vulnerable budget.
       - run: uv export --frozen --no-emit-project --all-groups -o requirements.txt
       - run: uvx pip-audit --strict --disable-pip -r requirements.txt
+
+  passed:
+    name: CI passed
+    # The one check branch protection requires: it stands for every job above.
+    if: always()
+    needs: [lock, lint, types, tests, vocabulary, hygiene, audit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: every required job succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required job ended with: $result"
+              exit 1
+            fi
+          done

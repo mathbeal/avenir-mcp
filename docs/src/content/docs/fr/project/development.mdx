@@ -49,8 +49,11 @@ alors.
 | verrou | `uv lock --check` | `uv.lock` ne correspond pas à `pyproject.toml` |
 
 La CI lance aussi `typos`, `zizmor` sur les workflows, `pip-audit` sur les dépendances
-verrouillées, la suite de tests sous Python 3.12, 3.13 et 3.14, et sous 3.15 (autorisée à échouer tant que ses
-dépendances ne le gèrent pas), et la construction de la documentation.
+verrouillées, et la construction de la documentation. La suite de tests tourne sous Linux
+et macOS avec Python 3.12, 3.13 et 3.14 ; Windows et Python 3.15 tournent aussi, à titre
+expérimental, sans bloquer pour l'instant. Sur une pull request, chaque commit doit être
+signé et le titre doit commencer par la nature du changement. Un seul contrôle,
+**CI passed**, résume tous les jobs obligatoires.
 
 ## Tests
 

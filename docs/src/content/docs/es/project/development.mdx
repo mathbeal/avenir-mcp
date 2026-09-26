@@ -48,8 +48,11 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | bloqueo | `uv lock --check` | `uv.lock` no corresponde a `pyproject.toml` |
 
 La CI ejecuta además `typos`, `zizmor` sobre los workflows, `pip-audit` sobre las
-dependencias bloqueadas, la batería de pruebas en Python 3.12, 3.13 y 3.14, y en 3.15 (se permite que falle hasta
-que sus dependencias lo admitan) y la construcción de la documentación.
+dependencias bloqueadas, y la construcción de la documentación. La batería de pruebas se
+ejecuta en Linux y macOS con Python 3.12, 3.13 y 3.14; Windows y Python 3.15 también, como
+experimentos que aún no bloquean. En una pull request, cada commit debe estar firmado y el
+título debe empezar por el tipo de cambio. Un único control, **CI passed**, resume todos
+los jobs obligatorios.
 
 ## Pruebas
 

@@ -1,0 +1,31 @@
+name: pull request title
+
+# Pull requests are squashed: the title becomes the commit message, and the
+# changelog is generated from commit messages. It starts with the kind of change.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conventional:
+    name: title starts with feat, fix, docs, refactor, test, build, ci or chore
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: check the title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if printf '%s' "$TITLE" | grep -Eq '^(feat|fix|docs|refactor|test|build|ci|chore|perf|revert)(\([a-z0-9-]+\))?!?: .+'; then
+            echo "Title OK."
+          else
+            echo "::error::Start the title with the kind of change, e.g. 'fix: refuse an empty payee' (feat, fix, docs, refactor, test, build, ci, chore, perf, revert)."
+            exit 1
+          fi

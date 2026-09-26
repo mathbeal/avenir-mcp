@@ -48,8 +48,10 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | lock | `uv lock --check` | `uv.lock` does not match `pyproject.toml` |
 
 CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked dependencies,
-the test suite on Python 3.12, 3.13 and 3.14, and on 3.15 (allowed to fail until its dependencies support it), and
-the documentation build.
+and the documentation build. The test suite runs on Linux and macOS with Python 3.12,
+3.13 and 3.14; Windows and Python 3.15 run too, as experiments that do not block yet. On
+a pull request, every commit must be signed off and the title must start with the kind of
+change. One check, **CI passed**, stands for every required job.
 
 ## Tests
 
