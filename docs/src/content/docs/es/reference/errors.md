@@ -89,6 +89,7 @@ Cualquier herramienta que llame a YNAB puede devolver el error de YNAB: `Error c
 ## [`split_transaction`](/avenir-mcp/es/reference/tools/split-transaction/)
 
 - `Transaction {transaction_id} is not in this budget: use a transaction_id returned by suggest_categories.`
+- `Transaction {tx_id} was deleted in YNAB: there is nothing to split.`
 - `Transaction {tx_id} is already split: YNAB's API cannot change its lines, change them in YNAB.`
 - `Transaction {tx_id} is a transfer between accounts: it cannot be split.`
 - `Transaction {tx_id} is on an off-budget account: YNAB does not split those.`

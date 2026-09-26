@@ -79,9 +79,12 @@ def _check_transaction(tx: dict[str, Any], off_budget: set[str] | frozenset[str]
         off_budget: Ids of the tracking accounts.
 
     Raises:
-        ValueError: If it is already split, a transfer, or on an off-budget account.
+        ValueError: If it was deleted, is already split, a transfer, or on an off-budget
+            account.
     """
     tx_id = tx["id"]
+    if tx.get("deleted"):
+        raise ValueError(f"Transaction {tx_id} was deleted in YNAB: there is nothing to split.")
     if _is_split(tx):
         raise ValueError(
             f"Transaction {tx_id} is already split: YNAB's API cannot change its lines, "
@@ -159,7 +162,7 @@ def plan_split(
 
     Raises:
         ValueError: With a message saying what to fix, if the transaction is unknown,
-            already split, a transfer or off-budget, or if the lines are fewer than
+            deleted, already split, a transfer or off-budget, or if the lines are fewer than
             two, zero, in an unknown or internal category, or do not add up.
     """
     tx = next((t for t in transactions if t["id"] == transaction_id), None)

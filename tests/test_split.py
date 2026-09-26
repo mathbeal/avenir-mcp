@@ -97,6 +97,7 @@ def test_a_line_may_go_the_other_way() -> None:
         (_tx(subtransactions=[{"id": "s1"}]), _GOOD, "already split"),
         (_tx(transfer_account_id="acc2"), _GOOD, "transfer"),
         (_tx(account_id="tracking"), _GOOD, "off-budget"),
+        (_tx(deleted=True), _GOOD, "deleted"),
     ],
 )
 def test_what_cannot_be_split_is_refused_with_what_to_do(
