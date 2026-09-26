@@ -149,6 +149,29 @@ def _moved(state: DemoBudget) -> bool:
 
 TASKS = [
     Task(
+        "budgets-word",
+        "Which YNAB budgets do I have? Give their names." + FORMAT,
+        answer=_words("demo household"),
+        state=_unchanged,
+        notes="YNAB now calls a budget a plan: the agent must map the word to list_plans.",
+        tags=["read", "vocabulary"],
+    ),
+    Task(
+        "plan-word",
+        "What is my YNAB plan called?" + FORMAT,
+        answer=_words("demo household"),
+        state=_unchanged,
+        tags=["read", "vocabulary"],
+    ),
+    Task(
+        "restaurants-budget",
+        "What is my budget for Restaurants in September 2026?" + FORMAT,
+        answer=_number(demo.BUDGETED["cat-restaurants"] / 1000),
+        state=_unchanged,
+        notes="Here budget means the amount assigned to a category, not a plan.",
+        tags=["read", "vocabulary"],
+    ),
+    Task(
         "spent-restaurants",
         "How much did I spend on restaurants in August 2026?" + FORMAT,
         answer=_number(RESTAURANTS_AUGUST),
