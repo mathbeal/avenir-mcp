@@ -30,7 +30,7 @@ which the result gives.
 
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
-| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 | `category_id` | string | oui | — | Category to change (from suggest_categories or list_category_groups). |
 | `name` | string \| null | non | `null` | New name; omit to keep it. |
 | `category_group_id` | string \| null | non | `null` | Group to move it to (from list_category_groups); omit to keep it. |
@@ -55,7 +55,7 @@ Arguments :
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "category_id": "cat-tennis",
   "name": "Sport"
 }
@@ -78,13 +78,13 @@ Réponse sur le budget de démonstration :
 
 ## Erreurs
 
-- `Category {category_id} is not in this budget: use a category_id from suggest_categories.`
-- `Group {category_group_id} is not in this budget: use an id from list_category_groups.`
+- `Category {category_id} is not in this plan: use a category_id from suggest_categories.`
+- `Group {category_group_id} is not in this plan: use an id from list_category_groups.`
 - `The new name is empty: give a name, or omit it to keep the current one.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 Les erreurs propres à YNAB reviennent sous la forme `Error calling tool '<tool>': YNAB <status>: <detail>`.
 

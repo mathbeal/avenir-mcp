@@ -37,15 +37,15 @@ def test_expected_answers_come_from_the_demo_data() -> None:
 
 
 def test_demo_server_answers_like_ynab() -> None:
-    """Budgets by id or by "last-used"; unknown paths get YNAB's 404."""
+    """Plans by id or by "last-used"; unknown paths get YNAB's 404."""
     fake_ynab.STATE = fake_ynab.DemoBudget()
     server = fake_ynab.serve()
     base = f"http://127.0.0.1:{server.server_port}/v1"
     try:
-        for budget in ("demo-budget", "last-used"):
-            accounts = httpx.get(f"{base}/budgets/{budget}/accounts").json()["data"]["accounts"]
+        for plan in ("demo-budget", "last-used"):
+            accounts = httpx.get(f"{base}/plans/{plan}/accounts").json()["data"]["accounts"]
             assert {a["name"] for a in accounts} == {"Checking", "Savings"}
-        assert httpx.get(f"{base}/budgets/other/accounts").status_code == 404
+        assert httpx.get(f"{base}/plans/other/accounts").status_code == 404
         assert fake_ynab.STATE.requests == 3
     finally:
         server.shutdown()
@@ -109,12 +109,12 @@ def test_split_receipt_passes_only_for_the_receipt_lines() -> None:
 
 def test_mcp_tools_become_function_tools_with_their_schema() -> None:
     """Each MCP tool is offered to the model under its name, description and schema."""
-    tool = SimpleNamespace(name="list_budgets", description="List them.", input_schema={"a": 1})
+    tool = SimpleNamespace(name="list_plans", description="List them.", input_schema={"a": 1})
     assert run_openai.openai_tools([tool]) == [
         {
             "type": "function",
             "function": {
-                "name": "list_budgets",
+                "name": "list_plans",
                 "description": "List them.",
                 "parameters": {"a": 1},
             },

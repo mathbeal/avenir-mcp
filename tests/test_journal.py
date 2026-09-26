@@ -16,8 +16,8 @@ _MOVES = [
 ]
 
 
-def _found(book: journal.Journal, budget_id: str, operation_id: str | None = None) -> journal.Entry:
-    entry = book.find(budget_id, operation_id)
+def _found(book: journal.Journal, plan_id: str, operation_id: str | None = None) -> journal.Entry:
+    entry = book.find(plan_id, operation_id)
     assert entry is not None
     return entry
 
@@ -124,7 +124,7 @@ def test_a_line_written_by_an_earlier_version_is_still_read(tmp_path: Path) -> N
     """An operation recorded without details, or with a field unknown here, stays undoable."""
     path = tmp_path / "journal.jsonl"
     path.write_text(
-        '{"operation_id":"op1","budget_id":"b1","kind":"categorize",'
+        '{"operation_id":"op1","plan_id":"b1","kind":"categorize",'
         '"applied_at":"2026-09-01T10:00:00+00:00","moves":[],"origin":"cli"}\n',
         encoding="utf-8",
     )
@@ -144,3 +144,16 @@ def test_a_damaged_line_is_named_with_a_way_forward(tmp_path: Path, line: str) -
         file.write("\n" + line + "\n")
     with pytest.raises(ValueError, match=r"line 3, is not a journal entry"):
         journal.Journal(path).find("b1")
+
+
+def test_an_operation_recorded_with_budget_id_is_still_found(tmp_path: Path) -> None:
+    """Journals written before YNAB's plans named the budget: those lines stay undoable."""
+    path = tmp_path / "journal.jsonl"
+    path.write_text(
+        '{"operation_id":"op1","budget_id":"b1","kind":"categorize",'
+        '"applied_at":"2026-09-01T10:00:00+00:00","moves":[]}\n',
+        encoding="utf-8",
+    )
+    entry = journal.Journal(path).find("b1")
+    assert entry is not None
+    assert (entry.operation_id, entry.plan_id) == ("op1", "b1")

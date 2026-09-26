@@ -24,7 +24,7 @@ puisse la défaire plus tard — même après un redémarrage du serveur.
 JSON Lines, en ajout seul. Une opération appliquée tient sur une ligne :
 
 ```json
-{"operation_id":"5f2c9a1e7b30","budget_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+{"operation_id":"5f2c9a1e7b30","plan_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
 ```
 
 L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
@@ -36,7 +36,7 @@ L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
 | Champ | Sens |
 |---|---|
 | `operation_id` | 12 caractères hexadécimaux aléatoires |
-| `budget_id` | le budget modifié |
+| `plan_id` | le budget modifié |
 | `kind` | `categorize`, `budget`, `reconcile` ou `create` |
 | `applied_at` | ISO 8601, UTC, à la seconde |
 | `moves` | pour `categorize` : la catégorie de chaque transaction avant et après |

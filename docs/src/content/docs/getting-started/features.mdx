@@ -17,11 +17,17 @@ agent; the agent chooses the tool.
 `undo_operation`.
 </Aside>
 
+<Aside type="tip" title="Plan or budget?">
+YNAB now calls a budget a **plan**, and so do avenir-mcp's tools (`list_plans`,
+`plan_id`). Say whichever you prefer: the agent understands both and answers with your
+word. "My budget for Restaurants" still means the amount assigned to that category.
+</Aside>
+
 ## Look around
 
 | You say | Tool | |
 |---|---|---|
-| *“Which budgets do I have?”* | [`list_budgets`](/avenir-mcp/reference/tools/list-budgets/) | R |
+| *“Which budgets do I have?”* | [`list_plans`](/avenir-mcp/reference/tools/list-plans/) | R |
 | *“What's on my accounts?”* | [`list_accounts`](/avenir-mcp/reference/tools/list-accounts/) | R |
 | *“Which category groups exist?”* | [`list_category_groups`](/avenir-mcp/reference/tools/list-category-groups/) | R |
 | *“Which transaction is my 86.40 receipt from the 12th?”* | [`find_transactions`](/avenir-mcp/reference/tools/find-transactions/) — by dates, exact amount and account, categorised or not | R |

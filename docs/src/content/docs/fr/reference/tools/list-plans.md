@@ -1,6 +1,6 @@
 ---
-title: "list_budgets"
-description: "List all YNAB budgets accessible with the current API key."
+title: "list_plans"
+description: "List all YNAB plans accessible with the current API key."
 ---
 
 :::note[Généré]
@@ -9,10 +9,11 @@ Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne corre
 
 ## Rôle
 
-List all YNAB budgets accessible with the current API key.
+List all YNAB plans accessible with the current API key.
 
-Use the budget id in subsequent tool calls. 'last-used' also works, but names
-whichever budget was last opened in YNAB: with several budgets, pass the id.
+A plan is what YNAB now calls a budget, and what users may still call their budget.
+Use the plan id in subsequent tool calls. 'last-used' also works, but names
+whichever plan was last opened in YNAB: with several plans, pass the id.
 
 ## Comportement
 
@@ -34,7 +35,7 @@ aucun.
 
 | Champ | Type | Description |
 |---|---|---|
-| `id` | string | YNAB id of the budget, to pass as budget_id. |
+| `id` | string | YNAB id of the budget, to pass as plan_id. |
 | `name` | string | Budget name. |
 | `first_month` | string \| null | First month with data, YYYY-MM-01; null for an empty budget. |
 | `last_month` | string \| null | Last month with data, YYYY-MM-01; null for an empty budget. |

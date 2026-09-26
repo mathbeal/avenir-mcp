@@ -48,7 +48,7 @@ PROMPTS = {"monthly_review", "classify_pending", "reconcile", "plan_next_month"}
 @pytest.fixture(autouse=True, name="budget")
 def _budget() -> Iterator[None]:
     with (
-        patch("avenir_mcp.client.get_budgets", AsyncMock(return_value=_BUDGETS)),
+        patch("avenir_mcp.client.get_plans", AsyncMock(return_value=_BUDGETS)),
         patch("avenir_mcp.client.get_categories", AsyncMock(return_value=_CATS)),
         patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
     ):
@@ -81,23 +81,23 @@ def test_resources_and_templates_are_listed() -> None:
     """Clients can discover what context the server offers."""
     uris = {str(r.uri) for r in _run(lambda c: c.list_resources())}
     templates = {t.uri_template for t in _run(lambda c: c.list_resource_templates())}
-    assert {"ynab://budgets", "avenir-mcp://guide"} <= uris
+    assert {"ynab://plans", "avenir-mcp://guide"} <= uris
     assert {
-        "ynab://budgets/{budget_id}/categories",
-        "ynab://budgets/{budget_id}/accounts",
+        "ynab://plans/{plan_id}/categories",
+        "ynab://plans/{plan_id}/accounts",
     } <= templates
 
 
 def test_budgets_resource_is_compact() -> None:
     """Only what identifies a budget."""
-    assert json.loads(_read("ynab://budgets")) == [
-        {"budget_id": "b1", "name": "Personal", "last_modified_on": "2026-09-24"}
+    assert json.loads(_read("ynab://plans")) == [
+        {"plan_id": "b1", "name": "Personal", "last_modified_on": "2026-09-24"}
     ]
 
 
 def test_categories_resource_groups_assignable_categories() -> None:
     """Categories by group, internal ones left out, with the ids tools need."""
-    assert json.loads(_read("ynab://budgets/b1/categories")) == [
+    assert json.loads(_read("ynab://plans/b1/categories")) == [
         {"group": "Everyday", "categories": [{"category_id": "c1", "name": "Groceries"}]},
         {"group": "Home", "categories": [{"category_id": "c2", "name": "Rent"}]},
     ]
@@ -105,7 +105,7 @@ def test_categories_resource_groups_assignable_categories() -> None:
 
 def test_accounts_resource_lists_open_accounts_in_currency() -> None:
     """Closed accounts are left out; balances are in currency units."""
-    assert json.loads(_read("ynab://budgets/b1/accounts")) == [
+    assert json.loads(_read("ynab://plans/b1/accounts")) == [
         {
             "account_id": "a1",
             "name": "Current account",
@@ -129,20 +129,20 @@ def test_prompts_are_listed_with_their_arguments() -> None:
     prompts = {p.name: p for p in _run(lambda c: c.list_prompts())}
     assert set(prompts) == PROMPTS
     reconcile_args = {a.name: a.required for a in prompts["reconcile"].arguments}
-    assert reconcile_args == {"budget_id": True, "account_id": True, "bank_balance": True}
+    assert reconcile_args == {"plan_id": True, "account_id": True, "bank_balance": True}
 
 
 @pytest.mark.parametrize(
     ("name", "args", "must_name"),
     [
-        ("classify_pending", {"budget_id": "b1"}, {"suggest_categories", "apply_categories"}),
-        ("monthly_review", {"budget_id": "b1", "month": "2026-09-01"}, {"get_monthly_summary"}),
+        ("classify_pending", {"plan_id": "b1"}, {"suggest_categories", "apply_categories"}),
+        ("monthly_review", {"plan_id": "b1", "month": "2026-09-01"}, {"get_monthly_summary"}),
         (
             "reconcile",
-            {"budget_id": "b1", "account_id": "a1", "bank_balance": "1234.56"},
+            {"plan_id": "b1", "account_id": "a1", "bank_balance": "1234.56"},
             {"reconcile_account"},
         ),
-        ("plan_next_month", {"budget_id": "b1"}, {"forecast_balance", "set_category_budget"}),
+        ("plan_next_month", {"plan_id": "b1"}, {"forecast_balance", "set_category_budget"}),
     ],
 )
 def test_prompts_carry_their_arguments_and_only_real_tools(

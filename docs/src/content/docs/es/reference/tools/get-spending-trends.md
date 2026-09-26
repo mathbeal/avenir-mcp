@@ -28,7 +28,7 @@ first, in currency units.
 
 | Nombre | Tipo | Obligatorio | Por defecto | Descripción |
 |---|---|---|---|---|
-| `budget_id` | string | sí | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | sí | — | YNAB plan id or 'last-used'. |
 | `months_count` | integer | no | `3` | Number of past months to include (default 3). |
 
 ## Devuelve
@@ -42,7 +42,7 @@ Argumentos:
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "months_count": 3
 }
 ```

@@ -195,17 +195,17 @@ class Handler(BaseHTTPRequestHandler):
         query = {k: v[0] for k, v in parse_qs(url.query).items()}
         with STATE.lock:
             STATE.requests += 1
-            if (method, path) == ("GET", "/budgets"):
+            if (method, path) == ("GET", "/plans"):
                 budget = {
-                    "id": demo.BUDGET_ID,
+                    "id": demo.PLAN_ID,
                     "name": "Demo household",
                     "last_modified_on": "2026-09-20",
                     "first_month": demo.MONTHS[0],
                     "last_month": demo.MONTHS[-1],
                 }
-                return self._send(200, {"data": {"budgets": [budget]}})
+                return self._send(200, {"data": {"plans": [budget]}})
             # YNAB accepts "last-used" wherever a budget id goes.
-            match = re.match(rf"^/budgets/(?:{demo.BUDGET_ID}|last-used)(/.*)$", path)
+            match = re.match(rf"^/plans/(?:{demo.PLAN_ID}|last-used)(/.*)$", path)
             if not match:
                 return self._send(404, {"error": {"detail": "Resource not found"}})
             rest = match.group(1)

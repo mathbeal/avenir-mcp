@@ -77,7 +77,7 @@ def test_suggest_categories_returns_structured_content_in_three_requests() -> No
         patch("avenir_mcp.client.get_categories", get_cats),
         patch("avenir_mcp.client.get_accounts", get_accounts),
     ):
-        result = asyncio.run(_call("suggest_categories", {"budget_id": "b1"}))
+        result = asyncio.run(_call("suggest_categories", {"plan_id": "b1"}))
     assert not result.is_error
     data = result.structured_content
     assert data["pending_count"] == 1
@@ -101,7 +101,7 @@ def test_suggest_categories_skips_off_budget_accounts() -> None:
         patch("avenir_mcp.client.get_categories", AsyncMock(return_value=_CATS)),
         patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
     ):
-        data = asyncio.run(_call("suggest_categories", {"budget_id": "b1"})).structured_content
+        data = asyncio.run(_call("suggest_categories", {"plan_id": "b1"})).structured_content
     assert "loan-start" not in {item["transaction_id"] for item in data["items"]}
 
 
@@ -112,7 +112,7 @@ def test_suggest_categories_reports_a_bad_cursor_as_a_tool_error() -> None:
         patch("avenir_mcp.client.get_categories", AsyncMock(return_value=_CATS)),
         patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
     ):
-        result = asyncio.run(_call("suggest_categories", {"budget_id": "b1", "cursor": "x"}))
+        result = asyncio.run(_call("suggest_categories", {"plan_id": "b1", "cursor": "x"}))
     assert result.is_error
     assert "next_cursor" in result.content[0].text
 

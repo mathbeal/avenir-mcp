@@ -32,7 +32,7 @@ as for apply_categories.
 
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
-| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 | `account_id` | string | oui | — | Account to add them to (from list_accounts). |
 | `transactions` | array of object | oui | — | The transactions to create. |
 | `approved` | boolean | non | `false` | Skip YNAB's review step. |
@@ -62,7 +62,7 @@ Arguments :
 
 ```json
 {
-  "budget_id": "demo-budget",
+  "plan_id": "demo-budget",
   "account_id": "acc-checking",
   "transactions": [
     {
@@ -100,14 +100,14 @@ Réponse sur le budget de démonstration :
 
 ## Erreurs
 
-- `Account {account_id} is not in this budget: use an id from list_accounts.`
+- `Account {account_id} is not in this plan: use an id from list_accounts.`
 - `Give at least one transaction to create.`
 - `{date} is in the future: YNAB only records transactions that happened.`
-- `Category {category} is not in this budget: use a category_id from get_category_balances.`
+- `Category {category} is not in this plan: use a category_id from get_category_balances.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 Les erreurs propres à YNAB reviennent sous la forme `Error calling tool '<tool>': YNAB <status>: <detail>`.
 

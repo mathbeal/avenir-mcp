@@ -30,7 +30,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
     tool_names = sorted(t.name for t in asyncio.run(server.mcp.list_tools()))
     assert tool_names == sorted(
         [
-            "list_budgets",
+            "list_plans",
             "list_accounts",
             "list_category_groups",
             "get_category_balances",
@@ -54,7 +54,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
 
 
 # ---------------------------------------------------------------------------
-# list_budgets
+# list_plans
 # ---------------------------------------------------------------------------
 
 
@@ -70,8 +70,8 @@ def test_list_budgets_keeps_what_an_agent_needs() -> None:
         },
         {"id": "b2", "name": "Empty"},
     ]
-    with patch("avenir_mcp.client.get_budgets", new=AsyncMock(return_value=budgets)):
-        result = asyncio.run(server.list_budgets())
+    with patch("avenir_mcp.client.get_plans", new=AsyncMock(return_value=budgets)):
+        result = asyncio.run(server.list_plans())
     assert [b.model_dump() for b in result] == [
         {"id": "b1", "name": "Business", "first_month": "2026-01-01", "last_month": "2026-09-01"},
         {"id": "b2", "name": "Empty", "first_month": None, "last_month": None},

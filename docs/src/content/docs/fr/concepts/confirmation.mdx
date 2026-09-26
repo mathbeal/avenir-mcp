@@ -26,7 +26,7 @@ Chaque outil construit un **sujet** : le changement exact, sous forme de donnée
 | `reconcile_account` | compte, solde bancaire, écart à ajuster |
 | `undo_operation` | l'identifiant de l'opération |
 
-Son **empreinte** est le SHA-256 du JSON `[budget_id, sujet]`, clés triées ; pour une
+Son **empreinte** est le SHA-256 du JSON `[plan_id, sujet]`, clés triées ; pour une
 liste de changements, l'ordre des éléments est indifférent. Une réponse ou un code ne
 confirme jamais que le sujet dont il porte l'empreinte.
 

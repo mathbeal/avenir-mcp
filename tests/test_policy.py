@@ -55,7 +55,7 @@ def test_read_only_mode_hides_and_refuses_writes() -> None:
     async def call() -> Any:
         async with Client(server.mcp) as mcp_client:
             return await mcp_client.call_tool(
-                "approve_transactions", {"budget_id": "b1", "tx_ids": []}, raise_on_error=False
+                "approve_transactions", {"plan_id": "b1", "tx_ids": []}, raise_on_error=False
             )
 
     assert asyncio.run(call()).is_error

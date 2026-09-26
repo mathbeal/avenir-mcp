@@ -25,7 +25,7 @@ Each tool builds a **subject**: the exact change, as data.
 | `split_transaction` | transaction, the lines (amount, category, memo) |
 | `undo_operation` | the operation id |
 
-Its **fingerprint** is the SHA-256 of the JSON `[budget_id, subject]`, keys sorted; for
+Its **fingerprint** is the SHA-256 of the JSON `[plan_id, subject]`, keys sorted; for
 a list of changes, the order of the elements does not matter. An answer or a code only
 ever confirms the subject whose fingerprint it carries.
 

@@ -32,7 +32,7 @@ Confirmation works as for apply_categories.
 
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
-| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 | `operation_id` | string \| null | non | `null` | Operation to undo; omit for the most recent one. |
 | `confirmation` | string \| null | non | `null` | Code from a previous "confirmation_required" result. |
 
@@ -62,7 +62,7 @@ Arguments :
 
 ```json
 {
-  "budget_id": "demo-budget"
+  "plan_id": "demo-budget"
 }
 ```
 
@@ -103,11 +103,11 @@ Réponse sur le budget de démonstration :
 
 ## Erreurs
 
-- `Nothing to undo: no operation of this budget is still in effect with id {operation_id}.`
+- `Nothing to undo: no operation of this plan is still in effect with id {operation_id}.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
-- `The budget changed between the preview and the answer. Call again without an answer to get a new preview.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
 Les erreurs propres à YNAB reviennent sous la forme `Error calling tool '<tool>': YNAB <status>: <detail>`.
 

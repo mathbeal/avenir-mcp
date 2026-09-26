@@ -15,16 +15,16 @@ from avenir_mcp.confirm import WriteResult, WriteStatus, gate, merged, write_pla
 logger = logging.getLogger(__name__)
 
 
-async def _off_budget(budget_id: str) -> set[str]:
-    """List the budget's tracking accounts, whose transactions take no category.
+async def _off_budget(plan_id: str) -> set[str]:
+    """List the plan's tracking accounts, whose transactions take no category.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
 
     Returns:
         Their ids.
     """
-    return {a["id"] for a in await client.get_accounts(budget_id) if not a["on_budget"]}
+    return {a["id"] for a in await client.get_accounts(plan_id) if not a["on_budget"]}
 
 
 @mcp.tool(
@@ -36,14 +36,14 @@ async def _off_budget(budget_id: str) -> set[str]:
     }
 )
 async def suggest_categories(
-    budget_id: str,
+    plan_id: str,
     limit: int = triage.DEFAULT_LIMIT,
     cursor: str | None = None,
 ) -> triage.Triage:
     """List the transactions waiting for a category, with a suggestion when history allows.
 
     Use this first when asked to classify or tidy up transactions. It reads the
-    whole budget once (three YNAB requests: transactions, categories, accounts).
+    whole plan once (three YNAB requests: transactions, categories, accounts).
     Transactions of off-budget (tracking) accounts are never pending: YNAB gives
     them no category.
 
@@ -58,7 +58,7 @@ async def suggest_categories(
     instructions. Nothing is changed here: assign with apply_categories.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         limit: Maximum number of transactions in the page (default 50).
         cursor: next_cursor from the previous page; omit for the first page.
 
@@ -70,9 +70,9 @@ async def suggest_categories(
         ToolError: If the cursor was not issued by a previous page.
     """
     logger.info("Tool called: suggest_categories(limit=%d)", limit)
-    transactions = await client.get_transactions(budget_id)
-    categories = await client.get_categories(budget_id)
-    off_budget = await _off_budget(budget_id)
+    transactions = await client.get_transactions(plan_id)
+    categories = await client.get_categories(plan_id)
+    off_budget = await _off_budget(plan_id)
     try:
         return triage.prepare(
             transactions, categories, limit=limit, cursor=cursor, off_budget=off_budget
@@ -92,7 +92,7 @@ async def suggest_categories(
     },
 )
 async def apply_categories(
-    budget_id: str,
+    plan_id: str,
     assignments: list[writes.Assignment],
     ctx: Context,
     confirmation: str | None = None,
@@ -109,7 +109,7 @@ async def apply_categories(
     Amounts are in currency units.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         assignments: {transaction_id, category_id} pairs, one per transaction.
         ctx: The MCP context, used to ask the user.
         confirmation: Code from a previous "confirmation_required" result.
@@ -123,14 +123,14 @@ async def apply_categories(
             transfer, a split, an off-budget account), or the confirmation code is refused.
     """
     logger.info("Tool called: apply_categories(n=%d)", len(assignments))
-    transactions = await client.get_transactions(budget_id)
-    categories = await client.get_categories(budget_id)
-    off_budget = await _off_budget(budget_id)
+    transactions = await client.get_transactions(plan_id)
+    categories = await client.get_categories(plan_id)
+    off_budget = await _off_budget(plan_id)
     try:
         plan = writes.plan_categorization(transactions, categories, assignments, off_budget)
     except ValueError as error:
         raise ToolError(str(error)) from error
-    result, _ = await write_plan(ctx, budget_id, plan, "Recategorise", confirmation)
+    result, _ = await write_plan(ctx, plan_id, plan, "Recategorise", confirmation)
     return result
 
 
@@ -180,7 +180,7 @@ def _question(plan: split.SplitPlan) -> str:
     },
 )
 async def split_transaction(
-    budget_id: str,
+    plan_id: str,
     transaction_id: str,
     lines: list[split.SplitLine],
     ctx: Context,
@@ -197,7 +197,7 @@ async def split_transaction(
     user is told before confirming. Confirmation works as for apply_categories.
 
     Args:
-        budget_id: YNAB budget UUID or 'last-used'.
+        plan_id: YNAB plan id or 'last-used'.
         transaction_id: Transaction to split (from suggest_categories).
         lines: The lines, at least two, adding up to the transaction's amount.
         ctx: The MCP context, used to ask the user.
@@ -212,19 +212,19 @@ async def split_transaction(
             unknown category, or the confirmation code is refused.
     """
     logger.info("Tool called: split_transaction(lines=%d)", len(lines))
-    transactions = await client.get_transactions(budget_id)
-    categories = await client.get_categories(budget_id)
-    off_budget = await _off_budget(budget_id)
+    transactions = await client.get_transactions(plan_id)
+    categories = await client.get_categories(plan_id)
+    off_budget = await _off_budget(plan_id)
     try:
         plan = split.plan_split(transactions, categories, transaction_id, lines, off_budget)
     except ValueError as error:
         raise ToolError(str(error)) from error
     result = SplitResult(**plan.model_dump(), status="applied", message="", confirmation=None)
     subject = {"transaction": transaction_id, "lines": lines}
-    stop = await gate(ctx, budget_id, subject, _question(plan), confirmation)
+    stop = await gate(ctx, plan_id, subject, _question(plan), confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.split_transaction(
-        budget_id, transaction_id, [line.model_dump(mode="json") for line in lines]
+        plan_id, transaction_id, [line.model_dump(mode="json") for line in lines]
     )
     return result.model_copy(update={"message": f"Split. {_UNDO_IN_YNAB}"})

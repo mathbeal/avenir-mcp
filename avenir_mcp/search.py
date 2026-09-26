@@ -52,11 +52,11 @@ def check(
         since: First date.
         until: Last date, or None for no end.
         account_ids: Accounts to search, or None for all.
-        names: The budget's account names by id.
+        names: The plan's account names by id.
 
     Raises:
         ValueError: If the dates are reversed, span more than MAX_DAYS, or an
-            account is not in the budget.
+            account is not in the plan.
     """
     if until is not None:
         if until < since:
@@ -65,9 +65,7 @@ def check(
             raise ValueError(f"The dates span more than {MAX_DAYS} days: search a shorter period.")
     unknown = [a for a in account_ids or [] if a not in names]
     if unknown:
-        raise ValueError(
-            f"Account {unknown[0]} is not in this budget: use an id from list_accounts."
-        )
+        raise ValueError(f"Account {unknown[0]} is not in this plan: use an id from list_accounts.")
 
 
 def _categorisation(tx: dict[str, Any], labels: dict[str, str]) -> dict[str, Any]:
@@ -75,7 +73,7 @@ def _categorisation(tx: dict[str, Any], labels: dict[str, str]) -> dict[str, Any
 
     Args:
         tx: A YNAB transaction.
-        labels: The budget's category names by id.
+        labels: The plan's category names by id.
 
     Returns:
         category, split, cleared and approved.
@@ -104,9 +102,9 @@ def find(  # pylint: disable=too-many-arguments
     """Find the transactions matching the filters, newest first.
 
     Args:
-        transactions: The budget's transactions; deleted ones are never found.
-        accounts: The budget's accounts.
-        categories: The budget's categories.
+        transactions: The plan's transactions; deleted ones are never found.
+        accounts: The plan's accounts.
+        categories: The plan's categories.
         since: First date, included.
         until: Last date, included; None for no end.
         amount: Exact amount in currency units, or None for any.
@@ -118,7 +116,7 @@ def find(  # pylint: disable=too-many-arguments
 
     Raises:
         ValueError: With a message saying what to fix, if the dates are reversed or
-            span more than a year, or an account is not in the budget.
+            span more than a year, or an account is not in the plan.
     """
     names = {a["id"]: a["name"] for a in accounts}
     check(since, until, account_ids, names)

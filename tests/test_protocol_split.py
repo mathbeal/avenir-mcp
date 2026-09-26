@@ -35,7 +35,7 @@ def _ynab() -> Iterator[AsyncMock]:
 
 
 def _args(**extra: Any) -> dict[str, Any]:
-    return {"budget_id": "b1", "transaction_id": "t1", "lines": _LINES, **extra}
+    return {"plan_id": "b1", "transaction_id": "t1", "lines": _LINES, **extra}
 
 
 def test_split_is_previewed_then_applied_with_the_code(ynab: AsyncMock) -> None:

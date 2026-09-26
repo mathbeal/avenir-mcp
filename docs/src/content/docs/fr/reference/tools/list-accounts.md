@@ -1,6 +1,6 @@
 ---
 title: "list_accounts"
-description: "List the budget's accounts with their current balances (in currency units)."
+description: "List the plan's accounts with their current balances (in currency units)."
 ---
 
 :::note[Généré]
@@ -9,7 +9,7 @@ Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne corre
 
 ## Rôle
 
-List the budget's accounts with their current balances (in currency units).
+List the plan's accounts with their current balances (in currency units).
 
 Use it to reconcile YNAB with the bank.
 
@@ -27,7 +27,7 @@ Use it to reconcile YNAB with the bank.
 
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
-| `budget_id` | string | oui | — | YNAB budget UUID or 'last-used'. |
+| `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 
 ## Retour
 
@@ -50,7 +50,7 @@ Arguments :
 
 ```json
 {
-  "budget_id": "demo-budget"
+  "plan_id": "demo-budget"
 }
 ```
 

@@ -25,7 +25,7 @@ Cada herramienta construye un **sujeto**: el cambio exacto, como datos.
 | `reconcile_account` | cuenta, saldo bancario, diferencia a ajustar |
 | `undo_operation` | el id de la operación |
 
-Su **huella** es el SHA-256 del JSON `[budget_id, sujeto]`, con claves ordenadas; para
+Su **huella** es el SHA-256 del JSON `[plan_id, sujeto]`, con claves ordenadas; para
 una lista de cambios, el orden de los elementos no importa. Una respuesta o un código
 solo confirma el sujeto cuya huella lleva.
 

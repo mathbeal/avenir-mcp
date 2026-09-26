@@ -105,7 +105,7 @@ def _check_lines(
 
     Args:
         tx: The transaction.
-        names: The budget's category names by id.
+        names: The plan's category names by id.
         uncategorized: Ids of YNAB's internal Uncategorized.
         lines: The lines proposed.
 
@@ -130,7 +130,7 @@ def _check_lines(
             )
         if line.category_id not in names:
             raise ValueError(
-                f"Category {line.category_id} is not in this budget: "
+                f"Category {line.category_id} is not in this plan: "
                 "use a category_id from suggest_categories or get_category_balances."
             )
         total += milliunits
@@ -151,8 +151,8 @@ def plan_split(
     """Work out the split of one transaction, refusing what cannot be meant.
 
     Args:
-        transactions: The budget's transactions.
-        categories: The budget's categories.
+        transactions: The plan's transactions.
+        categories: The plan's categories.
         transaction_id: The transaction to split.
         lines: Its lines, at least two, adding up to its amount.
         off_budget: Ids of the tracking accounts.
@@ -168,7 +168,7 @@ def plan_split(
     tx = next((t for t in transactions if t["id"] == transaction_id), None)
     if tx is None:
         raise ValueError(
-            f"Transaction {transaction_id} is not in this budget: "
+            f"Transaction {transaction_id} is not in this plan: "
             "use a transaction_id returned by suggest_categories."
         )
     _check_transaction(tx, off_budget)

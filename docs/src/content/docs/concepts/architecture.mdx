@@ -48,12 +48,12 @@ units: no tool ever returns milliunits.
 
 <Steps>
 
-1. The client calls `get_monthly_summary` with `{"budget_id": "last-used", "month":
+1. The client calls `get_monthly_summary` with `{"plan_id": "last-used", "month":
    "2026-09-01"}`.
 2. FastMCP validates the arguments against the tool's input schema.
 3. The tool checks `month` (`app.check_month`) before any request: a malformed month is
    refused with a message, at no cost.
-4. `client.get_month` sends one `GET /budgets/last-used/months/2026-09-01` to YNAB.
+4. `client.get_month` sends one `GET /plans/last-used/months/2026-09-01` to YNAB.
 5. `analytics.month_overview` keeps the totals and the overspent categories, in currency
    units.
 6. FastMCP validates the answer against the output schema and returns it as
@@ -72,7 +72,7 @@ units: no tool ever returns milliunits.
 3. `confirm.write_plan` asks the user through the channel the client supports — see
    [Confirmation](/avenir-mcp/concepts/confirmation/). Until the answer is yes, it
    returns the preview.
-4. On yes, one bulk `PATCH /budgets/{id}/transactions` applies every change.
+4. On yes, one bulk `PATCH /plans/{id}/transactions` applies every change.
 5. `journal.Journal.record` appends the operation to the journal; its id comes back to the
    agent for [undo](/avenir-mcp/concepts/journal/).
 

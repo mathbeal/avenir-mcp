@@ -55,7 +55,7 @@ def _checks() -> list[tuple[str, list[str], Callable[[dict[str, Any]], bool]]]:
     Returns:
         (name, Inspector options, check of the answer) triples.
     """
-    budget = demo_budget.BUDGET_ID
+    budget = demo_budget.PLAN_ID
     return [
         ("tools, schemas portable", ["--method", "tools/list", "--strict"],
          lambda d: len(d["tools"]) == TOOLS),
@@ -64,14 +64,14 @@ def _checks() -> list[tuple[str, list[str], Callable[[dict[str, Any]], bool]]]:
         ("resource templates", ["--method", "resources/templates/list"],
          lambda d: len(d["resourceTemplates"]) == TEMPLATES),
         ("prompts", ["--method", "prompts/list"], lambda d: len(d["prompts"]) == PROMPTS),
-        ("list_budgets on the demo budget",
-         ["--method", "tools/call", "--tool-name", "list_budgets"],
+        ("list_plans on the demo budget",
+         ["--method", "tools/call", "--tool-name", "list_plans"],
          lambda d: not d.get("isError") and d["structuredContent"]["result"][0]["id"] == budget),
         ("guide resource", ["--method", "resources/read", "--uri", "avenir-mcp://guide"],
          lambda d: "YNAB method" in d["contents"][0]["text"]),
         ("monthly_review prompt",
          ["--method", "prompts/get", "--prompt-name", "monthly_review",
-          "--prompt-args", f"budget_id={budget}"],
+          "--prompt-args", f"plan_id={budget}"],
          lambda d: "get_monthly_summary" in d["messages"][0]["content"]["text"]),
     ]  # fmt: skip
 

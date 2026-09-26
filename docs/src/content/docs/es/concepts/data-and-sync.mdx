@@ -33,7 +33,7 @@ presupuesto; los gastos son negativos, las entradas positivas.
 | Métodos | `GET` para leer; `PATCH`, `POST` y `DELETE` sobre transacciones, categorías y presupuestos mensuales |
 | Errores | cualquier 4xx o 5xx vuelve como `Error calling tool '<tool>': YNAB <status>: <detail>`, con la explicación de YNAB |
 
-`budget_id` acepta `last-used`, que YNAB resuelve como el último presupuesto usado.
+`plan_id` acepta `last-used`, que YNAB resuelve como el último presupuesto usado.
 
 ## La copia local de las transacciones
 
@@ -53,7 +53,7 @@ Con el id de un presupuesto, la copia se actualiza por sincronización increment
 Con `last-used`, que designa el último presupuesto abierto en YNAB y puede cambiar de
 una llamada a otra, las transacciones se cargan completas cada vez — sigue siendo una
 sola petición — para no mezclar nunca dos presupuestos. Con varios presupuestos, pase
-el id que da `list_budgets`.
+el id que da `list_plans`.
 
 La copia vive tanto como el proceso del servidor. Las lecturas filtradas — por fecha o
 por categoría — no la usan.
@@ -73,7 +73,7 @@ y se indica en su [página de referencia](/avenir-mcp/es/reference/tools/):
 | Coste | Herramientas |
 |---|---|
 | 0 | toda llamada rechazada por la validación (un mes mal formado, un nombre vacío…) |
-| 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, la vista previa de `set_category_budget` |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, la vista previa de `set_category_budget` |
 | 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
 | 3 | `suggest_categories` (una página entera), `apply_categories` |
 | 1 + N | `get_spending_trends` sobre N meses |

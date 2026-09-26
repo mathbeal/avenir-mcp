@@ -22,7 +22,7 @@ _THIS_MACHINE = {"127.0.0.1", "localhost", "::1"}
 
 
 def _base_url() -> str:
-    """Give YNAB's API, or AVENIR_MCP_YNAB_URL (a demo budget server for evaluations).
+    """Give YNAB's API, or AVENIR_MCP_YNAB_URL (a demo plan server for evaluations).
 
     Every request carries the token, so it goes over https — plain http only to a
     stand-in on this machine.
@@ -55,7 +55,7 @@ def _url(path: str) -> str:
     as "x/../../user" must not steer a request to another endpoint.
 
     Args:
-        path: The API path, such as "/budgets/{id}/accounts".
+        path: The API path, such as "/plans/{id}/accounts".
 
     Returns:
         The base URL followed by the path.
@@ -66,16 +66,16 @@ def _url(path: str) -> str:
     for segment in path.strip("/").split("/"):
         if not _SEGMENT.fullmatch(segment):
             raise ValueError(
-                f"{segment!r} is not a YNAB id: use the ids returned by list_budgets, "
+                f"{segment!r} is not a YNAB id: use the ids returned by list_plans, "
                 "list_accounts or the other tools."
             )
     return f"{_base_url()}{path}"
 
 
-# The budget YNAB last opened: a moving target, never cached.
+# The plan YNAB last opened: a moving target, never cached.
 LAST_USED = "last-used"
 
-# Delta-sync cache: {budget_id: {"server_knowledge": int, "transactions": {tx_id: tx}}}
+# Delta-sync cache: {plan_id: {"server_knowledge": int, "transactions": {tx_id: tx}}}
 _CACHE: dict[str, dict[str, Any]] = {}
 
 
@@ -233,28 +233,28 @@ async def _delete(path: str) -> dict[str, Any]:
     return await _request("delete", path)
 
 
-async def get_budgets() -> list[dict[str, Any]]:
-    """Return all YNAB budgets accessible with the current API key.
+async def get_plans() -> list[dict[str, Any]]:
+    """Return all YNAB plans accessible with the current API key.
 
     Returns:
-        List of budget dicts with id, name, first_month, last_month.
+        List of plan dicts with id, name, first_month, last_month.
     """
-    logger.info("Fetching budget list")
-    data = await _get("/budgets")
-    return data["data"]["budgets"]  # type: ignore[no-any-return]
+    logger.info("Fetching plan list")
+    data = await _get("/plans")
+    return data["data"]["plans"]  # type: ignore[no-any-return]
 
 
-async def get_categories(budget_id: str) -> list[dict[str, Any]]:
-    """Return all non-hidden categories for the given budget (flattened).
+async def get_categories(plan_id: str) -> list[dict[str, Any]]:
+    """Return all non-hidden categories for the given plan (flattened).
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
 
     Returns:
         Flat list of category dicts (id, name, category_group_id, hidden, …).
     """
-    logger.info("Fetching categories for budget %s", budget_id)
-    data = await _get(f"/budgets/{budget_id}/categories")
+    logger.info("Fetching categories for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/categories")
     groups: list[dict[str, Any]] = data["data"]["category_groups"]
     categories: list[dict[str, Any]] = []
     for group in groups:
@@ -264,33 +264,33 @@ async def get_categories(budget_id: str) -> list[dict[str, Any]]:
     return categories
 
 
-async def get_month(budget_id: str, month: str = "current") -> dict[str, Any]:
-    """Return the summary for a single budget month.
+async def get_month(plan_id: str, month: str = "current") -> dict[str, Any]:
+    """Return the summary for a single plan month.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         month: ISO month string "YYYY-MM-01" or the literal "current".
 
     Returns:
         Month dict with budgeted, activity, balance, income, overspend.
     """
-    logger.info("Fetching month %s for budget %s", month, budget_id)
-    data = await _get(f"/budgets/{budget_id}/months/{month}")
+    logger.info("Fetching month %s for plan %s", month, plan_id)
+    data = await _get(f"/plans/{plan_id}/months/{month}")
     return data["data"]["month"]  # type: ignore[no-any-return]
 
 
-async def get_month_categories(budget_id: str, month: str = "current") -> list[dict[str, Any]]:
+async def get_month_categories(plan_id: str, month: str = "current") -> list[dict[str, Any]]:
     """Return per-category budget/actual data for a given month.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         month: ISO month string "YYYY-MM-01" or "current".
 
     Returns:
         List of category dicts enriched with budgeted, activity, balance for that month.
     """
-    logger.info("Fetching month categories for %s / %s", budget_id, month)
-    month_data = await get_month(budget_id, month)
+    logger.info("Fetching month categories for %s / %s", plan_id, month)
+    month_data = await get_month(plan_id, month)
     categories: list[dict[str, Any]] = []
     for group in month_data.get("categories", []):
         if isinstance(group, dict) and "categories" in group:
@@ -301,18 +301,18 @@ async def get_month_categories(budget_id: str, month: str = "current") -> list[d
 
 
 async def get_transactions(
-    budget_id: str,
+    plan_id: str,
     since_date: str | None = None,
     category_id: str | None = None,
     uncategorized_only: bool = False,
 ) -> list[dict[str, Any]]:
-    """Return transactions for a budget, with optional filters.
+    """Return transactions for a plan, with optional filters.
 
     Uses delta sync (last_knowledge_of_server) to minimise API calls when
-    called repeatedly for the same budget without filters.
+    called repeatedly for the same plan without filters.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         since_date: ISO date "YYYY-MM-DD"; only return transactions on/after.
         category_id: Filter to a specific category UUID.
         uncategorized_only: If True, only return uncategorized transactions.
@@ -322,7 +322,7 @@ async def get_transactions(
     """
     if category_id:
         logger.info("Fetching transactions for category %s", category_id)
-        data = await _get(f"/budgets/{budget_id}/categories/{category_id}/transactions")
+        data = await _get(f"/plans/{plan_id}/categories/{category_id}/transactions")
         return data["data"]["transactions"]  # type: ignore[no-any-return]
 
     params: dict[str, Any] = {}
@@ -333,19 +333,19 @@ async def get_transactions(
 
     # Delta sync, only for a named budget and no filter: "last-used" may name another
     # budget from one call to the next, and changes are counted per budget.
-    cache_key = budget_id
-    cached = not since_date and not uncategorized_only and budget_id != LAST_USED
+    cache_key = plan_id
+    cached = not since_date and not uncategorized_only and plan_id != LAST_USED
     if cached and cache_key in _CACHE:
         params["last_knowledge_of_server"] = _CACHE[cache_key]["server_knowledge"]
         logger.info(
             "Delta sync: fetching transactions for %s since knowledge=%s",
-            budget_id,
+            plan_id,
             params["last_knowledge_of_server"],
         )
     else:
-        logger.info("Fetching transactions for budget %s (full load)", budget_id)
+        logger.info("Fetching transactions for plan %s (full load)", plan_id)
 
-    data = await _get(f"/budgets/{budget_id}/transactions", params=params)
+    data = await _get(f"/plans/{plan_id}/transactions", params=params)
     payload = data["data"]
     transactions: list[dict[str, Any]] = payload["transactions"]
     if not cached:
@@ -366,17 +366,17 @@ async def get_transactions(
     return list(known.values())
 
 
-async def get_months(budget_id: str) -> list[dict[str, Any]]:
-    """Return all available months for a budget, ordered chronologically.
+async def get_months(plan_id: str) -> list[dict[str, Any]]:
+    """Return all available months for a plan, ordered chronologically.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
 
     Returns:
         List of month summary dicts with month, budgeted, activity, balance.
     """
-    logger.info("Fetching months list for budget %s", budget_id)
-    data = await _get(f"/budgets/{budget_id}/months")
+    logger.info("Fetching months list for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/months")
     return data["data"]["months"]  # type: ignore[no-any-return]
 
 
@@ -384,19 +384,19 @@ async def get_months(budget_id: str) -> list[dict[str, Any]]:
 _SYSTEM_GROUPS = {"Internal Master Category", "Credit Card Payments", "Hidden Categories"}
 
 
-async def get_category_groups(budget_id: str) -> list[dict[str, Any]]:
-    """Return the user-visible category groups of a budget (id and name only).
+async def get_category_groups(plan_id: str) -> list[dict[str, Any]]:
+    """Return the user-visible category groups of a plan (id and name only).
 
     Hidden, deleted and system groups are skipped: new categories cannot go there.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
 
     Returns:
         List of {"id", "name"} dicts.
     """
-    logger.info("Fetching category groups for budget %s", budget_id)
-    data = await _get(f"/budgets/{budget_id}/categories")
+    logger.info("Fetching category groups for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/categories")
     return [
         {"id": group["id"], "name": group["name"]}
         for group in data["data"]["category_groups"]
@@ -406,11 +406,11 @@ async def get_category_groups(budget_id: str) -> list[dict[str, Any]]:
     ]
 
 
-async def create_category(budget_id: str, category_group_id: str, name: str) -> dict[str, Any]:
-    """Create a new category in a budget.
+async def create_category(plan_id: str, category_group_id: str, name: str) -> dict[str, Any]:
+    """Create a new category in a plan.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         category_group_id: UUID of the (non-internal) group to create it in.
         name: Name of the new category.
 
@@ -419,7 +419,7 @@ async def create_category(budget_id: str, category_group_id: str, name: str) -> 
     """
     logger.info("Creating a category in group %s", category_group_id)
     body = {"category": {"name": name, "category_group_id": category_group_id}}
-    data = await _post(f"/budgets/{budget_id}/categories", body)
+    data = await _post(f"/plans/{plan_id}/categories", body)
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
@@ -445,12 +445,12 @@ def amount_to_milliunit(amount: float) -> int:
 
 
 async def set_category_budgeted(
-    budget_id: str, month: str, category_id: str, amount: float
+    plan_id: str, month: str, category_id: str, amount: float
 ) -> dict[str, Any]:
     """Set the amount assigned to a category for one month (absolute, not a delta).
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         month: ISO month "YYYY-MM-01" or "current".
         category_id: Category UUID.
         amount: Amount to assign, in currency units (e.g. 1890.0).
@@ -460,22 +460,22 @@ async def set_category_budgeted(
     """
     logger.info("Setting the budgeted amount of category %s for %s", category_id, month)
     body = {"category": {"budgeted": amount_to_milliunit(amount)}}
-    data = await _patch(f"/budgets/{budget_id}/months/{month}/categories/{category_id}", body)
+    data = await _patch(f"/plans/{plan_id}/months/{month}/categories/{category_id}", body)
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
-async def get_accounts(budget_id: str) -> list[dict[str, Any]]:
-    """Return the non-deleted accounts of a budget, balances in currency units.
+async def get_accounts(plan_id: str) -> list[dict[str, Any]]:
+    """Return the non-deleted accounts of a plan, balances in currency units.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
 
     Returns:
         List of dicts: id, name, type, on_budget, closed, balance,
         cleared_balance, uncleared_balance.
     """
-    logger.info("Fetching accounts for budget %s", budget_id)
-    data = await _get(f"/budgets/{budget_id}/accounts")
+    logger.info("Fetching accounts for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/accounts")
     return [
         {
             "id": acc["id"],
@@ -496,7 +496,7 @@ _OPTIONAL_TX_FIELDS = ("memo", "category_id", "import_id")
 
 
 async def create_transactions(
-    budget_id: str, account_id: str, items: list[dict[str, Any]], approved: bool = True
+    plan_id: str, account_id: str, items: list[dict[str, Any]], approved: bool = True
 ) -> dict[str, Any]:
     """Create cleared transactions on one account, approved unless told otherwise.
 
@@ -505,7 +505,7 @@ async def create_transactions(
     YNAB skips any item whose import_id already exists on the account.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         account_id: Account UUID the transactions belong to.
         items: Transactions to create.
         approved: False leaves them for the user to review in YNAB.
@@ -525,7 +525,7 @@ async def create_transactions(
         tx.update({"cleared": "cleared", "approved": approved})
         transactions.append(tx)
     logger.info("Creating %d transactions on account %s", len(transactions), account_id)
-    data = await _post(f"/budgets/{budget_id}/transactions", {"transactions": transactions})
+    data = await _post(f"/plans/{plan_id}/transactions", {"transactions": transactions})
     payload = data["data"]
     return {
         "created": len(payload.get("transaction_ids", [])),
@@ -534,11 +534,11 @@ async def create_transactions(
     }
 
 
-async def approve_transactions(budget_id: str, tx_ids: list[str]) -> dict[str, int]:
+async def approve_transactions(plan_id: str, tx_ids: list[str]) -> dict[str, int]:
     """Mark transactions as approved (reviewed) in one bulk request.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         tx_ids: Transaction UUIDs to approve.
 
     Returns:
@@ -548,17 +548,17 @@ async def approve_transactions(budget_id: str, tx_ids: list[str]) -> dict[str, i
         return {"approved": 0}
     logger.info("Approving %d transactions", len(tx_ids))
     body = {"transactions": [{"id": tx_id, "approved": True} for tx_id in tx_ids]}
-    data = await _patch(f"/budgets/{budget_id}/transactions", body)
+    data = await _patch(f"/plans/{plan_id}/transactions", body)
     return {"approved": len(data["data"].get("transaction_ids", []))}
 
 
 async def set_transaction_categories(
-    budget_id: str, moves: list[tuple[str, str | None]]
+    plan_id: str, moves: list[tuple[str, str | None]]
 ) -> list[str]:
     """Give each transaction a category in one bulk request.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         moves: (transaction_id, category_id) pairs; None clears the category.
 
     Returns:
@@ -568,15 +568,15 @@ async def set_transaction_categories(
         return []
     logger.info("Setting the category of %d transactions", len(moves))
     body = {"transactions": [{"id": tx_id, "category_id": cat} for tx_id, cat in moves]}
-    data = await _patch(f"/budgets/{budget_id}/transactions", body)
+    data = await _patch(f"/plans/{plan_id}/transactions", body)
     return list(data["data"].get("transaction_ids", []))
 
 
-async def split_transaction(budget_id: str, tx_id: str, lines: list[dict[str, Any]]) -> None:
+async def split_transaction(plan_id: str, tx_id: str, lines: list[dict[str, Any]]) -> None:
     """Split one transaction across categories; YNAB's API cannot change the lines afterwards.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         tx_id: Transaction UUID; it must not be split already.
         lines: {amount (currency units), category_id, memo or None}, adding up to the
             transaction's amount.
@@ -594,11 +594,11 @@ async def split_transaction(budget_id: str, tx_id: str, lines: list[dict[str, An
     body = {
         "transactions": [{"id": tx_id, "category_id": None, "subtransactions": subtransactions}]
     }
-    await _patch(f"/budgets/{budget_id}/transactions", body)
+    await _patch(f"/plans/{plan_id}/transactions", body)
 
 
 async def update_category(
-    budget_id: str,
+    plan_id: str,
     category_id: str,
     name: str | None = None,
     category_group_id: str | None = None,
@@ -606,7 +606,7 @@ async def update_category(
     """Rename a category and/or move it to another group.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         category_id: Category to update.
         name: New name, or None to keep it.
         category_group_id: Group to move it to, or None to keep it.
@@ -620,15 +620,15 @@ async def update_category(
     if category_group_id is not None:
         fields["category_group_id"] = category_group_id
     logger.info("Updating category %s (%s)", category_id, ", ".join(fields))
-    data = await _patch(f"/budgets/{budget_id}/categories/{category_id}", {"category": fields})
+    data = await _patch(f"/plans/{plan_id}/categories/{category_id}", {"category": fields})
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
-async def set_transactions_cleared(budget_id: str, tx_ids: list[str], cleared: str) -> list[str]:
+async def set_transactions_cleared(plan_id: str, tx_ids: list[str], cleared: str) -> list[str]:
     """Set the cleared status of transactions in one bulk request.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         tx_ids: Transaction UUIDs to update.
         cleared: "cleared", "uncleared" or "reconciled".
 
@@ -639,16 +639,16 @@ async def set_transactions_cleared(budget_id: str, tx_ids: list[str], cleared: s
         return []
     logger.info("Marking %d transactions %s", len(tx_ids), cleared)
     body = {"transactions": [{"id": tx_id, "cleared": cleared} for tx_id in tx_ids]}
-    data = await _patch(f"/budgets/{budget_id}/transactions", body)
+    data = await _patch(f"/plans/{plan_id}/transactions", body)
     return list(data["data"].get("transaction_ids", []))
 
 
-async def delete_transaction(budget_id: str, tx_id: str) -> None:
+async def delete_transaction(plan_id: str, tx_id: str) -> None:
     """Delete one transaction.
 
     Args:
-        budget_id: YNAB budget UUID or "last-used".
+        plan_id: YNAB plan id or "last-used".
         tx_id: Transaction UUID.
     """
     logger.info("Deleting transaction %s", tx_id)
-    await _delete(f"/budgets/{budget_id}/transactions/{tx_id}")
+    await _delete(f"/plans/{plan_id}/transactions/{tx_id}")

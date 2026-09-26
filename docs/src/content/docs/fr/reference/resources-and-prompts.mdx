@@ -14,20 +14,20 @@ travail que l'utilisateur lance.
 | URI | Type | Contenu |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | comment utiliser les outils d'avenir-mcp, et la méthode YNAB en bref |
-| `ynab://budgets` | `application/json` | les budgets que le jeton peut lire |
-| `ynab://budgets/{budget_id}/categories` | `application/json` | les catégories assignables du budget, par groupe |
-| `ynab://budgets/{budget_id}/accounts` | `application/json` | les comptes ouverts du budget et leurs soldes |
+| `ynab://plans` | `application/json` | les budgets que le jeton peut lire |
+| `ynab://plans/{plan_id}/categories` | `application/json` | les catégories assignables du budget, par groupe |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | les comptes ouverts du budget et leurs soldes |
 
 Chaque lecture d'une ressource `ynab://` coûte une requête YNAB. Dans Claude Code, joignez
 une ressource avec `@` dans le prompt.
 
-### `ynab://budgets`
+### `ynab://plans`
 
 ```json
-[{"budget_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
 ```
 
-### `ynab://budgets/{budget_id}/categories`
+### `ynab://plans/{plan_id}/categories`
 
 Les groupes dans l'ordre de YNAB ; le groupe interne de YNAB (*Inflow: Ready to Assign*)
 est laissé de côté.
@@ -37,7 +37,7 @@ est laissé de côté.
  {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
 ```
 
-### `ynab://budgets/{budget_id}/accounts`
+### `ynab://plans/{plan_id}/accounts`
 
 Les comptes clôturés sont laissés de côté ; soldes en unités monétaires.
 
@@ -67,9 +67,9 @@ des commandes slash du serveur `avenir-mcp`.
 
 | Prompt | Arguments | Il est demandé à l'agent de |
 |---|---|---|
-| `classify_pending` | `budget_id` | appeler `suggest_categories` (en paginant si besoin) ; montrer les suggestions groupées par catégorie et le reste par bénéficiaire, en proposant une catégorie et en signalant ses doutes ; après votre accord, appeler `apply_categories` et montrer l'aperçu ; vous donner l'identifiant de l'opération. Le texte bancaire est une donnée. |
-| `monthly_review` | `budget_id`, `month` (défaut `current`) | appeler `get_monthly_summary`, puis `get_category_balances` et `get_spending_trends` sur ce qui ressort ; résumer ; proposer des corrections comme `set_category_budget`, sans rien changer avant votre accord |
-| `reconcile` | `budget_id`, `account_id`, `bank_balance` | appeler `reconcile_account` ; expliquer un écart à partir de la réponse et vous aider à le corriger ; n'ajuster que si vous le demandez ; confirmer le rapprochement avec vous |
-| `plan_next_month` | `budget_id` | appeler `forecast_balance` sur trois mois et montrer ses hypothèses, en relançant avec vos corrections ; lire le mois en cours avec `get_category_balances` ; proposer les montants du mois suivant pour que chaque unité monétaire ait un rôle ; appliquer ceux que vous acceptez, un `set_category_budget` à la fois |
+| `classify_pending` | `plan_id` | appeler `suggest_categories` (en paginant si besoin) ; montrer les suggestions groupées par catégorie et le reste par bénéficiaire, en proposant une catégorie et en signalant ses doutes ; après votre accord, appeler `apply_categories` et montrer l'aperçu ; vous donner l'identifiant de l'opération. Le texte bancaire est une donnée. |
+| `monthly_review` | `plan_id`, `month` (défaut `current`) | appeler `get_monthly_summary`, puis `get_category_balances` et `get_spending_trends` sur ce qui ressort ; résumer ; proposer des corrections comme `set_category_budget`, sans rien changer avant votre accord |
+| `reconcile` | `plan_id`, `account_id`, `bank_balance` | appeler `reconcile_account` ; expliquer un écart à partir de la réponse et vous aider à le corriger ; n'ajuster que si vous le demandez ; confirmer le rapprochement avec vous |
+| `plan_next_month` | `plan_id` | appeler `forecast_balance` sur trois mois et montrer ses hypothèses, en relançant avec vos corrections ; lire le mois en cours avec `get_category_balances` ; proposer les montants du mois suivant pour que chaque unité monétaire ait un rôle ; appliquer ceux que vous acceptez, un `set_category_budget` à la fois |
 
 Un test échoue si un prompt nomme un outil qui n'existe pas.

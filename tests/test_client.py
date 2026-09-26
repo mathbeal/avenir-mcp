@@ -87,17 +87,17 @@ def test_api_key_returns_env_value() -> None:
 
 
 # ---------------------------------------------------------------------------
-# get_budgets
+# get_plans
 # ---------------------------------------------------------------------------
 
 
 def test_get_budgets_returns_list() -> None:
-    """get_budgets should return the budgets list from the API payload."""
-    payload = {"data": {"budgets": [{"id": "b1", "name": "Business"}]}}
+    """get_plans should return the budgets list from the API payload."""
+    payload = {"data": {"plans": [{"id": "b1", "name": "Business"}]}}
     ctx = _async_client_returning(payload)
     with patch("httpx.AsyncClient", return_value=ctx):
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            result = asyncio.run(client.get_budgets())
+            result = asyncio.run(client.get_plans())
     assert result == [{"id": "b1", "name": "Business"}]
 
 
@@ -431,7 +431,7 @@ def test_create_category_posts_name_and_group() -> None:
             result = asyncio.run(client.create_category("b1", "g1", "Miscellaneous"))
 
     assert result == {"id": "c42", "name": "Miscellaneous"}
-    assert mock_http.post.call_args.args[0].endswith("/budgets/b1/categories")
+    assert mock_http.post.call_args.args[0].endswith("/plans/b1/categories")
     sent_json = mock_http.post.call_args.kwargs["json"]
     assert sent_json == {"category": {"name": "Miscellaneous", "category_group_id": "g1"}}
 
@@ -450,7 +450,7 @@ def test_set_category_budgeted_patches_month_category_in_milliunits() -> None:
             result = asyncio.run(client.set_category_budgeted("b1", "2026-09-01", "c1", 1890.0))
     http = ctx.__aenter__.return_value
     assert result == {"id": "c1", "budgeted": 1890000}
-    assert http.patch.call_args.args[0].endswith("/budgets/b1/months/2026-09-01/categories/c1")
+    assert http.patch.call_args.args[0].endswith("/plans/b1/months/2026-09-01/categories/c1")
     assert http.patch.call_args.kwargs["json"] == {"category": {"budgeted": 1890000}}
 
 
@@ -550,7 +550,7 @@ def test_create_transactions_posts_milliunits_and_reports_duplicates() -> None:
             result = asyncio.run(client.create_transactions("b1", "a1", items))
 
     assert result == {"created": 1, "transaction_ids": ["t1"], "duplicate_import_ids": ["dup-1"]}
-    assert mock_http.post.call_args.args[0].endswith("/budgets/b1/transactions")
+    assert mock_http.post.call_args.args[0].endswith("/plans/b1/transactions")
     sent = mock_http.post.call_args.kwargs["json"]["transactions"]
     assert sent[0] == {
         "account_id": "a1",
@@ -608,7 +608,7 @@ def test_api_error_with_non_json_body_uses_raw_text() -> None:
     with patch("httpx.AsyncClient", return_value=ctx):
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
             with pytest.raises(RuntimeError, match="502: Bad Gateway"):
-                asyncio.run(client.get_budgets())
+                asyncio.run(client.get_plans())
 
 
 # ---------------------------------------------------------------------------
@@ -625,7 +625,7 @@ def test_approve_transactions_bulk_patches_approved_flag() -> None:
             result = asyncio.run(client.approve_transactions("b1", ["t1", "t2"]))
     http = ctx.__aenter__.return_value
     assert result == {"approved": 2}
-    assert http.patch.call_args.args[0].endswith("/budgets/b1/transactions")
+    assert http.patch.call_args.args[0].endswith("/plans/b1/transactions")
     assert http.patch.call_args.kwargs["json"] == {
         "transactions": [{"id": "t1", "approved": True}, {"id": "t2", "approved": True}]
     }
@@ -650,7 +650,7 @@ def test_set_transaction_categories_bulk_patches_category_ids() -> None:
             )
     http = ctx.__aenter__.return_value
     assert result == ["t1", "t2"]
-    assert http.patch.call_args.args[0].endswith("/budgets/b1/transactions")
+    assert http.patch.call_args.args[0].endswith("/plans/b1/transactions")
     assert http.patch.call_args.kwargs["json"] == {
         "transactions": [{"id": "t1", "category_id": "c1"}, {"id": "t2", "category_id": None}]
     }
@@ -668,7 +668,7 @@ def test_split_transaction_sends_lines_in_milliunits_and_clears_the_category() -
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
             asyncio.run(client.split_transaction("b1", "t1", lines))
     http = ctx.__aenter__.return_value
-    assert http.patch.call_args.args[0].endswith("/budgets/b1/transactions")
+    assert http.patch.call_args.args[0].endswith("/plans/b1/transactions")
     assert http.patch.call_args.kwargs["json"] == {
         "transactions": [
             {
@@ -702,7 +702,7 @@ def test_update_category_patches_only_given_fields() -> None:
             )
     http = ctx.__aenter__.return_value
     assert result["name"] == "Pets"
-    assert http.patch.call_args.args[0].endswith("/budgets/b1/categories/c1")
+    assert http.patch.call_args.args[0].endswith("/plans/b1/categories/c1")
     assert http.patch.call_args.kwargs["json"] == {
         "category": {"name": "Pets", "category_group_id": "g2"}
     }
@@ -754,7 +754,7 @@ def test_delete_transaction_sends_delete() -> None:
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
             asyncio.run(client.delete_transaction("b1", "t1"))
     http = ctx.__aenter__.return_value
-    assert http.delete.call_args.args[0].endswith("/budgets/b1/transactions/t1")
+    assert http.delete.call_args.args[0].endswith("/plans/b1/transactions/t1")
 
 
 def test_create_transactions_can_leave_them_for_review() -> None:
@@ -772,23 +772,23 @@ def test_create_transactions_can_leave_them_for_review() -> None:
 
 def test_api_url_can_point_to_another_server() -> None:
     """AVENIR_MCP_YNAB_URL sends requests elsewhere, e.g. to a demo budget server."""
-    ctx = _async_client_returning({"data": {"budgets": []}})
+    ctx = _async_client_returning({"data": {"plans": []}})
     env = {"YNAB_API_KEY": "tok", "AVENIR_MCP_YNAB_URL": "http://127.0.0.1:9999/v1"}
     with patch("httpx.AsyncClient", return_value=ctx):
         with patch.dict("os.environ", env):
-            asyncio.run(client.get_budgets())
+            asyncio.run(client.get_plans())
     url = ctx.__aenter__.return_value.get.call_args.args[0]
-    assert url == "http://127.0.0.1:9999/v1/budgets"
+    assert url == "http://127.0.0.1:9999/v1/plans"
 
 
 def test_api_url_defaults_to_ynab() -> None:
     """Without configuration, requests go to YNAB's API."""
-    ctx = _async_client_returning({"data": {"budgets": []}})
+    ctx = _async_client_returning({"data": {"plans": []}})
     with patch("httpx.AsyncClient", return_value=ctx):
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}, clear=True):
-            asyncio.run(client.get_budgets())
+            asyncio.run(client.get_plans())
     url = ctx.__aenter__.return_value.get.call_args.args[0]
-    assert url == "https://api.ynab.com/v1/budgets"
+    assert url == "https://api.ynab.com/v1/plans"
 
 
 @pytest.mark.parametrize(
@@ -864,33 +864,33 @@ def test_no_token_at_all_names_both_ways(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 @pytest.mark.parametrize(
-    "budget_id",
+    "plan_id",
     ["x/../../user", "b1/transactions/tx-9?", "..", "", "-flag", "b1 b2", "b1%2F..", "b1#frag"],
 )
 def test_ids_that_would_change_the_request_are_refused(
-    budget_id: str, monkeypatch: pytest.MonkeyPatch
+    plan_id: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """An id is one path segment: slashes, dots, queries or escapes never reach YNAB."""
     monkeypatch.setenv("YNAB_API_KEY", "tok")
-    request = client.get_accounts(budget_id)
+    request = client.get_accounts(plan_id)
     with patch("httpx.AsyncClient") as http, pytest.raises(ValueError, match="not a YNAB id"):
         asyncio.run(request)
     http.assert_not_called()
 
 
 @pytest.mark.parametrize(
-    "budget_id", ["last-used", "demo-budget", "0f9c2a1e-6b5d-4c3a-9e8f-1a2b3c4d5e6f", "b_1"]
+    "plan_id", ["last-used", "demo-budget", "0f9c2a1e-6b5d-4c3a-9e8f-1a2b3c4d5e6f", "b_1"]
 )
-def test_real_ids_reach_ynab_unchanged(budget_id: str, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_real_ids_reach_ynab_unchanged(plan_id: str, monkeypatch: pytest.MonkeyPatch) -> None:
     """UUIDs, last-used and the demo budget's ids pass as they are."""
     monkeypatch.setenv("YNAB_API_KEY", "tok")
     response = MagicMock(status_code=200)
     response.json.return_value = {"data": {"accounts": []}}
     with patch("httpx.AsyncClient") as http:
         http.return_value.__aenter__.return_value.get = AsyncMock(return_value=response)
-        asyncio.run(client.get_accounts(budget_id))
+        asyncio.run(client.get_accounts(plan_id))
         url = http.return_value.__aenter__.return_value.get.call_args.args[0]
-    assert url.endswith(f"/budgets/{budget_id}/accounts")
+    assert url.endswith(f"/plans/{plan_id}/accounts")
 
 
 def test_last_used_is_never_merged_across_budgets() -> None:

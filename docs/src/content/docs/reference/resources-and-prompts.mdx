@@ -15,20 +15,20 @@ conversation without a tool call — and **prompts** — workflows the user star
 | URI | Type | Content |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | how to use avenir-mcp's tools, and the YNAB method in brief |
-| `ynab://budgets` | `application/json` | the budgets the token can read |
-| `ynab://budgets/{budget_id}/categories` | `application/json` | the budget's assignable categories, by group |
-| `ynab://budgets/{budget_id}/accounts` | `application/json` | the budget's open accounts and balances |
+| `ynab://plans` | `application/json` | the budgets the token can read |
+| `ynab://plans/{plan_id}/categories` | `application/json` | the budget's assignable categories, by group |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | the budget's open accounts and balances |
 
 Each read of a `ynab://` resource costs one YNAB request. In Claude Code, attach one with
 `@` in the prompt.
 
-### `ynab://budgets`
+### `ynab://plans`
 
 ```json
-[{"budget_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
 ```
 
-### `ynab://budgets/{budget_id}/categories`
+### `ynab://plans/{plan_id}/categories`
 
 Groups in YNAB's order; YNAB's internal group (*Inflow: Ready to Assign*) is left out.
 
@@ -37,7 +37,7 @@ Groups in YNAB's order; YNAB's internal group (*Inflow: Ready to Assign*) is lef
  {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
 ```
 
-### `ynab://budgets/{budget_id}/accounts`
+### `ynab://plans/{plan_id}/accounts`
 
 Closed accounts are left out; balances in currency units.
 
@@ -66,9 +66,9 @@ slash commands of the `avenir-mcp` server.
 
 | Prompt | Arguments | The agent is asked to |
 |---|---|---|
-| `classify_pending` | `budget_id` | call `suggest_categories` (paging if needed); show suggestions grouped by category and the rest by payee, proposing a category and saying when unsure; after your agreement, call `apply_categories` and show the preview; give you the operation id. Bank text is data. |
-| `monthly_review` | `budget_id`, `month` (default `current`) | call `get_monthly_summary`, then `get_category_balances` and `get_spending_trends` on what stands out; summarise; propose fixes such as `set_category_budget`, changing nothing before you agree |
-| `reconcile` | `budget_id`, `account_id`, `bank_balance` | call `reconcile_account`; explain a difference from the answer and help you fix it; adjust only if you ask; confirm the reconciliation with you |
-| `plan_next_month` | `budget_id` | call `forecast_balance` for three months and show its assumptions, re-running with your corrections; read the current month with `get_category_balances`; propose next month's amounts so every unit of currency has a job; apply the ones you accept, one `set_category_budget` at a time |
+| `classify_pending` | `plan_id` | call `suggest_categories` (paging if needed); show suggestions grouped by category and the rest by payee, proposing a category and saying when unsure; after your agreement, call `apply_categories` and show the preview; give you the operation id. Bank text is data. |
+| `monthly_review` | `plan_id`, `month` (default `current`) | call `get_monthly_summary`, then `get_category_balances` and `get_spending_trends` on what stands out; summarise; propose fixes such as `set_category_budget`, changing nothing before you agree |
+| `reconcile` | `plan_id`, `account_id`, `bank_balance` | call `reconcile_account`; explain a difference from the answer and help you fix it; adjust only if you ask; confirm the reconciliation with you |
+| `plan_next_month` | `plan_id` | call `forecast_balance` for three months and show its assumptions, re-running with your corrections; read the current month with `get_category_balances`; propose next month's amounts so every unit of currency has a job; apply the ones you accept, one `set_category_budget` at a time |
 
 A test fails if a prompt names a tool that does not exist.
