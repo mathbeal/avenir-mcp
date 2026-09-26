@@ -197,6 +197,15 @@ TASKS = [
         tags=["read"],
     ),
     Task(
+        "forecast-yearly",
+        "Forecast my balance until November 2026. Which yearly payment does the forecast "
+        "expect in October, and for how much?" + FORMAT,
+        answer=lambda t: _words("insurance")(t) and _number(420.0)(t),
+        state=_unchanged,
+        notes="The yearly insurance is scheduled in YNAB; the history cannot show it.",
+        tags=["read"],
+    ),
+    Task(
         "spent-restaurants",
         "How much did I spend on restaurants in August 2026?" + FORMAT,
         answer=_number(RESTAURANTS_AUGUST),
