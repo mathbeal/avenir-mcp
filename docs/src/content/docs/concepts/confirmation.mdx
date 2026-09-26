@@ -22,6 +22,7 @@ Each tool builds a **subject**: the exact change, as data.
 | `create_category` | group, name |
 | `create_transactions` | account, the transactions, `approved` |
 | `reconcile_account` | account, bank balance, difference to adjust |
+| `split_transaction` | transaction, the lines (amount, category, memo) |
 | `undo_operation` | the operation id |
 
 Its **fingerprint** is the SHA-256 of the JSON `[budget_id, subject]`, keys sorted; for
@@ -117,5 +118,6 @@ Only clients that support MCP elicitation can then write.
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?* then one line per transaction |
+| `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* then one line per category, and a warning that only YNAB can undo it |
 | `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
 | `undo_operation` | *Undo: recategorise 2 transaction(s)?*, or the kind of undo |

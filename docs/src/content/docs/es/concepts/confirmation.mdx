@@ -21,6 +21,7 @@ Cada herramienta construye un **sujeto**: el cambio exacto, como datos.
 | `update_category` | categoría, nombre después, grupo después |
 | `create_category` | grupo, nombre |
 | `create_transactions` | cuenta, las transacciones, `approved` |
+| `split_transaction` | transacción, las líneas (importe, categoría, nota) |
 | `reconcile_account` | cuenta, saldo bancario, diferencia a ajustar |
 | `undo_operation` | el id de la operación |
 
@@ -117,6 +118,7 @@ Solo los clientes que admiten la elicitación MCP pueden entonces escribir.
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?* y una línea por transacción |
+| `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* y una línea por categoría, con el aviso de que solo YNAB puede deshacerla |
 | `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
 | `undo_operation` | *Undo: recategorise 2 transaction(s)?*, o el tipo de deshacer |
 

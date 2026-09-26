@@ -15,7 +15,7 @@ sidebar:
 | `update_category`, `create_category` | non annulables ; l'API YNAB ne peut pas supprimer une catégorie | renommer à nouveau ; masquer la catégorie dans YNAB |
 | Transport HTTP | HTTP simple, un seul jeton partagé, pas de comptes | le garder sur `127.0.0.1`, ou utiliser stdio |
 | Serveur public ou partagé | non pris en charge : pas de comptes, et les conditions de YNAB imposent OAuth pour les budgets d'autrui | chacun fait tourner son propre avenir-mcp — voir les [mentions légales](/avenir-mcp/fr/project/legal/) |
-| Transactions ventilées | jamais proposées ni recatégorisées : leurs lignes portent les catégories | les modifier dans YNAB |
+| Transactions ventilées | jamais proposées ni recatégorisées : leurs lignes portent les catégories ; `split_transaction` en ventile une, mais l'API YNAB ne peut ni modifier ni annuler une ventilation | les modifier ou les annuler dans YNAB |
 | Suggestions | exigent un historique : un commerçant jamais classé n'en reçoit pas | l'agent propose, vous décidez |
 | Prévision | prolonge les derniers mois ; les charges trimestrielles ou annuelles ne sont pas récurrentes à ses yeux | les passer en `one_offs` |
 | Transactions planifiées | non lues : la prévision s'appuie sur l'historique | passer les montants futurs connus en `one_offs` |
