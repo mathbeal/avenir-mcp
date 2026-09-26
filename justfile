@@ -67,6 +67,7 @@ evaluate:
 docs:
     uv run python -m docsgen
     npm --prefix docs ci
+    npm --prefix docs test
     npm --prefix docs run build
 
 # Serve the documentation locally with live reload.
