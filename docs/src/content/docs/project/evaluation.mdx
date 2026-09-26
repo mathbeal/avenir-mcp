@@ -27,6 +27,9 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 
 | Task | Asks | Passes when |
 |---|---|---|
+| `budgets-word` | which YNAB budgets exist, in the user's old word | Demo household; nothing changed |
+| `plan-word` | what the YNAB plan is called | Demo household; nothing changed |
+| `restaurants-budget` | the budget for Restaurants in September: an amount, not a plan | 120.00; nothing changed |
 | `spent-restaurants` | spending on restaurants in August | the answer is 89.10; nothing changed |
 | `overspent` | which category is overspent in September, by how much | Restaurants, 22.50; nothing changed |
 | `checking-balance` | the checking account's balance | 3,512.66; nothing changed |
@@ -50,6 +53,7 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-26 | Sonnet | 10/10 | 2.4 | a tenth task: split a purchase from its receipt |
 | 2026-09-26 | Sonnet | 10/10 | 2.3 | a tenth task: find a payment already categorised |
 | 2026-09-26 | Sonnet | 11/11 | 2.0 | both tenth tasks together; `move-money` failed at first (10/11): the confirmation warning kept the agent from using codes the user had accepted in advance. After the rewording it passes, and so do `classify` and `split-receipt`, run again |
+| 2026-09-26 | Sonnet | 14/14 | 2.1 | YNAB's plans: the client calls `/plans`, the tools say plan; three tasks check the words budget and plan, in both senses |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A
@@ -89,7 +93,7 @@ just evaluate
 uv run python -m evals.run --task classify --task move-money --model haiku
 ```
 
-It uses your Claude plan: about 1 USD for the eleven tasks with Sonnet.
+It uses your Claude plan: about 1 USD for the fourteen tasks with Sonnet.
 
 For another model, put an API key in `~/.config/mammouth/api_key` (readable by you only),
 then:

@@ -28,6 +28,9 @@ escriben: `3,512.66`, `3 512,66`, `-22.5`.
 
 | Tarea | Pide | Se supera cuando |
 |---|---|---|
+| `budgets-word` | qué presupuestos YNAB existen, con la palabra antigua del usuario | Demo household; nada cambiado |
+| `plan-word` | cómo se llama el plan de YNAB | Demo household; nada cambiado |
+| `restaurants-budget` | el presupuesto de Restaurants en septiembre: un importe, no un plan | 120,00; nada cambiado |
 | `spent-restaurants` | el gasto en restaurantes en agosto | la respuesta es 89,10; nada cambiado |
 | `overspent` | qué categoría se excede en septiembre, y cuánto | Restaurants, 22,50; nada cambiado |
 | `checking-balance` | el saldo de la cuenta corriente | 3.512,66; nada cambiado |
@@ -51,6 +54,7 @@ escriben: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-26 | Sonnet | 10/10 | 2,4 | una décima tarea: dividir una compra según su ticket |
 | 2026-09-26 | Sonnet | 10/10 | 2,3 | una décima tarea: encontrar un pago ya categorizado |
 | 2026-09-26 | Sonnet | 11/11 | 2,0 | las dos décimas tareas juntas; `move-money` falló al principio (10/11): el aviso de confirmación impedía al agente usar códigos aceptados de antemano por el usuario. Tras la nueva redacción pasa, igual que `classify` y `split-receipt`, ejecutadas de nuevo |
+| 2026-09-26 | Sonnet | 14/14 | 2,1 | los planes de YNAB: el cliente llama a `/plans`, las herramientas dicen plan; tres tareas comprueban las palabras presupuesto y plan, en sus dos sentidos |
 
 La primera ejecución encontró un defecto real: los clientes sin interfaz cierran todas
 las preguntas de confirmación, y avenir-mcp contaba un cierre como un rechazo, así que ninguna
@@ -92,7 +96,7 @@ just evaluate
 uv run python -m evals.run --task classify --task move-money --model haiku
 ```
 
-Usa su plan de Claude: alrededor de 1 USD por las once tareas con Sonnet.
+Usa su plan de Claude: alrededor de 1 USD por las catorce tareas con Sonnet.
 
 Para otro modelo, ponga una clave de API en `~/.config/mammouth/api_key` (legible solo por
 usted) y luego:
