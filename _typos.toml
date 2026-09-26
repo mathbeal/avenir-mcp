@@ -10,6 +10,7 @@ extend-exclude = [
   "docsgen/guide_titles.json",
   "docsgen/labels.json",
   "docs/src/components/home-i18n.ts",
+  "docs/src/components/BudgetChart.astro",
   "docs/package-lock.json",
 ]
 

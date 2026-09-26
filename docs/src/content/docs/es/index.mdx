@@ -17,7 +17,9 @@ hero:
 import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
 import Stats from '../../../components/Stats.astro';
 import WriteFlow from '../../../components/WriteFlow.astro';
-import summary from '@snippets/monthly_summary.json?raw';
+import BudgetChart from '../../../components/BudgetChart.astro';
+import august from '@snippets/august_categories.json';
+import augustRaw from '@snippets/august_categories.json?raw';
 
 <Stats />
 
@@ -53,15 +55,30 @@ funciona: [Confirmación](/avenir-mcp/es/concepts/confirmation/) y
 
 ## Respuestas estructuradas, no prosa
 
-Las herramientas devuelven datos estructurados en los que el agente puede confiar. Si
-pregunta cómo va septiembre, el agente llama a
-[`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/) y recibe los
-totales del mes y solo las categorías que requieren atención:
+Las herramientas devuelven datos estructurados en los que el agente puede confiar — y
+que le traduce en palabras sencillas.
 
-<Code code={summary} lang="json" title="get_monthly_summary — presupuesto de demostración" />
+> **Usted:** ¿Cómo fue agosto?
 
-Cada ejemplo de esta documentación es una respuesta real de avenir-mcp sobre un presupuesto
-de demostración inventado.
+El agente llama a [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/)
+con `{"month": "2026-08-01"}` y recibe, para cada categoría, lo presupuestado y lo
+gastado. Esta es esa respuesta sobre el presupuesto de demostración, en imagen:
+
+<BudgetChart rows={august} month="2026-08-01" />
+
+> **Claude:** Agosto quedó dentro del presupuesto en todo. El alquiler, el teléfono y la
+> electricidad consumieron el 90 % o más del suyo, las suscripciones casi lo mismo, la
+> compra cerca de la mitad. Los 200,00 apartados para vacaciones siguen intactos.
+
+<details>
+<summary>La respuesta en bruto</summary>
+
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — presupuesto de demostración" />
+
+</details>
+
+Cada ejemplo de esta documentación es una respuesta real de avenir-mcp sobre un
+presupuesto de demostración inventado.
 
 ## Explorar la documentación
 

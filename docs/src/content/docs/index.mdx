@@ -17,7 +17,9 @@ hero:
 import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
 import Stats from '../../components/Stats.astro';
 import WriteFlow from '../../components/WriteFlow.astro';
-import summary from '@snippets/monthly_summary.json?raw';
+import BudgetChart from '../../components/BudgetChart.astro';
+import august from '@snippets/august_categories.json';
+import augustRaw from '@snippets/august_categories.json?raw';
 
 <Stats />
 
@@ -52,11 +54,26 @@ works: [Confirmation](/avenir-mcp/concepts/confirmation/) and
 
 ## Real answers, not prose
 
-Tools return structured data the agent can rely on. Asked how September is going, the
-agent calls [`get_monthly_summary`](/avenir-mcp/reference/tools/get-monthly-summary/)
-and gets the month's totals and only the categories that need attention:
+Tools return structured data the agent can rely on — and put into plain words for you.
 
-<Code code={summary} lang="json" title="get_monthly_summary — demo budget" />
+> **You:** How did August go?
+
+The agent calls [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/)
+with `{"month": "2026-08-01"}` and gets, for every category, what was budgeted and what
+was spent. Here is that answer on the demo budget, drawn:
+
+<BudgetChart rows={august} month="2026-08-01" />
+
+> **Claude:** August stayed within budget everywhere. Rent, phone and electricity used 90 %
+> or more of theirs, subscriptions nearly as much, groceries about half. The 200.00 set
+> aside for holidays is untouched.
+
+<details>
+<summary>The raw answer</summary>
+
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — demo budget" />
+
+</details>
 
 Every example in this documentation is a real answer from avenir-mcp on an invented demo
 budget.

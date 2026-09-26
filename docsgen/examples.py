@@ -66,6 +66,13 @@ CALLS: list[Call] = [
         "category_balances", "get_category_balances", {"budget_id": BUDGET, "month": "2026-09-01"}
     ),
     Call("budget_vs_actual", "get_budget_vs_actual", {"budget_id": BUDGET, "month": "2026-09-01"}),
+    # Every category of a full month, for the chart on the home page.
+    Call(
+        "august_categories",
+        "get_budget_vs_actual",
+        {"budget_id": BUDGET, "month": "2026-08-01"},
+        keep=100,
+    ),
     Call("spending_trends", "get_spending_trends", {"budget_id": BUDGET, "months_count": 3}, 3),
     Call("suggest_categories", "suggest_categories", {"budget_id": BUDGET, "limit": 3}, 3),
     Call("apply_preview", "apply_categories", _APPLY),

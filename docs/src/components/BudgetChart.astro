@@ -1,0 +1,328 @@
+---
+// Share of each budget used in a month, drawn from a real get_budget_vs_actual answer.
+// One series, one hue (validated light and dark); the 100 % line is the budget.
+// Hover shows the amounts; a table gives the same numbers without the picture.
+interface Row {
+  name: string;
+  budgeted: number;
+  actual: number;
+  utilization_pct: number;
+}
+interface Props {
+  rows: Row[];
+  month: string;
+}
+
+const texts = {
+  en: {
+    title: 'Share of each budget used',
+    source: 'Answer of get_budget_vs_actual on the demo budget',
+    budget: 'budget',
+    of: 'of',
+    used: 'used',
+    table: 'Show as a table',
+    category: 'Category',
+    budgeted: 'Budgeted',
+    spent: 'Spent',
+    untouched: 'untouched',
+  },
+  fr: {
+    title: 'Part de chaque budget consommée',
+    source: 'Réponse de get_budget_vs_actual sur le budget de démonstration',
+    budget: 'budget',
+    of: 'sur',
+    used: 'consommé',
+    table: 'Afficher en tableau',
+    category: 'Catégorie',
+    budgeted: 'Budgété',
+    spent: 'Dépensé',
+    untouched: 'intact',
+  },
+  es: {
+    title: 'Parte de cada presupuesto consumida',
+    source: 'Respuesta de get_budget_vs_actual sobre el presupuesto de demostración',
+    budget: 'presupuesto',
+    of: 'de',
+    used: 'consumido',
+    table: 'Ver como tabla',
+    category: 'Categoría',
+    budgeted: 'Presupuestado',
+    spent: 'Gastado',
+    untouched: 'intacto',
+  },
+} as const;
+
+const lang = Astro.locals.starlightRoute.lang as keyof typeof texts;
+const t = texts[lang] ?? texts.en;
+const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES' }[lang] ?? 'en-US';
+const money = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+  new Date(`${Astro.props.month}T00:00:00Z`),
+);
+
+const rows = [...Astro.props.rows].sort((a, b) => b.utilization_pct - a.utilization_pct);
+const labelW = 128;
+const plotW = 440;
+const rowH = 30;
+const barH = 14;
+const top = 30;
+const width = labelW + plotW + 64;
+const height = top + rows.length * rowH + 8;
+const max = Math.max(100, ...rows.map((r) => r.utilization_pct));
+const x = (v: number) => labelW + (v / max) * plotW;
+
+// A bar anchored on the left, with a 4 px rounded data end on the right.
+function bar(x0: number, x1: number, y: number): string {
+  const w = Math.max(0, x1 - x0);
+  if (w === 0) return '';
+  const r = Math.min(4, w / 2, barH / 2);
+  return `M${x0},${y} H${x1 - r} Q${x1},${y} ${x1},${y + r} V${y + barH - r} Q${x1},${y + barH} ${x1 - r},${y + barH} H${x0} Z`;
+}
+---
+
+<figure class="budget-chart not-content">
+  <figcaption>
+    <strong>{t.title}</strong>
+    <span>{monthName}</span>
+  </figcaption>
+  <div class="plot">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${t.title}, ${monthName}`}>
+      {
+        [0, 50, 100].map((v) => (
+          <g class={v === 100 ? 'ref' : 'grid'}>
+            <line x1={x(v)} x2={x(v)} y1={top - 8} y2={height - 4} />
+            <text x={x(v)} y={top - 14} text-anchor="middle">
+              {v === 100 ? `${pct.format(v)} % · ${t.budget}` : `${pct.format(v)} %`}
+            </text>
+          </g>
+        ))
+      }
+      {
+        rows.map((r, i) => {
+          const y = top + i * rowH + (rowH - barH) / 2;
+          const tip = `${r.name} — ${money.format(r.actual)} ${t.of} ${money.format(r.budgeted)} (${pct.format(r.utilization_pct)} % ${t.used})`;
+          const label =
+            r.utilization_pct >= 90
+              ? `${pct.format(r.utilization_pct)} %`
+              : r.actual === 0
+                ? t.untouched
+                : '';
+          return (
+            <g class="row" data-tip={tip} tabindex="0" aria-label={tip}>
+              <rect class="hit" x="0" y={top + i * rowH} width={width} height={rowH} />
+              <text class="name" x={labelW - 12} y={y + barH / 2} dominant-baseline="middle" text-anchor="end">
+                {r.name}
+              </text>
+              <path class="track" d={bar(x(0), x(100), y)} />
+              <path class="fill" d={bar(x(0), x(r.utilization_pct), y)} />
+              {label && (
+                <text class="value" x={x(Math.min(r.utilization_pct, 100)) + 8} y={y + barH / 2} dominant-baseline="middle">
+                  {label}
+                </text>
+              )}
+            </g>
+          );
+        })
+      }
+    </svg>
+    <div class="tip" role="status" hidden></div>
+  </div>
+  <p class="source">{t.source}</p>
+  <details>
+    <summary>{t.table}</summary>
+    <table>
+      <thead>
+        <tr><th>{t.category}</th><th>{t.budgeted}</th><th>{t.spent}</th><th>{t.used}</th></tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((r) => (
+            <tr>
+              <td>{r.name}</td>
+              <td>{money.format(r.budgeted)}</td>
+              <td>{money.format(r.actual)}</td>
+              <td>{pct.format(r.utilization_pct)} %</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </details>
+</figure>
+
+<script>
+  // One tooltip per chart, following the pointer or the focused row.
+  for (const chart of document.querySelectorAll<HTMLElement>('.budget-chart')) {
+    const plot = chart.querySelector<HTMLElement>('.plot')!;
+    const tip = chart.querySelector<HTMLElement>('.tip')!;
+    const show = (row: Element, px: number, py: number) => {
+      tip.textContent = row.getAttribute('data-tip');
+      tip.hidden = false;
+      const box = plot.getBoundingClientRect();
+      tip.style.left = `${Math.min(px - box.left + 12, box.width - tip.offsetWidth - 4)}px`;
+      tip.style.top = `${py - box.top - tip.offsetHeight - 10}px`;
+    };
+    for (const row of chart.querySelectorAll('.row')) {
+      row.addEventListener('pointermove', (e) => {
+        const ev = e as PointerEvent;
+        show(row, ev.clientX, ev.clientY);
+      });
+      row.addEventListener('pointerleave', () => (tip.hidden = true));
+      row.addEventListener('focus', () => {
+        const r = row.getBoundingClientRect();
+        show(row, r.left + r.width / 3, r.top + r.height / 2);
+      });
+      row.addEventListener('blur', () => (tip.hidden = true));
+    }
+  }
+</script>
+
+<style>
+  .budget-chart {
+    /* Bar colours validated with the dataviz palette checks, one per theme. */
+    --viz-bar: #1a9e8c;
+    --viz-track: color-mix(in srgb, var(--sl-color-gray-5) 45%, transparent);
+    margin: 1.5rem 0 0;
+    padding: 1.25rem 1.25rem 1rem;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 35%, transparent);
+  }
+
+  :global(:root[data-theme='light']) .budget-chart {
+    --viz-bar: #008a7a;
+    --viz-track: var(--sl-color-gray-6);
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--sl-color-white);
+  }
+
+  figcaption span {
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+    text-transform: capitalize;
+  }
+
+  .plot {
+    position: relative;
+    overflow-x: auto;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 32rem;
+    height: auto;
+    font-family: var(--sl-font);
+  }
+
+  .grid line {
+    stroke: var(--sl-color-hairline-light);
+    stroke-width: 1;
+  }
+
+  .ref line {
+    stroke: var(--sl-color-gray-3);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+
+  .grid text,
+  .ref text {
+    fill: var(--sl-color-gray-3);
+    font-size: 11px;
+  }
+
+  .name {
+    fill: var(--sl-color-gray-2);
+    font-size: 13px;
+  }
+
+  .value {
+    fill: var(--sl-color-gray-2);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .track {
+    fill: var(--viz-track);
+  }
+
+  .fill {
+    fill: var(--viz-bar);
+  }
+
+  .hit {
+    fill: transparent;
+  }
+
+  .row {
+    outline: none;
+  }
+
+  .row:hover .name,
+  .row:focus-visible .name {
+    fill: var(--sl-color-white);
+  }
+
+  .row:hover .hit,
+  .row:focus-visible .hit {
+    fill: color-mix(in srgb, var(--sl-color-gray-5) 25%, transparent);
+  }
+
+  .tip {
+    position: absolute;
+    z-index: 2;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 0.4rem;
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-white);
+    font-size: var(--sl-text-xs);
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+  }
+
+  .source {
+    margin: 0.5rem 0 0;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+
+  details {
+    margin-top: 0.5rem;
+    font-size: var(--sl-text-sm);
+  }
+
+  summary {
+    cursor: pointer;
+    color: var(--sl-color-gray-2);
+  }
+
+  table {
+    width: 100%;
+    margin-top: 0.5rem;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th,
+  td {
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--sl-color-hairline-light);
+    text-align: end;
+  }
+
+  th:first-child,
+  td:first-child {
+    text-align: start;
+  }
+</style>

@@ -17,7 +17,9 @@ hero:
 import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
 import Stats from '../../../components/Stats.astro';
 import WriteFlow from '../../../components/WriteFlow.astro';
-import summary from '@snippets/monthly_summary.json?raw';
+import BudgetChart from '../../../components/BudgetChart.astro';
+import august from '@snippets/august_categories.json';
+import augustRaw from '@snippets/august_categories.json?raw';
 
 <Stats />
 
@@ -53,12 +55,27 @@ marche : [Confirmation](/avenir-mcp/fr/concepts/confirmation/) et
 
 ## Des réponses structurées, pas du texte
 
-Les outils renvoient des données structurées sur lesquelles l'agent peut compter. Quand
-vous demandez où en est septembre, l'agent appelle
-[`get_monthly_summary`](/avenir-mcp/fr/reference/tools/get-monthly-summary/) et reçoit
-les totaux du mois et seulement les catégories qui demandent votre attention :
+Les outils renvoient des données structurées sur lesquelles l'agent peut compter — et
+qu'il vous traduit en langage courant.
 
-<Code code={summary} lang="json" title="get_monthly_summary — budget de démonstration" />
+> **Vous :** Comment s'est passé août ?
+
+L'agent appelle [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/)
+avec `{"month": "2026-08-01"}` et reçoit, pour chaque catégorie, le montant budgété et le
+montant dépensé. Voici cette réponse sur le budget de démonstration, en image :
+
+<BudgetChart rows={august} month="2026-08-01" />
+
+> **Claude :** Août est resté dans le budget partout. Le loyer, le téléphone et
+> l'électricité ont consommé 90 % ou plus du leur, les abonnements presque autant, les
+> courses environ la moitié. Les 200,00 mis de côté pour les vacances sont intacts.
+
+<details>
+<summary>La réponse brute</summary>
+
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — budget de démonstration" />
+
+</details>
 
 Chaque exemple de cette documentation est une vraie réponse d'avenir-mcp sur un budget de
 démonstration inventé.
