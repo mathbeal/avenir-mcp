@@ -12,9 +12,30 @@ from avenir_mcp import client
 logger = logging.getLogger(__name__)
 
 
+@with_config(ConfigDict(use_attribute_docstrings=True))
+class BudgetUsage(TypedDict):
+    """How much of a category's budget was used in a month."""
+
+    id: str
+    """YNAB id of the category."""
+    name: str
+    """Category name."""
+    group: str
+    """Name of the category's group, e.g. Fun for Tennis."""
+    budgeted: float
+    """Amount assigned to the category this month."""
+    actual: float
+    """Amount spent this month, as a positive number."""
+    balance: float
+    """What is left: budgeted minus spent, plus what was carried over; negative when overspent."""
+    utilization_pct: float
+    """Spent as a share of budgeted, in percent; above 100 means overspent, 0 when nothing
+    is budgeted."""
+
+
 def budget_vs_actual(
     month_categories: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
+) -> list[BudgetUsage]:
     """Compute budget-vs-actual for each category in a given month.
 
     Args:
@@ -24,7 +45,7 @@ def budget_vs_actual(
     Returns:
         List of dicts with human-readable amounts and utilisation percentage:
 
-        - ``id``, ``name`` — category identifiers
+        - ``id``, ``name``, ``group`` — the category and its group
         - ``budgeted`` — budgeted amount (currency units)
         - ``actual`` — amount spent, always positive for display (currency units)
         - ``balance`` — remaining budget (currency units)
@@ -36,7 +57,7 @@ def budget_vs_actual(
         >>> budget_vs_actual([cat])[0]["utilization_pct"]
         80.0
     """
-    results = []
+    results: list[BudgetUsage] = []
     for cat in filter(_usable, month_categories):
         budgeted_mu = cat.get("budgeted", 0)
         activity_mu = cat.get("activity", 0)
@@ -54,6 +75,7 @@ def budget_vs_actual(
             {
                 "id": cat.get("id", ""),
                 "name": cat.get("name", ""),
+                "group": cat.get("category_group_name", ""),
                 "budgeted": budgeted,
                 "actual": actual,
                 "balance": balance,

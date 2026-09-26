@@ -4,6 +4,7 @@
 // Hover shows the amounts; a table gives the same numbers without the picture.
 interface Row {
   name: string;
+  group: string;
   budgeted: number;
   actual: number;
   utilization_pct: number;
@@ -25,6 +26,8 @@ const texts = {
     budgeted: 'Budgeted',
     spent: 'Spent',
     untouched: 'untouched',
+    note: '',
+    names: {} as Record<string, string>,
   },
   fr: {
     title: 'Part de chaque budget consommée',
@@ -37,6 +40,22 @@ const texts = {
     budgeted: 'Budgété',
     spent: 'Dépensé',
     untouched: 'intact',
+    note: 'Noms des catégories traduits ; la réponse brute garde ceux du budget de démonstration.',
+    names: {
+      Bills: 'Factures',
+      Everyday: 'Quotidien',
+      Fun: 'Loisirs',
+      'Savings goals': 'Épargne',
+      Rent: 'Loyer',
+      Electricity: 'Électricité',
+      Phone: 'Téléphone',
+      Groceries: 'Courses',
+      Restaurants: 'Restaurants',
+      Transport: 'Transports',
+      Tennis: 'Tennis',
+      Subscriptions: 'Abonnements',
+      Holidays: 'Vacances',
+    } as Record<string, string>,
   },
   es: {
     title: 'Parte de cada presupuesto consumida',
@@ -49,8 +68,24 @@ const texts = {
     budgeted: 'Presupuestado',
     spent: 'Gastado',
     untouched: 'intacto',
+    note: 'Nombres de categorías traducidos; la respuesta en bruto conserva los del presupuesto de demostración.',
+    names: {
+      Bills: 'Facturas',
+      Everyday: 'Día a día',
+      Fun: 'Ocio',
+      'Savings goals': 'Ahorro',
+      Rent: 'Alquiler',
+      Electricity: 'Electricidad',
+      Phone: 'Teléfono',
+      Groceries: 'Compra',
+      Restaurants: 'Restaurantes',
+      Transport: 'Transporte',
+      Tennis: 'Tenis',
+      Subscriptions: 'Suscripciones',
+      Holidays: 'Vacaciones',
+    } as Record<string, string>,
   },
-} as const;
+};
 
 const lang = Astro.locals.starlightRoute.lang as keyof typeof texts;
 const t = texts[lang] ?? texts.en;
@@ -61,14 +96,33 @@ const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeri
   new Date(`${Astro.props.month}T00:00:00Z`),
 );
 
-const rows = [...Astro.props.rows].sort((a, b) => b.utilization_pct - a.utilization_pct);
-const labelW = 128;
+const label = (name: string) => t.names[name] ?? name;
+// Groups in YNAB's order; within a group, the most used budget first.
+const groups = [...new Set(Astro.props.rows.map((r) => r.group))].map((group) => ({
+  group,
+  rows: Astro.props.rows
+    .filter((r) => r.group === group)
+    .sort((a, b) => b.utilization_pct - a.utilization_pct),
+}));
+const rows = groups.flatMap((g) => g.rows);
+const labelW = 136;
 const plotW = 440;
 const rowH = 30;
+const headH = 28;
 const barH = 14;
 const top = 30;
 const width = labelW + plotW + 64;
-const height = top + rows.length * rowH + 8;
+const layout: ({ kind: 'group'; name: string; y: number } | { kind: 'row'; row: Row; y: number })[] = [];
+let cursor = top;
+for (const g of groups) {
+  layout.push({ kind: 'group', name: label(g.group), y: cursor });
+  cursor += headH;
+  for (const row of g.rows) {
+    layout.push({ kind: 'row', row, y: cursor });
+    cursor += rowH;
+  }
+}
+const height = cursor + 8;
 const max = Math.max(100, ...rows.map((r) => r.utilization_pct));
 const x = (v: number) => labelW + (v / max) * plotW;
 
@@ -99,10 +153,18 @@ function bar(x0: number, x1: number, y: number): string {
         ))
       }
       {
-        rows.map((r, i) => {
-          const y = top + i * rowH + (rowH - barH) / 2;
-          const tip = `${r.name} — ${money.format(r.actual)} ${t.of} ${money.format(r.budgeted)} (${pct.format(r.utilization_pct)} % ${t.used})`;
-          const label =
+        layout.map((item) => {
+          if (item.kind === 'group') {
+            return (
+              <text class="group" x="0" y={item.y + headH / 2 + 4} dominant-baseline="middle">
+                {item.name}
+              </text>
+            );
+          }
+          const r = item.row;
+          const y = item.y + (rowH - barH) / 2;
+          const tip = `${label(r.name)} — ${money.format(r.actual)} ${t.of} ${money.format(r.budgeted)} (${pct.format(r.utilization_pct)} % ${t.used})`;
+          const value =
             r.utilization_pct >= 90
               ? `${pct.format(r.utilization_pct)} %`
               : r.actual === 0
@@ -110,15 +172,15 @@ function bar(x0: number, x1: number, y: number): string {
                 : '';
           return (
             <g class="row" data-tip={tip} tabindex="0" aria-label={tip}>
-              <rect class="hit" x="0" y={top + i * rowH} width={width} height={rowH} />
+              <rect class="hit" x="0" y={item.y} width={width} height={rowH} />
               <text class="name" x={labelW - 12} y={y + barH / 2} dominant-baseline="middle" text-anchor="end">
-                {r.name}
+                {label(r.name)}
               </text>
               <path class="track" d={bar(x(0), x(100), y)} />
               <path class="fill" d={bar(x(0), x(r.utilization_pct), y)} />
-              {label && (
+              {value && (
                 <text class="value" x={x(Math.min(r.utilization_pct, 100)) + 8} y={y + barH / 2} dominant-baseline="middle">
-                  {label}
+                  {value}
                 </text>
               )}
             </g>
@@ -128,7 +190,7 @@ function bar(x0: number, x1: number, y: number): string {
     </svg>
     <div class="tip" role="status" hidden></div>
   </div>
-  <p class="source">{t.source}</p>
+  <p class="source">{t.source}{t.note && <><br />{t.note}</>}</p>
   <details>
     <summary>{t.table}</summary>
     <table>
@@ -139,7 +201,7 @@ function bar(x0: number, x1: number, y: number): string {
         {
           rows.map((r) => (
             <tr>
-              <td>{r.name}</td>
+              <td>{label(r.group)} · {label(r.name)}</td>
               <td>{money.format(r.budgeted)}</td>
               <td>{money.format(r.actual)}</td>
               <td>{pct.format(r.utilization_pct)} %</td>
@@ -243,6 +305,12 @@ function bar(x0: number, x1: number, y: number): string {
   .name {
     fill: var(--sl-color-gray-2);
     font-size: 13px;
+  }
+
+  .group {
+    fill: var(--sl-color-white);
+    font-size: 12px;
+    font-weight: 600;
   }
 
   .value {

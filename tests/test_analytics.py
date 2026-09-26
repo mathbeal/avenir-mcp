@@ -273,3 +273,18 @@ def test_budget_vs_actual_and_trends_skip_internal_and_hidden_categories() -> No
     shown = _month_cat("c1", "Groceries", 50000)
     assert [c["name"] for c in analytics.budget_vs_actual([inflow, hidden, shown])] == ["Groceries"]
     assert list(analytics.spending_trends([("2026-09", [inflow, hidden, shown])])) == ["Groceries"]
+
+
+def test_budget_vs_actual_names_each_category_group() -> None:
+    """Categories come with their group (Fun → Tennis), for grouped reviews and charts."""
+    cats = [
+        {
+            "id": "c1",
+            "name": "Tennis",
+            "category_group_name": "Fun",
+            "budgeted": 80000,
+            "activity": -22000,
+            "balance": 58000,
+        },
+    ]
+    assert analytics.budget_vs_actual(cats)[0]["group"] == "Fun"

@@ -115,3 +115,17 @@ def test_suggest_categories_reports_a_bad_cursor_as_a_tool_error() -> None:
         result = asyncio.run(_call("suggest_categories", {"budget_id": "b1", "cursor": "x"}))
     assert result.is_error
     assert "next_cursor" in result.content[0].text
+
+
+def test_budget_vs_actual_describes_every_field() -> None:
+    """Its answer has an output schema whose fields, group included, are described."""
+
+    async def run() -> Any:
+        async with Client(server.mcp) as mcp_client:
+            tools = await mcp_client.list_tools()
+        return next(t for t in tools if t.name == "get_budget_vs_actual").output_schema
+
+    schema = asyncio.run(run())
+    item = schema["properties"]["result"]["items"]["properties"]
+    assert {"group", "utilization_pct"} <= set(item)
+    assert all(field.get("description") for field in item.values())

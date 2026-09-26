@@ -32,6 +32,15 @@ Return a budget-vs-actual breakdown with utilisation percentage per category.
 
 `array of object`
 
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | string | YNAB id of the category. |
+| `name` | string | Category name. |
+| `group` | string | Name of the category's group, e.g. Fun for Tennis. |
+| `budgeted` | number | Amount assigned to the category this month. |
+| `actual` | number | Amount spent this month, as a positive number. |
+| `balance` | number | What is left: budgeted minus spent, plus what was carried over; negative when overspent. |
+| `utilization_pct` | number | Spent as a share of budgeted, in percent; above 100 means overspent, 0 when nothing is budgeted. |
 
 ## Ejemplo
 
@@ -51,6 +60,7 @@ Respuesta sobre el presupuesto de demostración:
   {
     "id": "cat-rent",
     "name": "Rent",
+    "group": "Bills",
     "budgeted": 950.0,
     "actual": 950.0,
     "balance": 0.0,
@@ -59,6 +69,7 @@ Respuesta sobre el presupuesto de demostración:
   {
     "id": "cat-power",
     "name": "Electricity",
+    "group": "Bills",
     "budgeted": 70.0,
     "actual": 0.0,
     "balance": 70.0,
@@ -67,6 +78,7 @@ Respuesta sobre el presupuesto de demostración:
   {
     "id": "cat-phone",
     "name": "Phone",
+    "group": "Bills",
     "budgeted": 20.0,
     "actual": 19.99,
     "balance": 0.01,
@@ -75,6 +87,7 @@ Respuesta sobre el presupuesto de demostración:
   {
     "id": "cat-groceries",
     "name": "Groceries",
+    "group": "Everyday",
     "budgeted": 400.0,
     "actual": 0.0,
     "balance": 400.0,

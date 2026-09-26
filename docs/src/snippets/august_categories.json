@@ -2,6 +2,7 @@
   {
     "id": "cat-rent",
     "name": "Rent",
+    "group": "Bills",
     "budgeted": 950.0,
     "actual": 950.0,
     "balance": 0.0,
@@ -10,6 +11,7 @@
   {
     "id": "cat-power",
     "name": "Electricity",
+    "group": "Bills",
     "budgeted": 70.0,
     "actual": 64.2,
     "balance": 5.8,
@@ -18,6 +20,7 @@
   {
     "id": "cat-phone",
     "name": "Phone",
+    "group": "Bills",
     "budgeted": 20.0,
     "actual": 19.99,
     "balance": 0.01,
@@ -26,6 +29,7 @@
   {
     "id": "cat-groceries",
     "name": "Groceries",
+    "group": "Everyday",
     "budgeted": 400.0,
     "actual": 192.51,
     "balance": 207.49,
@@ -34,6 +38,7 @@
   {
     "id": "cat-restaurants",
     "name": "Restaurants",
+    "group": "Everyday",
     "budgeted": 120.0,
     "actual": 89.1,
     "balance": 30.9,
@@ -42,6 +47,7 @@
   {
     "id": "cat-transport",
     "name": "Transport",
+    "group": "Everyday",
     "budgeted": 90.0,
     "actual": 45.0,
     "balance": 45.0,
@@ -50,6 +56,7 @@
   {
     "id": "cat-tennis",
     "name": "Tennis",
+    "group": "Fun",
     "budgeted": 80.0,
     "actual": 22.0,
     "balance": 58.0,
@@ -58,6 +65,7 @@
   {
     "id": "cat-subscriptions",
     "name": "Subscriptions",
+    "group": "Fun",
     "budgeted": 15.0,
     "actual": 13.49,
     "balance": 1.51,
@@ -66,6 +74,7 @@
   {
     "id": "cat-holidays",
     "name": "Holidays",
+    "group": "Savings goals",
     "budgeted": 200.0,
     "actual": 0.0,
     "balance": 200.0,

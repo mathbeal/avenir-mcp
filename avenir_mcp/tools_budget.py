@@ -98,7 +98,7 @@ async def get_monthly_summary(
 async def get_budget_vs_actual(
     budget_id: str,
     month: str = "current",
-) -> list[dict[str, Any]]:
+) -> list[analytics.BudgetUsage]:
     """Return a budget-vs-actual breakdown with utilisation percentage per category.
 
     Args:
@@ -106,7 +106,7 @@ async def get_budget_vs_actual(
         month: ISO month 'YYYY-MM-01' or 'current'.
 
     Each item in the returned list contains:
-    - id, name — category identifiers
+    - id, name, group — the category and its group
     - budgeted, actual, balance — amounts in currency units
     - utilization_pct — percentage of budget consumed (> 100 means over-budget)
     """
