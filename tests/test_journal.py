@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import stat
 from pathlib import Path
 
@@ -55,6 +56,7 @@ def test_journal_survives_a_restart(tmp_path: Path) -> None:
     assert journal.Journal(path).find("b1", op_id) is not None
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permissions; Windows uses ACLs")
 def test_journal_file_is_private_and_holds_no_amounts_or_names(tmp_path: Path) -> None:
     """Only the owner can read it, and it stores identifiers only."""
     path = tmp_path / "sub" / "journal.jsonl"
@@ -84,7 +86,7 @@ def test_default_path_falls_back_to_local_state(
     """Without XDG_STATE_HOME, it lives in ~/.local/state."""
     monkeypatch.delenv("AVENIR_MCP_JOURNAL", raising=False)
     monkeypatch.delenv("XDG_STATE_HOME", raising=False)
-    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setattr(Path, "home", lambda: tmp_path)
     assert journal.default_path() == tmp_path / ".local" / "state" / "avenir-mcp" / "journal.jsonl"
 
 

@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -789,6 +790,7 @@ def test_token_can_come_from_a_file(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert client._api_key() == "file-token"  # pylint: disable=protected-access
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permissions; Windows uses ACLs")
 def test_token_file_readable_by_others_is_refused(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

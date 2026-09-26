@@ -85,7 +85,7 @@ jobs:
       - run: uv run mypy
 
   tests:
-    name: pytest ${{ matrix.python-version }} on ${{ matrix.os }}, 100 % coverage
+    name: pytest ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
@@ -99,10 +99,12 @@ jobs:
         python-version: ["3.12", "3.13", "3.14"]
         experimental: [false]
         include:
-          # Windows runs to learn what breaks there, without blocking yet.
+          # Windows is required too. POSIX-only checks (file permissions) are
+          # skipped there, so coverage is enforced on Linux and macOS only.
           - os: windows-latest
             python-version: "3.14"
-            experimental: true
+            experimental: false
+            coverage: "--cov-fail-under=0"
           # 3.15 is a release candidate, and beartype (via fastmcp) does not import
           # on it yet. Run it to learn when that changes, without blocking.
           - os: ubuntu-latest
@@ -118,7 +120,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       # The suite never calls YNAB: no token is needed, and none is available here.
-      - run: uv run pytest
+      - run: uv run pytest ${{ matrix.coverage }}
 
   vocabulary:
     name: lexdrift against its baseline
