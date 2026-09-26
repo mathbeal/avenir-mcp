@@ -46,7 +46,7 @@ operation's answer carries its `operation_id`.
 Anything left alone is listed in `conflicts`: undo never overwrites later work.
 
 **Not undoable:** `update_category` (call it again with the previous name and group),
-`create_category` (hide the category in YNAB), `approve_transactions` (approval is a
+`create_category` (hide the category in YNAB), `split_transaction` (YNAB's API cannot change a split: edit it in YNAB), `approve_transactions` (approval is a
 review flag).
 
 <Aside type="note">

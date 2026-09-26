@@ -22,7 +22,7 @@ What the server does:
 - it reads the token from the environment, or from `YNAB_API_KEY_FILE` (a file readable
   by its owner only, else refused), and never writes it anywhere
 - `apply_categories`, `reconcile_account`, `set_category_budget`, `update_category`,
-  `create_transactions`, `create_category` and `undo_operation` change nothing until the user confirms the
+  `create_transactions`, `create_category`, `split_transaction` and `undo_operation` change nothing until the user confirms the
   previewed changes. A confirmation code is single-use, expires after 10 minutes and
   only confirms the exact changes it was issued for
 - with `AVENIR_MCP_REQUIRE_ELICITATION=1`, only the user's yes given in the client

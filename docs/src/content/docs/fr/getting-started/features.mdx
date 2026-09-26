@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp donne à un agent 17 outils, 4 ressources et 4 prompts sur vos budgets YNAB. Cette
+avenir-mcp donne à un agent 18 outils, 4 ressources et 4 prompts sur vos budgets YNAB. Cette
 page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
 l'agent ; c'est lui qui choisit l'outil.
 
@@ -46,6 +46,7 @@ Guide : [Faire le point sur un mois](/avenir-mcp/fr/guides/monthly-review/).
 |---|---|---|
 | *« Qu'est-ce qui attend une catégorie ? »* | [`suggest_categories`](/avenir-mcp/fr/reference/tools/suggest-categories/) — transactions en attente, avec une proposition quand votre historique est clair | L |
 | *« Oui, applique. »* | [`apply_categories`](/avenir-mcp/fr/reference/tools/apply-categories/) — un lot confirmé | É ↺ |
+| *« Ventile ce ticket : 81,15 en courses, 5,25 en entretien. »* | [`split_transaction`](/avenir-mcp/fr/reference/tools/split-transaction/) — une transaction sur plusieurs catégories ; s'annule dans YNAB, pas ici | É |
 | *« Marque-les comme revues. »* | [`approve_transactions`](/avenir-mcp/fr/reference/tools/approve-transactions/) — lève le marqueur *unapproved* de YNAB | É |
 
 Les propositions reconnaissent un commerçant à travers ses libellés bancaires

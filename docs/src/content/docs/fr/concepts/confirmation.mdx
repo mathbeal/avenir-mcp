@@ -22,6 +22,7 @@ Chaque outil construit un **sujet** : le changement exact, sous forme de donnée
 | `update_category` | catégorie, nom après, groupe après |
 | `create_category` | groupe, nom |
 | `create_transactions` | compte, les transactions, `approved` |
+| `split_transaction` | transaction, les lignes (montant, catégorie, note) |
 | `reconcile_account` | compte, solde bancaire, écart à ajuster |
 | `undo_operation` | l'identifiant de l'opération |
 
@@ -118,6 +119,7 @@ Seuls les clients qui gèrent l'élicitation MCP peuvent alors écrire.
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?* puis une ligne par transaction |
+| `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* puis une ligne par catégorie, et l'avertissement que seul YNAB peut l'annuler |
 | `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
 | `undo_operation` | *Undo: recategorise 2 transaction(s)?*, ou la sorte d'annulation |
 
