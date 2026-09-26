@@ -104,7 +104,7 @@ def find(  # pylint: disable=too-many-arguments
     """Find the transactions matching the filters, newest first.
 
     Args:
-        transactions: The budget's transactions, deleted ones left out.
+        transactions: The budget's transactions; deleted ones are never found.
         accounts: The budget's accounts.
         categories: The budget's categories.
         since: First date, included.
@@ -128,7 +128,8 @@ def find(  # pylint: disable=too-many-arguments
     kept = [
         tx
         for tx in transactions
-        if tx["date"] >= first
+        if not tx.get("deleted")
+        and tx["date"] >= first
         and (last is None or tx["date"] <= last)
         and (wanted is None or tx["amount"] == wanted)
         and (account_ids is None or tx["account_id"] in account_ids)

@@ -116,3 +116,10 @@ def test_what_cannot_be_searched_is_refused_with_what_to_do(
     """Each refusal says what to fix."""
     with pytest.raises(ValueError, match=message):
         _find(**kw)
+
+
+def test_a_deleted_transaction_is_never_found() -> None:
+    """YNAB can still send a deleted transaction: it matches nothing."""
+    txs = [_tx("gone", "2026-09-12", -86400, deleted=True), _tx("kept", "2026-09-12", -86400)]
+    found = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1), amount=-86.40)
+    assert [m.transaction_id for m in found.transactions] == ["kept"]
