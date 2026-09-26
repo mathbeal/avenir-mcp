@@ -21,6 +21,7 @@ _CATS = [
     {"id": "c-fun", "name": "Leisure"},
 ]
 _ASSIGN = [{"transaction_id": "t1", "category_id": "c-food"}]
+_ACCOUNTS = [{"id": "acc", "on_budget": True}]
 
 
 def _txs(category_id: str | None = None) -> list[dict[str, Any]]:
@@ -66,6 +67,7 @@ def _budget(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[_Budget
     with (
         patch("avenir_mcp.client.get_transactions", fake.get_transactions),
         patch("avenir_mcp.client.get_categories", AsyncMock(return_value=_CATS)),
+        patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
         patch("avenir_mcp.client.set_transaction_categories", fake.set_transaction_categories),
     ):
         yield fake

@@ -31,14 +31,16 @@ obtenez quand même les propositions ; vous les appliquez alors dans YNAB.
 
 2. **L'agent lit ce qui attend.** Il appelle `suggest_categories` avec
    `{"budget_id": "last-used"}`. avenir-mcp télécharge une seule fois les transactions du
-   budget (deux requêtes YNAB, quel que soit leur nombre) et répond avec une page de
+   budget (trois requêtes YNAB, quel que soit leur nombre) et répond avec une page de
    transactions en attente, de la plus récente à la plus ancienne :
 
    <Code code={pending} lang="json" title="suggest_categories — les 3 premières sur 6" />
 
    `pending_count` est le total ; `items` contient cette page (50 par défaut, `limit`
-   pour changer) ; `next_cursor` donne la page suivante. `categories` liste toutes les
-   catégories que l'agent peut assigner.
+   pour changer) ; `next_cursor` donne la page suivante. `categories`, sur la première page,
+   liste toutes les catégories que l'agent peut assigner. Un élément avec
+   `possible_transfer_with` est sans doute la moitié d'un virement importé en double :
+   reliez la paire dans YNAB plutôt.
 
 3. **L'agent propose.** Les transactions avec proposition sont regroupées par catégorie ;
    les autres par bénéficiaire, avec une proposition et une question en cas de doute.

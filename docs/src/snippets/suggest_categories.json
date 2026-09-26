@@ -13,7 +13,8 @@
         "category_id": "cat-groceries",
         "category_name": "Groceries",
         "confidence": 1.0
-      }
+      },
+      "possible_transfer_with": null
     },
     {
       "transaction_id": "tx-051",
@@ -26,7 +27,8 @@
         "category_id": "cat-groceries",
         "category_name": "Groceries",
         "confidence": 1.0
-      }
+      },
+      "possible_transfer_with": null
     },
     {
       "transaction_id": "tx-049",
@@ -39,7 +41,8 @@
         "category_id": "cat-transport",
         "category_name": "Transport",
         "confidence": 1.0
-      }
+      },
+      "possible_transfer_with": null
     }
   ],
   "categories": [

@@ -75,7 +75,8 @@ de chaque outil, cache froid, est mesuré sur le budget de démonstration et ind
 |---|---|
 | 0 | tout appel refusé par la validation (mois mal formé, nom vide…) |
 | 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, l'aperçu de `set_category_budget` |
-| 2 | `suggest_categories` (une page entière), `apply_categories`, `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `suggest_categories` (une page entière), `apply_categories` |
 | 1 + N | `get_spending_trends` sur N mois |
 
 Appliquer une écriture confirmée ajoute sa propre requête (un seul `PATCH` groupé, quel

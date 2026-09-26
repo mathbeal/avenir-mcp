@@ -10,11 +10,21 @@ est ce commerçant ?* et *où l'avez-vous rangé avant ?*
 
 ## Ce qui est en attente
 
-Une transaction est en attente quand elle n'est pas supprimée, n'a pas de catégorie,
-n'est pas un virement entre vos comptes (les virements ne prennent pas de catégorie dans
-YNAB), et n'est pas ventilée (ce sont les lignes d'une transaction ventilée qui portent
-ses catégories). Les transactions en attente sont listées des plus récentes aux plus
-anciennes.
+Une transaction est en attente quand elle n'est pas supprimée, n'a pas de catégorie (ou
+la catégorie interne *Uncategorized* de YNAB), n'est pas un virement entre vos comptes
+(les virements ne prennent pas de catégorie dans YNAB), n'est pas ventilée (ce sont les
+lignes d'une transaction ventilée qui portent ses catégories), et appartient à un compte
+**inclus au budget** : les transactions des comptes de suivi — un crédit immobilier, un
+emprunt, des placements — ne prennent jamais de catégorie, solde d'ouverture compris. Les
+transactions en attente sont listées des plus récentes aux plus anciennes.
+
+## Virements importés en double
+
+Un mouvement entre deux de vos comptes arrive parfois comme deux transactions ordinaires
+— une sortie, une entrée — au lieu d'un virement. Quand deux transactions en attente ont
+des **montants opposés**, sur des **comptes différents**, à **3 jours** d'écart au plus,
+chacune désigne l'autre dans `possible_transfer_with`. L'agent propose alors de les relier
+en virement dans YNAB, plutôt que de donner une catégorie à chacune.
 
 ## Reconnaître un commerçant
 
@@ -66,7 +76,8 @@ des cas.
 |---|---|
 | Taille de page | `limit`, 50 par défaut |
 | Page suivante | `next_cursor`, opaque : à renvoyer tel quel |
-| Coût | deux requêtes YNAB par page : transactions et catégories |
+| Coût | trois requêtes YNAB par page : transactions, catégories et comptes |
+| Catégories | la liste des catégories assignables n'arrive qu'avec la première page |
 | Texte | bénéficiaire et mémo tronqués à 80 caractères, marqués `…` |
 
 Un curseur est l'encodage base64 d'une position. Un curseur qu'avenir-mcp n'a pas émis est

@@ -19,6 +19,7 @@ from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move
 from avenir_mcp.text import untrusted
+from avenir_mcp.triage import internal_uncategorized
 
 CONFIRMATION_TTL_SECONDS = 600
 
@@ -71,15 +72,19 @@ def plan_categorization(
     transactions: list[dict[str, Any]],
     categories: list[dict[str, Any]],
     assignments: list[Assignment],
+    off_budget: set[str] | frozenset[str] = frozenset(),
 ) -> Plan:
     """Work out what assigning these categories would change.
 
     Raises:
         ValueError: With a message saying what to fix, if an assignment names an
-            unknown transaction or category, a transfer, or a transaction twice.
+            unknown transaction or category, a transfer, a split, a transaction of
+            an off-budget account, YNAB's internal Uncategorized, or a
+            transaction twice.
     """
     by_id = {tx["id"]: tx for tx in transactions}
     names = {c["id"]: c["name"] for c in categories}
+    uncategorized = internal_uncategorized(categories)
     seen: set[str] = set()
     changes: list[Change] = []
     unchanged = 0
@@ -94,6 +99,10 @@ def plan_categorization(
                 f"Transaction {tx_id} is not in this budget: "
                 "use the transaction_id values returned by suggest_categories."
             )
+        if category_id in uncategorized:
+            raise ValueError(
+                f"Category {category_id} is YNAB's internal Uncategorized: choose a real category."
+            )
         if category_id not in names:
             raise ValueError(
                 f"Category {category_id} is not in this budget: "
@@ -102,6 +111,10 @@ def plan_categorization(
         if tx.get("subtransactions"):
             raise ValueError(
                 f"Transaction {tx_id} is split across categories: change its lines in YNAB."
+            )
+        if tx.get("account_id") in off_budget:
+            raise ValueError(
+                f"Transaction {tx_id} is on an off-budget account: YNAB gives it no category."
             )
         if tx.get("transfer_account_id"):
             raise ValueError(

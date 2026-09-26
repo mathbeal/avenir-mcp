@@ -185,3 +185,29 @@ def test_expired_codes_are_forgotten() -> None:
     now[0] = 601.0
     fresh = codes.issue("b1", "fresh")
     assert list(codes._issued) == [fresh]  # pylint: disable=protected-access
+
+
+def test_plan_rejects_a_transaction_of_an_off_budget_account() -> None:
+    """A tracking account's transaction takes no category."""
+    with pytest.raises(ValueError, match="off-budget"):
+        writes.plan_categorization(
+            [_tx("t1", account_id="acc-loan")],
+            _CATEGORIES,
+            [{"transaction_id": "t1", "category_id": "c-food"}],
+            off_budget={"acc-loan"},
+        )
+
+
+def test_plan_rejects_ynab_internal_uncategorized() -> None:
+    """Assigning YNAB's internal Uncategorized category changes nothing useful."""
+    internal = {
+        "id": "c-uncat",
+        "name": "Uncategorized",
+        "category_group_name": "Internal Master Category",
+    }
+    with pytest.raises(ValueError, match="Uncategorized"):
+        writes.plan_categorization(
+            [_tx("t1")],
+            [*_CATEGORIES, internal],
+            [{"transaction_id": "t1", "category_id": "c-uncat"}],
+        )

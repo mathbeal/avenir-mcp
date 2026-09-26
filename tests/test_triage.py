@@ -49,6 +49,7 @@ def test_pending_transactions_are_listed_with_currency_amounts() -> None:
             "memo": "lunch",
             "account": "Checking",
             "suggestion": None,
+            "possible_transfer_with": None,
         }
     ]
 
@@ -150,3 +151,63 @@ def test_split_transactions_are_not_pending() -> None:
         "p1", "SUPERMARKET", subtransactions=[{"category_id": "c-food"}, {"category_id": "c-fun"}]
     )
     assert triage.prepare([split], _CATEGORIES)["pending_count"] == 0
+
+
+_INTERNAL = [
+    {
+        "id": "c-inflow",
+        "name": "Inflow: Ready to Assign",
+        "category_group_name": "Internal Master Category",
+        "deleted": False,
+    },
+    {
+        "id": "c-uncat",
+        "name": "Uncategorized",
+        "category_group_name": "Internal Master Category",
+        "deleted": False,
+    },
+]
+
+
+def test_transactions_of_off_budget_accounts_are_never_pending() -> None:
+    """A tracking account (a mortgage, a loan) takes no category in YNAB."""
+    txs = [
+        _tx("p1", "SHOP", account_id="acc-main"),
+        _tx("p2", "Starting Balance", account_id="acc-loan"),
+    ]
+    page = triage.prepare(txs, _CATEGORIES, off_budget={"acc-loan"})
+    assert [i["transaction_id"] for i in page["items"]] == ["p1"]
+    assert page["pending_count"] == 1
+
+
+def test_uncategorized_is_not_offered_but_counts_as_pending() -> None:
+    """YNAB's internal Uncategorized is no choice; a transaction carrying it still waits."""
+    page = triage.prepare([_tx("p1", "SHOP", "c-uncat")], _CATEGORIES + _INTERNAL)
+    assert [i["transaction_id"] for i in page["items"]] == ["p1"]
+    offered = {c["category_id"] for c in page["categories"]}
+    assert "c-uncat" not in offered
+    assert "c-inflow" in offered
+
+
+def test_opposite_amounts_between_accounts_are_a_possible_transfer() -> None:
+    """Money leaving one account and arriving in another, unlinked, is flagged both ways."""
+    txs = [
+        _tx("out", "To vault", amount=-25000, date="2026-03-31", account_id="acc-a"),
+        _tx("in", "To vault", amount=25000, date="2026-04-01", account_id="acc-b"),
+        _tx("same-account", "Refund", amount=25000, date="2026-03-31", account_id="acc-a"),
+        _tx("far", "Gift", amount=-25000, date="2026-01-01", account_id="acc-c"),
+    ]
+    items = {i["transaction_id"]: i for i in triage.prepare(txs, _CATEGORIES)["items"]}
+    assert items["out"]["possible_transfer_with"] == "in"
+    assert items["in"]["possible_transfer_with"] == "out"
+    assert items["same-account"]["possible_transfer_with"] is None
+    assert items["far"]["possible_transfer_with"] is None
+
+
+def test_categories_come_with_the_first_page_only() -> None:
+    """A long category list is sent once, not on every page."""
+    txs = [_tx(f"p{i}", "SHOP", date=f"2026-09-0{i + 1}") for i in range(3)]
+    first = triage.prepare(txs, _CATEGORIES, limit=2)
+    assert first["categories"]
+    second = triage.prepare(txs, _CATEGORIES, limit=2, cursor=first["next_cursor"])
+    assert second["categories"] == []

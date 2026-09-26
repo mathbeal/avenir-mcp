@@ -10,10 +10,22 @@ este comercio?* y *¿dónde lo puso antes?*
 
 ## Qué está pendiente
 
-Una transacción está pendiente cuando no está borrada, no tiene categoría, no es una
-transferencia entre sus cuentas (las transferencias no llevan categoría en YNAB) y no
-está dividida (las líneas de una transacción dividida llevan sus categorías). Las
-pendientes se listan de la más reciente a la más antigua.
+Una transacción está pendiente cuando no está borrada, no tiene categoría (o la categoría
+interna *Uncategorized* de YNAB), no es una transferencia entre sus cuentas (las
+transferencias no llevan categoría en YNAB), no está dividida (las líneas de una
+transacción dividida llevan sus categorías) y pertenece a una cuenta **incluida en el
+presupuesto**: las transacciones de las cuentas de seguimiento — una hipoteca, un
+préstamo, inversiones — nunca llevan categoría, saldo inicial incluido. Las pendientes se
+listan de la más reciente a la más antigua.
+
+## Transferencias importadas dos veces
+
+Un movimiento entre dos de sus cuentas llega a veces como dos transacciones normales —
+una salida y una entrada — en lugar de una transferencia. Cuando dos transacciones
+pendientes tienen **importes opuestos**, en **cuentas distintas**, con **3 días** de
+diferencia como mucho, cada una nombra a la otra en `possible_transfer_with`. El agente
+propone entonces vincularlas como transferencia en YNAB, en lugar de dar una categoría a
+cada una.
 
 ## Reconocer un comercio
 
@@ -64,7 +76,8 @@ las veces.
 |---|---|
 | Tamaño de página | `limit`, 50 por defecto |
 | Página siguiente | `next_cursor`, opaco: devuélvalo sin cambios |
-| Coste | dos peticiones a YNAB por página: transacciones y categorías |
+| Coste | tres peticiones a YNAB por página: transacciones, categorías y cuentas |
+| Categorías | la lista de categorías asignables llega solo con la primera página |
 | Texto | beneficiario y memo truncados a 80 caracteres, marcados con `…` |
 
 Un cursor es la codificación base64 de una posición. Un cursor que avenir-mcp no emitió se

@@ -10,9 +10,20 @@ merchant?* and *where did you put it before?*
 
 ## What is pending
 
-A transaction is pending when it is not deleted, has no category, is not a transfer
-between your accounts (transfers take no category in YNAB), and is not a split (a split's
-lines carry its categories). Pending transactions are listed newest first.
+A transaction is pending when it is not deleted, has no category (or YNAB's internal
+*Uncategorized*), is not a transfer between your accounts (transfers take no category in
+YNAB), is not a split (a split's lines carry its categories), and belongs to an account
+**on budget**: the transactions of tracking accounts — a mortgage, a loan, an investment —
+never take a category, their starting balance included. Pending transactions are listed
+newest first.
+
+## Transfers imported twice
+
+A move between two of your accounts sometimes arrives as two ordinary transactions — one
+out, one in — instead of one transfer. When two pending transactions have **opposite
+amounts**, on **different accounts**, at most **3 days** apart, each item names the other
+in `possible_transfer_with`. The agent then suggests linking them as a transfer in YNAB,
+rather than giving each a category.
 
 ## Recognising a merchant
 
@@ -61,7 +72,8 @@ one out in turn, suggestions made at 0.90 were right 95 % of the time.
 |---|---|
 | Page size | `limit`, 50 by default |
 | Next page | `next_cursor`, opaque: pass it back unchanged |
-| Cost | two YNAB requests per page: transactions and categories |
+| Cost | three YNAB requests per page: transactions, categories and accounts |
+| Categories | the list of assignable categories comes with the first page only |
 | Text | payee and memo cut to 80 characters, marked `…` |
 
 A cursor is the base64 encoding of an offset. A cursor avenir-mcp did not issue is refused:

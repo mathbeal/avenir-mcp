@@ -72,7 +72,8 @@ costs, on a cold cache, is measured on the demo budget and stated on its
 |---|---|
 | 0 | any call refused by validation (a malformed month, an empty name…) |
 | 1 | `list_budgets`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a `set_category_budget` preview |
-| 2 | `suggest_categories` (a whole page), `apply_categories`, `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `suggest_categories` (a whole page), `apply_categories` |
 | 1 + N | `get_spending_trends` over N months |
 
 Applying a confirmed write adds its own request (one bulk `PATCH` for any number of

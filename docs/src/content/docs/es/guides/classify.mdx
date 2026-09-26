@@ -31,14 +31,16 @@ lectura sigue obteniendo las sugerencias; luego las aplica en YNAB.
 
 2. **El agente lee lo pendiente.** Llama a `suggest_categories` con
    `{"budget_id": "last-used"}`. avenir-mcp descarga las transacciones del presupuesto una
-   vez (dos peticiones a YNAB, sea cual sea su número) y responde con una página de
+   vez (tres peticiones a YNAB, sea cual sea su número) y responde con una página de
    transacciones pendientes, de la más reciente a la más antigua:
 
    <Code code={pending} lang="json" title="suggest_categories — 3 primeras de 6" />
 
    `pending_count` es el total; `items` contiene esta página (50 por defecto, `limit`
-   para cambiarlo); `next_cursor` trae la página siguiente. `categories` lista todas las
-   categorías que el agente puede asignar.
+   para cambiarlo); `next_cursor` trae la página siguiente. `categories`, en la primera página,
+   lista todas las categorías que el agente puede asignar. Un elemento con
+   `possible_transfer_with` es probablemente la mitad de una transferencia importada dos
+   veces: vincule el par en YNAB.
 
 3. **El agente propone.** Los elementos con sugerencia se agrupan por categoría; los
    demás por beneficiario, con una propuesta y una pregunta cuando duda.

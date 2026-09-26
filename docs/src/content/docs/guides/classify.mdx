@@ -30,15 +30,16 @@ still get the suggestions; you then apply them in YNAB.
    > **You:** Categorise everything that is waiting for a category.
 
 2. **The agent reads what is pending.** It calls `suggest_categories` with
-   `{"budget_id": "last-used"}`. avenir-mcp downloads the budget's transactions once (two
+   `{"budget_id": "last-used"}`. avenir-mcp downloads the budget's transactions once (three
    YNAB requests, whatever their number) and answers with a page of pending
    transactions, newest first:
 
    <Code code={pending} lang="json" title="suggest_categories — first 3 of 6" />
 
    `pending_count` is the total; `items` holds this page (50 by default, `limit` to
-   change); `next_cursor` fetches the next page. `categories` lists every category the
-   agent may assign.
+   change); `next_cursor` fetches the next page. `categories`, on the first page, lists
+   every category the agent may assign. An item with `possible_transfer_with` is probably
+   half of a transfer imported twice: link the pair in YNAB instead.
 
 3. **The agent proposes.** Suggested items are grouped by category; the others by
    payee, with a proposal and a question when it is unsure.

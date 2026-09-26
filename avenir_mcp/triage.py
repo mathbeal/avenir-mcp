@@ -7,6 +7,7 @@ list of what is pending: no request per transaction.
 from __future__ import annotations
 
 import base64
+from datetime import date
 from typing import Any, TypedDict
 
 from pydantic import ConfigDict, with_config  # pylint: disable=import-error
@@ -48,6 +49,10 @@ class PendingItem(TypedDict):
     """Account name."""
     suggestion: Suggestion | None
     """Category suggested by the history, or null when there is none clear enough."""
+    possible_transfer_with: str | None
+    """Another pending transaction with the opposite amount on another account, within
+    3 days: probably one transfer imported as two. Link them in YNAB rather than
+    categorising them. Null otherwise."""
 
 
 @with_config(ConfigDict(use_attribute_docstrings=True))
@@ -73,7 +78,7 @@ class Triage(TypedDict):
     items: list[PendingItem]
     """This page of pending transactions, newest first."""
     categories: list[CategoryChoice]
-    """Every category that can be assigned."""
+    """Every category that can be assigned; on the first page only, empty on the next ones."""
     next_cursor: str | None
     """Pass it back to get the next page; null on the last page."""
 
@@ -95,15 +100,50 @@ def _decode_cursor(cursor: str) -> int:
     return int(value)
 
 
-def _is_pending(tx: dict[str, Any]) -> bool:
-    """Waiting for a category: not deleted, not a transfer, and not a split, whose
-    lines carry the categories."""
+# YNAB's own group, which holds "Inflow: Ready to Assign" and "Uncategorized".
+INTERNAL_GROUP = "Internal Master Category"
+# Days between the two halves of a transfer imported as two transactions.
+TRANSFER_WINDOW_DAYS = 3
+
+
+def internal_uncategorized(categories: list[dict[str, Any]]) -> set[str]:
+    """Ids of YNAB's internal "Uncategorized" category: no choice, and no category."""
+    return {
+        c["id"]
+        for c in categories
+        if c.get("category_group_name") == INTERNAL_GROUP and c.get("name") == "Uncategorized"
+    }
+
+
+def _is_pending(tx: dict[str, Any], off_budget: set[str], uncategorized: set[str]) -> bool:
+    """Waiting for a category: not deleted, not a transfer, not a split (its lines
+    carry the categories), and on an account that takes categories."""
     return (
         not tx.get("deleted")
-        and not tx.get("category_id")
+        and (not tx.get("category_id") or tx["category_id"] in uncategorized)
         and not tx.get("transfer_account_id")
         and not tx.get("subtransactions")
+        and tx.get("account_id") not in off_budget
     )
+
+
+def _transfer_pairs(pending: list[dict[str, Any]]) -> dict[str, str]:
+    """Pair pending transactions that look like both halves of one transfer."""
+    pairs: dict[str, str] = {}
+    for tx in pending:
+        if tx["id"] in pairs or tx["amount"] >= 0:
+            continue
+        day = date.fromisoformat(tx["date"])
+        for other in pending:
+            if (
+                other["id"] not in pairs
+                and other["amount"] == -tx["amount"]
+                and other.get("account_id") != tx.get("account_id")
+                and abs((date.fromisoformat(other["date"]) - day).days) <= TRANSFER_WINDOW_DAYS
+            ):
+                pairs[tx["id"]], pairs[other["id"]] = other["id"], tx["id"]
+                break
+    return pairs
 
 
 def _histories(transactions: list[dict[str, Any]]) -> dict[bool, dict[str, dict[str, int]]]:
@@ -140,12 +180,14 @@ def _suggestion(
     }
 
 
-def prepare(
+def prepare(  # pylint: disable=too-many-arguments
     transactions: list[dict[str, Any]],
     categories: list[dict[str, Any]],
+    *,
     limit: int = DEFAULT_LIMIT,
     cursor: str | None = None,
     threshold: float | None = None,
+    off_budget: set[str] | frozenset[str] = frozenset(),
 ) -> Triage:
     """Return one page of pending transactions, newest first, with suggestions.
 
@@ -155,15 +197,20 @@ def prepare(
         limit: Maximum number of items in the page.
         cursor: ``next_cursor`` of the previous page, or None for the first page.
         threshold: Confidence needed for a suggestion; defaults to the classifier's.
+        off_budget: Ids of tracking accounts, whose transactions take no category.
 
     Raises:
         ValueError: If ``cursor`` was not issued by this function.
     """
     offset = _decode_cursor(cursor) if cursor else 0
+    uncategorized = internal_uncategorized(categories)
     histories = _histories(transactions)
     pending = sorted(
-        (tx for tx in transactions if _is_pending(tx)), key=lambda tx: tx["date"], reverse=True
+        (tx for tx in transactions if _is_pending(tx, set(off_budget), uncategorized)),
+        key=lambda tx: tx["date"],
+        reverse=True,
     )
+    transfers = _transfer_pairs(pending)
     items: list[PendingItem] = [
         {
             "transaction_id": tx["id"],
@@ -173,6 +220,7 @@ def prepare(
             "memo": untrusted(tx["memo"]) if tx.get("memo") else None,
             "account": tx.get("account_name") or "",
             "suggestion": _suggestion(tx, histories, categories, threshold),
+            "possible_transfer_with": transfers.get(tx["id"]),
         }
         for tx in pending
     ]
@@ -183,10 +231,18 @@ def prepare(
         "pending_count": len(pending),
         "suggested_count": suggested,
         "items": items[offset:end],
-        "categories": [
-            {"category_id": c["id"], "name": c["name"], "group": c.get("category_group_name", "")}
-            for c in categories
-            if not c.get("deleted")
-        ],
+        "categories": (
+            []
+            if cursor
+            else [
+                {
+                    "category_id": c["id"],
+                    "name": c["name"],
+                    "group": c.get("category_group_name", ""),
+                }
+                for c in categories
+                if not c.get("deleted") and c["id"] not in uncategorized
+            ]
+        ),
         "next_cursor": _encode_cursor(end) if end < len(items) else None,
     }
