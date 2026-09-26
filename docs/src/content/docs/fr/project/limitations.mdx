@@ -17,8 +17,7 @@ sidebar:
 | Serveur public ou partagé | non pris en charge : pas de comptes, et les conditions de YNAB imposent OAuth pour les budgets d'autrui | chacun fait tourner son propre avenir-mcp — voir les [mentions légales](/avenir-mcp/fr/project/legal/) |
 | Transactions ventilées | jamais proposées ni recatégorisées : leurs lignes portent les catégories ; `split_transaction` en ventile une, mais l'API YNAB ne peut ni modifier ni annuler une ventilation | les modifier ou les annuler dans YNAB |
 | Suggestions | exigent un historique : un commerçant jamais classé n'en reçoit pas | l'agent propose, vous décidez |
-| Prévision | prolonge les derniers mois ; les charges trimestrielles ou annuelles ne sont pas récurrentes à ses yeux | les passer en `one_offs` |
-| Transactions planifiées | listées par `list_scheduled_transactions`, mais la prévision s'appuie encore sur l'historique | passer les montants futurs connus en `one_offs` |
+| Prévision | prolonge les derniers mois, plus les transactions planifiées de YNAB ; une charge trimestrielle ou annuelle sans échéance n'est pas récurrente à ses yeux | la planifier dans YNAB, ou la passer en `one_offs` |
 | Devise | montants affichés en nombres, sans symbole monétaire | — |
 | Python | 3.12 à 3.14 ; 3.15 attend une dépendance (beartype) | — |
 
@@ -27,7 +26,6 @@ sidebar:
 - Publier sur PyPI, puis un paquet `.mcpb` pour une installation en un clic dans Claude
   Desktop.
 - L'annulation pour `update_category`.
-- Lire les transactions planifiées de YNAB dans la prévision.
 - Abaisser la version minimale de Python dès que les dépendances le permettent.
 - Lancer l'évaluation avec d'autres clients que Claude Code, et avec des modèles locaux.
 

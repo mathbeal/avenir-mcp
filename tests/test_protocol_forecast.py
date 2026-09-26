@@ -13,6 +13,8 @@ from fastmcp import Client
 
 from avenir_mcp import server
 
+from .factories import scheduled
+
 _ACCOUNTS = [
     {"id": "acc", "name": "Checking", "on_budget": True, "closed": False, "balance": 1000.0},
     {"id": "savings", "name": "Savings", "on_budget": True, "closed": False, "balance": 500.0},
@@ -43,13 +45,17 @@ _TXS = [
 
 
 @pytest.fixture(autouse=True, name="budget")
-def _budget() -> Iterator[None]:
+def _budget() -> Iterator[AsyncMock]:
+    """A fake YNAB on 24 September 2026, with no schedule unless a test gives some."""
+    schedules = AsyncMock(return_value=[])
     with (
         patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=_ACCOUNTS)),
         patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=_TXS)),
+        patch("avenir_mcp.client.get_categories", AsyncMock(return_value=[])),
+        patch("avenir_mcp.client.get_scheduled_transactions", schedules),
         patch("avenir_mcp.app.today", lambda: date(2026, 9, 24)),
     ):
-        yield
+        yield schedules
 
 
 def _call(args: dict[str, Any]) -> Any:
@@ -184,3 +190,72 @@ def test_given_income_replaces_income_found_in_history() -> None:
     content = data.structured_content
     assert content["months"][1]["inflows"] == 3200.0
     assert all(r["amount"] < 0 for r in content["assumptions"]["recurring"])
+
+
+def _outflows(data: dict[str, Any], month: str) -> float:
+    return float(next(m["outflows"] for m in data["months"] if m["month"] == month))
+
+
+def test_a_scheduled_payment_falls_on_its_date(budget: AsyncMock) -> None:
+    """A yearly bill the history cannot guess is projected, and listed in the assumptions."""
+    before = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    budget.return_value = [
+        scheduled(
+            "HOME INSURANCE", "2025-10-20", "2026-10-20", "yearly", amount=-420_000,
+            category_id=None,
+        )
+    ]  # fmt: skip
+    after = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert [o["payee"] for o in after["assumptions"]["scheduled"]] == ["HOME INSURANCE"]
+    assert round(_outflows(after, "2026-10") - _outflows(before, "2026-10"), 2) == -420.0
+
+
+def test_a_charge_with_a_schedule_is_not_counted_twice(budget: AsyncMock) -> None:
+    """The schedule replaces what the history guessed for the same payee: same months."""
+    before = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    budget.return_value = [
+        scheduled("CAR LEASE", "2026-01-25", "2026-09-25", "monthly", amount=-400_000)
+    ]
+    after = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert "CAR LEASE" not in [r["payee"] for r in after["assumptions"]["recurring"]]
+    assert [o["date"] for o in after["assumptions"]["scheduled"]] == ["2026-09-25", "2026-10-25"]
+    for month in ("2026-09", "2026-10"):
+        assert _outflows(after, month) == _outflows(before, month)
+
+
+def test_transfers_between_projected_accounts_cancel(budget: AsyncMock) -> None:
+    """Money moved from Checking to Savings leaves neither when both are projected."""
+    budget.return_value = [
+        scheduled(
+            "Transfer : Savings", "2026-01-29", "2026-09-29", "monthly", amount=-200_000,
+            category_id=None, transfer_account_id="savings",
+        )
+    ]  # fmt: skip
+    both = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert both["assumptions"]["scheduled"] == []
+    alone = _call({"plan_id": "b1", "until": "2026-10", "account_ids": ["acc"]}).structured_content
+    assert [o["amount"] for o in alone["assumptions"]["scheduled"]] == [-200.0, -200.0]
+
+
+def test_schedules_of_other_accounts_are_left_out(budget: AsyncMock) -> None:
+    """Only the projected accounts' schedules count."""
+    budget.return_value = [
+        scheduled("LOAN PAYMENT", "2026-01-05", "2026-10-05", "monthly", account_id="loan")
+    ]
+    data = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert data["assumptions"]["scheduled"] == []
+
+
+def _inflows(data: dict[str, Any], month: str) -> float:
+    return float(next(m["inflows"] for m in data["months"] if m["month"] == month))
+
+
+def test_given_income_replaces_scheduled_income(budget: AsyncMock) -> None:
+    """A salary scheduled in YNAB is not added to the income the caller gives."""
+    budget.return_value = [
+        scheduled("ACME SALARY", "2026-01-28", "2026-09-28", "monthly", amount=2_500_000),
+        scheduled("GYM", "2026-01-26", "2026-09-26", "monthly", amount=-30_000, id="s2"),
+    ]
+    data = _call({"plan_id": "b1", "until": "2026-10", "monthly_income": 3000}).structured_content
+    assert [o["payee"] for o in data["assumptions"]["scheduled"]] == ["GYM", "GYM"]
+    assert round(_inflows(data, "2026-10"), 2) == 3000.0

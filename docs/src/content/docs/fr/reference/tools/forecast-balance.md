@@ -15,6 +15,8 @@ Starts from today's balance of the open on-budget accounts (or those given).
 For the current month, what was already spent or received since the 1st is
 deducted from the monthly averages, so only what is left is projected.
 Assumes, and returns as `assumptions` so the user can correct them:
+YNAB's scheduled transactions on their dates (a payee with a schedule is
+projected by it alone; transfers between projected accounts left out),
 charges that recur in the last 4 months (same payee, stable amount), the
 average of all other spending over the last 3 months, and what you pass:
 expected monthly income (default: the last 3 months' non-recurring inflows,
@@ -31,7 +33,7 @@ first month it goes below zero. Changes nothing.
 | Confirmation | non |
 | Annulation | non |
 | Idempotent | oui |
-| Requêtes YNAB | 2 pour l'exemple ci-dessous, cache vide |
+| Requêtes YNAB | 4 pour l'exemple ci-dessous, cache vide |
 
 ## Paramètres
 
@@ -40,9 +42,9 @@ first month it goes below zero. Changes nothing.
 | `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
 | `until` | string | oui | — | Last month to project, YYYY-MM, at most 24 months ahead. |
 | `account_ids` | array of string \| null | non | `null` | Accounts to include (from list_accounts); default all open on-budget accounts. |
-| `monthly_income` | number \| null | non | `null` | Income expected each month, replacing the income found in the history (recurring or average); default: what the history shows. |
+| `monthly_income` | number \| null | non | `null` | Income expected each month, replacing the income found in the history (recurring or average) and scheduled in YNAB; default: what they show. |
 | `variable_monthly` | number \| null | non | `null` | Monthly spending besides recurring charges (negative); default: the last 3 months' average. |
-| `one_offs` | array of object \| null | non | `null` | Expected one-off amounts: {date YYYY-MM-DD, amount, label}. |
+| `one_offs` | array of object \| null | non | `null` | Expected one-off amounts: {date YYYY-MM-DD, amount, label}; not those already scheduled in YNAB, which are counted. |
 
 ## Retour
 
@@ -56,6 +58,7 @@ first month it goes below zero. Changes nothing.
 | `assumptions.variable_monthly` | number | Monthly spending besides recurring charges, negative. |
 | `assumptions.monthly_income` | number | Monthly income assumed, besides recurring income. |
 | `assumptions.one_offs` | array of object | One-off amounts given by the caller. |
+| `assumptions.scheduled` | array of object | Scheduled transactions of the projected accounts, from tomorrow to the last month; they replace what the history suggests for the same payees. Transfers between the projected accounts are left out. |
 | `months` | array of object | The projected months. |
 | `months[].month` | string | Month, YYYY-MM. |
 | `months[].start` | number | Projected balance on the first day (today's balance for the current month). |
@@ -90,21 +93,9 @@ Réponse sur le budget de démonstration :
   "assumptions": {
     "recurring": [
       {
-        "payee": "LANDLORD SARL",
-        "amount": -950.0,
-        "day": 3,
-        "months_seen": 3
-      },
-      {
         "payee": "MARKET FRESH",
         "amount": -182.58,
         "day": 14,
-        "months_seen": 3
-      },
-      {
-        "payee": "POWERCO ENERGIE",
-        "amount": -64.2,
-        "day": 12,
         "months_seen": 3
       },
       {
@@ -120,16 +111,84 @@ Réponse sur le budget de démonstration :
         "months_seen": 3
       },
       {
-        "payee": "TELCO MOBILE - PRELEV",
-        "amount": -19.99,
-        "day": 8,
+        "payee": "TENNIS CLUB - PRELEV",
+        "amount": -22.0,
+        "day": 20,
         "months_seen": 3
-      },
-      "… 1 more"
+      }
     ],
     "variable_monthly": -68.7,
     "monthly_income": 3200.0,
-    "one_offs": []
+    "one_offs": [],
+    "scheduled": [
+      {
+        "scheduled_id": "sch-rent",
+        "date": "2026-10-03",
+        "amount": -950.0,
+        "account": "Checking",
+        "category": "Rent",
+        "payee": "LANDLORD SARL",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-phone",
+        "date": "2026-10-08",
+        "amount": -19.99,
+        "account": "Checking",
+        "category": "Phone",
+        "payee": "TELCO MOBILE - PRELEV",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-power",
+        "date": "2026-10-12",
+        "amount": -64.2,
+        "account": "Checking",
+        "category": "Electricity",
+        "payee": "POWERCO ENERGIE",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-insurance",
+        "date": "2026-10-20",
+        "amount": -420.0,
+        "account": "Checking",
+        "category": null,
+        "payee": "HOMESAFE INSURANCE",
+        "memo": null,
+        "frequency": "yearly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-rent",
+        "date": "2026-11-03",
+        "amount": -950.0,
+        "account": "Checking",
+        "category": "Rent",
+        "payee": "LANDLORD SARL",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-phone",
+        "date": "2026-11-08",
+        "amount": -19.99,
+        "account": "Checking",
+        "category": "Phone",
+        "payee": "TELCO MOBILE - PRELEV",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      "… 4 more"
+    ]
   },
   "months": [
     {
@@ -144,25 +203,25 @@ Réponse sur le budget de démonstration :
       "month": "2026-10",
       "start": 7312.66,
       "inflows": 3200.0,
-      "outflows": -1365.96,
-      "end": 9146.7,
+      "outflows": -1785.96,
+      "end": 8726.7,
       "lowest": 6665.72
     },
     {
       "month": "2026-11",
-      "start": 9146.7,
+      "start": 8726.7,
       "inflows": 3200.0,
       "outflows": -1365.96,
-      "end": 10980.74,
-      "lowest": 8509.84
+      "end": 10560.74,
+      "lowest": 8089.84
     },
     {
       "month": "2026-12",
-      "start": 10980.74,
+      "start": 10560.74,
       "inflows": 3200.0,
       "outflows": -1365.96,
-      "end": 12814.78,
-      "lowest": 10333.8
+      "end": 12394.78,
+      "lowest": 9913.8
     }
   ],
   "first_shortfall": null
