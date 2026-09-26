@@ -1,0 +1,136 @@
+# The operations of YNAB's API that avenir-mcp does not use, and why.
+#
+# The operations it uses are not listed: they are found by following the code, from
+# each tool and resource down to the HTTP client. tests/test_api_coverage.py fails
+# when an operation of api/ynab-operations.json is neither used nor listed here,
+# or is both. `python -m docsgen` turns this file into the "YNAB API coverage" page.
+#
+# status: "planned" (on the roadmap) or "excluded" (left out on purpose).
+
+[operations.getUser]
+status = "excluded"
+reason = "The user's id tells an agent nothing about the money."
+
+[operations.getPlanById]
+status = "excluded"
+reason = "The whole plan at once: far more than an agent can read; tools fetch the parts they need."
+
+[operations.getPlanSettingsById]
+status = "planned"
+reason = "The plan's currency and formats, to show amounts with their currency."
+
+[operations.createAccount]
+status = "excluded"
+reason = "Accounts are opened in YNAB, where the bank connection is set up."
+
+[operations.getAccountById]
+status = "excluded"
+reason = "list_accounts gives every account in the same single request."
+
+[operations.createCategoryGroup]
+status = "planned"
+reason = "Create a group, for a category that belongs in none of the existing ones."
+
+[operations.updateCategoryGroup]
+status = "planned"
+reason = "Rename or hide a group."
+
+[operations.getCategoryById]
+status = "excluded"
+reason = "The category list gives every category in one request."
+
+[operations.getMonthCategoryById]
+status = "excluded"
+reason = "A month's categories come in one request with the month."
+
+[operations.getPayees]
+status = "planned"
+reason = "List payees, to clean the names bank imports give them."
+
+[operations.createPayee]
+status = "excluded"
+reason = "YNAB creates a payee with the first transaction that names it."
+
+[operations.getPayeeById]
+status = "excluded"
+reason = "The payee list, once planned, gives every payee in one request."
+
+[operations.updatePayee]
+status = "planned"
+reason = "Rename a payee, e.g. a bank label into the merchant's name."
+
+[operations.getPayeeLocations]
+status = "excluded"
+reason = "Where a payment was made: personal data that no task needs."
+
+[operations.getPayeeLocationById]
+status = "excluded"
+reason = "Where a payment was made: personal data that no task needs."
+
+[operations.getPayeeLocationsByPayee]
+status = "excluded"
+reason = "Where a payment was made: personal data that no task needs."
+
+[operations.getMoneyMovements]
+status = "planned"
+reason = "Money moved between categories, for the monthly review."
+
+[operations.getMoneyMovementsByMonth]
+status = "planned"
+reason = "Money moved between categories in a month, for the monthly review."
+
+[operations.getMoneyMovementGroups]
+status = "planned"
+reason = "Moves of money grouped as the user made them, for the monthly review."
+
+[operations.getMoneyMovementGroupsByMonth]
+status = "planned"
+reason = "Moves of money grouped as the user made them in a month, for the monthly review."
+
+[operations.importTransactions]
+status = "planned"
+reason = "Fetch the bank's latest transactions before classifying or reconciling."
+
+[operations.getTransactionById]
+status = "excluded"
+reason = "Transactions are read in one request for the whole plan, then kept in sync."
+
+[operations.updateTransaction]
+status = "planned"
+reason = "Edit one transaction: memo, flag, payee, date or amount."
+
+[operations.getTransactionsByAccount]
+status = "excluded"
+reason = "find_transactions filters the plan's transactions by account, in one request."
+
+[operations.getTransactionsByCategory]
+status = "excluded"
+reason = "Filtering the plan's transactions by category, planned in find_transactions, needs no other request."
+
+[operations.getTransactionsByPayee]
+status = "excluded"
+reason = "Filtering the plan's transactions by payee, planned in find_transactions, needs no other request."
+
+[operations.getTransactionsByMonth]
+status = "excluded"
+reason = "find_transactions reads the plan's transactions from a date, in one request."
+
+[operations.getScheduledTransactions]
+status = "planned"
+reason = "Coming bills and income, for the forecast and \"what is due this week?\"."
+
+[operations.getScheduledTransactionById]
+status = "excluded"
+reason = "The scheduled transactions, once planned, come in one request."
+
+[operations.createScheduledTransaction]
+status = "planned"
+reason = "Schedule a coming payment, after reading them is in place."
+
+[operations.updateScheduledTransaction]
+status = "planned"
+reason = "Change a coming payment, after reading them is in place."
+
+[operations.deleteScheduledTransaction]
+status = "planned"
+reason = "Cancel a coming payment, after reading them is in place."

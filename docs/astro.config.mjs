@@ -82,6 +82,7 @@ export default defineConfig({
             'reference/resources-and-prompts',
             'reference/configuration',
             'reference/errors',
+            'reference/api-coverage',
           ],
         },
         {

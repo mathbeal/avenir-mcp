@@ -64,6 +64,10 @@ mutate:
     uv run mutmut run --max-children 8
     uv run mutmut results
 
+# Compare the snapshot of YNAB's API with the live specification (network).
+api-drift:
+    uv run python -m docsgen.api
+
 # The server as a client sees it, through the official MCP Inspector (needs Node.js).
 inspect:
     uv run python -m evals.inspector
