@@ -59,6 +59,10 @@ changelog-check:
     uvx git-cliff -o /tmp/avenir-cliff.md
     diff -u CHANGELOG.md /tmp/avenir-cliff.md
 
+# The server as a client sees it, through the official MCP Inspector (needs Node.js).
+inspect:
+    uv run python -m evals.inspector
+
 # A real agent on the demo budget (uses your Claude plan; about 1 USD).
 evaluate:
     uv run python -m evals.run
