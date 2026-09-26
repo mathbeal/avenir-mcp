@@ -49,6 +49,13 @@ RESTAURANTS_SEPTEMBER_OVER = round(
     demo.BUDGETED["cat-restaurants"] / 1000 + _sum("cat-restaurants", "2026-09"), 2
 )
 CHECKING = _checking()
+SCHEDULED_EARLY_OCTOBER = _milli(
+    -sum(
+        amount
+        for _, _, next_date, _, amount, _, _, _, transfer in demo.SCHEDULED
+        if "2026-10-01" <= next_date <= "2026-10-10" and amount < 0 and not transfer
+    )
+)
 
 
 @dataclass
@@ -178,6 +185,15 @@ TASKS = [
         answer=_words("lucie", "sushi"),
         state=_unchanged,
         notes="The totals say Restaurants is over; only a search by category names why.",
+        tags=["read"],
+    ),
+    Task(
+        "due-early-october",
+        "Which scheduled payments fall between 1 and 10 October 2026, and how much will "
+        "leave my accounts in total?" + FORMAT,
+        answer=_number(SCHEDULED_EARLY_OCTOBER),
+        state=_unchanged,
+        notes="Rent and phone; the salary, the transfer and the insurance fall later.",
         tags=["read"],
     ),
     Task(

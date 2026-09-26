@@ -129,3 +129,45 @@ def transactions() -> list[dict[str, Any]]:
             }
         )
     return result
+
+
+# (id, first date, next date, frequency, milliunits, payee, category, account, transfer to)
+SCHEDULED: list[tuple[str, str, str, str, int, str, str | None, str, str | None]] = [
+    ("sch-rent", "2026-06-03", "2026-10-03", "monthly", -950_000, "LANDLORD SARL", "cat-rent",
+     CHECKING, None),
+    ("sch-phone", "2026-06-08", "2026-10-08", "monthly", -19_990, "TELCO MOBILE - PRELEV",
+     "cat-phone", CHECKING, None),
+    ("sch-power", "2026-06-12", "2026-10-12", "monthly", -64_200, "POWERCO ENERGIE", "cat-power",
+     CHECKING, None),
+    ("sch-salary", "2026-06-28", "2026-09-28", "monthly", 3_200_000, "ACME EMPLOYER SALAIRE",
+     "cat-inflow", CHECKING, None),
+    ("sch-savings", "2026-06-29", "2026-09-29", "monthly", -200_000, "Transfer : Savings", None,
+     CHECKING, SAVINGS),
+    ("sch-insurance", "2025-10-20", "2026-10-20", "yearly", -420_000, "HOMESAFE INSURANCE", None,
+     CHECKING, None),
+]  # fmt: skip
+
+
+def scheduled() -> list[dict[str, Any]]:
+    """The demo budget's scheduled transactions, as YNAB returns them."""
+    return [
+        {
+            "id": sched_id,
+            "date_first": first,
+            "date_next": next_date,
+            "frequency": frequency,
+            "amount": amount,
+            "memo": None,
+            "flag_color": None,
+            "account_id": account,
+            "account_name": "Checking",
+            "payee_name": payee,
+            "category_id": category,
+            "transfer_account_id": transfer,
+            "subtransactions": [],
+            "deleted": False,
+        }
+        for sched_id, first, next_date, frequency, amount, payee, category, account, transfer in (
+            SCHEDULED
+        )
+    ]
