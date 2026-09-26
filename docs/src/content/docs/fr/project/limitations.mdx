@@ -18,7 +18,7 @@ sidebar:
 | Transactions ventilées | jamais proposées ni recatégorisées : leurs lignes portent les catégories ; `split_transaction` en ventile une, mais l'API YNAB ne peut ni modifier ni annuler une ventilation | les modifier ou les annuler dans YNAB |
 | Suggestions | exigent un historique : un commerçant jamais classé n'en reçoit pas | l'agent propose, vous décidez |
 | Prévision | prolonge les derniers mois ; les charges trimestrielles ou annuelles ne sont pas récurrentes à ses yeux | les passer en `one_offs` |
-| Transactions planifiées | non lues : la prévision s'appuie sur l'historique | passer les montants futurs connus en `one_offs` |
+| Transactions planifiées | listées par `list_scheduled_transactions`, mais la prévision s'appuie encore sur l'historique | passer les montants futurs connus en `one_offs` |
 | Devise | montants affichés en nombres, sans symbole monétaire | — |
 | Python | 3.12 à 3.14 ; 3.15 attend une dépendance (beartype) | — |
 

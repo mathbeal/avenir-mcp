@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp donne à un agent 19 outils, 4 ressources et 4 prompts sur vos budgets YNAB. Cette
+avenir-mcp donne à un agent 20 outils, 4 ressources et 4 prompts sur vos budgets YNAB. Cette
 page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
 l'agent ; c'est lui qui choisit l'outil.
 
@@ -33,6 +33,7 @@ vous répond avec le vôtre. « Mon budget restaurants » désigne toujours le m
 | *« Quels groupes de catégories existent ? »* | [`list_category_groups`](/avenir-mcp/fr/reference/tools/list-category-groups/) | L |
 | *« Quelle transaction correspond à mon ticket de 86,40 du 12 ? »* | [`find_transactions`](/avenir-mcp/fr/reference/tools/find-transactions/) — par dates, montant exact et compte, catégorisée ou non | L |
 | *« Qu'est-ce qui a fait dépasser Restaurants ce mois-ci ? »* | [`find_transactions`](/avenir-mcp/fr/reference/tools/find-transactions/) — par catégorie, lignes ventilées comprises, ou par bénéficiaire, quel que soit le libellé bancaire | L |
+| *« Quelles factures tombent avant le 10 ? »* | [`list_scheduled_transactions`](/avenir-mcp/fr/reference/tools/list-scheduled-transactions/) — les transactions planifiées répétées à leur fréquence, avec l'argent qui entre et qui sort | L |
 
 Budgets, comptes et catégories sont aussi servis comme
 [ressources](/avenir-mcp/fr/reference/resources-and-prompts/), que votre client peut

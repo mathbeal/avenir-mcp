@@ -34,6 +34,7 @@ from avenir_mcp.tools_budget import (
     list_accounts,
     list_category_groups,
     list_plans,
+    list_scheduled_transactions,
 )
 from avenir_mcp.tools_categories import create_category, set_category_budget
 
@@ -50,6 +51,7 @@ __all__ = [
     "get_spending_trends",
     "list_accounts",
     "list_plans",
+    "list_scheduled_transactions",
     "list_category_groups",
     "http_options",
     "main",

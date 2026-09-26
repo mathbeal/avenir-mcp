@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 19 tools, 4 resources and 4 prompts over your YNAB budgets. This
+avenir-mcp gives an agent 20 tools, 4 resources and 4 prompts over your YNAB budgets. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -32,6 +32,7 @@ word. "My budget for Restaurants" still means the amount assigned to that catego
 | *“Which category groups exist?”* | [`list_category_groups`](/avenir-mcp/reference/tools/list-category-groups/) | R |
 | *“Which transaction is my 86.40 receipt from the 12th?”* | [`find_transactions`](/avenir-mcp/reference/tools/find-transactions/) — by dates, exact amount and account, categorised or not | R |
 | *“What made Restaurants overspent this month?”* | [`find_transactions`](/avenir-mcp/reference/tools/find-transactions/) — by category, split lines included, or by payee, whatever the bank label | R |
+| *“Which bills are due before the 10th?”* | [`list_scheduled_transactions`](/avenir-mcp/reference/tools/list-scheduled-transactions/) — scheduled transactions repeated at their frequency, with money in and out | R |
 
 The budgets, accounts and categories are also served as
 [resources](/avenir-mcp/reference/resources-and-prompts/) your client can attach to a

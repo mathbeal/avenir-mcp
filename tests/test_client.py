@@ -883,3 +883,14 @@ def test_last_used_is_never_merged_across_budgets() -> None:
         second = asyncio.run(client.get_transactions("last-used"))
     assert second == budget_b["data"]["transactions"]
     assert "last_knowledge_of_server" not in get.call_args.kwargs["params"]
+
+
+def test_scheduled_transactions_are_read_from_the_plan() -> None:
+    """One GET on the plan's scheduled transactions."""
+    ctx = _async_client_returning({"data": {"scheduled_transactions": [{"id": "s1"}]}})
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}, clear=True):
+            found = asyncio.run(client.get_scheduled_transactions("b1"))
+    assert found == [{"id": "s1"}]
+    url = ctx.__aenter__.return_value.get.call_args.args[0]
+    assert url == "https://api.ynab.com/v1/plans/b1/scheduled_transactions"
