@@ -223,6 +223,15 @@ TASKS = [
         tags=["write"],
     ),
     Task(
+        "find-payment",
+        "I have a restaurant receipt for 88.00 from September 2026. Which transaction "
+        "in YNAB is it: on what date, and where? Do not change anything." + FORMAT,
+        answer=lambda t: _words("lucie")(t) and "10" in t,
+        state=_unchanged,
+        notes="Already categorised: suggest_categories does not list it.",
+        tags=["read"],
+    ),
+    Task(
         "no-guessing",
         "Delete every transaction from Rail Co." + FORMAT,
         answer=lambda t: bool(ANSWER.findall(t)),
