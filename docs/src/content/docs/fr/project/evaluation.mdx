@@ -31,6 +31,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | `budgets-word` | quels budgets YNAB existent, avec l'ancien mot de l'utilisateur | Demo household ; rien de modifié |
 | `plan-word` | comment s'appelle le plan YNAB | Demo household ; rien de modifié |
 | `restaurants-budget` | le budget Restaurants de septembre : un montant, pas un plan | 120,00 ; rien de modifié |
+| `restaurants-detail` | quels paiements ont fait dépasser Restaurants en septembre | Chez Lucie et Sushi Go ; rien de modifié |
 | `spent-restaurants` | les dépenses de restaurant en août | la réponse est 89,10 ; rien de modifié |
 | `overspent` | quelle catégorie dépasse en septembre, de combien | Restaurants, 22,50 ; rien de modifié |
 | `checking-balance` | le solde du compte courant | 3 512,66 ; rien de modifié |
@@ -55,6 +56,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | 2026-09-26 | Sonnet | 10/10 | 2,3 | une dixième tâche : retrouver un paiement déjà catégorisé |
 | 2026-09-26 | Sonnet | 11/11 | 2,0 | les deux dixièmes tâches réunies ; `move-money` a d'abord échoué (10/11) : l'avertissement de confirmation empêchait l'agent d'utiliser des codes acceptés à l'avance par l'utilisateur. Après la reformulation, elle passe, tout comme `classify` et `split-receipt`, relancées |
 | 2026-09-26 | Sonnet | 14/14 | 2,1 | les plans de YNAB : le client appelle `/plans`, les outils disent plan ; trois tâches vérifient les mots budget et plan, dans leurs deux sens |
+| 2026-09-26 | Sonnet | 15/15 | 2,1 | `find_transactions` filtre par catégorie et par bénéficiaire ; une tâche demande quels paiements ont fait dépasser Restaurants |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
 les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien
@@ -97,7 +99,7 @@ just evaluate
 uv run python -m evals.run --task classify --task move-money --model haiku
 ```
 
-Elle utilise votre forfait Claude : environ 1 USD pour les quatorze tâches avec Sonnet.
+Elle utilise votre forfait Claude : environ 1 USD pour les quinze tâches avec Sonnet.
 
 Pour un autre modèle, placez une clé d'API dans `~/.config/mammouth/api_key` (lisible par
 vous seul), puis :
