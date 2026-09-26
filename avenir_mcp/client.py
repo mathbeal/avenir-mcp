@@ -359,6 +359,20 @@ async def get_transactions(
     return list(known.values())
 
 
+async def get_scheduled_transactions(plan_id: str) -> list[dict[str, Any]]:
+    """Return a plan's scheduled transactions: each with its next date and frequency.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+
+    Returns:
+        List of scheduled transaction dicts, amounts in milliunits.
+    """
+    logger.info("Fetching scheduled transactions for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/scheduled_transactions")
+    return data["data"]["scheduled_transactions"]  # type: ignore[no-any-return]
+
+
 async def get_months(plan_id: str) -> list[dict[str, Any]]:
     """Return all available months for a plan, ordered chronologically.
 

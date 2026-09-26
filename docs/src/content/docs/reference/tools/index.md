@@ -20,6 +20,7 @@ avenir-mcp declares these tools. Read-only tools are always available; write too
 | [`list_accounts`](/avenir-mcp/reference/tools/list-accounts/) | List the plan's accounts with their current balances (in currency units). |
 | [`list_category_groups`](/avenir-mcp/reference/tools/list-category-groups/) | List the category groups a new category can be created in. |
 | [`list_plans`](/avenir-mcp/reference/tools/list-plans/) | List all YNAB plans accessible with the current API key. |
+| [`list_scheduled_transactions`](/avenir-mcp/reference/tools/list-scheduled-transactions/) | List the scheduled transactions due between two dates: bills, salary, transfers. |
 | [`suggest_categories`](/avenir-mcp/reference/tools/suggest-categories/) | List the transactions waiting for a category, with a suggestion when history allows. |
 
 ## Write

@@ -115,13 +115,9 @@ reason = "find_transactions filters the plan's transactions by payee, whatever t
 status = "excluded"
 reason = "find_transactions reads the plan's transactions from a date, in one request."
 
-[operations.getScheduledTransactions]
-status = "planned"
-reason = "Coming bills and income, for the forecast and \"what is due this week?\"."
-
 [operations.getScheduledTransactionById]
 status = "excluded"
-reason = "The scheduled transactions, once planned, come in one request."
+reason = "list_scheduled_transactions reads every schedule in one request."
 
 [operations.createScheduledTransaction]
 status = "planned"

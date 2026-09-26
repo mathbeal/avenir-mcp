@@ -20,7 +20,7 @@ from typing import Any
 from evals import demo_budget, fake_ynab
 
 INSPECTOR = "@modelcontextprotocol/inspector@2.8.0"
-TOOLS = 19
+TOOLS = 20
 RESOURCES = 2
 TEMPLATES = 2
 PROMPTS = 4
