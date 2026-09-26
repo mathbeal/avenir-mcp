@@ -27,7 +27,7 @@ The models each client offers change often: choose in the client's own menu.
 
 ## What makes a model good at avenir-mcp
 
-- **Reliable tool calls.** It picks the right one of 18 tools and fills arguments
+- **Reliable tool calls.** It picks the right one of 19 tools and fills arguments
   exactly: identifiers copied from a previous answer, months as `YYYY-MM-01`.
 - **Patience with confirmations.** It shows you the preview, waits for your answer, and
   only then calls again.
@@ -41,10 +41,11 @@ mistakes: a wrong tool, an invented identifier, a forgotten page.
 
 ## What has been measured
 
-Only Claude has been [evaluated](/avenir-mcp/project/evaluation/): 10 tasks out of 10 with
-Sonnet. Other models have not been measured yet — this is not a verdict on them. The
-evaluation runs through Claude Code today; running it through other clients is on the
-[roadmap](/avenir-mcp/project/limitations/#roadmap).
+The [evaluation](/avenir-mcp/project/evaluation/) runs through Claude Code with Sonnet, and
+through an API with nine models of seven providers: GPT-5.5, GPT-5.4 mini, Gemini 3.5
+Flash, DeepSeek V4 Pro and Claude Sonnet 5 passed every task; Llama 4 Maverick did not
+make its tool calls. Other clients than Claude Code have not been measured yet: that is on
+the [roadmap](/avenir-mcp/project/limitations/#roadmap).
 
 <Aside type="caution" title="Safety does not depend on the model — almost">
 Read-only mode, previews and the binding of a confirmation to its exact preview are
