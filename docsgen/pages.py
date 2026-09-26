@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from docsgen import examples, reference
+from docsgen import api, examples, reference
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "docs" / "src" / "content" / "docs"
@@ -29,7 +29,10 @@ def security() -> str:
 def generated() -> dict[Path, str]:
     """Every generated file and its expected content."""
     captures = examples.capture_all()
-    files = {CONTENT / "project" / "security.md": security()}
+    files = {
+        CONTENT / "project" / "security.md": security(),
+        CONTENT / "reference" / "api-coverage.md": api.page(),
+    }
     for relative, text in reference.generate(captures).items():
         files[CONTENT / relative] = text
     for name, capture in captures.items():

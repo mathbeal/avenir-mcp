@@ -52,7 +52,8 @@ alors.
 
 La CI lance aussi `typos`, `zizmor` sur les workflows, `pip-audit` sur les dépendances
 verrouillées, la construction de la documentation avec les tests de son propre code, CodeQL et
-l'OpenSSF Scorecard (une fois le dépôt public), et
+l'OpenSSF Scorecard (une fois le dépôt public), une comparaison hebdomadaire de l'API YNAB
+avec son instantané (`just api-drift`), et
 le MCP Inspector officiel (`just inspect`), qui contrôle le serveur comme le voit un
 client, sur le budget de démonstration : ses listes, la portabilité des schémas de ses
 outils et un appel de chaque sorte. La suite de tests tourne sous Linux
@@ -85,6 +86,7 @@ cassée ou malveillante vite retirée n'atteint jamais le projet.
 | Propriétés | `test_properties` | avec Hypothesis, des règles vraies pour toute entrée : aller-retour des montants, répartition sans perdre un centime, mois qui s'enchaînent, curseurs, texte bancaire, empreintes de confirmation |
 | Protocole | `test_protocol*`, `test_context`, `test_policy` | les outils via un client MCP en mémoire : schémas, annotations, chemins de confirmation, annulation |
 | Documentation | `test_docs` | les pages et exemples générés correspondent au code ; chaque page existe en français et en espagnol ; chaque variable d'environnement est documentée |
+| Couverture de l'API | `test_api_coverage` | chaque opération de l'API YNAB est utilisée par un outil, prévue, ou écartée avec sa raison ; le client n'appelle que des chemins documentés |
 | Hygiène | `test_hygiene` | ni IBAN, ni jeton, ni relevé, ni chemin personnel, ni copie du Finder dans le dépôt |
 | Évaluation | `test_evals` | les vérifications de l'évaluation sont justes |
 

@@ -221,30 +221,6 @@ def test_get_transactions_delta_sync_merges_changes() -> None:
     ]
 
 
-def test_get_transactions_by_category_uses_category_endpoint() -> None:
-    """Passing category_id should hit the category-specific endpoint."""
-    payload = {"data": {"transactions": [{"id": "t9"}]}}
-    mock_resp = _mock_response(payload)
-    mock_http = AsyncMock()
-    mock_http.get = AsyncMock(return_value=mock_resp)
-    ctx = MagicMock()
-    ctx.__aenter__ = AsyncMock(return_value=mock_http)
-    ctx.__aexit__ = AsyncMock(return_value=None)
-
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            result = asyncio.run(client.get_transactions("b1", category_id="cat-42"))
-
-    assert result == [{"id": "t9"}]
-    url_called = mock_http.get.call_args.args[0]
-    assert "categories/cat-42/transactions" in url_called
-
-
-# ---------------------------------------------------------------------------
-# get_month
-# ---------------------------------------------------------------------------
-
-
 def test_get_month_returns_month_dict() -> None:
     """get_month should return the 'month' key from the API response."""
     payload = {

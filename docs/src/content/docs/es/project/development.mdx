@@ -51,7 +51,8 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 
 La CI ejecuta además `typos`, `zizmor` sobre los workflows, `pip-audit` sobre las
 dependencias bloqueadas, la construcción de la documentación con las pruebas de su propio
-código, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
+código, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), una comparación semanal de
+la API de YNAB con su instantánea (`just api-drift`), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
 cliente, sobre el presupuesto de demostración: sus listas, la portabilidad de los esquemas
 de sus herramientas y una llamada de cada tipo. La batería de pruebas se
 ejecuta en Linux y macOS con Python 3.12, 3.13 y 3.14, y en Windows con Python 3.14; la
@@ -83,6 +84,7 @@ maliciosa retirada rápido nunca llega al proyecto.
 | Propiedades | `test_properties` | con Hypothesis, reglas que se cumplen para cualquier entrada: ida y vuelta de importes, reparto sin perder un céntimo, meses que se encadenan, cursores, texto bancario, huellas de confirmación |
 | Protocolo | `test_protocol*`, `test_context`, `test_policy` | las herramientas a través de un cliente MCP en memoria: esquemas, anotaciones, caminos de confirmación, deshacer |
 | Documentación | `test_docs` | las páginas y ejemplos generados corresponden al código; cada página existe en francés y en español; cada variable de entorno está documentada |
+| Cobertura de la API | `test_api_coverage` | cada operación de la API de YNAB la usa una herramienta, está prevista o se descarta con su razón; el cliente solo llama a rutas documentadas |
 | Higiene | `test_hygiene` | ni IBAN, ni token, ni extracto, ni ruta personal, ni copia del Finder en el repositorio |
 | Evaluación | `test_evals` | las comprobaciones de la evaluación son correctas |
 

@@ -1,0 +1,28 @@
+name: YNAB API drift
+
+# Every Monday, compare the snapshot of YNAB's API (api/ynab-operations.json) with
+# the specification YNAB publishes. It fails when YNAB added, removed or moved an
+# operation: update the snapshot, then classify the change in api/coverage.toml.
+on:
+  schedule:
+    - cron: "29 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  UV_FROZEN: "1"
+
+jobs:
+  drift:
+    name: YNAB API drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - run: uv run python -m docsgen.api

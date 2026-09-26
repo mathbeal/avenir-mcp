@@ -49,6 +49,14 @@ entries derive from `avenir_mcp.model.Model`: unknown fields are refused, and ea
 field's docstring becomes its description in the schema. Data from the YNAB API
 stays a dict until a tool turns it into a result.
 
+**Every operation of YNAB's API is accounted for.** `api/ynab-operations.json` is a
+snapshot of YNAB's specification; the operations a tool uses are found in the code,
+and `api/coverage.toml` says why each other one is planned or left out. A tool that
+starts using an operation removes it from `coverage.toml`; `tests/test_api_coverage.py`
+fails otherwise, and when the client calls a path YNAB does not document. A weekly
+workflow fails when YNAB changes its API: `uv run python -m docsgen.api --update`,
+then classify what changed.
+
 **A secret is never a plain string.** The YNAB token and AVENIR_MCP_HTTP_TOKEN
 become a pydantic `SecretStr` where they are read, and `get_secret_value()` is
 called only where the value is sent or compared. A secret field of a model is a

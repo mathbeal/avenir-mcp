@@ -303,7 +303,6 @@ async def get_month_categories(plan_id: str, month: str = "current") -> list[dic
 async def get_transactions(
     plan_id: str,
     since_date: str | None = None,
-    category_id: str | None = None,
     uncategorized_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Return transactions for a plan, with optional filters.
@@ -314,17 +313,11 @@ async def get_transactions(
     Args:
         plan_id: YNAB plan id or "last-used".
         since_date: ISO date "YYYY-MM-DD"; only return transactions on/after.
-        category_id: Filter to a specific category UUID.
         uncategorized_only: If True, only return uncategorized transactions.
 
     Returns:
         List of transaction dicts.
     """
-    if category_id:
-        logger.info("Fetching transactions for category %s", category_id)
-        data = await _get(f"/plans/{plan_id}/categories/{category_id}/transactions")
-        return data["data"]["transactions"]  # type: ignore[no-any-return]
-
     params: dict[str, Any] = {}
     if since_date:
         params["since_date"] = since_date

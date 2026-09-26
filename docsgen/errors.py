@@ -163,3 +163,49 @@ def tool_errors() -> dict[str, list[str]]:
             pending += _callees(key[0], functions[key], modules)
         result[name] = messages
     return result
+
+
+def _decorated_by(node: ast.FunctionDef | ast.AsyncFunctionDef, name: str) -> ast.Call | None:
+    """Find the decorator call `name(...)` on a function.
+
+    Args:
+        node: The function.
+        name: The decorator, such as "mcp.tool".
+
+    Returns:
+        The decorator's call, or None when the function has no such decorator.
+    """
+    return next(
+        (d for d in node.decorator_list if isinstance(d, ast.Call) and ast.unparse(d.func) == name),
+        None,
+    )
+
+
+def reached() -> dict[str, set[tuple[str, str]]]:
+    """Follow every tool and resource through the package, the HTTP client included.
+
+    Returns:
+        Each tool's name, and each resource's URI, with the (module, function) pairs
+        its calls reach.
+    """
+    modules = _modules()
+    functions = _functions(modules)
+    result: dict[str, set[tuple[str, str]]] = {}
+    for (module, name), node in functions.items():
+        resource = _decorated_by(node, "mcp.resource")
+        if _decorated_by(node, "mcp.tool"):
+            label = name
+        elif resource and resource.args and isinstance(resource.args[0], ast.Constant):
+            label = str(resource.args[0].value)
+        else:
+            continue
+        seen: set[tuple[str, str]] = set()
+        pending = [(module, name)]
+        while pending:
+            key = pending.pop(0)
+            if key in seen or key not in functions:
+                continue
+            seen.add(key)
+            pending += _callees(key[0], functions[key], modules)
+        result[label] = seen
+    return result

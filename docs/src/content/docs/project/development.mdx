@@ -51,7 +51,8 @@ hide the `.pth` file of an editable install, which Python then ignores.
 
 CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked dependencies,
 the documentation build with the tests of its own code, CodeQL and the OpenSSF Scorecard
-(once the repository is public), and the official MCP Inspector
+(once the repository is public), a weekly comparison of YNAB's API with its snapshot
+(`just api-drift`), and the official MCP Inspector
 (`just inspect`), which checks the server as a client sees it on the demo budget: its
 lists, the portability of its tool schemas, and one call of each kind. The test suite runs on Linux and macOS with Python 3.12,
 3.13 and 3.14, and on Windows with Python 3.14; coverage is enforced on Linux and macOS,
@@ -84,6 +85,7 @@ version withdrawn quickly never reaches the project.
 | Properties | `test_properties` | with Hypothesis, rules that hold for any input: amounts round-trip, spreading keeps every cent, months add up, cursors, bank text, confirmation fingerprints |
 | Protocol | `test_protocol*`, `test_context`, `test_policy` | tools through an in-memory MCP client: schemas, annotations, confirmation paths, undo |
 | Documentation | `test_docs` | generated pages and examples match the code; every page exists in French and Spanish; every environment variable is documented |
+| API coverage | `test_api_coverage` | every operation of YNAB's API is used by a tool, planned or left out with a reason; the client calls only documented paths |
 | Hygiene | `test_hygiene` | no IBAN, token, statement, home path or Finder copy in the repository |
 | Evaluation | `test_evals` | the evaluation's own checks are right |
 
