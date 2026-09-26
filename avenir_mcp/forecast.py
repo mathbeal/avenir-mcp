@@ -145,7 +145,11 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
 
 
 def _other_average(
-    transactions: list[dict[str, Any]], today: date, known: list[Recurring], outflow: bool
+    transactions: list[dict[str, Any]],
+    today: date,
+    known: list[Recurring],
+    outflow: bool,
+    also: frozenset[tuple[str, bool]] = frozenset(),
 ) -> float:
     """Average one direction of money over the last 3 full months, recurring amounts excluded.
 
@@ -154,12 +158,15 @@ def _other_average(
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
         outflow: True for money out, False for money in.
+        also: Other (normalised payee, is money out) pairs to leave out, e.g. the
+            payees of scheduled transactions, which are projected apart.
 
     Returns:
         The monthly average in currency units, negative for money out.
     """
     months = set(_months_before(today, VARIABLE_MONTHS))
     recurring_payees = {r.payee for r in known if (r.amount < 0) == outflow}
+    recurring_payees |= {payee for payee, out in also if out == outflow}
     total = sum(
         tx["amount"]
         for tx in transactions
@@ -172,7 +179,10 @@ def _other_average(
 
 
 def variable_average(
-    transactions: list[dict[str, Any]], today: date, known: list[Recurring]
+    transactions: list[dict[str, Any]],
+    today: date,
+    known: list[Recurring],
+    also: frozenset[tuple[str, bool]] = frozenset(),
 ) -> float:
     """Average the monthly outflow over the last 3 full months, recurring charges excluded.
 
@@ -180,15 +190,20 @@ def variable_average(
         transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
+        also: Other (normalised payee, is money out) pairs to leave out, e.g. the
+            payees of scheduled transactions, which are projected apart.
 
     Returns:
         The monthly average in currency units, negative.
     """
-    return _other_average(transactions, today, known, outflow=True)
+    return _other_average(transactions, today, known, outflow=True, also=also)
 
 
 def income_average(
-    transactions: list[dict[str, Any]], today: date, known: list[Recurring]
+    transactions: list[dict[str, Any]],
+    today: date,
+    known: list[Recurring],
+    also: frozenset[tuple[str, bool]] = frozenset(),
 ) -> float:
     """Average the monthly inflow over the last 3 full months, recurring income excluded.
 
@@ -196,15 +211,20 @@ def income_average(
         transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
+        also: Other (normalised payee, is money out) pairs to leave out, e.g. the
+            payees of scheduled transactions, which are projected apart.
 
     Returns:
         The monthly average in currency units.
     """
-    return _other_average(transactions, today, known, outflow=False)
+    return _other_average(transactions, today, known, outflow=False, also=also)
 
 
 def month_to_date(
-    transactions: list[dict[str, Any]], today: date, known: list[Recurring]
+    transactions: list[dict[str, Any]],
+    today: date,
+    known: list[Recurring],
+    also: frozenset[tuple[str, bool]] = frozenset(),
 ) -> tuple[float, float]:
     """Sum what was spent and received since the 1st of this month, recurring amounts excluded.
 
@@ -212,12 +232,14 @@ def month_to_date(
         transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made.
         known: Recurring amounts found by :func:`recurring`, left out of the average.
+        also: Other (normalised payee, is money out) pairs to leave out, e.g. the
+            payees of scheduled transactions, which are projected apart.
 
     Returns:
         (spent, received) in currency units; spent is negative.
     """
     this_month = today.isoformat()[:7]
-    recurring_payees = {(r.payee, r.amount < 0) for r in known}
+    recurring_payees = {(r.payee, r.amount < 0) for r in known} | also
     spent = received = 0
     for tx in transactions:
         if not _usable(tx) or tx["date"][:7] != this_month:
