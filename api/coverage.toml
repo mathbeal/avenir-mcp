@@ -105,11 +105,11 @@ reason = "find_transactions filters the plan's transactions by account, in one r
 
 [operations.getTransactionsByCategory]
 status = "excluded"
-reason = "Filtering the plan's transactions by category, planned in find_transactions, needs no other request."
+reason = "find_transactions filters the plan's transactions by category, split lines included, in one request."
 
 [operations.getTransactionsByPayee]
 status = "excluded"
-reason = "Filtering the plan's transactions by payee, planned in find_transactions, needs no other request."
+reason = "find_transactions filters the plan's transactions by payee, whatever the bank label, in one request."
 
 [operations.getTransactionsByMonth]
 status = "excluded"
