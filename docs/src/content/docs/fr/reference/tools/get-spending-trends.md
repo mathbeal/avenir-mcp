@@ -11,6 +11,9 @@ Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne corre
 
 Return monthly spending trends per category over the last N months.
 
+The result maps each category name to its spending month by month, oldest
+first, in currency units.
+
 ## Comportement
 
 | | |

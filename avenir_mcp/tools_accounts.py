@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import logging
 from datetime import date
-from typing import Any, Literal, TypedDict
+from typing import Literal
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import app, client, forecast, journal, reconcile
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, mcp
-from avenir_mcp.confirm import WriteStatus, gate
+from avenir_mcp.confirm import WriteStatus, gate, merged
+from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 
 logger = logging.getLogger(__name__)
@@ -25,8 +25,7 @@ ReconcileStatus = Literal[
 ]
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class ReconcileResult(TypedDict):
+class ReconcileResult(Model):
     """The outcome of reconcile_account."""
 
     status: ReconcileStatus
@@ -87,8 +86,16 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         budget_id: YNAB budget UUID or 'last-used'.
         account_id: Account to reconcile (from list_accounts).
         bank_balance: Balance shown by the bank, in currency units.
+        ctx: The MCP context, used to ask the user.
         adjust: Record the remaining difference as an adjustment.
         confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        The comparison with the bank and what was done, or an input request the client answers by
+        asking the user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the account is not in the budget, or the confirmation code is refused.
     """
     logger.info("Tool called: reconcile_account(adjust=%s)", adjust)
     accounts = {a["id"]: a["name"] for a in await client.get_accounts(budget_id)}
@@ -98,30 +105,32 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         )
     transactions = await client.get_transactions(budget_id)
     analysis = reconcile.analyse(account_id, transactions, bank_balance)
-    difference = analysis["difference"]
-    result: ReconcileResult = {
-        "status": "nothing_to_do",
-        "message": "Already reconciled: nothing to do.",
-        "account": accounts[account_id],
-        "analysis": analysis,
-        "adjustment": None,
-        "confirmation": None,
-        "operation_id": None,
-    }
+    difference = analysis.difference
+    result = ReconcileResult(
+        status="nothing_to_do",
+        message="Already reconciled: nothing to do.",
+        account=accounts[account_id],
+        analysis=analysis,
+        adjustment=None,
+        confirmation=None,
+        operation_id=None,
+    )
     if difference and not adjust:
-        return {
-            **result,
-            "status": "difference_found",
-            "message": (
-                f"YNAB's cleared balance differs from the bank by {difference:.2f}. Nothing was "
-                "changed. Check explained_by, uncleared and possible_duplicates with the user; "
-                "call again once fixed, or with adjust=true to record the gap as an adjustment."
-            ),
-        }
-    if not difference and not analysis["to_reconcile_count"]:
+        return result.model_copy(
+            update={
+                "status": "difference_found",
+                "message": (
+                    f"YNAB's cleared balance differs from the bank by {difference:.2f}. Nothing "
+                    "was changed. Check explained_by, uncleared and possible_duplicates with the "
+                    "user; call again once fixed, or with adjust=true to record the gap as an "
+                    "adjustment."
+                ),
+            }
+        )
+    if not difference and not analysis.to_reconcile_count:
         return result
     question = (
-        f"Reconcile {accounts[account_id]}: mark {analysis['to_reconcile_count']} "
+        f"Reconcile {accounts[account_id]}: mark {analysis.to_reconcile_count} "
         "cleared transaction(s) reconciled"
         + (f" and add a balance adjustment of {difference:.2f}?" if difference else "?")
     )
@@ -142,7 +151,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     }
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
-        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     adjustment_id = None
     if difference:
         inflow = next(
@@ -175,20 +184,20 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         [],
         {"account_id": account_id, "reconciled_ids": to_reconcile, "adjustment_id": adjustment_id},
     )
-    return {
-        **result,
-        "status": "applied",
-        "message": f"Reconciled. undo_operation with operation_id {operation_id} reverts it.",
-        "adjustment": difference or None,
-        "operation_id": operation_id,
-    }
+    return result.model_copy(
+        update={
+            "status": "applied",
+            "message": f"Reconciled. undo_operation with operation_id {operation_id} reverts it.",
+            "adjustment": difference or None,
+            "operation_id": operation_id,
+        }
+    )
 
 
 MAX_FORECAST_MONTHS = 24
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class ForecastAssumptions(TypedDict):
+class ForecastAssumptions(Model):
     """What the projection assumed, so the user can correct it."""
 
     recurring: list[forecast.Recurring]
@@ -201,8 +210,7 @@ class ForecastAssumptions(TypedDict):
     """One-off amounts given by the caller."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class ForecastResult(TypedDict):
+class ForecastResult(Model):
     """A balance projection and what it rests on."""
 
     message: str
@@ -220,6 +228,16 @@ class ForecastResult(TypedDict):
 
 
 def _check_horizon(until: str, now: date) -> None:
+    """Refuse a forecast horizon that is malformed, past, or too far ahead.
+
+    Args:
+        until: Last month to project, YYYY-MM.
+        now: Today.
+
+    Raises:
+        ToolError: If until is not YYYY-MM, before this month, or more than
+            MAX_FORECAST_MONTHS months ahead.
+    """
     try:
         year, month = (int(part) for part in until.split("-"))
         date(year, month, 1)
@@ -272,6 +290,12 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         variable_monthly: Monthly spending besides recurring charges (negative);
             default: the last 3 months' average.
         one_offs: Expected one-off amounts: {date YYYY-MM-DD, amount, label}.
+
+    Returns:
+        The month-by-month projection and the assumptions it rests on.
+
+    Raises:
+        ToolError: If until is malformed, in the past or too far ahead, or an account is unknown.
     """
     logger.info("Tool called: forecast_balance")
     now = app.today()
@@ -289,7 +313,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     charges = forecast.recurring(history, now)
     if monthly_income is not None:
         # The income given replaces what the history suggests, recurring salary included.
-        charges = [r for r in charges if r["amount"] < 0]
+        charges = [r for r in charges if r.amount < 0]
     variable = (
         variable_monthly
         if variable_monthly is not None
@@ -315,45 +339,43 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         spent_this_month=spent,
         received_this_month=received,
     )
-    shortfall = projection["first_shortfall"]
+    shortfall = projection.first_shortfall
     message = (
         f"The balance goes below zero in {shortfall}."
         if shortfall
         else f"The balance stays above zero until {until}."
     ) + " This rests on the assumptions listed: check them with the user."
-    return {
-        "message": message,
-        "accounts": [a["name"] for a in chosen],
-        "start_balance": start,
-        "assumptions": {
-            "recurring": charges,
-            "variable_monthly": variable,
-            "monthly_income": income,
-            "one_offs": one_offs or [],
-        },
-        "months": projection["months"],
-        "first_shortfall": shortfall,
-    }
+    return ForecastResult(
+        message=message,
+        accounts=[a["name"] for a in chosen],
+        start_balance=start,
+        assumptions=ForecastAssumptions(
+            recurring=charges,
+            variable_monthly=variable,
+            monthly_income=income,
+            one_offs=one_offs or [],
+        ),
+        months=projection.months,
+        first_shortfall=shortfall,
+    )
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class NewTransaction(TypedDict, total=False):
+class NewTransaction(Model):
     """A transaction to create; memo and category_id are optional."""
 
-    date: str
+    date: date
     """Date, YYYY-MM-DD, not in the future."""
     amount: Amount
     """Amount in currency units, negative for spending."""
     payee_name: str
     """Payee as it should appear in YNAB."""
-    memo: str
+    memo: str | None = None
     """Optional note."""
-    category_id: str
+    category_id: str | None = None
     """Optional category id."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class NewTransactionPreview(TypedDict):
+class NewTransactionPreview(Model):
     """A transaction to create, as the user sees it."""
 
     date: str
@@ -368,8 +390,7 @@ class NewTransactionPreview(TypedDict):
     """Note; null if none."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class CreateResult(TypedDict):
+class CreateResult(Model):
     """The outcome of create_transactions."""
 
     status: WriteStatus
@@ -395,19 +416,25 @@ class CreateResult(TypedDict):
 
 
 def _check_new(items: list[NewTransaction], categories: dict[str, str], now: date) -> None:
-    """Refuse what YNAB would refuse, or what cannot be what the user meant."""
+    """Refuse what YNAB would refuse, or what cannot be what the user meant.
+
+    Args:
+        items: The transactions to create.
+        categories: The budget's category names by id.
+        now: Today.
+
+    Raises:
+        ToolError: If the list is empty, a date is in the future, or a category is not
+            in the budget.
+    """
     if not items:
         raise ToolError("Give at least one transaction to create.")
     for item in items:
-        try:
-            when = date.fromisoformat(item["date"])
-        except ValueError as error:
-            raise ToolError(f"date must be YYYY-MM-DD, got {item['date']!r}.") from error
-        if when > now:
+        if item.date > now:
             raise ToolError(
-                f"{item['date']} is in the future: YNAB only records transactions that happened."
+                f"{item.date} is in the future: YNAB only records transactions that happened."
             )
-        category = item.get("category_id")
+        category = item.category_id
         if category and category not in categories:
             raise ToolError(
                 f"Category {category} is not in this budget: "
@@ -445,8 +472,17 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         budget_id: YNAB budget UUID or 'last-used'.
         account_id: Account to add them to (from list_accounts).
         transactions: The transactions to create.
+        ctx: The MCP context, used to ask the user.
         approved: Skip YNAB's review step.
         confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        The transactions as they will be (or were) created, or an input request the client answers
+        by asking the user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the account or a category is not in the budget, a date is in the
+            future, the list is empty, or the confirmation code is refused.
     """
     logger.info("Tool called: create_transactions(n=%d)", len(transactions))
     accounts = {a["id"]: a["name"] for a in await client.get_accounts(budget_id)}
@@ -456,47 +492,50 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         )
     categories = {c["id"]: c["name"] for c in await client.get_categories(budget_id)}
     _check_new(transactions, categories, app.today())
-    preview: list[NewTransactionPreview] = [
-        {
-            "date": item["date"],
-            "amount": item["amount"],
-            "payee": untrusted(item.get("payee_name")),
-            "category": categories.get(item.get("category_id", "")),
-            "memo": item.get("memo"),
-        }
+    preview = [
+        NewTransactionPreview(
+            date=item.date.isoformat(),
+            amount=item.amount,
+            payee=untrusted(item.payee_name),
+            category=categories.get(item.category_id or ""),
+            memo=item.memo,
+        )
         for item in transactions
     ]
-    result: CreateResult = {
-        "status": "applied",
-        "message": "",
-        "account": accounts[account_id],
-        "transactions": preview,
-        "created_ids": [],
-        "duplicate_import_ids": [],
-        "confirmation": None,
-        "operation_id": None,
-    }
+    result = CreateResult(
+        status="applied",
+        message="",
+        account=accounts[account_id],
+        transactions=preview,
+        created_ids=[],
+        duplicate_import_ids=[],
+        confirmation=None,
+        operation_id=None,
+    )
     lines = [
-        f"- {p['date']} {p['payee']} {p['amount']:.2f} ({p['category'] or 'no category'})"
-        for p in preview[:20]
+        f"- {p.date} {p.payee} {p.amount:.2f} ({p.category or 'no category'})" for p in preview[:20]
     ]
     question = f"Create {len(preview)} transaction(s) on {accounts[account_id]}?\n" + "\n".join(
         lines
     )
-    subject: dict[str, Any] = {"account": account_id, "items": transactions, "approved": approved}
+    subject = {"account": account_id, "items": transactions, "approved": approved}
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
-        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     created = await client.create_transactions(
-        budget_id, account_id, [dict(item) for item in transactions], approved=approved
+        budget_id,
+        account_id,
+        [item.model_dump(mode="json", exclude_none=True) for item in transactions],
+        approved=approved,
     )
     operation_id = journal.Journal(journal.default_path()).record(
         budget_id, "create", [], {"transaction_ids": created["transaction_ids"]}
     )
-    return {
-        **result,
-        "message": f"Created. undo_operation with operation_id {operation_id} deletes them.",
-        "created_ids": created["transaction_ids"],
-        "duplicate_import_ids": created["duplicate_import_ids"],
-        "operation_id": operation_id,
-    }
+    return result.model_copy(
+        update={
+            "message": f"Created. undo_operation with operation_id {operation_id} deletes them.",
+            "created_ids": created["transaction_ids"],
+            "duplicate_import_ids": created["duplicate_import_ids"],
+            "operation_id": operation_id,
+        }
+    )

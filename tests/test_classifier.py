@@ -73,8 +73,8 @@ def test_build_payee_history_doctest() -> None:
 def test_unknown_payee_returns_zero_confidence() -> None:
     """An unknown payee gets confidence 0 and is left for review."""
     result = classifier.score_payee("NewVendor", {}, _CATEGORIES)
-    assert result["confidence"] == 0.0
-    assert result["auto_classify"] is False
+    assert result.confidence == 0.0
+    assert result.auto_classify is False
 
 
 # ---------------------------------------------------------------------------
@@ -86,18 +86,18 @@ def test_known_payee_high_confidence_auto_classify() -> None:
     """5/5 identical classifications → confidence=1.0, auto_classify=True."""
     history = {"AWS": {"c2": 5}}
     result = classifier.score_payee("AWS", history, _CATEGORIES, threshold=0.90)
-    assert result["confidence"] == 1.0
-    assert result["auto_classify"] is True
-    assert result["category_id"] == "c2"
-    assert result["category_name"] == "AWS / Cloud"
+    assert result.confidence == 1.0
+    assert result.auto_classify is True
+    assert result.category_id == "c2"
+    assert result.category_name == "AWS / Cloud"
 
 
 def test_threshold_boundary_auto_classify() -> None:
     """confidence == threshold should set auto_classify=True."""
     history = {"AWS": {"c2": 9, "c1": 1}}  # confidence = 0.9
     result = classifier.score_payee("AWS", history, _CATEGORIES, threshold=0.90)
-    assert result["confidence"] == 0.9
-    assert result["auto_classify"] is True
+    assert result.confidence == 0.9
+    assert result.auto_classify is True
 
 
 # ---------------------------------------------------------------------------
@@ -109,17 +109,16 @@ def test_known_payee_low_confidence_returns_candidates() -> None:
     """Ambiguous history should return auto_classify=False and top-3 candidates."""
     history = {"AWS": {"c2": 2, "c1": 1, "c3": 1}}  # confidence = 0.5
     result = classifier.score_payee("AWS", history, _CATEGORIES, threshold=0.90)
-    assert result["confidence"] == 0.5
-    assert result["auto_classify"] is False
-    assert "candidates" in result
-    assert len(result["candidates"]) <= 3
+    assert result.confidence == 0.5
+    assert result.auto_classify is False
+    assert len(result.candidates) <= 3
 
 
 def test_candidates_ordered_by_frequency() -> None:
     """Candidates should be sorted from most to least frequent."""
     history = {"AWS": {"c3": 3, "c1": 5, "c2": 2}}
     result = classifier.score_payee("AWS", history, _CATEGORIES, threshold=0.99)
-    freqs = [c["frequency"] for c in result["candidates"]]
+    freqs = [c.frequency for c in result.candidates]
     assert freqs == sorted(freqs, reverse=True)
 
 
@@ -128,7 +127,7 @@ def test_candidates_capped_at_three() -> None:
     cats = [{"id": f"c{i}", "name": f"Cat{i}"} for i in range(10)]
     history = {"X": {f"c{i}": i + 1 for i in range(10)}}
     result = classifier.score_payee("X", history, cats, threshold=0.99)
-    assert len(result["candidates"]) == 3
+    assert len(result.candidates) == 3
 
 
 def test_score_payee_uses_default_threshold_from_env() -> None:
@@ -138,7 +137,7 @@ def test_score_payee_uses_default_threshold_from_env() -> None:
         history = {"AWS": {"c2": 1, "c1": 1}}  # confidence = 0.5
         result = classifier.score_payee("AWS", history, _CATEGORIES)
     # With threshold=0.5, confidence=0.5 should auto-classify
-    assert result["auto_classify"] is True
+    assert result.auto_classify is True
 
 
 def test_default_threshold_is_read_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -201,26 +200,26 @@ def test_score_payee_recognises_a_new_label_of_a_known_merchant() -> None:
     result = classifier.score_payee(
         "CB ACME OUTDOOR FACT 300926 525130******2", history, _CATEGORIES
     )
-    assert result["auto_classify"] is True
-    assert result["category_id"] == "c1"
+    assert result.auto_classify is True
+    assert result.category_id == "c1"
 
 
 def test_score_payee_unknown_payee_returns_no_candidates() -> None:
     """With no history there is nothing to suggest: no dump of every category."""
     result = classifier.score_payee("NEVER SEEN", {}, _CATEGORIES)
-    assert result == {"confidence": 0.0, "auto_classify": False, "candidates": []}
+    assert result == classifier.Score(confidence=0.0, auto_classify=False)
 
 
 def test_score_payee_ignores_categories_no_longer_available() -> None:
     """History pointing to a hidden or deleted category suggests nothing, not a raw id."""
     history = {"ATM": {"c-hidden": 5}}
     result = classifier.score_payee("ATM", history, _CATEGORIES)
-    assert result == {"confidence": 0.0, "auto_classify": False, "candidates": []}
+    assert result == classifier.Score(confidence=0.0, auto_classify=False)
 
 
 def test_score_payee_counts_only_available_categories() -> None:
     """Past assignments to a vanished category do not dilute the confidence."""
     history = {"AWS": {"c-hidden": 9, "c2": 3}}
     result = classifier.score_payee("AWS", history, _CATEGORIES)
-    assert result["auto_classify"] is True
-    assert result["category_id"] == "c2"
+    assert result.auto_classify is True
+    assert result.category_id == "c2"

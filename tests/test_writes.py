@@ -38,11 +38,11 @@ def test_plan_lists_each_change_with_before_and_after() -> None:
         [_tx("t1"), _tx("t2", "c-fun")],
         _CATEGORIES,
         [
-            {"transaction_id": "t1", "category_id": "c-food"},
-            {"transaction_id": "t2", "category_id": "c-food"},
+            writes.Assignment(transaction_id="t1", category_id="c-food"),
+            writes.Assignment(transaction_id="t2", category_id="c-food"),
         ],
     )
-    assert plan["changes"] == [
+    assert [c.model_dump() for c in plan.changes] == [
         {
             "transaction_id": "t1",
             "date": "2026-09-01",
@@ -64,23 +64,25 @@ def test_plan_lists_each_change_with_before_and_after() -> None:
             "to_category": "Groceries",
         },
     ]
-    assert plan["unchanged_count"] == 0
+    assert plan.unchanged_count == 0
 
 
 def test_plan_skips_assignments_that_change_nothing() -> None:
     """Assigning a transaction to its current category is not a change."""
     plan = writes.plan_categorization(
-        [_tx("t1", "c-food")], _CATEGORIES, [{"transaction_id": "t1", "category_id": "c-food"}]
+        [_tx("t1", "c-food")],
+        _CATEGORIES,
+        [writes.Assignment(transaction_id="t1", category_id="c-food")],
     )
-    assert not plan["changes"]
-    assert plan["unchanged_count"] == 1
+    assert not plan.changes
+    assert plan.unchanged_count == 1
 
 
 def test_plan_rejects_an_unknown_transaction() -> None:
     """An id that is not in the budget is refused, naming it."""
     with pytest.raises(ValueError, match="t404.*suggest_categories"):
         writes.plan_categorization(
-            [], _CATEGORIES, [{"transaction_id": "t404", "category_id": "c-food"}]
+            [], _CATEGORIES, [writes.Assignment(transaction_id="t404", category_id="c-food")]
         )
 
 
@@ -88,7 +90,7 @@ def test_plan_rejects_an_unknown_category() -> None:
     """A category id that is not in the budget is refused, naming it."""
     with pytest.raises(ValueError, match="c-404.*categories"):
         writes.plan_categorization(
-            [_tx("t1")], _CATEGORIES, [{"transaction_id": "t1", "category_id": "c-404"}]
+            [_tx("t1")], _CATEGORIES, [writes.Assignment(transaction_id="t1", category_id="c-404")]
         )
 
 
@@ -98,7 +100,7 @@ def test_plan_rejects_a_transfer() -> None:
         writes.plan_categorization(
             [_tx("t1", transfer_account_id="acc-2")],
             _CATEGORIES,
-            [{"transaction_id": "t1", "category_id": "c-food"}],
+            [writes.Assignment(transaction_id="t1", category_id="c-food")],
         )
 
 
@@ -109,8 +111,8 @@ def test_plan_rejects_the_same_transaction_twice() -> None:
             [_tx("t1")],
             _CATEGORIES,
             [
-                {"transaction_id": "t1", "category_id": "c-food"},
-                {"transaction_id": "t1", "category_id": "c-fun"},
+                writes.Assignment(transaction_id="t1", category_id="c-food"),
+                writes.Assignment(transaction_id="t1", category_id="c-fun"),
             ],
         )
 
@@ -122,8 +124,8 @@ def test_plan_rejects_the_same_transaction_twice() -> None:
 
 def _changes(to: str = "c-food") -> list[writes.Change]:
     return writes.plan_categorization(
-        [_tx("t1")], _CATEGORIES, [{"transaction_id": "t1", "category_id": to}]
-    )["changes"]
+        [_tx("t1")], _CATEGORIES, [writes.Assignment(transaction_id="t1", category_id=to)]
+    ).changes
 
 
 def test_confirmation_code_accepts_the_plan_it_was_issued_for_once() -> None:
@@ -172,7 +174,7 @@ def test_plan_rejects_a_split_transaction() -> None:
         writes.plan_categorization(
             [_tx("t1", subtransactions=[{"category_id": "c-food"}])],
             _CATEGORIES,
-            [{"transaction_id": "t1", "category_id": "c-fun"}],
+            [writes.Assignment(transaction_id="t1", category_id="c-fun")],
         )
 
 
@@ -193,7 +195,7 @@ def test_plan_rejects_a_transaction_of_an_off_budget_account() -> None:
         writes.plan_categorization(
             [_tx("t1", account_id="acc-loan")],
             _CATEGORIES,
-            [{"transaction_id": "t1", "category_id": "c-food"}],
+            [writes.Assignment(transaction_id="t1", category_id="c-food")],
             off_budget={"acc-loan"},
         )
 
@@ -209,5 +211,5 @@ def test_plan_rejects_ynab_internal_uncategorized() -> None:
         writes.plan_categorization(
             [_tx("t1")],
             [*_CATEGORIES, internal],
-            [{"transaction_id": "t1", "category_id": "c-uncat"}],
+            [writes.Assignment(transaction_id="t1", category_id="c-uncat")],
         )

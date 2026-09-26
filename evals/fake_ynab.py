@@ -195,6 +195,8 @@ class Handler(BaseHTTPRequestHandler):
                     "id": demo.BUDGET_ID,
                     "name": "Demo household",
                     "last_modified_on": "2026-09-20",
+                    "first_month": demo.MONTHS[0],
+                    "last_month": demo.MONTHS[-1],
                 }
                 return self._send(200, {"data": {"budgets": [budget]}})
             # YNAB accepts "last-used" wherever a budget id goes.

@@ -13,6 +13,7 @@ lint:
     uv run black --check avenir_mcp tests evals docsgen
     uv run isort --check avenir_mcp tests evals docsgen
     uv run pylint avenir_mcp tests evals docsgen
+    uv run ruff check avenir_mcp
 
 types:
     uv run mypy

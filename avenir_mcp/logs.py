@@ -19,6 +19,14 @@ class JsonFormatter(logging.Formatter):
     """One JSON object per record: time (UTC), level, logger, message, exception."""
 
     def format(self, record: logging.LogRecord) -> str:
+        """Render a record as one line of JSON.
+
+        Args:
+            record: The log record.
+
+        Returns:
+            The JSON object, with the traceback under "exception" when there is one.
+        """
         entry = {
             "time": datetime.fromtimestamp(record.created, UTC).isoformat(timespec="milliseconds"),
             "level": record.levelname,
@@ -35,7 +43,12 @@ class _Avenir(logging.StreamHandler):  # type: ignore[type-arg]
 
 
 def configure(level: str, fmt: str) -> None:
-    """Configure the root logger: stderr at `level`, as text or, for fmt "json", JSON."""
+    """Configure the root logger to write to stderr.
+
+    Args:
+        level: The lowest level logged, such as WARNING.
+        fmt: "json" for one JSON object per line; anything else for text.
+    """
     handler = _Avenir(sys.stderr)
     handler.setFormatter(JsonFormatter() if fmt == "json" else logging.Formatter(TEXT_FORMAT))
     root = logging.getLogger()

@@ -12,20 +12,20 @@ import json
 import secrets
 import time
 from collections.abc import Callable
-from typing import Any, TypedDict
+from typing import Any
 
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+from pydantic_core import to_jsonable_python  # pylint: disable=import-error
 
 from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move
+from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 from avenir_mcp.triage import internal_uncategorized
 
 CONFIRMATION_TTL_SECONDS = 600
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Assignment(TypedDict):
+class Assignment(Model):
     """A category to give to a transaction."""
 
     transaction_id: str
@@ -34,8 +34,7 @@ class Assignment(TypedDict):
     """Category to give it."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Change(TypedDict):
+class Change(Model):
     """One transaction moving from a category to another."""
 
     transaction_id: str
@@ -56,15 +55,14 @@ class Change(TypedDict):
     """Category name after; null for none."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Plan(TypedDict):
+class Plan(Model):
     """What an operation would change, and what it leaves alone."""
 
-    changes: list[Change]
+    changes: list[Change] = []
     """Transactions that would change."""
-    unchanged_count: int
+    unchanged_count: int = 0
     """Assignments that change nothing."""
-    conflicts: list[str]
+    conflicts: list[str] = []
     """Ids left alone because they changed since."""
 
 
@@ -75,6 +73,15 @@ def plan_categorization(
     off_budget: set[str] | frozenset[str] = frozenset(),
 ) -> Plan:
     """Work out what assigning these categories would change.
+
+    Args:
+        transactions: The budget's transactions.
+        categories: The budget's categories.
+        assignments: The categories to give, one per transaction.
+        off_budget: Ids of the tracking accounts.
+
+    Returns:
+        The changes, and how many assignments change nothing.
 
     Raises:
         ValueError: With a message saying what to fix, if an assignment names an
@@ -89,7 +96,7 @@ def plan_categorization(
     changes: list[Change] = []
     unchanged = 0
     for assignment in assignments:
-        tx_id, category_id = assignment["transaction_id"], assignment["category_id"]
+        tx_id, category_id = assignment.transaction_id, assignment.category_id
         if tx_id in seen:
             raise ValueError(f"Transaction {tx_id} is assigned twice: keep one assignment.")
         seen.add(tx_id)
@@ -125,18 +132,18 @@ def plan_categorization(
             unchanged += 1
             continue
         changes.append(
-            {
-                "transaction_id": tx_id,
-                "date": tx["date"],
-                "amount": milliunit_to_amount(tx["amount"]),
-                "payee": untrusted(tx.get("payee_name")),
-                "from_category_id": current,
-                "from_category": names.get(current) if current else None,
-                "to_category_id": category_id,
-                "to_category": names[category_id],
-            }
+            Change(
+                transaction_id=tx_id,
+                date=tx["date"],
+                amount=milliunit_to_amount(tx["amount"]),
+                payee=untrusted(tx.get("payee_name")),
+                from_category_id=current,
+                from_category=names.get(current) if current else None,
+                to_category_id=category_id,
+                to_category=names[category_id],
+            )
         )
-    return {"changes": changes, "unchanged_count": unchanged, "conflicts": []}
+    return Plan(changes=changes, unchanged_count=unchanged)
 
 
 def plan_undo(
@@ -148,34 +155,51 @@ def plan_undo(
 
     A transaction whose category changed again since the operation is left
     alone and listed in ``conflicts``, so that undo never overwrites later work.
+
+    Args:
+        transactions: The budget's transactions.
+        categories: The budget's categories.
+        moves: The operation's moves, from the journal.
+
+    Returns:
+        The changes back, and the transactions left alone.
     """
     by_id = {tx["id"]: tx for tx in transactions}
     names = {c["id"]: c["name"] for c in categories}
     changes: list[Change] = []
     conflicts: list[str] = []
     for move in moves:
-        tx = by_id.get(move["transaction_id"])
-        if tx is None or tx.get("category_id") != move["to_category_id"]:
-            conflicts.append(move["transaction_id"])
+        tx = by_id.get(move.transaction_id)
+        if tx is None or tx.get("category_id") != move.to_category_id:
+            conflicts.append(move.transaction_id)
             continue
-        before = move["from_category_id"]
+        before = move.from_category_id
         changes.append(
-            {
-                "transaction_id": tx["id"],
-                "date": tx["date"],
-                "amount": milliunit_to_amount(tx["amount"]),
-                "payee": untrusted(tx.get("payee_name")),
-                "from_category_id": move["to_category_id"],
-                "from_category": names.get(move["to_category_id"] or ""),
-                "to_category_id": before,
-                "to_category": names.get(before) if before else None,
-            }
+            Change(
+                transaction_id=tx["id"],
+                date=tx["date"],
+                amount=milliunit_to_amount(tx["amount"]),
+                payee=untrusted(tx.get("payee_name")),
+                from_category_id=move.to_category_id,
+                from_category=names.get(move.to_category_id or ""),
+                to_category_id=before,
+                to_category=names.get(before) if before else None,
+            )
         )
-    return {"changes": changes, "unchanged_count": 0, "conflicts": conflicts}
+    return Plan(changes=changes, conflicts=conflicts)
 
 
 def fingerprint(budget_id: str, subject: object) -> str:
-    """Hash what is being confirmed; the order of a list of changes does not matter."""
+    """Hash what is being confirmed; the order of a list of changes does not matter.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+        subject: The exact change, as JSON data or models.
+
+    Returns:
+        A SHA-256 hex digest.
+    """
+    subject = to_jsonable_python(subject)
     if isinstance(subject, list):
         subject = sorted(json.dumps(item, sort_keys=True) for item in subject)
     payload = json.dumps([budget_id, subject], sort_keys=True, separators=(",", ":"))
@@ -190,14 +214,27 @@ class Confirmations:
         ttl_seconds: float = CONFIRMATION_TTL_SECONDS,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
+        """Start with no code issued.
+
+        Args:
+            ttl_seconds: How long a code stays valid.
+            clock: Seconds from an arbitrary start; replaceable in tests.
+        """
         self._ttl = ttl_seconds
         self._clock = clock
         self._issued: dict[str, tuple[str, float]] = {}
 
     def issue(self, budget_id: str, subject: object) -> str:
-        """Return a new code that confirms this subject (JSON data), and nothing else.
+        """Issue a code that confirms this subject, and nothing else.
 
         Expired codes are dropped first, so previews never confirmed do not pile up.
+
+        Args:
+            budget_id: YNAB budget UUID or 'last-used'.
+            subject: The exact change previewed, as JSON data or models.
+
+        Returns:
+            The new code.
         """
         now = self._clock()
         self._issued = {c: v for c, v in self._issued.items() if now - v[1] <= self._ttl}
@@ -206,7 +243,16 @@ class Confirmations:
         return code
 
     def consume(self, code: str, budget_id: str, subject: object) -> bool:
-        """Spend a code: True only if it was issued for this subject and is still fresh."""
+        """Spend a code.
+
+        Args:
+            code: The code the agent passed back.
+            budget_id: YNAB budget UUID or 'last-used'.
+            subject: The exact change the agent wants to make now.
+
+        Returns:
+            True only if the code was issued for this subject and is still fresh.
+        """
         issued = self._issued.pop(code, None)
         if issued is None:
             return False

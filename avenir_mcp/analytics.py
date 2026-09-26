@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, TypedDict
-
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+from typing import Any
 
 from avenir_mcp import client
+from avenir_mcp.model import Model
 
 logger = logging.getLogger(__name__)
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class BudgetUsage(TypedDict):
+class BudgetUsage(Model):
     """How much of a category's budget was used in a month."""
 
     id: str
@@ -43,18 +41,12 @@ def budget_vs_actual(
             each containing ``budgeted`` and ``activity`` in milliunits.
 
     Returns:
-        List of dicts with human-readable amounts and utilisation percentage:
-
-        - ``id``, ``name``, ``group`` — the category and its group
-        - ``budgeted`` — budgeted amount (currency units)
-        - ``actual`` — amount spent, always positive for display (currency units)
-        - ``balance`` — remaining budget (currency units)
-        - ``utilization_pct`` — 0–100+ (> 100 means over-budget); 0 if budgeted=0
+        One usage per usable category, amounts in currency units.
 
     Examples:
         >>> cat = {"id": "c1", "name": "Rent", "budgeted": 500000,
         ...        "activity": -400000, "balance": 100000}
-        >>> budget_vs_actual([cat])[0]["utilization_pct"]
+        >>> budget_vs_actual([cat])[0].utilization_pct
         80.0
     """
     results: list[BudgetUsage] = []
@@ -72,22 +64,31 @@ def budget_vs_actual(
             utilization_pct = round(actual / budgeted * 100, 1)
 
         results.append(
-            {
-                "id": cat.get("id", ""),
-                "name": cat.get("name", ""),
-                "group": cat.get("category_group_name", ""),
-                "budgeted": budgeted,
-                "actual": actual,
-                "balance": balance,
-                "utilization_pct": utilization_pct,
-            }
+            BudgetUsage(
+                id=cat.get("id", ""),
+                name=cat.get("name", ""),
+                group=cat.get("category_group_name", ""),
+                budgeted=budgeted,
+                actual=actual,
+                balance=balance,
+                utilization_pct=utilization_pct,
+            )
         )
     return results
 
 
+class MonthSpending(Model):
+    """What a category spent in one month."""
+
+    month: str
+    """First day of the month, YYYY-MM-01."""
+    amount: float
+    """Amount spent, as a positive number in currency units."""
+
+
 def spending_trends(
     months_data: list[tuple[str, list[dict[str, Any]]]],
-) -> dict[str, list[dict[str, Any]]]:
+) -> dict[str, list[MonthSpending]]:
     """Build a time-series of spending per category across multiple months.
 
     Args:
@@ -97,15 +98,15 @@ def spending_trends(
             :func:`client.get_month_categories`.
 
     Returns:
-        Dict mapping category name to a chronological list of
-        ``{"month": label, "amount": spending}`` dicts.
+        Dict mapping category name to its spending, month by month in chronological
+        order.
 
     Examples:
         >>> cats = [{"id": "c1", "name": "AWS", "budgeted": 0, "activity": -100000, "balance": 0}]
-        >>> spending_trends([("2026-01", cats)])["AWS"]
-        [{'month': '2026-01', 'amount': 100.0}]
+        >>> spending_trends([("2026-01-01", cats)])["AWS"]
+        [MonthSpending(month='2026-01-01', amount=100.0)]
     """
-    trends: dict[str, list[dict[str, Any]]] = {}
+    trends: dict[str, list[MonthSpending]] = {}
     for month_label, categories in months_data:
         for cat in filter(_usable, categories):
             name = cat.get("name", "")
@@ -114,14 +115,25 @@ def spending_trends(
             amount = client.milliunit_to_amount(abs(cat.get("activity", 0)))
             if name not in trends:
                 trends[name] = []
-            trends[name].append({"month": month_label, "amount": amount})
+            trends[name].append(MonthSpending(month=month_label, amount=amount))
     return trends
+
+
+class PayeeTotal(Model):
+    """What was spent with one payee."""
+
+    payee_name: str
+    """Payee name; Unknown when the transactions have none."""
+    total: float
+    """Total spent, as a positive number in currency units."""
+    count: int
+    """Number of transactions."""
 
 
 def top_payees(
     transactions: list[dict[str, Any]],
     limit: int = 10,
-) -> list[dict[str, Any]]:
+) -> list[PayeeTotal]:
     """Aggregate transactions by payee and return the top spenders.
 
     Args:
@@ -130,11 +142,7 @@ def top_payees(
         limit: Maximum number of payees to return (default 10).
 
     Returns:
-        List of dicts ordered by total spending (descending):
-
-        - ``payee_name`` — name of the payee
-        - ``total`` — total amount spent in currency units (positive)
-        - ``count`` — number of transactions
+        The payees, the biggest spending first.
 
     Examples:
         >>> txs = [
@@ -142,7 +150,7 @@ def top_payees(
         ...     {"payee_name": "AWS", "amount": -30000},
         ...     {"payee_name": "Loyer", "amount": -500000},
         ... ]
-        >>> top_payees(txs, limit=1)[0]["payee_name"]
+        >>> top_payees(txs, limit=1)[0].payee_name
         'Loyer'
     """
     totals: dict[str, dict[str, Any]] = {}
@@ -156,11 +164,11 @@ def top_payees(
 
     sorted_payees = sorted(totals.items(), key=lambda kv: kv[1]["total_mu"], reverse=True)
     return [
-        {
-            "payee_name": name,
-            "total": client.milliunit_to_amount(data["total_mu"]),
-            "count": data["count"],
-        }
+        PayeeTotal(
+            payee_name=name,
+            total=client.milliunit_to_amount(data["total_mu"]),
+            count=data["count"],
+        )
         for name, data in sorted_payees[:limit]
     ]
 
@@ -168,8 +176,7 @@ def top_payees(
 _INTERNAL_GROUP = "Internal Master Category"
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Overspent(TypedDict):
+class Overspent(Model):
     """A category whose available balance is negative."""
 
     category_id: str
@@ -182,8 +189,7 @@ class Overspent(TypedDict):
     """Available balance, negative: the amount overspent, in currency units."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class MonthOverview(TypedDict):
+class MonthOverview(Model):
     """A month's totals and the categories that need attention."""
 
     month: str
@@ -202,8 +208,7 @@ class MonthOverview(TypedDict):
     """Categories whose available balance is negative this month."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class CategoryBalance(TypedDict):
+class CategoryBalance(Model):
     """One category's month in currency units."""
 
     category_id: str
@@ -221,7 +226,14 @@ class CategoryBalance(TypedDict):
 
 
 def _usable(cat: dict[str, Any]) -> bool:
-    """Visible, not deleted, and not one of YNAB's internal categories."""
+    """Tell whether a category counts as the user's spending.
+
+    Args:
+        cat: A YNAB category.
+
+    Returns:
+        True when it is visible, not deleted, and not one of YNAB's internal categories.
+    """
     return (
         not cat.get("hidden")
         and not cat.get("deleted")
@@ -230,42 +242,57 @@ def _usable(cat: dict[str, Any]) -> bool:
 
 
 def month_overview(month: dict[str, Any]) -> MonthOverview:
-    """Summarise a YNAB month: totals in currency units and overspent categories."""
+    """Summarise a YNAB month: totals in currency units and overspent categories.
+
+    Args:
+        month: A YNAB month, as returned by :func:`client.get_month`.
+
+    Returns:
+        The month's totals and the usable categories whose balance is negative.
+    """
     amount = client.milliunit_to_amount
-    return {
-        "month": month["month"],
-        "income": amount(month.get("income", 0)),
-        "budgeted": amount(month.get("budgeted", 0)),
-        "activity": amount(month.get("activity", 0)),
-        "ready_to_assign": amount(month.get("to_be_budgeted", 0)),
-        "age_of_money": month.get("age_of_money"),
-        "overspent": [
-            {
-                "category_id": cat["id"],
-                "name": cat["name"],
-                "group": cat.get("category_group_name", ""),
-                "balance": amount(cat["balance"]),
-            }
+    return MonthOverview(
+        month=month["month"],
+        income=amount(month.get("income", 0)),
+        budgeted=amount(month.get("budgeted", 0)),
+        activity=amount(month.get("activity", 0)),
+        ready_to_assign=amount(month.get("to_be_budgeted", 0)),
+        age_of_money=month.get("age_of_money"),
+        overspent=[
+            Overspent(
+                category_id=cat["id"],
+                name=cat["name"],
+                group=cat.get("category_group_name", ""),
+                balance=amount(cat["balance"]),
+            )
             for cat in month.get("categories", [])
             if _usable(cat) and cat.get("balance", 0) < 0
         ],
-    }
+    )
 
 
 def category_balances(
     categories: list[dict[str, Any]], include_empty: bool = False
 ) -> list[CategoryBalance]:
-    """One line per usable category; categories with nothing at all only if asked."""
+    """Give one line per usable category of a month.
+
+    Args:
+        categories: The month's YNAB categories, amounts in milliunits.
+        include_empty: Also list categories with nothing budgeted, spent or available.
+
+    Returns:
+        Each category's budgeted, activity and balance, in currency units.
+    """
     amount = client.milliunit_to_amount
     return [
-        {
-            "category_id": cat["id"],
-            "name": cat["name"],
-            "group": cat.get("category_group_name", ""),
-            "budgeted": amount(cat.get("budgeted", 0)),
-            "activity": amount(cat.get("activity", 0)),
-            "balance": amount(cat.get("balance", 0)),
-        }
+        CategoryBalance(
+            category_id=cat["id"],
+            name=cat["name"],
+            group=cat.get("category_group_name", ""),
+            budgeted=amount(cat.get("budgeted", 0)),
+            activity=amount(cat.get("activity", 0)),
+            balance=amount(cat.get("balance", 0)),
+        )
         for cat in categories
         if _usable(cat)
         and (include_empty or any(cat.get(key, 0) for key in ("budgeted", "activity", "balance")))

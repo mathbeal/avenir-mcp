@@ -11,6 +11,9 @@ Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne corre
 
 List the category groups a new category can be created in.
 
+Hidden, deleted and system groups are left out. Pass a group id to
+create_category.
+
 ## Comportement
 
 | | |
@@ -31,6 +34,10 @@ List the category groups a new category can be created in.
 
 `array of object`
 
+| Champ | Type | Description |
+|---|---|---|
+| `id` | string | YNAB id of the group, to pass as category_group_id. |
+| `name` | string | Group name. |
 
 ## Exemple
 

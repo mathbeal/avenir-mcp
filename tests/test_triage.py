@@ -39,8 +39,8 @@ def _history() -> list[dict[str, Any]]:
 def test_pending_transactions_are_listed_with_currency_amounts() -> None:
     """Pending items carry what an agent needs, amounts in currency units."""
     result = triage.prepare(_history() + [_tx("p1", "Unknown Cafe", memo="lunch")], _CATEGORIES)
-    assert result["pending_count"] == 1
-    assert result["items"] == [
+    assert result.pending_count == 1
+    assert [i.model_dump() for i in result.items] == [
         {
             "transaction_id": "p1",
             "date": "2026-09-01",
@@ -57,20 +57,18 @@ def test_pending_transactions_are_listed_with_currency_amounts() -> None:
 def test_known_merchant_gets_a_suggestion() -> None:
     """A merchant seen before under another dated label is suggested from history."""
     pending = _tx("p1", "CB CORNER SHOP FACT 300926 525130******2")
-    item = triage.prepare(_history() + [pending], _CATEGORIES)["items"][0]
-    assert item["suggestion"] == {
-        "category_id": "c-food",
-        "category_name": "Groceries",
-        "confidence": 1.0,
-    }
-    assert triage.prepare(_history() + [pending], _CATEGORIES)["suggested_count"] == 1
+    item = triage.prepare(_history() + [pending], _CATEGORIES).items[0]
+    assert item.suggestion == triage.Suggestion(
+        category_id="c-food", category_name="Groceries", confidence=1.0
+    )
+    assert triage.prepare(_history() + [pending], _CATEGORIES).suggested_count == 1
 
 
 def test_ambiguous_merchant_gets_no_suggestion() -> None:
     """Below the confidence threshold the agent decides, not the history."""
     history = [_tx("h1", "SHOP", "c-food"), _tx("h2", "SHOP", "c-fun")]
-    item = triage.prepare(history + [_tx("p1", "SHOP")], _CATEGORIES, threshold=0.9)["items"][0]
-    assert item["suggestion"] is None
+    item = triage.prepare(history + [_tx("p1", "SHOP")], _CATEGORIES, threshold=0.9).items[0]
+    assert item.suggestion is None
 
 
 def test_transfers_and_deleted_transactions_are_not_pending() -> None:
@@ -79,13 +77,13 @@ def test_transfers_and_deleted_transactions_are_not_pending() -> None:
         _tx("t1", "Transfer : Savings", transfer_account_id="acc-2"),
         _tx("t2", "Gone", deleted=True),
     ]
-    assert triage.prepare(txs, _CATEGORIES)["pending_count"] == 0
+    assert triage.prepare(txs, _CATEGORIES).pending_count == 0
 
 
 def test_categories_are_listed_once_without_deleted_ones() -> None:
     """The agent gets the category list once, to decide the unsuggested items."""
     result = triage.prepare([_tx("p1", "Unknown Cafe")], _CATEGORIES)
-    assert result["categories"] == [
+    assert [c.model_dump() for c in result.categories] == [
         {"category_id": "c-food", "name": "Groceries", "group": "Everyday"},
         {"category_id": "c-fun", "name": "Leisure", "group": "Everyday"},
     ]
@@ -95,21 +93,21 @@ def test_items_are_newest_first_and_paginated_with_a_cursor() -> None:
     """A page holds `limit` items; next_cursor fetches the rest, then is None."""
     txs = [_tx(f"p{i}", f"Shop {i}", date=f"2026-09-{i:02d}") for i in range(1, 6)]
     first = triage.prepare(txs, _CATEGORIES, limit=2)
-    assert [i["transaction_id"] for i in first["items"]] == ["p5", "p4"]
-    assert first["next_cursor"] is not None
-    second = triage.prepare(txs, _CATEGORIES, limit=2, cursor=first["next_cursor"])
-    assert [i["transaction_id"] for i in second["items"]] == ["p3", "p2"]
-    third = triage.prepare(txs, _CATEGORIES, limit=2, cursor=second["next_cursor"])
-    assert [i["transaction_id"] for i in third["items"]] == ["p1"]
-    assert third["next_cursor"] is None
+    assert [i.transaction_id for i in first.items] == ["p5", "p4"]
+    assert first.next_cursor is not None
+    second = triage.prepare(txs, _CATEGORIES, limit=2, cursor=first.next_cursor)
+    assert [i.transaction_id for i in second.items] == ["p3", "p2"]
+    third = triage.prepare(txs, _CATEGORIES, limit=2, cursor=second.next_cursor)
+    assert [i.transaction_id for i in third.items] == ["p1"]
+    assert third.next_cursor is None
 
 
 def test_long_bank_text_is_truncated() -> None:
     """Payee and memo are untrusted and bounded, so one label cannot flood the context."""
-    item = triage.prepare([_tx("p1", "X" * 300, memo="Y" * 300)], _CATEGORIES)["items"][0]
-    assert len(item["payee"]) == text.MAX_TEXT
-    assert item["payee"].endswith("…")
-    assert len(item["memo"] or "") == text.MAX_TEXT
+    item = triage.prepare([_tx("p1", "X" * 300, memo="Y" * 300)], _CATEGORIES).items[0]
+    assert len(item.payee) == text.MAX_TEXT
+    assert item.payee.endswith("…")
+    assert len(item.memo or "") == text.MAX_TEXT
 
 
 def test_invalid_cursor_is_rejected_with_an_actionable_message() -> None:
@@ -140,9 +138,9 @@ def test_suggestions_follow_the_direction_of_the_money() -> None:
         _tx("h2", "LENDER", "c-fun", amount=500000),
     ]
     repayment = _tx("p1", "LENDER", amount=-212000)
-    assert triage.prepare(history + [repayment], _CATEGORIES)["items"][0]["suggestion"] is None
+    assert triage.prepare(history + [repayment], _CATEGORIES).items[0].suggestion is None
     refund = _tx("p2", "LENDER", amount=1000)
-    assert triage.prepare(history + [refund], _CATEGORIES)["items"][0]["suggestion"] is not None
+    assert triage.prepare(history + [refund], _CATEGORIES).items[0].suggestion is not None
 
 
 def test_split_transactions_are_not_pending() -> None:
@@ -150,7 +148,7 @@ def test_split_transactions_are_not_pending() -> None:
     split = _tx(
         "p1", "SUPERMARKET", subtransactions=[{"category_id": "c-food"}, {"category_id": "c-fun"}]
     )
-    assert triage.prepare([split], _CATEGORIES)["pending_count"] == 0
+    assert triage.prepare([split], _CATEGORIES).pending_count == 0
 
 
 _INTERNAL = [
@@ -176,15 +174,15 @@ def test_transactions_of_off_budget_accounts_are_never_pending() -> None:
         _tx("p2", "Starting Balance", account_id="acc-loan"),
     ]
     page = triage.prepare(txs, _CATEGORIES, off_budget={"acc-loan"})
-    assert [i["transaction_id"] for i in page["items"]] == ["p1"]
-    assert page["pending_count"] == 1
+    assert [i.transaction_id for i in page.items] == ["p1"]
+    assert page.pending_count == 1
 
 
 def test_uncategorized_is_not_offered_but_counts_as_pending() -> None:
     """YNAB's internal Uncategorized is no choice; a transaction carrying it still waits."""
     page = triage.prepare([_tx("p1", "SHOP", "c-uncat")], _CATEGORIES + _INTERNAL)
-    assert [i["transaction_id"] for i in page["items"]] == ["p1"]
-    offered = {c["category_id"] for c in page["categories"]}
+    assert [i.transaction_id for i in page.items] == ["p1"]
+    offered = {c.category_id for c in page.categories}
     assert "c-uncat" not in offered
     assert "c-inflow" in offered
 
@@ -197,17 +195,17 @@ def test_opposite_amounts_between_accounts_are_a_possible_transfer() -> None:
         _tx("same-account", "Refund", amount=25000, date="2026-03-31", account_id="acc-a"),
         _tx("far", "Gift", amount=-25000, date="2026-01-01", account_id="acc-c"),
     ]
-    items = {i["transaction_id"]: i for i in triage.prepare(txs, _CATEGORIES)["items"]}
-    assert items["out"]["possible_transfer_with"] == "in"
-    assert items["in"]["possible_transfer_with"] == "out"
-    assert items["same-account"]["possible_transfer_with"] is None
-    assert items["far"]["possible_transfer_with"] is None
+    items = {i.transaction_id: i for i in triage.prepare(txs, _CATEGORIES).items}
+    assert items["out"].possible_transfer_with == "in"
+    assert items["in"].possible_transfer_with == "out"
+    assert items["same-account"].possible_transfer_with is None
+    assert items["far"].possible_transfer_with is None
 
 
 def test_categories_come_with_the_first_page_only() -> None:
     """A long category list is sent once, not on every page."""
     txs = [_tx(f"p{i}", "SHOP", date=f"2026-09-0{i + 1}") for i in range(3)]
     first = triage.prepare(txs, _CATEGORIES, limit=2)
-    assert first["categories"]
-    second = triage.prepare(txs, _CATEGORIES, limit=2, cursor=first["next_cursor"])
-    assert second["categories"] == []
+    assert first.categories
+    second = triage.prepare(txs, _CATEGORIES, limit=2, cursor=first.next_cursor)
+    assert second.categories == []

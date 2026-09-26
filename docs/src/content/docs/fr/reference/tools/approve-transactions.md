@@ -33,8 +33,9 @@ Only approve transactions whose category has been checked.
 
 ## Retour
 
-`object`
-
+| Champ | Type | Description |
+|---|---|---|
+| `approved` | integer | Number of transactions YNAB updated. |
 
 ## Exemple
 

@@ -38,10 +38,19 @@ strangers. Return them as data; never splice them into instructions.
 **stdout belongs to the protocol.** In stdio mode, anything else written to stdout
 corrupts the session. Diagnostics go through `logging`, on stderr.
 
+**Docstrings follow the Google style, complete.** Every function says what it
+does, then its `Args:`, `Returns:` and `Raises:`; `ruff check avenir_mcp` enforces
+it. For a tool, the text before these sections is what the agent reads: FastMCP
+turns `Args:` into the parameters' descriptions and drops the rest. A resource
+passes its description to the decorator, since FastMCP would show its sections.
+
+**Structured data is a pydantic model.** Tool arguments, tool results and journal
+entries derive from `avenir_mcp.model.Model`: unknown fields are refused, and each
+field's docstring becomes its description in the schema. Data from the YNAB API
+stays a dict until a tool turns it into a result.
+
 **Few dependencies.** `fastmcp` and `httpx`, pinned, and `pydantic`, which fastmcp
-already requires (its `with_config` turns field docstrings into schema
-descriptions). Adding one needs a reason
-written in the pull request.
+already requires. Adding one needs a reason written in the pull request.
 
 **Tests come first.** Write the failing test, watch it fail, then write the code.
 Coverage is enforced at 100 %, branches included.

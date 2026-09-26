@@ -40,25 +40,25 @@ def test_budget_vs_actual_utilization() -> None:
     """400€ actual on 500€ budget → utilization_pct=80.0."""
     cats = [_cat("c1", "Rent", budgeted=500_000, activity=-400_000, balance=100_000)]
     result = analytics.budget_vs_actual(cats)
-    assert result[0]["utilization_pct"] == 80.0
-    assert result[0]["budgeted"] == 500.0
-    assert result[0]["actual"] == 400.0
-    assert result[0]["balance"] == 100.0
+    assert result[0].utilization_pct == 80.0
+    assert result[0].budgeted == 500.0
+    assert result[0].actual == 400.0
+    assert result[0].balance == 100.0
 
 
 def test_budget_vs_actual_overspend() -> None:
     """Spending more than budget: activity > budgeted → utilization > 100."""
     cats = [_cat("c1", "AWS", budgeted=100_000, activity=-150_000, balance=-50_000)]
     result = analytics.budget_vs_actual(cats)
-    assert result[0]["utilization_pct"] == 150.0
-    assert result[0]["balance"] == -50.0
+    assert result[0].utilization_pct == 150.0
+    assert result[0].balance == -50.0
 
 
 def test_budget_vs_actual_zero_budget_no_division() -> None:
     """Category with budgeted=0 must not cause a ZeroDivisionError."""
     cats = [_cat("c1", "Misc", budgeted=0, activity=-20_000, balance=0)]
     result = analytics.budget_vs_actual(cats)
-    assert result[0]["utilization_pct"] == 0.0
+    assert result[0].utilization_pct == 0.0
 
 
 def test_budget_vs_actual_preserves_all_categories() -> None:
@@ -75,7 +75,7 @@ def test_budget_vs_actual_actual_is_always_positive() -> None:
     """The 'actual' field should always be positive (absolute value of activity)."""
     cats = [_cat("c1", "Rent", budgeted=500_000, activity=-400_000)]
     result = analytics.budget_vs_actual(cats)
-    assert result[0]["actual"] >= 0.0
+    assert result[0].actual >= 0.0
 
 
 def test_budget_vs_actual_doctest() -> None:
@@ -83,7 +83,7 @@ def test_budget_vs_actual_doctest() -> None:
     cats = [
         {"id": "c1", "name": "Rent", "budgeted": 500_000, "activity": -400_000, "balance": 100_000}
     ]
-    assert analytics.budget_vs_actual(cats)[0]["utilization_pct"] == 80.0
+    assert analytics.budget_vs_actual(cats)[0].utilization_pct == 80.0
 
 
 # ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ def test_spending_trends_amounts_in_euros() -> None:
     """Amounts should be converted from milliunits to euros."""
     cats = [_cat("c1", "AWS", activity=-250_000)]
     result = analytics.spending_trends([("2026-04", cats)])
-    assert result["AWS"][0]["amount"] == 250.0
+    assert result["AWS"][0].amount == 250.0
 
 
 def test_spending_trends_doctest() -> None:
@@ -115,7 +115,9 @@ def test_spending_trends_doctest() -> None:
             [{"id": "c1", "name": "AWS", "budgeted": 0, "activity": -100_000, "balance": 0}],
         )
     ]
-    assert analytics.spending_trends(data)["AWS"] == [{"month": "2026-01", "amount": 100.0}]
+    assert analytics.spending_trends(data)["AWS"] == [
+        analytics.MonthSpending(month="2026-01", amount=100.0)
+    ]
 
 
 def test_spending_trends_skips_categories_with_empty_name() -> None:
@@ -134,8 +136,8 @@ def test_top_payees_ordered_by_total() -> None:
     """Payees should be sorted by total spending, descending."""
     txs = [_tx("AWS", -50_000), _tx("AWS", -30_000), _tx("Rent", -500_000)]
     result = analytics.top_payees(txs)
-    assert result[0]["payee_name"] == "Rent"
-    assert result[1]["payee_name"] == "AWS"
+    assert result[0].payee_name == "Rent"
+    assert result[1].payee_name == "AWS"
 
 
 def test_top_payees_limit_respected() -> None:
@@ -149,14 +151,14 @@ def test_top_payees_total_in_euros() -> None:
     """Total spending should be in euros, not milliunits."""
     txs = [_tx("AWS", -50_000), _tx("AWS", -50_000)]
     result = analytics.top_payees(txs)
-    assert result[0]["total"] == 100.0
+    assert result[0].total == 100.0
 
 
 def test_top_payees_count_is_transaction_count() -> None:
     """Count should reflect the number of transactions for that payee."""
     txs = [_tx("AWS", -10_000), _tx("AWS", -20_000), _tx("AWS", -30_000)]
     result = analytics.top_payees(txs)
-    assert result[0]["count"] == 3
+    assert result[0].count == 3
 
 
 def test_top_payees_empty_transactions() -> None:
@@ -168,7 +170,7 @@ def test_top_payees_null_payee_name_grouped_as_unknown() -> None:
     """Transactions with no payee name should be grouped under 'Unknown'."""
     txs = [{"payee_name": None, "amount": -10_000}]
     result = analytics.top_payees(txs)
-    assert result[0]["payee_name"] == "Unknown"
+    assert result[0].payee_name == "Unknown"
 
 
 def test_top_payees_doctest() -> None:
@@ -178,7 +180,7 @@ def test_top_payees_doctest() -> None:
         {"payee_name": "AWS", "amount": -30_000},
         {"payee_name": "Rent", "amount": -500_000},
     ]
-    assert analytics.top_payees(txs, limit=1)[0]["payee_name"] == "Rent"
+    assert analytics.top_payees(txs, limit=1)[0].payee_name == "Rent"
 
 
 # ---------------------------------------------------------------------------
@@ -225,7 +227,7 @@ _MONTH: dict[str, Any] = {
 
 def test_month_overview_gives_totals_in_currency_and_only_overspent_categories() -> None:
     """A summary is a few totals plus what needs attention, not the whole month."""
-    assert analytics.month_overview(_MONTH) == {
+    assert analytics.month_overview(_MONTH).model_dump() == {
         "month": "2026-09-01",
         "income": 5250.0,
         "budgeted": 8000.0,
@@ -242,7 +244,7 @@ def test_category_balances_are_compact_and_skip_hidden_internal_and_empty() -> N
     """One short line per usable category; empty ones only on request."""
     empty = _month_cat("c6", "Unused", 0, budgeted=0, activity=0)
     cats = _MONTH["categories"] + [empty]
-    assert analytics.category_balances(cats) == [
+    assert [c.model_dump() for c in analytics.category_balances(cats)] == [
         {
             "category_id": "c1",
             "name": "Groceries",
@@ -260,7 +262,7 @@ def test_category_balances_are_compact_and_skip_hidden_internal_and_empty() -> N
             "balance": -12.34,
         },
     ]
-    names = [c["name"] for c in analytics.category_balances(cats, include_empty=True)]
+    names = [c.name for c in analytics.category_balances(cats, include_empty=True)]
     assert names == ["Groceries", "Restaurants", "Unused"]
 
 
@@ -271,7 +273,7 @@ def test_budget_vs_actual_and_trends_skip_internal_and_hidden_categories() -> No
     )
     hidden = _month_cat("c3", "Old", 0, hidden=True)
     shown = _month_cat("c1", "Groceries", 50000)
-    assert [c["name"] for c in analytics.budget_vs_actual([inflow, hidden, shown])] == ["Groceries"]
+    assert [c.name for c in analytics.budget_vs_actual([inflow, hidden, shown])] == ["Groceries"]
     assert list(analytics.spending_trends([("2026-09", [inflow, hidden, shown])])) == ["Groceries"]
 
 
@@ -287,4 +289,4 @@ def test_budget_vs_actual_names_each_category_group() -> None:
             "balance": 58000,
         },
     ]
-    assert analytics.budget_vs_actual(cats)[0]["group"] == "Fun"
+    assert analytics.budget_vs_actual(cats)[0].group == "Fun"

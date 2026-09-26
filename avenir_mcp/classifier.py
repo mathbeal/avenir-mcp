@@ -7,6 +7,8 @@ import os
 import re
 from typing import Any
 
+from avenir_mcp.model import Model
+
 logger = logging.getLogger(__name__)
 
 _DEFAULT_THRESHOLD = float(os.getenv("AVENIR_MCP_CONFIDENCE_THRESHOLD", "0.90"))
@@ -28,6 +30,12 @@ def normalize_payee(label: str) -> str:
     Card payments and transfers of the same merchant carry a different date,
     reference or card number every time. Stripping them lets every payment at
     one shop share a single history.
+
+    Args:
+        label: The payee as the bank wrote it.
+
+    Returns:
+        The merchant, upper case, with single spaces; empty for an empty label.
 
     Examples:
         >>> normalize_payee("CB ACME OUTDOOR FACT 110126 525130******2")
@@ -79,12 +87,39 @@ def build_payee_history(
     return history
 
 
+class Candidate(Model):
+    """A category a payee was given before, when none is clear enough to suggest."""
+
+    category_id: str
+    """Category id."""
+    category_name: str
+    """Category name."""
+    frequency: int
+    """How many of the payee's past transactions were in it."""
+
+
+class Score(Model):
+    """How clearly a payee's history points to one category."""
+
+    confidence: float
+    """Share of the payee's past transactions in its most frequent category, 0 to 1."""
+    auto_classify: bool
+    """True when the confidence reaches the threshold."""
+    category_id: str | None = None
+    """The category to suggest, when auto_classify is true."""
+    category_name: str | None = None
+    """Its name, when auto_classify is true."""
+    candidates: list[Candidate] = []
+    """Up to three categories to choose from, when auto_classify is false; empty when the
+    payee has no history."""
+
+
 def score_payee(
     payee_name: str,
     history: dict[str, dict[str, int]],
     categories: list[dict[str, Any]],
     threshold: float | None = None,
-) -> dict[str, Any]:
+) -> Score:
     """Compute a confidence score and suggest categories for a payee.
 
     The confidence score is the fraction of historical transactions for this
@@ -96,16 +131,11 @@ def score_payee(
         history: Frequency table from :func:`build_payee_history`, keyed by
             normalized payee.
         categories: Full list of available YNAB categories (id, name).
-        threshold: Minimum confidence to set ``auto_classify: True``.
+        threshold: Minimum confidence to set ``auto_classify``.
 
     Returns:
-        Dict with keys:
-
-        - ``confidence`` (float 0–1)
-        - ``auto_classify`` (bool)
-        - ``category_id`` / ``category_name`` if ``auto_classify`` is True
-        - ``candidates`` (list of top-3 dicts) if ``auto_classify`` is False;
-          empty when the payee has no history
+        The score: a category to suggest when the confidence reaches the threshold,
+        otherwise up to three candidates.
     """
     if threshold is None:
         threshold = _DEFAULT_THRESHOLD
@@ -118,7 +148,7 @@ def score_payee(
     counts = {cat_id: n for cat_id, n in history.get(payee, {}).items() if cat_id in cat_index}
     if not counts:
         logger.info("No usable history for this payee: no suggestion")
-        return {"confidence": 0.0, "auto_classify": False, "candidates": []}
+        return Score(confidence=0.0, auto_classify=False)
 
     total = sum(counts.values())
     sorted_cats = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)
@@ -127,20 +157,16 @@ def score_payee(
 
     if confidence >= threshold:
         logger.info("Suggestion found (confidence=%.2f ≥ %.2f)", confidence, threshold)
-        return {
-            "confidence": confidence,
-            "auto_classify": True,
-            "category_id": top_cat_id,
-            "category_name": cat_index[top_cat_id],
-        }
+        return Score(
+            confidence=confidence,
+            auto_classify=True,
+            category_id=top_cat_id,
+            category_name=cat_index[top_cat_id],
+        )
 
     logger.info("Ambiguous payee (confidence=%.2f < %.2f): top-3 candidates", confidence, threshold)
     candidates = [
-        {
-            "category_id": cat_id,
-            "category_name": cat_index[cat_id],
-            "frequency": count,
-        }
+        Candidate(category_id=cat_id, category_name=cat_index[cat_id], frequency=count)
         for cat_id, count in sorted_cats[:3]
     ]
-    return {"confidence": confidence, "auto_classify": False, "candidates": candidates}
+    return Score(confidence=confidence, auto_classify=False, candidates=candidates)

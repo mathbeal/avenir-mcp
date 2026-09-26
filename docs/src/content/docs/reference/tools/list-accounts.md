@@ -11,6 +11,8 @@ Generated from the code by `python -m docsgen`; a test fails when it no longer m
 
 List the budget's accounts with their current balances (in currency units).
 
+Use it to reconcile YNAB with the bank.
+
 ## Behaviour
 
 | | |
@@ -31,6 +33,16 @@ List the budget's accounts with their current balances (in currency units).
 
 `array of object`
 
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | YNAB id of the account. |
+| `name` | string | Account name. |
+| `type` | string | YNAB account type, e.g. checking, savings, creditCard, otherAsset. |
+| `on_budget` | boolean | False for a tracking account, whose transactions take no category. |
+| `closed` | boolean | True when the account is closed in YNAB. |
+| `balance` | number | Balance of all transactions. |
+| `cleared_balance` | number | Balance of the transactions the bank has shown. |
+| `uncleared_balance` | number | Balance of the transactions the bank has not shown yet. |
 
 ## Example
 

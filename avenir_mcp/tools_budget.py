@@ -7,27 +7,94 @@ from typing import Any
 
 from avenir_mcp import analytics, client
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
+from avenir_mcp.model import Model
 
 logger = logging.getLogger(__name__)
 
 
+class Budget(Model):
+    """A budget the API key can reach."""
+
+    id: str
+    """YNAB id of the budget, to pass as budget_id."""
+    name: str
+    """Budget name."""
+    first_month: str | None
+    """First month with data, YYYY-MM-01; null for an empty budget."""
+    last_month: str | None
+    """Last month with data, YYYY-MM-01; null for an empty budget."""
+
+
+class CategoryGroup(Model):
+    """A group a category can be created in or moved to."""
+
+    id: str
+    """YNAB id of the group, to pass as category_group_id."""
+    name: str
+    """Group name."""
+
+
+class Account(Model):
+    """An account and its balances, in currency units."""
+
+    id: str
+    """YNAB id of the account."""
+    name: str
+    """Account name."""
+    type: str
+    """YNAB account type, e.g. checking, savings, creditCard, otherAsset."""
+    on_budget: bool
+    """False for a tracking account, whose transactions take no category."""
+    closed: bool
+    """True when the account is closed in YNAB."""
+    balance: float
+    """Balance of all transactions."""
+    cleared_balance: float
+    """Balance of the transactions the bank has shown."""
+    uncleared_balance: float
+    """Balance of the transactions the bank has not shown yet."""
+
+
+class Approval(Model):
+    """The outcome of approve_transactions."""
+
+    approved: int
+    """Number of transactions YNAB updated."""
+
+
+_LIST_BUDGETS = """List all YNAB budgets accessible with the current API key.
+
+Use the budget id in subsequent tool calls. 'last-used' also works, but names
+whichever budget was last opened in YNAB: with several budgets, pass the id."""
+
+
+# Without a parameter to document, FastMCP would show the whole docstring, sections
+# included: the description is given here instead.
 @mcp.tool(
+    description=_LIST_BUDGETS,
     annotations={
         "title": "List budgets",
         "read_only_hint": True,
         "idempotent_hint": True,
         "open_world_hint": True,
-    }
+    },
 )
-async def list_budgets() -> list[dict[str, Any]]:
-    """List all YNAB budgets accessible with the current API key.
+async def list_budgets() -> list[Budget]:
+    """List all YNAB budgets accessible with the current API key; agents read _LIST_BUDGETS.
 
-    Returns a list of budget dicts with id, name, first_month, last_month.
-    Use the budget id in subsequent tool calls. 'last-used' also works, but names
-    whichever budget was last opened in YNAB: with several budgets, pass the id.
+    Returns:
+        One entry per budget: its id, name, and first and last months.
     """
     logger.info("Tool called: list_budgets()")
-    return await client.get_budgets()
+    return [
+        Budget(
+            id=budget["id"],
+            name=budget["name"],
+            first_month=budget.get("first_month"),
+            last_month=budget.get("last_month"),
+        )
+        for budget in await client.get_budgets()
+    ]
 
 
 @mcp.tool(
@@ -54,6 +121,9 @@ async def get_category_balances(
         budget_id: YNAB budget UUID or 'last-used'.
         month: 'YYYY-MM-01' or 'current'.
         include_empty: Also list categories with no amount at all.
+
+    Returns:
+        One line per category, amounts in currency units.
     """
     logger.info("Tool called: get_category_balances(month=%r)", month)
     check_month(month)
@@ -81,6 +151,9 @@ async def get_monthly_summary(
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
         month: 'YYYY-MM-01' or 'current'.
+
+    Returns:
+        The month's totals and its overspent categories.
     """
     logger.info("Tool called: get_monthly_summary(month=%r)", month)
     check_month(month)
@@ -101,14 +174,14 @@ async def get_budget_vs_actual(
 ) -> list[analytics.BudgetUsage]:
     """Return a budget-vs-actual breakdown with utilisation percentage per category.
 
+    Amounts in currency units; utilization_pct above 100 means over budget.
+
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
         month: ISO month 'YYYY-MM-01' or 'current'.
 
-    Each item in the returned list contains:
-    - id, name, group — the category and its group
-    - budgeted, actual, balance — amounts in currency units
-    - utilization_pct — percentage of budget consumed (> 100 means over-budget)
+    Returns:
+        One usage per category: budgeted, spent, balance and share used.
     """
     logger.info("Tool called: get_budget_vs_actual(month=%r)", month)
     check_month(month)
@@ -127,15 +200,18 @@ async def get_budget_vs_actual(
 async def get_spending_trends(
     budget_id: str,
     months_count: int = 3,
-) -> dict[str, list[dict[str, Any]]]:
+) -> dict[str, list[analytics.MonthSpending]]:
     """Return monthly spending trends per category over the last N months.
+
+    The result maps each category name to its spending month by month, oldest
+    first, in currency units.
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
         months_count: Number of past months to include (default 3).
 
-    Returns a dict mapping category name to a chronological list of
-    {month, amount} dicts (amounts in currency units).
+    Returns:
+        Each category's spending, month by month.
     """
     logger.info(
         "Tool called: get_spending_trends(budget_id=%r, months_count=%d)",
@@ -163,17 +239,20 @@ async def get_spending_trends(
         "open_world_hint": True,
     }
 )
-async def list_category_groups(budget_id: str) -> list[dict[str, Any]]:
+async def list_category_groups(budget_id: str) -> list[CategoryGroup]:
     """List the category groups a new category can be created in.
+
+    Hidden, deleted and system groups are left out. Pass a group id to
+    create_category.
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
 
-    Returns a list of {id, name} dicts (hidden, deleted and system groups
-    excluded). Pass a group id to create_category.
+    Returns:
+        The groups' ids and names.
     """
     logger.info("Tool called: list_category_groups(budget_id=%r)", budget_id)
-    return await client.get_category_groups(budget_id)
+    return [CategoryGroup(**group) for group in await client.get_category_groups(budget_id)]
 
 
 @mcp.tool(
@@ -184,17 +263,19 @@ async def list_category_groups(budget_id: str) -> list[dict[str, Any]]:
         "open_world_hint": True,
     }
 )
-async def list_accounts(budget_id: str) -> list[dict[str, Any]]:
+async def list_accounts(budget_id: str) -> list[Account]:
     """List the budget's accounts with their current balances (in currency units).
+
+    Use it to reconcile YNAB with the bank.
 
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
 
-    Returns a list of {id, name, type, on_budget, closed, balance,
-    cleared_balance, uncleared_balance}. Use it to reconcile YNAB with the bank.
+    Returns:
+        The accounts not deleted, with their balances.
     """
     logger.info("Tool called: list_accounts(budget_id=%r)", budget_id)
-    return await client.get_accounts(budget_id)
+    return [Account(**account) for account in await client.get_accounts(budget_id)]
 
 
 @mcp.tool(
@@ -207,7 +288,7 @@ async def list_accounts(budget_id: str) -> list[dict[str, Any]]:
         "open_world_hint": True,
     },
 )
-async def approve_transactions(budget_id: str, tx_ids: list[str]) -> dict[str, int]:
+async def approve_transactions(budget_id: str, tx_ids: list[str]) -> Approval:
     """Mark transactions as approved, i.e. reviewed (clears YNAB's "unapproved" badge).
 
     Only approve transactions whose category has been checked.
@@ -216,7 +297,8 @@ async def approve_transactions(budget_id: str, tx_ids: list[str]) -> dict[str, i
         budget_id: YNAB budget UUID or 'last-used'.
         tx_ids: Transaction UUIDs to approve.
 
-    Returns {approved: count}.
+    Returns:
+        How many transactions YNAB updated.
     """
     logger.info("Tool called: approve_transactions(budget_id=%r, n=%d)", budget_id, len(tx_ids))
-    return await client.approve_transactions(budget_id, tx_ids)
+    return Approval(**await client.approve_transactions(budget_id, tx_ids))

@@ -58,10 +58,16 @@ logger = logging.getLogger(__name__)
 
 
 def http_options(token: str | None) -> dict[str, Any]:
-    """What guards the HTTP transport, besides listening on 127.0.0.1.
+    """Say what guards the HTTP transport, besides listening on 127.0.0.1.
 
     The Host and Origin headers must name this machine, so a web page cannot reach
     the server through DNS rebinding; with a token, every request must carry it.
+
+    Args:
+        token: AVENIR_MCP_HTTP_TOKEN, or None.
+
+    Returns:
+        Keyword arguments for FastMCP's run().
     """
     return {"host_origin_protection": True, "middleware": http_auth.middleware(token)}
 
@@ -81,6 +87,12 @@ def main(argv: list[str] | None = None) -> None:
     127.0.0.1:8103, so the server is never reachable from the network by accident.
     Over HTTP, requests must name this machine (see http_options); writes also need
     AVENIR_MCP_HTTP_TOKEN, which every request must then carry.
+
+    Args:
+        argv: The command-line arguments; None for sys.argv.
+
+    Raises:
+        SystemExit: If writes are enabled over HTTP without AVENIR_MCP_HTTP_TOKEN.
     """
     if (sys.argv[1:] if argv is None else argv) == ["--version"]:
         print(f"avenir-mcp {__version__}")

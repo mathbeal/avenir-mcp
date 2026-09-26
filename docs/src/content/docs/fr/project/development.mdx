@@ -43,6 +43,7 @@ alors.
 |---|---|---|
 | format | `black --check`, `isort --check` | un fichier n'est pas formaté |
 | lint | `pylint` | la note est sous 10,00 |
+| docstrings | `ruff check avenir_mcp` | une docstring n'est pas au format Google, ou omet un argument, la valeur renvoyée ou une exception levée |
 | types | `mypy` (strict) | une erreur de type |
 | tests | `pytest` | un test échoue, **un avertissement** est émis, ou la couverture des lignes **ou des branches** est sous 100 % |
 | vocabulaire | `lexdrift check avenir_mcp --baseline lexdrift.lock` | un nouveau mot apparaît pour une idée déjà nommée |

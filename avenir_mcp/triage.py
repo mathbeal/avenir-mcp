@@ -8,19 +8,17 @@ from __future__ import annotations
 
 import base64
 from datetime import date
-from typing import Any, TypedDict
-
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+from typing import Any
 
 from avenir_mcp import classifier
 from avenir_mcp.client import milliunit_to_amount
+from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 
 DEFAULT_LIMIT = 50
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Suggestion(TypedDict):
+class Suggestion(Model):
     """A category proposed from the payee's history."""
 
     category_id: str
@@ -31,8 +29,7 @@ class Suggestion(TypedDict):
     """Share of the payee's past transactions (same direction) in that category, 0 to 1."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class PendingItem(TypedDict):
+class PendingItem(Model):
     """A transaction waiting for a category."""
 
     transaction_id: str
@@ -55,8 +52,7 @@ class PendingItem(TypedDict):
     categorising them. Null otherwise."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class CategoryChoice(TypedDict):
+class CategoryChoice(Model):
     """A category the agent may assign."""
 
     category_id: str
@@ -67,8 +63,7 @@ class CategoryChoice(TypedDict):
     """Name of its group."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Triage(TypedDict):
+class Triage(Model):
     """One page of pending transactions, with what is needed to classify them."""
 
     pending_count: int
@@ -84,10 +79,29 @@ class Triage(TypedDict):
 
 
 def _encode_cursor(offset: int) -> str:
+    """Encode the offset of the next page as an opaque cursor.
+
+    Args:
+        offset: Index of the first item of the next page.
+
+    Returns:
+        The cursor.
+    """
     return base64.urlsafe_b64encode(f"offset:{offset}".encode()).decode()
 
 
 def _decode_cursor(cursor: str) -> int:
+    """Decode a cursor made by :func:`_encode_cursor`.
+
+    Args:
+        cursor: The next_cursor of a previous page.
+
+    Returns:
+        The offset it stands for.
+
+    Raises:
+        ValueError: If the cursor was not made by this module, saying what to pass.
+    """
     try:
         prefix, _, value = base64.urlsafe_b64decode(cursor.encode()).decode().partition(":")
         if prefix != "offset" or not value.isdigit():
@@ -107,7 +121,14 @@ TRANSFER_WINDOW_DAYS = 3
 
 
 def internal_uncategorized(categories: list[dict[str, Any]]) -> set[str]:
-    """Ids of YNAB's internal "Uncategorized" category: no choice, and no category."""
+    """Find YNAB's internal "Uncategorized" category: no choice, and no category.
+
+    Args:
+        categories: The budget's categories.
+
+    Returns:
+        Its ids; empty when the budget has none.
+    """
     return {
         c["id"]
         for c in categories
@@ -116,8 +137,17 @@ def internal_uncategorized(categories: list[dict[str, Any]]) -> set[str]:
 
 
 def _is_pending(tx: dict[str, Any], off_budget: set[str], uncategorized: set[str]) -> bool:
-    """Waiting for a category: not deleted, not a transfer, not a split (its lines
-    carry the categories), and on an account that takes categories."""
+    """Tell whether a transaction waits for a category.
+
+    Args:
+        tx: A YNAB transaction.
+        off_budget: Ids of the tracking accounts.
+        uncategorized: Ids of YNAB's internal Uncategorized category.
+
+    Returns:
+        True when it is not deleted, not a transfer, not a split (its lines carry the
+        categories), on an account that takes categories, and without a real category.
+    """
     return (
         not tx.get("deleted")
         and (not tx.get("category_id") or tx["category_id"] in uncategorized)
@@ -128,7 +158,14 @@ def _is_pending(tx: dict[str, Any], off_budget: set[str], uncategorized: set[str
 
 
 def _transfer_pairs(pending: list[dict[str, Any]]) -> dict[str, str]:
-    """Pair pending transactions that look like both halves of one transfer."""
+    """Pair pending transactions that look like both halves of one transfer.
+
+    Args:
+        pending: The pending transactions.
+
+    Returns:
+        Each paired transaction's id mapped to its other half's.
+    """
     pairs: dict[str, str] = {}
     for tx in pending:
         if tx["id"] in pairs or tx["amount"] >= 0:
@@ -147,10 +184,15 @@ def _transfer_pairs(pending: list[dict[str, Any]]) -> dict[str, str]:
 
 
 def _histories(transactions: list[dict[str, Any]]) -> dict[bool, dict[str, dict[str, int]]]:
-    """Payee histories keyed by direction: True for money out, False for money in.
+    """Learn each payee's categories, money in and money out apart.
 
-    Money in and money out are learnt apart: a lender that once paid you does
-    not make your repayments income.
+    A lender that once paid you does not make your repayments income.
+
+    Args:
+        transactions: The budget's transactions.
+
+    Returns:
+        Payee histories keyed by direction: True for money out, False for money in.
     """
     known = [
         tx for tx in transactions if not tx.get("deleted") and not tx.get("transfer_account_id")
@@ -169,15 +211,26 @@ def _suggestion(
     categories: list[dict[str, Any]],
     threshold: float | None,
 ) -> Suggestion | None:
+    """Suggest a category for a pending transaction from its payee's history.
+
+    Args:
+        tx: The pending transaction.
+        histories: Payee histories from :func:`_histories`.
+        categories: The budget's categories.
+        threshold: Confidence needed; None for the classifier's default.
+
+    Returns:
+        The suggestion, or None when the history is not clear enough.
+    """
     history = histories[tx["amount"] < 0]
     score = classifier.score_payee(tx.get("payee_name") or "", history, categories, threshold)
-    if not score["auto_classify"]:
+    if score.category_id is None or score.category_name is None:
         return None
-    return {
-        "category_id": score["category_id"],
-        "category_name": score["category_name"],
-        "confidence": round(score["confidence"], 2),
-    }
+    return Suggestion(
+        category_id=score.category_id,
+        category_name=score.category_name,
+        confidence=round(score.confidence, 2),
+    )
 
 
 def prepare(  # pylint: disable=too-many-arguments
@@ -211,38 +264,36 @@ def prepare(  # pylint: disable=too-many-arguments
         reverse=True,
     )
     transfers = _transfer_pairs(pending)
-    items: list[PendingItem] = [
-        {
-            "transaction_id": tx["id"],
-            "date": tx["date"],
-            "amount": milliunit_to_amount(tx["amount"]),
-            "payee": untrusted(tx.get("payee_name")),
-            "memo": untrusted(tx["memo"]) if tx.get("memo") else None,
-            "account": tx.get("account_name") or "",
-            "suggestion": _suggestion(tx, histories, categories, threshold),
-            "possible_transfer_with": transfers.get(tx["id"]),
-        }
+    items = [
+        PendingItem(
+            transaction_id=tx["id"],
+            date=tx["date"],
+            amount=milliunit_to_amount(tx["amount"]),
+            payee=untrusted(tx.get("payee_name")),
+            memo=untrusted(tx["memo"]) if tx.get("memo") else None,
+            account=tx.get("account_name") or "",
+            suggestion=_suggestion(tx, histories, categories, threshold),
+            possible_transfer_with=transfers.get(tx["id"]),
+        )
         for tx in pending
     ]
-    suggested = sum(1 for item in items if item["suggestion"] is not None)
+    suggested = sum(1 for item in items if item.suggestion is not None)
 
     end = offset + limit
-    return {
-        "pending_count": len(pending),
-        "suggested_count": suggested,
-        "items": items[offset:end],
-        "categories": (
+    return Triage(
+        pending_count=len(pending),
+        suggested_count=suggested,
+        items=items[offset:end],
+        categories=(
             []
             if cursor
             else [
-                {
-                    "category_id": c["id"],
-                    "name": c["name"],
-                    "group": c.get("category_group_name", ""),
-                }
+                CategoryChoice(
+                    category_id=c["id"], name=c["name"], group=c.get("category_group_name", "")
+                )
                 for c in categories
                 if not c.get("deleted") and c["id"] not in uncategorized
             ]
         ),
-        "next_cursor": _encode_cursor(end) if end < len(items) else None,
-    }
+        next_cursor=_encode_cursor(end) if end < len(items) else None,
+    )

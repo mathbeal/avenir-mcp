@@ -11,6 +11,8 @@ Generado desde el código con `python -m docsgen`; una prueba falla si deja de c
 
 Return a budget-vs-actual breakdown with utilisation percentage per category.
 
+Amounts in currency units; utilization_pct above 100 means over budget.
+
 ## Comportamiento
 
 | | |

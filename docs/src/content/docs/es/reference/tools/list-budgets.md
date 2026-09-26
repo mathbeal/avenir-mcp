@@ -11,7 +11,6 @@ Generado desde el código con `python -m docsgen`; una prueba falla si deja de c
 
 List all YNAB budgets accessible with the current API key.
 
-Returns a list of budget dicts with id, name, first_month, last_month.
 Use the budget id in subsequent tool calls. 'last-used' also works, but names
 whichever budget was last opened in YNAB: with several budgets, pass the id.
 
@@ -33,6 +32,12 @@ ninguno.
 
 `array of object`
 
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | string | YNAB id of the budget, to pass as budget_id. |
+| `name` | string | Budget name. |
+| `first_month` | string \| null | First month with data, YYYY-MM-01; null for an empty budget. |
+| `last_month` | string \| null | Last month with data, YYYY-MM-01; null for an empty budget. |
 
 ## Ejemplo
 
@@ -49,7 +54,8 @@ Respuesta sobre el presupuesto de demostración:
   {
     "id": "demo-budget",
     "name": "Demo household",
-    "last_modified_on": "2026-09-20"
+    "first_month": "2026-06-01",
+    "last_month": "2026-09-01"
   }
 ]
 ```

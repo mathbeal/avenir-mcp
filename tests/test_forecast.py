@@ -36,14 +36,14 @@ def test_stable_monthly_charge_is_recurring() -> None:
     """A payee charged about the same amount in 3 of the last 4 full months recurs."""
     txs = _monthly("CAR LEASE", -364080, 25, ["2026-05", "2026-06", "2026-08"])
     assert forecast.recurring(txs, TODAY) == [
-        {"payee": "CAR LEASE", "amount": -364.08, "day": 25, "months_seen": 3}
+        forecast.Recurring(payee="CAR LEASE", amount=-364.08, day=25, months_seen=3)
     ]
 
 
 def test_recurring_payee_is_shown_without_invisible_characters() -> None:
     """A payee name in the assumptions is safe to show."""
     txs = _monthly("CAR\u202e LEASE", -364080, 25, ["2026-05", "2026-06", "2026-08"])
-    assert forecast.recurring(txs, TODAY)[0]["payee"] == "CAR LEASE"
+    assert forecast.recurring(txs, TODAY)[0].payee == "CAR LEASE"
 
 
 def test_irregular_or_rare_payees_are_not_recurring() -> None:
@@ -102,21 +102,21 @@ def test_projection_walks_month_by_month_and_flags_the_first_shortfall() -> None
         start_balance=1000.0,
         today=TODAY,
         until="2026-12",
-        recurring=[{"payee": "CAR LEASE", "amount": -400.0, "day": 25, "months_seen": 4}],
+        recurring=[forecast.Recurring(payee="CAR LEASE", amount=-400.0, day=25, months_seen=4)],
         variable_monthly=-300.0,
         monthly_income=0.0,
-        one_offs=[{"date": "2026-11-15", "amount": 200.0, "label": "refund"}],
+        one_offs=[forecast.OneOff(date=date(2026, 11, 15), amount=200.0, label="refund")],
     )
-    months = result["months"]
-    assert [m["month"] for m in months] == ["2026-09", "2026-10", "2026-11", "2026-12"]
+    months = result.months
+    assert [m.month for m in months] == ["2026-09", "2026-10", "2026-11", "2026-12"]
     # September: only what is still to come — the lease on the 25th and, since
     # nothing was spent yet this month, the month's variable spending.
-    assert months[0]["start"] == 1000.0
-    assert months[0]["end"] == 1000.0 - 400.0 - 300.0
-    assert months[1]["start"] == months[0]["end"]
-    assert months[2]["inflows"] == 200.0
-    assert result["first_shortfall"] == "2026-10"
-    assert months[1]["lowest"] < 0
+    assert months[0].start == 1000.0
+    assert months[0].end == 1000.0 - 400.0 - 300.0
+    assert months[1].start == months[0].end
+    assert months[2].inflows == 200.0
+    assert result.first_shortfall == "2026-10"
+    assert months[1].lowest < 0
 
 
 def test_projection_counts_monthly_income() -> None:
@@ -130,10 +130,10 @@ def test_projection_counts_monthly_income() -> None:
         monthly_income=3000.0,
         one_offs=[],
     )
-    assert result["months"][0]["end"] == 3000.0  # not received yet this month
-    assert result["months"][1]["inflows"] == 3000.0
-    assert result["months"][1]["end"] == 6000.0
-    assert result["first_shortfall"] is None
+    assert result.months[0].end == 3000.0  # not received yet this month
+    assert result.months[1].inflows == 3000.0
+    assert result.months[1].end == 6000.0
+    assert result.first_shortfall is None
 
 
 def test_one_offs_outside_the_period_are_ignored() -> None:
@@ -146,17 +146,17 @@ def test_one_offs_outside_the_period_are_ignored() -> None:
         variable_monthly=0.0,
         monthly_income=0.0,
         one_offs=[
-            {"date": "2026-09-01", "amount": -50.0, "label": "past"},
-            {"date": "2027-01-01", "amount": -50.0, "label": "later"},
+            forecast.OneOff(date=date(2026, 9, 1), amount=-50.0, label="past"),
+            forecast.OneOff(date=date(2027, 1, 1), amount=-50.0, label="later"),
         ],
     )
-    assert result["months"][-1]["end"] == 100.0
+    assert result.months[-1].end == 100.0
 
 
 def test_january_looks_back_into_the_previous_year() -> None:
     """In January the last full months belong to the year before."""
     txs = _monthly("RENT", -50000, 1, ["2025-10", "2025-11", "2025-12"])
-    assert forecast.recurring(txs, date(2026, 1, 10))[0]["payee"] == "RENT"
+    assert forecast.recurring(txs, date(2026, 1, 10))[0].payee == "RENT"
 
 
 def test_transactions_without_payee_are_not_recurring() -> None:
@@ -187,28 +187,33 @@ def test_projection_amounts_are_whole_cents() -> None:
         monthly_income=0.0,
         one_offs=[],
     )
-    for month in result["months"]:
+    for month in result.months:
         for key in ("inflows", "outflows", "end", "lowest"):
-            assert month[key] == round(month[key], 2)
-    assert result["months"][0]["end"] == -100.0
-    assert result["months"][1]["end"] == -200.0
+            value = getattr(month, key)
+            assert value == round(value, 2)
+    assert result.months[0].end == -100.0
+    assert result.months[1].end == -200.0
 
 
 def test_current_month_counts_only_what_is_left_to_spend_and_receive() -> None:
     """What already happened this month is deducted from the monthly averages."""
 
     def september_end(spent: float, received: float) -> float:
-        return forecast.project(
-            start_balance=0.0,
-            today=TODAY,
-            until="2026-09",
-            recurring=[],
-            variable_monthly=-300.0,
-            monthly_income=1000.0,
-            one_offs=[],
-            spent_this_month=spent,
-            received_this_month=received,
-        )["months"][0]["end"]
+        return (
+            forecast.project(
+                start_balance=0.0,
+                today=TODAY,
+                until="2026-09",
+                recurring=[],
+                variable_monthly=-300.0,
+                monthly_income=1000.0,
+                one_offs=[],
+                spent_this_month=spent,
+                received_this_month=received,
+            )
+            .months[0]
+            .end
+        )
 
     assert september_end(-250.0, 400.0) == -50.0 + 600.0
     assert september_end(-400.0, 1500.0) == 0.0
@@ -225,7 +230,7 @@ def test_spending_is_spread_so_income_can_cover_it() -> None:
         monthly_income=3000.0,
         one_offs=[],
     )
-    assert result["months"][1]["lowest"] > -200.0
+    assert result.months[1].lowest > -200.0
 
 
 def test_last_day_of_the_month_has_nothing_left_to_spread() -> None:
@@ -239,7 +244,7 @@ def test_last_day_of_the_month_has_nothing_left_to_spread() -> None:
         monthly_income=0.0,
         one_offs=[],
     )
-    assert result["months"][0]["end"] == 10.0
+    assert result.months[0].end == 10.0
 
 
 def test_month_to_date_sums_this_month_without_recurring_amounts() -> None:

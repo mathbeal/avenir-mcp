@@ -3,23 +3,21 @@
 from __future__ import annotations
 
 import logging
-from typing import TypedDict
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import app, client, journal
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
-from avenir_mcp.confirm import WriteStatus, gate
+from avenir_mcp.confirm import WriteStatus, gate, merged
+from avenir_mcp.model import Model
 
 logger = logging.getLogger(__name__)
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class CategoryUpdate(TypedDict):
+class CategoryUpdate(Model):
     """The outcome of update_category."""
 
     status: WriteStatus
@@ -72,9 +70,18 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
         category_id: Category to change (from suggest_categories or list_category_groups).
+        ctx: The MCP context, used to ask the user.
         name: New name; omit to keep it.
         category_group_id: Group to move it to (from list_category_groups); omit to keep it.
         confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        The names and groups before and after, or an input request the client answers by asking the
+        user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the category or group is not in the budget, the new name is empty,
+            or the confirmation code is refused.
     """
     logger.info("Tool called: update_category")
     categories = {c["id"]: c for c in await client.get_categories(budget_id)}
@@ -94,41 +101,41 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
         raise ToolError("The new name is empty: give a name, or omit it to keep the current one.")
     new_name = name.strip() if name is not None else category["name"]
     new_group = category_group_id or category["category_group_id"]
-    result: CategoryUpdate = {
-        "status": "nothing_to_do",
-        "message": "Nothing to change.",
-        "category_id": category_id,
-        "from_name": category["name"],
-        "to_name": new_name,
-        "from_group": category.get("category_group_name", ""),
-        "to_group": groups.get(new_group, ""),
-        "confirmation": None,
-    }
+    result = CategoryUpdate(
+        status="nothing_to_do",
+        message="Nothing to change.",
+        category_id=category_id,
+        from_name=category["name"],
+        to_name=new_name,
+        from_group=category.get("category_group_name", ""),
+        to_group=groups.get(new_group, ""),
+        confirmation=None,
+    )
     if new_name == category["name"] and new_group == category["category_group_id"]:
         return result
     subject = {"category_id": category_id, "name": new_name, "group": new_group}
     question = (
-        f"Change category '{result['from_name']}' ({result['from_group']}) "
-        f"to '{new_name}' ({result['to_group']})?"
+        f"Change category '{result.from_name}' ({result.from_group}) "
+        f"to '{new_name}' ({result.to_group})?"
     )
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
-        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.update_category(
         budget_id,
         category_id,
         name=new_name if new_name != category["name"] else None,
         category_group_id=new_group if new_group != category["category_group_id"] else None,
     )
-    return {
-        **result,
-        "status": "applied",
-        "message": "Applied. To revert, call update_category with the previous name and group.",
-    }
+    return result.model_copy(
+        update={
+            "status": "applied",
+            "message": "Applied. To revert, call update_category with the previous name and group.",
+        }
+    )
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class BudgetChange(TypedDict):
+class BudgetChange(Model):
     """The outcome of set_category_budget."""
 
     status: WriteStatus
@@ -184,7 +191,16 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         month: 'YYYY-MM-01' or 'current'.
         category_id: Category (from get_category_balances or suggest_categories).
         amount: New budgeted amount, in currency units.
+        ctx: The MCP context, used to ask the user.
         confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        The amounts before and after, or an input request the client answers by asking the user
+        (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the month is malformed, the category is not in the budget, or the
+            confirmation code is refused.
     """
     logger.info("Tool called: set_category_budget(month=%r)", month)
     check_month(month)
@@ -197,27 +213,27 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
             "use a category_id from get_category_balances."
         )
     before, after = category["budgeted"], client.amount_to_milliunit(amount)
-    result: BudgetChange = {
-        "status": "nothing_to_do",
-        "message": "Nothing to change.",
-        "category_id": category_id,
-        "category": category["name"],
-        "month": month,
-        "from_amount": client.milliunit_to_amount(before),
-        "to_amount": client.milliunit_to_amount(after),
-        "confirmation": None,
-        "operation_id": None,
-    }
+    result = BudgetChange(
+        status="nothing_to_do",
+        message="Nothing to change.",
+        category_id=category_id,
+        category=category["name"],
+        month=month,
+        from_amount=client.milliunit_to_amount(before),
+        to_amount=client.milliunit_to_amount(after),
+        confirmation=None,
+        operation_id=None,
+    )
     if before == after:
         return result
     question = (
         f"Budget {category['name']} for {month}: "
-        f"{result['from_amount']:.2f} → {result['to_amount']:.2f}?"
+        f"{result.from_amount:.2f} → {result.to_amount:.2f}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
-        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.set_category_budgeted(budget_id, month, category_id, amount)
     operation_id = journal.Journal(journal.default_path()).record(
         budget_id,
@@ -225,16 +241,16 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         [],
         {"month": month, "category_id": category_id, "from": before, "to": after},
     )
-    return {
-        **result,
-        "status": "applied",
-        "message": f"Applied. undo_operation with operation_id {operation_id} reverts it.",
-        "operation_id": operation_id,
-    }
+    return result.model_copy(
+        update={
+            "status": "applied",
+            "message": f"Applied. undo_operation with operation_id {operation_id} reverts it.",
+            "operation_id": operation_id,
+        }
+    )
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class NewCategory(TypedDict):
+class NewCategory(Model):
     """The outcome of create_category."""
 
     status: WriteStatus
@@ -281,7 +297,16 @@ async def create_category(
         budget_id: YNAB budget UUID or 'last-used'.
         category_group_id: Group to create it in (from list_category_groups).
         name: Name of the new category.
+        ctx: The MCP context, used to ask the user.
         confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        The new category's name, group and id, or an input request the client answers by asking the
+        user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the group is not in the budget, the name is empty or already used in
+            the group, or the confirmation code is refused.
     """
     logger.info("Tool called: create_category")
     groups = {g["id"]: g["name"] for g in await client.get_category_groups(budget_id)}
@@ -300,18 +325,18 @@ async def create_category(
     }
     if new_name.casefold() in taken:
         raise ToolError(f"{new_name!r} already exists in {groups[category_group_id]}.")
-    result: NewCategory = {
-        "status": "applied",
-        "message": "",
-        "name": new_name,
-        "group": groups[category_group_id],
-        "category_id": None,
-        "confirmation": None,
-    }
-    question = f"Create category '{new_name}' in {result['group']}?"
+    result = NewCategory(
+        status="applied",
+        message="",
+        name=new_name,
+        group=groups[category_group_id],
+        category_id=None,
+        confirmation=None,
+    )
+    question = f"Create category '{new_name}' in {result.group}?"
     subject = {"group": category_group_id, "name": new_name}
     stop = await gate(ctx, budget_id, subject, question, confirmation)
     if stop is not None:
-        return stop if isinstance(stop, InputRequiredResult) else {**result, **stop}
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     created = await client.create_category(budget_id, category_group_id, new_name)
-    return {**result, "message": "Created.", "category_id": created["id"]}
+    return result.model_copy(update={"message": "Created.", "category_id": created["id"]})

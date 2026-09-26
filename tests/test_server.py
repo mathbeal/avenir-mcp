@@ -56,12 +56,24 @@ def test_catalog_is_exactly_the_published_tools() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_list_budgets_delegates_to_client() -> None:
-    """list_budgets should return whatever client.get_budgets() returns."""
-    budgets = [{"id": "b1", "name": "Business"}]
+def test_list_budgets_keeps_what_an_agent_needs() -> None:
+    """Each budget comes back as its id, name and months, without YNAB's other settings."""
+    budgets = [
+        {
+            "id": "b1",
+            "name": "Business",
+            "first_month": "2026-01-01",
+            "last_month": "2026-09-01",
+            "currency_format": {"iso_code": "EUR"},
+        },
+        {"id": "b2", "name": "Empty"},
+    ]
     with patch("avenir_mcp.client.get_budgets", new=AsyncMock(return_value=budgets)):
         result = asyncio.run(server.list_budgets())
-    assert result == budgets
+    assert [b.model_dump() for b in result] == [
+        {"id": "b1", "name": "Business", "first_month": "2026-01-01", "last_month": "2026-09-01"},
+        {"id": "b2", "name": "Empty", "first_month": None, "last_month": None},
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -106,9 +118,9 @@ def test_get_monthly_summary_is_compact_and_in_currency() -> None:
     }
     with patch("avenir_mcp.client.get_month", new=AsyncMock(return_value=month)):
         result = asyncio.run(server.get_monthly_summary("b1", "2026-04-01"))
-    assert result["activity"] == -3200.0
-    assert "categories" not in result
-    assert result["overspent"] == []
+    assert result.activity == -3200.0
+    assert "categories" not in result.model_dump()
+    assert result.overspent == []
 
 
 def test_get_category_balances_are_in_currency() -> None:
@@ -116,7 +128,7 @@ def test_get_category_balances_are_in_currency() -> None:
     cats = [{"id": "c1", "name": "Rent", "budgeted": 500_000, "activity": 0, "balance": 500_000}]
     with patch("avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)):
         result = asyncio.run(server.get_category_balances("b1"))
-    assert result[0]["budgeted"] == 500.0
+    assert result[0].budgeted == 500.0
 
 
 @pytest.mark.parametrize("month", ["2026-13-01", "2026-04", "april", "2026-04-15"])
@@ -145,7 +157,7 @@ def test_get_budget_vs_actual_returns_analytics_output() -> None:
     ]
     with patch("avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)):
         result = asyncio.run(server.get_budget_vs_actual("b1"))
-    assert result[0]["utilization_pct"] == 80.0
+    assert result[0].utilization_pct == 80.0
 
 
 # ---------------------------------------------------------------------------
@@ -185,7 +197,7 @@ def test_list_category_groups_delegates_to_client() -> None:
     ) as mock_fn:
         result = asyncio.run(server.list_category_groups("b1"))
     mock_fn.assert_called_once_with("b1")
-    assert result == groups
+    assert [g.model_dump() for g in result] == groups
 
 
 # ---------------------------------------------------------------------------
@@ -195,11 +207,23 @@ def test_list_category_groups_delegates_to_client() -> None:
 
 def test_list_accounts_delegates_to_client() -> None:
     """list_accounts must return client.get_accounts output."""
-    accounts = [{"id": "a1", "name": "Checking", "balance": 1250.0}]
+    accounts = [
+        {
+            "uncleared_balance": 0.0,
+            "cleared_balance": 8000.0,
+            "balance": 8000.0,
+            "closed": True,
+            "on_budget": False,
+            "type": "savings",
+            "name": "Old savings",
+            "id": "a9",
+        }
+    ]
     with patch("avenir_mcp.client.get_accounts", new=AsyncMock(return_value=accounts)) as mock_fn:
         result = asyncio.run(server.list_accounts("b1"))
     mock_fn.assert_called_once_with("b1")
-    assert result == accounts
+    assert [a.model_dump() for a in result] == accounts
+    assert result[0].on_budget is False
 
 
 def test_approve_transactions_delegates_to_client() -> None:
@@ -209,7 +233,7 @@ def test_approve_transactions_delegates_to_client() -> None:
     ) as mock_fn:
         result = asyncio.run(server.approve_transactions("b1", ["t1"]))
     mock_fn.assert_called_once_with("b1", ["t1"])
-    assert result == {"approved": 1}
+    assert result.approved == 1
     assert "approve_transactions" in [t.name for t in asyncio.run(server.mcp.list_tools())]
 
 

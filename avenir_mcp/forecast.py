@@ -11,13 +11,12 @@ import calendar
 import statistics
 from collections import defaultdict
 from datetime import date
-from typing import Any, TypedDict
-
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+from typing import Any
 
 from avenir_mcp.amounts import Amount
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
+from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 
 LOOKBACK_MONTHS = 4
@@ -26,8 +25,7 @@ AMOUNT_TOLERANCE = 0.2
 VARIABLE_MONTHS = 3
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Recurring(TypedDict):
+class Recurring(Model):
     """A charge (or income) seen most months at about the same amount."""
 
     payee: str
@@ -40,11 +38,10 @@ class Recurring(TypedDict):
     """How many of the last 4 full months it appeared in."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class OneOff(TypedDict):
+class OneOff(Model):
     """An amount expected once, on a date."""
 
-    date: str
+    date: date
     """Day it is expected, YYYY-MM-DD."""
     amount: Amount
     """Amount, negative for a payment, positive for money received."""
@@ -52,8 +49,7 @@ class OneOff(TypedDict):
     """What it is, for the reader."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class MonthProjection(TypedDict):
+class MonthProjection(Model):
     """One projected month."""
 
     month: str
@@ -70,8 +66,7 @@ class MonthProjection(TypedDict):
     """Lowest projected balance within the month, day by day."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Projection(TypedDict):
+class Projection(Model):
     """The projected months and the first one where money runs out."""
 
     months: list[MonthProjection]
@@ -81,7 +76,15 @@ class Projection(TypedDict):
 
 
 def _months_before(today: date, count: int) -> list[str]:
-    """The `count` full months before today's month, oldest first."""
+    """List the full months before today's month.
+
+    Args:
+        today: The day the forecast is made.
+        count: How many months.
+
+    Returns:
+        The months as YYYY-MM, oldest first.
+    """
     year, month = today.year, today.month
     months = []
     for _ in range(count):
@@ -93,11 +96,27 @@ def _months_before(today: date, count: int) -> list[str]:
 
 
 def _usable(tx: dict[str, Any]) -> bool:
+    """Tell whether a transaction is money in or out of the accounts.
+
+    Args:
+        tx: A YNAB transaction.
+
+    Returns:
+        False for a deleted transaction or a transfer between accounts.
+    """
     return not tx.get("deleted") and not tx.get("transfer_account_id")
 
 
 def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring]:
-    """Payees seen in 3 of the last 4 full months, each month within 20 % of the median."""
+    """Find the payees seen in 3 of the last 4 full months, each month within 20 % of the median.
+
+    Args:
+        transactions: The budget's transactions, amounts in milliunits.
+        today: The day the forecast is made; its month is incomplete and not looked at.
+
+    Returns:
+        One recurring charge or income per payee and direction, sorted by payee.
+    """
     months = set(_months_before(today, LOOKBACK_MONTHS))
     groups: dict[tuple[str, bool], list[dict[str, Any]]] = defaultdict(list)
     for tx in transactions:
@@ -115,12 +134,12 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
         median = statistics.median(per_month.values())
         if all(abs(v - median) <= abs(median) * AMOUNT_TOLERANCE for v in per_month.values()):
             found.append(
-                {
-                    "payee": untrusted(payee),
-                    "amount": milliunit_to_amount(round(median)),
-                    "day": int(statistics.median(int(tx["date"][8:10]) for tx in txs)),
-                    "months_seen": len(per_month),
-                }
+                Recurring(
+                    payee=untrusted(payee),
+                    amount=milliunit_to_amount(round(median)),
+                    day=int(statistics.median(int(tx["date"][8:10]) for tx in txs)),
+                    months_seen=len(per_month),
+                )
             )
     return found
 
@@ -128,9 +147,19 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
 def _other_average(
     transactions: list[dict[str, Any]], today: date, known: list[Recurring], outflow: bool
 ) -> float:
-    """Monthly average over the last 3 full months of one direction, recurring excluded."""
+    """Average one direction of money over the last 3 full months, recurring amounts excluded.
+
+    Args:
+        transactions: The budget's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`, left out of the average.
+        outflow: True for money out, False for money in.
+
+    Returns:
+        The monthly average in currency units, negative for money out.
+    """
     months = set(_months_before(today, VARIABLE_MONTHS))
-    recurring_payees = {r["payee"] for r in known if (r["amount"] < 0) == outflow}
+    recurring_payees = {r.payee for r in known if (r.amount < 0) == outflow}
     total = sum(
         tx["amount"]
         for tx in transactions
@@ -145,23 +174,50 @@ def _other_average(
 def variable_average(
     transactions: list[dict[str, Any]], today: date, known: list[Recurring]
 ) -> float:
-    """Average monthly outflow over the last 3 full months, recurring charges excluded."""
+    """Average the monthly outflow over the last 3 full months, recurring charges excluded.
+
+    Args:
+        transactions: The budget's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`, left out of the average.
+
+    Returns:
+        The monthly average in currency units, negative.
+    """
     return _other_average(transactions, today, known, outflow=True)
 
 
 def income_average(
     transactions: list[dict[str, Any]], today: date, known: list[Recurring]
 ) -> float:
-    """Average monthly inflow over the last 3 full months, recurring income excluded."""
+    """Average the monthly inflow over the last 3 full months, recurring income excluded.
+
+    Args:
+        transactions: The budget's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`, left out of the average.
+
+    Returns:
+        The monthly average in currency units.
+    """
     return _other_average(transactions, today, known, outflow=False)
 
 
 def month_to_date(
     transactions: list[dict[str, Any]], today: date, known: list[Recurring]
 ) -> tuple[float, float]:
-    """(spent, received) since the 1st of this month, recurring amounts excluded."""
+    """Sum what was spent and received since the 1st of this month, recurring amounts excluded.
+
+    Args:
+        transactions: The budget's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`, left out of the average.
+
+    Returns:
+        (spent, received) in currency units; spent is negative.
+    """
     this_month = today.isoformat()[:7]
-    recurring_payees = {(r["payee"], r["amount"] < 0) for r in known}
+    recurring_payees = {(r.payee, r.amount < 0) for r in known}
     spent = received = 0
     for tx in transactions:
         if not _usable(tx) or tx["date"][:7] != this_month:
@@ -177,6 +233,15 @@ def month_to_date(
 
 
 def _horizon(today: date, until: str) -> list[tuple[int, int]]:
+    """List the months from today's month to the horizon.
+
+    Args:
+        today: The day the forecast is made.
+        until: Last month, YYYY-MM.
+
+    Returns:
+        (year, month) pairs, in order.
+    """
     year, month = today.year, today.month
     end_year, end_month = (int(part) for part in until.split("-"))
     months = []
@@ -187,7 +252,16 @@ def _horizon(today: date, until: str) -> list[tuple[int, int]]:
 
 
 def _spread(total: int, first_day: int, last_day: int) -> dict[int, int]:
-    """Split `total` milliunits evenly over the days, in whole cents, summing exactly."""
+    """Split milliunits evenly over days, in whole cents, summing exactly.
+
+    Args:
+        total: The amount to spread, in milliunits.
+        first_day: First day of the month to receive a share.
+        last_day: Last day of the month to receive a share.
+
+    Returns:
+        The amount falling on each day; empty when there is nothing or no day.
+    """
     days = last_day - first_day + 1
     if days <= 0 or not total:
         return {}
@@ -205,34 +279,57 @@ def _dated(  # pylint: disable=too-many-arguments
     days: int,
     today: date,
 ) -> dict[int, int]:
-    """Milliunits falling on a given day: recurring amounts from first_day, and one-offs."""
+    """Place recurring amounts and one-offs on their days of one month.
+
+    Args:
+        recurring: Recurring amounts; only those on or after first_day count.
+        one_offs: One-off amounts; only those in this month and after today count.
+        label: The month, YYYY-MM.
+        first_day: First day still to project.
+        days: Number of days in the month; a recurring day beyond it falls on the last.
+        today: The day the forecast is made.
+
+    Returns:
+        Milliunits falling on each day.
+    """
     dated: dict[int, int] = defaultdict(int)
     for r in recurring:
-        if r["day"] >= first_day:
-            dated[min(r["day"], days)] += amount_to_milliunit(r["amount"])
+        if r.day >= first_day:
+            dated[min(r.day, days)] += amount_to_milliunit(r.amount)
     for o in one_offs:
-        if o["date"].startswith(label) and o["date"] > today.isoformat():
-            dated[int(o["date"][8:10])] += amount_to_milliunit(o["amount"])
+        if o.date.isoformat().startswith(label) and o.date > today:
+            dated[o.date.day] += amount_to_milliunit(o.amount)
     return dated
 
 
 def _walk(
     label: str, balance: int, first_day: int, days: int, daily: list[dict[int, int]]
 ) -> tuple[MonthProjection, int]:
-    """Walk one month day by day from first_day; return it and its closing balance."""
+    """Walk one month day by day from first_day.
+
+    Args:
+        label: The month, YYYY-MM.
+        balance: Balance at the start, in milliunits.
+        first_day: First day to walk.
+        days: Number of days in the month.
+        daily: Amounts per day, in milliunits, one mapping per source.
+
+    Returns:
+        The month's projection, and its closing balance in milliunits.
+    """
     running = lowest = balance
     for day in range(first_day, days + 1):
         running += sum(flow.get(day, 0) for flow in daily)
         lowest = min(lowest, running)
     amounts = [amount for flow in daily for amount in flow.values()]
-    month: MonthProjection = {
-        "month": label,
-        "start": milliunit_to_amount(balance),
-        "inflows": milliunit_to_amount(sum(a for a in amounts if a > 0)),
-        "outflows": milliunit_to_amount(sum(a for a in amounts if a < 0)),
-        "end": milliunit_to_amount(running),
-        "lowest": milliunit_to_amount(lowest),
-    }
+    month = MonthProjection(
+        month=label,
+        start=milliunit_to_amount(balance),
+        inflows=milliunit_to_amount(sum(a for a in amounts if a > 0)),
+        outflows=milliunit_to_amount(sum(a for a in amounts if a < 0)),
+        end=milliunit_to_amount(running),
+        lowest=milliunit_to_amount(lowest),
+    )
     return month, running
 
 
@@ -255,6 +352,20 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
     is left is projected: the averages minus what was already spent
     (`spent_this_month`, negative) and received (`received_this_month`), and
     recurring amounts dated after today.
+
+    Args:
+        start_balance: Today's balance, in currency units.
+        today: The day the forecast is made.
+        until: Last month to project, YYYY-MM.
+        recurring: Recurring charges and income, on their days.
+        variable_monthly: Monthly spending besides recurring charges, negative.
+        monthly_income: Monthly income besides recurring income.
+        one_offs: Amounts expected once, on their dates.
+        spent_this_month: Already spent since the 1st, negative.
+        received_this_month: Already received since the 1st.
+
+    Returns:
+        The projected months and the first one whose lowest balance is below zero.
     """
     balance = amount_to_milliunit(start_balance)
     variable = amount_to_milliunit(variable_monthly)
@@ -277,6 +388,6 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         ]
         projection, balance = _walk(label, balance, first_day, days, daily)
         months.append(projection)
-        if projection["lowest"] < 0 and first_shortfall is None:
+        if projection.lowest < 0 and first_shortfall is None:
             first_shortfall = label
-    return {"months": months, "first_shortfall": first_shortfall}
+    return Projection(months=months, first_shortfall=first_shortfall)

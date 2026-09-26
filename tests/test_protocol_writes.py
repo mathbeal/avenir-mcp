@@ -193,6 +193,15 @@ def test_undo_leaves_alone_what_was_changed_since(budget: _Budget) -> None:
     assert len(budget.patches) == 1
 
 
+def test_undo_with_a_damaged_journal_says_which_line(budget: _Budget, tmp_path: Path) -> None:
+    """A damaged journal is a tool error naming the line, not a crash; nothing is written."""
+    (tmp_path / "journal.jsonl").write_text("not json\n", encoding="utf-8")
+    result = call("undo_operation", {"budget_id": "b1"}, accept)
+    assert result.is_error
+    assert "line 1, is not a journal entry" in result.content[0].text
+    assert not budget.patches
+
+
 def test_undo_without_elicitation_needs_the_code(budget: _Budget) -> None:
     """Undo is a write too: previewed, then confirmed with its own code."""
     op_id = call(

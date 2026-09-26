@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
@@ -21,9 +21,9 @@ from fastmcp.server.elicitation import (  # pylint: disable=import-error
 )
 from mcp import types  # pylint: disable=import-error
 from mcp_types.version import MODERN_PROTOCOL_VERSIONS  # pylint: disable=import-error
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
 
 from avenir_mcp import client, journal, writes
+from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 
 logger = logging.getLogger(__name__)
@@ -39,8 +39,7 @@ _QUESTION_KEY = "confirm"
 WriteStatus = Literal["applied", "confirmation_required", "declined", "nothing_to_do"]
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class WriteResult(TypedDict):
+class WriteResult(Model):
     """The outcome of a write tool."""
 
     status: WriteStatus
@@ -64,34 +63,61 @@ class WriteResult(TypedDict):
 
 
 def result_of(status: WriteStatus, message: str, plan: writes.Plan, **extra: Any) -> WriteResult:
-    """Build a write tool's result from a plan; `extra` may set confirmation and operation_id."""
-    return {
-        "status": status,
-        "message": message,
-        "changes": plan["changes"],
-        "unchanged_count": plan["unchanged_count"],
-        "conflicts": plan["conflicts"],
-        "confirmation": extra.get("confirmation"),
-        "operation_id": extra.get("operation_id"),
-    }
+    """Build a write tool's result from a plan.
+
+    Args:
+        status: The outcome.
+        message: What happened and what to do next, for the agent to relay.
+        plan: The changes, unchanged count and conflicts to report.
+        **extra: confirmation and operation_id, when there are any.
+
+    Returns:
+        The result, every field set.
+    """
+    return WriteResult(
+        status=status,
+        message=message,
+        changes=plan.changes,
+        unchanged_count=plan.unchanged_count,
+        conflicts=plan.conflicts,
+        confirmation=extra.get("confirmation"),
+        operation_id=extra.get("operation_id"),
+    )
 
 
 def describe(plan: writes.Plan, action: str) -> str:
-    """The question put to the user: the first 20 changes, and how many more."""
+    """Write the question put to the user: the first 20 changes, and how many more.
+
+    Args:
+        plan: The changes to confirm.
+        action: What is done to them, e.g. "Recategorise".
+
+    Returns:
+        The question; bank text in it is made safe to show.
+    """
     lines = [
-        f"- {c['date']} {untrusted(c['payee'])} {c['amount']:.2f}: "
-        f"{untrusted(c['from_category']) or 'no category'} → "
-        f"{untrusted(c['to_category']) or 'no category'}"
-        for c in plan["changes"][:20]
+        f"- {c.date} {untrusted(c.payee)} {c.amount:.2f}: "
+        f"{untrusted(c.from_category) or 'no category'} → "
+        f"{untrusted(c.to_category) or 'no category'}"
+        for c in plan.changes[:20]
     ]
-    more = len(plan["changes"]) - len(lines)
+    more = len(plan.changes) - len(lines)
     if more > 0:
         lines.append(f"- … and {more} more")
-    return f"{action} {len(plan['changes'])} transaction(s)?\n" + "\n".join(lines)
+    return f"{action} {len(plan.changes)} transaction(s)?\n" + "\n".join(lines)
 
 
 def _answer(action: str, content: dict[str, Any] | None) -> WriteStatus | None:
-    """Read the user's answer; None when nobody answered (the question was dismissed)."""
+    """Read the user's answer to an elicitation.
+
+    Args:
+        action: accept, decline or cancel.
+        content: The form the user filled in, if any.
+
+    Returns:
+        "applied" for a ticked yes, "declined" for a no or an unticked form, None when
+        nobody answered (the question was dismissed).
+    """
     if action == "accept":
         # An accepted form with the box left unticked is not a yes.
         return "applied" if handle_elicit_accept(_YES_NO, content).data is True else "declined"
@@ -101,7 +127,21 @@ def _answer(action: str, content: dict[str, Any] | None) -> WriteStatus | None:
 
 
 def _spend_code(confirmation: str, budget_id: str, subject: object, required: bool) -> WriteStatus:
-    """ "applied" when the code was issued for exactly this subject; otherwise an error."""
+    """Spend a confirmation code.
+
+    Args:
+        confirmation: The code from a previous preview.
+        budget_id: YNAB budget UUID or 'last-used'.
+        subject: The exact change being confirmed, as JSON data.
+        required: True when only an answer in the client may confirm.
+
+    Returns:
+        "applied", when the code was issued for exactly this subject.
+
+    Raises:
+        ToolError: If codes are disabled, or the code is unknown, expired, spent or
+            issued for other changes.
+    """
     if required:
         raise ToolError(
             "Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again "
@@ -122,6 +162,19 @@ def _modern_answer(
 
     The request state carries the preview's fingerprint: an answer to a preview of
     other changes is refused.
+
+    Args:
+        ctx: The MCP context of the call.
+        budget_id: YNAB budget UUID or 'last-used'.
+        subject: The exact change being confirmed, as JSON data.
+        question: What the user is asked.
+
+    Returns:
+        The input request to return on the first call; then "applied", "declined",
+        or None when nobody answered.
+
+    Raises:
+        ToolError: If the answer was given to a preview of other changes.
     """
     fingerprint = writes.fingerprint(budget_id, subject)
     responses = ctx.input_responses
@@ -144,7 +197,18 @@ def _modern_answer(
 async def _answer_in_client(
     ctx: Context, budget_id: str, subject: object, question: str
 ) -> WriteStatus | None | types.InputRequiredResult:
-    """The user's answer given in the client; None when nobody answered."""
+    """Ask the user in the client, the way the connection's protocol version allows.
+
+    Args:
+        ctx: The MCP context of the call.
+        budget_id: YNAB budget UUID or 'last-used'.
+        subject: The exact change being confirmed, as JSON data.
+        question: What the user is asked.
+
+    Returns:
+        "applied" or "declined"; an input request on a 2026-07-28 connection; None
+        when nobody answered.
+    """
     rc = ctx.request_context
     if rc is not None and rc.protocol_version in MODERN_PROTOCOL_VERSIONS:
         return _modern_answer(ctx, budget_id, subject, question)
@@ -155,14 +219,27 @@ async def _answer_in_client(
 async def ask(
     ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
 ) -> WriteStatus | str | types.InputRequiredResult:
-    """Return "applied" when the user agreed, "declined", a code to confirm later, or
-    an input request the tool must return so the client can ask (2026-07-28).
+    """Confirm a write with the user.
 
     `subject` is the exact change being confirmed: a code, or an answer, only ever
-    confirms it.
+    confirms it. With AVENIR_MCP_REQUIRE_ELICITATION=1 only the user's answer in the
+    client counts: an agent could relay a code without asking, so codes are neither
+    issued nor accepted.
 
-    With AVENIR_MCP_REQUIRE_ELICITATION=1 only the user's answer in the client counts:
-    an agent could relay a code without asking, so codes are neither issued nor accepted.
+    Args:
+        ctx: The MCP context of the call.
+        budget_id: YNAB budget UUID or 'last-used'.
+        subject: The exact change being confirmed, as JSON data.
+        question: What the user is asked.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        "applied" when the user agreed, "declined", a code to confirm later, or an
+        input request the tool must return so the client can ask (2026-07-28).
+
+    Raises:
+        ToolError: If the code is refused, or if confirmation codes are forbidden and
+            the client cannot ask.
     """
     required = os.getenv("AVENIR_MCP_REQUIRE_ELICITATION") == "1"
     if confirmation is not None:
@@ -193,15 +270,27 @@ async def write_plan(
     action: str,
     confirmation: str | None,
 ) -> tuple[WriteResult | types.InputRequiredResult, str | None]:
-    """Confirm and apply a plan; return the result and the new operation id."""
-    if not plan["changes"]:
+    """Confirm a recategorisation plan, apply it and journal it.
+
+    Args:
+        ctx: The MCP context of the call.
+        budget_id: YNAB budget UUID or 'last-used'.
+        plan: The changes to make.
+        action: What is done to them, e.g. "Recategorise", for the question.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        The result (or the input request to return), and the new operation's id when
+        the plan was applied.
+    """
+    if not plan.changes:
         message = "Nothing to change." + (
-            f" {len(plan['conflicts'])} transaction(s) changed since and were left alone."
-            if plan["conflicts"]
+            f" {len(plan.conflicts)} transaction(s) changed since and were left alone."
+            if plan.conflicts
             else ""
         )
         return result_of("nothing_to_do", message, plan), None
-    decision = await ask(ctx, budget_id, plan["changes"], describe(plan, action), confirmation)
+    decision = await ask(ctx, budget_id, plan.changes, describe(plan, action), confirmation)
     if isinstance(decision, types.InputRequiredResult):
         return decision, None
     if decision == "declined":
@@ -213,15 +302,15 @@ async def write_plan(
         )
         return result_of("confirmation_required", message, plan, confirmation=decision), None
     await client.set_transaction_categories(
-        budget_id, [(c["transaction_id"], c["to_category_id"]) for c in plan["changes"]]
+        budget_id, [(c.transaction_id, c.to_category_id) for c in plan.changes]
     )
-    moves: list[journal.Move] = [
-        {
-            "transaction_id": c["transaction_id"],
-            "from_category_id": c["from_category_id"],
-            "to_category_id": c["to_category_id"],
-        }
-        for c in plan["changes"]
+    moves = [
+        journal.Move(
+            transaction_id=c.transaction_id,
+            from_category_id=c.from_category_id,
+            to_category_id=c.to_category_id,
+        )
+        for c in plan.changes
     ]
     operation_id = journal.Journal(journal.default_path()).record(budget_id, "categorize", moves)
     message = f"Applied. undo_operation with operation_id {operation_id} reverts it."
@@ -229,8 +318,7 @@ async def write_plan(
     return result, operation_id
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class NotApplied(TypedDict):
+class NotApplied(Model):
     """Why a confirmed write did not happen, in a tool result's own fields."""
 
     status: WriteStatus
@@ -244,33 +332,60 @@ class NotApplied(TypedDict):
 
 
 def not_applied(decision: WriteStatus | str, question: str) -> NotApplied | None:
-    """Turn ask()'s answer into result fields, or None when the write may proceed."""
+    """Turn ask()'s answer into result fields.
+
+    Args:
+        decision: What :func:`ask` returned, other than an input request.
+        question: What the user was asked, repeated in the message.
+
+    Returns:
+        None when the write may proceed; otherwise its status, message and code.
+    """
     if decision == "applied":
         return None
     if decision == "declined":
-        return {
-            "status": "declined",
-            "message": "The user declined: nothing changed.",
-            "confirmation": None,
-        }
-    return {
-        "status": "confirmation_required",
-        "message": (
-            f"Nothing changed yet. {question} If the user agrees, call again with this code."
-        ),
-        "confirmation": decision,
-    }
+        return NotApplied(
+            status="declined", message="The user declined: nothing changed.", confirmation=None
+        )
+    return NotApplied(
+        status="confirmation_required",
+        message=f"Nothing changed yet. {question} If the user agrees, call again with this code.",
+        confirmation=decision,
+    )
 
 
 async def gate(
     ctx: Context, budget_id: str, subject: object, question: str, confirmation: str | None
 ) -> NotApplied | types.InputRequiredResult | None:
-    """Ask for confirmation; None when the write may proceed, otherwise what to return.
+    """Ask for confirmation before a write.
 
     A tool returns an InputRequiredResult as is, and merges NotApplied fields
-    into its own result.
+    into its own result with :func:`merged`.
+
+    Args:
+        ctx: The MCP context of the call.
+        budget_id: YNAB budget UUID or 'last-used'.
+        subject: The exact change being confirmed, as JSON data.
+        question: What the user is asked.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        None when the write may proceed; otherwise what to return instead.
     """
     decision = await ask(ctx, budget_id, subject, question, confirmation)
     if isinstance(decision, types.InputRequiredResult):
         return decision
     return not_applied(decision, question)
+
+
+def merged[R: Model](result: R, stop: NotApplied) -> R:
+    """Give a tool's result the status, message and confirmation of a write not applied.
+
+    Args:
+        result: The tool's result, as previewed.
+        stop: Why the write did not happen.
+
+    Returns:
+        A copy of the result with those three fields replaced.
+    """
+    return result.model_copy(update=stop.model_dump())

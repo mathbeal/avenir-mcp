@@ -52,9 +52,11 @@ def _imports(tree: ast.Module) -> tuple[dict[str, str], dict[str, str]]:
 
 
 def _placeholder(node: ast.expr) -> str:
-    """A readable name for an interpolated expression: item['date'] -> date."""
+    """A readable name for an interpolated expression: item['date'] or item.date -> date."""
     if isinstance(node, ast.Name):
         return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
     if isinstance(node, ast.Subscript):
         if isinstance(node.slice, ast.Constant):
             return str(node.slice.value)

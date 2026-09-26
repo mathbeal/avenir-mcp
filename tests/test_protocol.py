@@ -129,3 +129,36 @@ def test_budget_vs_actual_describes_every_field() -> None:
     item = schema["properties"]["result"]["items"]["properties"]
     assert {"group", "utilization_pct"} <= set(item)
     assert all(field.get("description") for field in item.values())
+
+
+def test_descriptions_carry_no_docstring_sections() -> None:
+    """Agents read the prose of a docstring; Args, Returns and Raises stay in the code."""
+
+    async def descriptions() -> dict[str, str]:
+        server.configure(enable_writes=True)
+        try:
+            async with Client(server.mcp) as mcp_client:
+                found = {t.name: t.description or "" for t in await mcp_client.list_tools()}
+                found |= {
+                    f"resource {r.name}": r.description or ""
+                    for r in await mcp_client.list_resources()
+                }
+                found |= {
+                    f"template {r.name}": r.description or ""
+                    for r in await mcp_client.list_resource_templates()
+                }
+                found |= {
+                    f"prompt {p.name}": p.description or "" for p in await mcp_client.list_prompts()
+                }
+                return found
+        finally:
+            server.configure(enable_writes=False)
+
+    found = asyncio.run(descriptions())
+    assert len(found) == 25
+    leaking = {
+        name
+        for name, text in found.items()
+        if any(section in text for section in ("Args:", "Returns:", "Raises:"))
+    }
+    assert not leaking

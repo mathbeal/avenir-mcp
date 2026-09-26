@@ -21,10 +21,13 @@ _THIS_MACHINE = {"127.0.0.1", "localhost", "::1"}
 
 
 def _base_url() -> str:
-    """YNAB's API, or AVENIR_MCP_YNAB_URL (a demo budget server for evaluations).
+    """Give YNAB's API, or AVENIR_MCP_YNAB_URL (a demo budget server for evaluations).
 
     Every request carries the token, so it goes over https — plain http only to a
     stand-in on this machine.
+
+    Returns:
+        The base URL, without a trailing slash.
 
     Raises:
         RuntimeError: If AVENIR_MCP_YNAB_URL would send the token in clear.
@@ -45,10 +48,16 @@ _SEGMENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 
 
 def _url(path: str) -> str:
-    """The full URL of an API path whose every segment is a plain id or name.
+    """Build the full URL of an API path whose every segment is a plain id or name.
 
     Ids come from agents, and an agent may have read a malicious memo: an id such
     as "x/../../user" must not steer a request to another endpoint.
+
+    Args:
+        path: The API path, such as "/budgets/{id}/accounts".
+
+    Returns:
+        The base URL followed by the path.
 
     Raises:
         ValueError: If a segment is not a YNAB id.
@@ -120,7 +129,13 @@ def milliunit_to_amount(milliunit: int) -> float:
 
 
 def _check(response: Any) -> dict[str, Any]:
-    """Return the JSON body, or raise with YNAB's own error detail on a 4xx/5xx.
+    """Check a response: its JSON body, or YNAB's own error detail on a 4xx/5xx.
+
+    Args:
+        response: The httpx response.
+
+    Returns:
+        The JSON body.
 
     Raises:
         RuntimeError: "YNAB <status>: <detail>" when the API rejects the request.
@@ -139,11 +154,17 @@ _TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 
 async def _request(method: str, path: str, **kwargs: Any) -> dict[str, Any]:
-    """Send an authenticated request to a YNAB API path and return its JSON body.
-
-    `method` is get, patch, post or delete.
+    """Send an authenticated request to a YNAB API path.
 
     The path is checked before anything is opened: a bad id never reaches the network.
+
+    Args:
+        method: get, patch, post or delete.
+        path: The API path.
+        **kwargs: Passed to httpx: params, json.
+
+    Returns:
+        The response's JSON body.
 
     Raises:
         ValueError: If a path segment is not a YNAB id.
@@ -158,22 +179,53 @@ async def _request(method: str, path: str, **kwargs: Any) -> dict[str, Any]:
 
 
 async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-    """GET a YNAB API path, with optional query parameters."""
+    """GET a YNAB API path, with optional query parameters.
+
+    Args:
+        path: The API path.
+        params: Query parameters, if any.
+
+    Returns:
+        The response's JSON body.
+    """
     return await _request("get", path, params=params or {})
 
 
 async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """PATCH a YNAB API path with a JSON body."""
+    """PATCH a YNAB API path with a JSON body.
+
+    Args:
+        path: The API path.
+        body: The JSON body.
+
+    Returns:
+        The response's JSON body.
+    """
     return await _request("patch", path, json=body)
 
 
 async def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """POST a JSON body to a YNAB API path."""
+    """POST a JSON body to a YNAB API path.
+
+    Args:
+        path: The API path.
+        body: The JSON body.
+
+    Returns:
+        The response's JSON body.
+    """
     return await _request("post", path, json=body)
 
 
 async def _delete(path: str) -> dict[str, Any]:
-    """DELETE a YNAB API path."""
+    """DELETE a YNAB API path.
+
+    Args:
+        path: The API path.
+
+    Returns:
+        The response's JSON body.
+    """
     return await _request("delete", path)
 
 
@@ -370,12 +422,18 @@ async def create_category(budget_id: str, category_group_id: str, name: str) -> 
 def amount_to_milliunit(amount: float) -> int:
     """Convert a decimal amount to YNAB milliunits, rounding to avoid float drift.
 
-    Examples:
-        >>> amount_to_milliunit(111.32)
-        111320
+    Args:
+        amount: An amount in currency units.
+
+    Returns:
+        The amount in milliunits (thousandths of the currency unit).
 
     Raises:
         ValueError: If the amount is not a finite number.
+
+    Examples:
+        >>> amount_to_milliunit(111.32)
+        111320
     """
     if not math.isfinite(amount):
         raise ValueError(f"An amount must be a finite number, got {amount!r}.")
@@ -538,7 +596,12 @@ async def update_category(
 
 
 async def set_transactions_cleared(budget_id: str, tx_ids: list[str], cleared: str) -> list[str]:
-    """Set the cleared status ("cleared", "uncleared" or "reconciled") in one bulk request.
+    """Set the cleared status of transactions in one bulk request.
+
+    Args:
+        budget_id: YNAB budget UUID or "last-used".
+        tx_ids: Transaction UUIDs to update.
+        cleared: "cleared", "uncleared" or "reconciled".
 
     Returns:
         The ids of the transactions YNAB updated.
@@ -552,6 +615,11 @@ async def set_transactions_cleared(budget_id: str, tx_ids: list[str], cleared: s
 
 
 async def delete_transaction(budget_id: str, tx_id: str) -> None:
-    """Delete one transaction."""
+    """Delete one transaction.
+
+    Args:
+        budget_id: YNAB budget UUID or "last-used".
+        tx_id: Transaction UUID.
+    """
     logger.info("Deleting transaction %s", tx_id)
     await _delete(f"/budgets/{budget_id}/transactions/{tx_id}")

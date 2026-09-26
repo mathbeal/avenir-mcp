@@ -42,6 +42,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 |---|---|---|
 | formato | `black --check`, `isort --check` | un archivo no está formateado |
 | lint | `pylint` | la nota es inferior a 10,00 |
+| docstrings | `ruff check avenir_mcp` | un docstring no sigue el estilo Google, u omite un argumento, el valor devuelto o una excepción lanzada |
 | tipos | `mypy` (estricto) | cualquier error de tipos |
 | pruebas | `pytest` | una prueba falla, se emite **cualquier aviso**, o la cobertura de líneas **o ramas** es inferior al 100 % |
 | vocabulario | `lexdrift check avenir_mcp --baseline lexdrift.lock` | aparece una palabra nueva para una idea ya nombrada |

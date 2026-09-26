@@ -7,12 +7,11 @@ made in milliunits, so no rounding error can invent a difference.
 from __future__ import annotations
 
 from datetime import date, timedelta
-from typing import Any, TypedDict
-
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+from typing import Any
 
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
+from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 
 MAX_LISTED = 50
@@ -20,8 +19,7 @@ DUPLICATE_WINDOW_DAYS = 3
 DUPLICATE_LOOKBACK_DAYS = 60
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Uncleared(TypedDict):
+class Uncleared(Model):
     """A transaction the bank has not shown yet."""
 
     transaction_id: str
@@ -34,8 +32,7 @@ class Uncleared(TypedDict):
     """Payee as imported, cut to 80 characters. Untrusted bank text."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Analysis(TypedDict):
+class Analysis(Model):
     """An account compared with the bank's balance."""
 
     account_id: str
@@ -61,7 +58,14 @@ class Analysis(TypedDict):
 
 
 def _duplicates(transactions: list[dict[str, Any]]) -> list[list[str]]:
-    """Pairs with the same amount and merchant, dated a few days apart."""
+    """Find pairs with the same amount and merchant, dated a few days apart.
+
+    Args:
+        transactions: The account's transactions, amounts in milliunits.
+
+    Returns:
+        Pairs of transaction ids, oldest first within a pair.
+    """
     pairs: list[list[str]] = []
     ordered = sorted(transactions, key=lambda tx: tx["date"])
     for i, first in enumerate(ordered):
@@ -83,10 +87,19 @@ def analyse(
     bank_balance: float,
     today: date | None = None,
 ) -> Analysis:
-    """Analyse the account's cleared balance against `bank_balance` (currency units).
+    """Analyse an account's cleared balance against the balance the bank shows.
 
     `difference` is bank minus cleared: negative when YNAB counts more money
     than the bank. Duplicates are only looked for in the last 60 days.
+
+    Args:
+        account_id: The account to analyse.
+        transactions: The budget's transactions, amounts in milliunits.
+        bank_balance: The balance the bank shows, in currency units.
+        today: The day of the analysis; defaults to today.
+
+    Returns:
+        The balances, the difference, and what may explain it.
     """
     since = ((today or date.today()) - timedelta(days=DUPLICATE_LOOKBACK_DAYS)).isoformat()
     live = [
@@ -96,23 +109,23 @@ def analyse(
     uncleared = [tx for tx in live if tx.get("cleared") not in ("cleared", "reconciled")]
     cleared_total = sum(tx["amount"] for tx in cleared)
     difference = amount_to_milliunit(bank_balance) - cleared_total
-    return {
-        "account_id": account_id,
-        "bank_balance": bank_balance,
-        "cleared_balance": milliunit_to_amount(cleared_total),
-        "working_balance": milliunit_to_amount(sum(tx["amount"] for tx in live)),
-        "difference": milliunit_to_amount(difference),
-        "to_reconcile_count": sum(1 for tx in cleared if tx.get("cleared") == "cleared"),
-        "uncleared_count": len(uncleared),
-        "uncleared": [
-            {
-                "transaction_id": tx["id"],
-                "date": tx["date"],
-                "amount": milliunit_to_amount(tx["amount"]),
-                "payee": untrusted(tx.get("payee_name")),
-            }
+    return Analysis(
+        account_id=account_id,
+        bank_balance=bank_balance,
+        cleared_balance=milliunit_to_amount(cleared_total),
+        working_balance=milliunit_to_amount(sum(tx["amount"] for tx in live)),
+        difference=milliunit_to_amount(difference),
+        to_reconcile_count=sum(1 for tx in cleared if tx.get("cleared") == "cleared"),
+        uncleared_count=len(uncleared),
+        uncleared=[
+            Uncleared(
+                transaction_id=tx["id"],
+                date=tx["date"],
+                amount=milliunit_to_amount(tx["amount"]),
+                payee=untrusted(tx.get("payee_name")),
+            )
             for tx in uncleared[:MAX_LISTED]
         ],
-        "explained_by": [tx["id"] for tx in uncleared if difference and tx["amount"] == difference],
-        "possible_duplicates": _duplicates([tx for tx in live if tx["date"] >= since]),
-    }
+        explained_by=[tx["id"] for tx in uncleared if difference and tx["amount"] == difference],
+        possible_duplicates=_duplicates([tx for tx in live if tx["date"] >= since]),
+    )

@@ -33,8 +33,9 @@ Only approve transactions whose category has been checked.
 
 ## Devuelve
 
-`object`
-
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `approved` | integer | Number of transactions YNAB updated. |
 
 ## Ejemplo
 

@@ -12,13 +12,14 @@ import os
 import secrets
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any
 
-from pydantic import ConfigDict, with_config  # pylint: disable=import-error
+from pydantic import ConfigDict, ValidationError  # pylint: disable=import-error
+
+from avenir_mcp.model import Model
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Move(TypedDict):
+class Move(Model):
     """One transaction's category before and after an operation."""
 
     transaction_id: str
@@ -29,9 +30,11 @@ class Move(TypedDict):
     """Category after the operation; null for none."""
 
 
-@with_config(ConfigDict(use_attribute_docstrings=True))
-class Entry(TypedDict):
+class Entry(Model):
     """An operation as recorded in the journal."""
+
+    # A line written by a later version may carry fields this one does not know.
+    model_config = ConfigDict(extra="ignore")
 
     operation_id: str
     """Random id of the operation."""
@@ -43,7 +46,7 @@ class Entry(TypedDict):
     """When it was applied, ISO 8601 in UTC."""
     moves: list[Move]
     """Category changes (categorize operations)."""
-    details: dict[str, Any]
+    details: dict[str, Any] = {}
     """What undoing other kinds needs, as identifiers."""
 
 
@@ -60,19 +63,54 @@ class Journal:
     """Operations applied through the server, newest last."""
 
     def __init__(self, path: Path) -> None:
+        """Open the journal at a path; the file is created on the first write.
+
+        Args:
+            path: The JSON Lines file.
+        """
         self._path = path
 
     def _append(self, line: dict[str, Any]) -> None:
+        """Append one line, creating the file readable by its owner only.
+
+        Args:
+            line: The JSON object to write.
+        """
         self._path.parent.mkdir(parents=True, exist_ok=True)
         descriptor = os.open(self._path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
         with os.fdopen(descriptor, "a", encoding="utf-8") as file:
             file.write(json.dumps(line, separators=(",", ":")) + "\n")
 
-    def _lines(self) -> list[dict[str, Any]]:
+    def _lines(self) -> tuple[list[Entry], set[str]]:
+        """Read the journal.
+
+        Returns:
+            The operations recorded, oldest first, and the ids marked undone.
+
+        Raises:
+            ValueError: If a line is neither an operation nor an undo mark, naming the
+                file and the line.
+        """
+        entries: list[Entry] = []
+        undone: set[str] = set()
         if not self._path.exists():
-            return []
+            return entries, undone
         with self._path.open(encoding="utf-8") as file:
-            return [json.loads(line) for line in file if line.strip()]
+            for number, line in enumerate(file, start=1):
+                if not line.strip():
+                    continue
+                try:
+                    data = json.loads(line)
+                    if isinstance(data, dict) and isinstance(data.get("undone"), str):
+                        undone.add(data["undone"])
+                    else:
+                        entries.append(Entry.model_validate(data))
+                except (json.JSONDecodeError, ValidationError) as error:
+                    raise ValueError(
+                        f"{self._path}, line {number}, is not a journal entry: fix or remove "
+                        "that line, or move the file aside to start a new journal."
+                    ) from error
+        return entries, undone
 
     def record(
         self,
@@ -81,46 +119,54 @@ class Journal:
         moves: list[Move],
         details: dict[str, Any] | None = None,
     ) -> str:
-        """Append an applied operation and return its id.
+        """Append an applied operation.
 
-        `details` holds what undoing an operation other than a recategorisation
-        needs, as identifiers only.
+        Args:
+            budget_id: The budget it changed.
+            kind: categorize, reconcile, budget or create.
+            moves: Category changes, for a recategorisation.
+            details: What undoing another kind needs, as identifiers only.
+
+        Returns:
+            The new operation's id.
         """
         operation_id = secrets.token_hex(6)
-        entry: Entry = {
-            "operation_id": operation_id,
-            "budget_id": budget_id,
-            "kind": kind,
-            "applied_at": datetime.now(UTC).isoformat(timespec="seconds"),
-            "moves": moves,
-            "details": details or {},
-        }
-        self._append(dict(entry))
+        entry = Entry(
+            operation_id=operation_id,
+            budget_id=budget_id,
+            kind=kind,
+            applied_at=datetime.now(UTC).isoformat(timespec="seconds"),
+            moves=moves,
+            details=details or {},
+        )
+        self._append(entry.model_dump(mode="json"))
         return operation_id
 
     def mark_undone(self, operation_id: str) -> None:
-        """Record that an operation has been undone."""
+        """Record that an operation has been undone.
+
+        Args:
+            operation_id: The operation undone.
+        """
         self._append({"undone": operation_id})
 
     def find(self, budget_id: str, operation_id: str | None = None) -> Entry | None:
-        """Return an operation of this budget still in effect.
+        """Find an operation of this budget still in effect.
 
-        With no id, return the most recent one; None if there is none.
+        Args:
+            budget_id: The budget the operation changed.
+            operation_id: The operation wanted; None for the most recent one.
+
+        Returns:
+            The operation, or None if there is none.
+
+        Raises:
+            ValueError: If a line of the journal is damaged.
         """
-        lines = self._lines()
-        undone = {line["undone"] for line in lines if "undone" in line}
-        for line in reversed(lines):
-            if "undone" in line or line["operation_id"] in undone:
+        entries, undone = self._lines()
+        for entry in reversed(entries):
+            if entry.operation_id in undone or entry.budget_id != budget_id:
                 continue
-            if line["budget_id"] != budget_id:
-                continue
-            if operation_id is None or line["operation_id"] == operation_id:
-                return {
-                    "operation_id": line["operation_id"],
-                    "budget_id": line["budget_id"],
-                    "kind": line["kind"],
-                    "applied_at": line["applied_at"],
-                    "moves": line["moves"],
-                    "details": line.get("details", {}),
-                }
+            if operation_id is None or entry.operation_id == operation_id:
+                return entry
         return None

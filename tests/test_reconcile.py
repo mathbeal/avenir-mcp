@@ -27,10 +27,10 @@ def test_matching_balance_has_no_difference() -> None:
     """Bank balance equal to the cleared balance: nothing to explain."""
     txs = [_tx("t1", 100000, "reconciled"), _tx("t2", -30000), _tx("t3", -5000, "uncleared")]
     result = reconcile.analyse("acc", txs, 70.0)
-    assert result["cleared_balance"] == 70.0
-    assert result["working_balance"] == 65.0
-    assert result["difference"] == 0.0
-    assert result["to_reconcile_count"] == 1
+    assert result.cleared_balance == 70.0
+    assert result.working_balance == 65.0
+    assert result.difference == 0.0
+    assert result.to_reconcile_count == 1
 
 
 def test_other_accounts_and_deleted_transactions_are_ignored() -> None:
@@ -40,17 +40,17 @@ def test_other_accounts_and_deleted_transactions_are_ignored() -> None:
         _tx("t2", -50000, account_id="other"),
         _tx("t3", -50000, deleted=True),
     ]
-    assert reconcile.analyse("acc", txs, 100.0)["difference"] == 0.0
+    assert reconcile.analyse("acc", txs, 100.0).difference == 0.0
 
 
 def test_uncleared_transaction_of_the_exact_difference_is_pointed_out() -> None:
     """If clearing one pending transaction closes the gap, say which."""
     txs = [_tx("t1", 100000), _tx("t2", -12340, "uncleared"), _tx("t3", -999, "uncleared")]
     result = reconcile.analyse("acc", txs, 87.66)
-    assert result["difference"] == -12.34
-    assert result["explained_by"] == ["t2"]
-    assert [u["transaction_id"] for u in result["uncleared"]] == ["t2", "t3"]
-    assert result["uncleared"][0]["amount"] == -12.34
+    assert result.difference == -12.34
+    assert result.explained_by == ["t2"]
+    assert [u.transaction_id for u in result.uncleared] == ["t2", "t3"]
+    assert result.uncleared[0].amount == -12.34
 
 
 def test_likely_duplicates_are_flagged() -> None:
@@ -62,15 +62,15 @@ def test_likely_duplicates_are_flagged() -> None:
         _tx("t4", -4500, payee_name="CB CAFE FACT 200926 525130******2", date="2026-09-20"),
     ]
     result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 24))
-    assert result["possible_duplicates"] == [["t1", "t2"]]
+    assert result.possible_duplicates == [["t1", "t2"]]
 
 
 def test_uncleared_list_is_bounded() -> None:
     """A neglected account cannot flood the answer."""
     txs = [_tx(f"t{i}", -1000, "uncleared") for i in range(80)]
     result = reconcile.analyse("acc", txs, 0.0)
-    assert len(result["uncleared"]) == reconcile.MAX_LISTED
-    assert result["uncleared_count"] == 80
+    assert len(result.uncleared) == reconcile.MAX_LISTED
+    assert result.uncleared_count == 80
 
 
 def test_old_look_alike_transactions_are_not_flagged() -> None:
@@ -82,11 +82,11 @@ def test_old_look_alike_transactions_are_not_flagged() -> None:
         _tx("t4", -4500, payee_name="CAFE", date="2026-09-21"),
     ]
     result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 24))
-    assert result["possible_duplicates"] == [["t3", "t4"]]
+    assert result.possible_duplicates == [["t3", "t4"]]
 
 
 def test_uncleared_payees_are_shown_on_one_line() -> None:
     """Bank text in the answer loses its line breaks and invisible characters."""
     txs = [_tx("t1", -5000, "uncleared", payee_name="SHOP\nRENT\u202e")]
-    item = reconcile.analyse("acc", txs, 0.0)["uncleared"][0]
-    assert item["payee"] == "SHOP RENT"
+    item = reconcile.analyse("acc", txs, 0.0).uncleared[0]
+    assert item.payee == "SHOP RENT"

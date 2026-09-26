@@ -10,10 +10,16 @@ import pytest
 
 from avenir_mcp import journal
 
-_MOVES: list[journal.Move] = [
-    {"transaction_id": "t1", "from_category_id": None, "to_category_id": "c-food"},
-    {"transaction_id": "t2", "from_category_id": "c-fun", "to_category_id": "c-food"},
+_MOVES = [
+    journal.Move(transaction_id="t1", from_category_id=None, to_category_id="c-food"),
+    journal.Move(transaction_id="t2", from_category_id="c-fun", to_category_id="c-food"),
 ]
+
+
+def _found(book: journal.Journal, budget_id: str, operation_id: str | None = None) -> journal.Entry:
+    entry = book.find(budget_id, operation_id)
+    assert entry is not None
+    return entry
 
 
 def test_recorded_operation_can_be_found_again(tmp_path: Path) -> None:
@@ -22,9 +28,9 @@ def test_recorded_operation_can_be_found_again(tmp_path: Path) -> None:
     op_id = book.record("b1", "categorize", _MOVES)
     entry = book.find("b1", op_id)
     assert entry is not None
-    assert entry["operation_id"] == op_id
-    assert entry["kind"] == "categorize"
-    assert entry["moves"] == _MOVES
+    assert entry.operation_id == op_id
+    assert entry.kind == "categorize"
+    assert entry.moves == _MOVES
 
 
 def test_latest_returns_the_last_operation_not_yet_undone(tmp_path: Path) -> None:
@@ -33,9 +39,9 @@ def test_latest_returns_the_last_operation_not_yet_undone(tmp_path: Path) -> Non
     first = book.record("b1", "categorize", _MOVES)
     second = book.record("b1", "categorize", _MOVES)
     book.record("b2", "categorize", _MOVES)
-    assert book.find("b1")["operation_id"] == second  # type: ignore[index]
+    assert _found(book, "b1").operation_id == second
     book.mark_undone(second)
-    assert book.find("b1")["operation_id"] == first  # type: ignore[index]
+    assert _found(book, "b1").operation_id == first
     book.mark_undone(first)
     assert book.find("b1") is None
 
@@ -101,7 +107,7 @@ def test_older_operation_can_be_named_while_newer_ones_exist(tmp_path: Path) -> 
     book = journal.Journal(tmp_path / "journal.jsonl")
     first = book.record("b1", "categorize", _MOVES)
     book.record("b1", "categorize", _MOVES)
-    assert book.find("b1", first)["operation_id"] == first  # type: ignore[index]
+    assert _found(book, "b1", first).operation_id == first
 
 
 def test_operation_details_are_kept(tmp_path: Path) -> None:
@@ -109,6 +115,32 @@ def test_operation_details_are_kept(tmp_path: Path) -> None:
     book = journal.Journal(tmp_path / "journal.jsonl")
     details = {"account_id": "acc", "reconciled_ids": ["t1"], "adjustment_id": "t9"}
     op_id = book.record("b1", "reconcile", [], details)
-    assert book.find("b1", op_id)["details"] == details  # type: ignore[index]
+    assert _found(book, "b1", op_id).details == details
     other = book.record("b1", "categorize", _MOVES)
-    assert book.find("b1", other)["details"] == {}  # type: ignore[index]
+    assert _found(book, "b1", other).details == {}
+
+
+def test_a_line_written_by_an_earlier_version_is_still_read(tmp_path: Path) -> None:
+    """An operation recorded without details, or with a field unknown here, stays undoable."""
+    path = tmp_path / "journal.jsonl"
+    path.write_text(
+        '{"operation_id":"op1","budget_id":"b1","kind":"categorize",'
+        '"applied_at":"2026-09-01T10:00:00+00:00","moves":[],"origin":"cli"}\n',
+        encoding="utf-8",
+    )
+    entry = journal.Journal(path).find("b1")
+    assert entry is not None
+    assert (entry.operation_id, entry.details) == ("op1", {})
+
+
+@pytest.mark.parametrize(
+    "line", ["not json", '{"operation_id": "op1"}', '["undone"]', '{"undone": 3}']
+)
+def test_a_damaged_line_is_named_with_a_way_forward(tmp_path: Path, line: str) -> None:
+    """A line that is not an operation stops the reading and says which one it is."""
+    path = tmp_path / "journal.jsonl"
+    journal.Journal(path).record("b1", "categorize", _MOVES)
+    with path.open("a", encoding="utf-8") as file:
+        file.write("\n" + line + "\n")
+    with pytest.raises(ValueError, match=r"line 3, is not a journal entry"):
+        journal.Journal(path).find("b1")

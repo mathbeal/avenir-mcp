@@ -42,6 +42,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 |---|---|---|
 | format | `black --check`, `isort --check` | a file is not formatted |
 | lint | `pylint` | the score is below 10.00 |
+| docstrings | `ruff check avenir_mcp` | a docstring is not in Google style, or leaves out an argument, the return value or an exception raised |
 | types | `mypy` (strict) | any type error |
 | tests | `pytest` | a test fails, **any warning** is raised, or coverage of lines **or branches** is below 100 % |
 | vocabulary | `lexdrift check avenir_mcp --baseline lexdrift.lock` | a new word appears for an idea already named |

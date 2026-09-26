@@ -123,7 +123,8 @@ def test_declined_creation_writes_nothing(ledger: _Ledger) -> None:
     [
         ({"account_id": "nope"}, "list_accounts"),
         ({"transactions": [dict(_ITEM, category_id="c-404")]}, "c-404"),
-        ({"transactions": [dict(_ITEM, date="20/09/2026")]}, "YYYY-MM-DD"),
+        ({"transactions": [dict(_ITEM, date="20/09/2026")]}, "transactions.0.date"),
+        ({"transactions": [dict(_ITEM, payee="typo")]}, "transactions.0.payee"),
         ({"transactions": [dict(_ITEM, date="2026-10-01")]}, "future"),
         ({"transactions": []}, "at least one"),
     ],
@@ -131,7 +132,7 @@ def test_declined_creation_writes_nothing(ledger: _Ledger) -> None:
 def test_invalid_creation_is_a_tool_error(
     ledger: _Ledger, change: dict[str, Any], expected: str
 ) -> None:
-    """Bad account, category or date is refused before anything is asked."""
+    """Bad account, category, date or field name is refused before anything is asked."""
     result = call("create_transactions", _args(**change))
     assert result.is_error
     assert expected in result.content[0].text

@@ -16,7 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 async def _off_budget(budget_id: str) -> set[str]:
-    """Ids of the budget's tracking accounts, whose transactions take no category."""
+    """List the budget's tracking accounts, whose transactions take no category.
+
+    Args:
+        budget_id: YNAB budget UUID or 'last-used'.
+
+    Returns:
+        Their ids.
+    """
     return {a["id"] for a in await client.get_accounts(budget_id) if not a["on_budget"]}
 
 
@@ -54,6 +61,13 @@ async def suggest_categories(
         budget_id: YNAB budget UUID or 'last-used'.
         limit: Maximum number of transactions in the page (default 50).
         cursor: next_cursor from the previous page; omit for the first page.
+
+    Returns:
+        One page of pending transactions, with suggestions and, on the first page, the
+            categories to choose from.
+
+    Raises:
+        ToolError: If the cursor was not issued by a previous page.
     """
     logger.info("Tool called: suggest_categories(limit=%d)", limit)
     transactions = await client.get_transactions(budget_id)
@@ -95,7 +109,16 @@ async def apply_categories(
     Args:
         budget_id: YNAB budget UUID or 'last-used'.
         assignments: {transaction_id, category_id} pairs, one per transaction.
+        ctx: The MCP context, used to ask the user.
         confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        Every change, before and after, and what was done, or an input request the client answers by
+        asking the user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If an assignment cannot be made (unknown transaction or category, a
+            transfer, a split, an off-budget account), or the confirmation code is refused.
     """
     logger.info("Tool called: apply_categories(n=%d)", len(assignments))
     transactions = await client.get_transactions(budget_id)

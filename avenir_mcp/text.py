@@ -18,7 +18,16 @@ _INVISIBLE = {"Cf"}
 
 
 def untrusted(text: str | None) -> str:
-    """One line of visible characters, at most MAX_TEXT long, marked with … when cut."""
+    """Make bank text safe to show: one line of visible characters.
+
+    Args:
+        text: Text from a bank or a stranger, or None.
+
+    Returns:
+        The text on one line: format characters dropped, line breaks and control
+        characters turned into spaces, runs of spaces collapsed; at most MAX_TEXT
+        long and marked with … when cut; empty for None.
+    """
     kept = []
     for char in text or "":
         category = unicodedata.category(char)

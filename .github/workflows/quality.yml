@@ -28,7 +28,7 @@ jobs:
       - run: uv lock --check
 
   lint:
-    name: black, isort, pylint
+    name: black, isort, pylint, ruff
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
@@ -44,6 +44,7 @@ jobs:
       - run: uv run black --check avenir_mcp tests evals docsgen
       - run: uv run isort --check avenir_mcp tests evals docsgen
       - run: uv run pylint avenir_mcp tests evals docsgen
+      - run: uv run ruff check avenir_mcp
 
   changelog:
     name: changelog matches the history
