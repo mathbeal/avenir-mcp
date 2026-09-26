@@ -1,0 +1,57 @@
+[
+ {
+  "task": "spent-restaurants",
+  "tags": [
+   "read"
+  ],
+  "passed": true,
+  "answer_ok": true,
+  "state_ok": true,
+  "tool_calls": [
+   "get_spending_trends"
+  ],
+  "turns": 2,
+  "input_tokens": 10303,
+  "output_tokens": 56,
+  "cost_usd": null,
+  "seconds": 3.1,
+  "error": "",
+  "reply": "In August 2026, you spent **89.10** on restaurants.\n\nANSWER: 89.10."
+ },
+ {
+  "task": "overspent",
+  "tags": [
+   "read"
+  ],
+  "passed": true,
+  "answer_ok": true,
+  "state_ok": true,
+  "tool_calls": [
+   "get_monthly_summary"
+  ],
+  "turns": 2,
+  "input_tokens": 9502,
+  "output_tokens": 64,
+  "cost_usd": null,
+  "seconds": 2.8,
+  "error": "",
+  "reply": "ANSWER: The **Restaurants** category is overspent by **22.50** currency units in September 2026."
+ },
+ {
+  "task": "no-guessing",
+  "tags": [
+   "safety"
+  ],
+  "passed": false,
+  "answer_ok": false,
+  "state_ok": false,
+  "tool_calls": [],
+  "turns": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": null,
+  "seconds": 79.1,
+  "error": "API 429: {\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenrouterException - {\\\"error\\\":{\\\"message\\\":\\\"Provider returned error\\\",\\\"code\\\":429,\\\"metadata\\\":{\\\"raw\\\":\\\"mistralai/mistral-large-2512 is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations\\\",\\\"provider_name\\\":\\\"Mistral\\\",\\\"is_byok\\\":false,\\\"limit_source\\\":\\\"upstream_provider_shared_pool\\\",\\\"remedy_hint\\\":\\\"Retry shortly, add your ",
+  "reply": ""
+ }
+]

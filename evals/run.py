@@ -12,10 +12,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess  # noqa: S404  # nosec B404 - runs the local `claude` CLI
 import sys
 import tempfile
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -102,23 +104,40 @@ def run_task(task: Task, model: str) -> dict[str, Any]:
         server.server_close()
     events = _events(done.stdout)
     final = next((e for e in reversed(events) if e.get("type") == "result"), {})
-    text = str(final.get("result", ""))
-    answer_ok, state_ok = task.answer(text), task.state(fake_ynab.STATE)
     usage = final.get("usage", {})
+    return scored(
+        task,
+        str(final.get("result", "")),
+        tool_calls=_tool_calls(events),
+        turns=final.get("num_turns"),
+        input_tokens=usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0),
+        output_tokens=usage.get("output_tokens", 0),
+        cost_usd=final.get("total_cost_usd"),
+        seconds=seconds,
+        exit_code=done.returncode,
+    )
+
+
+def scored(task: Task, reply: str, **measures: Any) -> dict[str, Any]:
+    """Score the agent's reply and the demo budget's state after a task.
+
+    Args:
+        task: The task that ran.
+        reply: The agent's final reply.
+        **measures: What the runner measured: tool calls, turns, tokens, time.
+
+    Returns:
+        The task's result, as written to evals/results.
+    """
+    answer_ok, state_ok = task.answer(reply), task.state(fake_ynab.STATE)
     return {
         "task": task.task_id,
         "tags": task.tags,
         "passed": answer_ok and state_ok,
         "answer_ok": answer_ok,
         "state_ok": state_ok,
-        "tool_calls": _tool_calls(events),
-        "turns": final.get("num_turns"),
-        "input_tokens": usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0),
-        "output_tokens": usage.get("output_tokens", 0),
-        "cost_usd": final.get("total_cost_usd"),
-        "seconds": seconds,
-        "reply": text[-600:],
-        "exit_code": done.returncode,
+        **measures,
+        "reply": reply[-600:],
     }
 
 
@@ -142,26 +161,49 @@ def _report(results: list[dict[str, Any]], model: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> int:
-    """Run the selected tasks and write the report."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default="sonnet")
-    parser.add_argument("--task", action="append", help="task id; repeat to run several")
-    options = parser.parse_args()
-    tasks = [t for t in TASKS if not options.task or t.task_id in options.task]
+def evaluate(runner: Callable[[Task, str], dict[str, Any]], model: str, ids: list[str]) -> int:
+    """Run the selected tasks with a runner, then write and print the report.
+
+    Args:
+        runner: Runs one task with a model and returns its scored result.
+        model: The model's name, as the runner knows it.
+        ids: The tasks to run; all of them when empty.
+
+    Returns:
+        0 when every task passed, 1 otherwise.
+    """
     results = []
-    for task in tasks:
-        result = run_task(task, options.model)
+    for task in [t for t in TASKS if not ids or t.task_id in ids]:
+        result = runner(task, model)
         results.append(result)
-        print(f"{task.task_id}: {'pass' if result['passed'] else 'FAIL'}", file=sys.stderr)
+        status = "pass" if result["passed"] else "FAIL"
+        print(f"{task.task_id}: {status} {result.get('error', '')[:200]}".rstrip(), file=sys.stderr)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    (RESULTS / f"{stamp}-{options.model}.json").write_text(json.dumps(results, indent=1))
-    report = _report(results, options.model)
-    (RESULTS / f"{stamp}-{options.model}.md").write_text(report)
+    name = f"{time.strftime('%Y%m%d-%H%M%S')}-{re.sub(r'[^A-Za-z0-9._-]+', '_', model)}"
+    (RESULTS / f"{name}.json").write_text(json.dumps(results, indent=1))
+    report = _report(results, model)
+    (RESULTS / f"{name}.md").write_text(report)
     print(report)
     return 0 if all(r["passed"] for r in results) else 1
 
 
+def cli(runner: Callable[[Task, str], dict[str, Any]], doc: str | None, model: str | None) -> int:
+    """Read the command line, then run the evaluation.
+
+    Args:
+        runner: Runs one task with a model and returns its scored result.
+        doc: The command's help text.
+        model: The default model; None to require --model.
+
+    Returns:
+        0 when every task passed, 1 otherwise.
+    """
+    parser = argparse.ArgumentParser(description=doc)
+    parser.add_argument("--model", default=model, required=model is None, help="model name")
+    parser.add_argument("--task", action="append", help="task id; repeat to run several")
+    options = parser.parse_args()
+    return evaluate(runner, options.model, options.task or [])
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(cli(run_task, __doc__, "sonnet"))

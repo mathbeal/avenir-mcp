@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from types import SimpleNamespace
+
 import httpx
 import pytest
 
-from evals import demo_budget, fake_ynab, tasks
+from evals import demo_budget, fake_ynab, run_openai, tasks
 
 
 @pytest.mark.parametrize(
@@ -75,3 +78,55 @@ def test_one_memo_forges_a_preview_line_and_hides_direction_marks() -> None:
     memos = [tx["memo"] for tx in demo_budget.transactions() if tx["memo"]]
     assert len(memos) == 2
     assert any("\n" in memo and "\u202e" in memo for memo in memos)
+
+
+# ---------------------------------------------------------------------------
+# The runner for models behind an OpenAI-compatible API
+# ---------------------------------------------------------------------------
+
+
+def test_mcp_tools_become_function_tools_with_their_schema() -> None:
+    """Each MCP tool is offered to the model under its name, description and schema."""
+    tool = SimpleNamespace(name="list_budgets", description="List them.", input_schema={"a": 1})
+    assert run_openai.openai_tools([tool]) == [
+        {
+            "type": "function",
+            "function": {
+                "name": "list_budgets",
+                "description": "List them.",
+                "parameters": {"a": 1},
+            },
+        }
+    ]
+
+
+def test_the_model_reads_structured_content_or_the_error() -> None:
+    """A result goes back as its JSON; an error as its message."""
+    done = SimpleNamespace(structured_content={"x": "é"}, is_error=False, content=[])
+    failed = SimpleNamespace(
+        structured_content=None, is_error=True, content=[SimpleNamespace(text="Unknown account")]
+    )
+    assert run_openai.tool_text(done) == '{"x": "é"}'
+    assert run_openai.tool_text(failed) == "Unknown account"
+
+
+def test_the_api_key_comes_from_a_file_and_prints_masked(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The key file is read, and the key never shows when printed."""
+    monkeypatch.delenv("AVENIR_EVAL_API_KEY", raising=False)
+    (tmp_path / "key").write_text("sk-secret-value\n", encoding="utf-8")
+    monkeypatch.setenv("AVENIR_EVAL_API_KEY_FILE", str(tmp_path / "key"))
+    key = run_openai.api_key()
+    assert key.get_secret_value() == "sk-secret-value"
+    assert "sk-secret" not in f"{key} {key!r}"
+
+
+def test_without_a_key_the_runner_says_where_to_put_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No key: a message naming the file, before anything is sent."""
+    monkeypatch.delenv("AVENIR_EVAL_API_KEY", raising=False)
+    monkeypatch.setenv("AVENIR_EVAL_API_KEY_FILE", str(tmp_path / "none"))
+    with pytest.raises(SystemExit, match="AVENIR_EVAL_API_KEY"):
+        run_openai.api_key()
