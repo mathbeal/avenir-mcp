@@ -11,7 +11,7 @@ avenir-mcp déclare ces outils. Les outils de lecture sont toujours disponibles 
 
 | Outil | Résumé |
 |---|---|
-| [`find_transactions`](/avenir-mcp/fr/reference/tools/find-transactions/) | Find transactions by date, exact amount and account, whether categorised or not. |
+| [`find_transactions`](/avenir-mcp/fr/reference/tools/find-transactions/) | Find transactions by date, amount, account, category or payee, categorised or not. |
 | [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/) | Project the balance month by month and say when money would run out. |
 | [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/) | Return a budget-vs-actual breakdown with utilisation percentage per category. |
 | [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/) | Budgeted, spent (activity) and available (balance) per category for a month. |

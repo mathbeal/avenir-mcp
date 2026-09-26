@@ -14,6 +14,7 @@ Any tool that reaches YNAB can return YNAB's own error: `Error calling tool '<to
 ## [`find_transactions`](/avenir-mcp/reference/tools/find-transactions/)
 
 - `Account {0} is not in this plan: use an id from list_accounts.`
+- `Category {0} is not in this plan: use a category_id from get_category_balances.`
 - `until_date {until} is before since_date {since}: swap them.`
 - `The dates span more than 366 days: search a shorter period.`
 

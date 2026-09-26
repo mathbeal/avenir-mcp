@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
+from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.client import amount_to_milliunit
 from avenir_mcp.model import Model
 from avenir_mcp.triage import Line, line_fields
@@ -45,6 +46,7 @@ def check(
     until: date | None,
     account_ids: list[str] | None,
     names: dict[str, str],
+    categories: tuple[list[str] | None, dict[str, str]] = (None, {}),
 ) -> None:
     """Refuse a search that cannot be meant, or would read too much.
 
@@ -53,10 +55,12 @@ def check(
         until: Last date, or None for no end.
         account_ids: Accounts to search, or None for all.
         names: The plan's account names by id.
+        categories: The categories to search, or None for all, and the plan's
+            category names by id.
 
     Raises:
         ValueError: If the dates are reversed, span more than MAX_DAYS, or an
-            account is not in the plan.
+            account or a category is not in the plan.
     """
     if until is not None:
         if until < since:
@@ -66,6 +70,13 @@ def check(
     unknown = [a for a in account_ids or [] if a not in names]
     if unknown:
         raise ValueError(f"Account {unknown[0]} is not in this plan: use an id from list_accounts.")
+    category_ids, labels = categories
+    unknown = [c for c in category_ids or [] if c not in labels]
+    if unknown:
+        raise ValueError(
+            f"Category {unknown[0]} is not in this plan: "
+            "use a category_id from get_category_balances."
+        )
 
 
 def _categorisation(tx: dict[str, Any], labels: dict[str, str]) -> dict[str, Any]:
@@ -88,6 +99,38 @@ def _categorisation(tx: dict[str, Any], labels: dict[str, str]) -> dict[str, Any
     }
 
 
+def _in_categories(tx: dict[str, Any], category_ids: set[str]) -> bool:
+    """Tell whether a transaction, or one of its live split lines, is in the categories.
+
+    Args:
+        tx: A YNAB transaction.
+        category_ids: The categories searched.
+
+    Returns:
+        True when the transaction's category, or a line's, is one of them.
+    """
+    lines = [sub for sub in tx.get("subtransactions") or [] if not sub.get("deleted")]
+    return tx.get("category_id") in category_ids or any(
+        sub.get("category_id") in category_ids for sub in lines
+    )
+
+
+def _names_payee(tx: dict[str, Any], payee: str) -> bool:
+    """Tell whether a transaction's payee names the merchant searched.
+
+    Both sides are reduced to the merchant (case, card numbers, dates and references
+    left out), so "acme" finds "CB ACME OUTDOOR FACT 110126 525130******2".
+
+    Args:
+        tx: A YNAB transaction.
+        payee: The merchant searched, or part of its name.
+
+    Returns:
+        True when the merchant searched is part of the transaction's payee.
+    """
+    return normalize_payee(payee) in normalize_payee(tx.get("payee_name") or "")
+
+
 def find(  # pylint: disable=too-many-arguments
     transactions: list[dict[str, Any]],
     accounts: list[dict[str, Any]],
@@ -97,6 +140,8 @@ def find(  # pylint: disable=too-many-arguments
     until: date | None = None,
     amount: float | None = None,
     account_ids: list[str] | None = None,
+    category_ids: list[str] | None = None,
+    payee: str | None = None,
     limit: int = DEFAULT_LIMIT,
 ) -> Found:
     """Find the transactions matching the filters, newest first.
@@ -109,6 +154,8 @@ def find(  # pylint: disable=too-many-arguments
         until: Last date, included; None for no end.
         amount: Exact amount in currency units, or None for any.
         account_ids: Accounts to search, or None for all.
+        category_ids: Categories to search, a split line in one counting, or None for all.
+        payee: Merchant to search, or part of its name, or None for any.
         limit: Maximum number of transactions returned.
 
     Returns:
@@ -116,12 +163,11 @@ def find(  # pylint: disable=too-many-arguments
 
     Raises:
         ValueError: With a message saying what to fix, if the dates are reversed or
-            span more than a year, or an account is not in the plan.
+            span more than a year, or an account or a category is not in the plan.
     """
-    names = {a["id"]: a["name"] for a in accounts}
-    check(since, until, account_ids, names)
-    wanted = amount_to_milliunit(amount) if amount is not None else None
     labels = {c["id"]: c["name"] for c in categories}
+    check(since, until, account_ids, {a["id"]: a["name"] for a in accounts}, (category_ids, labels))
+    wanted = amount_to_milliunit(amount) if amount is not None else None
     first, last = since.isoformat(), until.isoformat() if until else None
     kept = [
         tx
@@ -131,7 +177,13 @@ def find(  # pylint: disable=too-many-arguments
         and (last is None or tx["date"] <= last)
         and (wanted is None or tx["amount"] == wanted)
         and (account_ids is None or tx["account_id"] in account_ids)
+        and (category_ids is None or _in_categories(tx, set(category_ids)))
+        and (not payee or _names_payee(tx, payee))
     ]
     kept.sort(key=lambda tx: tx["date"], reverse=True)
-    matches = [Match(**line_fields(tx), **_categorisation(tx, labels)) for tx in kept[:limit]]
-    return Found(transactions=matches, truncated=len(kept) > limit)
+    return Found(
+        transactions=[
+            Match(**line_fields(tx), **_categorisation(tx, labels)) for tx in kept[:limit]
+        ],
+        truncated=len(kept) > limit,
+    )

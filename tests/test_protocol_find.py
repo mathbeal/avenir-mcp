@@ -57,3 +57,23 @@ def test_a_bad_window_is_refused_before_any_request(read: AsyncMock) -> None:
     assert result.is_error
     assert "before" in result.content[0].text
     read.assert_not_awaited()
+
+
+def test_category_and_payee_narrow_the_search(read: AsyncMock) -> None:
+    """Both filters reach the search: a matching pair is found, a wrong payee is not."""
+    args: dict[str, Any] = {"plan_id": "b1", "since_date": "2026-09-01", "category_ids": ["c-food"]}
+    found = call("find_transactions", {**args, "payee": "organic"}).structured_content
+    assert [t["transaction_id"] for t in found["transactions"]] == ["t1"]
+    missed = call("find_transactions", {**args, "payee": "bakery"}).structured_content
+    assert missed["transactions"] == []
+    read.assert_awaited_with("b1", since_date="2026-09-01")
+
+
+@pytest.mark.usefixtures("read")
+def test_an_unknown_category_is_a_tool_error() -> None:
+    """The agent learns which id is wrong and where to find a right one."""
+    args = {"plan_id": "b1", "since_date": "2026-09-01", "category_ids": ["c-gone"]}
+    result = call("find_transactions", args)
+    assert result.is_error
+    assert "c-gone" in result.content[0].text
+    assert "get_category_balances" in result.content[0].text

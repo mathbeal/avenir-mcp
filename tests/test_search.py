@@ -123,3 +123,53 @@ def test_a_deleted_transaction_is_never_found() -> None:
     txs = [_tx("gone", "2026-09-12", -86400, deleted=True), _tx("kept", "2026-09-12", -86400)]
     found = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1), amount=-86.40)
     assert [m.transaction_id for m in found.transactions] == ["kept"]
+
+
+_TWO_CATEGORIES = [{"id": "c-food", "name": "Groceries"}, {"id": "c-fun", "name": "Leisure"}]
+
+
+def test_a_category_finds_its_transactions_and_split_lines() -> None:
+    """A transaction in the category, or split with a line in it, is found; others are not."""
+    txs = [
+        _tx("food", "2026-09-10", -1000, category_id="c-food"),
+        _tx("fun", "2026-09-10", -2000, category_id="c-fun"),
+        _tx(
+            "split",
+            "2026-09-11",
+            -3000,
+            subtransactions=[
+                {"id": "s1", "category_id": "c-fun", "deleted": False},
+                {"id": "s2", "category_id": "c-food", "deleted": False},
+            ],
+        ),
+        _tx(
+            "gone-line",
+            "2026-09-12",
+            -4000,
+            subtransactions=[
+                {"id": "s3", "category_id": "c-food", "deleted": True},
+                {"id": "s4", "category_id": "c-fun", "deleted": False},
+            ],
+        ),
+    ]
+    found = search.find(
+        txs, _ACCOUNTS, _TWO_CATEGORIES, since=date(2026, 9, 1), category_ids=["c-food"]
+    )
+    assert [m.transaction_id for m in found.transactions] == ["split", "food"]
+
+
+def test_a_payee_matches_the_merchant_whatever_the_bank_label() -> None:
+    """Case, card numbers and dates in the bank label do not hide the merchant."""
+    txs = [
+        _tx("card", "2026-09-10", -1000, payee_name="CB ACME OUTDOOR FACT 110126 525130******2"),
+        _tx("plain", "2026-09-11", -2000, payee_name="Acme Outdoor"),
+        _tx("other", "2026-09-12", -3000, payee_name="Corner Shop"),
+    ]
+    found = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1), payee="acme")
+    assert [m.transaction_id for m in found.transactions] == ["plain", "card"]
+
+
+def test_an_unknown_category_is_refused_with_what_to_do() -> None:
+    """A category id that is not in the plan is named, with where to find one."""
+    with pytest.raises(ValueError, match="c-gone.*get_category_balances"):
+        search.find(_TXS, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1), category_ids=["c-gone"])

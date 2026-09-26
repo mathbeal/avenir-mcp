@@ -23,7 +23,7 @@ YNAB's API 1.87.0 has 44 operations: 12 used by avenir-mcp, 15 planned, 17 left 
 | `POST /plans/{plan_id}/categories` | covered | `create_category` |
 | `GET /plans/{plan_id}/categories/{category_id}` | excluded | The category list gives every category in one request. |
 | `PATCH /plans/{plan_id}/categories/{category_id}` | covered | `update_category` |
-| `GET /plans/{plan_id}/categories/{category_id}/transactions` | excluded | Filtering the plan's transactions by category, planned in find_transactions, needs no other request. |
+| `GET /plans/{plan_id}/categories/{category_id}/transactions` | excluded | find_transactions filters the plan's transactions by category, split lines included, in one request. |
 | `POST /plans/{plan_id}/category_groups` | planned | Create a group, for a category that belongs in none of the existing ones. |
 | `PATCH /plans/{plan_id}/category_groups/{category_group_id}` | planned | Rename or hide a group. |
 | `GET /plans/{plan_id}/money_movement_groups` | planned | Moves of money grouped as the user made them, for the monthly review. |
@@ -42,7 +42,7 @@ YNAB's API 1.87.0 has 44 operations: 12 used by avenir-mcp, 15 planned, 17 left 
 | `GET /plans/{plan_id}/payees/{payee_id}` | excluded | The payee list, once planned, gives every payee in one request. |
 | `PATCH /plans/{plan_id}/payees/{payee_id}` | planned | Rename a payee, e.g. a bank label into the merchant's name. |
 | `GET /plans/{plan_id}/payees/{payee_id}/payee_locations` | excluded | Where a payment was made: personal data that no task needs. |
-| `GET /plans/{plan_id}/payees/{payee_id}/transactions` | excluded | Filtering the plan's transactions by payee, planned in find_transactions, needs no other request. |
+| `GET /plans/{plan_id}/payees/{payee_id}/transactions` | excluded | find_transactions filters the plan's transactions by payee, whatever the bank label, in one request. |
 | `GET /plans/{plan_id}/scheduled_transactions` | planned | Coming bills and income, for the forecast and "what is due this week?". |
 | `POST /plans/{plan_id}/scheduled_transactions` | planned | Schedule a coming payment, after reading them is in place. |
 | `GET /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | excluded | The scheduled transactions, once planned, come in one request. |
