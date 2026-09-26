@@ -32,3 +32,9 @@ def test_missing_text_is_empty() -> None:
 def test_ordinary_text_is_kept() -> None:
     """Accents, symbols and single spaces are left as they are."""
     assert text.untrusted("Boulangerie du Port — 12,50 €") == "Boulangerie du Port — 12,50 €"
+
+
+def test_text_of_exactly_the_maximum_length_is_not_cut() -> None:
+    """Eighty characters fit: no ellipsis."""
+    exact = "x" * text.MAX_TEXT
+    assert text.untrusted(exact) == exact

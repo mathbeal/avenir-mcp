@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from avenir_mcp import analytics
 
 # ---------------------------------------------------------------------------
@@ -134,10 +136,9 @@ def test_spending_trends_skips_categories_with_empty_name() -> None:
 
 def test_top_payees_ordered_by_total() -> None:
     """Payees should be sorted by total spending, descending."""
-    txs = [_tx("AWS", -50_000), _tx("AWS", -30_000), _tx("Rent", -500_000)]
+    txs = [_tx("Zoo", -50_000), _tx("Zoo", -30_000), _tx("Aquarium", -500_000)]
     result = analytics.top_payees(txs)
-    assert result[0].payee_name == "Rent"
-    assert result[1].payee_name == "AWS"
+    assert [p.payee_name for p in result] == ["Aquarium", "Zoo"]
 
 
 def test_top_payees_limit_respected() -> None:
@@ -290,3 +291,42 @@ def test_budget_vs_actual_names_each_category_group() -> None:
         },
     ]
     assert analytics.budget_vs_actual(cats)[0].group == "Fun"
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_top_payees_keeps_ten_by_default() -> None:
+    """Without a limit, the ten biggest payees."""
+    txs = [_tx(f"Vendor{i}", -(i + 1) * 10_000) for i in range(12)]
+    assert len(analytics.top_payees(txs)) == 10
+
+
+def test_budget_usage_carries_the_category_id_and_one_decimal() -> None:
+    """Each line names its category by id; the share used has one decimal."""
+    cats = [_cat("c7", "Books", budgeted=300_000, activity=-100_000, balance=200_000)]
+    usage = analytics.budget_vs_actual(cats)[0]
+    assert usage.id == "c7"
+    assert usage.utilization_pct == 33.3
+
+
+def test_trends_go_on_after_a_category_without_a_name() -> None:
+    """A nameless category is skipped, and the next ones are still counted."""
+    cats = [_cat("c1", "", activity=-10_000), _cat("c2", "Books", activity=-20_000)]
+    assert list(analytics.spending_trends([("2026-04-01", cats)])) == ["Books"]
+
+
+def test_a_category_at_exactly_zero_is_not_overspent() -> None:
+    """Nothing left is not overspent: only a negative balance is."""
+    month = {**_MONTH, "categories": [_month_cat("c1", "Groceries", 0)]}
+    assert analytics.month_overview(month).overspent == []
+
+
+@pytest.mark.parametrize("key", ["budgeted", "activity", "balance"])
+def test_a_category_with_any_one_amount_is_listed(key: str) -> None:
+    """Budgeted, spent or available: one amount is enough to be listed."""
+    cat = _month_cat("c1", "Books", 0, budgeted=0, activity=0)
+    cat[key] = 5000
+    assert [c.name for c in analytics.category_balances([cat])] == ["Books"]

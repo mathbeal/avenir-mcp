@@ -80,12 +80,17 @@ version withdrawn quickly never reaches the project.
 | Kind | Files | What they check |
 |---|---|---|
 | Unit | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | the pure logic and the HTTP client, with invented data |
+| Properties | `test_properties` | with Hypothesis, rules that hold for any input: amounts round-trip, spreading keeps every cent, months add up, cursors, bank text, confirmation fingerprints |
 | Protocol | `test_protocol*`, `test_context`, `test_policy` | tools through an in-memory MCP client: schemas, annotations, confirmation paths, undo |
 | Documentation | `test_docs` | generated pages and examples match the code; every page exists in French and Spanish; every environment variable is documented |
 | Hygiene | `test_hygiene` | no IBAN, token, statement, home path or Finder copy in the repository |
 | Evaluation | `test_evals` | the evaluation's own checks are right |
 
 Tests are written first. No test calls YNAB.
+
+`just mutate` runs mutation testing (mutmut) on the modules that compute: it changes the
+code on purpose, some 1,500 times, and checks that a test fails each time. The changes no
+test notices point to the tests to write; many are harmless, such as a message's wording.
 
 ## Documentation
 

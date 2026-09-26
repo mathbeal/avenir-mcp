@@ -90,3 +90,29 @@ def test_uncleared_payees_are_shown_on_one_line() -> None:
     txs = [_tx("t1", -5000, "uncleared", payee_name="SHOP\nRENT\u202e")]
     item = reconcile.analyse("acc", txs, 0.0).uncleared[0]
     assert item.payee == "SHOP RENT"
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_reconciled_transactions_are_neither_pending_nor_to_reconcile() -> None:
+    """Already reconciled: counted in the cleared balance, not listed, not reconciled again."""
+    txs = [_tx("r1", 50000, "reconciled"), _tx("r2", 20000, "reconciled"), _tx("c1", 10000)]
+    result = reconcile.analyse("acc", txs, 80.0)
+    assert result.cleared_balance == 80.0
+    assert result.uncleared_count == 0
+    assert result.to_reconcile_count == 1
+
+
+def test_duplicates_may_be_up_to_three_days_apart() -> None:
+    """Three days apart can be a duplicate; four days apart cannot."""
+    txs = [
+        _tx("a1", -1000, date="2026-09-01"),
+        _tx("a2", -1000, date="2026-09-04"),
+        _tx("b1", -2000, date="2026-09-01"),
+        _tx("b2", -2000, date="2026-09-05"),
+    ]
+    result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 10))
+    assert result.possible_duplicates == [["a1", "a2"]]

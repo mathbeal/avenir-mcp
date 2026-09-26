@@ -256,3 +256,114 @@ def test_month_to_date_sums_this_month_without_recurring_amounts() -> None:
     ]
     rec = forecast.recurring(txs, TODAY)
     assert forecast.month_to_date(txs, TODAY, rec) == (-1638.0, 500.0)
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_several_charges_of_a_payee_in_a_month_add_up() -> None:
+    """Two instalments to the same payee in a month count as one monthly charge, summed."""
+    txs = [
+        _tx("GYM", amount, f"{month}-{day:02d}")
+        for month in ("2026-05", "2026-06", "2026-07")
+        for amount, day in ((-20000, 3), (-10000, 18))
+    ]
+    assert forecast.recurring(txs, TODAY)[0].amount == -30.0
+
+
+def test_month_to_date_adds_every_payment() -> None:
+    """Spending and income since the 1st are sums, not the last payment seen."""
+    txs = [
+        _tx("SHOP", -10000, "2026-09-02"),
+        _tx("SHOP", -25000, "2026-09-10"),
+        _tx("CLIENT", 40000, "2026-09-05"),
+        _tx("CLIENT", 60000, "2026-09-12"),
+    ]
+    assert forecast.month_to_date(txs, TODAY, []) == (-35.0, 100.0)
+
+
+def test_the_projection_crosses_the_new_year() -> None:
+    """From November to February, the months follow each other across December."""
+    result = forecast.project(
+        start_balance=0.0,
+        today=date(2026, 11, 20),
+        until="2027-02",
+        recurring=[],
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[],
+    )
+    assert [m.month for m in result.months] == ["2026-11", "2026-12", "2027-01", "2027-02"]
+
+
+def test_charges_and_one_offs_on_the_same_day_add_up() -> None:
+    """Two amounts falling on one day both count."""
+    result = forecast.project(
+        start_balance=0.0,
+        today=TODAY,
+        until="2026-10",
+        recurring=[
+            forecast.Recurring(payee="RENT", amount=-500.0, day=5, months_seen=4),
+            forecast.Recurring(payee="PHONE", amount=-20.0, day=5, months_seen=4),
+        ],
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[
+            forecast.OneOff(date=date(2026, 10, 5), amount=-100.0, label="tax"),
+            forecast.OneOff(date=date(2026, 10, 5), amount=-50.0, label="fine"),
+        ],
+    )
+    assert result.months[1].outflows == -670.0
+
+
+def test_a_one_off_dated_today_has_already_happened() -> None:
+    """Only amounts after today are projected: one dated today is in today's balance."""
+    result = forecast.project(
+        start_balance=100.0,
+        today=TODAY,
+        until="2026-09",
+        recurring=[],
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[forecast.OneOff(date=TODAY, amount=-50.0, label="paid today")],
+    )
+    assert result.months[0].end == 100.0
+
+
+def test_next_months_are_whole_whatever_was_spent_this_month() -> None:
+    """A month after this one starts on the 1st, with full averages and every charge."""
+    result = forecast.project(
+        start_balance=0.0,
+        today=TODAY,
+        until="2026-10",
+        recurring=[forecast.Recurring(payee="RENT", amount=-500.0, day=2, months_seen=4)],
+        variable_monthly=-300.0,
+        monthly_income=1000.0,
+        one_offs=[],
+        spent_this_month=-250.0,
+        received_this_month=400.0,
+    )
+    october = result.months[1]
+    assert (october.inflows, october.outflows) == (1000.0, -800.0)
+
+
+def test_a_charge_on_the_first_of_a_coming_month_counts() -> None:
+    """A month after this one is projected from its first day."""
+    result = forecast.project(
+        start_balance=0.0,
+        today=TODAY,
+        until="2026-10",
+        recurring=[forecast.Recurring(payee="RENT", amount=-500.0, day=1, months_seen=4)],
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[],
+    )
+    assert result.months[1].outflows == -500.0
+
+
+def test_in_january_the_four_months_before_reach_back_to_september() -> None:
+    """September, November and December make three of the last four full months."""
+    txs = _monthly("RENT", -50000, 1, ["2025-09", "2025-11", "2025-12"])
+    assert forecast.recurring(txs, date(2026, 1, 10))[0].months_seen == 3

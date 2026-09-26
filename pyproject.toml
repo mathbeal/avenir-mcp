@@ -55,6 +55,8 @@ dev = [
     "pylint==4.0.9",
     "ruff==0.16.9",
     "deptry==0.25.1",
+    "hypothesis==6.168.1",
+    "mutmut==3.8.0",
 ]
 
 [build-system]
@@ -103,6 +105,37 @@ testpaths = ["tests"]
 filterwarnings = ["error"]
 xfail_strict = true
 addopts = "--strict-markers --strict-config --cov=avenir_mcp --cov-branch --cov-report=term-missing --cov-fail-under=100"
+
+# Mutation testing (`just mutate`): the modules that compute, against their own tests.
+[tool.mutmut]
+paths_to_mutate = ["avenir_mcp/"]
+do_not_mutate = [
+    "avenir_mcp/__init__.py",
+    "avenir_mcp/__main__.py",
+    "avenir_mcp/amounts.py",
+    "avenir_mcp/app.py",
+    "avenir_mcp/client.py",
+    "avenir_mcp/confirm.py",
+    "avenir_mcp/context.py",
+    "avenir_mcp/http_auth.py",
+    "avenir_mcp/journal.py",
+    "avenir_mcp/logs.py",
+    "avenir_mcp/model.py",
+    "avenir_mcp/server.py",
+    "avenir_mcp/tools_*.py",
+]
+also_copy = ["evals/"]
+pytest_add_cli_args = ["--no-cov", "-p", "no:cacheprovider"]
+tests_dir = [
+    "tests/test_analytics.py",
+    "tests/test_classifier.py",
+    "tests/test_forecast.py",
+    "tests/test_properties.py",
+    "tests/test_reconcile.py",
+    "tests/test_text.py",
+    "tests/test_triage.py",
+    "tests/test_writes.py",
+]
 
 [tool.coverage.run]
 omit = ["avenir_mcp/__main__.py"]

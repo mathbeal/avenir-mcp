@@ -209,3 +209,62 @@ def test_categories_come_with_the_first_page_only() -> None:
     assert first.categories
     second = triage.prepare(txs, _CATEGORIES, limit=2, cursor=first.next_cursor)
     assert second.categories == []
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_opposite_amounts_on_one_account_are_not_a_transfer() -> None:
+    """A payment and its refund on the same account are two transactions, not a transfer."""
+    txs = [
+        _tx("pay", "Shop", amount=-25000, date="2026-03-30", account_id="acc-a"),
+        _tx("refund", "Shop", amount=25000, date="2026-03-31", account_id="acc-a"),
+    ]
+    items = triage.prepare(txs, _CATEGORIES).items
+    assert [i.possible_transfer_with for i in items] == [None, None]
+
+
+def test_a_transfer_may_take_up_to_three_days() -> None:
+    """Three days apart is still one transfer; four days apart is not."""
+    txs = [
+        _tx("out", "To vault", amount=-25000, date="2026-03-28", account_id="acc-a"),
+        _tx("in", "To vault", amount=25000, date="2026-03-31", account_id="acc-b"),
+        _tx("late-out", "To vault", amount=-9000, date="2026-03-20", account_id="acc-a"),
+        _tx("late-in", "To vault", amount=9000, date="2026-03-24", account_id="acc-b"),
+    ]
+    items = {i.transaction_id: i for i in triage.prepare(txs, _CATEGORIES).items}
+    assert items["out"].possible_transfer_with == "in"
+    assert items["late-out"].possible_transfer_with is None
+
+
+def test_deleted_transactions_and_transfers_teach_nothing() -> None:
+    """History ignores deleted transactions and transfers, however many there are."""
+    ghosts = [_tx(f"d{i}", "SHOP", "c-fun", deleted=True) for i in range(5)]
+    ghosts += [_tx(f"t{i}", "SHOP", "c-fun", transfer_account_id="acc-2") for i in range(5)]
+    history = [_tx("h1", "SHOP", "c-food")]
+    item = triage.prepare(ghosts + history + [_tx("p1", "SHOP")], _CATEGORIES).items[0]
+    assert item.suggestion is not None
+    assert item.suggestion.category_id == "c-food"
+
+
+def test_the_threshold_given_is_the_one_applied() -> None:
+    """A lower threshold lets a two-in-three history suggest, rounded to two decimals."""
+    history = [_tx("h1", "SHOP", "c-food"), _tx("h2", "SHOP", "c-food"), _tx("h3", "SHOP", "c-fun")]
+    pending = [_tx("p1", "SHOP")]
+    assert triage.prepare(history + pending, _CATEGORIES).items[0].suggestion is None
+    item = triage.prepare(history + pending, _CATEGORIES, threshold=0.6).items[0]
+    assert item.suggestion is not None
+    assert item.suggestion.confidence == 0.67
+
+
+def test_an_empty_memo_is_no_memo() -> None:
+    """A blank memo is reported as null, not as an empty string."""
+    assert triage.prepare([_tx("p1", "SHOP", memo="")], _CATEGORIES).items[0].memo is None
+
+
+def test_a_full_last_page_has_no_next_cursor() -> None:
+    """When the items fill the page exactly, there is nothing more to fetch."""
+    txs = [_tx(f"p{i}", "SHOP", date=f"2026-09-0{i + 1}") for i in range(2)]
+    assert triage.prepare(txs, _CATEGORIES, limit=2).next_cursor is None

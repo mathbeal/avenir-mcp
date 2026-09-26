@@ -59,6 +59,11 @@ changelog-check:
     uvx git-cliff -o /tmp/avenir-cliff.md
     diff -u CHANGELOG.md /tmp/avenir-cliff.md
 
+# Mutation testing: change the code on purpose and check a test notices (about 30 s).
+mutate:
+    uv run mutmut run --max-children 8
+    uv run mutmut results
+
 # The server as a client sees it, through the official MCP Inspector (needs Node.js).
 inspect:
     uv run python -m evals.inspector

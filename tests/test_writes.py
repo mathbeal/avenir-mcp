@@ -213,3 +213,51 @@ def test_plan_rejects_ynab_internal_uncategorized() -> None:
             [*_CATEGORIES, internal],
             [writes.Assignment(transaction_id="t1", category_id="c-uncat")],
         )
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_every_assignment_is_planned_after_ones_that_change_nothing() -> None:
+    """Assignments that change nothing are counted, and the ones after them still planned."""
+    plan = writes.plan_categorization(
+        [_tx("t1", "c-food"), _tx("t2", "c-food"), _tx("t3")],
+        _CATEGORIES,
+        [
+            writes.Assignment(transaction_id="t1", category_id="c-food"),
+            writes.Assignment(transaction_id="t2", category_id="c-food"),
+            writes.Assignment(transaction_id="t3", category_id="c-fun"),
+        ],
+    )
+    assert plan.unchanged_count == 2
+    assert [c.transaction_id for c in plan.changes] == ["t3"]
+
+
+def test_the_fingerprint_ignores_the_order_of_keys() -> None:
+    """The same change written with its keys in another order is the same change."""
+    assert writes.fingerprint("b1", {"a": 1, "b": 2}) == writes.fingerprint("b1", {"b": 2, "a": 1})
+    assert writes.fingerprint("b1", [{"a": 1, "b": 2}]) == writes.fingerprint(
+        "b1", [{"b": 2, "a": 1}]
+    )
+
+
+def test_codes_are_distinct_strings_and_a_fresh_one_survives_the_next_issue() -> None:
+    """Issuing a code drops only expired ones; each code is a new non-empty string."""
+    now = [100.0]
+    confirmations = writes.Confirmations(ttl_seconds=600, clock=lambda: now[0])
+    first = confirmations.issue("b1", {"x": 1})
+    now[0] = 700.0
+    second = confirmations.issue("b1", {"x": 2})
+    assert isinstance(first, str) and first and first != second
+    assert confirmations.consume(first, "b1", {"x": 1}) is True
+
+
+def test_a_code_is_still_valid_at_the_exact_end_of_its_lifetime() -> None:
+    """Ten minutes means up to and including the tenth minute."""
+    now = [0.0]
+    confirmations = writes.Confirmations(ttl_seconds=600, clock=lambda: now[0])
+    code = confirmations.issue("b1", {"x": 1})
+    now[0] = 600.0
+    assert confirmations.consume(code, "b1", {"x": 1}) is True

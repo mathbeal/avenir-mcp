@@ -80,12 +80,18 @@ maliciosa retirada rápido nunca llega al proyecto.
 | Tipo | Archivos | Qué comprueban |
 |---|---|---|
 | Unitarias | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | la lógica pura y el cliente HTTP, con datos inventados |
+| Propiedades | `test_properties` | con Hypothesis, reglas que se cumplen para cualquier entrada: ida y vuelta de importes, reparto sin perder un céntimo, meses que se encadenan, cursores, texto bancario, huellas de confirmación |
 | Protocolo | `test_protocol*`, `test_context`, `test_policy` | las herramientas a través de un cliente MCP en memoria: esquemas, anotaciones, caminos de confirmación, deshacer |
 | Documentación | `test_docs` | las páginas y ejemplos generados corresponden al código; cada página existe en francés y en español; cada variable de entorno está documentada |
 | Higiene | `test_hygiene` | ni IBAN, ni token, ni extracto, ni ruta personal, ni copia del Finder en el repositorio |
 | Evaluación | `test_evals` | las comprobaciones de la evaluación son correctas |
 
 Las pruebas se escriben primero. Ninguna prueba llama a YNAB.
+
+`just mutate` ejecuta las pruebas de mutación (mutmut) sobre los módulos de cálculo: modifica
+a propósito el código, unas 1.500 veces, y comprueba que una prueba falla cada vez. Los
+cambios que ninguna prueba detecta señalan las pruebas que escribir; muchos no tienen
+efecto, como la redacción de un mensaje.
 
 ## Documentación
 

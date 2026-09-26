@@ -223,3 +223,14 @@ def test_score_payee_counts_only_available_categories() -> None:
     result = classifier.score_payee("AWS", history, _CATEGORIES)
     assert result.auto_classify is True
     assert result.category_id == "c2"
+
+
+def test_history_goes_on_after_a_transaction_without_category() -> None:
+    """An uncategorised transaction is skipped, and the ones after it still counted."""
+    txs: list[dict[str, Any]] = [
+        {"payee_name": "AWS", "category_id": None},
+        {"payee_name": "AWS", "category_id": "c1"},
+        {"payee_name": "", "category_id": "c1"},
+        {"payee_name": "Rent", "category_id": "c2"},
+    ]
+    assert classifier.build_payee_history(txs) == {"AWS": {"c1": 1}, "RENT": {"c2": 1}}
