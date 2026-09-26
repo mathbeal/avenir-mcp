@@ -1,12 +1,13 @@
 ---
 // A still picture of a conversation: a question, a tool call, an answer, and a
-// previewed change waiting for the user's yes. Figures are those of the demo budget.
+// previewed change waiting for the user's yes. Figures are those of the demo budget;
+// the leisure activity is one people of each language would budget for.
 import { home } from './home-i18n';
 
 const t = home(Astro.locals.starlightRoute.lang);
 const rows = [
-  ['Tennis', ...t.tennis],
-  ['Restaurants', ...t.restaurants],
+  [t.names[0], ...t.tennis],
+  [t.names[1], ...t.restaurants],
 ];
 ---
 
