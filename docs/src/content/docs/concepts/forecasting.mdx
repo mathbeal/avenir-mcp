@@ -29,6 +29,15 @@ and direction. A group **recurs** when:
 It is then projected every month for its **median** monthly amount, on the **median
 day** it fell on (the last day of a shorter month when needed).
 
+## Scheduled transactions
+
+The scheduled transactions of the projected accounts, from tomorrow to the end of the
+horizon, fall on their dates, repeated at their YNAB frequency — a yearly insurance
+included. A payee with a schedule is projected by it alone: it leaves the recurring
+charges and the averages, so it is never counted twice. A transfer between two projected
+accounts is left out, since it changes neither total; a transfer to another account
+counts as money out. They are returned in `assumptions.scheduled`.
+
 ## Everything else
 
 | Assumption | Default | Override |
@@ -37,8 +46,8 @@ day** it fell on (the last day of a shorter month when needed).
 | Income | the average of the last 3 full months' inflows, recurring income excluded | `monthly_income` |
 | One-off amounts | none | `one_offs`: `{date, amount, label}` |
 
-When you give `monthly_income`, it **replaces** the income found in the history,
-recurring salary included, so a salary is never counted twice.
+When you give `monthly_income`, it **replaces** the income found in the history and the
+scheduled inflows, salary included, so a salary is never counted twice.
 
 ## The projection
 
@@ -50,7 +59,7 @@ Month by month, day by day from tomorrow:
   For the current month, what was already spent or received since the 1st (outside
   recurring payees) is deducted from the monthly averages: only what is left is
   projected.
-- **One-off amounts** fall on their date, if it is after today and within the horizon.
+- **Scheduled transactions and one-off amounts** fall on their date, if it is after today and within the horizon.
 
 For each month the answer gives `start`, `inflows`, `outflows`, `end` and `lowest`, the
 lowest balance of any day in the month. `first_shortfall` is the first month whose
@@ -63,8 +72,8 @@ A forecast extends your recent past. Keep in mind that:
 
 - averages include whatever was unusual in the last 3 months — holidays, a yearly tax, a
   large purchase;
-- a charge that is quarterly or yearly does not recur by this definition: add it as a
-  one-off;
+- a quarterly or yearly charge that has no schedule in YNAB does not recur by this
+  definition: schedule it in YNAB, or add it as a one-off;
 - income paid irregularly is averaged: give `monthly_income` if you know better;
 - only the chosen accounts are projected; money moved to other accounts looks spent.
 </Aside>

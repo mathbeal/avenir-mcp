@@ -29,6 +29,15 @@ et par sens. Un groupe est **récurrent** quand :
 Il est alors projeté chaque mois pour son montant mensuel **médian**, au **jour médian**
 où il est tombé (le dernier jour d'un mois plus court si besoin).
 
+## Transactions planifiées
+
+Les transactions planifiées des comptes projetés, de demain à la fin de l'horizon,
+tombent à leurs dates, répétées à leur fréquence YNAB — une assurance annuelle comprise.
+Un bénéficiaire qui a une échéance n'est projeté que par elle : il sort des charges
+récurrentes et des moyennes, et n'est donc jamais compté deux fois. Un virement entre
+deux comptes projetés est écarté, puisqu'il ne change aucun total ; un virement vers un
+autre compte compte comme une sortie. Elles sont rendues dans `assumptions.scheduled`.
+
 ## Tout le reste
 
 | Hypothèse | Défaut | Remplacement |
@@ -38,7 +47,8 @@ où il est tombé (le dernier jour d'un mois plus court si besoin).
 | Montants ponctuels | aucun | `one_offs` : `{date, amount, label}` |
 
 Quand vous donnez `monthly_income`, il **remplace** les revenus trouvés dans
-l'historique, salaire récurrent compris : un salaire n'est jamais compté deux fois.
+l'historique et les entrées planifiées, salaire compris : un salaire n'est jamais compté
+deux fois.
 
 ## La projection
 
@@ -50,7 +60,7 @@ Mois par mois, jour par jour à partir de demain :
   centimes entiers. Pour le mois en cours, ce qui a déjà été dépensé ou reçu depuis le 1er
   (hors bénéficiaires récurrents) est déduit des moyennes mensuelles : seul le reste est
   projeté.
-- Les **montants ponctuels** tombent à leur date, si elle est après aujourd'hui et dans
+- Les **transactions planifiées et montants ponctuels** tombent à leur date, si elle est après aujourd'hui et dans
   l'horizon.
 
 Pour chaque mois, la réponse donne `start`, `inflows`, `outflows`, `end` et `lowest`, le
@@ -64,8 +74,8 @@ Une prévision prolonge votre passé récent. Gardez en tête que :
 
 - les moyennes incluent ce qui était inhabituel ces 3 derniers mois — vacances, impôt
   annuel, gros achat ;
-- une charge trimestrielle ou annuelle n'est pas récurrente au sens de cette définition :
-  ajoutez-la en montant ponctuel ;
+- une charge trimestrielle ou annuelle sans échéance dans YNAB n'est pas récurrente au
+  sens de cette définition : planifiez-la dans YNAB, ou ajoutez-la en montant ponctuel ;
 - un revenu versé irrégulièrement est moyenné : donnez `monthly_income` si vous en savez
   plus ;
 - seuls les comptes choisis sont projetés ; l'argent déplacé vers d'autres comptes semble

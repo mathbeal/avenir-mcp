@@ -29,6 +29,15 @@ y sentido. Un grupo es **recurrente** cuando:
 Entonces se proyecta cada mes por su importe mensual **mediano**, en el **día mediano**
 en que cayó (el último día de un mes más corto si hace falta).
 
+## Transacciones programadas
+
+Las transacciones programadas de las cuentas proyectadas, desde mañana hasta el final del
+horizonte, caen en sus fechas, repetidas según su frecuencia de YNAB — un seguro anual
+incluido. Un beneficiario con una programación solo se proyecta por ella: sale de los
+cargos recurrentes y de las medias, así que nunca se cuenta dos veces. Una transferencia
+entre dos cuentas proyectadas se descarta, pues no cambia ningún total; una transferencia
+a otra cuenta cuenta como salida. Se devuelven en `assumptions.scheduled`.
+
 ## Todo lo demás
 
 | Supuesto | Por defecto | Se sustituye con |
@@ -37,8 +46,8 @@ en que cayó (el último día de un mes más corto si hace falta).
 | Ingresos | la media de las entradas de los 3 últimos meses completos, sin ingresos recurrentes | `monthly_income` |
 | Importes puntuales | ninguno | `one_offs`: `{date, amount, label}` |
 
-Cuando indica `monthly_income`, **sustituye** los ingresos encontrados en el historial,
-nómina recurrente incluida: una nómina nunca se cuenta dos veces.
+Cuando indica `monthly_income`, **sustituye** los ingresos encontrados en el historial y
+las entradas programadas, nómina incluida: una nómina nunca se cuenta dos veces.
 
 ## La proyección
 
@@ -50,7 +59,7 @@ Mes a mes, día a día desde mañana:
   céntimos enteros. Para el mes en curso, lo ya gastado o recibido desde el día 1 (fuera
   de los beneficiarios recurrentes) se descuenta de las medias mensuales: solo se
   proyecta lo que queda.
-- Los **importes puntuales** caen en su fecha, si es posterior a hoy y dentro del
+- Las **transacciones programadas e importes puntuales** caen en su fecha, si es posterior a hoy y dentro del
   horizonte.
 
 Para cada mes la respuesta da `start`, `inflows`, `outflows`, `end` y `lowest`, el saldo
@@ -64,8 +73,8 @@ Una previsión prolonga su pasado reciente. Tenga en cuenta que:
 
 - las medias incluyen lo que fue inusual en los últimos 3 meses — vacaciones, un impuesto
   anual, una compra grande;
-- un cargo trimestral o anual no es recurrente según esta definición: añádalo como
-  importe puntual;
+- un cargo trimestral o anual sin programación en YNAB no es recurrente según esta
+  definición: prográmelo en YNAB, o añádalo como importe puntual;
 - un ingreso cobrado de forma irregular se promedia: indique `monthly_income` si sabe
   más;
 - solo se proyectan las cuentas elegidas; el dinero movido a otras cuentas parece

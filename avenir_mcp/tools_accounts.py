@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
+import calendar
 import logging
-from datetime import date
+from datetime import date, timedelta
 from typing import Literal
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
-from avenir_mcp import app, client, forecast, journal, reconcile
+from avenir_mcp import app, client, forecast, journal, reconcile, schedule
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, mcp
+from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.confirm import WriteStatus, gate, merged
 from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
@@ -206,6 +208,10 @@ class ForecastAssumptions(Model):
     """Monthly income assumed, besides recurring income."""
     one_offs: list[forecast.OneOff]
     """One-off amounts given by the caller."""
+    scheduled: list[schedule.Occurrence]
+    """Scheduled transactions of the projected accounts, from tomorrow to the last month;
+    they replace what the history suggests for the same payees. Transfers between the
+    projected accounts are left out."""
 
 
 class ForecastResult(Model):
@@ -270,6 +276,8 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     For the current month, what was already spent or received since the 1st is
     deducted from the monthly averages, so only what is left is projected.
     Assumes, and returns as `assumptions` so the user can correct them:
+    YNAB's scheduled transactions on their dates (a payee with a schedule is
+    projected by it alone; transfers between projected accounts left out),
     charges that recur in the last 4 months (same payee, stable amount), the
     average of all other spending over the last 3 months, and what you pass:
     expected monthly income (default: the last 3 months' non-recurring inflows,
@@ -284,10 +292,12 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         account_ids: Accounts to include (from list_accounts); default all open
             on-budget accounts.
         monthly_income: Income expected each month, replacing the income found in
-            the history (recurring or average); default: what the history shows.
+            the history (recurring or average) and scheduled in YNAB; default: what
+            they show.
         variable_monthly: Monthly spending besides recurring charges (negative);
             default: the last 3 months' average.
-        one_offs: Expected one-off amounts: {date YYYY-MM-DD, amount, label}.
+        one_offs: Expected one-off amounts: {date YYYY-MM-DD, amount, label}; not
+            those already scheduled in YNAB, which are counted.
 
     Returns:
         The month-by-month projection and the assumptions it rests on.
@@ -308,24 +318,47 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         chosen = [a for a in accounts if a["on_budget"] and not a["closed"]]
     ids = {a["id"] for a in chosen}
     history = [tx for tx in await client.get_transactions(plan_id) if tx.get("account_id") in ids]
-    charges = forecast.recurring(history, now)
+    plans = [
+        item
+        for item in await client.get_scheduled_transactions(plan_id)
+        if not item.get("deleted")
+        and item["account_id"] in ids
+        and item.get("transfer_account_id") not in ids
+        # The income the caller gives replaces every income, scheduled ones too.
+        and (monthly_income is None or item["amount"] < 0)
+    ]
+    # A payee with a schedule is projected by it, not guessed from the history.
+    planned = frozenset(
+        (normalize_payee(item.get("payee_name") or ""), item["amount"] < 0) for item in plans
+    )
+    year, month = (int(part) for part in until.split("-"))
+    upcoming = schedule.occurrences(
+        plans,
+        {a["id"]: a["name"] for a in accounts},
+        {c["id"]: c["name"] for c in await client.get_categories(plan_id)},
+        now + timedelta(days=1),
+        date(year, month, calendar.monthrange(year, month)[1]),
+    )
+    charges = [
+        r for r in forecast.recurring(history, now) if (r.payee, r.amount < 0) not in planned
+    ]
     if monthly_income is not None:
         # The income given replaces what the history suggests, recurring salary included.
         charges = [r for r in charges if r.amount < 0]
     variable = (
         variable_monthly
         if variable_monthly is not None
-        else forecast.variable_average(history, now, charges)
+        else forecast.variable_average(history, now, charges, also=planned)
     )
     income = (
         monthly_income
         if monthly_income is not None
-        else forecast.income_average(history, now, charges)
+        else forecast.income_average(history, now, charges, also=planned)
     )
     start = client.milliunit_to_amount(
         sum(client.amount_to_milliunit(a["balance"]) for a in chosen)
     )
-    spent, received = forecast.month_to_date(history, now, charges)
+    spent, received = forecast.month_to_date(history, now, charges, also=planned)
     projection = forecast.project(
         start_balance=start,
         today=now,
@@ -333,7 +366,11 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         recurring=charges,
         variable_monthly=variable,
         monthly_income=income,
-        one_offs=one_offs or [],
+        one_offs=(one_offs or [])
+        + [
+            forecast.OneOff(date=date.fromisoformat(o.date), amount=o.amount, label=o.payee)
+            for o in upcoming
+        ],
         spent_this_month=spent,
         received_this_month=received,
     )
@@ -352,6 +389,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
             variable_monthly=variable,
             monthly_income=income,
             one_offs=one_offs or [],
+            scheduled=upcoming,
         ),
         months=projection.months,
         first_shortfall=shortfall,

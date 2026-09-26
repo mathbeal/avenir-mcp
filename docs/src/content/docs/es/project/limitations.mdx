@@ -17,8 +17,7 @@ sidebar:
 | Servidor público o compartido | no compatible: sin cuentas, y las condiciones de YNAB exigen OAuth para presupuestos ajenos | cada persona ejecuta su propio avenir-mcp — vea el [aviso legal](/avenir-mcp/es/project/legal/) |
 | Transacciones divididas | nunca se sugieren ni se recategorizan: sus líneas llevan las categorías; `split_transaction` divide una, pero la API de YNAB no puede cambiar ni deshacer una división | cambiarlas o deshacerlas en YNAB |
 | Sugerencias | necesitan historial: un comercio nunca clasificado no recibe ninguna | el agente propone, usted decide |
-| Previsión | prolonga los últimos meses; los cargos trimestrales o anuales no son recurrentes según su definición | pasarlos como `one_offs` |
-| Transacciones programadas | las lista `list_scheduled_transactions`, pero la previsión aún se basa en el historial | pasar los importes futuros conocidos como `one_offs` |
+| Previsión | prolonga los últimos meses, más las transacciones programadas de YNAB; un cargo trimestral o anual sin programación no es recurrente según su definición | programarlo en YNAB, o pasarlo como `one_offs` |
 | Moneda | los importes se muestran como números, sin símbolo de moneda | — |
 | Python | 3.12 a 3.14; 3.15 espera a una dependencia (beartype) | — |
 
@@ -27,7 +26,6 @@ sidebar:
 - Publicar en PyPI, y después un paquete `.mcpb` para instalar con un clic en Claude
   Desktop.
 - Deshacer para `update_category`.
-- Leer las transacciones programadas de YNAB en la previsión.
 - Bajar la versión mínima de Python cuando las dependencias lo permitan.
 - Ejecutar la evaluación con otros clientes distintos de Claude Code, y con modelos locales.
 

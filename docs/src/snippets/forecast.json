@@ -8,21 +8,9 @@
   "assumptions": {
     "recurring": [
       {
-        "payee": "LANDLORD SARL",
-        "amount": -950.0,
-        "day": 3,
-        "months_seen": 3
-      },
-      {
         "payee": "MARKET FRESH",
         "amount": -182.58,
         "day": 14,
-        "months_seen": 3
-      },
-      {
-        "payee": "POWERCO ENERGIE",
-        "amount": -64.2,
-        "day": 12,
         "months_seen": 3
       },
       {
@@ -38,16 +26,84 @@
         "months_seen": 3
       },
       {
-        "payee": "TELCO MOBILE - PRELEV",
-        "amount": -19.99,
-        "day": 8,
+        "payee": "TENNIS CLUB - PRELEV",
+        "amount": -22.0,
+        "day": 20,
         "months_seen": 3
-      },
-      "… 1 more"
+      }
     ],
     "variable_monthly": -68.7,
     "monthly_income": 3200.0,
-    "one_offs": []
+    "one_offs": [],
+    "scheduled": [
+      {
+        "scheduled_id": "sch-rent",
+        "date": "2026-10-03",
+        "amount": -950.0,
+        "account": "Checking",
+        "category": "Rent",
+        "payee": "LANDLORD SARL",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-phone",
+        "date": "2026-10-08",
+        "amount": -19.99,
+        "account": "Checking",
+        "category": "Phone",
+        "payee": "TELCO MOBILE - PRELEV",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-power",
+        "date": "2026-10-12",
+        "amount": -64.2,
+        "account": "Checking",
+        "category": "Electricity",
+        "payee": "POWERCO ENERGIE",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-insurance",
+        "date": "2026-10-20",
+        "amount": -420.0,
+        "account": "Checking",
+        "category": null,
+        "payee": "HOMESAFE INSURANCE",
+        "memo": null,
+        "frequency": "yearly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-rent",
+        "date": "2026-11-03",
+        "amount": -950.0,
+        "account": "Checking",
+        "category": "Rent",
+        "payee": "LANDLORD SARL",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-phone",
+        "date": "2026-11-08",
+        "amount": -19.99,
+        "account": "Checking",
+        "category": "Phone",
+        "payee": "TELCO MOBILE - PRELEV",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      "… 4 more"
+    ]
   },
   "months": [
     {
@@ -62,25 +118,25 @@
       "month": "2026-10",
       "start": 7312.66,
       "inflows": 3200.0,
-      "outflows": -1365.96,
-      "end": 9146.7,
+      "outflows": -1785.96,
+      "end": 8726.7,
       "lowest": 6665.72
     },
     {
       "month": "2026-11",
-      "start": 9146.7,
+      "start": 8726.7,
       "inflows": 3200.0,
       "outflows": -1365.96,
-      "end": 10980.74,
-      "lowest": 8509.84
+      "end": 10560.74,
+      "lowest": 8089.84
     },
     {
       "month": "2026-12",
-      "start": 10980.74,
+      "start": 10560.74,
       "inflows": 3200.0,
       "outflows": -1365.96,
-      "end": 12814.78,
-      "lowest": 10333.8
+      "end": 12394.78,
+      "lowest": 9913.8
     }
   ],
   "first_shortfall": null
