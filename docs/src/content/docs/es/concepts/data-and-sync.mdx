@@ -33,7 +33,25 @@ presupuesto; los gastos son negativos, las entradas positivas.
 | Métodos | `GET` para leer; `PATCH`, `POST` y `DELETE` sobre transacciones, categorías y presupuestos mensuales |
 | Errores | cualquier 4xx o 5xx vuelve como `Error calling tool '<tool>': YNAB <status>: <detail>`, con la explicación de YNAB |
 
-`plan_id` acepta `last-used`, que YNAB resuelve como el último presupuesto usado.
+`plan_id` acepta `last-used`, que YNAB resuelve como el último plan abierto.
+
+### Los planes, antes presupuestos
+
+YNAB [renombró los presupuestos como planes](https://www.ynab.com/blog/budget-tab-breakdown), en sus aplicaciones y en su API: la
+especificación ya solo documenta rutas `/plans`. avenir-mcp la sigue: su cliente llama a
+`/plans`, y sus herramientas dicen `list_plans` y `plan_id`. La palabra *budget* se queda
+donde YNAB la mantiene, para el dinero asignado a una categoría (`budgeted`, mostrado como
+*Assigned*), de ahí `set_category_budget` y `get_budget_vs_actual`.
+
+### Las referencias de YNAB
+
+- [Documentación de la API de YNAB](https://api.ynab.com/) — endpoints, autenticación,
+  cuota (en inglés)
+- [Especificación OpenAPI](https://api.ynab.com/papi/open_api_spec.yaml) — la fuente de la
+  página [Cobertura de la API de YNAB](/avenir-mcp/es/reference/api-coverage/)
+- [We Renamed the Budget Tab to Plan](https://www.ynab.com/blog/budget-tab-breakdown) — el anuncio de YNAB (en inglés)
+- [Navigating Multiple Plans in YNAB](https://support.ynab.com/en_us/navigating-multiple-plans-r1qeOvbC5)
+- [How to Adjust Your Plan Settings](https://support.ynab.com/en_us/how-to-adjust-your-plan-settings-SyFt35cAq)
 
 ## La copia local de las transacciones
 
@@ -50,7 +68,7 @@ presupuesto, en memoria, y la actualiza con la **sincronización incremental** d
    una borrada se elimina.
 
 Con el id de un presupuesto, la copia se actualiza por sincronización incremental.
-Con `last-used`, que designa el último presupuesto abierto en YNAB y puede cambiar de
+Con `last-used`, que designa el último plan abierto en YNAB y puede cambiar de
 una llamada a otra, las transacciones se cargan completas cada vez — sigue siendo una
 sola petición — para no mezclar nunca dos presupuestos. Con varios presupuestos, pase
 el id que da `list_plans`.

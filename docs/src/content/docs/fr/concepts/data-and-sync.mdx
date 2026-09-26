@@ -33,7 +33,25 @@ devise du budget ; les dépenses sont négatives, les entrées positives.
 | Méthodes | `GET` pour lire ; `PATCH`, `POST` et `DELETE` sur les transactions, les catégories et les budgets mensuels |
 | Erreurs | tout 4xx ou 5xx revient en `Error calling tool '<tool>': YNAB <status>: <detail>`, avec l'explication de YNAB |
 
-`plan_id` accepte `last-used`, que YNAB résout en votre dernier budget utilisé.
+`plan_id` accepte `last-used`, que YNAB résout en votre dernier plan ouvert.
+
+### Les plans, anciens budgets
+
+YNAB [a renommé les budgets en plans](https://www.ynab.com/blog/budget-tab-breakdown), dans ses applications et dans son API :
+la spécification ne documente plus que des chemins `/plans`. avenir-mcp suit : son client
+appelle `/plans`, et ses outils disent `list_plans` et `plan_id`. Le mot *budget* reste là
+où YNAB le garde, pour l'argent attribué à une catégorie (`budgeted`, affiché *Assigned*),
+d'où `set_category_budget` et `get_budget_vs_actual`.
+
+### Les références de YNAB
+
+- [Documentation de l'API YNAB](https://api.ynab.com/) — points d'accès, authentification,
+  quota (en anglais)
+- [Spécification OpenAPI](https://api.ynab.com/papi/open_api_spec.yaml) — la source de la
+  page [Couverture de l'API YNAB](/avenir-mcp/fr/reference/api-coverage/)
+- [We Renamed the Budget Tab to Plan](https://www.ynab.com/blog/budget-tab-breakdown) — l'annonce de YNAB (en anglais)
+- [Navigating Multiple Plans in YNAB](https://support.ynab.com/en_us/navigating-multiple-plans-r1qeOvbC5)
+- [How to Adjust Your Plan Settings](https://support.ynab.com/en_us/how-to-adjust-your-plan-settings-SyFt35cAq)
 
 ## La copie locale des transactions
 
@@ -50,7 +68,7 @@ mémoire, et la rafraîchit par la **synchronisation incrémentale** de YNAB :
    transaction supprimée est retirée.
 
 Avec l'identifiant d'un budget, la copie est rafraîchie par synchronisation
-incrémentale. Avec `last-used`, qui désigne le dernier budget ouvert dans YNAB et peut
+incrémentale. Avec `last-used`, qui désigne le dernier plan ouvert dans YNAB et peut
 changer d'un appel à l'autre, les transactions sont chargées en entier à chaque fois —
 toujours une seule requête — pour ne jamais mélanger deux budgets. Avec plusieurs
 budgets, passez l'identifiant donné par `list_plans`.
