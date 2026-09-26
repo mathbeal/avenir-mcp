@@ -1,10 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Keep avenir-mcp's dependencies current. Tooling merges itself once CI passes; what runs in front of users' budgets is reviewed by hand.",
   "extends": [
     "config:recommended",
-    ":semanticCommitsDisabled",
+    ":semanticCommits",
     "helpers:pinGitHubActionDigests"
   ],
+  "semanticCommitType": "build",
+  "semanticCommitScope": "deps",
+  "commitBody": "Signed-off-by: {{{gitAuthor}}}",
   "timezone": "Europe/Paris",
   "schedule": [
     "before 6am on monday"
@@ -13,9 +17,22 @@
   "labels": [
     "dependencies"
   ],
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "labels": [
+      "dependencies",
+      "security"
+    ],
+    "minimumReleaseAge": null,
+    "schedule": [
+      "at any time"
+    ]
+  },
   "packageRules": [
     {
-      "description": "Development tools and CI actions move together: one pull request to review.",
+      "description": "Development tools and CI actions move together: one pull request, merged once CI passes.",
       "matchManagers": [
         "pep621",
         "github-actions",
@@ -28,43 +45,44 @@
       ],
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "digest"
       ],
       "groupName": "development tooling",
-      "automerge": false
+      "automerge": true
     },
     {
-      "description": "The documentation site (Astro, Starlight): one grouped pull request, checked by the docs build.",
+      "description": "The documentation site (Astro, Starlight): one grouped pull request, merged once the docs build passes.",
       "matchManagers": [
         "npm"
       ],
       "matchFileNames": [
         "docs/package.json"
       ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "documentation site",
-      "automerge": false
+      "automerge": true
     },
     {
-      "description": "fastmcp and httpx run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp update.",
+      "description": "fastmcp, httpx and pydantic run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp update.",
       "matchPackageNames": [
         "fastmcp",
-        "httpx"
+        "httpx",
+        "pydantic"
       ],
       "groupName": null,
       "automerge": false
     },
     {
-      "description": "Linters change what the build accepts. Their major versions are reviewed one at a time.",
-      "matchPackageNames": [
-        "black",
-        "isort",
-        "pylint",
-        "mypy"
-      ],
+      "description": "Major versions change what the build accepts or how the code behaves: reviewed one at a time.",
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": null
+      "groupName": null,
+      "automerge": false
     }
   ],
   "lockFileMaintenance": {
@@ -72,7 +90,7 @@
     "schedule": [
       "before 6am on monday"
     ],
-    "automerge": false
+    "automerge": true
   },
   "pre-commit": {
     "enabled": true

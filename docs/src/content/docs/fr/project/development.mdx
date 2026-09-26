@@ -55,6 +55,20 @@ expérimental, sans bloquer pour l'instant. Sur une pull request, chaque commit 
 signé et le titre doit commencer par la nature du changement. Un seul contrôle,
 **CI passed**, résume tous les jobs obligatoires.
 
+## Dépendances
+
+[Renovate](https://docs.renovatebot.com) ouvre des pull requests chaque lundi matin :
+
+| Mise à jour | Traitement |
+|---|---|
+| outils de développement, actions de la CI, site de documentation (mineures et correctifs) | regroupées, fusionnées d'elles-mêmes une fois la CI au vert |
+| `fastmcp`, `httpx`, `pydantic` — ils tournent devant les budgets des utilisateurs | une pull request chacune, relue à la main ; l'évaluation est lancée avant une mise à jour de `fastmcp` |
+| toute version majeure | une pull request chacune, relue à la main |
+| une vulnérabilité connue | aussitôt, quel que soit le jour |
+
+Une nouvelle version attend trois jours avant que Renovate la propose : une version
+cassée ou malveillante vite retirée n'atteint jamais le projet.
+
 ## Tests
 
 | Sorte | Fichiers | Ce qu'ils vérifient |

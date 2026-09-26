@@ -53,6 +53,20 @@ and the documentation build. The test suite runs on Linux and macOS with Python 
 a pull request, every commit must be signed off and the title must start with the kind of
 change. One check, **CI passed**, stands for every required job.
 
+## Dependencies
+
+[Renovate](https://docs.renovatebot.com) opens pull requests every Monday morning:
+
+| Update | Handling |
+|---|---|
+| development tools, CI actions, the documentation site (minor and patch) | grouped, merged by itself once CI passes |
+| `fastmcp`, `httpx`, `pydantic` — they run in front of users' budgets | one pull request each, reviewed by hand; the evaluation runs before a `fastmcp` update |
+| any major version | one pull request each, reviewed by hand |
+| a known vulnerability | at once, whatever the day |
+
+A new release waits three days before Renovate proposes it, so a broken or malicious
+version withdrawn quickly never reaches the project.
+
 ## Tests
 
 | Kind | Files | What they check |
