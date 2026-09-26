@@ -367,3 +367,17 @@ def test_in_january_the_four_months_before_reach_back_to_september() -> None:
     """September, November and December make three of the last four full months."""
     txs = _monthly("RENT", -50000, 1, ["2025-09", "2025-11", "2025-12"])
     assert forecast.recurring(txs, date(2026, 1, 10))[0].months_seen == 3
+
+
+def test_scheduled_payees_are_left_out_of_the_averages() -> None:
+    """A payee with a schedule is projected by it, so it leaves the averages and month to date."""
+    txs = [
+        _tx("INSURANCE", -300000, "2026-08-10"),
+        _tx("SHOP", -30000, "2026-08-12"),
+        _tx("INSURANCE", -120000, "2026-09-02"),
+        _tx("CLIENT", 90000, "2026-07-10"),
+    ]
+    scheduled = frozenset({("INSURANCE", True), ("CLIENT", False)})
+    assert forecast.variable_average(txs, TODAY, [], also=scheduled) == -10.0
+    assert forecast.income_average(txs, TODAY, [], also=scheduled) == 0.0
+    assert forecast.month_to_date(txs, TODAY, [], also=scheduled) == (0.0, 0.0)
