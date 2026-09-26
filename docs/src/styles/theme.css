@@ -109,3 +109,27 @@ h1,
 .sl-markdown-content table {
   font-variant-numeric: tabular-nums;
 }
+
+/* The name avenir-mcp in running text: the mono face of the commands, in the accent
+   colour, without the grey box of code, so it reads as a name, not as something to type. */
+.brand {
+  font-family: var(--__sl-font-mono);
+  font-size: 0.9em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--sl-color-accent);
+  white-space: nowrap;
+}
+
+:root:not([data-theme='light']) .brand {
+  color: var(--sl-color-accent-high);
+}
+
+/* In a link or a heading, the name takes the colour around it. */
+a .brand,
+h1 .brand,
+h2 .brand,
+h3 .brand,
+h4 .brand {
+  color: inherit;
+}

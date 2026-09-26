@@ -1,11 +1,11 @@
 ---
 // The notice that avenir-mcp is unofficial, at the foot of every page.
-import { home } from './home-i18n';
+import { branded, home } from './home-i18n';
 
 const t = home(Astro.locals.starlightRoute.lang);
 ---
 
-<p class="disclaimer not-content" set:html={t.disclaimer} />
+<p class="disclaimer not-content" set:html={branded(t.disclaimer)} />
 
 <style>
   .disclaimer {
@@ -19,5 +19,10 @@ const t = home(Astro.locals.starlightRoute.lang);
 
   .disclaimer :global(a) {
     color: var(--sl-color-gray-2);
+  }
+
+  /* The name keeps its face, not its colour: the notice stays quiet. */
+  .disclaimer :global(.brand) {
+    color: inherit;
   }
 </style>

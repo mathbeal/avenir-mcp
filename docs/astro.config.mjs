@@ -3,10 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import { satteri } from '@astrojs/markdown-satteri';
+import { brand } from './src/plugins/brand.mjs';
 
 export default defineConfig({
   site: 'https://mathbeal.github.io',
   base: '/avenir-mcp',
+  // The name avenir-mcp is set apart in the text of every page (see the plugin).
+  markdown: { processor: satteri({ hastPlugins: [brand] }) },
   vite: {
     resolve: {
       // Real answers from avenir-mcp on the invented demo budget, written by `python -m docsgen`.

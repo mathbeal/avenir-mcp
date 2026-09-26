@@ -94,6 +94,14 @@ const texts = {
 
 export type Lang = keyof typeof texts;
 
+/**
+ * Sets the name avenir-mcp apart, as the Markdown pages do (src/plugins/brand.mjs).
+ * Only a mention in text: the name inside a path such as /avenir-mcp/ stays as it is.
+ */
+export function branded(html: string): string {
+  return html.replace(/(?<![\w/-])avenir-mcp(?![\w/-])/g, '<span class="brand">avenir-mcp</span>');
+}
+
 export function home(lang: string) {
   return texts[(lang in texts ? lang : 'en') as Lang];
 }
