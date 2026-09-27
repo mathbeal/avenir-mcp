@@ -259,3 +259,15 @@ def test_given_income_replaces_scheduled_income(budget: AsyncMock) -> None:
     data = _call({"plan_id": "b1", "until": "2026-10", "monthly_income": 3000}).structured_content
     assert [o["payee"] for o in data["assumptions"]["scheduled"]] == ["GYM", "GYM"]
     assert round(_inflows(data, "2026-10"), 2) == 3000.0
+
+
+def test_a_schedule_named_briefly_still_replaces_the_bank_payee(budget: AsyncMock) -> None:
+    """A schedule "Lease" covers the bank's "CAR LEASE": the charge is not counted twice."""
+    before = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    budget.return_value = [
+        scheduled("Lease", "2026-01-25", "2026-09-25", "monthly", amount=-400_000)
+    ]
+    after = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert "CAR LEASE" not in [r["payee"] for r in after["assumptions"]["recurring"]]
+    for month in ("2026-09", "2026-10"):
+        assert _outflows(after, month) == _outflows(before, month)

@@ -6,6 +6,7 @@ from datetime import date
 from typing import Any
 
 from avenir_mcp import forecast
+from avenir_mcp.classifier import normalize_payee
 
 TODAY = date(2026, 9, 24)
 
@@ -381,3 +382,21 @@ def test_scheduled_payees_are_left_out_of_the_averages() -> None:
     assert forecast.variable_average(txs, TODAY, [], also=scheduled) == -10.0
     assert forecast.income_average(txs, TODAY, [], also=scheduled) == 0.0
     assert forecast.month_to_date(txs, TODAY, [], also=scheduled) == (0.0, 0.0)
+
+
+def test_a_schedule_matches_the_longer_bank_label_of_its_payee() -> None:
+    """A schedule named "Acme Payroll" covers "Acme Payroll - ACME PAYROLL - REF-FF01 - IBAN…"."""
+    label = "Acme Payroll - ACME PAYROLL - REF-FF2608004 - IBAN: (masqué)"
+    txs = [_tx(label, 900000, "2026-07-31"), _tx("OTHER CLIENT", 30000, "2026-08-10")]
+    scheduled = frozenset({(normalize_payee("Acme Payroll"), False)})
+    assert forecast.income_average(txs, TODAY, [], also=scheduled) == 10.0
+    assert forecast.is_scheduled(normalize_payee(label), False, scheduled)
+
+
+def test_a_schedule_matches_whole_words_only_and_its_own_direction() -> None:
+    """ "ACME" does not cover "ACMEVILLE STORE", and an inflow schedule does not cover a payment."""
+    scheduled = frozenset({("ACME", False)})
+    assert not forecast.is_scheduled("ACMEVILLE STORE", False, scheduled)
+    assert not forecast.is_scheduled("ACME", True, scheduled)
+    assert forecast.is_scheduled("ACME SAS - ACME", False, scheduled)
+    assert not forecast.is_scheduled("", False, frozenset({("", False)}))
