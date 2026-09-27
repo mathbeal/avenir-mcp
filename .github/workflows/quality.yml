@@ -28,7 +28,7 @@ jobs:
       - run: uv lock --check
 
   lint:
-    name: black, isort, pylint, ruff, deptry
+    name: ruff, pylint, deptry
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
@@ -41,10 +41,9 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: true
-      - run: uv run black --check avenir_mcp tests evals docsgen
-      - run: uv run isort --check avenir_mcp tests evals docsgen
+      - run: uv run ruff format --check avenir_mcp tests evals docsgen
       - run: uv run pylint avenir_mcp tests evals docsgen
-      - run: uv run ruff check avenir_mcp
+      - run: uv run ruff check avenir_mcp tests evals docsgen
       - run: uv run deptry .
 
   changelog:

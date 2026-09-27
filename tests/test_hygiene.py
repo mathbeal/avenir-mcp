@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-import subprocess  # nosec B404 - runs git ls-files
+import subprocess  # noqa: S404  # nosec B404 - runs git ls-files
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,8 +22,11 @@ DUPLICATE = re.compile(r".+ \d+(\.[^.]+)?$")
 def _repository_files() -> list[Path]:
     """Files git tracks, or every file when there is no repository (an sdist)."""
     if (ROOT / ".git").exists():
-        listed = subprocess.run(
-            ["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True
+        listed = subprocess.run(  # noqa: S603  # nosec B603 - fixed argument list
+            ["git", "ls-files", "-z"],  # noqa: S607 - git from PATH, as the developer runs it
+            cwd=ROOT,
+            capture_output=True,
+            check=True,
         ).stdout
         return [ROOT / name for name in listed.decode().split("\0") if name]
     return [

@@ -10,10 +10,9 @@ setup:
 check: lint types test vocabulary lock
 
 lint:
-    uv run black --check avenir_mcp tests evals docsgen
-    uv run isort --check avenir_mcp tests evals docsgen
+    uv run ruff format --check avenir_mcp tests evals docsgen
     uv run pylint avenir_mcp tests evals docsgen
-    uv run ruff check avenir_mcp
+    uv run ruff check avenir_mcp tests evals docsgen
     uv run deptry .
 
 types:
@@ -31,8 +30,8 @@ lock:
 
 # Reformat.
 fix:
-    uv run isort avenir_mcp tests evals docsgen
-    uv run black avenir_mcp tests evals docsgen
+    uv run ruff check --select I --fix avenir_mcp tests evals docsgen
+    uv run ruff format avenir_mcp tests evals docsgen
 
 # Audit the workflows and hunt typos, as CI does.
 hygiene:
