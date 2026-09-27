@@ -50,7 +50,8 @@ alors.
 | vocabulaire | `lexdrift check avenir_mcp --baseline lexdrift.lock` | un nouveau mot apparaît pour une idée déjà nommée |
 | verrou | `uv lock --check` | `uv.lock` ne correspond pas à `pyproject.toml` |
 
-La CI lance aussi `typos`, `zizmor` sur les workflows, `pip-audit` sur les dépendances
+La CI lance aussi `gitleaks` sur chaque commit de l'historique (`just secrets`, avec
+Docker), `typos`, `zizmor` sur les workflows, `pip-audit` sur les dépendances
 verrouillées, la construction de la documentation avec les tests de son propre code, CodeQL et
 l'OpenSSF Scorecard (une fois le dépôt public), une comparaison hebdomadaire de l'API YNAB
 avec son instantané (`just api-drift`), et
