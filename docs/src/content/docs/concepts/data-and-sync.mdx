@@ -88,15 +88,21 @@ costs, on a cold cache, is measured on the demo budget and stated on its
 | Cost | Tools |
 |---|---|
 | 0 | any call refused by validation (a malformed month, an empty name…) |
-| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a `set_category_budget` preview |
-| 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
-| 3 | `suggest_categories` (a whole page), `apply_categories` |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a preview of `set_category_budget` |
+| 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `find_transactions`, `list_scheduled_transactions`, `suggest_categories` (a whole page), `apply_categories`, a preview of `split_transaction` |
+| 4 | `forecast_balance` |
 | 1 + N | `get_spending_trends` over N months |
 
 Applying a confirmed write adds its own request (one bulk `PATCH` for any number of
 transactions). With a warm cache, reading transactions again costs one small delta
-request. When the quota is spent YNAB answers `429`, which avenir-mcp returns as `… YNAB 429:
-…`; waiting a few minutes is enough.
+request.
+
+When the quota is spent YNAB answers `429` without saying when to come back, so
+avenir-mcp **retries nothing**: it returns `… YNAB 429: …` and sends no request at all for
+10 minutes. It also stops by itself at **180 requests** in the last hour, leaving the rest
+to other apps using the same token, and says in how many minutes the next request can
+leave. Either way, the agent is told to tell you and not to retry before then.
 
 ## What is never stored
 

@@ -93,14 +93,21 @@ de chaque outil, cache froid, est mesuré sur le budget de démonstration et ind
 |---|---|
 | 0 | tout appel refusé par la validation (mois mal formé, nom vide…) |
 | 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, l'aperçu de `set_category_budget` |
-| 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
-| 3 | `suggest_categories` (une page entière), `apply_categories` |
+| 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `find_transactions`, `list_scheduled_transactions`, `suggest_categories` (une page entière), `apply_categories`, l'aperçu de `split_transaction` |
+| 4 | `forecast_balance` |
 | 1 + N | `get_spending_trends` sur N mois |
 
 Appliquer une écriture confirmée ajoute sa propre requête (un seul `PATCH` groupé, quel
 que soit le nombre de transactions). Avec un cache chaud, relire les transactions coûte
-une petite requête incrémentale. Quand le quota est épuisé, YNAB répond `429`, qu'avenir-mcp
-renvoie en `… YNAB 429: …` ; il suffit d'attendre quelques minutes.
+une petite requête incrémentale.
+
+Quand le quota est épuisé, YNAB répond `429` sans dire quand revenir : avenir-mcp **ne
+réessaie donc rien**. Il renvoie `… YNAB 429: …` et n'envoie plus aucune requête pendant
+10 minutes. Il s'arrête aussi de lui-même à **180 requêtes** dans l'heure écoulée, laissant
+le reste aux autres applications qui utilisent le même jeton, et dit dans combien de
+minutes la prochaine requête pourra partir. Dans les deux cas, l'agent doit vous prévenir
+et ne pas réessayer avant.
 
 ## Ce qui n'est jamais stocké
 

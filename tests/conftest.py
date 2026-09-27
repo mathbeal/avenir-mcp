@@ -13,6 +13,7 @@ from avenir_mcp import client, server
 def reset_cache() -> None:
     """Reset the in-memory delta-sync cache before every test."""
     client._CACHE.clear()  # pylint: disable=protected-access
+    client.PACE.reset()
 
 
 @pytest.fixture(autouse=True)
