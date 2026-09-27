@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from docsgen import api, examples, reference
+from docsgen import api, examples, readme, reference
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "docs" / "src" / "content" / "docs"
@@ -37,6 +37,8 @@ def generated() -> dict[Path, str]:
         files[CONTENT / relative] = text
     for name, capture in captures.items():
         files[SNIPPETS / f"{name}.json"] = capture.text
+    for scheme, svg in readme.charts(captures["forecast"].text).items():
+        files[ROOT / ".github" / "assets" / f"forecast-{scheme}.svg"] = svg
     return files
 
 

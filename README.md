@@ -4,11 +4,12 @@
 [![MCP Inspector](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml)
 [![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://mathbeal.github.io/avenir-mcp/)
 
-[![python](https://img.shields.io/badge/python-3.12%20%7C%203.13%20%7C%203.14-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
+[![PyPI](https://img.shields.io/pypi/v/avenir-mcp)](https://pypi.org/project/avenir-mcp/)
+[![python](https://img.shields.io/pypi/pyversions/avenir-mcp)](https://pypi.org/project/avenir-mcp/)
 [![coverage](https://img.shields.io/badge/coverage-100%25%20lines%20and%20branches-brightgreen)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![types](https://img.shields.io/badge/types-mypy%20strict-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![docstrings](https://img.shields.io/badge/docstrings-Google%20style%2C%20ruff-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
-[![code style](https://img.shields.io/badge/code%20style-black-000000)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
+[![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
 
 > 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB budget
@@ -23,6 +24,19 @@ matches the bank, when money would run out. Every change is previewed, confirmed
 you, and can be undone.
 
 **📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
+  <img alt="Asked to categorise pending transactions, the agent flags a prompt injection hidden in a memo and a likely duplicate, proposes a category for each, and asks before applying anything." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-light.svg" width="720">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-dark.svg">
+  <img alt="forecast_balance on the demo plan: the month-end balance rises from September to December, with each month's lowest day and a yearly insurance payment scheduled on 20 October." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-light.svg" width="720">
+</picture>
+
+Both come from the invented demo plan: a real reply of Claude Sonnet, and the forecast
+the documentation shows.
 
 > **Unofficial project.** We are not affiliated, associated, or in any way officially
 > connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget
