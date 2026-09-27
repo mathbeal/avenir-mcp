@@ -41,9 +41,9 @@ alors.
 
 | Contrôle | Commande | Échoue quand |
 |---|---|---|
-| format | `black --check`, `isort --check` | un fichier n'est pas formaté |
+| format | `ruff format --check` | un fichier n'est pas formaté |
 | lint | `pylint` | la note est sous 10,00 |
-| docstrings | `ruff check avenir_mcp` | une docstring n'est pas au format Google, ou omet un argument, la valeur renvoyée ou une exception levée |
+| ruff | `ruff check` | une docstring du paquet n'est pas au format Google ou omet un argument, la valeur de retour ou une exception levée ; les imports ne sont pas triés ; les contrôles de sécurité de bandit trouvent un motif risqué (TLS non vérifié, commande shell, mot de passe dans le code…) |
 | dépendances | `deptry .` | le code importe un paquet que `pyproject.toml` ne déclare pas, ou en déclare un qu'il n'utilise pas |
 | types | `mypy` (strict) | une erreur de type |
 | tests | `pytest` | un test échoue, **un avertissement** est émis, ou la couverture des lignes **ou des branches** est sous 100 % |

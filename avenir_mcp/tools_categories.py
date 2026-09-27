@@ -94,8 +94,7 @@ async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
         )
     if category_group_id is not None and category_group_id not in groups:
         raise ToolError(
-            f"Group {category_group_id} is not in this plan: "
-            "use an id from list_category_groups."
+            f"Group {category_group_id} is not in this plan: use an id from list_category_groups."
         )
     if name is not None and not name.strip():
         raise ToolError("The new name is empty: give a name, or omit it to keep the current one.")
@@ -227,8 +226,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     if before == after:
         return result
     question = (
-        f"Budget {category['name']} for {month}: "
-        f"{result.from_amount:.2f} → {result.to_amount:.2f}?"
+        f"Budget {category['name']} for {month}: {result.from_amount:.2f} → {result.to_amount:.2f}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
     stop = await gate(ctx, plan_id, subject, question, confirmation)
@@ -312,8 +310,7 @@ async def create_category(
     groups = {g["id"]: g["name"] for g in await client.get_category_groups(plan_id)}
     if category_group_id not in groups:
         raise ToolError(
-            f"Group {category_group_id} is not in this plan: "
-            "use an id from list_category_groups."
+            f"Group {category_group_id} is not in this plan: use an id from list_category_groups."
         )
     new_name = name.strip()
     if not new_name:

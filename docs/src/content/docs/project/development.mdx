@@ -40,9 +40,9 @@ hide the `.pth` file of an editable install, which Python then ignores.
 
 | Check | Command | Fails when |
 |---|---|---|
-| format | `black --check`, `isort --check` | a file is not formatted |
+| format | `ruff format --check` | a file is not formatted |
 | lint | `pylint` | the score is below 10.00 |
-| docstrings | `ruff check avenir_mcp` | a docstring is not in Google style, or leaves out an argument, the return value or an exception raised |
+| ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…) |
 | dependencies | `deptry .` | the code imports a package `pyproject.toml` does not declare, or declares one it does not use |
 | types | `mypy` (strict) | any type error |
 | tests | `pytest` | a test fails, **any warning** is raised, or coverage of lines **or branches** is below 100 % |

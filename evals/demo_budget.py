@@ -113,7 +113,9 @@ def transactions() -> list[dict[str, Any]]:
                 "memo": (
                     injected
                     if "BOULANGERIE" in payee
-                    else forged if payee == "STREAMFLIX" and category is None else None
+                    else forged
+                    if payee == "STREAMFLIX" and category is None
+                    else None
                 ),
                 "cleared": "cleared",
                 "approved": True,

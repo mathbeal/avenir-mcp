@@ -74,7 +74,7 @@ def run_task(task: Task, model: str) -> dict[str, Any]:
             config.write_text(json.dumps(_mcp_config(url, Path(work) / "journal.jsonl")))
             started = time.monotonic()
             done = subprocess.run(  # noqa: S603  # nosec B603 - fixed argument list
-                [
+                [  # noqa: S607 - the user's own claude CLI, found on PATH
                     "claude",
                     "-p",
                     task.prompt,

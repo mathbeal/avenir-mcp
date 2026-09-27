@@ -49,8 +49,6 @@ avenir-mcp = "avenir_mcp.server:main"
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "black==26.5.1",
-    "isort==9.0.1",
     "mypy==2.3.1",
     "pylint==4.0.9",
     "ruff==0.16.9",
@@ -71,14 +69,6 @@ packages = ["avenir_mcp"]
 [tool.setuptools.dynamic]
 version = { attr = "avenir_mcp.__version__" }
 
-[tool.black]
-line-length = 100
-target-version = ["py312", "py313", "py314"]
-
-[tool.isort]
-profile = "black"
-line_length = 100
-
 [tool.mypy]
 strict = true
 python_version = "3.12"
@@ -90,11 +80,18 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["D", "DOC"]
+# D, DOC: Google docstrings. I: sorted imports. S: bandit's security checks.
+select = ["D", "DOC", "I", "S"]
 # A Raises section may name what a called function raises: the caller needs it too.
 ignore = ["DOC502"]
 # The DOC rules (pydoclint) are still in preview.
 preview = true
+
+[tool.ruff.lint.per-file-ignores]
+# Docstrings are enforced on the package only. Tests assert, and use made-up tokens.
+"tests/**" = ["D", "DOC", "S101", "S105", "S106"]
+"evals/**" = ["D", "DOC"]
+"docsgen/**" = ["D", "DOC"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
