@@ -172,11 +172,30 @@ jobs:
       - run: uv export --frozen --no-emit-project --all-groups -o requirements.txt
       - run: uvx pip-audit --strict --disable-pip -r requirements.txt
 
+  secrets:
+    name: no secret in the history
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Every commit, not only the last one: a secret removed later is still published.
+          fetch-depth: 0
+      # gitleaks 8.30.1, pinned by digest. --redact keeps a found secret out of the log.
+      - run: >-
+          docker run --rm -v "$PWD:/repo"
+          zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git /repo --redact --log-opts=--all
+
   passed:
     name: CI passed
     # The one check branch protection requires: it stands for every job above.
     if: always()
-    needs: [lock, lint, types, tests, vocabulary, hygiene, audit]
+    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, secrets]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

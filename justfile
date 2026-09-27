@@ -33,6 +33,11 @@ fix:
     uv run ruff check --select I --fix avenir_mcp tests evals docsgen
     uv run ruff format avenir_mcp tests evals docsgen
 
+# Look for secrets in every commit of every branch, as CI does (needs Docker).
+# It mounts the repository that holds the history, so a worktree works too.
+secrets:
+    docker run --rm -v "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)"):/repo" zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git /repo --redact --log-opts=--all
+
 # Audit the workflows and hunt typos, as CI does.
 hygiene:
     uvx typos .

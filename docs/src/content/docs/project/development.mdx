@@ -50,6 +50,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | lock | `uv lock --check` | `uv.lock` does not match `pyproject.toml` |
 
 CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked dependencies,
+`gitleaks` on every commit of the history (`just secrets`, with Docker),
 the documentation build with the tests of its own code, CodeQL and the OpenSSF Scorecard
 (once the repository is public), a weekly comparison of YNAB's API with its snapshot
 (`just api-drift`), and the official MCP Inspector
