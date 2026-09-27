@@ -58,7 +58,8 @@ avec son instantané (`just api-drift`), et
 le MCP Inspector officiel (`just inspect`), qui contrôle le serveur comme le voit un
 client, sur le budget de démonstration : ses listes, la portabilité des schémas de ses
 outils et un appel de chaque sorte. La suite de tests tourne sous Linux
-et macOS avec Python 3.12, 3.13 et 3.14, et sous Windows avec Python 3.14 ; la couverture
+et macOS avec Python 3.12, 3.13 et 3.14, et sous Windows avec Python 3.14 (sur une pull
+request, macOS n'essaie que 3.14 : ses machines coûtent dix fois celles de Linux) ; la couverture
 est exigée sous Linux et macOS, où s'appliquent les vérifications de permissions de
 fichiers. Python 3.15 tourne aussi, à titre expérimental, sans bloquer pour l'instant. Sur une pull request, chaque commit doit être
 signé et le titre doit commencer par la nature du changement. Deux contrôles doivent être

@@ -56,7 +56,8 @@ código, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), una co
 la API de YNAB con su instantánea (`just api-drift`), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
 cliente, sobre el presupuesto de demostración: sus listas, la portabilidad de los esquemas
 de sus herramientas y una llamada de cada tipo. La batería de pruebas se
-ejecuta en Linux y macOS con Python 3.12, 3.13 y 3.14, y en Windows con Python 3.14; la
+ejecuta en Linux y macOS con Python 3.12, 3.13 y 3.14, y en Windows con Python 3.14 (en
+una pull request, macOS solo prueba 3.14: sus máquinas cuestan diez veces las de Linux); la
 cobertura se exige en Linux y macOS, donde se aplican los controles de permisos de
 archivos. Python 3.15 también se ejecuta, como experimento que aún no bloquea. En una pull request, cada commit debe estar firmado y el
 título debe empezar por el tipo de cambio. Dos controles deben estar en verde:

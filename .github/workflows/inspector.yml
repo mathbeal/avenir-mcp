@@ -2,7 +2,12 @@ name: MCP Inspector
 
 # The server as a client sees it, through the official MCP Inspector, on the demo
 # budget. A workflow of its own, so that its badge shows this check alone.
-on: [push, pull_request]
+# On a pull request, and on main once merged; a push to a pull request's branch
+# alone would run everything a second time.
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 permissions: {}
 
