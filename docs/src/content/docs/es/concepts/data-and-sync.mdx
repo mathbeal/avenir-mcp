@@ -92,14 +92,21 @@ y se indica en su [página de referencia](/avenir-mcp/es/reference/tools/):
 |---|---|
 | 0 | toda llamada rechazada por la validación (un mes mal formado, un nombre vacío…) |
 | 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, la vista previa de `set_category_budget` |
-| 2 | `reconcile_account`, `forecast_balance`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
-| 3 | `suggest_categories` (una página entera), `apply_categories` |
+| 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `find_transactions`, `list_scheduled_transactions`, `suggest_categories` (una página entera), `apply_categories`, la vista previa de `split_transaction` |
+| 4 | `forecast_balance` |
 | 1 + N | `get_spending_trends` sobre N meses |
 
 Aplicar una escritura confirmada añade su propia petición (un único `PATCH` agrupado, sea
 cual sea el número de transacciones). Con la caché caliente, releer las transacciones
-cuesta una pequeña petición incremental. Cuando se agota la cuota, YNAB responde `429`,
-que avenir-mcp devuelve como `… YNAB 429: …`; basta con esperar unos minutos.
+cuesta una pequeña petición incremental.
+
+Cuando se agota la cuota, YNAB responde `429` sin decir cuándo volver, así que
+avenir-mcp **no reintenta nada**: devuelve `… YNAB 429: …` y no envía ninguna petición
+durante 10 minutos. También se detiene por sí mismo en **180 peticiones** en la última
+hora, dejando el resto a otras aplicaciones que usen el mismo token, e indica en cuántos
+minutos podrá salir la siguiente petición. En ambos casos, el agente debe avisarle y no
+reintentar antes.
 
 ## Lo que nunca se guarda
 

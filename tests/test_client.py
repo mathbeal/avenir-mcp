@@ -588,6 +588,66 @@ def test_api_error_with_non_json_body_uses_raw_text() -> None:
 
 
 # ---------------------------------------------------------------------------
+# YNAB's rate limit: 200 requests per hour and per token, over a rolling window
+# ---------------------------------------------------------------------------
+
+
+def _plans_client(status_code: int = 200) -> tuple[MagicMock, AsyncMock]:
+    payload: Any = {"data": {"plans": []}}
+    if status_code == 429:
+        payload = {
+            "error": {"id": "429", "name": "too_many_requests", "detail": "Too many requests"}
+        }
+    ctx = _async_client_returning(None)
+    get = AsyncMock(return_value=_mock_response(payload, status_code))
+    ctx.__aenter__.return_value.get = get
+    return ctx, get
+
+
+def _plans(ctx: MagicMock, clock: float) -> Any:
+    with (
+        patch("httpx.AsyncClient", return_value=ctx),
+        patch.dict("os.environ", {"YNAB_API_KEY": "tok"}),
+        patch("avenir_mcp.client.time.monotonic", return_value=clock),
+    ):
+        return asyncio.run(client.get_plans())
+
+
+def test_a_429_is_not_retried_and_pauses_every_request() -> None:
+    """Too many requests: say so, retry nothing, and send nothing more for ten minutes."""
+    ctx, get = _plans_client(429)
+    with pytest.raises(RuntimeError, match="200 requests per hour.*10 minutes"):
+        _plans(ctx, 1000.0)
+    assert get.await_count == 1
+    ok, sent = _plans_client()
+    with pytest.raises(RuntimeError, match="Nothing was sent.*10 minute"):
+        _plans(ok, 1000.0 + 1)
+    with pytest.raises(RuntimeError, match="1 minute"):
+        _plans(ok, 1000.0 + 599)
+    assert sent.await_count == 0
+    assert _plans(ok, 1000.0 + 600) == []
+    assert sent.await_count == 1
+
+
+def test_requests_stop_short_of_ynabs_limit() -> None:
+    """After 180 requests in an hour, the next waits for the oldest to leave the hour."""
+    ctx, get = _plans_client()
+    for second in range(client.PACE.budget):
+        _plans(ctx, float(second))
+    with pytest.raises(RuntimeError, match="180 requests.*last hour.*Nothing was sent.*57 minutes"):
+        _plans(ctx, 200.0)
+    assert get.await_count == client.PACE.budget
+    assert _plans(ctx, 3600.0) == []
+
+
+def test_a_rejected_request_does_not_count() -> None:
+    """A bad id never reaches YNAB, so it takes nothing from the hour's requests."""
+    with pytest.raises(ValueError):
+        asyncio.run(client.get_accounts("x/../user"))
+    assert not client.PACE.sent
+
+
+# ---------------------------------------------------------------------------
 # approve_transactions
 # ---------------------------------------------------------------------------
 
