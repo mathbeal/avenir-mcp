@@ -1,0 +1,23 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-HTTPCACHESEMANTICS-19964068:
+    - '*':
+        reason: >-
+          Build-time only: astro uses it while building the static documentation
+          site, on one machine or in CI. Both flaws need a shared HTTP cache
+          serving several users, which never exists here, and no fixed version
+          exists yet. Renovate updates it when one does.
+        expires: 2026-12-31T00:00:00.000Z
+        created: 2026-09-27T08:28:20.013Z
+  SNYK-JS-HTTPCACHESEMANTICS-19964064:
+    - '*':
+        reason: >-
+          Build-time only: astro uses it while building the static documentation
+          site, on one machine or in CI. Both flaws need a shared HTTP cache
+          serving several users, which never exists here, and no fixed version
+          exists yet. Renovate updates it when one does.
+        expires: 2026-12-31T00:00:00.000Z
+        created: 2026-09-27T08:28:22.375Z
+patch: {}
