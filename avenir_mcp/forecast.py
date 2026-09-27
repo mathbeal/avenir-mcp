@@ -8,6 +8,7 @@ expects (monthly income, one-off amounts). Sums are made in milliunits.
 from __future__ import annotations
 
 import calendar
+import re
 import statistics
 from collections import defaultdict
 from datetime import date
@@ -23,6 +24,9 @@ LOOKBACK_MONTHS = 4
 MIN_MONTHS_SEEN = 3
 AMOUNT_TOLERANCE = 0.2
 VARIABLE_MONTHS = 3
+
+# Words of a payee name: letters and digits, whatever the punctuation between them.
+_WORD = re.compile(r"[A-Z0-9]+")
 
 
 class Recurring(Model):
@@ -144,6 +148,30 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
     return found
 
 
+def is_scheduled(payee: str, outflow: bool, scheduled: frozenset[tuple[str, bool]]) -> bool:
+    """Tell whether a bank payee is one a schedule already projects.
+
+    A schedule names its payee briefly ("ACME PAYROLL"), while the bank label of
+    the same payee often says more ("ACME PAYROLL - ACME PAYROLL - REF-FF01"). A
+    schedule covers a payee when every word of its name is a word of the label,
+    in the same direction of money.
+
+    Args:
+        payee: The bank payee, normalised.
+        outflow: True for money out.
+        scheduled: (normalised payee, is money out) pairs of the schedules.
+
+    Returns:
+        True when one of the schedules covers this payee.
+    """
+    words = set(_WORD.findall(payee))
+    return any(
+        out == outflow and (name == payee or (name_words and name_words <= words))
+        for name, out in scheduled
+        if (name_words := set(_WORD.findall(name)))
+    )
+
+
 def _other_average(
     transactions: list[dict[str, Any]],
     today: date,
@@ -166,7 +194,6 @@ def _other_average(
     """
     months = set(_months_before(today, VARIABLE_MONTHS))
     recurring_payees = {r.payee for r in known if (r.amount < 0) == outflow}
-    recurring_payees |= {payee for payee, out in also if out == outflow}
     total = sum(
         tx["amount"]
         for tx in transactions
@@ -174,6 +201,7 @@ def _other_average(
         and (tx["amount"] < 0) == outflow
         and tx["date"][:7] in months
         and normalize_payee(tx.get("payee_name") or "") not in recurring_payees
+        and not is_scheduled(normalize_payee(tx.get("payee_name") or ""), outflow, also)
     )
     return milliunit_to_amount(round(total / VARIABLE_MONTHS))
 
@@ -239,13 +267,14 @@ def month_to_date(
         (spent, received) in currency units; spent is negative.
     """
     this_month = today.isoformat()[:7]
-    recurring_payees = {(r.payee, r.amount < 0) for r in known} | also
+    recurring_payees = {(r.payee, r.amount < 0) for r in known}
     spent = received = 0
     for tx in transactions:
         if not _usable(tx) or tx["date"][:7] != this_month:
             continue
         payee = normalize_payee(tx.get("payee_name") or "")
-        if (payee, tx["amount"] < 0) in recurring_payees:
+        key = (payee, tx["amount"] < 0)
+        if key in recurring_payees or is_scheduled(*key, also):
             continue
         if tx["amount"] < 0:
             spent += tx["amount"]

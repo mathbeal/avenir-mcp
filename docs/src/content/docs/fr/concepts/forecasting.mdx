@@ -33,7 +33,9 @@ où il est tombé (le dernier jour d'un mois plus court si besoin).
 
 Les transactions planifiées des comptes projetés, de demain à la fin de l'horizon,
 tombent à leurs dates, répétées à leur fréquence YNAB — une assurance annuelle comprise.
-Un bénéficiaire qui a une échéance n'est projeté que par elle : il sort des charges
+Un bénéficiaire qui a une échéance n'est projeté que par elle, même quand la banque le
+libelle plus longuement (une échéance « Acme Payroll » couvre « ACME PAYROLL - ACME PAYROLL -
+REF-FF01 » : chaque mot de son nom figure dans le libellé) : il sort des charges
 récurrentes et des moyennes, et n'est donc jamais compté deux fois. Un virement entre
 deux comptes projetés est écarté, puisqu'il ne change aucun total ; un virement vers un
 autre compte compte comme une sortie. Elles sont rendues dans `assumptions.scheduled`.

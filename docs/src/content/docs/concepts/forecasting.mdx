@@ -33,7 +33,9 @@ day** it fell on (the last day of a shorter month when needed).
 
 The scheduled transactions of the projected accounts, from tomorrow to the end of the
 horizon, fall on their dates, repeated at their YNAB frequency — a yearly insurance
-included. A payee with a schedule is projected by it alone: it leaves the recurring
+included. A payee with a schedule is projected by it alone, even when the bank labels it at
+length (a schedule "Acme Payroll" covers "ACME PAYROLL - ACME PAYROLL - REF-FF01": every word
+of its name is in the label): it leaves the recurring
 charges and the averages, so it is never counted twice. A transfer between two projected
 accounts is left out, since it changes neither total; a transfer to another account
 counts as money out. They are returned in `assumptions.scheduled`.

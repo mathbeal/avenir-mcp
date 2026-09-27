@@ -340,7 +340,9 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         date(year, month, calendar.monthrange(year, month)[1]),
     )
     charges = [
-        r for r in forecast.recurring(history, now) if (r.payee, r.amount < 0) not in planned
+        r
+        for r in forecast.recurring(history, now)
+        if not forecast.is_scheduled(r.payee, r.amount < 0, planned)
     ]
     if monthly_income is not None:
         # The income given replaces what the history suggests, recurring salary included.
