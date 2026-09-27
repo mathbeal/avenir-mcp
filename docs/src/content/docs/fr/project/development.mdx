@@ -61,7 +61,8 @@ outils et un appel de chaque sorte. La suite de tests tourne sous Linux
 et macOS avec Python 3.12, 3.13 et 3.14, et sous Windows avec Python 3.14 (sur une pull
 request, macOS n'essaie que 3.14 : ses machines coûtent dix fois celles de Linux) ; la couverture
 est exigée sous Linux et macOS, où s'appliquent les vérifications de permissions de
-fichiers. Python 3.15 tourne aussi, à titre expérimental, sans bloquer pour l'instant. Sur une pull request, chaque commit doit être
+fichiers. Python 3.15 tourne aussi, à titre expérimental : un échec y est un avertissement, pas
+un contrôle en rouge. Sur une pull request, chaque commit doit être
 signé et le titre doit commencer par la nature du changement. Deux contrôles doivent être
 au vert : **CI passed**, qui résume tous les jobs du workflow de qualité, et
 **MCP Inspector**, un workflow à part pour que son badge le montre seul.
