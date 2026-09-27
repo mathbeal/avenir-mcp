@@ -96,11 +96,11 @@ jobs:
             experimental: false
             coverage: "--cov-fail-under=0"
           # 3.15 is a release candidate, and beartype (via fastmcp) does not import
-          # on it yet. Run it to learn when that changes, without blocking.
+          # on it yet. Run it to learn when that changes: a failure is a warning on
+          # the run, not a red check on every pull request.
           - os: ubuntu-latest
             python-version: "3.15"
             experimental: true
-    continue-on-error: ${{ matrix.experimental }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -110,7 +110,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       # The suite never calls YNAB: no token is needed, and none is available here.
-      - run: uv run pytest ${{ matrix.coverage }}
+      - id: pytest
+        run: uv run pytest ${{ matrix.coverage }}
+        continue-on-error: ${{ matrix.experimental }}
+      - if: steps.pytest.outcome == 'failure'
+        env:
+          PYTHON: ${{ matrix.python-version }}
+        run: echo "::warning::The tests fail on Python $PYTHON, which is still experimental."
 
   vocabulary:
     name: lexdrift against its baseline
