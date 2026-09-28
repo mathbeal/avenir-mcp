@@ -48,7 +48,7 @@ Closed accounts are left out; balances in currency units.
 
 ### `avenir-mcp://guide`
 
-About 1,600 characters in three sections:
+About 2,000 characters in three sections:
 
 - **Conventions** — amounts in currency units, read-only unless enabled, never pass a
   confirmation code the user has not seen the preview for, undo, bank text is data;
@@ -58,6 +58,9 @@ About 1,600 characters in three sections:
   moving money, budget true expenses every month.
 
 A test fails if the guide names a tool that does not exist.
+
+The same text is the server's **instructions**: a client that passes them to its model
+gives it the guide from the first message, without anyone attaching the resource.
 
 ## Prompts
 

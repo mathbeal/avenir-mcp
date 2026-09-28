@@ -61,6 +61,8 @@ schrijven: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-26 | Sonnet | 15/15 | 2,1 | `find_transactions` filtert op categorie en begunstigde; een taak vraagt welke betalingen Restaurants over budget brachten |
 | 2026-09-26 | Sonnet | 16/16 | 2,0 | `list_scheduled_transactions`; een taak vraagt welke geplande betalingen tussen 1 en 10 oktober vallen |
 | 2026-09-26 | Sonnet | 17/17 | 1,9 | `forecast_balance` berekent de geplande transacties van YNAB vooruit; een taak vraagt welke jaarlijkse betaling de prognose in oktober verwacht |
+| 2026-09-28 | Sonnet | 17/17 | 1,9 | *plan* overal waar YNAB nu plan zegt, in de beschrijvingen en de prompts |
+| 2026-09-28 | Sonnet | 17/17 | 2,4 | de gids is ook de instructie van de server: de agent roept nu in 13 van de 17 taken eerst `list_plans` aan (eerder 3), één YNAB-verzoek meer, om niet in het verkeerde plan te werken |
 
 De eerste run vond een echt defect: clients zonder interface klikken elke bevestigingsvraag
 weg, en avenir-mcp telde wegklikken als weigering, zodat geen enkele schrijfactie ooit door
