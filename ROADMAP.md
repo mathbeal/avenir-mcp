@@ -6,6 +6,21 @@ previewed, confirmed and undoable; short, structured answers.
 
 Newest first.
 
+## Next: from a document to the year's schedules
+
+- The user gives the agent a document that sets future payments: a tax notice, a
+  corrected tax schedule, a building's call for funds, a loan's amortisation table.
+  The agent reads it; avenir-mcp never parses a document.
+- Write tools for scheduled transactions: create, change and delete, each previewed,
+  confirmed and undoable.
+- A tool to set a category's target: amount, and date for a one-off need.
+- One batch per document: a single preview of every schedule and target to create or
+  change, one confirmation, one `undo_operation`.
+- A new document updates the schedules it replaces instead of adding duplicates,
+  matched by payee as `forecast.is_scheduled` does.
+- The answer says what was created, changed or left out, and why: YNAB refuses a date
+  in the past or more than five years ahead, and a category on an inflow.
+
 ## 1.0: verified and published
 
 - Contract tests through the MCP protocol, and an MCP Inspector session in CI.
