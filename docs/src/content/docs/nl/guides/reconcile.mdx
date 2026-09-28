@@ -1,0 +1,84 @@
+---
+title: Een rekening afstemmen
+description: Een rekening vergelijken met het saldo dat je bank toont, elk verschil uitleggen, en haar dan als afgestemd markeren.
+sidebar:
+  order: 2
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import gap from '@snippets/reconcile_gap.json?raw';
+
+**Doel:** zeker weten dat YNAB overeenkomt met je bank, de oorzaak vinden als dat niet zo
+is, en de rekening als afgestemd markeren zodra het klopt.
+
+**Voordat je begint:** het saldo dat je bank vandaag toont, en schrijven ingeschakeld om de
+rekening als afgestemd te markeren (de diagnose werkt ook alleen lezend).
+
+**Tool:** [`reconcile_account`](/avenir-mcp/nl/reference/tools/reconcile-account/).
+**Prompt:** `reconcile`.
+
+## Het gesprek
+
+<Steps>
+
+1. **Vraag het, met het saldo van de bank.**
+
+   > **Jij:** Mijn bank toont 3.440,80 op mijn betaalrekening. Is YNAB het daarmee eens?
+
+2. **De agent vergelijkt.** Hij roept `reconcile_account` aan met
+   `{"plan_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}`.
+   avenir-mcp telt de *cleared* transacties van de rekening op (die de bank al heeft
+   getoond) en vergelijkt. Ze verschillen, dus **wordt er niets geschreven**:
+
+   <Code code={gap} lang="json" title="reconcile_account — verschil gevonden" />
+
+3. **De agent legt het verschil uit.**
+
+   > **Claude:** YNAB telt 71,86 meer dan de bank. Twee identieke betalingen aan Market
+   > Fresh van 71,86 op 19 september lijken één import die twee keer binnenkwam.
+
+   Het antwoord biedt drie aanwijzingen: `explained_by` (een openstaande transactie
+   waarvan het bedrag precies het verschil is), `uncleared` (wat de bank nog niet heeft
+   getoond) en `possible_duplicates` (zelfde bedrag en winkelier, hooguit 3 dagen uit
+   elkaar, in de laatste 60 dagen).
+
+4. **Je lost de oorzaak op** – hier verwijder je de dubbele boeking in YNAB.
+
+5. **Vraag het opnieuw.** Als de saldi overeenkomen, toont avenir-mcp de afstemming als
+   voorbeeld: elke *cleared* transactie van de rekening wordt *reconciled*. Je bevestigt;
+   het wordt in één verzoek toegepast en in het journaal vastgelegd.
+
+</Steps>
+
+## Als het verschil niet te verklaren is
+
+Soms blijft er een klein verschil: kosten die nooit zijn geïmporteerd, een oude fout. Alleen
+als je erom vraagt, roept de agent opnieuw aan met `adjust=true`:
+
+- er wordt een transactie **Balance adjustment** ter grootte van het verschil op de
+  rekening aangemaakt, met de datum van vandaag, in *Ready to Assign*, met de omschrijving
+  *Entered by reconcile_account*;
+- daarna wordt de rekening afgestemd, de correctie inbegrepen.
+
+<Aside type="caution">
+Een correctie verbergt een probleem in plaats van het op te lossen. avenir-mcp maakt er
+nooit uit zichzelf een, en de evaluatie controleert dat een agent die *„verander niets“*
+te horen kreeg, dat ook niet doet.
+</Aside>
+
+## Ongedaan maken
+
+`undo_operation` zet elke afgestemde transactie terug op *cleared* en verwijdert de
+correctie, als die er is. Zie [Een wijziging ongedaan maken](/avenir-mcp/nl/guides/undo/).
+
+## Statussen
+
+| `status` | Betekenis |
+|---|---|
+| `difference_found` | de saldi verschillen; niets geschreven; lees `analysis` |
+| `nothing_to_do` | de saldi komen overeen en er valt niets meer af te stemmen |
+| `confirmation_required` | de saldi komen overeen (of `adjust` is gevraagd); wacht op je ja |
+| `applied` | afgestemd; `operation_id` om ongedaan te maken |
+| `declined` | je zei nee; niets geschreven |
+
+Hoe de vergelijking werkt: [Afstemming](/avenir-mcp/nl/concepts/reconciliation/).

@@ -1,0 +1,75 @@
+---
+title: Een functie voorstellen
+description: Hoe je een nieuwe tool of werkstroom voorstelt, wat een voorstel makkelijk te accepteren maakt, en wat er daarna gebeurt.
+sidebar:
+  order: 5
+---
+
+import { Steps, Aside, LinkButton } from '@astrojs/starlight/components';
+
+avenir-mcp groeit uit echt gebruik van een budget. Merk je dat je met de hand een taak doet
+die een agent voor je zou kunnen doen, of een antwoord dat duidelijker kan, stel het dan
+voor. Voorstellen worden in het openbaar behandeld in de GitHub-issues van het project; je
+hebt een GitHub-account nodig.
+
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml" icon="external">Een functieverzoek openen</LinkButton>
+
+## Hoe je voorstelt
+
+<Steps>
+
+1. **Controleer dat het er nog niet is.** Lees de
+   [roadmap](/avenir-mcp/nl/project/limitations/#roadmap) en doorzoek de
+   [open voorstellen](https://github.com/mathbeal/avenir-mcp/issues?q=is%3Aissue+label%3Aenhancement).
+   Bestaat het jouwe al, voeg dan een 👍 en je gebruiksgeval toe in plaats van een nieuw
+   issue.
+
+2. **Open een functieverzoek.** Het formulier vraagt vier dingen (in het Engels):
+
+   | Vraag | Waarom |
+   |---|---|
+   | Wat wil je doen? | de taak, in je eigen woorden – niet de tool die je je voorstelt |
+   | Wat zou je tegen de agent zeggen? | een zin die je zou typen, en het antwoord dat je verwacht |
+   | Wat gebeurt er vandaag? | wat de huidige tools doen, en waarom dat niet genoeg is |
+   | Verandert het het budget? | een schrijfactie heeft een voorbeeld, een bevestiging en een ongedaanmaking nodig |
+
+3. **Volg de discussie.** Vragen komen als reacties op het issue; GitHub stuurt je een
+   melding.
+
+</Steps>
+
+<Aside type="danger" title="Plak nooit echte financiële gegevens">
+Issues zijn openbaar. Plak geen transacties, saldi, rekeningnamen, begunstigden,
+schermafbeeldingen van YNAB of je token. Verzin de cijfers: *„een abonnement van 12,99 dat
+14,99 werd“* is genoeg om de behoefte te begrijpen.
+</Aside>
+
+## Wat goed past
+
+Een voorstel is makkelijker te accepteren als het:
+
+- **een taak** beschrijft, geen YNAB-endpoint om in te pakken – zie
+  [Architectuur](/avenir-mcp/nl/concepts/architecture/);
+- werkt met de **openbare API van YNAB** en een personal access token;
+- **te testen is op een verzonnen budget**, zoals de rest van avenir-mcp;
+- als het schrijft, **een voorbeeld, een bevestiging en een ongedaanmaking** kan krijgen – zie
+  [Veilig door ontwerp](/avenir-mcp/nl/concepts/safety/).
+
+Voorstellen die je gegevens naar een andere dienst zouden sturen, of zonder je bevestiging
+zouden handelen, worden afgewezen.
+
+## Wat er daarna gebeurt
+
+| Status | Betekenis |
+|---|---|
+| open, `enhancement` | ontvangen; in reacties kan om details worden gevraagd |
+| op de [roadmap](/avenir-mcp/nl/project/limitations/#roadmap) | geaccepteerd en gepland |
+| gesloten met een pull request | geleverd: zie de [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) |
+| gesloten, `wontfix` | afgewezen, met de reden |
+
+## Andere manieren om te helpen
+
+- **Is er iets kapot?** Open een [bugmelding](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml).
+- **Een beveiligingsprobleem?** Meld het vertrouwelijk: zie [Beveiliging](/avenir-mcp/nl/project/security/).
+- **Wil je het zelf bouwen?** Zeg dat eerst op het issue, en lees dan
+  [Een pull request voorstellen](/avenir-mcp/nl/project/pull-requests/).

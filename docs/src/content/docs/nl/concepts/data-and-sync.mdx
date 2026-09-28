@@ -1,0 +1,116 @@
+---
+title: Gegevens en synchronisatie
+description: Bedragen en milliunits, de lokale kopie van transacties, delta-synchronisatie, de verzoeklimiet van YNAB en zijn fouten.
+sidebar:
+  order: 5
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Bedragen
+
+YNAB bewaart elk bedrag als een geheel aantal **milliunits**: 1,00 is `1000`, −12,34 is
+`-12340`. avenir-mcp rekent om aan de grens en laat de agent nooit milliunits zien:
+
+| Richting | Regel |
+|---|---|
+| YNAB → agent | `milliunits / 1000` |
+| agent → YNAB | `round(amount × 1000)`: 111,32 wordt precies `111320` |
+
+Sommen, verschillen en verdelingen worden in milliunits berekend en daarna één keer
+omgerekend, zodat geen afrondingsfout een cent kan laten ontstaan of verdwijnen. Bedragen
+zijn in de eigen valuta van het budget; uitgaven zijn negatief, inkomend geld positief.
+
+## Praten met YNAB
+
+`client.py` is de enige module die de [API van YNAB](https://api.ynab.com/) aanroept:
+
+| | |
+|---|---|
+| Basis-URL | `https://api.ynab.com/v1`, of `AVENIR_MCP_YNAB_URL` |
+| Authenticatie | `Authorization: Bearer <YNAB_API_KEY>` bij elk verzoek |
+| Gebruikte methoden | `GET` om te lezen; `PATCH`, `POST` en `DELETE` op transacties, categorieën en maandbudgetten |
+| Fouten | elke 4xx of 5xx komt terug als `Error calling tool '<tool>': YNAB <status>: <detail>`, met de eigen uitleg van YNAB |
+
+`plan_id` accepteert `last-used`, dat YNAB omzet naar het plan dat je het laatst hebt
+geopend.
+
+### Plans, vroeger budgets
+
+YNAB [heeft budgets hernoemd tot plans](https://www.ynab.com/blog/budget-tab-breakdown), in
+zijn apps en in zijn API: de specificatie documenteert alleen nog paden `/plans`.
+avenir-mcp volgt dat: zijn client roept `/plans` aan, en zijn tools zeggen `list_plans` en
+`plan_id`. Het woord *budget* blijft waar YNAB het houdt, voor het geld dat aan een
+categorie is toegewezen (`budgeted`, getoond als *Assigned*), vandaar
+`set_category_budget` en `get_budget_vs_actual`.
+
+### De bronnen van YNAB
+
+- [Documentatie van de YNAB-API](https://api.ynab.com/) – endpoints, authenticatie, verzoeklimiet
+- [OpenAPI-specificatie](https://api.ynab.com/papi/open_api_spec.yaml) – de bron van de
+  pagina [Dekking van de YNAB-API](/avenir-mcp/nl/reference/api-coverage/)
+- [We Renamed the Budget Tab to Plan](https://www.ynab.com/blog/budget-tab-breakdown) – de aankondiging van YNAB
+- [Navigating Multiple Plans in YNAB](https://support.ynab.com/en_us/navigating-multiple-plans-r1qeOvbC5)
+- [How to Adjust Your Plan Settings](https://support.ynab.com/en_us/how-to-adjust-your-plan-settings-SyFt35cAq)
+
+## De lokale kopie van transacties
+
+De meeste tools hebben de transacties van het budget nodig: om te vinden wat openstaat, te
+leren van de geschiedenis, te vergelijken met de bank, vooruit te rekenen. Ze bij elke
+aanroep allemaal downloaden zou traag zijn en het quotum van YNAB opmaken. avenir-mcp
+houdt per budget een kopie in het geheugen en werkt die bij met de
+**delta-synchronisatie** van YNAB:
+
+1. De eerste keer laden vraagt om elke transactie en bewaart de `server_knowledge` van
+   YNAB, een teller van wijzigingen.
+2. De volgende keer laden stuurt `last_knowledge_of_server` en ontvangt **alleen wat er
+   sindsdien is veranderd**: nieuwe, gewijzigde en verwijderde transacties.
+3. avenir-mcp voegt ze samen in zijn kopie: een gewijzigde transactie vervangt de oude,
+   een verwijderde wordt weggehaald.
+
+Met het id van een budget wordt de kopie bijgewerkt met delta-synchronisatie. Met
+`last-used`, dat het budget aanduidt dat je het laatst in YNAB hebt geopend en tussen twee
+aanroepen kan veranderen, worden transacties elke keer volledig geladen – nog steeds één
+verzoek – zodat twee budgetten nooit door elkaar raken. Met meerdere budgetten geef je het
+id uit `list_plans` door.
+
+De kopie leeft zo lang als het serverproces. Gefilterde leesacties – op datum of op
+categorie – gaan eromheen.
+
+<Aside type="note">
+Een vroege versie bewaarde alleen de teller, niet de transacties: elke keer laden na de
+eerste leverde alleen de wijzigingen op, meestal niets, en suggesties vonden nooit een
+geschiedenis. Een test controleert nu dat een lege delta de volledige lijst intact laat.
+</Aside>
+
+## De verzoeklimiet van YNAB
+
+YNAB staat **200 verzoeken per uur** per token toe, over een voortschrijdend venster. Wat
+elke tool kost met een lege cache, wordt gemeten op het demobudget en vermeld op zijn
+[naslagpagina](/avenir-mcp/nl/reference/tools/):
+
+| Kosten | Tools |
+|---|---|
+| 0 | elke aanroep die door de controle wordt geweigerd (een verkeerd geschreven maand, een lege naam…) |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, een voorbeeld van `set_category_budget` |
+| 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `find_transactions`, `list_scheduled_transactions`, `suggest_categories` (een hele pagina), `apply_categories`, een voorbeeld van `split_transaction` |
+| 4 | `forecast_balance` |
+| 1 + N | `get_spending_trends` over N maanden |
+
+Het toepassen van een bevestigde schrijfactie voegt een eigen verzoek toe (één gebundelde
+`PATCH` voor elk aantal transacties). Met een warme cache kost opnieuw lezen van de
+transacties één klein deltaverzoek.
+
+Als het quotum op is, antwoordt YNAB met `429` zonder te zeggen wanneer je terug kunt
+komen, dus **probeert avenir-mcp niets opnieuw**: het geeft `… YNAB 429: …` terug en stuurt
+10 minuten lang helemaal geen verzoek. Het stopt ook uit zichzelf bij **180 verzoeken** in
+het laatste uur, laat de rest over aan andere apps met hetzelfde token, en zegt over hoeveel
+minuten het volgende verzoek weg kan. Hoe dan ook krijgt de agent de opdracht het je te
+zeggen en het niet eerder opnieuw te proberen.
+
+## Wat nooit wordt opgeslagen
+
+avenir-mcp bewaart geen kopie op schijf. De transacties leven in het geheugen zolang de
+server draait; het [journaal](/avenir-mcp/nl/concepts/journal/) bevat alleen id's; het token
+blijft in de omgeving en wordt nooit gelogd.

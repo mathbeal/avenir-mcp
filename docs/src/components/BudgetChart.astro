@@ -113,11 +113,39 @@ const texts = {
       Holidays: 'Urlaub',
     } as Record<string, string>,
   },
+  nl: {
+    title: 'Verbruikt deel van elk budget',
+    source: 'Antwoord van get_budget_vs_actual op het demobudget',
+    budget: 'budget',
+    of: 'van',
+    used: 'verbruikt',
+    table: 'Als tabel tonen',
+    category: 'Categorie',
+    budgeted: 'Gebudgetteerd',
+    spent: 'Uitgegeven',
+    untouched: 'onaangeroerd',
+    note: 'Categorienamen vertaald naar het Nederlands; het ruwe antwoord houdt die van het demobudget.',
+    names: {
+      Bills: 'Rekeningen',
+      Everyday: 'Dagelijks',
+      Fun: 'Vrije tijd',
+      'Savings goals': 'Spaardoelen',
+      Rent: 'Huur',
+      Electricity: 'Elektriciteit',
+      Phone: 'Telefoon',
+      Groceries: 'Boodschappen',
+      Restaurants: 'Restaurants',
+      Transport: 'Vervoer',
+      Tennis: 'Tennis',
+      Subscriptions: 'Abonnementen',
+      Holidays: 'Vakantie',
+    } as Record<string, string>,
+  },
 };
 
 const lang = Astro.locals.starlightRoute.lang as keyof typeof texts;
 const t = texts[lang] ?? texts.en;
-const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', de: 'de-DE' }[lang] ?? 'en-US';
+const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', de: 'de-DE', nl: 'nl-NL' }[lang] ?? 'en-US';
 const money = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pct = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
 const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(

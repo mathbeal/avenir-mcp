@@ -41,6 +41,7 @@ export default defineConfig({
         fr: { label: 'Français', lang: 'fr' },
         es: { label: 'Español', lang: 'es' },
         de: { label: 'Deutsch', lang: 'de' },
+        nl: { label: 'Nederlands', lang: 'nl' },
       },
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/mathbeal/avenir-mcp' }],
       editLink: { baseUrl: 'https://github.com/mathbeal/avenir-mcp/edit/main/docs/' },
@@ -53,7 +54,7 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Getting started',
-          translations: { fr: 'Premiers pas', es: 'Primeros pasos', de: 'Erste Schritte' },
+          translations: { fr: 'Premiers pas', es: 'Primeros pasos', de: 'Erste Schritte', nl: 'Aan de slag' },
           items: [
             'getting-started/install',
             'getting-started/first-conversation',
@@ -62,21 +63,21 @@ export default defineConfig({
         },
         {
           label: 'Guides',
-          translations: { fr: 'Guides', es: 'Guías', de: 'Anleitungen' },
+          translations: { fr: 'Guides', es: 'Guías', de: 'Anleitungen', nl: 'Handleidingen' },
           items: [{ autogenerate: { directory: 'guides' } }],
         },
         {
           label: 'Concepts',
-          translations: { fr: 'Concepts', es: 'Conceptos', de: 'Konzepte' },
+          translations: { fr: 'Concepts', es: 'Conceptos', de: 'Konzepte', nl: 'Concepten' },
           items: [{ autogenerate: { directory: 'concepts' } }],
         },
         {
           label: 'Reference',
-          translations: { fr: 'Référence', es: 'Referencia', de: 'Referenz' },
+          translations: { fr: 'Référence', es: 'Referencia', de: 'Referenz', nl: 'Naslag' },
           items: [
             {
               label: 'Tools',
-              translations: { fr: 'Outils', es: 'Herramientas', de: 'Tools' },
+              translations: { fr: 'Outils', es: 'Herramientas', de: 'Tools', nl: 'Tools' },
               collapsed: true,
               items: [{ autogenerate: { directory: 'reference/tools' } }],
             },
@@ -88,7 +89,7 @@ export default defineConfig({
         },
         {
           label: 'Project',
-          translations: { fr: 'Projet', es: 'Proyecto', de: 'Projekt' },
+          translations: { fr: 'Projet', es: 'Proyecto', de: 'Projekt', nl: 'Project' },
           items: [{ autogenerate: { directory: 'project' } }],
         },
       ],

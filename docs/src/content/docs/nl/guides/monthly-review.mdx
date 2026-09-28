@@ -1,0 +1,88 @@
+---
+title: Een maand doornemen
+description: Zien waar het geld naartoe ging, opmerken wat opvalt, en geld verschuiven om overschrijdingen te dekken.
+sidebar:
+  order: 3
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import usage from '@snippets/budget_vs_actual.json?raw';
+import trends from '@snippets/spending_trends.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+import badMonth from '@snippets/bad_month.json?raw';
+
+**Doel:** een maand begrijpen – inkomsten, uitgaven, wat er nog toe te wijzen is – en
+corrigeren wat uit de koers is geraakt.
+
+**Tools:** [`get_monthly_summary`](/avenir-mcp/nl/reference/tools/get-monthly-summary/),
+[`get_category_balances`](/avenir-mcp/nl/reference/tools/get-category-balances/),
+[`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/),
+[`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/), en
+[`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/) om te corrigeren.
+**Prompt:** `monthly_review`.
+
+## Het gesprek
+
+<Steps>
+
+1. **Vraag het.**
+
+   > **Jij:** Neem september met me door.
+
+2. **De maand in één oogopslag.** `get_monthly_summary` met `month: "2026-09-01"` antwoordt
+   in een paar regels – één YNAB-verzoek:
+
+   <Code code={summary} lang="json" title="get_monthly_summary" />
+
+   | Veld | Betekent |
+   |---|---|
+   | `income` | deze maand ontvangen geld in Ready to Assign |
+   | `budgeted` | deze maand in totaal aan categorieën toegewezen |
+   | `activity` | uitgegeven (negatief) en ontvangen in categorieën |
+   | `ready_to_assign` | geld zonder taak – negatief als je meer hebt toegewezen dan je hebt |
+   | `overspent` | categorieën waarvan het beschikbare saldo negatief is |
+
+3. **De details.** `get_category_balances` somt elke categorie op waar iets in zit:
+
+   <Code code={balances} lang="json" title="get_category_balances (eerste regels)" />
+
+   `get_budget_vs_actual` geeft het verbruikte deel van elk budget – een `utilization_pct`
+   boven 100 betekent over budget:
+
+   <Code code={usage} lang="json" title="get_budget_vs_actual (eerste regels)" />
+
+4. **De trend.** Is Restaurants deze maand hoog, of elke maand?
+   `get_spending_trends` met `months_count: 3` geeft de uitgaven per categorie, maand voor
+   maand:
+
+   <Code code={trends} lang="json" title="get_spending_trends (fragment)" />
+
+5. **De correctie.** Een overschrijding wordt gedekt door geld te verschuiven vanuit een
+   categorie met ruimte:
+
+   > **Claude:** Restaurants zit 22,50 over budget. Tennis heeft 80 beschikbaar en nog
+   > niets uitgegeven. 30 van Tennis naar Restaurants verschuiven?
+   >
+   > **Jij:** Ja.
+
+   Twee aanroepen van `set_category_budget`, elk met voorbeeld ervoor → erna:
+
+   <Code code={budget} lang="json" title="set_category_budget — voorbeeld" />
+
+</Steps>
+
+## Goed om te weten
+
+- `month` is `"current"` of de eerste dag van een maand, `YYYY-MM-01`. Al het andere
+  wordt geweigerd voordat YNAB wordt aangeroepen, zonder kosten:
+
+  <Code code={badMonth} lang="text" title="get_monthly_summary — maand 2026-13-01" />
+- Verborgen categorieën en de interne van YNAB (*Inflow: Ready to Assign*) worden bij elke
+  doorname weggelaten.
+- `set_category_budget` zet een **absoluut** bedrag, geen wijziging: 30 verschuiven zijn
+  twee aanroepen, één die Tennis verlaagt van 80 naar 50, één die Restaurants verhoogt van
+  120 naar 150. Elke aanroep is ongedaan te maken.
+- De resource `avenir-mcp://guide` herinnert agents aan de methode van YNAB: een
+  overschrijding los je op door geld te verschuiven, niet door haar te negeren.

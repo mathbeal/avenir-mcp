@@ -33,7 +33,7 @@ a fixture or a log. Invent them.
 ## Documentation
 
 The site lives in `docs/`: [Starlight](https://starlight.astro.build), in English,
-French, Spanish and German. The tool reference, the security page and every JSON example are
+French, Spanish, German and Dutch. The tool reference, the security page and every JSON example are
 generated: run `uv run python -m docsgen` after changing a tool, then `just docs` (a
 broken internal link in any language fails the build) or `just docs-serve` to read the
 result. Examples come from the invented demo budget in `evals/demo_budget.py`, never

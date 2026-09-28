@@ -34,5 +34,14 @@
     "guides/categories": "Kategorien ordnen",
     "guides/missing-transactions": "Fehlende Transaktionen ergänzen",
     "concepts/journal": "Journal und Rückgängig"
+  },
+  "nl": {
+    "guides/classify": "Openstaande transacties categoriseren",
+    "guides/reconcile": "Een rekening afstemmen",
+    "guides/monthly-review": "Een maand doornemen",
+    "guides/plan-ahead": "Vooruit plannen",
+    "guides/categories": "Categorieën ordenen",
+    "guides/missing-transactions": "Ontbrekende transacties toevoegen",
+    "concepts/journal": "Journaal en ongedaan maken"
   }
 }

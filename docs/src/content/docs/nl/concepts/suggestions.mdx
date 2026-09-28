@@ -1,0 +1,85 @@
+---
+title: Suggesties
+description: Hoe avenir-mcp een winkelier herkent over bankomschrijvingen heen, leert van je geschiedenis, en beslist wanneer het een categorie voorstelt.
+sidebar:
+  order: 6
+---
+
+`suggest_categories` beantwoordt voor elke openstaande transactie twee vragen: *wie is deze
+winkelier?* en *waar heb je hem eerder ingedeeld?*
+
+## Wat openstaat
+
+Een transactie staat open als ze niet verwijderd is, geen categorie heeft (of de interne
+categorie *Uncategorized* van YNAB), geen overboeking tussen je rekeningen is
+(overboekingen krijgen in YNAB geen categorie), niet gesplitst is (de regels van een
+splitsing dragen haar categorieën) en bij een rekening **in het budget** hoort: de
+transacties van volgrekeningen – een hypotheek, een lening, een belegging – krijgen nooit
+een categorie, hun beginsaldo inbegrepen. Openstaande transacties worden de nieuwste eerst
+getoond.
+
+## Twee keer geïmporteerde overboekingen
+
+Een verplaatsing tussen twee van je rekeningen komt soms binnen als twee gewone transacties
+– één eruit, één erin – in plaats van één overboeking. Als twee openstaande transacties
+**tegengestelde bedragen** hebben, op **verschillende rekeningen**, hooguit **3 dagen** uit
+elkaar, noemt elk item het andere in `possible_transfer_with`. De agent stelt dan voor ze in
+YNAB als overboeking te koppelen, in plaats van elk een categorie te geven.
+
+## Een winkelier herkennen
+
+Banken schrijven dezelfde winkel elke keer anders: een datum, een kaartnummer, een
+referentie. Vóór het vergelijken wordt elke begunstigde **genormaliseerd**, in deze
+volgorde:
+
+| Stap | Regel | Voorbeeld |
+|---|---|---|
+| 1 | hoofdletters, spaties samengevoegd | `Corner  Shop` → `CORNER SHOP` |
+| 2 | een bankrekeningnummer en wat volgt weglaten: `- IBAN: …` | `INSURER - PRELEV - IBAN: FR00…` → `INSURER - PRELEV` |
+| 3 | een betalingsvoorvoegsel weglaten: `CB`, `CARTE`, `PRLV`, `PRLV SEPA`, `VIR`, `VIREMENT`, `VIR INST`, `VIR SEPA` | `VIR INST GARAGE MARTIN` → `GARAGE MARTIN` |
+| 4 | een factuurdatum en wat volgt weglaten: `FACT` + 6 cijfers | `ACME OUTDOOR FACT 110126 525130******2` → `ACME OUTDOOR` |
+| 5 | gemaskeerde kaartnummers (`525130******2`), data (`12/01`, `12/01/26`) en referenties van 5 cijfers of meer weglaten | `ONLINE STORE 1234567890` → `ONLINE STORE` |
+| 6 | spaties opnieuw samenvoegen | |
+
+Zo zijn `CB MARKET FRESH FACT 050926 525130******1` en `CB MARKET FRESH FACT 190926
+525130******1` allebei `MARKET FRESH`. Het weglaten van bankrekeningnummers houdt ook de
+IBAN van een schuldeiser uit elk antwoord.
+
+## Leren van de geschiedenis
+
+De geschiedenis wordt opgebouwd uit de transacties van het budget die een categorie hebben,
+niet verwijderd zijn en geen overboekingen zijn. Ze telt voor elke genormaliseerde
+begunstigde hoe vaak elke categorie is gebruikt – **apart voor geld eruit en geld erin**.
+Een geldschieter die je ooit heeft betaald (geld erin, *Ready to Assign*), laat je
+aflossingen (geld eruit) niet op inkomsten lijken.
+
+## Beslissen
+
+Voor een openstaande transactie kijkt avenir-mcp naar de geschiedenis van haar begunstigde,
+in haar richting, en houdt alleen de categorieën die je nog kunt toewijzen: een verborgen
+of verwijderde categorie wordt nooit voorgesteld.
+
+- **confidence** = gebruik van de meest gebruikte categorie ÷ alle gebruik van die
+  categorieën.
+- Er wordt een suggestie gedaan als confidence ≥ de drempel, standaard **0,90**
+  (`AVENIR_MCP_CONFIDENCE_THRESHOLD`).
+- Geen geschiedenis, of geen categorie boven de drempel: geen suggestie. De agent stelt er
+  een voor uit de categorielijst en vraagt het je.
+
+Gemeten op een echt huishoudbudget van ongeveer 800 gecategoriseerde transacties, waarbij
+elke transactie om de beurt werd weggelaten, klopten de suggesties bij 0,90 in 95 % van de
+gevallen.
+
+## Paginering
+
+| | |
+|---|---|
+| Paginagrootte | `limit`, standaard 50 |
+| Volgende pagina | `next_cursor`, ondoorzichtig: geef hem ongewijzigd terug |
+| Kosten | drie YNAB-verzoeken per pagina: transacties, categorieën en rekeningen |
+| Categorieën | de lijst met toe te wijzen categorieën komt alleen met de eerste pagina |
+| Tekst | begunstigde en omschrijving ingekort tot 80 tekens, gemarkeerd met `…` |
+
+Een cursor is de base64-codering van een positie. Een cursor die avenir-mcp niet heeft
+uitgegeven, wordt geweigerd: *„Invalid cursor: pass the next_cursor value from the previous
+page unchanged, or omit it to start from the first page.“*

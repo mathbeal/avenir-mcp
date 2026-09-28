@@ -20,7 +20,7 @@ from docsgen import errors
 from docsgen.examples import Capture
 
 HERE = Path(__file__).resolve().parent
-LANGUAGES = ("", "fr", "es", "de")
+LANGUAGES = ("", "fr", "es", "de", "nl")
 LABELS: dict[str, dict[str, str]] = json.loads((HERE / "labels.json").read_text(encoding="utf-8"))
 GUIDE_TITLES: dict[str, dict[str, str]] = json.loads(
     (HERE / "guide_titles.json").read_text(encoding="utf-8")

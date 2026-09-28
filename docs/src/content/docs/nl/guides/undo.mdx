@@ -1,0 +1,59 @@
+---
+title: Een wijziging ongedaan maken
+description: De laatste operatie, of een die je noemt, terugdraaien zonder later werk te overschrijven.
+sidebar:
+  order: 7
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import undo from '@snippets/undo_preview.json?raw';
+
+**Doel:** een wijziging die via avenir-mcp is gedaan terugdraaien.
+
+**Tool:** [`undo_operation`](/avenir-mcp/nl/reference/tools/undo-operation/).
+
+## Het gesprek
+
+<Steps>
+
+1. **Vraag het.**
+
+   > **Jij:** Maak dat ongedaan.
+
+2. **De agent toont het ongedaan maken als voorbeeld.** `undo_operation` met
+   `{"plan_id": "last-used"}` vindt de laatste operatie van het budget die nog van kracht
+   is, en laat zien wat ongedaan maken zou veranderen – hier twee transacties die weer geen
+   categorie hebben:
+
+   <Code code={undo} lang="json" title="undo_operation — voorbeeld" />
+
+3. **Je bevestigt.** De vorige toestand wordt hersteld, en de operatie wordt in het
+   journaal als ongedaan gemarkeerd.
+
+</Steps>
+
+Om een oudere operatie ongedaan te maken, noem je haar id: *„maak operatie 3f9a…
+ongedaan“*. Het antwoord van elke toegepaste operatie bevat haar `operation_id`.
+
+## Wat ongedaan kan worden gemaakt
+
+| Operatie | Ongedaan maken herstelt | Blijft ongemoeid als |
+|---|---|---|
+| `apply_categories` | de vorige categorie van elke transactie | haar categorie sindsdien opnieuw is veranderd |
+| `set_category_budget` | het vorige bedrag | het bedrag sindsdien opnieuw is veranderd |
+| `reconcile_account` | de status *cleared*; verwijdert de correctie | een transactie niet meer afgestemd is |
+| `create_transactions` | verwijdert de aangemaakte transacties | er een al verwijderd was |
+
+Alles wat ongemoeid blijft, staat in `conflicts`: ongedaan maken overschrijft nooit later
+werk.
+
+**Niet ongedaan te maken:** `update_category` (roep het opnieuw aan met de vorige naam en
+groep), `create_category` (verberg de categorie in YNAB), `split_transaction` (de API van
+YNAB kan een splitsing niet wijzigen: bewerk haar in YNAB), `approve_transactions` (de
+goedkeuring is een controlemarkering).
+
+<Aside type="note">
+Een ongedaanmaking kan zelf niet ongedaan worden gemaakt, en ongedaan maken werkt op de
+computer waarvan het [journaal](/avenir-mcp/nl/concepts/journal/) de operatie heeft
+vastgelegd.
+</Aside>

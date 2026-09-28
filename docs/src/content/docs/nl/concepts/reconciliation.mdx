@@ -1,0 +1,63 @@
+---
+title: Afstemming
+description: Hoe een rekening met de bank wordt vergeleken, hoe een verschil wordt verklaard, en wat afstemmen verandert.
+sidebar:
+  order: 7
+---
+
+`reconcile_account` vergelijkt een rekening met het saldo dat je bank toont. De
+vergelijking is een pure berekening op de transacties van de rekening
+(`reconcile.analyse`); ze schrijft niets.
+
+## De vergelijking
+
+Alleen de niet-verwijderde transacties van de rekening tellen mee.
+
+| Grootheid | Definitie |
+|---|---|
+| verwerkt saldo | som van de transacties met de status *cleared* of *reconciled* |
+| werksaldo | som van alle transacties |
+| verschil | banksaldo − verwerkt saldo |
+| af te stemmen | transacties die *cleared* zijn maar nog niet *reconciled* |
+| niet verwerkt | transacties die de bank nog niet heeft getoond (tot 50 vermeld) |
+
+Alles wordt in milliunits opgeteld. Een **negatief** verschil betekent dat YNAB meer geld
+telt dan de bank – meestal een dubbele boeking of een terugbetaling die nooit kwam; een
+**positief** verschil minder – meestal kosten of een inkomst die niet is geïmporteerd.
+
+## Een verschil verklaren
+
+| Aanwijzing | Regel |
+|---|---|
+| `explained_by` | niet-verwerkte transacties waarvan het bedrag precies gelijk is aan het verschil: er één verwerken dicht het gat |
+| `possible_duplicates` | paren met hetzelfde bedrag en dezelfde [genormaliseerde](/avenir-mcp/nl/concepts/suggestions/#een-winkelier-herkennen) winkelier, hooguit **3 dagen** uit elkaar, onder de transacties van de laatste **60 dagen** |
+| `uncleared` | wat de bank nog niet heeft getoond, zodat de agent het met je kan nalopen |
+
+Het venster van 60 dagen houdt oude, legitieme dubbelgangers – twee nachten in hetzelfde
+hotel vorige winter – buiten het antwoord.
+
+## Uitkomsten
+
+| Situatie | `status` | Geschreven |
+|---|---|---|
+| saldi verschillen, geen `adjust` | `difference_found` | niets, en niets gevraagd |
+| saldi komen overeen, niets meer af te stemmen | `nothing_to_do` | niets |
+| saldi komen overeen | `confirmation_required`, dan `applied` | cleared → reconciled |
+| saldi verschillen, `adjust=true` | `confirmation_required`, dan `applied` | een correctie, dan cleared → reconciled |
+
+## Toepassen
+
+Na bevestiging:
+
+1. Met `adjust=true` en een verschil wordt één transactie op de rekening aangemaakt:
+   begunstigde *Balance adjustment*, met de datum van vandaag, bedrag = het verschil,
+   categorie *Inflow: Ready to Assign*, omschrijving *Entered by reconcile_account*,
+   verwerkt en goedgekeurd.
+2. De *cleared* transacties uit het voorbeeld – en de correctie – worden in één gebundeld
+   verzoek op *reconciled* gezet. De bevestiging dekt precies die transacties: een
+   transactie die na het voorbeeld wordt verwerkt, verandert wat er bevestigd is, en er is
+   een nieuw voorbeeld nodig.
+3. De operatie wordt in het journaal vastgelegd met de afgestemde id's en het id van de
+   correctie.
+
+`undo_operation` zet ze terug op *cleared* en verwijdert de correctie.

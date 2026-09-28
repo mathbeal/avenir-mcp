@@ -1,0 +1,120 @@
+---
+title: Je eerste gesprek
+description: Een begeleide rondleiding, aanroep voor aanroep, met de echte antwoorden van het demobudget.
+sidebar:
+  order: 2
+---
+
+import { Code, Aside, Steps } from '@astrojs/starlight/components';
+import accounts from '@snippets/list_accounts.json?raw';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import pending from '@snippets/suggest_categories.json?raw';
+import preview from '@snippets/apply_preview.json?raw';
+
+Deze rondleiding volgt een echt gesprek op het demobudget, een verzonnen huishouden met een
+betaalrekening en een spaarrekening. Bij elke stap zie je wat je zegt, welke tool de agent
+met welke argumenten aanroept, wat avenir-mcp antwoordt en wat de agent je vertelt. Je
+eigen antwoorden hebben dezelfde vorm, met je eigen cijfers.
+
+<Aside type="tip">
+Je noemt zelf nooit tools: zeg wat je wilt, de agent kiest de tool. Een tool noemen
+(*„gebruik get_monthly_summary“*) werkt ook, en helpt als een antwoord je verrast.
+</Aside>
+
+## 1. Rondkijken
+
+> **Jij:** Welke rekeningen heb ik, en hoeveel staat erop?
+
+De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
+
+<Code code={accounts} lang="json" title="list_accounts" />
+
+> **Claude:** Twee rekeningen: Checking met 3.512,66, alles verwerkt, en Savings met 600,00.
+
+Saldi zijn in de valuta van je budget. `cleared_balance` is wat de bank al heeft
+getoond; `uncleared_balance` is wat ze nog niet heeft getoond.
+
+## 2. Zien hoe de maand gaat
+
+> **Jij:** Hoe gaat september?
+
+De agent roept `get_monthly_summary` aan met `{"plan_id": "last-used", "month":
+"2026-09-01"}`:
+
+<Code code={summary} lang="json" title="get_monthly_summary" />
+
+> **Claude:** September verloopt volgens plan, behalve Restaurants, 22,50 over budget.
+> Er wacht nog 1.820,00 om toegewezen te worden.
+
+Alleen categorieën die over budget zijn, worden vermeld. Vraag om de details:
+
+> **Jij:** Laat me elke categorie van september zien.
+
+<Code code={balances} lang="json" title="get_category_balances (eerste regels)" />
+
+`activity` is wat er is uitgegeven (negatief) of ontvangen; `balance` is wat nog
+beschikbaar is. Categorieën zonder gebudgetteerd, uitgegeven of beschikbaar bedrag worden
+weggelaten, tenzij de agent `include_empty` doorgeeft.
+
+## 3. Opruimen
+
+> **Jij:** Wat heeft nog een categorie nodig?
+
+De agent roept `suggest_categories` aan met `{"plan_id": "last-used"}`:
+
+<Code code={pending} lang="json" title="suggest_categories (eerste pagina, 3 items)" />
+
+> **Claude:** Er wachten zes transacties. Vijf hebben een duidelijke suggestie uit je
+> geschiedenis: twee keer Market Fresh, Streamflix, Rail Co… De bakker is nieuw voor
+> mij: boodschappen?
+
+Waar je geschiedenis duidelijk is, staat er een `suggestion` klaar met zijn `confidence`.
+Voor een winkelier die nog nooit is gezien, stelt de agent een categorie voor uit de lijst
+`categories` en vraagt het je.
+
+## 4. Iets wijzigen – veilig
+
+> **Jij:** Ja, de bakker is boodschappen, en de trein is vervoer.
+
+De agent roept `apply_categories` aan met de twee toewijzingen. **Er verandert nog
+niets:**
+
+<Code code={preview} lang="json" title="apply_categories — voorbeeld" />
+
+<Steps>
+
+1. avenir-mcp heeft precies berekend wat er zou veranderen: twee transacties, van geen
+   categorie naar Groceries en Transport.
+2. Je client laat je de vraag zien – een bevestigingsvenster als hij MCP-elicitation
+   ondersteunt, of de agent geeft het voorbeeld door en wacht.
+3. Je zegt ja. De agent roept opnieuw aan met je antwoord (of de code `confirmation`).
+4. avenir-mcp past beide wijzigingen toe in één YNAB-verzoek, legt ze vast in zijn
+   journaal en geeft een `operation_id` terug.
+
+</Steps>
+
+> **Jij:** Toch maar niet, maak dat ongedaan.
+
+De agent roept `undo_operation` aan, dat als voorbeeld toont hoe beide transacties worden
+teruggezet, en het toepast zodra je akkoord gaat. Zie
+[Een wijziging ongedaan maken](/avenir-mcp/nl/guides/undo/).
+
+## 5. De kant-en-klare werkstromen gebruiken
+
+In plaats van elke stap te sturen, start je een prompt: die geeft de agent de hele
+werkwijze.
+
+| Prompt | Wat hij met je doorloopt |
+|---|---|
+| `classify_pending` | suggesties, jouw keuzes, één bevestigde batch, het id om ongedaan te maken |
+| `monthly_review` | totalen, wat opvalt, voorgestelde correcties |
+| `reconcile` | het verschil met je bank uitgelegd, dan een bevestigde afstemming |
+| `plan_next_month` | een prognose en haar aannames, dan de bedragen van volgende maand |
+
+In Claude Code verschijnen ze tussen de slash-commando's van de server `avenir-mcp`.
+
+## Verder
+
+- [Functies](/avenir-mcp/nl/getting-started/features/): de volledige lijst.
+- [Handleidingen](/avenir-mcp/nl/guides/classify/): één taak tegelijk, uitgebreid.

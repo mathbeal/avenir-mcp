@@ -120,6 +120,36 @@ const texts = {
     disclaimer:
       '<strong>Inoffizielles Projekt.</strong> „We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.“ Wir sind mit YNAB weder verbunden noch assoziiert noch in irgendeiner Weise offiziell verknüpft. YNAB und You Need A Budget sind eingetragene Marken von YNAB. avenir-mcp wird ohne Gewähr bereitgestellt und ist keine Finanzberatung. <a href="/avenir-mcp/de/project/legal/">Rechtliche Hinweise</a>',
   },
+  nl: {
+    eyebrow: 'Onofficiële opensource-MCP-server voor YNAB',
+    install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=jouw-token \\\n  -- uvx avenir-mcp',
+    worksWith: 'Werkt met',
+    demoLabel: 'Een gesprek met Claude via avenir-mcp',
+    you: 'Jij',
+    q1: 'Welke categorie zit deze maand over budget?',
+    a1: 'Restaurants zit <strong>22,50 over budget</strong>. Tennis heeft nog 80,00 beschikbaar – 30 overhevelen om het te dekken?',
+    q2: 'Ja, doe maar.',
+    preview: 'Voorbeeld',
+    names: ['Tennis', 'Restaurants'],
+    tennis: ['80,00', '50,00'],
+    restaurants: ['120,00', '150,00'],
+    confirm: 'Bevestigen',
+    cancel: 'Annuleren',
+    undo: 'In het journaal – met één zin ongedaan te maken',
+    stats: [
+      ['17', 'tools, elk voor een hele taak'],
+      ['100 %', 'dekking van regels en vertakkingen'],
+      ['9 / 9', 'taken gehaald door een echte agent'],
+      ['1–2', 'YNAB-verzoeken per aanroep, bij de meeste tools'],
+    ],
+    flow: [
+      ['Voorbeeld', 'avenir-mcp berekent de exacte wijziging en laat die zien. Er wordt nog niets geschreven.'],
+      ['Bevestiging', 'Je zegt ja in je client, of met een eenmalige code die aan dat voorbeeld gekoppeld is.'],
+      ['Ongedaan maken', 'Elke toegepaste wijziging staat in het journaal; ongedaan maken herstelt haar zonder later werk te overschrijven.'],
+    ],
+    disclaimer:
+      '<strong>Onofficieel project.</strong> “We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.” We zijn op geen enkele manier verbonden, geassocieerd of officieel gelieerd aan YNAB. YNAB en You Need A Budget zijn geregistreerde handelsmerken van YNAB. avenir-mcp wordt geleverd zoals het is, zonder garantie, en is geen financieel advies. <a href="/avenir-mcp/nl/project/legal/">Juridische informatie</a>',
+  },
 } as const;
 
 export type Lang = keyof typeof texts;
