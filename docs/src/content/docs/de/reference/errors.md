@@ -1,15 +1,15 @@
 ---
 title: "Fehler"
-description: "Jede Fehlermeldung, die avenir-mcp zurückgeben kann, Werkzeug für Werkzeug."
+description: "Jede Fehlermeldung, die avenir-mcp zurückgeben kann, Tool für Tool."
 sidebar:
   order: 2
 ---
 
-Ein Fehler kommt als Werkzeugergebnis mit `isError` zurück, mit einer Meldung, die sagt, was zu korrigieren ist, damit der Agent seinen Aufruf berichtigen kann. Teile in geschweiften Klammern stehen für den übergebenen Wert.
+Ein Fehler kommt als Tool-Ergebnis mit `isError` zurück, mit einer Meldung, die sagt, was zu korrigieren ist, damit der Agent seinen Aufruf berichtigen kann. Teile in geschweiften Klammern stehen für den übergebenen Wert.
 
 ## Von YNAB
 
-Jedes Werkzeug, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error calling tool '<tool>': YNAB <status>: <detail>` — zum Beispiel `YNAB 401` für ein falsches oder widerrufenes Token, `YNAB 429`, wenn die 200 Anfragen pro Stunde aufgebraucht sind. Ohne `YNAB_API_KEY` weigert sich der Server, YNAB aufzurufen: `YNAB_API_KEY environment variable is not set`.
+Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error calling tool '<tool>': YNAB <status>: <detail>` — zum Beispiel `YNAB 401` für ein falsches oder widerrufenes Token, `YNAB 429`, wenn die 200 Anfragen pro Stunde aufgebraucht sind. Ohne `YNAB_API_KEY` weigert sich der Server, YNAB aufzurufen: `YNAB_API_KEY environment variable is not set`.
 
 ## [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/)
 

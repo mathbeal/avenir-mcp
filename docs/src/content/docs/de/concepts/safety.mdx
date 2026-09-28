@@ -27,11 +27,11 @@ avenir-mcp schützt und wie.
 
 ## Standardmäßig nur lesend
 
-Schreibende Werkzeuge tragen das Tag `write` und sind **deaktiviert**, außer bei
-`AVENIR_MCP_WRITE=1`: nicht aufgelistet, nicht aufrufbar. Jedes Werkzeug erklärt zudem
+Schreibende Tools tragen das Tag `write` und sind **deaktiviert**, außer bei
+`AVENIR_MCP_WRITE=1`: nicht aufgelistet, nicht aufrufbar. Jedes Tool erklärt zudem
 MCP-Annotationen – `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` –,
 damit der Client entscheiden kann, wie viel er Sie fragt. Ein Test schlägt fehl, wenn einem
-Werkzeug welche fehlen.
+Tool welche fehlen.
 
 ## Vorschau und Bestätigung
 
@@ -53,7 +53,7 @@ Empfängernamen und Verwendungszwecke werden von Banken, Händlern und jedem ges
 der Ihnen Geld senden kann. avenir-mcp gibt sie in eigenen Feldern zurück, auf einer
 Zeile, ohne Steuer-, Nullbreiten- oder Richtungsumkehrzeichen, auf 80 Zeichen gekürzt –
 damit sie einer Bestätigungsfrage keine gefälschte Zeile hinzufügen können – und setzt sie
-nie in eine Werkzeugbeschreibung, einen Prompt oder eine Anweisung. Die Ressource
+nie in eine Tool-Beschreibung, einen Prompt oder eine Anweisung. Die Ressource
 `avenir-mcp://guide` und der Prompt `classify_pending` weisen Agenten an, sie als Daten zu
 behandeln. Die [Evaluierung](/avenir-mcp/de/project/evaluation/) versteckt eine Anweisung in
 einem Verwendungszweck und prüft, dass der Agent sie ignoriert.
@@ -71,7 +71,7 @@ einem Verwendungszweck und prüft, dass der Agent sie ignoriert.
   geschrieben.
 - Transaktionen leben im Speicher, solange der Server läuft; nichts wird auf der
   Festplatte zwischengespeichert.
-- Das Journal enthält nur Kennungen, in einer Datei, die nur für den Eigentümer zugänglich
+- Das Journal enthält nur IDs, in einer Datei, die nur für den Eigentümer zugänglich
   angelegt wird.
 - Diagnosen gehen standardmäßig mit `WARNING` nach stderr.
 

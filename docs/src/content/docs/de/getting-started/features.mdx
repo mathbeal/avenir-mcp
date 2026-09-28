@@ -1,15 +1,15 @@
 ---
 title: Funktionen
-description: Alles, was avenir-mcp kann, mit dem, was Sie fragen, und dem Werkzeug, das antwortet.
+description: Alles, was avenir-mcp kann, mit dem, was Sie fragen, und dem Tool, das antwortet.
 sidebar:
   order: 3
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gibt einem Agenten 20 Werkzeuge, 4 Ressourcen und 4 Prompts für Ihre
+avenir-mcp gibt einem Agenten 20 Tools, 4 Ressourcen und 4 Prompts für Ihre
 YNAB-Budgets. Diese Seite ordnet sie nach dem, was Sie tun möchten. Jede Zeile nennt einen
-Satz, den Sie dem Agenten sagen können; der Agent wählt das Werkzeug.
+Satz, den Sie dem Agenten sagen können; der Agent wählt das Tool.
 
 <Aside type="note">
 **L** = nur lesend, immer verfügbar. **S** = schreibend, verfügbar mit
@@ -18,7 +18,7 @@ rückgängig zu machen.
 </Aside>
 
 <Aside type="tip" title="Plan oder Budget?">
-YNAB [nennt ein Budget jetzt **plan**](https://www.ynab.com/blog/budget-tab-breakdown), und die Werkzeuge von avenir-mcp ebenso (`list_plans`,
+YNAB [nennt ein Budget jetzt **plan**](https://www.ynab.com/blog/budget-tab-breakdown), und die Tools von avenir-mcp ebenso (`list_plans`,
 `plan_id`). Sagen Sie, was Ihnen lieber ist: Der Agent versteht beides und antwortet mit
 Ihrem Wort. „Mein Budget für Restaurants“ meint weiterhin den Betrag, der dieser Kategorie
 zugewiesen ist.
@@ -26,7 +26,7 @@ zugewiesen ist.
 
 ## Sich umsehen
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Welche Budgets habe ich?“* | [`list_plans`](/avenir-mcp/de/reference/tools/list-plans/) | L |
 | *„Was ist auf meinen Konten?“* | [`list_accounts`](/avenir-mcp/de/reference/tools/list-accounts/) | L |
@@ -37,11 +37,11 @@ zugewiesen ist.
 
 Budgets, Konten und Kategorien werden auch als
 [Ressourcen](/avenir-mcp/de/reference/resources-and-prompts/) bereitgestellt, die Ihr Client
-ohne Werkzeugaufruf an ein Gespräch anhängen kann.
+ohne Tool-Aufruf an ein Gespräch anhängen kann.
 
 ## Einen Monat verstehen
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Wie läuft der September?“* | [`get_monthly_summary`](/avenir-mcp/de/reference/tools/get-monthly-summary/) – Einnahmen, budgetiert, ausgegeben, Ready to Assign, überzogene Kategorien | L |
 | *„Zeig mir jede Kategorie.“* | [`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/) – budgetiert, ausgegeben, verfügbar je Kategorie | L |
@@ -52,7 +52,7 @@ Anleitung: [Einen Monat auswerten](/avenir-mcp/de/guides/monthly-review/).
 
 ## Transaktionen kategorisieren
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Was braucht noch eine Kategorie?“* | [`suggest_categories`](/avenir-mcp/de/reference/tools/suggest-categories/) – ausstehende Transaktionen, mit Vorschlag, wenn Ihre Historie eindeutig ist | L |
 | *„Ja, wende das an.“* | [`apply_categories`](/avenir-mcp/de/reference/tools/apply-categories/) – ein bestätigter Stapel | S ↺ |
@@ -67,7 +67,7 @@ funktioniert: [Vorschläge](/avenir-mcp/de/concepts/suggestions/).
 
 ## Mit der Bank vergleichen
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Meine Bank zeigt 3.440,80. Stimmt YNAB damit überein?“* | [`reconcile_account`](/avenir-mcp/de/reference/tools/reconcile-account/) – erklärt eine Differenz, ohne zu schreiben; gleicht ab, sobald es passt | S ↺ |
 | *„Füge die Apothekenzahlung hinzu, die der Import verpasst hat.“* | [`create_transactions`](/avenir-mcp/de/reference/tools/create-transactions/) | S ↺ |
@@ -79,7 +79,7 @@ Differenz entspricht, und wahrscheinliche Duplikate (gleicher Betrag und Händle
 
 ## Planen
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Rutsche ich vor Dezember unter null?“* | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) – Monat für Monat, mit seinen Annahmen | L |
 | *„Setz 150 in Restaurants für September.“* | [`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/) | S ↺ |
@@ -91,7 +91,7 @@ Wie es funktioniert: [Prognose](/avenir-mcp/de/concepts/forecasting/).
 
 ## Kategorien ordnen
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Leg eine Kategorie Haustiere in Everyday an.“* | [`create_category`](/avenir-mcp/de/reference/tools/create-category/) | S |
 | *„Benenne Tennis in Sport um.“* | [`update_category`](/avenir-mcp/de/reference/tools/update-category/) – verschiebt eine Kategorie auch in eine andere Gruppe | S |
@@ -100,7 +100,7 @@ Anleitung: [Kategorien ordnen](/avenir-mcp/de/guides/categories/).
 
 ## Rückgängig machen
 
-| Sie sagen | Werkzeug | |
+| Sie sagen | Tool | |
 |---|---|---|
 | *„Mach das rückgängig.“* | [`undo_operation`](/avenir-mcp/de/reference/tools/undo-operation/) – die letzte Operation oder die genannte | S |
 
@@ -114,7 +114,7 @@ durch eine ganze Aufgabe. In Claude Code sind es Slash-Befehle des Servers `aven
 
 | Prompt | Argumente | Was er tut |
 |---|---|---|
-| `classify_pending` | Budget | Vorschläge, Ihre Entscheidungen, ein bestätigter Stapel, die Kennung zum Rückgängigmachen |
+| `classify_pending` | Budget | Vorschläge, Ihre Entscheidungen, ein bestätigter Stapel, die ID zum Rückgängigmachen |
 | `monthly_review` | Budget, Monat | Summen, was auffällt, vorgeschlagene Korrekturen |
 | `reconcile` | Budget, Konto, Kontostand der Bank | die Differenz erklärt, dann ein bestätigter Abgleich |
 | `plan_next_month` | Budget | Prognose und Annahmen, dann die Beträge des nächsten Monats |
@@ -125,7 +125,7 @@ durch eine ganze Aufgabe. In Claude Code sind es Slash-Befehle des Servers `aven
   ein lokales Journal zum Rückgängigmachen, Banktexte als nicht vertrauenswürdig
   behandelt. Siehe [Sicherheit durch Design](/avenir-mcp/de/concepts/safety/).
 - **Sparsamkeit:** eine lokale Kopie Ihrer Transaktionen, per Delta-Synchronisation
-  aktualisiert; die meisten Werkzeuge kosten eine oder zwei YNAB-Anfragen. Siehe
+  aktualisiert; die meisten Tools kosten eine oder zwei YNAB-Anfragen. Siehe
   [Daten und Synchronisation](/avenir-mcp/de/concepts/data-and-sync/).
 - **Klarheit für Agenten:** Währungseinheiten, typisierte Ausgabeschemas mit einer
   Beschreibung je Feld, Paginierung, [Fehler](/avenir-mcp/de/reference/errors/), die sagen,

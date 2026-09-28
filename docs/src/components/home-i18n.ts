@@ -107,10 +107,10 @@ const texts = {
     cancel: 'Abbrechen',
     undo: 'Im Journal – mit einem Satz rückgängig zu machen',
     stats: [
-      ['17', 'Werkzeuge, jedes erledigt eine ganze Aufgabe'],
+      ['17', 'Tools, jedes erledigt eine ganze Aufgabe'],
       ['100 %', 'Zeilen- und Zweigabdeckung'],
       ['9 / 9', 'Aufgaben von einem echten Agenten bestanden'],
-      ['1–2', 'YNAB-Anfragen pro Aufruf, bei den meisten Werkzeugen'],
+      ['1–2', 'YNAB-Anfragen pro Aufruf, bei den meisten Tools'],
     ],
     flow: [
       ['Vorschau', 'avenir-mcp berechnet die genaue Änderung und zeigt sie. Noch wird nichts geschrieben.'],

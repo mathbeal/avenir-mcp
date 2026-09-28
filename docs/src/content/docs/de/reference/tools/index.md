@@ -1,15 +1,15 @@
 ---
-title: "Werkzeuge"
-description: "Alle Werkzeuge, die avenir-mcp bereitstellt: Zweck, lesend oder schreibend, Kosten."
+title: "Tools"
+description: "Alle Tools, die avenir-mcp bereitstellt: Zweck, lesend oder schreibend, Kosten."
 sidebar:
   order: 1
 ---
 
-avenir-mcp stellt diese Werkzeuge bereit. Lesende Werkzeuge sind immer verfügbar; schreibende existieren nur mit `AVENIR_MCP_WRITE=1`, und alle außer `approve_transactions` werden als Vorschau gezeigt und bestätigt.
+avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schreibende existieren nur mit `AVENIR_MCP_WRITE=1`, und alle außer `approve_transactions` werden als Vorschau gezeigt und bestätigt.
 
 ## Lesen
 
-| Werkzeug | Kurzbeschreibung |
+| Tool | Kurzbeschreibung |
 |---|---|
 | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) | Find transactions by date, amount, account, category or payee, categorised or not. |
 | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) | Project the balance month by month and say when money would run out. |
@@ -25,7 +25,7 @@ avenir-mcp stellt diese Werkzeuge bereit. Lesende Werkzeuge sind immer verfügba
 
 ## Schreiben
 
-| Werkzeug | Kurzbeschreibung |
+| Tool | Kurzbeschreibung |
 |---|---|
 | [`apply_categories`](/avenir-mcp/de/reference/tools/apply-categories/) | Assign categories to transactions, after the user confirms, and journal it for undo. |
 | [`approve_transactions`](/avenir-mcp/de/reference/tools/approve-transactions/) | Mark transactions as approved, i.e. reviewed (clears YNAB's "unapproved" badge). |

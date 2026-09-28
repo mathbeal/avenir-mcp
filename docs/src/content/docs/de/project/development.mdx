@@ -13,7 +13,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 - avenir_mcp/ — der Server (siehe [Architektur](/avenir-mcp/de/concepts/architecture/))
 - tests/ — Unit-Tests, Protokolltests, Dokumentations- und Hygienetests
 - evals/ — das Demo-Budget, ein Ersatz für die API von YNAB, die Evaluierung der Agenten
-- docsgen/ — erzeugt die Werkzeugreferenz, den Fehlerkatalog und die Beispiele
+- docsgen/ — erzeugt die Tool-Referenz, den Fehlerkatalog und die Beispiele
 - docs/ — diese Website (Astro Starlight, Englisch, Französisch, Spanisch, Deutsch)
 - AGENTS.md — der Vertrag für Mitwirkende, menschlich oder nicht
 - justfile — jeder Befehl unten
@@ -56,7 +56,7 @@ mit Docker), den Build der Dokumentation mit den Tests ihres eigenen Codes, Code
 OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen Vergleich der
 API von YNAB mit ihrem Schnappschuss (`just api-drift`) und den offiziellen MCP Inspector
 (`just inspect`), der den Server so prüft, wie ein Client ihn auf dem Demo-Budget sieht:
-seine Listen, die Portabilität seiner Werkzeugschemas und je einen Aufruf jeder Art. Die
+seine Listen, die Portabilität seiner Tool-Schemas und je einen Aufruf jeder Art. Die
 Testsuite läuft unter Linux und macOS mit Python 3.12, 3.13 und 3.14 und unter Windows mit
 Python 3.14 (bei einem Pull Request probiert macOS nur 3.14: seine Runner kosten so viel
 wie zehn Linux-Runner); die Abdeckung wird unter Linux und macOS durchgesetzt, wo die
@@ -86,9 +86,9 @@ oder bösartige, schnell zurückgezogene Version das Projekt nie erreicht.
 |---|---|---|
 | Unit | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | die reine Logik und den HTTP-Client, mit erfundenen Daten |
 | Eigenschaften | `test_properties` | mit Hypothesis Regeln, die für jede Eingabe gelten: Beträge überstehen den Hin- und Rückweg, die Verteilung behält jeden Cent, Monate summieren sich, Cursor, Banktext, Fingerabdrücke der Bestätigung |
-| Protokoll | `test_protocol*`, `test_context`, `test_policy` | Werkzeuge über einen MCP-Client im Speicher: Schemas, Annotationen, Bestätigungswege, Rückgängig |
+| Protokoll | `test_protocol*`, `test_context`, `test_policy` | Tools über einen MCP-Client im Speicher: Schemas, Annotationen, Bestätigungswege, Rückgängig |
 | Dokumentation | `test_docs` | erzeugte Seiten und Beispiele passen zum Code; jede Seite existiert in jeder Übersetzung; jede Umgebungsvariable ist dokumentiert |
-| API-Abdeckung | `test_api_coverage` | jede Operation der API von YNAB wird von einem Werkzeug genutzt, ist geplant oder mit Begründung ausgelassen; der Client ruft nur dokumentierte Pfade auf |
+| API-Abdeckung | `test_api_coverage` | jede Operation der API von YNAB wird von einem Tool genutzt, ist geplant oder mit Begründung ausgelassen; der Client ruft nur dokumentierte Pfade auf |
 | Hygiene | `test_hygiene` | keine IBAN, kein Token, kein Kontoauszug, kein Home-Pfad und keine Finder-Kopie im Repository |
 | Evaluierung | `test_evals` | die eigenen Prüfungen der Evaluierung sind richtig |
 
@@ -102,7 +102,7 @@ harmlos, etwa der Wortlaut einer Meldung.
 ## Dokumentation
 
 ```bash
-uv run python -m docsgen   # Werkzeugseiten, Fehlerkatalog, Beispiele
+uv run python -m docsgen   # Tool-Seiten, Fehlerkatalog, Beispiele
 just docs                  # baut die Website in allen Sprachen; defekte Links schlagen fehl
 just docs-serve            # Live-Vorschau auf http://localhost:4321/avenir-mcp/
 ```

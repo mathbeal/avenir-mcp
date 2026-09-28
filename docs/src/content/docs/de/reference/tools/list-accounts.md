@@ -83,4 +83,4 @@ Antwort auf dem Demo-Budget:
 
 ## Fehler
 
-Dieses Werkzeug erzeugt keine eigenen Fehler; Fehler von YNAB kommen als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück.
+Dieses Tool erzeugt keine eigenen Fehler; Fehler von YNAB kommen als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück.

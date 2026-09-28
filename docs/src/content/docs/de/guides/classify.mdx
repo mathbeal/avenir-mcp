@@ -16,7 +16,7 @@ dass Sie sie in YNAB einzeln durchgehen.
 **Bevor Sie beginnen:** Schreiben aktiviert (`AVENIR_MCP_WRITE=1`). Mit einem nur lesenden
 Server erhalten Sie trotzdem die Vorschläge; Sie wenden sie dann in YNAB an.
 
-**Werkzeuge:** [`suggest_categories`](/avenir-mcp/de/reference/tools/suggest-categories/),
+**Tools:** [`suggest_categories`](/avenir-mcp/de/reference/tools/suggest-categories/),
 [`apply_categories`](/avenir-mcp/de/reference/tools/apply-categories/), optional
 [`approve_transactions`](/avenir-mcp/de/reference/tools/approve-transactions/).
 **Prompt:** `classify_pending`.
@@ -107,7 +107,7 @@ Einzelheiten und Beispiele: [Vorschläge](/avenir-mcp/de/concepts/suggestions/).
 
 | Meldung | Bedeutung | Was dann geschieht |
 |---|---|---|
-| `Transaction … is not in this budget` | eine Kennung, die `suggest_categories` nicht geliefert hat | der Agent liest die Liste neu |
+| `Transaction … is not in this budget` | eine ID, die `suggest_categories` nicht geliefert hat | der Agent liest die Liste neu |
 | `Transaction … is a transfer between accounts` | Umbuchungen erhalten in YNAB keine Kategorie | sie wird ausgelassen |
 | `Transaction … is split across categories` | eine aufgeteilte Transaktion trägt ihre Kategorien in ihren Zeilen | ändern Sie sie in YNAB |
 | `Transaction … is assigned twice` | zwei Zuordnungen für eine Transaktion | der Agent behält eine |

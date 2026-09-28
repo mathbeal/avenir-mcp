@@ -15,8 +15,8 @@ gesetzt werden. Die vollständige Liste steht unter
 
 | Einstellung | Wirkung |
 |---|---|
-| nichts (Standard) | 11 lesende Werkzeuge; die 9 schreibenden sind weder aufgelistet noch aufrufbar |
-| `AVENIR_MCP_WRITE=1` | alle 20 Werkzeuge; jede Schreibaktion außer `approve_transactions` wird als Vorschau gezeigt und bestätigt |
+| nichts (Standard) | 11 lesende Tools; die 9 schreibenden sind weder aufgelistet noch aufrufbar |
+| `AVENIR_MCP_WRITE=1` | alle 20 Tools; jede Schreibaktion außer `approve_transactions` wird als Vorschau gezeigt und bestätigt |
 
 Jeder andere Wert (`0`, `true`, `yes`) lässt den Server nur lesend: Nur `1` aktiviert das
 Schreiben.
@@ -55,7 +55,7 @@ claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
   --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
 ```
 
-Über HTTP wird jede Anfrage geprüft, bevor sie ein Werkzeug erreicht:
+Über HTTP wird jede Anfrage geprüft, bevor sie ein Tool erreicht:
 
 | Prüfung | Abgelehnt mit | Verhindert |
 |---|---|---|
@@ -88,7 +88,7 @@ Protokoll gehört – auf der Stufe von `AVENIR_MCP_LOG_LEVEL`, standardmäßig 
 | Stufe | Sie sehen |
 |---|---|
 | `WARNING` (Standard) | nur Probleme |
-| `INFO` | jeden Werkzeugaufruf und jede YNAB-Anfrage |
+| `INFO` | jeden Tool-Aufruf und jede YNAB-Anfrage |
 | `DEBUG` | alles, einschließlich der eigenen Meldungen der MCP-Bibliothek |
 
 Ein erwarteter Fehler (ein fehlerhafter Monat, ein unbekanntes Konto) wird in einer Zeile
@@ -116,7 +116,7 @@ Jede Zeile lautet dann:
 Läuft der Server über HTTP als Dienst, behält der Dienstverwalter stderr: systemd sendet
 es ins Journal, launchd in die Datei, die `StandardErrorPath` nennt.
 
-Ab `INFO` enthalten die Meldungen nur Kennungen und Anzahlen – nie Empfänger, Beträge oder
+Ab `INFO` enthalten die Meldungen nur IDs und Anzahlen – nie Empfänger, Beträge oder
 Kategorienamen –, sodass Protokolle Ihren Rechner ohne Ihre Finanzdaten verlassen können.
 Behalten Sie `DEBUG` für die lokale Fehlersuche.
 

@@ -8,7 +8,7 @@ sidebar:
 ## Verbindung
 
 <details>
-<summary>Mein Client zeigt die Werkzeuge von avenir-mcp nicht</summary>
+<summary>Mein Client zeigt die Tools von avenir-mcp nicht</summary>
 
 1. Prüfen Sie, dass der Server verbunden ist: `claude mcp list` oder das MCP-Panel Ihres
    Clients.
@@ -22,7 +22,7 @@ sidebar:
 </details>
 
 <details>
-<summary>Die Werkzeuge, die mein Budget ändern, fehlen</summary>
+<summary>Die Tools, die mein Budget ändern, fehlen</summary>
 
 avenir-mcp ist nur lesend, außer seine Umgebung enthält `AVENIR_MCP_WRITE=1` – genau `1`.
 Starten Sie den Server nach der Änderung neu.
@@ -52,7 +52,7 @@ ein neues an und aktualisieren Sie `YNAB_API_KEY`.
 <details>
 <summary><code>YNAB 404</code></summary>
 
-Ein Budget, Konto, eine Kategorie oder ein Monat, den YNAB nicht kennt. Kennungen stammen
+Ein Budget, Konto, eine Kategorie oder ein Monat, den YNAB nicht kennt. IDs stammen
 aus `list_plans`, `list_accounts`, `list_category_groups` oder `get_category_balances`;
 Monate müssen im Budget existieren.
 
@@ -108,5 +108,5 @@ Setzen Sie `AVENIR_MCP_LOG_LEVEL=INFO` (jeder Aufruf und jede Anfrage) oder `DEB
 
 </details>
 
-Jede Meldung, die ein Werkzeug zurückgeben kann, steht im
+Jede Meldung, die ein Tool zurückgeben kann, steht im
 [Fehlerkatalog](/avenir-mcp/de/reference/errors/).

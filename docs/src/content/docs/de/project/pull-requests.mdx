@@ -7,7 +7,7 @@ sidebar:
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-Pull Requests sind willkommen, vom Tippfehler bis zum neuen Werkzeug. Diese Seite ist der
+Pull Requests sind willkommen, vom Tippfehler bis zum neuen Tool. Diese Seite ist der
 Weg, dem Sie folgen; [Entwicklung](/avenir-mcp/de/project/development/) beschreibt das
 Repository und seine Prüfungen im Einzelnen. Sie brauchen ein GitHub-Konto,
 [git](https://git-scm.com), [uv](https://docs.astral.sh/uv/) und [just](https://just.systems).
@@ -59,7 +59,7 @@ Ansatz zu einigen, erspart Ihnen das Neuschreiben.
    just secrets   # gitleaks auf jedem Commit (braucht Docker)
    ```
 
-6. **Aktualisieren Sie die Dokumentation.** Haben sich ein Werkzeug, seine Argumente oder
+6. **Aktualisieren Sie die Dokumentation.** Haben sich ein Tool, seine Argumente oder
    seine Antworten geändert, führen Sie `uv run python -m docsgen` aus und committen Sie,
    was es schreibt. Eine handgeschriebene Seite wird in allen Sprachen der Website
    zusammen geändert; `just docs` baut die Website und schlägt bei einem defekten Link fehl.
@@ -101,7 +101,7 @@ Ansatz zu einigen, erspart Ihnen das Neuschreiben.
 - **Eine Änderung pro Pull Request**, klein genug, um sie in einem Zug zu prüfen.
 - **Tests zuerst geschrieben**, die jede Zeile und jeden Zweig abdecken.
 - **Keine neue Laufzeitabhängigkeit** ohne eine im Pull Request geschriebene Begründung.
-- **Schreibaktionen bleiben sicher**: Ein Werkzeug, das das Budget ändert, zeigt eine
+- **Schreibaktionen bleiben sicher**: Ein Tool, das das Budget ändert, zeigt eine
   Vorschau, wartet auf Bestätigung und lässt sich rückgängig machen – siehe
   [Sicherheit durch Design](/avenir-mcp/de/concepts/safety/).
 - **Keine echten Finanzdaten**, nirgends: Code, Tests, Dokumentation, Bildschirmfotos.

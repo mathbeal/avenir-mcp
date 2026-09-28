@@ -39,7 +39,7 @@ haben.
 
 YNAB [hat Budgets in Plans umbenannt](https://www.ynab.com/blog/budget-tab-breakdown), in
 seinen Apps und in seiner API: Die Spezifikation dokumentiert nur noch Pfade `/plans`.
-avenir-mcp folgt ihr: Sein Client ruft `/plans` auf, und seine Werkzeuge sagen
+avenir-mcp folgt ihr: Sein Client ruft `/plans` auf, und seine Tools sagen
 `list_plans` und `plan_id`. Das Wort *budget* bleibt, wo YNAB es behält, für das einer
 Kategorie zugewiesene Geld (`budgeted`, angezeigt als *Assigned*), daher
 `set_category_budget` und `get_budget_vs_actual`.
@@ -55,7 +55,7 @@ Kategorie zugewiesene Geld (`budgeted`, angezeigt als *Assigned*), daher
 
 ## Die lokale Kopie der Transaktionen
 
-Die meisten Werkzeuge brauchen die Transaktionen des Budgets: um Ausstehendes zu finden,
+Die meisten Tools brauchen die Transaktionen des Budgets: um Ausstehendes zu finden,
 aus der Historie zu lernen, mit der Bank zu vergleichen, vorauszurechnen. Sie bei jedem
 Aufruf alle herunterzuladen wäre langsam und würde das Kontingent von YNAB verbrauchen.
 avenir-mcp hält eine Kopie je Budget im Speicher und aktualisiert sie mit der
@@ -68,11 +68,11 @@ avenir-mcp hält eine Kopie je Budget im Speicher und aktualisiert sie mit der
 3. avenir-mcp führt sie in seine Kopie zusammen: Eine geänderte Transaktion ersetzt die
    alte, eine gelöschte wird entfernt.
 
-Mit der Kennung eines Budgets wird die Kopie per Delta-Synchronisation aktualisiert. Mit
+Mit der ID eines Budgets wird die Kopie per Delta-Synchronisation aktualisiert. Mit
 `last-used`, das das zuletzt in YNAB geöffnete Budget meint und sich zwischen zwei
 Aufrufen ändern kann, werden die Transaktionen jedes Mal vollständig geladen – immer noch
 eine Anfrage –, damit zwei Budgets nie vermischt werden. Bei mehreren Budgets übergeben
-Sie die Kennung aus `list_plans`.
+Sie die ID aus `list_plans`.
 
 Die Kopie lebt so lange wie der Serverprozess. Gefilterte Lesevorgänge – nach Datum oder
 nach Kategorie – umgehen sie.
@@ -87,10 +87,10 @@ lässt.
 ## Das Anfragelimit von YNAB
 
 YNAB erlaubt **200 Anfragen pro Stunde** und Token, in einem gleitenden Fenster. Was jedes
-Werkzeug bei leerem Cache kostet, wird auf dem Demo-Budget gemessen und auf seiner
+Tool bei leerem Cache kostet, wird auf dem Demo-Budget gemessen und auf seiner
 [Referenzseite](/avenir-mcp/de/reference/tools/) angegeben:
 
-| Kosten | Werkzeuge |
+| Kosten | Tools |
 |---|---|
 | 0 | jeder durch die Prüfung abgelehnte Aufruf (ein fehlerhafter Monat, ein leerer Name…) |
 | 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, eine Vorschau von `set_category_budget` |
@@ -114,4 +114,4 @@ angewiesen, es Ihnen zu sagen und es vorher nicht erneut zu versuchen.
 
 avenir-mcp legt keine Kopie auf der Festplatte ab. Die Transaktionen leben im Speicher,
 solange der Server läuft; das [Journal](/avenir-mcp/de/concepts/journal/) enthält nur
-Kennungen; das Token bleibt in der Umgebung und wird nie protokolliert.
+IDs; das Token bleibt in der Umgebung und wird nie protokolliert.

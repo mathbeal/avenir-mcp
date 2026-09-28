@@ -76,7 +76,7 @@ export default defineConfig({
           items: [
             {
               label: 'Tools',
-              translations: { fr: 'Outils', es: 'Herramientas', de: 'Werkzeuge' },
+              translations: { fr: 'Outils', es: 'Herramientas', de: 'Tools' },
               collapsed: true,
               items: [{ autogenerate: { directory: 'reference/tools' } }],
             },

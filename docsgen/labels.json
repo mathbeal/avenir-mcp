@@ -176,7 +176,7 @@
     "response": "Antwort auf dem Demo-Budget:",
     "generated_title": "Erzeugt",
     "errors": "Fehler",
-    "no_errors": "Dieses Werkzeug erzeugt keine eigenen Fehler; Fehler von YNAB kommen als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück.",
+    "no_errors": "Dieses Tool erzeugt keine eigenen Fehler; Fehler von YNAB kommen als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück.",
     "ynab_errors": "Fehler von YNAB selbst kommen als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück.",
     "see_also": "Siehe auch",
     "kind": "Art",
@@ -201,10 +201,10 @@
     "description": "Beschreibung",
     "field": "Feld",
     "none": "keine",
-    "tools_title": "Werkzeuge",
-    "tools_description": "Alle Werkzeuge, die avenir-mcp bereitstellt: Zweck, lesend oder schreibend, Kosten.",
-    "tools_intro": "avenir-mcp stellt diese Werkzeuge bereit. Lesende Werkzeuge sind immer verfügbar; schreibende existieren nur mit `AVENIR_MCP_WRITE=1`, und alle außer `approve_transactions` werden als Vorschau gezeigt und bestätigt.",
-    "tool": "Werkzeug",
+    "tools_title": "Tools",
+    "tools_description": "Alle Tools, die avenir-mcp bereitstellt: Zweck, lesend oder schreibend, Kosten.",
+    "tools_intro": "avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schreibende existieren nur mit `AVENIR_MCP_WRITE=1`, und alle außer `approve_transactions` werden als Vorschau gezeigt und bestätigt.",
+    "tool": "Tool",
     "summary": "Kurzbeschreibung",
     "read_tools": "Lesen",
     "write_tools": "Schreiben",
@@ -214,9 +214,9 @@
     "arguments": "Argumente",
     "optional": "optional",
     "errors_title": "Fehler",
-    "errors_description": "Jede Fehlermeldung, die avenir-mcp zurückgeben kann, Werkzeug für Werkzeug.",
-    "errors_intro": "Ein Fehler kommt als Werkzeugergebnis mit `isError` zurück, mit einer Meldung, die sagt, was zu korrigieren ist, damit der Agent seinen Aufruf berichtigen kann. Teile in geschweiften Klammern stehen für den übergebenen Wert.",
+    "errors_description": "Jede Fehlermeldung, die avenir-mcp zurückgeben kann, Tool für Tool.",
+    "errors_intro": "Ein Fehler kommt als Tool-Ergebnis mit `isError` zurück, mit einer Meldung, die sagt, was zu korrigieren ist, damit der Agent seinen Aufruf berichtigen kann. Teile in geschweiften Klammern stehen für den übergebenen Wert.",
     "general": "Von YNAB",
-    "general_text": "Jedes Werkzeug, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error calling tool '<tool>': YNAB <status>: <detail>` — zum Beispiel `YNAB 401` für ein falsches oder widerrufenes Token, `YNAB 429`, wenn die 200 Anfragen pro Stunde aufgebraucht sind. Ohne `YNAB_API_KEY` weigert sich der Server, YNAB aufzurufen: `YNAB_API_KEY environment variable is not set`."
+    "general_text": "Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error calling tool '<tool>': YNAB <status>: <detail>` — zum Beispiel `YNAB 401` für ein falsches oder widerrufenes Token, `YNAB 429`, wenn die 200 Anfragen pro Stunde aufgebraucht sind. Ohne `YNAB_API_KEY` weigert sich der Server, YNAB aufzurufen: `YNAB_API_KEY environment variable is not set`."
   }
 }

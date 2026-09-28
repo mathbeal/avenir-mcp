@@ -14,7 +14,7 @@ weitermachen.
 
 <Steps>
 
-1. [uv installieren](#uv-installieren), das Werkzeug, das avenir-mcp ausführt.
+1. [uv installieren](#uv-installieren), das Tool, das avenir-mcp ausführt.
 2. [Ein YNAB-Token besorgen](#ein-ynab-token-besorgen), den Zugang von avenir-mcp zu Ihren Budgets.
 3. [Prüfen, ob avenir-mcp startet](#prüfen-ob-avenir-mcp-startet), einmal von Hand.
 4. [avenir-mcp zu Ihrem Client hinzufügen](#avenir-mcp-zu-ihrem-client-hinzufügen).
@@ -203,7 +203,7 @@ beantworten, aber nichts ändern. [Änderungen erlauben](#änderungen-erlauben) 
          }
        }
        ```
-    2. Starten Sie `gemini` und geben Sie `/mcp` ein: `avenir-mcp` erscheint mit seinen Werkzeugen. Das Modell ist das, welches Gemini CLI verwendet.
+    2. Starten Sie `gemini` und geben Sie `/mcp` ein: `avenir-mcp` erscheint mit seinen Tools. Das Modell ist das, welches Gemini CLI verwendet.
   </TabItem>
   <TabItem label="Codex CLI">
     1. Öffnen Sie `~/.codex/config.toml` (legen Sie die Datei bei Bedarf an) und fügen Sie hinzu:
@@ -213,7 +213,7 @@ beantworten, aber nichts ändern. [Änderungen erlauben](#änderungen-erlauben) 
        args = ["avenir-mcp"]
        env = { YNAB_API_KEY = "ihr-token" }
        ```
-    2. Starten Sie `codex` und geben Sie `/mcp` ein: `avenir-mcp` erscheint mit seinen Werkzeugen. Das Modell ist das, welches Codex verwendet.
+    2. Starten Sie `codex` und geben Sie `/mcp` ein: `avenir-mcp` erscheint mit seinen Tools. Das Modell ist das, welches Codex verwendet.
   </TabItem>
   <TabItem label="LM Studio">
     Für ein Modell, das auf Ihrem eigenen Rechner läuft – siehe [Ein Modell wählen](/avenir-mcp/de/guides/choose-a-model/#lokale-modelle).
@@ -230,7 +230,7 @@ beantworten, aber nichts ändern. [Änderungen erlauben](#änderungen-erlauben) 
          }
        }
        ```
-    2. Speichern Sie, laden Sie ein Modell, das Tool-Aufrufe unterstützt, und beginnen Sie einen Chat: LM Studio fragt vor jedem Werkzeugaufruf nach.
+    2. Speichern Sie, laden Sie ein Modell, das Tool-Aufrufe unterstützt, und beginnen Sie einen Chat: LM Studio fragt vor jedem Tool-Aufruf nach.
   </TabItem>
   <TabItem label="Andere Clients">
     Jeder MCP-Client, der Server über **stdio** startet, funktioniert. Geben Sie ihm:
@@ -263,11 +263,11 @@ Linux) oder `where uvx` (Windows) ausgibt – zum Beispiel `"/Users/<sie>/.local
     ```text
     avenir-mcp: uvx avenir-mcp - ✔ Connected
     ```
-    Starten Sie dann `claude` und geben Sie `/mcp` ein: `avenir-mcp` zeigt seine 9 Werkzeuge.
+    Starten Sie dann `claude` und geben Sie `/mcp` ein: `avenir-mcp` zeigt seine 9 Tools.
   </TabItem>
   <TabItem label="Andere Clients">
-    Öffnen Sie die Liste der MCP-Server oder Werkzeuge des Clients: `avenir-mcp` sollte
-    laufen, mit 9 Werkzeugen.
+    Öffnen Sie die Liste der MCP-Server oder Tools des Clients: `avenir-mcp` sollte
+    laufen, mit 9 Tools.
   </TabItem>
 </Tabs>
 
@@ -311,11 +311,11 @@ Konten abgleichen kann, fügen Sie der Umgebung von avenir-mcp `AVENIR_MCP_WRITE
   </TabItem>
 </Tabs>
 
-Der Wert muss genau `1` sein. Prüfen Sie: Der Client listet nun **20** Werkzeuge statt 11.
+Der Wert muss genau `1` sein. Prüfen Sie: Der Client listet nun **20** Tools statt 11.
 
 | | Nur lesend (Standard) | Mit `AVENIR_MCP_WRITE=1` |
 |---|---|---|
-| Aufgelistete Werkzeuge | 11 | 20 |
+| Aufgelistete Tools | 11 | 20 |
 | Kategorisieren, budgetieren, abgleichen, anlegen | — | als Vorschau gezeigt, von Ihnen bestätigt, rückgängig zu machen |
 | Wenn der Agent etwas missversteht | nichts kann sich ändern | eine Änderung, die Sie bestätigt haben und rückgängig machen können |
 

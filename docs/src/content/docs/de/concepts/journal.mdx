@@ -17,7 +17,7 @@ Jede bestätigte Schreibaktion wird in einem lokalen Journal erfasst, damit
 | Standarddatei | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, sonst `~/.local/state/avenir-mcp/journal.jsonl` |
 | Gewählte Datei | `AVENIR_MCP_JOURNAL` |
 | Berechtigungen | mit `0600` angelegt: nur für Sie les- und schreibbar |
-| Inhalt | nur Kennungen – kein Betrag, kein Empfänger, kein Verwendungszweck, kein Token |
+| Inhalt | nur IDs – kein Betrag, kein Empfänger, kein Verwendungszweck, kein Token |
 
 ## Format
 
@@ -50,8 +50,8 @@ Das Rückgängigmachen hängt eine Markierung an; nichts wird je überschrieben:
 
 ## Welche Operation das Rückgängigmachen wählt
 
-`undo_operation` ohne Kennung nimmt die **jüngste noch wirksame Operation des Budgets**:
-nicht rückgängig gemacht und selbst kein Rückgängigmachen. Mit einer Kennung diese
+`undo_operation` ohne ID nimmt die **jüngste noch wirksame Operation des Budgets**:
+nicht rückgängig gemacht und selbst kein Rückgängigmachen. Mit einer ID diese
 Operation, sofern sie noch wirksam ist. Andernfalls: *„Nothing to undo: no operation of
 this budget is still in effect.“*
 
