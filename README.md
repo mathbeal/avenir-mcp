@@ -27,7 +27,7 @@ you, and can be undone.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
-  <img alt="Asked to categorise pending transactions, the agent flags a prompt injection hidden in a memo and a likely duplicate, proposes a category for each, and asks before applying anything." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-light.svg" width="720">
+  <img alt="Asked how the September budget is doing, the agent reads the month with two read-only tools and answers: one category over budget, Restaurants by 22.50, everything else on track." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-light.svg" width="720">
 </picture>
 
 <picture>

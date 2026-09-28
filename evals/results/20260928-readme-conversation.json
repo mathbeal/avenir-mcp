@@ -1,0 +1,16 @@
+{
+  "about": "The conversation shown at the top of the README: Claude Sonnet through Claude Code, on the invented demo plan, 2026-09-28. The image shows this reply whole, word for word; nothing else was changed.",
+  "prompt": "How is my budget doing this September?",
+  "reply": "Here's where September stands:\n\n- **Budgeted:** €1,945 | **Spent so far:** €1,112.49 | **Ready to Assign:** €1,820\n- **Over budget:** Restaurants — €142.50 spent vs €120 budgeted (119%, €22.50 over)\n- **On track:** Rent (100%, fully paid) and Phone (€19.99/€20, essentially spent)\n- **Untouched budgets:** Groceries (€400), Transport (€90), Electricity (€70), Tennis (€80), Subscriptions (€15), Holidays savings (€200)\n\nOnly overspend flag is Restaurants. Everything else still has full headroom, so overall you're in good shape for the month — just keep an eye on dining out.",
+  "tool_calls": [
+    "ToolSearch",
+    "get_monthly_summary",
+    "get_budget_vs_actual"
+  ],
+  "turns": 4,
+  "input_tokens": 112789,
+  "output_tokens": 877,
+  "cost_usd": 0.09714620000000002,
+  "seconds": 12.0,
+  "exit_code": 0
+}
