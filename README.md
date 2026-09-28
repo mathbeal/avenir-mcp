@@ -11,6 +11,7 @@
 [![docstrings](https://img.shields.io/badge/docstrings-Google%20style%2C%20ruff-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
+[![last commit](https://img.shields.io/github/last-commit/mathbeal/avenir-mcp)](https://github.com/mathbeal/avenir-mcp/commits/main)
 
 > 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB plan
 > and help you plan what comes next.
@@ -24,6 +25,8 @@ matches the bank, when money would run out. Every change is previewed, confirmed
 you, and can be undone.
 
 **📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
+
+[English](https://mathbeal.github.io/avenir-mcp/) · [Français](https://mathbeal.github.io/avenir-mcp/fr/) · [Español](https://mathbeal.github.io/avenir-mcp/es/) · [Deutsch](https://mathbeal.github.io/avenir-mcp/de/) · [Nederlands](https://mathbeal.github.io/avenir-mcp/nl/)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
