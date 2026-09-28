@@ -23,8 +23,8 @@ configuración.
 | `AVENIR_MCP_HOST` | `127.0.0.1` | Dirección HTTP. |
 | `AVENIR_MCP_PORT` | `8103` | Puerto HTTP. |
 | `AVENIR_MCP_HTTP_TOKEN` | sin definir | Token que deben presentar los clientes HTTP; obligatorio con escrituras por HTTP. |
-| `AVENIR_MCP_JOURNAL` | ver abajo | Archivo del diario, usado por el deshacer. |
-| `XDG_STATE_HOME` | `~/.local/state` | Dónde vive el diario por defecto. |
+| `AVENIR_MCP_JOURNAL` | ver abajo | Archivo del diario, usado para anular operaciones. |
+| `XDG_STATE_HOME` | `~/.local/state` | Dónde se guarda el diario por defecto. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confianza necesaria para sugerir una categoría. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Nivel de los diagnósticos. |
 | `AVENIR_MCP_LOG_FORMAT` | `text` | `json` escribe un objeto JSON por línea. |
@@ -80,7 +80,7 @@ Exactamente `1`: una escritura solo se aplica tras un sí dado en la ventana de
 confirmación del propio cliente. Los códigos de confirmación ni se emiten ni se aceptan,
 una pregunta cerrada cuenta como no, y un cliente que no sabe preguntar recibe un error.
 Úselo cuando el modelo podría transmitir un código sin preguntarle — vea
-[Confirmación](/avenir-mcp/es/concepts/confirmation/#exigir-su-propia-respuesta).
+[Confirmación](/avenir-mcp/es/concepts/confirmation/#exigir-la-respuesta-del-propio-usuario).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
 
