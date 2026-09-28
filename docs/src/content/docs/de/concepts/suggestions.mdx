@@ -1,0 +1,85 @@
+---
+title: Vorschläge
+description: Wie avenir-mcp einen Händler über Bankbezeichnungen hinweg erkennt, aus Ihrer Historie lernt und entscheidet, wann es eine Kategorie vorschlägt.
+sidebar:
+  order: 6
+---
+
+`suggest_categories` beantwortet für jede ausstehende Transaktion zwei Fragen: *Wer ist
+dieser Händler?* und *Wohin haben Sie ihn bisher gebucht?*
+
+## Was aussteht
+
+Eine Transaktion steht aus, wenn sie nicht gelöscht ist, keine Kategorie hat (oder die
+interne Kategorie *Uncategorized* von YNAB), keine Umbuchung zwischen Ihren Konten ist
+(Umbuchungen erhalten in YNAB keine Kategorie), nicht aufgeteilt ist (die Zeilen einer
+Aufteilung tragen ihre Kategorien) und zu einem Konto **im Budget** gehört: Die
+Transaktionen von Verfolgungskonten – eine Hypothek, ein Kredit, eine Geldanlage –
+erhalten nie eine Kategorie, ihren Anfangssaldo eingeschlossen. Ausstehende Transaktionen
+werden die neuesten zuerst aufgeführt.
+
+## Doppelt importierte Umbuchungen
+
+Eine Bewegung zwischen zwei Ihrer Konten kommt manchmal als zwei gewöhnliche
+Transaktionen an – eine hinaus, eine herein – statt als eine Umbuchung. Haben zwei
+ausstehende Transaktionen **entgegengesetzte Beträge**, auf **verschiedenen Konten**,
+höchstens **3 Tage** auseinander, nennt jeder Eintrag den anderen in
+`possible_transfer_with`. Der Agent schlägt dann vor, sie in YNAB als Umbuchung zu
+verknüpfen, statt jeder eine Kategorie zu geben.
+
+## Einen Händler erkennen
+
+Banken schreiben denselben Laden jedes Mal anders: ein Datum, eine Kartennummer, eine
+Referenz. Vor dem Vergleich wird jeder Empfänger **normalisiert**, in dieser Reihenfolge:
+
+| Schritt | Regel | Beispiel |
+|---|---|---|
+| 1 | Großbuchstaben, Leerzeichen zusammengefasst | `Corner  Shop` → `CORNER SHOP` |
+| 2 | eine Bankkontonummer und was folgt entfernen: `- IBAN: …` | `INSURER - PRELEV - IBAN: FR00…` → `INSURER - PRELEV` |
+| 3 | ein Zahlungspräfix entfernen: `CB`, `CARTE`, `PRLV`, `PRLV SEPA`, `VIR`, `VIREMENT`, `VIR INST`, `VIR SEPA` | `VIR INST GARAGE MARTIN` → `GARAGE MARTIN` |
+| 4 | ein Rechnungsdatum und was folgt entfernen: `FACT` + 6 Ziffern | `ACME OUTDOOR FACT 110126 525130******2` → `ACME OUTDOOR` |
+| 5 | maskierte Kartennummern (`525130******2`), Daten (`12/01`, `12/01/26`) und Referenzen ab 5 Ziffern entfernen | `ONLINE STORE 1234567890` → `ONLINE STORE` |
+| 6 | Leerzeichen erneut zusammenfassen | |
+
+So sind `CB MARKET FRESH FACT 050926 525130******1` und `CB MARKET FRESH FACT 190926
+525130******1` beide `MARKET FRESH`. Das Entfernen von Bankkontonummern hält außerdem die
+IBAN eines Gläubigers aus jeder Antwort heraus.
+
+## Aus der Historie lernen
+
+Die Historie wird aus den Transaktionen des Budgets gebildet, die eine Kategorie haben,
+nicht gelöscht und keine Umbuchungen sind. Sie zählt für jeden normalisierten Empfänger,
+wie oft jede Kategorie verwendet wurde – **getrennt für Ausgänge und Eingänge**. Ein
+Kreditgeber, der Ihnen einmal Geld gezahlt hat (Eingang, *Ready to Assign*), lässt Ihre
+Rückzahlungen (Ausgang) nicht wie Einnahmen aussehen.
+
+## Entscheiden
+
+Für eine ausstehende Transaktion betrachtet avenir-mcp die Historie ihres Empfängers, in
+ihrer Richtung, und behält nur die Kategorien, die Sie noch zuweisen können: Eine
+ausgeblendete oder gelöschte Kategorie wird nie vorgeschlagen.
+
+- **confidence** = Verwendungen der häufigsten Kategorie ÷ alle Verwendungen dieser
+  Kategorien.
+- Ein Vorschlag wird gemacht, wenn confidence ≥ der Schwelle ist, standardmäßig **0,90**
+  (`AVENIR_MCP_CONFIDENCE_THRESHOLD`).
+- Keine Historie oder keine Kategorie über der Schwelle: kein Vorschlag. Der Agent
+  schlägt eine aus der Kategorienliste vor und fragt Sie.
+
+Gemessen an einem echten Haushaltsbudget mit etwa 800 kategorisierten Transaktionen,
+wobei jede der Reihe nach ausgelassen wurde, waren die bei 0,90 gemachten Vorschläge in
+95 % der Fälle richtig.
+
+## Seitenweise Abfrage
+
+| | |
+|---|---|
+| Seitengröße | `limit`, standardmäßig 50 |
+| Nächste Seite | `next_cursor`, undurchsichtig: unverändert zurückgeben |
+| Kosten | drei YNAB-Anfragen pro Seite: Transaktionen, Kategorien und Konten |
+| Kategorien | die Liste der zuweisbaren Kategorien kommt nur mit der ersten Seite |
+| Text | Empfänger und Verwendungszweck auf 80 Zeichen gekürzt, markiert mit `…` |
+
+Ein Cursor ist die Base64-Kodierung eines Versatzes. Ein Cursor, den avenir-mcp nicht
+ausgegeben hat, wird abgelehnt: *„Invalid cursor: pass the next_cursor value from the
+previous page unchanged, or omit it to start from the first page.“*

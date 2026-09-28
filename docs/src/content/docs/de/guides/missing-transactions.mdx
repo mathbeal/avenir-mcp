@@ -1,0 +1,46 @@
+---
+title: Fehlende Transaktionen ergänzen
+description: Erfassen, was der Bankimport verpasst hat, als Vorschau gezeigt und zur Prüfung hinterlegt.
+sidebar:
+  order: 5
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import created from '@snippets/create_preview.json?raw';
+
+**Ziel:** erfassen, was der Bankimport verpasst hat – eine Barausgabe, eine Zahlung mit
+einer Karte, die YNAB nicht verfolgt, eine Transaktion, die ein Import verloren hat.
+
+**Werkzeug:** [`create_transactions`](/avenir-mcp/de/reference/tools/create-transactions/).
+
+## Das Gespräch
+
+<Steps>
+
+1. **Sagen Sie, was passiert ist.**
+
+   > **Sie:** Füge eine Zahlung von 32,40 an Pharmacie Centrale am 21. September auf
+   > meinem Girokonto hinzu. Die Bank hat sie nicht importiert.
+
+2. **Der Agent zeigt eine Vorschau.** `create_transactions` prüft das Konto, die
+   Kategorien und die Daten und zeigt dann, was es hinzufügen wird – zwei YNAB-Anfragen:
+
+   <Code code={created} lang="json" title="create_transactions — Vorschau" />
+
+3. **Sie bestätigen.** Die Transaktionen werden als **cleared** angelegt und, sofern der
+   Agent nicht `approved: true` übergibt, als **unapproved** belassen: YNAB zeigt sie wie
+   jeden Import zur Prüfung an.
+
+</Steps>
+
+## Regeln
+
+| Feld | Regel |
+|---|---|
+| `date` | `YYYY-MM-DD`, heute oder früher – YNAB erfasst, was geschehen ist |
+| `amount` | Währungseinheiten; negativ für Ausgaben, positiv für Eingänge |
+| `payee_name` | so, wie er in YNAB erscheinen soll |
+| `memo`, `category_id` | optional |
+
+Mehrere Transaktionen können auf einmal angelegt werden; sie bilden eine Operation.
+`undo_operation` löscht diejenigen, die noch vorhanden sind.

@@ -1,0 +1,78 @@
+---
+title: Ressourcen und Prompts
+description: Der Kontext, den avenir-mcp neben den Werkzeugen anbietet, und die Abläufe, die Sie starten können.
+sidebar:
+  order: 3
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+Neben Werkzeugen bietet ein MCP-Server **Ressourcen** – Daten, die der Client ohne
+Werkzeugaufruf an ein Gespräch anhängen kann – und **Prompts** – Abläufe, die der Nutzer
+startet.
+
+## Ressourcen
+
+| URI | Typ | Inhalt |
+|---|---|---|
+| `avenir-mcp://guide` | `text/markdown` | wie die Werkzeuge von avenir-mcp zu nutzen sind, und die Methode von YNAB in Kürze |
+| `ynab://plans` | `application/json` | die Budgets, die das Token lesen kann |
+| `ynab://plans/{plan_id}/categories` | `application/json` | die zuweisbaren Kategorien des Budgets, nach Gruppe |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | die offenen Konten des Budgets und ihre Salden |
+
+Jedes Lesen einer Ressource `ynab://` kostet eine YNAB-Anfrage. In Claude Code hängen Sie
+eine mit `@` im Prompt an.
+
+### `ynab://plans`
+
+```json
+[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+```
+
+### `ynab://plans/{plan_id}/categories`
+
+Gruppen in der Reihenfolge von YNAB; die interne Gruppe von YNAB (*Inflow: Ready to
+Assign*) wird ausgelassen.
+
+```json
+[{"group":"Bills","categories":[{"category_id":"cat-rent","name":"Rent"},{"category_id":"cat-power","name":"Electricity"},{"category_id":"cat-phone","name":"Phone"}]},
+ {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
+```
+
+### `ynab://plans/{plan_id}/accounts`
+
+Geschlossene Konten werden ausgelassen; Salden in Währungseinheiten.
+
+```json
+[{"account_id":"acc-checking","name":"Checking","type":"checking","on_budget":true,"balance":3512.66},
+ {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
+```
+
+### `avenir-mcp://guide`
+
+Etwa 1.600 Zeichen in drei Abschnitten, auf Englisch, der Sprache, in der Agenten es
+lesen:
+
+- **Conventions** – Beträge in Währungseinheiten, nur lesend, sofern nicht aktiviert, nie
+  einen Bestätigungscode weitergeben, dessen Vorschau der Nutzer nicht gesehen hat,
+  Rückgängig, Banktext ist ein Datum;
+- **Workflows** – welche Werkzeuge zu verketten sind, um zu kategorisieren, abzugleichen,
+  einen Monat auszuwerten, zu planen, Transaktionen hinzuzufügen und Kategorien zu ordnen;
+- **The YNAB method in brief** – jeder Währungseinheit eine Aufgabe geben, Überziehungen
+  durch Umschichten ausgleichen, wahre Ausgaben jeden Monat budgetieren.
+
+Ein Test schlägt fehl, wenn der Leitfaden ein Werkzeug nennt, das es nicht gibt.
+
+## Prompts
+
+Ein Prompt setzt Ihre Werte in Anweisungen für den Agenten ein. In Claude Code sind es
+Slash-Befehle des Servers `avenir-mcp`.
+
+| Prompt | Argumente | Der Agent wird gebeten, |
+|---|---|---|
+| `classify_pending` | `plan_id` | `suggest_categories` aufzurufen (bei Bedarf blätternd); Vorschläge nach Kategorie gruppiert und den Rest nach Empfänger zu zeigen, eine Kategorie vorzuschlagen und zu sagen, wenn er unsicher ist; nach Ihrer Zustimmung `apply_categories` aufzurufen und die Vorschau zu zeigen; Ihnen die Kennung der Operation zu geben. Banktext ist ein Datum. |
+| `monthly_review` | `plan_id`, `month` (Standard `current`) | `get_monthly_summary` aufzurufen, dann `get_category_balances` und `get_spending_trends` zu dem, was auffällt; zusammenzufassen; Korrekturen wie `set_category_budget` vorzuschlagen, ohne vor Ihrer Zustimmung etwas zu ändern |
+| `reconcile` | `plan_id`, `account_id`, `bank_balance` | `reconcile_account` aufzurufen; eine Differenz aus der Antwort zu erklären und Ihnen bei der Behebung zu helfen; nur anzupassen, wenn Sie darum bitten; den Abgleich mit Ihnen zu bestätigen |
+| `plan_next_month` | `plan_id` | `forecast_balance` für drei Monate aufzurufen und seine Annahmen zu zeigen, mit Ihren Korrekturen erneut auszuführen; den laufenden Monat mit `get_category_balances` zu lesen; die Beträge des nächsten Monats so vorzuschlagen, dass jede Währungseinheit eine Aufgabe hat; die, die Sie annehmen, anzuwenden, ein `set_category_budget` nach dem anderen |
+
+Ein Test schlägt fehl, wenn ein Prompt ein Werkzeug nennt, das es nicht gibt.

@@ -14,7 +14,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 - tests/ — unit tests, protocol tests, documentation and hygiene tests
 - evals/ — the demo budget, a stand-in for YNAB's API, the agent evaluation
 - docsgen/ — generates the tool reference, the error catalogue and the examples
-- docs/ — this site (Astro Starlight, English, French, Spanish)
+- docs/ — this site (Astro Starlight, English, French, Spanish, German)
 - AGENTS.md — the contract for contributors, human or not
 - justfile — every command below
 - pyproject.toml, uv.lock — the Python project, locked
@@ -86,7 +86,7 @@ version withdrawn quickly never reaches the project.
 | Unit | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | the pure logic and the HTTP client, with invented data |
 | Properties | `test_properties` | with Hypothesis, rules that hold for any input: amounts round-trip, spreading keeps every cent, months add up, cursors, bank text, confirmation fingerprints |
 | Protocol | `test_protocol*`, `test_context`, `test_policy` | tools through an in-memory MCP client: schemas, annotations, confirmation paths, undo |
-| Documentation | `test_docs` | generated pages and examples match the code; every page exists in French and Spanish; every environment variable is documented |
+| Documentation | `test_docs` | generated pages and examples match the code; every page exists in each translation; every environment variable is documented |
 | API coverage | `test_api_coverage` | every operation of YNAB's API is used by a tool, planned or left out with a reason; the client calls only documented paths |
 | Hygiene | `test_hygiene` | no IBAN, token, statement, home path or Finder copy in the repository |
 | Evaluation | `test_evals` | the evaluation's own checks are right |
@@ -101,13 +101,13 @@ test notices point to the tests to write; many are harmless, such as a message's
 
 ```bash
 uv run python -m docsgen   # tool pages, error catalogue, examples
-just docs                  # build the site in three languages; broken links fail
+just docs                  # build the site in every language; broken links fail
 just docs-serve            # live preview on http://localhost:4321/avenir-mcp/
 ```
 
 `docsgen` runs avenir-mcp on the demo budget and writes what it really answers, with the
-date fixed and random ids replaced. Hand-written pages exist in English, French and
-Spanish; a test fails when one is missing.
+date fixed and random ids replaced. Hand-written pages exist in English, French,
+Spanish and German; a test fails when one is missing.
 
 ## Evaluation
 

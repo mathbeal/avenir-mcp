@@ -12,7 +12,7 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 const t = home(route.lang);
 const clients = ['Claude Code', 'Claude Desktop', 'Cursor', 'VS Code', 'Gemini CLI', 'Codex CLI', 'LM Studio'];
 // Only the home page of each language; other pages with a hero (404) keep Starlight's.
-const isHome = ['', 'fr', 'es'].includes(route.id.replace(/\/$/, ''));
+const isHome = ['', 'fr', 'es', 'de'].includes(route.id.replace(/\/$/, ''));
 ---
 
 {!isHome && <Default />}

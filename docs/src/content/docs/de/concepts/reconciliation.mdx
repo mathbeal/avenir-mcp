@@ -1,0 +1,64 @@
+---
+title: Abgleich
+description: Wie ein Konto mit der Bank verglichen wird, wie eine Differenz erklärt wird und was der Abgleich ändert.
+sidebar:
+  order: 7
+---
+
+`reconcile_account` vergleicht ein Konto mit dem Kontostand, den Ihre Bank zeigt. Der
+Vergleich ist eine reine Berechnung auf den Transaktionen des Kontos
+(`reconcile.analyse`); er schreibt nichts.
+
+## Der Vergleich
+
+Nur die nicht gelöschten Transaktionen des Kontos zählen.
+
+| Größe | Definition |
+|---|---|
+| gebuchter Saldo | Summe der Transaktionen mit dem Status *cleared* oder *reconciled* |
+| Arbeitssaldo | Summe aller Transaktionen |
+| Differenz | Kontostand der Bank − gebuchter Saldo |
+| abzugleichen | Transaktionen, die *cleared*, aber noch nicht *reconciled* sind |
+| nicht gebucht | Transaktionen, die die Bank noch nicht gezeigt hat (bis zu 50 aufgeführt) |
+
+Alles wird in Milliunits summiert. Eine **negative** Differenz bedeutet, dass YNAB mehr
+Geld zählt als die Bank – typischerweise ein Duplikat oder eine Erstattung, die nie kam;
+eine **positive** weniger – typischerweise eine Gebühr oder eine Einnahme, die nicht
+importiert wurde.
+
+## Eine Differenz erklären
+
+| Spur | Regel |
+|---|---|
+| `explained_by` | nicht gebuchte Transaktionen, deren Betrag genau der Differenz entspricht: eine davon zu buchen schließt die Lücke |
+| `possible_duplicates` | Paare mit gleichem Betrag und gleichem [normalisiertem](/avenir-mcp/de/concepts/suggestions/#einen-händler-erkennen) Händler, höchstens **3 Tage** auseinander, unter den Transaktionen der letzten **60 Tage** |
+| `uncleared` | was die Bank noch nicht gezeigt hat, damit der Agent es mit Ihnen prüft |
+
+Das Fenster von 60 Tagen hält alte, legitime Doppelgänger – zwei Nächte im selben Hotel
+im letzten Winter – aus der Antwort heraus.
+
+## Ergebnisse
+
+| Situation | `status` | Geschrieben |
+|---|---|---|
+| die Salden weichen ab, kein `adjust` | `difference_found` | nichts, und nichts gefragt |
+| die Salden stimmen überein, nichts bleibt abzugleichen | `nothing_to_do` | nichts |
+| die Salden stimmen überein | `confirmation_required`, dann `applied` | cleared → reconciled |
+| die Salden weichen ab, `adjust=true` | `confirmation_required`, dann `applied` | eine Anpassung, dann cleared → reconciled |
+
+## Anwenden
+
+Nach der Bestätigung:
+
+1. Mit `adjust=true` und einer Differenz wird eine Transaktion auf dem Konto angelegt:
+   Empfänger *Balance adjustment*, heutiges Datum, Betrag = die Differenz, Kategorie
+   *Inflow: Ready to Assign*, Verwendungszweck *Entered by reconcile_account*, gebucht
+   und freigegeben.
+2. Die in der Vorschau gezeigten *cleared* Transaktionen – und die Anpassung – werden in
+   einer gebündelten Anfrage auf *reconciled* gesetzt. Die Bestätigung deckt genau diese
+   Transaktionen ab: Wird nach der Vorschau eine weitere gebucht, ändert sich, was
+   bestätigt ist, und eine neue Vorschau ist nötig.
+3. Die Operation wird mit den abgeglichenen Kennungen und der Kennung der Anpassung im
+   Journal erfasst.
+
+`undo_operation` setzt sie auf *cleared* zurück und löscht die Anpassung.

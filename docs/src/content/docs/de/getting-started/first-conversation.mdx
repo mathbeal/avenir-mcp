@@ -1,0 +1,121 @@
+---
+title: Ihr erstes Gespräch
+description: Eine geführte Tour, Aufruf für Aufruf, mit den echten Antworten des Demo-Budgets.
+sidebar:
+  order: 2
+---
+
+import { Code, Aside, Steps } from '@astrojs/starlight/components';
+import accounts from '@snippets/list_accounts.json?raw';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import pending from '@snippets/suggest_categories.json?raw';
+import preview from '@snippets/apply_preview.json?raw';
+
+Diese Tour folgt einem echten Gespräch auf dem Demo-Budget, einem erfundenen Haushalt mit
+einem Girokonto und einem Sparkonto. Für jeden Schritt sehen Sie, was Sie sagen, welches
+Werkzeug der Agent mit welchen Argumenten aufruft, was avenir-mcp antwortet und was der
+Agent Ihnen sagt. Ihre eigenen Antworten haben dieselbe Form, mit Ihren eigenen Zahlen.
+
+<Aside type="tip">
+Sie nennen nie selbst Werkzeuge: Sagen Sie, was Sie möchten, der Agent wählt das Werkzeug.
+Ein Werkzeug zu nennen (*„nutze get_monthly_summary“*) funktioniert auch und hilft, wenn
+eine Antwort Sie überrascht.
+</Aside>
+
+## 1. Sich umsehen
+
+> **Sie:** Welche Konten habe ich, und wie viel ist darauf?
+
+Der Agent ruft `list_accounts` mit `{"plan_id": "last-used"}` auf:
+
+<Code code={accounts} lang="json" title="list_accounts" />
+
+> **Claude:** Zwei Konten: Checking mit 3.512,66, alles gebucht, und Savings mit 600,00.
+
+Die Salden sind in der Währung Ihres Budgets. `cleared_balance` ist, was die Bank bereits
+gezeigt hat; `uncleared_balance` ist, was sie noch nicht gezeigt hat.
+
+## 2. Sehen, wie der Monat läuft
+
+> **Sie:** Wie läuft der September?
+
+Der Agent ruft `get_monthly_summary` mit `{"plan_id": "last-used", "month":
+"2026-09-01"}` auf:
+
+<Code code={summary} lang="json" title="get_monthly_summary" />
+
+> **Claude:** Der September verläuft wie geplant, bis auf Restaurants, um 22,50 überzogen.
+> 1.820,00 warten noch darauf, zugewiesen zu werden.
+
+Nur überzogene Kategorien werden aufgeführt. Für die Einzelheiten fragen Sie danach:
+
+> **Sie:** Zeig mir jede Kategorie für September.
+
+<Code code={balances} lang="json" title="get_category_balances (erste Einträge)" />
+
+`activity` ist, was ausgegeben (negativ) oder eingenommen wurde; `balance` ist, was noch
+verfügbar ist. Kategorien ohne budgetierten, ausgegebenen oder verfügbaren Betrag werden
+weggelassen, außer der Agent übergibt `include_empty`.
+
+## 3. Aufräumen
+
+> **Sie:** Was braucht noch eine Kategorie?
+
+Der Agent ruft `suggest_categories` mit `{"plan_id": "last-used"}` auf:
+
+<Code code={pending} lang="json" title="suggest_categories (erste Seite, 3 Einträge)" />
+
+> **Claude:** Sechs Transaktionen warten. Fünf haben einen klaren Vorschlag aus Ihrer
+> Historie: zweimal Market Fresh, Streamflix, Rail Co… Die Bäckerei ist mir neu:
+> Lebensmittel?
+
+Wo Ihre Historie eindeutig ist, liegt ein `suggestion` mit seiner `confidence` bereit.
+Für einen nie gesehenen Händler schlägt der Agent eine Kategorie aus der Liste
+`categories` vor und fragt Sie.
+
+## 4. Etwas ändern – sicher
+
+> **Sie:** Ja, die Bäckerei ist Lebensmittel, und der Zug ist Verkehr.
+
+Der Agent ruft `apply_categories` mit den beiden Zuordnungen auf. **Noch ändert sich
+nichts:**
+
+<Code code={preview} lang="json" title="apply_categories — Vorschau" />
+
+<Steps>
+
+1. avenir-mcp hat genau berechnet, was sich ändern würde: zwei Transaktionen, von keiner
+   Kategorie zu Groceries und Transport.
+2. Ihr Client zeigt Ihnen die Frage – ein Bestätigungsfeld, wenn er MCP-Elicitation
+   unterstützt, oder der Agent gibt die Vorschau weiter und wartet.
+3. Sie sagen Ja. Der Agent ruft erneut auf, mit Ihrer Antwort (oder dem Code `confirmation`).
+4. avenir-mcp wendet beide Änderungen in einer YNAB-Anfrage an, trägt sie in sein Journal
+   ein und gibt eine `operation_id` zurück.
+
+</Steps>
+
+> **Sie:** Doch nicht, mach das rückgängig.
+
+Der Agent ruft `undo_operation` auf, das als Vorschau zeigt, wie beide Transaktionen
+zurückgesetzt werden, und es anwendet, sobald Sie zustimmen. Siehe
+[Eine Änderung rückgängig machen](/avenir-mcp/de/guides/undo/).
+
+## 5. Die fertigen Abläufe nutzen
+
+Statt jeden Schritt zu steuern, starten Sie einen Prompt: Er gibt dem Agenten die ganze
+Methode vor.
+
+| Prompt | Was er mit Ihnen durchgeht |
+|---|---|
+| `classify_pending` | Vorschläge, Ihre Entscheidungen, ein bestätigter Stapel, die Kennung zum Rückgängigmachen |
+| `monthly_review` | Summen, was auffällt, vorgeschlagene Korrekturen |
+| `reconcile` | die Differenz zu Ihrer Bank erklärt, dann ein bestätigter Abgleich |
+| `plan_next_month` | eine Prognose und ihre Annahmen, dann die Beträge des nächsten Monats |
+
+In Claude Code erscheinen sie unter den Slash-Befehlen des Servers `avenir-mcp`.
+
+## Weiter
+
+- [Funktionen](/avenir-mcp/de/getting-started/features/): die vollständige Liste.
+- [Anleitungen](/avenir-mcp/de/guides/classify/): eine Aufgabe nach der anderen, ausführlich.

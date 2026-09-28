@@ -1,0 +1,82 @@
+---
+title: Rechtliche Hinweise
+description: Wer avenir-mcp veröffentlicht, wofür es gedacht ist, was es nicht verspricht und wohin Ihre Daten gehen.
+sidebar:
+  order: 7
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Nicht mit YNAB verbunden
+
+„We are not affiliated, associated, or in any way officially connected with YNAB or any of
+its subsidiaries or affiliates.“ Wir sind mit YNAB oder einer seiner Tochtergesellschaften
+oder verbundenen Unternehmen weder verbunden noch assoziiert noch in irgendeiner Weise
+offiziell verknüpft. YNAB und You Need A Budget sind eingetragene Marken von YNAB und
+werden hier nur genannt, um zu sagen, mit welchem Dienst avenir-mcp arbeitet. avenir-mcp
+nutzt die öffentliche API von YNAB mit dem eigenen Zugangstoken jedes Nutzers.
+
+## Wofür avenir-mcp gedacht ist
+
+avenir-mcp ist für den **persönlichen Gebrauch** gedacht: Eine Person betreibt es **auf
+ihrem eigenen Rechner**, mit **ihrem eigenen YNAB-Token**, für ihre eigenen Budgets.
+
+<Aside type="caution" title="Nicht unterstützt: ein öffentlicher oder geteilter Server">
+avenir-mcp als öffentlichen oder geteilten MCP-Server zu betreiben – es für andere zu
+hosten, seinen HTTP-Transport ins Internet zu stellen oder die YNAB-Tokens anderer zu
+sammeln – ist **kein vorgesehener Gebrauch** und wird nicht unterstützt:
+
+- Die API-Bedingungen von YNAB behalten Personal Access Tokens ihrem Eigentümer vor; eine
+  von anderen genutzte Anwendung muss OAuth verwenden, mit einer veröffentlichten
+  Datenrichtlinie. avenir-mcp hat keines von beiden.
+- avenir-mcp hat keine Benutzerkonten, keine Trennung zwischen Nutzern, und sein
+  HTTP-Transport ist nur für diesen Rechner gebaut.
+
+Dies geschähe auf Ihr eigenes Risiko und könnte gegen die Bedingungen von YNAB verstoßen.
+</Aside>
+
+## Keine Gewährleistung, keine Finanzberatung
+
+avenir-mcp wird **ohne Gewähr** bereitgestellt, ohne jegliche Gewährleistung, unter der
+[MIT-Lizenz](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE). Es ist **keine
+Finanzberatung**: Prognosen schreiben Ihre jüngste Vergangenheit fort und können falsch
+sein.
+
+KI-Agenten machen Fehler. Jede Änderung, die avenir-mcp vornimmt, wird als Vorschau
+gezeigt und wartet auf Ihre Bestätigung: **Sie bleiben für die Änderungen verantwortlich,
+die Sie bestätigen.** Lesen Sie jede Vorschau und nutzen Sie das
+[Rückgängigmachen](/avenir-mcp/de/concepts/journal/), wenn etwas schiefgegangen ist.
+
+## Die KI-Verordnung der EU
+
+avenir-mcp enthält **kein KI-Modell**. Seine Vorschläge zählen, welche Kategorien ein
+Empfänger bisher erhalten hat; seine Prognosen verwenden Mediane und Durchschnitte. Es ist
+ein Werkzeug, das ein KI-Agent aufruft, kein eigenes KI-System. Das KI-System ist Ihr
+MCP-Client und sein Modell, dessen Anbieter – Anthropic, OpenAI, Google oder ein anderer –
+die Pflichten der Verordnung (EU) 2024/1689 trägt. Die Nutzung für Ihr eigenes Budget ist
+eine rein persönliche, nicht berufliche Nutzung, und avenir-mcp wird unter einer freien
+Open-Source-Lizenz veröffentlicht. Es bewertet nicht die Kreditwürdigkeit von Personen, die
+Kreditnutzung, die die Verordnung als hochriskant einstuft.
+
+Dies ist die Lesart des Herausgebers, keine Rechtsberatung. Eine gehostete, kommerzielle
+Version, die ein Modell einbettet, würde eine neue Bewertung erfordern.
+
+## Wohin Ihre Daten gehen
+
+- avenir-mcp sendet Ihre Budgetdaten nur an **YNAB** und an den **Modellanbieter**, den Ihr
+  MCP-Client nutzt (keinen, mit einem [lokalen Modell](/avenir-mcp/de/guides/choose-a-model/#lokale-modelle)).
+- Der Herausgeber von avenir-mcp erhält **nichts**: keine Telemetrie, kein Konto, keinen
+  Server.
+- Diese Dokumentationswebsite setzt **keine Cookies** und führt **keine Analysen** durch;
+  ihre Schriften werden von der Website selbst ausgeliefert.
+
+## Herausgeber und Hoster
+
+| | |
+|---|---|
+| Herausgeber | Mathieu Beal ([mathbeal](https://github.com/mathbeal) auf GitHub), als Privatperson, nicht beruflich |
+| Kontakt | [GitHub-Issues](https://github.com/mathbeal/avenir-mcp/issues); Sicherheitsmeldungen vertraulich, siehe [Sicherheit](/avenir-mcp/de/project/security/) |
+| Hoster | GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, Vereinigte Staaten |
+
+Andere Namen – Claude, GPT, Gemini, Cursor, VS Code, LM Studio – sind Marken ihrer
+Inhaber und werden nur genannt, um zu sagen, womit avenir-mcp arbeitet.

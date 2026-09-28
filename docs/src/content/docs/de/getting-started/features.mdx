@@ -1,0 +1,133 @@
+---
+title: Funktionen
+description: Alles, was avenir-mcp kann, mit dem, was Sie fragen, und dem Werkzeug, das antwortet.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+avenir-mcp gibt einem Agenten 20 Werkzeuge, 4 Ressourcen und 4 Prompts für Ihre
+YNAB-Budgets. Diese Seite ordnet sie nach dem, was Sie tun möchten. Jede Zeile nennt einen
+Satz, den Sie dem Agenten sagen können; der Agent wählt das Werkzeug.
+
+<Aside type="note">
+**L** = nur lesend, immer verfügbar. **S** = schreibend, verfügbar mit
+`AVENIR_MCP_WRITE=1`, als Vorschau gezeigt und bestätigt. **↺** = mit `undo_operation`
+rückgängig zu machen.
+</Aside>
+
+<Aside type="tip" title="Plan oder Budget?">
+YNAB [nennt ein Budget jetzt **plan**](https://www.ynab.com/blog/budget-tab-breakdown), und die Werkzeuge von avenir-mcp ebenso (`list_plans`,
+`plan_id`). Sagen Sie, was Ihnen lieber ist: Der Agent versteht beides und antwortet mit
+Ihrem Wort. „Mein Budget für Restaurants“ meint weiterhin den Betrag, der dieser Kategorie
+zugewiesen ist.
+</Aside>
+
+## Sich umsehen
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Welche Budgets habe ich?“* | [`list_plans`](/avenir-mcp/de/reference/tools/list-plans/) | L |
+| *„Was ist auf meinen Konten?“* | [`list_accounts`](/avenir-mcp/de/reference/tools/list-accounts/) | L |
+| *„Welche Kategoriegruppen gibt es?“* | [`list_category_groups`](/avenir-mcp/de/reference/tools/list-category-groups/) | L |
+| *„Welche Transaktion ist mein Beleg über 86,40 vom 12.?“* | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) – nach Datum, genauem Betrag und Konto, kategorisiert oder nicht | L |
+| *„Wodurch ist Restaurants diesen Monat überzogen?“* | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) – nach Kategorie, aufgeteilte Zeilen eingeschlossen, oder nach Empfänger, egal wie die Bank ihn bezeichnet | L |
+| *„Welche Rechnungen sind vor dem 10. fällig?“* | [`list_scheduled_transactions`](/avenir-mcp/de/reference/tools/list-scheduled-transactions/) – geplante Transaktionen in ihrem Rhythmus wiederholt, Ein- und Ausgänge | L |
+
+Budgets, Konten und Kategorien werden auch als
+[Ressourcen](/avenir-mcp/de/reference/resources-and-prompts/) bereitgestellt, die Ihr Client
+ohne Werkzeugaufruf an ein Gespräch anhängen kann.
+
+## Einen Monat verstehen
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Wie läuft der September?“* | [`get_monthly_summary`](/avenir-mcp/de/reference/tools/get-monthly-summary/) – Einnahmen, budgetiert, ausgegeben, Ready to Assign, überzogene Kategorien | L |
+| *„Zeig mir jede Kategorie.“* | [`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/) – budgetiert, ausgegeben, verfügbar je Kategorie | L |
+| *„Welche Budgets sind fast aufgebraucht?“* | [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/) – verbrauchter Anteil jedes Budgets | L |
+| *„Ist Restaurants jeden Monat hoch?“* | [`get_spending_trends`](/avenir-mcp/de/reference/tools/get-spending-trends/) – Ausgaben je Kategorie über N Monate | L |
+
+Anleitung: [Einen Monat auswerten](/avenir-mcp/de/guides/monthly-review/).
+
+## Transaktionen kategorisieren
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Was braucht noch eine Kategorie?“* | [`suggest_categories`](/avenir-mcp/de/reference/tools/suggest-categories/) – ausstehende Transaktionen, mit Vorschlag, wenn Ihre Historie eindeutig ist | L |
+| *„Ja, wende das an.“* | [`apply_categories`](/avenir-mcp/de/reference/tools/apply-categories/) – ein bestätigter Stapel | S ↺ |
+| *„Teile diesen Beleg auf: 81,15 Lebensmittel, 5,25 Haushalt.“* | [`split_transaction`](/avenir-mcp/de/reference/tools/split-transaction/) – eine Transaktion auf mehrere Kategorien; in YNAB rückgängig zu machen, nicht hier | S |
+| *„Markiere sie als geprüft.“* | [`approve_transactions`](/avenir-mcp/de/reference/tools/approve-transactions/) – entfernt YNABs Kennzeichen *unapproved* | S |
+
+Vorschläge erkennen einen Händler über seine Bankbezeichnungen hinweg
+(`CB MARKET FRESH FACT 050926 525130******1` und `… 190926 …` sind derselbe Laden), lernen
+Ein- und Ausgänge getrennt und verweisen nie auf eine ausgeblendete Kategorie. Anleitung:
+[Ausstehende Transaktionen kategorisieren](/avenir-mcp/de/guides/classify/). Wie es
+funktioniert: [Vorschläge](/avenir-mcp/de/concepts/suggestions/).
+
+## Mit der Bank vergleichen
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Meine Bank zeigt 3.440,80. Stimmt YNAB damit überein?“* | [`reconcile_account`](/avenir-mcp/de/reference/tools/reconcile-account/) – erklärt eine Differenz, ohne zu schreiben; gleicht ab, sobald es passt | S ↺ |
+| *„Füge die Apothekenzahlung hinzu, die der Import verpasst hat.“* | [`create_transactions`](/avenir-mcp/de/reference/tools/create-transactions/) | S ↺ |
+
+Eine Differenz wird erklärt durch ausstehende Transaktionen, diejenige, deren Betrag der
+Differenz entspricht, und wahrscheinliche Duplikate (gleicher Betrag und Händler, höchstens
+3 Tage auseinander). Anleitungen: [Ein Konto abgleichen](/avenir-mcp/de/guides/reconcile/),
+[Fehlende Transaktionen ergänzen](/avenir-mcp/de/guides/missing-transactions/).
+
+## Planen
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Rutsche ich vor Dezember unter null?“* | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) – Monat für Monat, mit seinen Annahmen | L |
+| *„Setz 150 in Restaurants für September.“* | [`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/) | S ↺ |
+
+Die Prognose setzt die geplanten Transaktionen von YNAB auf ihre Termine, findet
+wiederkehrende Belastungen in Ihrer Historie, mittelt den Rest und lässt Sie Ihr
+Einkommen und einmalige Beträge angeben. Anleitung: [Vorausplanen](/avenir-mcp/de/guides/plan-ahead/).
+Wie es funktioniert: [Prognose](/avenir-mcp/de/concepts/forecasting/).
+
+## Kategorien ordnen
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Leg eine Kategorie Haustiere in Everyday an.“* | [`create_category`](/avenir-mcp/de/reference/tools/create-category/) | S |
+| *„Benenne Tennis in Sport um.“* | [`update_category`](/avenir-mcp/de/reference/tools/update-category/) – verschiebt eine Kategorie auch in eine andere Gruppe | S |
+
+Anleitung: [Kategorien ordnen](/avenir-mcp/de/guides/categories/).
+
+## Rückgängig machen
+
+| Sie sagen | Werkzeug | |
+|---|---|---|
+| *„Mach das rückgängig.“* | [`undo_operation`](/avenir-mcp/de/reference/tools/undo-operation/) – die letzte Operation oder die genannte | S |
+
+Anleitung: [Eine Änderung rückgängig machen](/avenir-mcp/de/guides/undo/). Wie es
+funktioniert: [Journal und Rückgängig](/avenir-mcp/de/concepts/journal/).
+
+## Fertige Abläufe
+
+Vier [Prompts](/avenir-mcp/de/reference/resources-and-prompts/#prompts) führen den Agenten
+durch eine ganze Aufgabe. In Claude Code sind es Slash-Befehle des Servers `avenir-mcp`.
+
+| Prompt | Argumente | Was er tut |
+|---|---|---|
+| `classify_pending` | Budget | Vorschläge, Ihre Entscheidungen, ein bestätigter Stapel, die Kennung zum Rückgängigmachen |
+| `monthly_review` | Budget, Monat | Summen, was auffällt, vorgeschlagene Korrekturen |
+| `reconcile` | Budget, Konto, Kontostand der Bank | die Differenz erklärt, dann ein bestätigter Abgleich |
+| `plan_next_month` | Budget | Prognose und Annahmen, dann die Beträge des nächsten Monats |
+
+## Eingebaut
+
+- **Sicherheit:** standardmäßig nur lesend, Bestätigung an die genaue Vorschau gebunden,
+  ein lokales Journal zum Rückgängigmachen, Banktexte als nicht vertrauenswürdig
+  behandelt. Siehe [Sicherheit durch Design](/avenir-mcp/de/concepts/safety/).
+- **Sparsamkeit:** eine lokale Kopie Ihrer Transaktionen, per Delta-Synchronisation
+  aktualisiert; die meisten Werkzeuge kosten eine oder zwei YNAB-Anfragen. Siehe
+  [Daten und Synchronisation](/avenir-mcp/de/concepts/data-and-sync/).
+- **Klarheit für Agenten:** Währungseinheiten, typisierte Ausgabeschemas mit einer
+  Beschreibung je Feld, Paginierung, [Fehler](/avenir-mcp/de/reference/errors/), die sagen,
+  was zu tun ist.
+- **Protokoll:** MCP 2026-07-28 und frühere Versionen; stdio oder Streamable HTTP.

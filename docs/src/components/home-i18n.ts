@@ -1,4 +1,4 @@
-/** Short texts of the home page components, in the site's three languages. */
+/** Short texts of the home page components, in each of the site's languages. */
 const texts = {
   en: {
     eyebrow: 'Unofficial open-source MCP server for YNAB',
@@ -89,6 +89,36 @@ const texts = {
     ],
     disclaimer:
       '<strong>Proyecto no oficial.</strong> «We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.» No estamos afiliados, asociados ni conectados oficialmente con YNAB. YNAB y You Need A Budget son marcas registradas de YNAB. avenir-mcp se ofrece tal cual, sin garantía, y no es asesoramiento financiero. <a href="/avenir-mcp/es/project/legal/">Aviso legal</a>',
+  },
+  de: {
+    eyebrow: 'Inoffizieller Open-Source-MCP-Server für YNAB',
+    install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=ihr-token \\\n  -- uvx avenir-mcp',
+    worksWith: 'Funktioniert mit',
+    demoLabel: 'Ein Gespräch mit Claude über avenir-mcp',
+    you: 'Sie',
+    q1: 'Welche Kategorie ist diesen Monat überzogen?',
+    a1: 'Restaurants liegt <strong>22,50 darüber</strong>. Tennis hat noch 80,00 verfügbar – 30 davon umbuchen, um es auszugleichen?',
+    q2: 'Ja, mach das.',
+    preview: 'Vorschau',
+    names: ['Tennis', 'Restaurants'],
+    tennis: ['80,00', '50,00'],
+    restaurants: ['120,00', '150,00'],
+    confirm: 'Bestätigen',
+    cancel: 'Abbrechen',
+    undo: 'Im Journal – mit einem Satz rückgängig zu machen',
+    stats: [
+      ['17', 'Werkzeuge, jedes erledigt eine ganze Aufgabe'],
+      ['100 %', 'Zeilen- und Zweigabdeckung'],
+      ['9 / 9', 'Aufgaben von einem echten Agenten bestanden'],
+      ['1–2', 'YNAB-Anfragen pro Aufruf, bei den meisten Werkzeugen'],
+    ],
+    flow: [
+      ['Vorschau', 'avenir-mcp berechnet die genaue Änderung und zeigt sie. Noch wird nichts geschrieben.'],
+      ['Bestätigung', 'Sie sagen Ja in Ihrem Client oder mit einem Einmalcode, der an diese Vorschau gebunden ist.'],
+      ['Rückgängig', 'Jede angewendete Änderung wird im Journal erfasst; das Rückgängigmachen stellt sie wieder her, ohne spätere Arbeit zu überschreiben.'],
+    ],
+    disclaimer:
+      '<strong>Inoffizielles Projekt.</strong> „We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.“ Wir sind mit YNAB weder verbunden noch assoziiert noch in irgendeiner Weise offiziell verknüpft. YNAB und You Need A Budget sind eingetragene Marken von YNAB. avenir-mcp wird ohne Gewähr bereitgestellt und ist keine Finanzberatung. <a href="/avenir-mcp/de/project/legal/">Rechtliche Hinweise</a>',
   },
 } as const;
 

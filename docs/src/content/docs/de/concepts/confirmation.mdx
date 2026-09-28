@@ -1,0 +1,129 @@
+---
+title: Bestätigung
+description: Wie eine Schreibaktion auf den Nutzer wartet – Elicitation in beiden Protokollgenerationen, Einmalcodes und was eine Antwort an ihre Vorschau bindet.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Jede Schreibaktion außer `approve_transactions` durchläuft eine einzige Funktion,
+`confirm.ask`, bevor sie etwas ändert. Diese Seite beschreibt genau, was sie tut.
+
+## Was bestätigt wird
+
+Jedes Werkzeug baut einen **Gegenstand**: die genaue Änderung, als Daten.
+
+| Werkzeug | Gegenstand |
+|---|---|
+| `apply_categories` | die Liste der Änderungen (Transaktion, Kategorie danach) |
+| `set_category_budget` | Kategorie, Monat (aufgelöst), Betrag in Milliunits |
+| `update_category` | Kategorie, Name danach, Gruppe danach |
+| `create_category` | Gruppe, Name |
+| `create_transactions` | Konto, die Transaktionen, `approved` |
+| `reconcile_account` | Konto, Kontostand der Bank, anzupassende Differenz |
+| `split_transaction` | Transaktion, die Zeilen (Betrag, Kategorie, Verwendungszweck) |
+| `undo_operation` | die Kennung der Operation |
+
+Sein **Fingerabdruck** ist der SHA-256 des JSON `[plan_id, subject]`, mit sortierten
+Schlüsseln; bei einer Liste von Änderungen spielt die Reihenfolge der Elemente keine Rolle.
+Eine Antwort oder ein Code bestätigt immer nur den Gegenstand, dessen Fingerabdruck er
+trägt.
+
+## Drei Arten zu fragen
+
+`ask` prüft, was der Client beim Verbindungsaufbau erklärt hat, und wählt eine davon:
+
+### 1. Der Client unterstützt Elicitation, Protokoll 2026-07-28
+
+Im aktuellen MCP-Protokoll kann ein Server dem Client während eines Aufrufs keine eigene
+Anfrage senden. avenir-mcp nutzt den Rundgang *input required*:
+
+1. Der erste Aufruf gibt statt der Antwort des Werkzeugs ein `InputRequiredResult` zurück.
+   Es enthält eine Anfrage, `confirm`, ein Formular mit einem einzigen booleschen Feld
+   `value`, dessen Nachricht die Vorschau ist (bis zu 20 Änderungen, dann *„… and N
+   more“*), und einen `request_state`: den Fingerabdruck.
+2. Der Client zeigt das Formular. Der Nutzer setzt ein Häkchen oder lehnt ab.
+3. Der Client ruft das Werkzeug erneut mit denselben Argumenten auf, die Antwort in
+   `input_responses` und den erhaltenen `request_state`. FastMCP versiegelt diesen
+   Zustand auf dem Übertragungsweg und weist Manipulationen zurück.
+4. avenir-mcp berechnet den Plan und seinen Fingerabdruck neu. Weichen sie von
+   `request_state` ab – jemand hat das Budget inzwischen geändert –, schlägt der Aufruf
+   mit *„The budget changed between the preview and the answer“* fehl, und nichts wird
+   geschrieben.
+
+### 2. Der Client unterstützt Elicitation, älteres Protokoll
+
+Der Server fragt während des Aufrufs (`ctx.elicit`) mit demselben Ja/Nein-Formular und
+wartet auf die Antwort.
+
+### 3. Der Client unterstützt keine Elicitation
+
+Der erste Aufruf gibt `status: "confirmation_required"`, die Vorschau und einen
+**Bestätigungscode** zurück. Der Agent zeigt dem Nutzer die Vorschau und ruft, nur wenn
+dieser zustimmt, erneut mit denselben Argumenten plus `confirmation` auf.
+
+## Wie Antworten gelesen werden
+
+| Antwort | Ergebnis |
+|---|---|
+| Formular angenommen, Häkchen gesetzt | `applied` |
+| Formular angenommen, Häkchen **nicht** gesetzt | `declined` |
+| `decline` | `declined` – nichts geschrieben |
+| `cancel` (weggeklickt, oder ein Client, der es nicht anzeigen kann) | Rückfall auf einen Bestätigungscode |
+
+Wegklicken ist keine Ablehnung: Clients ohne Oberfläche klicken jede Frage weg, und das
+als *Nein* zu werten, würde jede Schreibaktion unmöglich machen – der Fehler, den die
+[Evaluierung](/avenir-mcp/de/project/evaluation/) von avenir-mcp bei ihrem ersten Lauf fand.
+
+## Bestätigungscodes
+
+| Eigenschaft | Wert |
+|---|---|
+| Format | 11 URL-sichere Zeichen (`secrets.token_urlsafe(8)`) |
+| Lebensdauer | 600 Sekunden, auf einer monotonen Uhr |
+| Verwendung | einmal: Ein Code ist bei seiner ersten Verwendung verbraucht, auch wenn er nicht passt |
+| Geltungsbereich | der Fingerabdruck eines Gegenstands in einem Budget |
+| Speicherung | nur im Speicher des Servers: Ein Neustart vergisst jeden Code |
+
+Ein unbekannter, abgelaufener, bereits verwendeter oder für andere Änderungen
+ausgegebener Code wird abgelehnt mit: *„This confirmation code is unknown, expired,
+already used, or was issued for different changes. Call again without confirmation to get
+a new preview.“*
+
+<Aside type="caution">
+Ein Code beweist, dass eine Vorschau erstellt wurde, nicht, dass ein Mensch sie gelesen
+hat. Der Agent darf ihn erst zurückgeben, nachdem der Nutzer zugestimmt hat; die
+Beschreibungen der Werkzeuge und die Ressource `avenir-mcp://guide` sagen das. Clients, die
+Elicitation unterstützen, geben eine stärkere Garantie: Der Nutzer antwortet dem Client
+direkt.
+</Aside>
+
+## Die eigene Antwort des Nutzers verlangen
+
+Ein Bestätigungscode beweist, dass es eine Vorschau gab, nicht, dass Sie sie gelesen
+haben. Mit `AVENIR_MCP_REQUIRE_ELICITATION=1`:
+
+| Situation | Ohne die Variable | Mit ihr |
+|---|---|---|
+| der Client kann fragen, Sie sagen Ja | `applied` | `applied` |
+| Frage weggeklickt | ein Bestätigungscode | `declined` |
+| der Client kann nicht fragen | ein Bestätigungscode | Fehler: nichts geändert |
+| ein Code `confirmation` wird übergeben | geprüft, dann angewendet | Fehler: Codes sind abgeschaltet |
+
+Nur Clients, die MCP-Elicitation unterstützen, können dann schreiben.
+
+## Was der Nutzer sieht
+
+Die Fragen stammen vom Server und sind auf Englisch:
+
+| Werkzeug | Frage |
+|---|---|
+| `apply_categories` | *Recategorise 2 transaction(s)?*, dann eine Zeile je Änderung: Datum, Empfänger, Betrag, vorher → nachher |
+| `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
+| `create_category` | *Create category 'Pets' in Everyday?* |
+| `create_transactions` | *Create 1 transaction(s) on Checking?*, dann eine Zeile je Transaktion |
+| `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?*, dann eine Zeile je Kategorie und ein Hinweis, dass nur YNAB es rückgängig machen kann |
+| `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
+| `undo_operation` | *Undo: recategorise 2 transaction(s)?*, oder die Art des Rückgängigmachens |

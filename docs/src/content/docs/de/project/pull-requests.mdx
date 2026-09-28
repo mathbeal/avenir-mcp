@@ -1,0 +1,111 @@
+---
+title: Einen Pull Request vorschlagen
+description: Der Weg eines Beitrags, vom Issue bis zum Merge – Fork, Branch, Tests zuerst, Prüfungen, Pull Request, Review.
+sidebar:
+  order: 6
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Pull Requests sind willkommen, vom Tippfehler bis zum neuen Werkzeug. Diese Seite ist der
+Weg, dem Sie folgen; [Entwicklung](/avenir-mcp/de/project/development/) beschreibt das
+Repository und seine Prüfungen im Einzelnen. Sie brauchen ein GitHub-Konto,
+[git](https://git-scm.com), [uv](https://docs.astral.sh/uv/) und [just](https://just.systems).
+
+<Aside type="tip" title="Erst reden, dann programmieren">
+Für alles, was größer ist als ein Tippfehler oder ein Satz Dokumentation, eröffnen oder
+kommentieren Sie zuerst ein Issue – einen [Funktionswunsch](/avenir-mcp/de/project/propose-a-feature/)
+oder einen [Fehlerbericht](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) –
+und sagen Sie, dass Sie es gern übernehmen würden. Sich vor dem Programmieren auf den
+Ansatz zu einigen, erspart Ihnen das Neuschreiben.
+</Aside>
+
+## Schritt für Schritt
+
+<Steps>
+
+1. **Forken und klonen.** Klicken Sie auf GitHub auf **Fork** und klonen Sie dann Ihre
+   Kopie. Mit der [GitHub CLI](https://cli.github.com) in einem Befehl:
+
+   ```bash
+   gh repo fork mathbeal/avenir-mcp --clone
+   cd avenir-mcp
+   ```
+
+2. **Installieren und den Ausgangspunkt prüfen.**
+
+   ```bash
+   uv sync       # Python 3.14 und die festgeschriebenen Entwicklungswerkzeuge
+   just check    # alles muss bestehen, bevor Sie etwas ändern
+   ```
+
+3. **Legen Sie einen Branch an**, benannt nach der Änderung:
+
+   ```bash
+   git switch -c feat/subscription-increases
+   ```
+
+4. **Schreiben Sie zuerst den Test**, sehen Sie ihn fehlschlagen, dann schreiben Sie den
+   Code, der ihn bestehen lässt. Tests verwenden nur erfundene Daten – nie YNAB, nie Ihr
+   Budget. Ergänzen Sie das Demo-Budget in `evals/demo_budget.py`, wenn ein Beispiel neue
+   Zahlen braucht.
+
+5. **Führen Sie die Prüfungen aus**, bis alle bestehen:
+
+   ```bash
+   just fix       # formatieren
+   just check     # ruff, pylint, mypy, pytest (100 % Abdeckung), Vokabular, Lock
+   just hygiene   # typos, Prüfung der Workflows
+   just secrets   # gitleaks auf jedem Commit (braucht Docker)
+   ```
+
+6. **Aktualisieren Sie die Dokumentation.** Haben sich ein Werkzeug, seine Argumente oder
+   seine Antworten geändert, führen Sie `uv run python -m docsgen` aus und committen Sie,
+   was es schreibt. Eine handgeschriebene Seite wird in allen Sprachen der Website
+   zusammen geändert; `just docs` baut die Website und schlägt bei einem defekten Link fehl.
+
+7. **Committen** Sie mit einem Präfix, das die Art der Änderung nennt – das Changelog wird
+   daraus erzeugt:
+
+   ```bash
+   git commit -s -m "feat: list subscriptions whose price went up"
+   ```
+
+   `-s` zeichnet den Commit ab: Sie bestätigen das
+   [Developer Certificate of Origin](https://developercertificate.org) – Sie haben die
+   Änderung geschrieben oder das Recht, sie unter der MIT-Lizenz einzureichen.
+
+8. **Pushen und den Pull Request eröffnen.**
+
+   ```bash
+   git push -u origin feat/subscription-increases
+   gh pr create --fill
+   ```
+
+   Oder eröffnen Sie ihn über den Link, den GitHub ausgibt. Füllen Sie die Vorlage aus:
+   was und warum, wie es geprüft wurde, die Checkliste und `Closes #<issue>`.
+
+</Steps>
+
+## Was danach geschieht
+
+| Phase | Was Sie erwartet |
+|---|---|
+| CI | dieselben Prüfungen wie `just check` und `just hygiene`, unter Linux, macOS und Windows, der Build der Dokumentation, der MCP Inspector, abgezeichnete Commits und ein Titel, der mit der Art der Änderung beginnt; **CI passed** und **MCP Inspector** müssen grün sein. Bei einem ersten Beitrag genehmigt ein Maintainer den Lauf zuerst. |
+| Review | Kommentare zum Code; pushen Sie neue Commits auf denselben Branch, um darauf zu antworten |
+| Merge | zu einem Commit auf `main` zusammengefasst, mit dem Titel Ihres Pull Requests als Nachricht |
+| Veröffentlichung | Ihre Änderung erscheint im [Changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) der nächsten Version |
+
+## Was einen Pull Request mergefähig macht
+
+- **Eine Änderung pro Pull Request**, klein genug, um sie in einem Zug zu prüfen.
+- **Tests zuerst geschrieben**, die jede Zeile und jeden Zweig abdecken.
+- **Keine neue Laufzeitabhängigkeit** ohne eine im Pull Request geschriebene Begründung.
+- **Schreibaktionen bleiben sicher**: Ein Werkzeug, das das Budget ändert, zeigt eine
+  Vorschau, wartet auf Bestätigung und lässt sich rückgängig machen – siehe
+  [Sicherheit durch Design](/avenir-mcp/de/concepts/safety/).
+- **Keine echten Finanzdaten**, nirgends: Code, Tests, Dokumentation, Bildschirmfotos.
+- **Jeder Commit abgezeichnet** (`git commit -s`).
+
+Der vollständige Vertrag steht in [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md),
+der für Menschen und Coding-Agenten gleichermaßen gilt.

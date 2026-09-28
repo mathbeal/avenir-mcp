@@ -47,7 +47,7 @@ def write_all() -> None:
     files = generated()
     for folder in (
         SNIPPETS,
-        *(CONTENT / lang / "reference" / "tools" for lang in ("", "fr", "es")),
+        *(CONTENT / lang / "reference" / "tools" for lang in reference.LANGUAGES),
     ):
         if folder.exists():
             for old in folder.iterdir():

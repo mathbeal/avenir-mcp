@@ -1,0 +1,91 @@
+---
+title: avenir-mcp
+description: Ein inoffizieller Open-Source-MCP-Server für YNAB, gebaut für Agenten. Standardmäßig nur lesend; jede Änderung wird als Vorschau gezeigt, bestätigt und lässt sich rückgängig machen.
+template: splash
+hero:
+  title: Ihr YNAB-Budget, in klaren Worten.
+  tagline: Mit avenir-mcp können Claude und andere KI-Agenten Ihr Budget lesen, kategorisieren, abgleichen und vorausberechnen. Standardmäßig nur lesend; jede Änderung wird als Vorschau gezeigt, von Ihnen bestätigt und lässt sich rückgängig machen.
+  actions:
+    - text: Loslegen
+      link: /avenir-mcp/de/getting-started/install/
+      icon: right-arrow
+    - text: Ein Gespräch ansehen
+      link: /avenir-mcp/de/getting-started/first-conversation/
+      variant: secondary
+---
+
+import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
+import Stats from '../../../components/Stats.astro';
+import WriteFlow from '../../../components/WriteFlow.astro';
+import BudgetChart from '../../../components/BudgetChart.astro';
+import august from '@snippets/august_categories.json';
+import augustRaw from '@snippets/august_categories.json?raw';
+
+<Stats />
+
+## Warum avenir-mcp
+
+<CardGrid>
+  <Card title="Werkzeuge für Aufgaben, nicht für Endpunkte" icon="rocket">
+    Einen Monat Transaktionen kategorisieren, ein Konto mit der Bank abgleichen, den
+    Kontostand vorausberechnen, einen Monat auswerten: Jede Aufgabe ist ein Werkzeug,
+    nicht zehn API-Aufrufe, die der Agent verketten muss.
+  </Card>
+  <Card title="Standardmäßig nur lesend" icon="seti:lock">
+    Die neun schreibenden Werkzeuge sind weder aufgelistet noch aufrufbar, bis Sie
+    `AVENIR_MCP_WRITE=1` setzen. Ein Agent kann nicht ändern, was er nicht sieht.
+  </Card>
+  <Card title="Antworten, die ein Agent lesen kann" icon="document">
+    Währungseinheiten, niemals Milliunits. Typisierte Ausgabeschemas mit einer
+    Beschreibung für jedes Feld, Paginierung und Fehler, die sagen, was zu
+    korrigieren ist.
+  </Card>
+  <Card title="Schont das YNAB-Kontingent" icon="seti:clock">
+    Eine lokale Kopie Ihrer Transaktionen, per Delta-Synchronisation aktualisiert: Die
+    meisten Werkzeuge kosten eine oder zwei der 200 Anfragen, die YNAB pro Stunde erlaubt.
+  </Card>
+</CardGrid>
+
+## Jede Änderung zu Ihren Bedingungen
+
+<WriteFlow />
+
+Kategorien, Beträge, Abgleiche und angelegte Transaktionen lassen sich alle rückgängig
+machen. Wie das funktioniert: [Bestätigung](/avenir-mcp/de/concepts/confirmation/) und
+[Journal und Rückgängig](/avenir-mcp/de/concepts/journal/).
+
+## Echte Antworten, keine Prosa
+
+Die Werkzeuge liefern strukturierte Daten, auf die sich der Agent verlassen kann – und
+die er Ihnen in klare Worte fasst.
+
+> **Sie:** Wie lief der August?
+
+Der Agent ruft [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/)
+mit `{"month": "2026-08-01"}` auf und erhält für jede Kategorie, was budgetiert und was
+ausgegeben wurde. Hier diese Antwort auf dem Demo-Budget, als Grafik:
+
+<BudgetChart rows={august} month="2026-08-01" />
+
+> **Claude:** Der August blieb überall im Budget. Miete, Telefon und Strom haben 90 % oder
+> mehr ihres Budgets verbraucht, Abonnements fast ebenso viel, Lebensmittel etwa die
+> Hälfte. Die 200,00 für den Urlaub sind unberührt.
+
+<details>
+<summary>Die Rohantwort</summary>
+
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — Demo-Budget" />
+
+</details>
+
+Jedes Beispiel in dieser Dokumentation ist eine echte Antwort von avenir-mcp auf einem
+erfundenen Demo-Budget.
+
+## Die Dokumentation erkunden
+
+<CardGrid>
+  <LinkCard title="Erste Schritte" description="In fünf Minuten installiert, dann ein geführtes erstes Gespräch." href="/avenir-mcp/de/getting-started/install/" />
+  <LinkCard title="Anleitungen" description="Kategorisieren, abgleichen, einen Monat auswerten, vorausplanen – Schritt für Schritt." href="/avenir-mcp/de/guides/classify/" />
+  <LinkCard title="Konzepte" description="Architektur, Sicherheit, Bestätigung, Vorschläge, Prognose." href="/avenir-mcp/de/concepts/architecture/" />
+  <LinkCard title="Referenz" description="Jedes Werkzeug: Parameter, Rückgabe, Kosten, Fehler, Beispiel." href="/avenir-mcp/de/reference/tools/" />
+</CardGrid>

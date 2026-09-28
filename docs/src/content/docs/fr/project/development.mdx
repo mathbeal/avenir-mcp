@@ -14,7 +14,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 - tests/ — tests unitaires, tests du protocole, de la documentation et d'hygiène
 - evals/ — le budget de démonstration, une doublure de l'API YNAB, l'évaluation par agent
 - docsgen/ — génère la référence des outils, le catalogue des erreurs et les exemples
-- docs/ — ce site (Astro Starlight, anglais, français, espagnol)
+- docs/ — ce site (Astro Starlight, anglais, français, espagnol, allemand)
 - AGENTS.md — le contrat des contributeurs, humains ou non
 - justfile — toutes les commandes ci-dessous
 - pyproject.toml, uv.lock — le projet Python, verrouillé
@@ -88,7 +88,7 @@ cassée ou malveillante vite retirée n'atteint jamais le projet.
 | Unitaires | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | la logique pure et le client HTTP, sur des données inventées |
 | Propriétés | `test_properties` | avec Hypothesis, des règles vraies pour toute entrée : aller-retour des montants, répartition sans perdre un centime, mois qui s'enchaînent, curseurs, texte bancaire, empreintes de confirmation |
 | Protocole | `test_protocol*`, `test_context`, `test_policy` | les outils via un client MCP en mémoire : schémas, annotations, chemins de confirmation, annulation |
-| Documentation | `test_docs` | les pages et exemples générés correspondent au code ; chaque page existe en français et en espagnol ; chaque variable d'environnement est documentée |
+| Documentation | `test_docs` | les pages et exemples générés correspondent au code ; chaque page existe dans chaque traduction ; chaque variable d'environnement est documentée |
 | Couverture de l'API | `test_api_coverage` | chaque opération de l'API YNAB est utilisée par un outil, prévue, ou écartée avec sa raison ; le client n'appelle que des chemins documentés |
 | Hygiène | `test_hygiene` | ni IBAN, ni jeton, ni relevé, ni chemin personnel, ni copie du Finder dans le dépôt |
 | Évaluation | `test_evals` | les vérifications de l'évaluation sont justes |
@@ -104,13 +104,13 @@ sans effet, comme la formulation d'un message.
 
 ```bash
 uv run python -m docsgen   # pages des outils, catalogue des erreurs, exemples
-just docs                  # construit le site en trois langues ; un lien cassé échoue
+just docs                  # construit le site dans toutes les langues ; un lien cassé échoue
 just docs-serve            # aperçu en direct sur http://localhost:4321/avenir-mcp/
 ```
 
 `docsgen` fait tourner avenir-mcp sur le budget de démonstration et écrit ce qu'il répond
 réellement, date fixée et identifiants aléatoires remplacés. Les pages écrites à la main
-existent en anglais, en français et en espagnol ; un test échoue s'il en manque une.
+existent en anglais, en français, en espagnol et en allemand ; un test échoue s'il en manque une.
 
 ## Évaluation
 

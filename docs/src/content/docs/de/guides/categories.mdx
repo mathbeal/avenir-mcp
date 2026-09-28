@@ -1,0 +1,69 @@
+---
+title: Kategorien ordnen
+description: Kategorien anlegen, umbenennen und verschieben, und festlegen, wie viel jede erhält.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import groups from '@snippets/list_category_groups.json?raw';
+import create from '@snippets/create_category_preview.json?raw';
+import rename from '@snippets/update_category_preview.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Ziel:** die Struktur der Kategorien an Ihr Leben anpassen und jeder Kategorie ihren
+Betrag geben.
+
+**Werkzeuge:** [`list_category_groups`](/avenir-mcp/de/reference/tools/list-category-groups/),
+[`create_category`](/avenir-mcp/de/reference/tools/create-category/),
+[`update_category`](/avenir-mcp/de/reference/tools/update-category/),
+[`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/).
+
+## Eine Kategorie anlegen
+
+> **Sie:** Leg eine Kategorie Pets in Everyday an.
+
+Der Agent findet die Kennung der Gruppe mit `list_category_groups` (die Systemgruppen von
+YNAB werden ausgelassen):
+
+<Code code={groups} lang="json" title="list_category_groups" />
+
+und zeigt dann die Anlage als Vorschau:
+
+<Code code={create} lang="json" title="create_category — Vorschau" />
+
+Ein in der Gruppe bereits verwendeter Name wird abgelehnt, unabhängig von Groß- und
+Kleinschreibung.
+
+## Eine Kategorie umbenennen oder verschieben
+
+> **Sie:** Benenne Tennis in Sport um.
+
+<Code code={rename} lang="json" title="update_category — Vorschau" />
+
+Übergeben Sie `category_group_id`, um die Kategorie in eine andere Gruppe zu verschieben,
+mit oder ohne neuen Namen. Transaktionen und Beträge bleiben an ihr hängen. Um zurückzugehen,
+rufen Sie erneut mit dem vorherigen Namen und der vorherigen Gruppe auf, die die Antwort
+nennt.
+
+## Den Betrag einer Kategorie festlegen
+
+> **Sie:** Setz 150 in Restaurants für September.
+
+<Code code={budget} lang="json" title="set_category_budget — Vorschau" />
+
+Der Betrag ist **absolut**: Er ersetzt, was budgetiert war. `month` ist `"current"` oder
+`YYYY-MM-01`; `"current"` wird in den tatsächlichen Monat aufgelöst, damit ein späteres
+Rückgängigmachen den richtigen trifft.
+
+## Rückgängig machen
+
+| Werkzeug | Rückgängig |
+|---|---|
+| `set_category_budget` | `undo_operation` stellt den vorherigen Betrag wieder her, sofern er sich seither nicht geändert hat |
+| `update_category` | erneut mit dem vorherigen Namen und der vorherigen Gruppe aufrufen |
+| `create_category` | die Kategorie in YNAB ausblenden – seine API kann keine löschen |
+
+<Aside type="note">
+Jede Änderung auf dieser Seite wird als Vorschau gezeigt und wartet auf Ihre Bestätigung.
+</Aside>

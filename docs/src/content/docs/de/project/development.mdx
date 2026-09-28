@@ -1,0 +1,131 @@
+---
+title: Entwicklung
+description: Aufbau des Repositorys, Einrichtung, die Prüfungen der CI, Tests, erzeugte Dokumentation und Veröffentlichungen.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Aside } from '@astrojs/starlight/components';
+
+## Aufbau
+
+<FileTree>
+- avenir_mcp/ — der Server (siehe [Architektur](/avenir-mcp/de/concepts/architecture/))
+- tests/ — Unit-Tests, Protokolltests, Dokumentations- und Hygienetests
+- evals/ — das Demo-Budget, ein Ersatz für die API von YNAB, die Evaluierung der Agenten
+- docsgen/ — erzeugt die Werkzeugreferenz, den Fehlerkatalog und die Beispiele
+- docs/ — diese Website (Astro Starlight, Englisch, Französisch, Spanisch, Deutsch)
+- AGENTS.md — der Vertrag für Mitwirkende, menschlich oder nicht
+- justfile — jeder Befehl unten
+- pyproject.toml, uv.lock — das Python-Projekt, festgeschrieben
+</FileTree>
+
+## Einrichten
+
+```bash
+git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
+uv sync            # Python 3.14 und die festgeschriebenen Abhängigkeiten
+just check         # jede Prüfung, die die CI ausführt
+```
+
+<Aside type="tip">
+Liegt das Projekt in einem von iCloud Drive synchronisierten Ordner, halten Sie die
+virtuelle Umgebung außerhalb: `UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv
+sync`. iCloud kann die Datei `.pth` einer editierbaren Installation verbergen, die Python
+dann ignoriert.
+</Aside>
+
+## Die Prüfungen
+
+`just check` führt in der Reihenfolge der CI aus:
+
+| Prüfung | Befehl | Schlägt fehl, wenn |
+|---|---|---|
+| Format | `ruff format --check` | eine Datei nicht formatiert ist |
+| Lint | `pylint` | die Bewertung unter 10,00 liegt |
+| ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…) |
+| Abhängigkeiten | `deptry .` | der Code ein Paket importiert, das `pyproject.toml` nicht deklariert, oder eines deklariert, das er nicht nutzt |
+| Typen | `mypy` (strikt) | irgendein Typfehler |
+| Tests | `pytest` | ein Test fehlschlägt, **irgendeine Warnung** ausgelöst wird oder die Abdeckung der Zeilen **oder Zweige** unter 100 % liegt |
+| Vokabular | `lexdrift check avenir_mcp --baseline lexdrift.lock` | ein neues Wort für eine bereits benannte Idee auftaucht |
+| Lock | `uv lock --check` | `uv.lock` nicht zu `pyproject.toml` passt |
+
+Die CI führt außerdem `typos` aus, `zizmor` auf den Workflows, `pip-audit` auf den
+festgeschriebenen Abhängigkeiten, `gitleaks` auf jedem Commit der Historie (`just secrets`,
+mit Docker), den Build der Dokumentation mit den Tests ihres eigenen Codes, CodeQL und die
+OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen Vergleich der
+API von YNAB mit ihrem Schnappschuss (`just api-drift`) und den offiziellen MCP Inspector
+(`just inspect`), der den Server so prüft, wie ein Client ihn auf dem Demo-Budget sieht:
+seine Listen, die Portabilität seiner Werkzeugschemas und je einen Aufruf jeder Art. Die
+Testsuite läuft unter Linux und macOS mit Python 3.12, 3.13 und 3.14 und unter Windows mit
+Python 3.14 (bei einem Pull Request probiert macOS nur 3.14: seine Runner kosten so viel
+wie zehn Linux-Runner); die Abdeckung wird unter Linux und macOS durchgesetzt, wo die
+Prüfungen der Dateiberechtigungen gelten. Python 3.15 läuft ebenfalls, als Experiment: Ein
+Fehlschlag dort ist eine Warnung, keine rote Prüfung. Bei einem Pull Request muss jeder
+Commit abgezeichnet sein (sign-off), und der Titel muss mit der Art der Änderung beginnen.
+Zwei Prüfungen müssen grün sein: **CI passed**, die für jeden Job des Qualitäts-Workflows
+steht, und **MCP Inspector**, ein eigener Workflow, damit sein Badge ihn allein zeigt.
+
+## Abhängigkeiten
+
+[Renovate](https://docs.renovatebot.com) eröffnet jeden Montagmorgen Pull Requests:
+
+| Aktualisierung | Behandlung |
+|---|---|
+| Entwicklungswerkzeuge, CI-Actions, die Dokumentationswebsite (Minor und Patch) | gruppiert, von selbst zusammengeführt, sobald die CI grün ist |
+| `fastmcp`, `httpx`, `pydantic` – sie laufen vor den Budgets der Nutzer | je ein Pull Request, von Hand geprüft; die Evaluierung läuft vor einer Aktualisierung von `fastmcp` |
+| jede Major-Version | je ein Pull Request, von Hand geprüft |
+| eine bekannte Schwachstelle | sofort, an jedem Tag |
+
+Eine neue Version wartet drei Tage, bevor Renovate sie vorschlägt, damit eine fehlerhafte
+oder bösartige, schnell zurückgezogene Version das Projekt nie erreicht.
+
+## Tests
+
+| Art | Dateien | Was sie prüfen |
+|---|---|---|
+| Unit | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | die reine Logik und den HTTP-Client, mit erfundenen Daten |
+| Eigenschaften | `test_properties` | mit Hypothesis Regeln, die für jede Eingabe gelten: Beträge überstehen den Hin- und Rückweg, die Verteilung behält jeden Cent, Monate summieren sich, Cursor, Banktext, Fingerabdrücke der Bestätigung |
+| Protokoll | `test_protocol*`, `test_context`, `test_policy` | Werkzeuge über einen MCP-Client im Speicher: Schemas, Annotationen, Bestätigungswege, Rückgängig |
+| Dokumentation | `test_docs` | erzeugte Seiten und Beispiele passen zum Code; jede Seite existiert in jeder Übersetzung; jede Umgebungsvariable ist dokumentiert |
+| API-Abdeckung | `test_api_coverage` | jede Operation der API von YNAB wird von einem Werkzeug genutzt, ist geplant oder mit Begründung ausgelassen; der Client ruft nur dokumentierte Pfade auf |
+| Hygiene | `test_hygiene` | keine IBAN, kein Token, kein Kontoauszug, kein Home-Pfad und keine Finder-Kopie im Repository |
+| Evaluierung | `test_evals` | die eigenen Prüfungen der Evaluierung sind richtig |
+
+Tests werden zuerst geschrieben. Kein Test ruft YNAB auf.
+
+`just mutate` führt Mutationstests (mutmut) auf den rechnenden Modulen aus: Es ändert den
+Code absichtlich, etwa 1.500 Mal, und prüft, dass jedes Mal ein Test fehlschlägt. Die
+Änderungen, die kein Test bemerkt, zeigen auf die zu schreibenden Tests; viele sind
+harmlos, etwa der Wortlaut einer Meldung.
+
+## Dokumentation
+
+```bash
+uv run python -m docsgen   # Werkzeugseiten, Fehlerkatalog, Beispiele
+just docs                  # baut die Website in allen Sprachen; defekte Links schlagen fehl
+just docs-serve            # Live-Vorschau auf http://localhost:4321/avenir-mcp/
+```
+
+`docsgen` führt avenir-mcp auf dem Demo-Budget aus und schreibt, was es wirklich
+antwortet, mit festem Datum und ersetzten Zufallskennungen. Handgeschriebene Seiten gibt
+es auf Englisch, Französisch, Spanisch und Deutsch; ein Test schlägt fehl, wenn eine fehlt.
+
+## Evaluierung
+
+```bash
+just evaluate    # alle Aufgaben, Sonnet, etwa 1 USD Ihres Claude-Abos
+uv run python -m evals.run --task classify --model haiku
+```
+
+Siehe [Evaluierung](/avenir-mcp/de/project/evaluation/).
+
+## Commits und Veröffentlichungen
+
+- Commit-Nachrichten beginnen mit einem Typ – `feat:`, `fix:`, `docs:`, `refactor:`,
+  `test:`, `build:`, `ci:`, `chore:` –, weil `CHANGELOG.md` von git-cliff daraus erzeugt
+  wird.
+- Zum Veröffentlichen: `just changelog`, committen, Tag `vX.Y.Z` passend zu
+  `avenir_mcp.__version__` setzen und ein GitHub-Release veröffentlichen. Der Workflow
+  `publish` baut, führt `twine check --strict` aus und lädt über Trusted Publishing auf PyPI
+  hoch: Es wird kein Token gespeichert.

@@ -3,10 +3,11 @@
 # as produced, not text to correct.
 extend-exclude = [
   "evals/results/",
-  # French and Spanish pages: typos knows English only.
+  # Translated pages: typos knows English only.
   "docs/src/content/docs/fr/",
   "docs/src/content/docs/es/",
-  # Labels and titles of the generated pages, in the three languages.
+  "docs/src/content/docs/de/",
+  # Labels and titles of the generated pages, in every language.
   "docsgen/guide_titles.json",
   "docsgen/labels.json",
   "docs/src/components/home-i18n.ts",
@@ -18,3 +19,4 @@ extend-exclude = [
 # Sidebar labels translated in docs/astro.config.mjs.
 Conceptos = "Conceptos"
 Projet = "Projet"
+Referenz = "Referenz"
