@@ -32,7 +32,7 @@ Beträge sind in der Währung des Budgets; Ausgaben sind negativ, Eingänge posi
 | Verwendete Methoden | `GET` zum Lesen; `PATCH`, `POST` und `DELETE` auf Transaktionen, Kategorien und Monatsbudgets |
 | Fehler | jeder 4xx- oder 5xx-Status kommt als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück, mit der eigenen Erklärung von YNAB |
 
-`plan_id` akzeptiert `last-used`, das YNAB zu dem Plan auflöst, den Sie zuletzt geöffnet
+`plan_id` akzeptiert `last-used`: YNAB setzt dafür den Plan ein, den Sie zuletzt geöffnet
 haben.
 
 ### Plans, früher Budgets
