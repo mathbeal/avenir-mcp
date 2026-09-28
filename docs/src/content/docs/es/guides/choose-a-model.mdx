@@ -98,7 +98,7 @@ menos fiabilidad que los mayores modelos en la nube.
 3. **Cargue el modelo con una longitud de contexto de al menos 32.000 tokens**, en los
    ajustes que aparecen al cargarlo.
 
-4. **Pruébelo en solo lectura**: *«Lista mis presupuestos de YNAB.»*, y luego *«¿Qué
+4. **Pruébelo en solo lectura**: *«Lista mis planes de YNAB.»*, y luego *«¿Qué
    queda sin categoría?»*. Compruebe que recorre las páginas de la respuesta y no inventa
    identificadores.
 
@@ -119,7 +119,7 @@ avenir-mcp como en la pestaña *Otros clientes* de
 ChatGPT solo se conecta a servidores MCP **remotos**, accesibles desde Internet por
 HTTPS. avenir-mcp se ejecuta en su máquina, y su transporte HTTP está hecho solo para esta
 máquina: HTTP simple, y las peticiones deben designar `127.0.0.1` o `localhost`.
-Exponerlo en Internet pondría en juego su presupuesto y su token.
+Exponerlo en Internet pondría en juego su plan y su token.
 Por eso ChatGPT no es compatible. Para usar los modelos de OpenAI, use Codex CLI, Cursor
 o VS Code.
 

@@ -47,8 +47,8 @@ sturen. avenir-mcp gebruikt de rondgang *input required*:
    `input_responses` en de ontvangen `request_state`. FastMCP verzegelt die toestand
    onderweg en weigert manipulatie.
 4. avenir-mcp berekent het plan en zijn vingerafdruk opnieuw. Verschillen ze van
-   `request_state` – iemand heeft het budget intussen gewijzigd – dan faalt de aanroep met
-   *„The budget changed between the preview and the answer“* en wordt er niets geschreven.
+   `request_state` – iemand heeft het plan intussen gewijzigd – dan faalt de aanroep met
+   *„The plan changed between the preview and the answer“* en wordt er niets geschreven.
 
 ### 2. De client ondersteunt elicitation, ouder protocol
 
@@ -81,7 +81,7 @@ Wegklikken is geen weigering: clients zonder interface klikken elke vraag weg, e
 | Formaat | 11 URL-veilige tekens (`secrets.token_urlsafe(8)`) |
 | Levensduur | 600 seconden, op een monotone klok |
 | Gebruik | één keer: een code is bij het eerste gebruik verbruikt, ook als hij niet klopt |
-| Bereik | de vingerafdruk van één onderwerp in één budget |
+| Bereik | de vingerafdruk van één onderwerp in één plan |
 | Opslag | alleen het geheugen van de server: een herstart vergeet elke code |
 
 Een code die onbekend, verlopen of al gebruikt is, of voor andere wijzigingen is

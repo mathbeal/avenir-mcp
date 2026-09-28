@@ -1,21 +1,21 @@
 ---
 title: Sécurité par conception
-description: Le modèle de menace et les six protections entre un agent et votre budget.
+description: Le modèle de menace et les six protections entre un agent et votre plan.
 sidebar:
   order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Un agent capable de modifier votre budget ne doit jamais vous surprendre. Cette page dit
+Un agent capable de modifier votre plan ne doit jamais vous surprendre. Cette page dit
 contre quoi avenir-mcp protège, et comment.
 
 ## Ce qui est en jeu
 
 | Bien | Risque |
 |---|---|
-| Votre jeton YNAB | il lit et modifie **tous** les budgets du compte ; YNAB n'a pas de jeton en lecture seule |
-| Votre budget | un changement erroné ou non voulu : une catégorie, un montant, une transaction supprimée |
+| Votre jeton YNAB | il lit et modifie **tous** les plans du compte ; YNAB n'a pas de jeton en lecture seule |
+| Votre plan | un changement erroné ou non voulu : une catégorie, un montant, une transaction supprimée |
 | Vos données | montants, bénéficiaires et mémos qui quittent votre machine, ou finissent dans des fichiers |
 
 | Menace | Exemple |
@@ -36,7 +36,7 @@ pour que le client décide combien vous demander. Un test échoue si un outil n'
 
 Chaque écriture sauf `approve_transactions` calcule d'abord ses changements exacts et
 n'applique rien avant votre accord, donné dans la fenêtre de votre client ou par un code
-à usage unique lié à cet aperçu. Si le budget change entre l'aperçu et votre réponse, la
+à usage unique lié à cet aperçu. Si le plan change entre l'aperçu et votre réponse, la
 réponse est refusée. Détails : [Confirmation](/avenir-mcp/fr/concepts/confirmation/).
 
 ## Annulation
@@ -75,7 +75,7 @@ cache une consigne dans un mémo et vérifie que l'agent l'ignore.
 
 - Un test échoue si le dépôt contient un IBAN, un jeton YNAB, un relevé bancaire, un
   chemin personnel absolu ou un doublon du Finder.
-- Les exemples de la documentation viennent uniquement d'un budget de démonstration
+- Les exemples de la documentation viennent uniquement d'un plan de démonstration
   inventé.
 - Les dépendances sont épinglées et auditées en CI ; les actions GitHub sont épinglées
   par commit et auditées avec zizmor.

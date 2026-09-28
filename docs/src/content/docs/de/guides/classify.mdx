@@ -30,7 +30,7 @@ Server erhalten Sie trotzdem die Vorschläge; Sie wenden sie dann in YNAB an.
    > **Sie:** Kategorisiere alles, was auf eine Kategorie wartet.
 
 2. **Der Agent liest, was aussteht.** Er ruft `suggest_categories` mit
-   `{"plan_id": "last-used"}` auf. avenir-mcp lädt die Transaktionen des Budgets einmal
+   `{"plan_id": "last-used"}` auf. avenir-mcp lädt die Transaktionen des Plans einmal
    herunter (drei YNAB-Anfragen, unabhängig von ihrer Anzahl) und antwortet mit einer
    Seite ausstehender Transaktionen, die neuesten zuerst:
 
@@ -107,11 +107,11 @@ Einzelheiten und Beispiele: [Vorschläge](/avenir-mcp/de/concepts/suggestions/).
 
 | Meldung | Bedeutung | Was dann geschieht |
 |---|---|---|
-| `Transaction … is not in this budget` | eine ID, die `suggest_categories` nicht geliefert hat | der Agent liest die Liste neu |
+| `Transaction … is not in this plan` | eine ID, die `suggest_categories` nicht geliefert hat | der Agent liest die Liste neu |
 | `Transaction … is a transfer between accounts` | Umbuchungen erhalten in YNAB keine Kategorie | sie wird ausgelassen |
 | `Transaction … is split across categories` | eine aufgeteilte Transaktion trägt ihre Kategorien in ihren Zeilen | ändern Sie sie in YNAB |
 | `Transaction … is assigned twice` | zwei Zuordnungen für eine Transaktion | der Agent behält eine |
-| `The budget changed between the preview and the answer` | jemand hat inzwischen eine Transaktion geändert | eine neue Vorschau wird erstellt |
+| `The plan changed between the preview and the answer` | jemand hat inzwischen eine Transaktion geändert | eine neue Vorschau wird erstellt |
 
 <Aside type="caution" title="Banktext ist nicht vertrauenswürdig">
 Empfängernamen und Verwendungszwecke stammen von Banken und Händlern. Ein

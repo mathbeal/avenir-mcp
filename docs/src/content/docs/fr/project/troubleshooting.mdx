@@ -22,7 +22,7 @@ sidebar:
 </details>
 
 <details>
-<summary>Les outils qui modifient mon budget manquent</summary>
+<summary>Les outils qui modifient mon plan manquent</summary>
 
 avenir-mcp est en lecture seule sauf si son environnement contient `AVENIR_MCP_WRITE=1` —
 exactement `1`. Redémarrez le serveur après l'avoir changé.
@@ -52,9 +52,9 @@ YNAB et mettez à jour `YNAB_API_KEY`.
 <details>
 <summary><code>YNAB 404</code></summary>
 
-Un budget, un compte, une catégorie ou un mois que YNAB ne connaît pas. Les identifiants
+Un plan, un compte, une catégorie ou un mois que YNAB ne connaît pas. Les identifiants
 viennent de `list_plans`, `list_accounts`, `list_category_groups` ou
-`get_category_balances` ; les mois doivent exister dans le budget.
+`get_category_balances` ; les mois doivent exister dans le plan.
 
 </details>
 
@@ -80,7 +80,7 @@ demandez un nouvel aperçu.
 </details>
 
 <details>
-<summary><code>The budget changed between the preview and the answer</code></summary>
+<summary><code>The plan changed between the preview and the answer</code></summary>
 
 Quelque chose a modifié une transaction entre l'aperçu et votre réponse — vous dans YNAB,
 un import, un autre agent. Redemandez : le nouvel aperçu reflète l'état actuel.
@@ -90,7 +90,7 @@ un import, un autre agent. Redemandez : le nouvel aperçu reflète l'état actue
 <details>
 <summary><code>Nothing to undo</code></summary>
 
-Aucune opération de ce budget n'est encore en vigueur dans le journal de cette machine :
+Aucune opération de ce plan n'est encore en vigueur dans le journal de cette machine :
 elle a déjà été annulée, faite ailleurs, ou le fichier du journal a changé. Voir
 [Journal et annulation](/avenir-mcp/fr/concepts/journal/).
 

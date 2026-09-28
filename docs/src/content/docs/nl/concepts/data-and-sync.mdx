@@ -19,7 +19,7 @@ YNAB bewaart elk bedrag als een geheel aantal **milliunits**: 1,00 is `1000`, �
 
 Sommen, verschillen en verdelingen worden in milliunits berekend en daarna één keer
 omgerekend, zodat geen afrondingsfout een cent kan laten ontstaan of verdwijnen. Bedragen
-zijn in de eigen valuta van het budget; uitgaven zijn negatief, inkomend geld positief.
+zijn in de eigen valuta van het plan; uitgaven zijn negatief, inkomend geld positief.
 
 ## Praten met YNAB
 
@@ -55,10 +55,10 @@ categorie is toegewezen (`budgeted`, getoond als *Assigned*), vandaar
 
 ## De lokale kopie van transacties
 
-De meeste tools hebben de transacties van het budget nodig: om te vinden wat openstaat, te
+De meeste tools hebben de transacties van het plan nodig: om te vinden wat openstaat, te
 leren van de geschiedenis, te vergelijken met de bank, vooruit te rekenen. Ze bij elke
 aanroep allemaal downloaden zou traag zijn en het quotum van YNAB opmaken. avenir-mcp
-houdt per budget een kopie in het geheugen en werkt die bij met de
+houdt per plan een kopie in het geheugen en werkt die bij met de
 **delta-synchronisatie** van YNAB:
 
 1. De eerste keer laden vraagt om elke transactie en bewaart de `server_knowledge` van
@@ -68,10 +68,10 @@ houdt per budget een kopie in het geheugen en werkt die bij met de
 3. avenir-mcp voegt ze samen in zijn kopie: een gewijzigde transactie vervangt de oude,
    een verwijderde wordt weggehaald.
 
-Met het id van een budget wordt de kopie bijgewerkt met delta-synchronisatie. Met
-`last-used`, dat het budget aanduidt dat je het laatst in YNAB hebt geopend en tussen twee
+Met het id van een plan wordt de kopie bijgewerkt met delta-synchronisatie. Met
+`last-used`, dat het plan aanduidt dat je het laatst in YNAB hebt geopend en tussen twee
 aanroepen kan veranderen, worden transacties elke keer volledig geladen – nog steeds één
-verzoek – zodat twee budgetten nooit door elkaar raken. Met meerdere budgetten geef je het
+verzoek – zodat twee plans nooit door elkaar raken. Met meerdere plans geef je het
 id uit `list_plans` door.
 
 De kopie leeft zo lang als het serverproces. Gefilterde leesacties – op datum of op
@@ -86,7 +86,7 @@ geschiedenis. Een test controleert nu dat een lege delta de volledige lijst inta
 ## De verzoeklimiet van YNAB
 
 YNAB staat **200 verzoeken per uur** per token toe, over een voortschrijdend venster. Wat
-elke tool kost met een lege cache, wordt gemeten op het demobudget en vermeld op zijn
+elke tool kost met een lege cache, wordt gemeten op het demoplan en vermeld op zijn
 [naslagpagina](/avenir-mcp/nl/reference/tools/):
 
 | Kosten | Tools |

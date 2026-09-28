@@ -30,7 +30,7 @@ lectura sigue obteniendo las sugerencias; luego las aplica en YNAB.
    > **Usted:** Categoriza todo lo que espera una categoría.
 
 2. **El agente lee lo pendiente.** Llama a `suggest_categories` con
-   `{"plan_id": "last-used"}`. avenir-mcp descarga las transacciones del presupuesto una
+   `{"plan_id": "last-used"}`. avenir-mcp descarga las transacciones del plan una
    vez (tres peticiones a YNAB, sea cual sea su número) y responde con una página de
    transacciones pendientes, de la más reciente a la más antigua:
 
@@ -107,11 +107,11 @@ Detalles y ejemplos: [Sugerencias](/avenir-mcp/es/concepts/suggestions/).
 
 | Mensaje | Significado | Qué pasa después |
 |---|---|---|
-| `Transaction … is not in this budget` | un id que `suggest_categories` no devolvió | el agente vuelve a leer la lista |
+| `Transaction … is not in this plan` | un id que `suggest_categories` no devolvió | el agente vuelve a leer la lista |
 | `Transaction … is a transfer between accounts` | las transferencias no llevan categoría en YNAB | se deja fuera |
 | `Transaction … is split across categories` | una transacción dividida lleva sus categorías en sus líneas | cámbiela en YNAB |
 | `Transaction … is assigned twice` | dos asignaciones para una transacción | el agente conserva una |
-| `The budget changed between the preview and the answer` | alguien cambió una transacción entretanto | se hace una nueva vista previa |
+| `The plan changed between the preview and the answer` | alguien cambió una transacción entretanto | se hace una nueva vista previa |
 
 <Aside type="caution" title="El texto bancario no es fiable">
 Los nombres de beneficiarios y los memos vienen de bancos y comercios. Un memo que dice

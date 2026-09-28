@@ -3,8 +3,8 @@ title: avenir-mcp
 description: Un servidor MCP no oficial y de código abierto para YNAB, pensado para agentes. Solo lectura por defecto; cada cambio se previsualiza, se confirma y se puede deshacer.
 template: splash
 hero:
-  title: Su presupuesto de YNAB, en palabras claras.
-  tagline: avenir-mcp permite a Claude y a otros agentes de IA leer, clasificar, conciliar y prever su presupuesto. Solo lectura por defecto; cada cambio se previsualiza, usted lo confirma, y se puede deshacer.
+  title: Su plan de YNAB, en palabras claras.
+  tagline: avenir-mcp permite a Claude y a otros agentes de IA leer, clasificar, conciliar y prever su plan. Solo lectura por defecto; cada cambio se previsualiza, usted lo confirma, y se puede deshacer.
   actions:
     - text: Empezar
       link: /avenir-mcp/es/getting-started/install/
@@ -62,7 +62,7 @@ que este le explica con palabras sencillas.
 
 El agente llama a [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/)
 con `{"month": "2026-08-01"}` y recibe, para cada categoría, lo presupuestado y lo
-gastado. Esta es esa respuesta sobre el presupuesto de demostración, en forma de gráfico:
+gastado. Esta es esa respuesta sobre el plan de demostración, en forma de gráfico:
 
 <BudgetChart rows={august} month="2026-08-01" />
 
@@ -73,12 +73,12 @@ gastado. Esta es esa respuesta sobre el presupuesto de demostración, en forma d
 <details>
 <summary>La respuesta en bruto</summary>
 
-<Code code={augustRaw} lang="json" title="get_budget_vs_actual — presupuesto de demostración" />
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — plan de demostración" />
 
 </details>
 
 Cada ejemplo de esta documentación es una respuesta real de avenir-mcp sobre un
-presupuesto de demostración inventado.
+plan de demostración inventado.
 
 ## Explorar la documentación
 

@@ -1,21 +1,21 @@
 ---
 title: Safety by design
-description: The threat model and the six protections between an agent and your budget.
+description: The threat model and the six protections between an agent and your plan.
 sidebar:
   order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-An agent that can change your budget must never surprise you. This page states what
+An agent that can change your plan must never surprise you. This page states what
 avenir-mcp protects against and how.
 
 ## What is at stake
 
 | Asset | Risk |
 |---|---|
-| Your YNAB token | it reads and changes **every** budget of the account; YNAB has no read-only token |
-| Your budget | a wrong or unwanted change: a category, an amount, a deleted transaction |
+| Your YNAB token | it reads and changes **every** plan of the account; YNAB has no read-only token |
+| Your plan | a wrong or unwanted change: a category, an amount, a deleted transaction |
 | Your data | amounts, payees and memos leaving your machine, or ending up in files |
 
 | Threat | Example |
@@ -36,7 +36,7 @@ to ask you. A test fails if any tool lacks them.
 
 Every write but `approve_transactions` first computes its exact changes and applies
 nothing until you agree, through your client's own dialog or a single-use code bound to
-that preview. If the budget changes between the preview and your answer, the answer is
+that preview. If the plan changes between the preview and your answer, the answer is
 refused. Details: [Confirmation](/avenir-mcp/concepts/confirmation/).
 
 ## Undo
@@ -73,7 +73,7 @@ that the agent ignores it.
 
 - A test fails if the repository contains an IBAN, a YNAB token, a bank statement file,
   an absolute home path, or a Finder duplicate.
-- Documentation examples come only from an invented demo budget.
+- Documentation examples come only from an invented demo plan.
 - Dependencies are pinned and audited for known vulnerabilities in CI; GitHub Actions
   are pinned by commit and audited with zizmor.
 

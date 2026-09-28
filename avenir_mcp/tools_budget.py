@@ -1,4 +1,4 @@
-"""Tools close to the YNAB API: budgets, accounts, categories, single transactions."""
+"""Tools close to the YNAB API: plans, accounts, categories, single transactions."""
 
 from __future__ import annotations
 
@@ -15,22 +15,22 @@ from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.model import Model
 
 MAX_TREND_MONTHS = 24
-"""Two years: one YNAB request per month, well within the hourly budget."""
+"""Two years: one YNAB request per month, well within the hourly limit."""
 
 logger = logging.getLogger(__name__)
 
 
 class PlanSummary(Model):
-    """A budget the API key can reach."""
+    """A plan the API key can reach."""
 
     id: str
-    """YNAB id of the budget, to pass as plan_id."""
+    """YNAB id of the plan, to pass as plan_id."""
     name: str
-    """Budget name."""
+    """Plan name."""
     first_month: str | None
-    """First month with data, YYYY-MM-01; null for an empty budget."""
+    """First month with data, YYYY-MM-01; null for an empty plan."""
     last_month: str | None
-    """Last month with data, YYYY-MM-01; null for an empty budget."""
+    """Last month with data, YYYY-MM-01; null for an empty plan."""
 
 
 class CategoryGroup(Model):
@@ -82,7 +82,7 @@ whichever plan was last opened in YNAB: with several plans, pass the id."""
 @mcp.tool(
     description=_LIST_PLANS,
     annotations={
-        "title": "List budgets",
+        "title": "List plans",
         "read_only_hint": True,
         "idempotent_hint": True,
         "open_world_hint": True,
@@ -92,7 +92,7 @@ async def list_plans() -> list[PlanSummary]:
     """List all YNAB plans accessible with the current API key; agents read _LIST_PLANS.
 
     Returns:
-        One entry per budget: its id, name, and first and last months.
+        One entry per plan: its id, name, and first and last months.
     """
     logger.info("Tool called: list_plans()")
     return [

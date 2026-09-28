@@ -3,8 +3,8 @@ title: avenir-mcp
 description: An unofficial, open-source MCP server for YNAB, built for agents. Read-only by default; every change is previewed, confirmed and undoable.
 template: splash
 hero:
-  title: Your YNAB budget, in plain words.
-  tagline: avenir-mcp lets Claude and other AI agents read, classify, reconcile and forecast your budget. Read-only by default; every change is previewed, confirmed by you, and can be undone.
+  title: Your YNAB plan, in plain words.
+  tagline: avenir-mcp lets Claude and other AI agents read, classify, reconcile and forecast your plan. Read-only by default; every change is previewed, confirmed by you, and can be undone.
   actions:
     - text: Get started
       link: /avenir-mcp/getting-started/install/
@@ -60,7 +60,7 @@ Tools return structured data the agent can rely on — and put into plain words 
 
 The agent calls [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/)
 with `{"month": "2026-08-01"}` and gets, for every category, what was budgeted and what
-was spent. Here is that answer on the demo budget, drawn:
+was spent. Here is that answer on the demo plan, drawn:
 
 <BudgetChart rows={august} month="2026-08-01" />
 
@@ -71,12 +71,12 @@ was spent. Here is that answer on the demo budget, drawn:
 <details>
 <summary>The raw answer</summary>
 
-<Code code={augustRaw} lang="json" title="get_budget_vs_actual — demo budget" />
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — demo plan" />
 
 </details>
 
 Every example in this documentation is a real answer from avenir-mcp on an invented demo
-budget.
+plan.
 
 ## Explore the documentation
 

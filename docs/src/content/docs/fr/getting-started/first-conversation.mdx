@@ -1,6 +1,6 @@
 ---
 title: Votre première conversation
-description: Une visite guidée, appel par appel, avec les vraies réponses du budget de démonstration.
+description: Une visite guidée, appel par appel, avec les vraies réponses du plan de démonstration.
 sidebar:
   order: 2
 ---
@@ -12,7 +12,7 @@ import balances from '@snippets/category_balances.json?raw';
 import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 
-Cette visite suit une vraie conversation sur le budget de démonstration, un foyer inventé
+Cette visite suit une vraie conversation sur le plan de démonstration, un foyer inventé
 avec un compte courant et un compte d'épargne. Pour chaque étape : ce que vous dites,
 l'outil que l'agent appelle et avec quels arguments, ce qu'avenir-mcp répond, et ce que
 l'agent vous dit. Vos propres réponses auront la même forme, avec vos chiffres.
@@ -34,7 +34,7 @@ L'agent appelle `list_accounts` avec `{"plan_id": "last-used"}` :
 > **Claude :** Deux comptes : Checking à 3 512,66, entièrement pointé, et Savings à
 > 600,00.
 
-Les soldes sont dans la devise de votre budget. `cleared_balance` est ce que la banque a
+Les soldes sont dans la devise de votre plan. `cleared_balance` est ce que la banque a
 déjà montré ; `uncleared_balance`, ce qu'elle n'a pas encore montré.
 
 ## 2. Voir où en est le mois

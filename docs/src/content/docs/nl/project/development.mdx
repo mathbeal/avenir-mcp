@@ -12,7 +12,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 <FileTree>
 - avenir_mcp/ — de server (zie [Architectuur](/avenir-mcp/nl/concepts/architecture/))
 - tests/ — unittests, protocoltests, documentatie- en hygiënetests
-- evals/ — het demobudget, een vervanger voor de API van YNAB, de evaluatie van agents
+- evals/ — het demoplan, een vervanger voor de API van YNAB, de evaluatie van agents
 - docsgen/ — genereert de toolnaslag, de foutencatalogus en de voorbeelden
 - docs/ — deze site (Astro Starlight, Engels, Frans, Spaans, Duits, Nederlands)
 - AGENTS.md — het contract voor bijdragers, mens of niet
@@ -54,7 +54,7 @@ afhankelijkheden, `gitleaks` op elke commit van de geschiedenis (`just secrets`,
 Docker), de build van de documentatie met de tests van haar eigen code, CodeQL en de
 OpenSSF Scorecard (zodra de repository openbaar is), een wekelijkse vergelijking van de API
 van YNAB met zijn momentopname (`just api-drift`), en de officiële MCP Inspector
-(`just inspect`), die de server controleert zoals een client hem op het demobudget ziet:
+(`just inspect`), die de server controleert zoals een client hem op het demoplan ziet:
 zijn lijsten, de overdraagbaarheid van zijn toolschema's, en één aanroep van elk soort. De
 testsuite draait op Linux en macOS met Python 3.12, 3.13 en 3.14, en op Windows met Python
 3.14 (bij een pull request probeert macOS alleen 3.14: zijn runners kosten evenveel als tien
@@ -72,7 +72,7 @@ Inspector**, een eigen workflow zodat zijn badge hem alleen toont.
 | Update | Behandeling |
 |---|---|
 | ontwikkeltools, CI-actions, de documentatiesite (minor en patch) | gegroepeerd, vanzelf samengevoegd zodra de CI groen is |
-| `fastmcp`, `httpx`, `pydantic` – ze draaien vóór de budgetten van gebruikers | elk een eigen pull request, met de hand beoordeeld; de evaluatie draait vóór een update van `fastmcp` |
+| `fastmcp`, `httpx`, `pydantic` – ze draaien vóór de plans van gebruikers | elk een eigen pull request, met de hand beoordeeld; de evaluatie draait vóór een update van `fastmcp` |
 | elke major-versie | elk een eigen pull request, met de hand beoordeeld |
 | een bekende kwetsbaarheid | meteen, op welke dag ook |
 
@@ -106,7 +106,7 @@ just docs                  # bouwt de site in elke taal; kapotte links falen
 just docs-serve            # live voorbeeld op http://localhost:4321/avenir-mcp/
 ```
 
-`docsgen` draait avenir-mcp op het demobudget en schrijft op wat het werkelijk antwoordt,
+`docsgen` draait avenir-mcp op het demoplan en schrijft op wat het werkelijk antwoordt,
 met vaste datum en vervangen willekeurige id's. Met de hand geschreven pagina's bestaan in
 het Engels, Frans, Spaans, Duits en Nederlands; een test faalt als er een ontbreekt.
 

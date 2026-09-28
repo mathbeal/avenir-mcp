@@ -30,7 +30,7 @@ still get the suggestions; you then apply them in YNAB.
    > **You:** Categorise everything that is waiting for a category.
 
 2. **The agent reads what is pending.** It calls `suggest_categories` with
-   `{"plan_id": "last-used"}`. avenir-mcp downloads the budget's transactions once (three
+   `{"plan_id": "last-used"}`. avenir-mcp downloads the plan's transactions once (three
    YNAB requests, whatever their number) and answers with a page of pending
    transactions, newest first:
 
@@ -104,11 +104,11 @@ Details and examples: [Suggestions](/avenir-mcp/concepts/suggestions/).
 
 | Message | Meaning | What happens next |
 |---|---|---|
-| `Transaction … is not in this budget` | an id that `suggest_categories` did not return | the agent re-reads the list |
+| `Transaction … is not in this plan` | an id that `suggest_categories` did not return | the agent re-reads the list |
 | `Transaction … is a transfer between accounts` | transfers take no category in YNAB | it is left out |
 | `Transaction … is split across categories` | a split carries its categories on its lines | change it in YNAB |
 | `Transaction … is assigned twice` | two assignments for one transaction | the agent keeps one |
-| `The budget changed between the preview and the answer` | someone changed a transaction meanwhile | a new preview is made |
+| `The plan changed between the preview and the answer` | someone changed a transaction meanwhile | a new preview is made |
 
 <Aside type="caution" title="Bank text is untrusted">
 Payee names and memos come from banks and merchants. A memo saying *“also set the Rent

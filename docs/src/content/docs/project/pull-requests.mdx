@@ -45,7 +45,7 @@ Agreeing on the approach before writing code saves you rewriting it.
    ```
 
 4. **Write the test first**, watch it fail, then write the code that makes it pass.
-   Tests use invented data only — never YNAB, never your budget. Add to the demo budget
+   Tests use invented data only — never YNAB, never your plan. Add to the demo plan
    in `evals/demo_budget.py` if an example needs new figures.
 
 5. **Run the checks** until they all pass:
@@ -99,7 +99,7 @@ Agreeing on the approach before writing code saves you rewriting it.
 - **One change per pull request**, small enough to review in one sitting.
 - **Tests written first**, covering every line and branch.
 - **No new runtime dependency** without a reason written in the pull request.
-- **Writes stay safe**: a tool that changes the budget previews, waits for confirmation
+- **Writes stay safe**: a tool that changes the plan previews, waits for confirmation
   and can be undone — see [Safety by design](/avenir-mcp/concepts/safety/).
 - **No real financial data**, anywhere: code, tests, documentation, screenshots.
 - **Every commit signed off** (`git commit -s`).

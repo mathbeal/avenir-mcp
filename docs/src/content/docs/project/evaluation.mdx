@@ -1,13 +1,13 @@
 ---
 title: Evaluation
-description: A real agent works on an invented budget, and both its answers and the budget's final state are checked.
+description: A real agent works on an invented plan, and both its answers and the plan's final state are checked.
 sidebar:
   order: 2
 ---
 
 Unit tests check the code. They cannot tell whether an agent picks the right tool, reads
 the answer correctly, or respects a confirmation. For that, avenir-mcp puts a real Claude
-agent to work on an invented budget.
+agent to work on an invented plan.
 
 ## How it runs
 
@@ -16,10 +16,10 @@ agent to work on an invented budget.
 | `evals/demo_budget.py` | an invented household: checking and savings, rent, salary, subscriptions, groceries with realistic bank labels, six pending transactions, a transaction imported twice, an overspent category, and a memo carrying a prompt injection |
 | `evals/fake_ynab.py` | a local stand-in for YNAB's API serving it, with delta sync and `last-used`, counting requests |
 | `evals/tasks.py` | the tasks and their checks |
-| `evals/run.py` | starts Claude Code headless on each task: avenir-mcp as its only tool, writes enabled, a fresh budget, an empty working directory, no session saved |
+| `evals/run.py` | starts Claude Code headless on each task: avenir-mcp as its only tool, writes enabled, a fresh plan, an empty working directory, no session saved |
 | `evals/run_openai.py` | the same tasks with a model behind an OpenAI-compatible API (Mammouth by default), through a small tool-calling loop in place of Claude Code |
 
-A task **passes** when the final answer is right **and** the budget ends in the expected
+A task **passes** when the final answer is right **and** the plan ends in the expected
 state. Expected figures are computed from the demo data, never copied from avenir-mcp's
 answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 
@@ -108,5 +108,5 @@ then:
 uv run python -m evals.run_openai --model gpt-5.4-mini
 ```
 
-`AVENIR_EVAL_BASE_URL` points to another OpenAI-compatible API. Only the demo budget's
+`AVENIR_EVAL_BASE_URL` points to another OpenAI-compatible API. Only the demo plan's
 invented data is sent.

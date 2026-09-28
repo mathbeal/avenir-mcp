@@ -17,7 +17,7 @@ configuratiebestand.
 |---|---|---|
 | `YNAB_API_KEY` | — (**verplicht**, of `YNAB_API_KEY_FILE`) | Je YNAB personal access token. |
 | `YNAB_API_KEY_FILE` | niet ingesteld | Een bestand met het token, gebruikt als `YNAB_API_KEY` niet is ingesteld. |
-| `AVENIR_MCP_WRITE` | niet ingesteld: alleen lezen | `1` registreert de tools die je budget wijzigen. |
+| `AVENIR_MCP_WRITE` | niet ingesteld: alleen lezen | `1` registreert de tools die je plan wijzigen. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | niet ingesteld | `1` accepteert alleen een ja in de client: geen bevestigingscodes. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` of `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-adres. |
@@ -36,7 +36,7 @@ configuratiebestand.
 
 Je personal access token, uit YNAB → Account Settings → Developer Settings. Zonder token
 faalt elke tool die YNAB aanroept met `YNAB_API_KEY environment variable is not set`. Het
-geeft volledige lees- en schrijftoegang tot elk budget van het account.
+geeft volledige lees- en schrijftoegang tot elk plan van het account.
 
 ### `YNAB_API_KEY_FILE`
 
@@ -134,7 +134,7 @@ voor een logcollector – zie
 ### `AVENIR_MCP_YNAB_URL`
 
 Het basisadres van de API. Alleen nuttig om avenir-mcp naar een vervanger te laten wijzen,
-zoals de evaluatie en de documentatiegenerator doen met hun server voor het demobudget. Het
+zoals de evaluatie en de documentatiegenerator doen met hun server voor het demoplan. Het
 moet beginnen met `https://` – gewoon `http://` wordt alleen voor `127.0.0.1` of `localhost`
 geaccepteerd – omdat elk verzoek je token draagt.
 
@@ -142,7 +142,7 @@ geaccepteerd – omdat elk verzoek je token draagt.
 
 | Argument | Geaccepteerde waarden |
 |---|---|
-| `plan_id` | een budget-id uit `list_plans`, of `last-used` |
+| `plan_id` | een plan-id uit `list_plans`, of `last-used` |
 | `month` | `current`, of de eerste dag van een maand: `YYYY-MM-01` |
 | `until` | een maand, `YYYY-MM`, tot 24 maanden vooruit |
 | data | `YYYY-MM-DD` |

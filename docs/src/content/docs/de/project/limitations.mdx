@@ -14,7 +14,7 @@ sidebar:
 | `approve_transactions` | wird sofort angewendet, ohne Vorschau | es entfernt nur das Prüfkennzeichen von YNAB |
 | `update_category`, `create_category` | nicht rückgängig zu machen; die API von YNAB kann keine Kategorie löschen | zurückbenennen; die Kategorie in YNAB ausblenden |
 | HTTP-Transport | einfaches HTTP, ein gemeinsames Token, keine Benutzerkonten | auf `127.0.0.1` belassen oder stdio nutzen |
-| Öffentlicher oder geteilter Server | nicht unterstützt: keine Benutzerkonten, und die Bedingungen von YNAB verlangen OAuth für die Budgets anderer | jede Person betreibt ihr eigenes avenir-mcp – siehe die [rechtlichen Hinweise](/avenir-mcp/de/project/legal/) |
+| Öffentlicher oder geteilter Server | nicht unterstützt: keine Benutzerkonten, und die Bedingungen von YNAB verlangen OAuth für die Plans anderer | jede Person betreibt ihr eigenes avenir-mcp – siehe die [rechtlichen Hinweise](/avenir-mcp/de/project/legal/) |
 | Aufgeteilte Transaktionen | nie vorgeschlagen oder neu kategorisiert: Ihre Zeilen tragen die Kategorien; `split_transaction` teilt eine auf, aber die API von YNAB kann eine Aufteilung weder ändern noch rückgängig machen | in YNAB ändern oder rückgängig machen |
 | Vorschläge | brauchen eine Historie: Ein nie kategorisierter Händler erhält keinen | der Agent schlägt vor, Sie entscheiden |
 | Prognose | schreibt die letzten Monate fort, plus die geplanten Transaktionen von YNAB; eine vierteljährliche oder jährliche Belastung ohne Planung kehrt nach ihrer Definition nicht wieder | in YNAB planen oder als `one_offs` übergeben |

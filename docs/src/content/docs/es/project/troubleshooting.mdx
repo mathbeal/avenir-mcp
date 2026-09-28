@@ -22,7 +22,7 @@ sidebar:
 </details>
 
 <details>
-<summary>Faltan las herramientas que modifican mi presupuesto</summary>
+<summary>Faltan las herramientas que modifican mi plan</summary>
 
 avenir-mcp está en solo lectura salvo que su entorno contenga `AVENIR_MCP_WRITE=1` —
 exactamente `1`. Reinicie el servidor tras cambiarlo.
@@ -52,9 +52,9 @@ y actualice `YNAB_API_KEY`.
 <details>
 <summary><code>YNAB 404</code></summary>
 
-Un presupuesto, cuenta, categoría o mes que YNAB no conoce. Los ids vienen de
+Un plan, cuenta, categoría o mes que YNAB no conoce. Los ids vienen de
 `list_plans`, `list_accounts`, `list_category_groups` o `get_category_balances`; los
-meses deben existir en el presupuesto.
+meses deben existir en el plan.
 
 </details>
 
@@ -80,7 +80,7 @@ previa.
 </details>
 
 <details>
-<summary><code>The budget changed between the preview and the answer</code></summary>
+<summary><code>The plan changed between the preview and the answer</code></summary>
 
 Algo cambió una transacción entre la vista previa y su respuesta — usted en YNAB, una
 importación, otro agente. Vuelva a pedirlo: la nueva vista previa refleja el estado
@@ -91,7 +91,7 @@ actual.
 <details>
 <summary><code>Nothing to undo</code></summary>
 
-Ninguna operación de este presupuesto sigue vigente en el diario de esta máquina: ya se
+Ninguna operación de este plan sigue vigente en el diario de esta máquina: ya se
 deshizo, se hizo en otro lugar, o el archivo del diario cambió. Vea
 [Diario y deshacer](/avenir-mcp/es/concepts/journal/).
 

@@ -17,7 +17,7 @@ keine Konfigurationsdatei.
 |---|---|---|
 | `YNAB_API_KEY` | — (**Pflicht**, oder `YNAB_API_KEY_FILE`) | Ihr YNAB Personal Access Token. |
 | `YNAB_API_KEY_FILE` | nicht gesetzt | Eine Datei mit dem Token, verwendet, wenn `YNAB_API_KEY` nicht gesetzt ist. |
-| `AVENIR_MCP_WRITE` | nicht gesetzt: nur lesend | `1` registriert die Tools, die Ihr Budget ändern. |
+| `AVENIR_MCP_WRITE` | nicht gesetzt: nur lesend | `1` registriert die Tools, die Ihren Plan ändern. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | nicht gesetzt | `1` akzeptiert nur ein im Client gegebenes Ja: keine Bestätigungscodes. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` oder `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-Adresse. |
@@ -36,7 +36,7 @@ keine Konfigurationsdatei.
 
 Ihr Personal Access Token, aus YNAB → Account Settings → Developer Settings. Ohne es
 schlägt jedes Tool, das YNAB aufruft, mit `YNAB_API_KEY environment variable is not
-set` fehl. Es gewährt vollen Lese- und Schreibzugriff auf jedes Budget des Kontos.
+set` fehl. Es gewährt vollen Lese- und Schreibzugriff auf jeden Plan des Kontos.
 
 ### `YNAB_API_KEY_FILE`
 
@@ -135,7 +135,7 @@ einen Log-Kollektor – siehe
 ### `AVENIR_MCP_YNAB_URL`
 
 Die Basisadresse der API. Nur nützlich, um avenir-mcp auf einen Ersatz zu richten, wie es
-die Evaluierung und der Dokumentationsgenerator mit ihrem Server für das Demo-Budget tun.
+die Evaluierung und der Dokumentationsgenerator mit ihrem Server für den Demo-Plan tun.
 Sie muss mit `https://` beginnen – einfaches `http://` wird nur für `127.0.0.1` oder
 `localhost` akzeptiert –, weil jede Anfrage Ihr Token trägt.
 
@@ -143,7 +143,7 @@ Sie muss mit `https://` beginnen – einfaches `http://` wird nur für `127.0.0.
 
 | Argument | Akzeptierte Werte |
 |---|---|
-| `plan_id` | eine Budget-ID aus `list_plans` oder `last-used` |
+| `plan_id` | eine Plan-ID aus `list_plans` oder `last-used` |
 | `month` | `current` oder der erste Tag eines Monats: `YYYY-MM-01` |
 | `until` | ein Monat, `YYYY-MM`, bis zu 24 Monate im Voraus |
 | Daten | `YYYY-MM-DD` |

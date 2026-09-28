@@ -13,7 +13,7 @@ export default defineConfig({
   markdown: { processor: satteri({ hastPlugins: [brand] }) },
   vite: {
     resolve: {
-      // Real answers from avenir-mcp on the invented demo budget, written by `python -m docsgen`.
+      // Real answers from avenir-mcp on the invented demo plan, written by `python -m docsgen`.
       alias: { '@snippets': fileURLToPath(new URL('./src/snippets', import.meta.url)) },
     },
   },

@@ -93,7 +93,7 @@ models.
 3. **Load the model with a context length of at least 32,000 tokens**, in the settings
    shown when you load it.
 
-4. **Try it read-only**: *“List my YNAB budgets.”*, then *“What still needs a
+4. **Try it read-only**: *“List my YNAB plans.”*, then *“What still needs a
    category?”*. Check that it pages through the answer and does not invent identifiers.
 
 5. **Allow changes only once it behaves**, by adding `AVENIR_MCP_WRITE=1` — and read
@@ -112,7 +112,7 @@ in the *Other clients* tab of [Install](/avenir-mcp/getting-started/install/#add
 ChatGPT only connects to **remote** MCP servers, reachable from the internet over HTTPS.
 avenir-mcp runs on your machine, and its HTTP transport is built for this machine only:
 plain HTTP, and requests must name `127.0.0.1` or `localhost`. Putting it on the
-internet would expose your budget and your token. ChatGPT is
+internet would expose your plan and your token. ChatGPT is
 therefore not supported. To use OpenAI's models, use Codex CLI, Cursor or VS Code.
 
 ## Tell us how a model does

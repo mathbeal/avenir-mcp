@@ -17,7 +17,7 @@ configuración.
 |---|---|---|
 | `YNAB_API_KEY` | — (**obligatoria**, o `YNAB_API_KEY_FILE`) | Su token de acceso personal de YNAB. |
 | `YNAB_API_KEY_FILE` | sin definir | Un archivo con el token, usado cuando `YNAB_API_KEY` no está definida. |
-| `AVENIR_MCP_WRITE` | sin definir: solo lectura | `1` registra las herramientas que modifican su presupuesto. |
+| `AVENIR_MCP_WRITE` | sin definir: solo lectura | `1` registra las herramientas que modifican su plan. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | sin definir | `1` solo acepta un sí dado en el cliente: sin códigos de confirmación. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` o `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | Dirección HTTP. |
@@ -36,7 +36,7 @@ configuración.
 
 Su token de acceso personal, en YNAB → Account Settings → Developer Settings. Sin él,
 cualquier herramienta que llame a YNAB falla con `YNAB_API_KEY environment variable is
-not set`. Da acceso completo de lectura y escritura a todos los presupuestos de la
+not set`. Da acceso completo de lectura y escritura a todos los planes de la
 cuenta.
 
 ### `YNAB_API_KEY_FILE`
@@ -135,7 +135,7 @@ para un recolector de logs — vea
 ### `AVENIR_MCP_YNAB_URL`
 
 La dirección base de la API. Solo sirve para dirigir avenir-mcp a un sustituto, como hacen la
-evaluación y el generador de documentación con su servidor de presupuesto de
+evaluación y el generador de documentación con su servidor de plan de
 demostración. Debe empezar por `https://` — `http://` solo se acepta para `127.0.0.1` o
 `localhost` — porque cada petición lleva su token.
 
@@ -143,7 +143,7 @@ demostración. Debe empezar por `https://` — `http://` solo se acepta para `12
 
 | Argumento | Valores aceptados |
 |---|---|
-| `plan_id` | un id de presupuesto de `list_plans`, o `last-used` |
+| `plan_id` | un id de plan de `list_plans`, o `last-used` |
 | `month` | `current`, o el primer día de un mes: `AAAA-MM-01` |
 | `until` | un mes, `AAAA-MM`, hasta 24 meses después |
 | fechas | `AAAA-MM-DD` |

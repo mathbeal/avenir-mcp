@@ -20,7 +20,7 @@ agente:
 
 Sumas, diferencias y prorrateos se calculan en miliunidades y se convierten una sola vez:
 ningún error de redondeo crea ni pierde un céntimo. Los importes están en la moneda del
-presupuesto; los gastos son negativos, las entradas positivas.
+plan; los gastos son negativos, las entradas positivas.
 
 ## Hablar con YNAB
 
@@ -55,10 +55,10 @@ donde YNAB la mantiene, para el dinero asignado a una categoría (`budgeted`, mo
 
 ## La copia local de las transacciones
 
-La mayoría de las herramientas necesitan las transacciones del presupuesto: encontrar lo
+La mayoría de las herramientas necesitan las transacciones del plan: encontrar lo
 pendiente, aprender del historial, comparar con el banco, prever. Descargarlo todo en
 cada llamada sería lento y gastaría la cuota de YNAB. avenir-mcp guarda una copia por
-presupuesto, en memoria, y la actualiza con la **sincronización incremental** de YNAB:
+plan, en memoria, y la actualiza con la **sincronización incremental** de YNAB:
 
 1. La primera carga pide todas las transacciones y guarda el `server_knowledge` de YNAB,
    un contador de cambios.
@@ -67,10 +67,10 @@ presupuesto, en memoria, y la actualiza con la **sincronización incremental** d
 3. avenir-mcp las fusiona en su copia: una transacción modificada sustituye a la anterior,
    una borrada se elimina.
 
-Con el id de un presupuesto, la copia se actualiza por sincronización incremental.
+Con el id de un plan, la copia se actualiza por sincronización incremental.
 Con `last-used`, que designa el último plan abierto en YNAB y puede cambiar de
 una llamada a otra, las transacciones se cargan completas cada vez — sigue siendo una
-sola petición — para no mezclar nunca dos presupuestos. Con varios presupuestos, pase
+sola petición — para no mezclar nunca dos planes. Con varios planes, pase
 el id que da `list_plans`.
 
 La copia vive tanto como el proceso del servidor. Las lecturas filtradas — por fecha o
@@ -85,7 +85,7 @@ historial. Una prueba comprueba ahora que un delta vacío deja la lista completa
 ## El límite de peticiones de YNAB
 
 YNAB permite **200 peticiones por hora** por token, en una ventana deslizante. Lo que
-cuesta cada herramienta, con la caché fría, se mide sobre el presupuesto de demostración
+cuesta cada herramienta, con la caché fría, se mide sobre el plan de demostración
 y se indica en su [página de referencia](/avenir-mcp/es/reference/tools/):
 
 | Coste | Herramientas |

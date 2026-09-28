@@ -15,7 +15,7 @@ la suivante.
 <Steps>
 
 1. [Installer uv](#installer-uv), l'outil qui lance avenir-mcp.
-2. [Obtenir un jeton YNAB](#obtenir-un-jeton-ynab), l'accès d'avenir-mcp à vos budgets.
+2. [Obtenir un jeton YNAB](#obtenir-un-jeton-ynab), l'accès d'avenir-mcp à vos plans.
 3. [Premier lancement à la main](#premier-lancement-à-la-main), une seule fois.
 4. [Ajouter avenir-mcp à votre client](#ajouter-avenir-mcp-à-votre-client).
 5. [Vérifier que tout fonctionne](#vérifier-que-tout-fonctionne) avec une première question.
@@ -27,7 +27,7 @@ la suivante.
 
 | | Pourquoi | Où l'obtenir |
 |---|---|---|
-| **Un compte YNAB** | avenir-mcp lit et modifie *vos* budgets | [app.ynab.com](https://app.ynab.com) |
+| **Un compte YNAB** | avenir-mcp lit et modifie *vos* plans | [app.ynab.com](https://app.ynab.com) |
 | **Un client MCP** | l'application avec laquelle vous parlez ; c'est elle qui lance avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
 | **uv** | télécharge et lance avenir-mcp, et le Python dont il a besoin, dans un environnement isolé | l'étape suivante |
 
@@ -80,7 +80,7 @@ la [documentation d'uv](https://docs.astral.sh/uv/getting-started/installation/)
 </Steps>
 
 <Aside type="danger" title="Traitez le jeton comme un mot de passe">
-Un jeton d'accès personnel peut **lire et modifier tous les budgets** de votre compte ;
+Un jeton d'accès personnel peut **lire et modifier tous les plans** de votre compte ;
 YNAB ne propose pas de jeton en lecture seule. Ne le collez jamais dans une conversation
 avec une IA, un fichier partagé, une issue ou un dépôt. avenir-mcp ne le journalise jamais et
 ne le renvoie jamais dans une réponse.
@@ -273,9 +273,9 @@ client ne trouve pas `uvx`, remplacez `"uvx"` par son chemin complet, donné par
   </TabItem>
 </Tabs>
 
-Demandez maintenant, dans une nouvelle conversation : *« Liste mes budgets YNAB. »*
+Demandez maintenant, dans une nouvelle conversation : *« Liste mes plans YNAB. »*
 L'agent appelle [`list_plans`](/avenir-mcp/fr/reference/tools/list-plans/) — votre
-client peut vous demander l'autorisation — et répond avec leurs noms. Ici, le budget de
+client peut vous demander l'autorisation — et répond avec leurs noms. Ici, le plan de
 démonstration utilisé dans toute cette documentation :
 
 <Code code={budgets} lang="json" title="list_plans" />

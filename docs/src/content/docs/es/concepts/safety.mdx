@@ -1,21 +1,21 @@
 ---
 title: Seguridad por diseño
-description: El modelo de amenazas y las seis protecciones entre un agente y su presupuesto.
+description: El modelo de amenazas y las seis protecciones entre un agente y su plan.
 sidebar:
   order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Un agente capaz de modificar su presupuesto nunca debe sorprenderle. Esta página dice de
+Un agente capaz de modificar su plan nunca debe sorprenderle. Esta página dice de
 qué protege avenir-mcp, y cómo.
 
 ## Qué está en juego
 
 | Bien | Riesgo |
 |---|---|
-| Su token de YNAB | lee y modifica **todos** los presupuestos de la cuenta; YNAB no tiene tokens de solo lectura |
-| Su presupuesto | un cambio erróneo o no deseado: una categoría, un importe, una transacción borrada |
+| Su token de YNAB | lee y modifica **todos** los planes de la cuenta; YNAB no tiene tokens de solo lectura |
+| Su plan | un cambio erróneo o no deseado: una categoría, un importe, una transacción borrada |
 | Sus datos | importes, beneficiarios y memos que salen de su máquina o acaban en archivos |
 
 | Amenaza | Ejemplo |
@@ -37,7 +37,7 @@ herramienta no las tiene.
 
 Cada escritura salvo `approve_transactions` calcula primero sus cambios exactos y no
 aplica nada sin su acuerdo, dado en la ventana de su cliente o mediante un código de un
-solo uso ligado a esa vista previa. Si el presupuesto cambia entre la vista previa y su
+solo uso ligado a esa vista previa. Si el plan cambia entre la vista previa y su
 respuesta, la respuesta se rechaza. Detalles:
 [Confirmación](/avenir-mcp/es/concepts/confirmation/).
 
@@ -77,7 +77,7 @@ en un memo y comprueba que el agente la ignora.
 
 - Una prueba falla si el repositorio contiene un IBAN, un token de YNAB, un extracto
   bancario, una ruta personal absoluta o un duplicado del Finder.
-- Los ejemplos de la documentación vienen solo de un presupuesto de demostración
+- Los ejemplos de la documentación vienen solo de un plan de demostración
   inventado.
 - Las dependencias están fijadas y auditadas en CI; las acciones de GitHub están fijadas
   por commit y auditadas con zizmor.

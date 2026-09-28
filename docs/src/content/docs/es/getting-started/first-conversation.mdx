@@ -1,6 +1,6 @@
 ---
 title: Su primera conversación
-description: Una visita guiada, llamada a llamada, con las respuestas reales del presupuesto de demostración.
+description: Una visita guiada, llamada a llamada, con las respuestas reales del plan de demostración.
 sidebar:
   order: 2
 ---
@@ -12,7 +12,7 @@ import balances from '@snippets/category_balances.json?raw';
 import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 
-Esta visita sigue una conversación real sobre el presupuesto de demostración, un hogar
+Esta visita sigue una conversación real sobre el plan de demostración, un hogar
 inventado con una cuenta corriente y una de ahorro. En cada paso verá lo que usted dice,
 qué herramienta llama el agente y con qué argumentos, qué responde avenir-mcp y qué le dice
 el agente. Sus propias respuestas tendrán la misma forma, con sus cifras.
@@ -33,7 +33,7 @@ El agente llama a `list_accounts` con `{"plan_id": "last-used"}`:
 
 > **Claude:** Dos cuentas: Checking con 3.512,66, todo punteado, y Savings con 600,00.
 
-Los saldos están en la moneda de su presupuesto. `cleared_balance` es lo que el banco ya
+Los saldos están en la moneda de su plan. `cleared_balance` es lo que el banco ya
 ha mostrado; `uncleared_balance`, lo que todavía no.
 
 ## 2. Ver cómo va el mes

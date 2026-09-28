@@ -21,7 +21,7 @@ import undo from '@snippets/undo_preview.json?raw';
    > **You:** Undo that.
 
 2. **The agent previews the undo.** `undo_operation` with `{"plan_id": "last-used"}`
-   finds the latest operation of the budget still in effect, and shows what undoing it
+   finds the latest operation of the plan still in effect, and shows what undoing it
    would change — here, two transactions going back to no category:
 
    <Code code={undo} lang="json" title="undo_operation — preview" />
