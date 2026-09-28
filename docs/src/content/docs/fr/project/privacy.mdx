@@ -1,0 +1,93 @@
+---
+title: Confidentialité
+description: Ce qu'avenir-mcp fait de vos données YNAB, où elles vont, combien de temps elles sont conservées, et comment les effacer.
+sidebar:
+  order: 8
+---
+
+avenir-mcp est un programme que vous faites tourner vous-même, pas un service. Son
+éditeur n'exploite aucun serveur et ne reçoit aucune de vos données. Cette page décrit ce
+que le programme fait, sur votre machine, des données qu'il obtient par l'API de YNAB.
+
+## Qui voit vos données
+
+| Qui | Quoi | Sous quelle politique |
+|---|---|---|
+| Vous, sur votre machine | avenir-mcp pendant qu'il tourne, et son journal | cette page |
+| YNAB | votre plan, comme toujours : avenir-mcp le lit, et le modifie quand vous confirmez, avec votre propre jeton | [la politique de confidentialité de YNAB](https://www.ynab.com/privacy-policy/) |
+| Votre fournisseur de modèle | les résultats d'outils que votre client MCP envoie à son modèle : comptes, catégories, bénéficiaires, montants, mémos | celle de votre fournisseur ; aucun avec un [modèle local](/avenir-mcp/fr/guides/choose-a-model/#modèles-locaux) |
+| L'éditeur d'avenir-mcp | rien | — |
+
+## Ce qu'avenir-mcp manipule
+
+- **Votre jeton YNAB.** Lu au démarrage dans `YNAB_API_KEY`, ou dans le fichier désigné
+  par `YNAB_API_KEY_FILE`. Gardé en mémoire comme valeur secrète, envoyé uniquement à
+  l'API de YNAB en HTTPS, et jamais journalisé, affiché, renvoyé à l'agent ni écrit sur le
+  disque. Il reste là où vous l'avez mis : la configuration de votre client MCP, ou ce
+  fichier.
+- **Les données de votre plan** : comptes, catégories, transactions, bénéficiaires et
+  mémos. Demandées à YNAB quand un outil en a besoin, gardées
+  [en mémoire](/avenir-mcp/fr/concepts/data-and-sync/#la-copie-locale-des-transactions)
+  pour que la requête suivante ne demande que ce qui a changé, et renvoyées à votre agent
+  comme résultats d'outils. Jamais écrites sur le disque.
+- **Le [journal](/avenir-mcp/fr/concepts/journal/).** Après chaque changement que vous
+  confirmez, une ligne d'identifiants : quelle transaction est passée de quelle catégorie
+  à quelle autre, et ce dont une annulation a besoin. Jamais un montant, un bénéficiaire
+  ni un mémo. Le fichier n'est lisible que par votre compte utilisateur.
+- **Les codes de confirmation.** En mémoire, à usage unique, valables 10 minutes.
+- **Les journaux de diagnostic.** Sur stderr, identifiants et comptages seulement,
+  avertissements et erreurs par défaut. Leur destination dépend de votre client MCP.
+
+## Comment elles sont protégées
+
+- **Lecture seule par défaut.** Les outils qui modifient votre plan n'existent que si vous
+  définissez `AVENIR_MCP_WRITE=1`, et chaque changement est
+  [présenté puis confirmé](/avenir-mcp/fr/concepts/confirmation/) avant d'être envoyé.
+- **Le jeton est une valeur secrète dans le code** : affiché, journalisé ou dans une
+  erreur, il apparaît comme `**********`.
+- **Le texte bancaire est une donnée.** Bénéficiaires et mémos viennent des banques et
+  d'inconnus ; ils sont renvoyés comme données, jamais comme instructions pour l'agent.
+- **Le transport HTTP reste sur cette machine.** Il écoute sur `127.0.0.1` par défaut, et
+  refuse d'autoriser des changements sans son propre jeton.
+- **Le code est vérifié à chaque changement** : analyse statique, recherche de secrets
+  dans tout l'historique, et audit des dépendances verrouillées. Voir
+  [Sécurité](/avenir-mcp/fr/project/security/).
+
+## Combien de temps elles sont conservées
+
+| Donnée | Conservée |
+|---|---|
+| Données du plan | tant qu'avenir-mcp tourne ; effacées à son arrêt |
+| Codes de confirmation | utilisables 10 minutes, effacés à l'arrêt d'avenir-mcp ; un code porte une empreinte de l'aperçu, jamais son contenu |
+| Journal | jusqu'à ce que vous le supprimiez ; avenir-mcp ne l'élague jamais |
+| Jeton | là où vous l'avez stocké, jusqu'à ce que vous le retiriez ou le révoquiez |
+
+## Comment les effacer
+
+1. **Arrêtez avenir-mcp**, ou quittez votre client MCP : les données du plan en mémoire
+   disparaissent.
+2. **Supprimez le journal** : `~/.local/state/avenir-mcp/journal.jsonl`, ou le chemin
+   donné par `AVENIR_MCP_JOURNAL` ou sous `XDG_STATE_HOME`. Vous perdez l'historique des
+   annulations, rien d'autre.
+3. **Révoquez le jeton** dans les
+   [paramètres développeur de YNAB](https://app.ynab.com/settings/developer), et retirez-le
+   de la configuration de votre client ou de son fichier.
+4. **Les conversations** avec votre agent sont conservées par votre client MCP et votre
+   fournisseur de modèle, pas par avenir-mcp : supprimez-les chez eux.
+
+Vos données chez YNAB restent dans votre compte YNAB, sous la politique de YNAB.
+
+## Rien d'autre n'est collecté
+
+avenir-mcp n'a ni télémétrie, ni compte, ni serveur. Ce site de documentation ne dépose
+aucun cookie et n'utilise aucune mesure d'audience ; ses polices sont servies par le site
+lui-même. GitHub, qui l'héberge, enregistre l'adresse IP des visiteurs à des fins de
+sécurité, selon la
+[déclaration de confidentialité de GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+## Modifications de cette page
+
+Une version qui change ce qu'avenir-mcp conserve ou envoie modifie cette page dans la même
+version, et son [journal des modifications](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md)
+le signale. Questions : [issues GitHub](https://github.com/mathbeal/avenir-mcp/issues) ;
+les [mentions légales](/avenir-mcp/fr/project/legal/) nomment l'éditeur.

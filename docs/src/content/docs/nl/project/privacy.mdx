@@ -1,0 +1,91 @@
+---
+title: Privacy
+description: Wat avenir-mcp met je YNAB-gegevens doet, waar ze heen gaan, hoe lang ze bewaard worden en hoe je ze wist.
+sidebar:
+  order: 8
+---
+
+avenir-mcp is een programma dat je zelf draait, geen dienst. De uitgever beheert geen
+server en ontvangt geen van je gegevens. Deze pagina beschrijft wat het programma op je
+computer doet met de gegevens die het via de API van YNAB krijgt.
+
+## Wie je gegevens ziet
+
+| Wie | Wat | Onder welk beleid |
+|---|---|---|
+| Jij, op je computer | avenir-mcp zolang het draait, en zijn journaal | deze pagina |
+| YNAB | je plan, zoals altijd: avenir-mcp leest het, en wijzigt het als je bevestigt, met je eigen token | [het privacybeleid van YNAB](https://www.ynab.com/privacy-policy/) |
+| Je modelaanbieder | de toolresultaten die je MCP-client naar zijn model stuurt: rekeningen, categorieën, begunstigden, bedragen, notities | dat van je aanbieder; geen met een [lokaal model](/avenir-mcp/nl/guides/choose-a-model/#lokale-modellen) |
+| De uitgever van avenir-mcp | niets | — |
+
+## Wat avenir-mcp verwerkt
+
+- **Je YNAB-token.** Bij het starten gelezen uit `YNAB_API_KEY`, of uit het bestand dat
+  `YNAB_API_KEY_FILE` noemt. In het geheugen bewaard als geheime waarde, alleen via HTTPS
+  naar de API van YNAB gestuurd, en nooit gelogd, getoond, aan de agent teruggegeven of
+  naar schijf geschreven. Het blijft waar je het neerzette: in de configuratie van je
+  MCP-client, of in dat bestand.
+- **De gegevens van je plan**: rekeningen, categorieën, transacties, begunstigden en
+  notities. Bij YNAB opgehaald als een tool ze nodig heeft,
+  [in het geheugen](/avenir-mcp/nl/concepts/data-and-sync/#de-lokale-kopie-van-transacties)
+  bewaard zodat het volgende verzoek alleen de wijzigingen ophaalt, en aan je agent
+  teruggegeven als toolresultaten. Nooit naar schijf geschreven.
+- **Het [journaal](/avenir-mcp/nl/concepts/journal/).** Na elke wijziging die je
+  bevestigt, één regel met ID's: welke transactie van welke categorie naar welke ging, en
+  wat ongedaan maken nodig heeft. Nooit een bedrag, een begunstigde of een notitie. Het
+  bestand is alleen leesbaar voor je eigen gebruikersaccount.
+- **Bevestigingscodes.** In het geheugen, eenmalig bruikbaar, 10 minuten geldig.
+- **Diagnoselogs.** Op stderr, alleen ID's en aantallen, standaard waarschuwingen en
+  fouten. Waar ze terechtkomen hangt af van je MCP-client.
+
+## Hoe ze beveiligd zijn
+
+- **Standaard alleen-lezen.** Tools die je plan wijzigen bestaan alleen als je
+  `AVENIR_MCP_WRITE=1` instelt, en elke wijziging wordt
+  [getoond en bevestigd](/avenir-mcp/nl/concepts/confirmation/) voordat ze verstuurd wordt.
+- **Het token is in de code een geheime waarde**: getoond, gelogd of in een foutmelding
+  verschijnt het als `**********`.
+- **Banktekst is data.** Begunstigden en notities komen van banken en vreemden; ze worden
+  als data teruggegeven, nooit als instructies voor de agent.
+- **Het HTTP-transport blijft op deze computer.** Het luistert standaard op `127.0.0.1`
+  en staat zonder eigen token geen wijzigingen toe.
+- **De code wordt bij elke wijziging gecontroleerd**: statische analyse, zoeken naar
+  geheimen in de hele geschiedenis en een audit van de vastgezette afhankelijkheden. Zie
+  [Beveiliging](/avenir-mcp/nl/project/security/).
+
+## Hoe lang ze bewaard worden
+
+| Gegevens | Bewaard |
+|---|---|
+| Plangegevens | zolang avenir-mcp draait; weg als het stopt |
+| Bevestigingscodes | 10 minuten bruikbaar, en weg als avenir-mcp stopt; een code bevat een vingerafdruk van het voorbeeld, nooit de inhoud |
+| Journaal | tot je het verwijdert; avenir-mcp kort het nooit in |
+| Token | waar je het opsloeg, tot je het verwijdert of intrekt |
+
+## Hoe je ze wist
+
+1. **Stop avenir-mcp**, of sluit je MCP-client: de plangegevens in het geheugen zijn weg.
+2. **Verwijder het journaal**: `~/.local/state/avenir-mcp/journal.jsonl`, of het pad in
+   `AVENIR_MCP_JOURNAL` of onder `XDG_STATE_HOME`. Je verliest de geschiedenis voor
+   ongedaan maken, verder niets.
+3. **Trek het token in** in de
+   [ontwikkelaarsinstellingen van YNAB](https://app.ynab.com/settings/developer), en haal
+   het uit de configuratie van je client of uit het bestand.
+4. **Gesprekken** met je agent worden bewaard door je MCP-client en je modelaanbieder,
+   niet door avenir-mcp: verwijder ze daar.
+
+Je gegevens bij YNAB blijven in je YNAB-account, onder het beleid van YNAB.
+
+## Verder wordt niets verzameld
+
+avenir-mcp heeft geen telemetrie, geen account en geen server. Deze documentatiesite
+plaatst geen cookies en gebruikt geen analytics; de lettertypen komen van de site zelf.
+GitHub, dat de site host, legt de IP-adressen van bezoekers vast voor beveiliging, volgens
+de [privacyverklaring van GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+## Wijzigingen van deze pagina
+
+Een versie die verandert wat avenir-mcp bewaart of verstuurt, wijzigt deze pagina in
+dezelfde versie, en de [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md)
+vermeldt het. Vragen: [GitHub-issues](https://github.com/mathbeal/avenir-mcp/issues); de
+[juridische informatie](/avenir-mcp/nl/project/legal/) noemt de uitgever.
