@@ -29,7 +29,7 @@ first, in currency units.
 | Nom | Type | Obligatoire | Défaut | Description |
 |---|---|---|---|---|
 | `plan_id` | string | oui | — | YNAB plan id or 'last-used'. |
-| `months_count` | integer | non | `3` | Number of past months to include (default 3). |
+| `months_count` | integer | non | `3` | Number of past months to include, 1 to 24 (default 3). |
 
 ## Retour
 

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import logging
+from typing import Annotated
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
+from pydantic import Field  # pylint: disable=import-error
 
 from avenir_mcp import client, split, triage, writes
 from avenir_mcp.app import WRITE_TAG, mcp
@@ -37,7 +39,7 @@ async def _off_budget(plan_id: str) -> set[str]:
 )
 async def suggest_categories(
     plan_id: str,
-    limit: int = triage.DEFAULT_LIMIT,
+    limit: Annotated[int, Field(ge=1, le=200)] = triage.DEFAULT_LIMIT,
     cursor: str | None = None,
 ) -> triage.Triage:
     """List the transactions waiting for a category, with a suggestion when history allows.
@@ -59,7 +61,7 @@ async def suggest_categories(
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
-        limit: Maximum number of transactions in the page (default 50).
+        limit: Maximum number of transactions in the page, 1 to 200 (default 50).
         cursor: next_cursor from the previous page; omit for the first page.
 
     Returns:

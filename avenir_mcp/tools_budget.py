@@ -14,6 +14,9 @@ from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.model import Model
 
+MAX_TREND_MONTHS = 24
+"""Two years: one YNAB request per month, well within the hourly budget."""
+
 logger = logging.getLogger(__name__)
 
 
@@ -205,7 +208,7 @@ async def get_budget_vs_actual(
 )
 async def get_spending_trends(
     plan_id: str,
-    months_count: int = 3,
+    months_count: Annotated[int, Field(ge=1, le=MAX_TREND_MONTHS)] = 3,
 ) -> dict[str, list[analytics.MonthSpending]]:
     """Return monthly spending trends per category over the last N months.
 
@@ -214,7 +217,7 @@ async def get_spending_trends(
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
-        months_count: Number of past months to include (default 3).
+        months_count: Number of past months to include, 1 to 24 (default 3).
 
     Returns:
         Each category's spending, month by month.
