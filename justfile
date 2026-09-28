@@ -85,7 +85,7 @@ inspect:
 evaluate:
     uv run python -m evals.run
 
-# Regenerate the tool reference and the examples, then build the site (EN, FR, ES).
+# Regenerate the tool reference and the examples, then build the site in every language.
 docs:
     uv run python -m docsgen
     npm --prefix docs ci
