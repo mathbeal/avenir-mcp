@@ -1,6 +1,6 @@
 ---
 title: Datos y sincronización
-description: Importes y miliunidades, la copia local de las transacciones, la sincronización incremental, la cuota de YNAB y sus errores.
+description: Importes y miliunidades, la copia local de las transacciones, la sincronización incremental, el límite de peticiones de YNAB y sus errores.
 sidebar:
   order: 5
 ---
@@ -82,7 +82,7 @@ primera devolvía solo los cambios, normalmente nada, y las sugerencias nunca en
 historial. Una prueba comprueba ahora que un delta vacío deja la lista completa intacta.
 </Aside>
 
-## La cuota de YNAB
+## El límite de peticiones de YNAB
 
 YNAB permite **200 peticiones por hora** por token, en una ventana deslizante. Lo que
 cuesta cada herramienta, con la caché fría, se mide sobre el presupuesto de demostración

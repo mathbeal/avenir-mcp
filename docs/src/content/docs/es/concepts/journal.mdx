@@ -1,6 +1,6 @@
 ---
 title: Diario y deshacer
-description: El registro local de las operaciones aplicadas, su formato y lo que restaura exactamente un deshacer.
+description: El registro local de las operaciones aplicadas, su formato y lo que restaura exactamente una anulación.
 sidebar:
   order: 4
 ---
@@ -21,7 +21,7 @@ deshacerla más tarde — incluso tras reiniciar el servidor.
 
 ## Formato
 
-JSON Lines, solo añadir. Una operación aplicada ocupa una línea:
+JSON Lines, en modo de solo anexado. Una operación aplicada ocupa una línea:
 
 ```json
 {"operation_id":"5f2c9a1e7b30","plan_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
@@ -40,7 +40,7 @@ Deshacerla añade un marcador; nunca se reescribe nada:
 | `kind` | `categorize`, `budget`, `reconcile` o `create` |
 | `applied_at` | ISO 8601, UTC, al segundo |
 | `moves` | para `categorize`: la categoría de cada transacción antes y después |
-| `details` | para los demás tipos, lo que necesita el deshacer (abajo) |
+| `details` | para los demás tipos, lo que necesita la anulación (abajo) |
 
 | `kind` | `details` |
 |---|---|
@@ -51,10 +51,10 @@ Deshacerla añade un marcador; nunca se reescribe nada:
 ## Qué operación se deshace
 
 Sin id, `undo_operation` toma **la operación más reciente del presupuesto aún vigente**:
-no deshecha, y que no sea ella misma un deshacer. Con un id, esa operación, si sigue
+que no se haya deshecho ni sea a su vez una anulación. Con un id, esa operación, si sigue
 vigente. Si no: *«Nothing to undo: no operation of this budget is still in effect.»*
 
-## Qué restaura el deshacer
+## Qué restaura la anulación
 
 | `kind` | Deshacer | Se comprueba antes | Si la comprobación falla |
 |---|---|---|---|
@@ -64,7 +64,7 @@ vigente. Si no: *«Nothing to undo: no operation of this budget is still in effe
 | `create` | se borran las transacciones creadas | cada una sigue existiendo | las ya borradas se listan en `conflicts` |
 
 El deshacer se previsualiza y confirma como cualquier escritura. Deshacer una operación
-`categorize` registra el deshacer como una operación y marca ambas como deshechas: un
+`categorize` registra la anulación como una operación y marca ambas como deshechas: un
 deshacer no se deshace.
 
 <Aside type="note">

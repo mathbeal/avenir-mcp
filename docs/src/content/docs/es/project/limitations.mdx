@@ -10,7 +10,7 @@ sidebar:
 | Área | Limitación | Alternativa |
 |---|---|---|
 | Códigos de confirmación | se guardan en memoria: un reinicio del servidor los olvida | pedir una nueva vista previa |
-| Deshacer | local a la máquina cuyo diario registró la operación; un deshacer no se deshace | rehacer el cambio |
+| Deshacer | local a la máquina cuyo diario registró la operación; una anulación no se puede anular | rehacer el cambio |
 | `approve_transactions` | se aplica al momento, sin vista previa | solo quita la marca de revisión de YNAB |
 | `update_category`, `create_category` | no se pueden deshacer; la API de YNAB no puede borrar una categoría | renombrar de nuevo; ocultar la categoría en YNAB |
 | Transporte HTTP | HTTP simple, un solo token compartido, sin cuentas | mantenerlo en `127.0.0.1`, o usar stdio |

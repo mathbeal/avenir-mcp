@@ -3,7 +3,7 @@ title: avenir-mcp
 description: Un servidor MCP no oficial y de código abierto para YNAB, pensado para agentes. Solo lectura por defecto; cada cambio se previsualiza, se confirma y se puede deshacer.
 template: splash
 hero:
-  title: Su presupuesto de YNAB, en sus propias palabras.
+  title: Su presupuesto de YNAB, en palabras claras.
   tagline: avenir-mcp permite a Claude y a otros agentes de IA leer, clasificar, conciliar y prever su presupuesto. Solo lectura por defecto; cada cambio se previsualiza, usted lo confirma, y se puede deshacer.
   actions:
     - text: Empezar
@@ -39,13 +39,13 @@ import augustRaw from '@snippets/august_categories.json?raw';
     Unidades monetarias, nunca miliunidades. Esquemas de salida tipados con una
     descripción por campo, paginación, y errores que dicen qué corregir.
   </Card>
-  <Card title="Ahorra la cuota de YNAB" icon="seti:clock">
+  <Card title="Ligero con la cuota de YNAB" icon="seti:clock">
     Una copia local de sus transacciones, actualizada por sincronización incremental: la
     mayoría de las herramientas cuestan una o dos de las 200 peticiones por hora de YNAB.
   </Card>
 </CardGrid>
 
-## Cada cambio, en sus términos
+## Cada cambio, bajo su control
 
 <WriteFlow />
 
@@ -56,13 +56,13 @@ funciona: [Confirmación](/avenir-mcp/es/concepts/confirmation/) y
 ## Respuestas estructuradas, no prosa
 
 Las herramientas devuelven datos estructurados en los que el agente puede confiar — y
-que le traduce en palabras sencillas.
+que este le explica con palabras sencillas.
 
 > **Usted:** ¿Cómo fue agosto?
 
 El agente llama a [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/)
 con `{"month": "2026-08-01"}` y recibe, para cada categoría, lo presupuestado y lo
-gastado. Esta es esa respuesta sobre el presupuesto de demostración, en imagen:
+gastado. Esta es esa respuesta sobre el presupuesto de demostración, en forma de gráfico:
 
 <BudgetChart rows={august} month="2026-08-01" />
 
