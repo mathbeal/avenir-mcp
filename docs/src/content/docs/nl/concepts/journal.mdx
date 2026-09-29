@@ -59,8 +59,8 @@ in effect.“*
 
 | `kind` | Ongedaan maken | Eerst gecontroleerd | Als de controle faalt |
 |---|---|---|---|
-| `categorize` | elke transactie terug naar haar vorige categorie | haar categorie is nog die welke de operatie heeft gezet | die transactie blijft ongemoeid en staat in `conflicts` |
-| `budget` | het vorige bedrag | het bedrag is nog dat welke de operatie heeft gezet | niets geschreven; `conflicts` noemt de categorie |
+| `categorize` | elke transactie terug naar haar vorige categorie | haar categorie is nog die van de operatie | die transactie blijft ongemoeid en staat in `conflicts` |
+| `budget` | het vorige bedrag | het bedrag is nog dat van de operatie | niets geschreven; `conflicts` noemt de categorie |
 | `reconcile` | *reconciled* transacties terug naar *cleared*; de correctie verwijderd | elke transactie is nog *reconciled* | de niet meer afgestemde worden overgeslagen |
 | `create` | de aangemaakte transacties verwijderd | elke transactie bestaat nog | de al verwijderde staan in `conflicts` |
 

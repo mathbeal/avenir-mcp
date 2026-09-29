@@ -15,7 +15,7 @@ Programm auf Ihrem Rechner mit den Daten macht, die es über die API von YNAB er
 |---|---|---|
 | Sie, auf Ihrem Rechner | avenir-mcp, solange es läuft, und sein Journal | diese Seite |
 | YNAB | Ihr Plan, wie immer: avenir-mcp liest ihn und ändert ihn, wenn Sie bestätigen, mit Ihrem eigenen Token | [Datenschutzerklärung von YNAB](https://www.ynab.com/privacy-policy/) |
-| Ihr Modellanbieter | die Tool-Ergebnisse, die Ihr MCP-Client an sein Modell sendet: Konten, Kategorien, Zahlungsempfänger, Beträge, Notizen | die Ihres Anbieters; keine mit einem [lokalen Modell](/avenir-mcp/de/guides/choose-a-model/#lokale-modelle) |
+| Ihr Modellanbieter | die Tool-Ergebnisse, die Ihr MCP-Client an sein Modell sendet: Konten, Kategorien, Empfänger, Beträge, Verwendungszwecke | die Ihres Anbieters; keine mit einem [lokalen Modell](/avenir-mcp/de/guides/choose-a-model/#lokale-modelle) |
 | Der Herausgeber von avenir-mcp | nichts | — |
 
 ## Was avenir-mcp verarbeitet
@@ -25,15 +25,15 @@ Programm auf Ihrem Rechner mit den Daten macht, die es über die API von YNAB er
   API von YNAB gesendet und nie protokolliert, ausgegeben, an den Agenten zurückgegeben
   oder auf die Festplatte geschrieben. Es bleibt dort, wo Sie es abgelegt haben: in der
   Konfiguration Ihres MCP-Clients oder in dieser Datei.
-- **Die Daten Ihres Plans**: Konten, Kategorien, Transaktionen, Zahlungsempfänger und
-  Notizen. Bei YNAB abgerufen, wenn ein Tool sie braucht,
+- **Die Daten Ihres Plans**: Konten, Kategorien, Transaktionen, Empfänger und
+  Verwendungszwecke. Bei YNAB abgerufen, wenn ein Tool sie braucht,
   [im Speicher](/avenir-mcp/de/concepts/data-and-sync/#die-lokale-kopie-der-transaktionen)
   gehalten, damit die nächste Anfrage nur Änderungen abruft, und Ihrem Agenten als
   Tool-Ergebnisse zurückgegeben. Nie auf die Festplatte geschrieben.
 - **Das [Journal](/avenir-mcp/de/concepts/journal/).** Nach jeder Änderung, die Sie
   bestätigen, eine Zeile mit IDs: welche Transaktion von welcher Kategorie in welche
-  wechselte und was ein Rückgängigmachen braucht. Nie ein Betrag, ein Zahlungsempfänger
-  oder eine Notiz. Die Datei ist nur für Ihr Benutzerkonto lesbar.
+  wechselte und was ein Rückgängigmachen braucht. Nie ein Betrag, ein Empfänger
+  oder ein Verwendungszweck. Die Datei ist nur für Ihr Benutzerkonto lesbar.
 - **Bestätigungscodes.** Im Speicher, einmalig verwendbar, 10 Minuten gültig.
 - **Diagnoseprotokolle.** Auf stderr, nur IDs und Anzahlen, standardmäßig Warnungen und
   Fehler. Wohin sie gelangen, hängt von Ihrem MCP-Client ab.
@@ -45,7 +45,7 @@ Programm auf Ihrem Rechner mit den Daten macht, die es über die API von YNAB er
   [angezeigt und bestätigt](/avenir-mcp/de/concepts/confirmation/), bevor sie gesendet wird.
 - **Das Token ist im Code ein geheimer Wert**: ausgegeben, protokolliert oder in einer
   Fehlermeldung erscheint es als `**********`.
-- **Banktext ist Daten.** Zahlungsempfänger und Notizen stammen von Banken und Fremden;
+- **Banktext gilt als Daten.** Empfänger und Verwendungszwecke stammen von Banken und Fremden;
   sie werden als Daten zurückgegeben, nie als Anweisungen an den Agenten.
 - **Der HTTP-Transport bleibt auf diesem Rechner.** Er lauscht standardmäßig auf
   `127.0.0.1` und erlaubt ohne sein eigenes Token keine Änderungen.

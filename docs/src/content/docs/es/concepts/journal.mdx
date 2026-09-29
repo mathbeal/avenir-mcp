@@ -63,9 +63,8 @@ vigente. Si no: *«Nothing to undo: no operation of this plan is still in effect
 | `reconcile` | las transacciones *reconciled* vuelven a *cleared*; se borra el ajuste | cada una sigue *reconciled* | las que ya no lo están se omiten |
 | `create` | se borran las transacciones creadas | cada una sigue existiendo | las ya borradas se listan en `conflicts` |
 
-El deshacer se previsualiza y confirma como cualquier escritura. Deshacer una operación
-`categorize` registra la anulación como una operación y marca ambas como deshechas: un
-deshacer no se deshace.
+La anulación se previsualiza y confirma como cualquier escritura. Deshacer una operación
+`categorize` registra la anulación como una operación y marca ambas como deshechas: una anulación no se puede deshacer.
 
 <Aside type="note">
 El diario es local: una operación hecha desde otra máquina, o antes de que el archivo del
