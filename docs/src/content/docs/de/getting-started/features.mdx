@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gibt einem Agenten 23 Tools, 4 Ressourcen und 4 Prompts für Ihre
+avenir-mcp gibt einem Agenten 24 Tools, 4 Ressourcen und 4 Prompts für Ihre
 YNAB-Plans. Diese Seite ordnet sie nach dem, was Sie tun möchten. Jede Zeile nennt einen
 Satz, den Sie dem Agenten sagen können; der Agent wählt das Tool.
 
@@ -35,6 +35,7 @@ zugewiesen ist.
 | *„Welche Transaktion ist mein Beleg über 86,40 vom 12.?“* | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) – nach Datum, genauem Betrag und Konto, kategorisiert oder nicht | L |
 | *„Wodurch ist Restaurants diesen Monat überzogen?“* | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) – nach Kategorie, aufgeteilte Zeilen eingeschlossen, oder nach Empfänger, egal wie die Bank ihn bezeichnet | L |
 | *„Welche Rechnungen sind vor dem 10. fällig?“* | [`list_scheduled_transactions`](/avenir-mcp/de/reference/tools/list-scheduled-transactions/) – geplante Transaktionen in ihrem Rhythmus wiederholt, Ein- und Ausgänge | L |
+| *„Was habe ich abonniert, und was kostet es im Jahr?“* | [`find_recurring_charges`](/avenir-mcp/de/reference/tools/find-recurring-charges/) – Ausgaben, die fast jeden Monat vorkommen, die im Jahr teuersten zuerst | L |
 
 Plans, Konten und Kategorien werden auch als
 [Ressourcen](/avenir-mcp/de/reference/resources-and-prompts/) bereitgestellt, die Ihr Client

@@ -99,7 +99,19 @@ def _months_before(today: date, count: int) -> list[str]:
     return sorted(months)
 
 
-def _usable(tx: dict[str, Any]) -> bool:
+def lookback(today: date) -> list[str]:
+    """List the full months recurring charges are looked for in.
+
+    Args:
+        today: The day of the question; its month is incomplete and not looked at.
+
+    Returns:
+        The last LOOKBACK_MONTHS full months, as YYYY-MM, oldest first.
+    """
+    return _months_before(today, LOOKBACK_MONTHS)
+
+
+def usable(tx: dict[str, Any]) -> bool:
     """Tell whether a transaction is money in or out of the accounts.
 
     Args:
@@ -121,10 +133,10 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
     Returns:
         One recurring charge or income per payee and direction, sorted by payee.
     """
-    months = set(_months_before(today, LOOKBACK_MONTHS))
+    months = set(lookback(today))
     groups: dict[tuple[str, bool], list[dict[str, Any]]] = defaultdict(list)
     for tx in transactions:
-        if _usable(tx) and tx["date"][:7] in months:
+        if usable(tx) and tx["date"][:7] in months:
             payee = normalize_payee(tx.get("payee_name") or "")
             if payee:
                 groups[(payee, tx["amount"] < 0)].append(tx)
@@ -197,7 +209,7 @@ def _other_average(
     total = sum(
         tx["amount"]
         for tx in transactions
-        if _usable(tx)
+        if usable(tx)
         and (tx["amount"] < 0) == outflow
         and tx["date"][:7] in months
         and normalize_payee(tx.get("payee_name") or "") not in recurring_payees
@@ -270,7 +282,7 @@ def month_to_date(
     recurring_payees = {(r.payee, r.amount < 0) for r in known}
     spent = received = 0
     for tx in transactions:
-        if not _usable(tx) or tx["date"][:7] != this_month:
+        if not usable(tx) or tx["date"][:7] != this_month:
             continue
         payee = normalize_payee(tx.get("payee_name") or "")
         key = (payee, tx["amount"] < 0)

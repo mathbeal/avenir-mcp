@@ -51,6 +51,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "approve_transactions",
             "import_transactions",
             "flag_transactions",
+            "find_recurring_charges",
         ]
     )
 

@@ -7,6 +7,7 @@ sidebar:
 
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/de/forecast.json?raw';
+import recurring from '@snippets/de/recurring_charges.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -69,6 +70,16 @@ Sie schreibt Ihre letzten Monate fort. Ein Urlaub, eine jährliche Steuer oder e
 einmaliger Kauf darin verschiebt die Durchschnitte; eine neue Ausgabe bleibt unsichtbar,
 bis Sie sie hinzufügen. Lesen Sie die Annahmen vor der Schlussfolgerung.
 </Aside>
+
+## Die Ausgaben, die jeden Monat wiederkommen
+
+Fragen Sie *„Was habe ich abonniert, und was kostet es im Jahr?“*: `find_recurring_charges`
+listet, was der Plan fast jeden Monat (in 3 der letzten 4) in etwa gleicher Höhe zahlt, die
+im Jahr teuersten zuerst, mit Kategorie und der Angabe, ob eine YNAB-Planung sie schon
+abdeckt. Regelmäßige Ausgaben beim selben Händler zählen auch (hier die Lebensmittel); eine
+jährliche Abbuchung erscheint nicht, außer sie hat eine Planung.
+
+<Code code={recurring} lang="json" title="find_recurring_charges" />
 
 ## Dann den nächsten Monat budgetieren
 

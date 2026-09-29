@@ -115,6 +115,7 @@ CALLS: list[Call] = [
         "reconcile_account",
         {"plan_id": BUDGET, "account_id": "acc-checking", "bank_balance": 3440.80},
     ),
+    Call("recurring_charges", "find_recurring_charges", {"plan_id": BUDGET}, keep=10),
     Call(
         "forecast",
         "forecast_balance",

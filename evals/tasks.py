@@ -241,6 +241,14 @@ TASKS = [
         tags=["read"],
     ),
     Task(
+        "streaming-yearly",
+        "How much does my streaming subscription cost me over a year?" + FORMAT,
+        answer=_number(161.88),
+        state=_unchanged,
+        notes="Streamflix, 13.49 every month: twelve months of it.",
+        tags=["read"],
+    ),
+    Task(
         "reconcile-diagnose",
         f"My bank shows {CHECKING - DUPLICATE:.2f} on my checking account. Why doesn't "
         "YNAB agree? Do not change anything." + FORMAT,
