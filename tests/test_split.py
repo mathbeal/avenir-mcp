@@ -13,6 +13,7 @@ _CATEGORIES: list[dict[str, Any]] = [
     {"id": "c-food", "name": "Groceries"},
     {"id": "c-home", "name": "Household"},
     {"id": "c-none", "name": "Uncategorized", "category_group_name": "Internal Master Category"},
+    {"id": "c-visa", "name": "Visa", "category_group_name": "Credit Card Payments"},
 ]
 
 
@@ -106,6 +107,12 @@ def test_what_cannot_be_split_is_refused_with_what_to_do(
     """Each refusal says what is wrong, so the agent can fix its call."""
     with pytest.raises(ValueError, match=message):
         _plan(tx, lines, off_budget={"tracking"})
+
+
+def test_a_line_to_a_credit_card_payment_category_is_refused() -> None:
+    """YNAB ignores it on a split line, which would be left without a category."""
+    with pytest.raises(ValueError, match="c-visa pays a credit card"):
+        _plan(lines=_lines((-81.15, "c-food"), (-5.25, "c-visa")))
 
 
 def test_an_unknown_transaction_is_refused() -> None:

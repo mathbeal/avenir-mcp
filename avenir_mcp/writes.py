@@ -20,7 +20,7 @@ from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move
 from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
-from avenir_mcp.triage import internal_uncategorized
+from avenir_mcp.triage import CARD_CATEGORY, card_payments, internal_uncategorized
 
 CONFIRMATION_TTL_SECONDS = 600
 # Turns what is confirmed, models included, into plain JSON data before hashing it.
@@ -68,6 +68,34 @@ class Plan(Model):
     """Ids left alone because they changed since."""
 
 
+def _check_category(
+    category_id: str, names: dict[str, str], refused: tuple[set[str], set[str]]
+) -> None:
+    """Refuse a category YNAB would not put on a transaction.
+
+    Args:
+        category_id: The category asked for.
+        names: The plan's category names by id.
+        refused: Ids of YNAB's internal Uncategorized, and of the categories that pay
+            credit cards.
+
+    Raises:
+        ValueError: If the category is internal, unknown, or pays a credit card.
+    """
+    uncategorized, cards = refused
+    if category_id in uncategorized:
+        raise ValueError(
+            f"Category {category_id} is YNAB's internal Uncategorized: choose a real category."
+        )
+    if category_id not in names:
+        raise ValueError(
+            f"Category {category_id} is not in this plan: "
+            "use a category_id from the categories returned by suggest_categories."
+        )
+    if category_id in cards:
+        raise ValueError(f"Category {category_id} {CARD_CATEGORY}")
+
+
 def plan_categorization(
     transactions: list[dict[str, Any]],
     categories: list[dict[str, Any]],
@@ -88,12 +116,12 @@ def plan_categorization(
     Raises:
         ValueError: With a message saying what to fix, if an assignment names an
             unknown transaction or category, a transfer, a split, a transaction of
-            an off-budget account, YNAB's internal Uncategorized, or a
-            transaction twice.
+            an off-budget account, YNAB's internal Uncategorized, a credit card
+            payment category, or a transaction twice.
     """
     by_id = {tx["id"]: tx for tx in transactions}
     names = {c["id"]: c["name"] for c in categories}
-    uncategorized = internal_uncategorized(categories)
+    refused = (internal_uncategorized(categories), card_payments(categories))
     seen: set[str] = set()
     changes: list[Change] = []
     unchanged = 0
@@ -108,15 +136,7 @@ def plan_categorization(
                 f"Transaction {tx_id} is not in this plan: "
                 "use the transaction_id values returned by suggest_categories."
             )
-        if category_id in uncategorized:
-            raise ValueError(
-                f"Category {category_id} is YNAB's internal Uncategorized: choose a real category."
-            )
-        if category_id not in names:
-            raise ValueError(
-                f"Category {category_id} is not in this plan: "
-                "use a category_id from the categories returned by suggest_categories."
-            )
+        _check_category(category_id, names, refused)
         if tx.get("subtransactions"):
             raise ValueError(
                 f"Transaction {tx_id} is split across categories: change its lines in YNAB."

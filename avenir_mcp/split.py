@@ -15,7 +15,7 @@ from avenir_mcp.amounts import Amount
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 from avenir_mcp.model import Model
 from avenir_mcp.text import MAX_MEMO, YnabText, untrusted
-from avenir_mcp.triage import internal_uncategorized
+from avenir_mcp.triage import CARD_CATEGORY, card_payments, internal_uncategorized
 
 
 class SplitLine(Model):
@@ -97,20 +97,26 @@ def _check_transaction(tx: dict[str, Any], off_budget: set[str] | frozenset[str]
 
 
 def _check_lines(
-    tx: dict[str, Any], names: dict[str, str], uncategorized: set[str], lines: list[SplitLine]
+    tx: dict[str, Any],
+    names: dict[str, str],
+    refused: tuple[set[str], set[str]],
+    lines: list[SplitLine],
 ) -> None:
     """Refuse lines that name no real category or do not add up to the transaction.
 
     Args:
         tx: The transaction.
         names: The plan's category names by id.
-        uncategorized: Ids of YNAB's internal Uncategorized.
+        refused: Ids of YNAB's internal Uncategorized, and of the categories that pay
+            credit cards.
         lines: The lines proposed.
 
     Raises:
         ValueError: If there are fewer than two lines, a line is zero, a category is
-            unknown or internal, or the sum differs from the transaction.
+            unknown, internal or pays a credit card, or the sum differs from the
+            transaction.
     """
+    uncategorized, cards = refused
     if len(lines) < 2:
         raise ValueError(
             "Give at least two lines: to give the whole transaction one category, "
@@ -131,6 +137,8 @@ def _check_lines(
                 f"Category {line.category_id} is not in this plan: "
                 "use a category_id from suggest_categories or get_category_balances."
             )
+        if line.category_id in cards:
+            raise ValueError(f"Category {line.category_id} {CARD_CATEGORY}")
         total += milliunits
     if total != tx["amount"]:
         raise ValueError(
@@ -171,7 +179,8 @@ def plan_split(
         )
     _check_transaction(tx, off_budget)
     names = {c["id"]: c["name"] for c in categories}
-    _check_lines(tx, names, internal_uncategorized(categories), lines)
+    refused = (internal_uncategorized(categories), card_payments(categories))
+    _check_lines(tx, names, refused, lines)
     current = tx.get("category_id")
     return SplitPlan(
         transaction_id=transaction_id,

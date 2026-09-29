@@ -67,6 +67,7 @@ user is told before confirming. Confirmation works as for apply_categories.
 - `A line is zero: leave it out.`
 - `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
 - `Category {category_id} is not in this plan: use a category_id from suggest_categories or get_category_balances.`
+- `Category {category_id} pays a credit card: YNAB ignores it on a transaction. Choose the category of what was paid for.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`

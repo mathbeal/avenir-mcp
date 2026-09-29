@@ -118,11 +118,12 @@ Antwort auf dem Demo-Budget:
 
 - `Transaction {tx_id} is assigned twice: keep one assignment.`
 - `Transaction {tx_id} is not in this plan: use the transaction_id values returned by suggest_categories.`
-- `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
-- `Category {category_id} is not in this plan: use a category_id from the categories returned by suggest_categories.`
 - `Transaction {tx_id} is split across categories: change its lines in YNAB.`
 - `Transaction {tx_id} is on an off-budget account: YNAB gives it no category.`
 - `Transaction {tx_id} is a transfer between accounts: YNAB gives it no category.`
+- `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
+- `Category {category_id} is not in this plan: use a category_id from the categories returned by suggest_categories.`
+- `Category {category_id} pays a credit card: YNAB ignores it on a transaction. Choose the category of what was paid for.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`

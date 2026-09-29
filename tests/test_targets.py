@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from avenir_mcp import targets
+from avenir_mcp import targets, triage
 
 
 def _cat(**goal: Any) -> dict[str, Any]:
@@ -29,7 +29,7 @@ NEED_BY_DATE = _cat(
     goal_needs_whole_amount=False,
 )
 MONTHLY_FUNDING = _cat(goal_type="MF", goal_target=30_000)
-CARD = _cat(name="Visa", category_group_name=targets.CARD_GROUP)
+CARD = _cat(name="Visa", category_group_name=triage.CARD_GROUP)
 LOAN = _cat(name="Car loan", goal_type="DEBT", goal_target=250_000)
 
 

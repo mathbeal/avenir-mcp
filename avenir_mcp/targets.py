@@ -19,6 +19,7 @@ from typing import Any, Literal
 
 from avenir_mcp.client import amount_to_milliunit
 from avenir_mcp.model import Model
+from avenir_mcp.triage import CARD_GROUP
 
 Frequency = Literal["monthly", "weekly", "yearly"]
 _CADENCE: dict[int, str] = {1: "monthly", 2: "weekly", 13: "yearly"}
@@ -32,8 +33,6 @@ _KIND = {
 }
 
 
-CARD_GROUP = "Credit Card Payments"
-"""The internal group of the categories that pay credit cards."""
 _CARD = "a credit card payment category"
 _LOAN = "a category paired to a loan account"
 
