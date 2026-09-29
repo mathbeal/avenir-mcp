@@ -29,12 +29,13 @@ def _mock_response(payload: Any, status_code: int = 200) -> MagicMock:
 
 
 def _async_client_returning(payload: Any) -> MagicMock:
-    """Return a context-manager mock whose .get() / .patch() yields *payload*."""
+    """Return a context-manager mock whose .get(), .patch(), .post() and .delete() yield it."""
     mock_resp = _mock_response(payload)
     mock_http = AsyncMock()
     mock_http.get = AsyncMock(return_value=mock_resp)
     mock_http.patch = AsyncMock(return_value=mock_resp)
     mock_http.delete = AsyncMock(return_value=mock_resp)
+    mock_http.post = AsyncMock(return_value=mock_resp)
     ctx = MagicMock()
     ctx.__aenter__ = AsyncMock(return_value=mock_http)
     ctx.__aexit__ = AsyncMock(return_value=None)
@@ -665,6 +666,19 @@ def test_approve_transactions_bulk_patches_approved_flag() -> None:
     assert http.patch.call_args.kwargs["json"] == {
         "transactions": [{"id": "t1", "approved": True}, {"id": "t2", "approved": True}]
     }
+
+
+def test_import_transactions_asks_ynab_to_import_from_linked_accounts() -> None:
+    """import_transactions POSTs to the import endpoint, with no body, and returns the new ids."""
+    payload = {"data": {"transaction_ids": ["t7", "t8"]}}
+    ctx = _async_client_returning(payload)
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            result = asyncio.run(client.import_transactions("b1"))
+    http = ctx.__aenter__.return_value
+    assert result == ["t7", "t8"]
+    assert http.post.call_args.args[0].endswith("/plans/b1/transactions/import")
+    assert "json" not in http.post.call_args.kwargs
 
 
 def test_approve_transactions_empty_list_makes_no_call() -> None:

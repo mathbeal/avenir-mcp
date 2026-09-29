@@ -12,6 +12,7 @@ sidebar:
 | Bestätigungscodes | im Speicher gehalten: Ein Neustart des Servers vergisst sie | erneut nach einer neuen Vorschau fragen |
 | Rückgängig | auf den Rechner beschränkt, dessen Journal die Operation erfasst hat; ein Rückgängigmachen lässt sich nicht rückgängig machen | die Änderung erneut vornehmen |
 | `approve_transactions` | wird sofort angewendet, ohne Vorschau | es entfernt nur das Prüfkennzeichen von YNAB |
+| `import_transactions` | wird sofort angewendet, ohne Vorschau; hier nicht rückgängig zu machen | es holt nur, was die Bank bereits hat; eine Transaktion in YNAB löschen, um sie zurückzunehmen |
 | `update_category`, `create_category` | nicht rückgängig zu machen; die API von YNAB kann keine Kategorie löschen | zurückbenennen; die Kategorie in YNAB ausblenden |
 | HTTP-Transport | einfaches HTTP, ein gemeinsames Token, keine Benutzerkonten | auf `127.0.0.1` belassen oder stdio nutzen |
 | Öffentlicher oder geteilter Server | nicht unterstützt: keine Benutzerkonten, und die Bedingungen von YNAB verlangen OAuth für die Plans anderer | jede Person betreibt ihr eigenes avenir-mcp – siehe die [rechtlichen Hinweise](/avenir-mcp/de/project/legal/) |

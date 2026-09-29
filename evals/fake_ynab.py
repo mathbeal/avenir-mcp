@@ -254,6 +254,9 @@ class Handler(BaseHTTPRequestHandler):
             if method == "PATCH" and rest == "/transactions":
                 ids = STATE.patch_transactions(self._body()["transactions"])
                 return self._send(200, {"data": {"transaction_ids": ids}})
+            if method == "POST" and rest == "/transactions/import":
+                # The demo plan has no bank connection: there is never anything new.
+                return self._send(200, {"data": {"transaction_ids": []}})
             if method == "POST" and rest == "/transactions":
                 ids = STATE.create_transactions(self._body()["transactions"])
                 data = {"transaction_ids": ids, "duplicate_import_ids": []}

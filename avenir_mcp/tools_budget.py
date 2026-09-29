@@ -63,6 +63,17 @@ class Account(Model):
     """Balance of the transactions the bank has not shown yet."""
 
 
+class ImportResult(Model):
+    """The outcome of import_transactions."""
+
+    imported: int
+    """Number of transactions YNAB imported from the linked accounts."""
+    transaction_ids: list[str]
+    """Their ids, e.g. for find_transactions or approve_transactions."""
+    message: str
+    """What happened and what to do next, for the agent to relay."""
+
+
 class Approval(Model):
     """The outcome of approve_transactions."""
 
@@ -457,3 +468,42 @@ async def approve_transactions(plan_id: str, tx_ids: list[str]) -> Approval:
     """
     logger.info("Tool called: approve_transactions(plan_id=%r, n=%d)", plan_id, len(tx_ids))
     return Approval(**await client.approve_transactions(plan_id, tx_ids))
+
+
+@mcp.tool(
+    tags={WRITE_TAG},
+    annotations={
+        "title": "Import the bank's latest transactions",
+        "read_only_hint": False,
+        "destructive_hint": False,
+        "idempotent_hint": True,
+        "open_world_hint": True,
+    },
+)
+async def import_transactions(plan_id: str) -> ImportResult:
+    """Import the latest transactions from the plan's linked bank accounts into YNAB.
+
+    The same as pressing Import in YNAB: nothing is deleted or changed, and YNAB never
+    imports a transaction twice, so it is applied at once, without a preview. Use it
+    before classifying or reconciling, so that the list is complete. Accounts without
+    a bank connection are left as they are. Imported transactions stay unapproved for
+    the user to review; to take one back, delete it in YNAB.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+
+    Returns:
+        How many transactions came in, and their ids.
+    """
+    logger.info("Tool called: import_transactions")
+    ids = await client.import_transactions(plan_id)
+    if not ids:
+        return ImportResult(imported=0, transaction_ids=[], message="No new transaction to import.")
+    return ImportResult(
+        imported=len(ids),
+        transaction_ids=ids,
+        message=(
+            f"Imported {len(ids)} transaction(s). suggest_categories lists those that still "
+            "need a category."
+        ),
+    )
