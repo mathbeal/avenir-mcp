@@ -12,7 +12,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 <FileTree>
 - avenir_mcp/ — le serveur (voir [Architecture](/avenir-mcp/fr/concepts/architecture/))
 - tests/ — tests unitaires, tests du protocole, de la documentation et d'hygiène
-- evals/ — le budget de démonstration, une doublure de l'API YNAB, l'évaluation par agent
+- evals/ — le plan de démonstration, une doublure de l'API YNAB, l'évaluation par agent
 - docsgen/ — génère la référence des outils, le catalogue des erreurs et les exemples
 - docs/ — ce site (Astro Starlight, anglais, français, espagnol, allemand, néerlandais)
 - AGENTS.md — le contrat des contributeurs, humains ou non
@@ -56,7 +56,7 @@ verrouillées, la construction de la documentation avec les tests de son propre 
 l'OpenSSF Scorecard (une fois le dépôt public), une comparaison hebdomadaire de l'API YNAB
 avec son instantané (`just api-drift`), et
 le MCP Inspector officiel (`just inspect`), qui contrôle le serveur comme le voit un
-client, sur le budget de démonstration : ses listes, la portabilité des schémas de ses
+client, sur le plan de démonstration : ses listes, la portabilité des schémas de ses
 outils et un appel de chaque sorte. La suite de tests tourne sous Linux
 et macOS avec Python 3.12, 3.13 et 3.14, et sous Windows avec Python 3.14 (sur une pull
 request, macOS n'essaie que 3.14 : ses machines coûtent dix fois celles de Linux) ; la couverture
@@ -74,7 +74,7 @@ au vert : **CI passed**, qui résume tous les jobs du workflow de qualité, et
 | Mise à jour | Traitement |
 |---|---|
 | outils de développement, actions de la CI, site de documentation (mineures et correctifs) | regroupées, fusionnées d'elles-mêmes une fois la CI au vert |
-| `fastmcp`, `httpx`, `pydantic` — ils tournent devant les budgets des utilisateurs | une pull request chacune, relue à la main ; l'évaluation est lancée avant une mise à jour de `fastmcp` |
+| `fastmcp`, `httpx`, `pydantic` — ils tournent devant les plans des utilisateurs | une pull request chacune, relue à la main ; l'évaluation est lancée avant une mise à jour de `fastmcp` |
 | toute version majeure | une pull request chacune, relue à la main |
 | une vulnérabilité connue | aussitôt, quel que soit le jour |
 
@@ -108,7 +108,7 @@ just docs                  # construit le site dans toutes les langues ; un lien
 just docs-serve            # aperçu en direct sur http://localhost:4321/avenir-mcp/
 ```
 
-`docsgen` fait tourner avenir-mcp sur le budget de démonstration et écrit ce qu'il répond
+`docsgen` fait tourner avenir-mcp sur le plan de démonstration et écrit ce qu'il répond
 réellement, date fixée et identifiants aléatoires remplacés. Les pages écrites à la main
 existent en anglais, en français, en espagnol, en allemand et en néerlandais ; un test échoue s'il en manque une.
 

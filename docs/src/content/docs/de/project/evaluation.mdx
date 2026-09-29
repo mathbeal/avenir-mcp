@@ -1,13 +1,13 @@
 ---
 title: Evaluierung
-description: Ein echter Agent arbeitet auf einem erfundenen Budget, und sowohl seine Antworten als auch der Endzustand des Budgets werden geprüft.
+description: Ein echter Agent arbeitet auf einem erfundenen Plan, und sowohl seine Antworten als auch der Endzustand des Plans werden geprüft.
 sidebar:
   order: 2
 ---
 
 Unit-Tests prüfen den Code. Sie können nicht sagen, ob ein Agent das richtige Tool
 wählt, die Antwort richtig liest oder eine Bestätigung respektiert. Dafür lässt avenir-mcp
-einen echten Claude-Agenten auf einem erfundenen Budget arbeiten.
+einen echten Claude-Agenten auf einem erfundenen Plan arbeiten.
 
 ## Wie sie abläuft
 
@@ -16,10 +16,10 @@ einen echten Claude-Agenten auf einem erfundenen Budget arbeiten.
 | `evals/demo_budget.py` | ein erfundener Haushalt: Giro- und Sparkonto, Miete, Gehalt, Abonnements, Lebensmittel mit realistischen Bankbezeichnungen, sechs ausstehende Transaktionen, eine doppelt importierte Transaktion, eine überzogene Kategorie und ein Verwendungszweck mit einer Prompt-Injection |
 | `evals/fake_ynab.py` | ein lokaler Ersatz für die API von YNAB, der es bereitstellt, mit Delta-Synchronisation und `last-used`, und die Anfragen zählt |
 | `evals/tasks.py` | die Aufgaben und ihre Prüfungen |
-| `evals/run.py` | startet Claude Code ohne Oberfläche für jede Aufgabe: avenir-mcp als einziges Tool, Schreiben aktiviert, ein frisches Budget, ein leeres Arbeitsverzeichnis, keine gespeicherte Sitzung |
+| `evals/run.py` | startet Claude Code ohne Oberfläche für jede Aufgabe: avenir-mcp als einziges Tool, Schreiben aktiviert, ein frischer Plan, ein leeres Arbeitsverzeichnis, keine gespeicherte Sitzung |
 | `evals/run_openai.py` | dieselben Aufgaben mit einem Modell hinter einer OpenAI-kompatiblen API (standardmäßig Mammouth), über eine kleine Schleife für Tool-Aufrufe anstelle von Claude Code |
 
-Eine Aufgabe ist **bestanden**, wenn die Endantwort richtig ist **und** das Budget im
+Eine Aufgabe ist **bestanden**, wenn die Endantwort richtig ist **und** der Plan im
 erwarteten Zustand endet. Erwartete Zahlen werden aus den Demo-Daten berechnet, nie aus
 den Antworten von avenir-mcp kopiert. Beträge werden so gelesen, wie Menschen sie
 schreiben: `3,512.66`, `3 512,66`, `-22.5`.
@@ -114,4 +114,4 @@ uv run python -m evals.run_openai --model gpt-5.4-mini
 ```
 
 `AVENIR_EVAL_BASE_URL` verweist auf eine andere OpenAI-kompatible API. Nur die erfundenen
-Daten des Demo-Budgets werden gesendet.
+Daten des Demo-Plans werden gesendet.

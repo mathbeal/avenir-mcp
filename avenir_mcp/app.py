@@ -12,7 +12,7 @@ from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 mcp = FastMCP("avenir-mcp")
 
 
-# Tools that change the budget carry this tag; read-only mode hides them.
+# Tools that change a plan carry this tag; read-only mode hides them.
 WRITE_TAG = "write"
 
 

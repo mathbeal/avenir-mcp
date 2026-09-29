@@ -36,7 +36,7 @@ Deshacerla añade un marcador; nunca se reescribe nada:
 | Campo | Significado |
 |---|---|
 | `operation_id` | 12 caracteres hexadecimales aleatorios |
-| `plan_id` | el presupuesto modificado |
+| `plan_id` | el plan modificado |
 | `kind` | `categorize`, `budget`, `reconcile` o `create` |
 | `applied_at` | ISO 8601, UTC, al segundo |
 | `moves` | para `categorize`: la categoría de cada transacción antes y después |
@@ -50,9 +50,9 @@ Deshacerla añade un marcador; nunca se reescribe nada:
 
 ## Qué operación se deshace
 
-Sin id, `undo_operation` toma **la operación más reciente del presupuesto aún vigente**:
+Sin id, `undo_operation` toma **la operación más reciente del plan aún vigente**:
 que no se haya deshecho ni sea a su vez una anulación. Con un id, esa operación, si sigue
-vigente. Si no: *«Nothing to undo: no operation of this budget is still in effect.»*
+vigente. Si no: *«Nothing to undo: no operation of this plan is still in effect.»*
 
 ## Qué restaura la anulación
 

@@ -47,7 +47,7 @@ a call. avenir-mcp uses the *input required* round trip:
    `input_responses`, and the `request_state` it received. FastMCP seals that state on
    the wire and rejects tampering.
 4. avenir-mcp recomputes the plan and its fingerprint. If they differ from `request_state` —
-   someone changed the budget in between — the call fails with *“The budget changed
+   someone changed the plan in between — the call fails with *“The plan changed
    between the preview and the answer”* and nothing is written.
 
 ### 2. The client supports elicitation, older protocol
@@ -81,7 +81,7 @@ as *no* would make every write impossible — the defect avenir-mcp's
 | Format | 11 URL-safe characters (`secrets.token_urlsafe(8)`) |
 | Lifetime | 600 seconds, on a monotonic clock |
 | Use | once: a code is spent on its first use, even if it does not match |
-| Scope | the fingerprint of one subject in one budget |
+| Scope | the fingerprint of one subject in one plan |
 | Storage | the server's memory only: a restart forgets every code |
 
 A code that is unknown, expired, already used, or issued for other changes is refused

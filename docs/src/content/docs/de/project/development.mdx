@@ -12,7 +12,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 <FileTree>
 - avenir_mcp/ — der Server (siehe [Architektur](/avenir-mcp/de/concepts/architecture/))
 - tests/ — Unit-Tests, Protokolltests, Dokumentations- und Hygienetests
-- evals/ — das Demo-Budget, ein Ersatz für die API von YNAB, die Evaluierung der Agenten
+- evals/ — der Demo-Plan, ein Ersatz für die API von YNAB, die Evaluierung der Agenten
 - docsgen/ — erzeugt die Tool-Referenz, den Fehlerkatalog und die Beispiele
 - docs/ — diese Website (Astro Starlight, Englisch, Französisch, Spanisch, Deutsch, Niederländisch)
 - AGENTS.md — der Vertrag für Mitwirkende, menschlich oder nicht
@@ -55,7 +55,7 @@ festgeschriebenen Abhängigkeiten, `gitleaks` auf jedem Commit der Historie (`ju
 mit Docker), den Build der Dokumentation mit den Tests ihres eigenen Codes, CodeQL und die
 OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen Vergleich der
 API von YNAB mit ihrem Schnappschuss (`just api-drift`) und den offiziellen MCP Inspector
-(`just inspect`), der den Server so prüft, wie ein Client ihn auf dem Demo-Budget sieht:
+(`just inspect`), der den Server so prüft, wie ein Client ihn auf dem Demo-Plan sieht:
 seine Listen, die Portabilität seiner Tool-Schemas und je einen Aufruf jeder Art. Die
 Testsuite läuft unter Linux und macOS mit Python 3.12, 3.13 und 3.14 und unter Windows mit
 Python 3.14 (bei einem Pull Request probiert macOS nur 3.14: seine Runner kosten so viel
@@ -73,7 +73,7 @@ steht, und **MCP Inspector**, ein eigener Workflow, damit sein Badge ihn allein 
 | Aktualisierung | Behandlung |
 |---|---|
 | Entwicklungswerkzeuge, CI-Actions, die Dokumentationswebsite (Minor und Patch) | gruppiert, von selbst zusammengeführt, sobald die CI grün ist |
-| `fastmcp`, `httpx`, `pydantic` – sie laufen vor den Budgets der Nutzer | je ein Pull Request, von Hand geprüft; die Evaluierung läuft vor einer Aktualisierung von `fastmcp` |
+| `fastmcp`, `httpx`, `pydantic` – sie laufen vor den Plans der Nutzer | je ein Pull Request, von Hand geprüft; die Evaluierung läuft vor einer Aktualisierung von `fastmcp` |
 | jede Major-Version | je ein Pull Request, von Hand geprüft |
 | eine bekannte Schwachstelle | sofort, an jedem Tag |
 
@@ -107,7 +107,7 @@ just docs                  # baut die Website in allen Sprachen; defekte Links s
 just docs-serve            # Live-Vorschau auf http://localhost:4321/avenir-mcp/
 ```
 
-`docsgen` führt avenir-mcp auf dem Demo-Budget aus und schreibt, was es wirklich
+`docsgen` führt avenir-mcp auf dem Demo-Plan aus und schreibt, was es wirklich
 antwortet, mit festem Datum und ersetzten Zufallskennungen. Handgeschriebene Seiten gibt
 es auf Englisch, Französisch, Spanisch, Deutsch und Niederländisch; ein Test schlägt fehl, wenn eine fehlt.
 

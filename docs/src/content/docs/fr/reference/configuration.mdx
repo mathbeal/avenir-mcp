@@ -17,7 +17,7 @@ fichier de configuration.
 |---|---|---|
 | `YNAB_API_KEY` | — (**obligatoire**, ou `YNAB_API_KEY_FILE`) | Votre jeton d'accès personnel YNAB. |
 | `YNAB_API_KEY_FILE` | absente | Un fichier contenant le jeton, utilisé quand `YNAB_API_KEY` est absente. |
-| `AVENIR_MCP_WRITE` | absente : lecture seule | `1` enregistre les outils qui modifient votre budget. |
+| `AVENIR_MCP_WRITE` | absente : lecture seule | `1` enregistre les outils qui modifient votre plan. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | absente | `1` n'accepte qu'un oui donné dans le client : pas de codes de confirmation. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` ou `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | Adresse HTTP. |
@@ -36,7 +36,7 @@ fichier de configuration.
 
 Votre jeton d'accès personnel, dans YNAB → Account Settings → Developer Settings. Sans
 lui, tout outil qui appelle YNAB échoue avec `YNAB_API_KEY environment variable is not
-set`. Il donne un accès complet en lecture et en écriture à tous les budgets du compte.
+set`. Il donne un accès complet en lecture et en écriture à tous les plans du compte.
 
 ### `YNAB_API_KEY_FILE`
 
@@ -135,7 +135,7 @@ un collecteur de logs — voir
 ### `AVENIR_MCP_YNAB_URL`
 
 L'adresse de base de l'API. Utile seulement pour diriger avenir-mcp vers une doublure, comme
-le font l'évaluation et le générateur de documentation avec leur serveur de budget de
+le font l'évaluation et le générateur de documentation avec leur serveur de plan de
 démonstration. Elle doit commencer par `https://` — `http://` n'est accepté que pour
 `127.0.0.1` ou `localhost` — car chaque requête porte votre jeton.
 
@@ -143,7 +143,7 @@ démonstration. Elle doit commencer par `https://` — `http://` n'est accepté 
 
 | Argument | Valeurs acceptées |
 |---|---|
-| `plan_id` | un identifiant de budget donné par `list_plans`, ou `last-used` |
+| `plan_id` | un identifiant de plan donné par `list_plans`, ou `last-used` |
 | `month` | `current`, ou le premier jour d'un mois : `AAAA-MM-01` |
 | `until` | un mois, `AAAA-MM`, jusqu'à 24 mois plus tard |
 | dates | `AAAA-MM-JJ` |

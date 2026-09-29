@@ -15,7 +15,7 @@ weitermachen.
 <Steps>
 
 1. [uv installieren](#uv-installieren), das Tool, das avenir-mcp ausführt.
-2. [Ein YNAB-Token besorgen](#ein-ynab-token-besorgen), den Zugang von avenir-mcp zu Ihren Budgets.
+2. [Ein YNAB-Token besorgen](#ein-ynab-token-besorgen), den Zugang von avenir-mcp zu Ihren Plans.
 3. [Prüfen, ob avenir-mcp startet](#prüfen-ob-avenir-mcp-startet), einmal von Hand.
 4. [avenir-mcp zu Ihrem Client hinzufügen](#avenir-mcp-zu-ihrem-client-hinzufügen).
 5. [Prüfen, ob es funktioniert](#prüfen-ob-es-funktioniert), mit einer ersten Frage.
@@ -27,7 +27,7 @@ weitermachen.
 
 | | Wozu | Woher |
 |---|---|---|
-| **Ein YNAB-Konto** | avenir-mcp liest und ändert *Ihre* Budgets | [app.ynab.com](https://app.ynab.com) |
+| **Ein YNAB-Konto** | avenir-mcp liest und ändert *Ihre* Plans | [app.ynab.com](https://app.ynab.com) |
 | **Einen MCP-Client** | die Anwendung, mit der Sie sprechen; sie startet avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
 | **uv** | lädt avenir-mcp und das nötige Python herunter und führt sie in einer isolierten Umgebung aus | der nächste Schritt |
 
@@ -80,7 +80,7 @@ fügt uv nur dem `PATH` neuer Terminals hinzu: Öffnen Sie ein neues. Details in
 </Steps>
 
 <Aside type="danger" title="Behandeln Sie das Token wie ein Passwort">
-Ein Personal Access Token kann **jedes Budget Ihres Kontos lesen und ändern**; YNAB bietet
+Ein Personal Access Token kann **jeden Plan Ihres Kontos lesen und ändern**; YNAB bietet
 kein Token nur zum Lesen. Fügen Sie es niemals in einen Chat mit einer KI, eine geteilte
 Datei, ein Issue oder ein Repository ein. avenir-mcp protokolliert es nie und gibt es nie in
 einer Antwort zurück.
@@ -271,9 +271,9 @@ Linux) oder `where uvx` (Windows) ausgibt – zum Beispiel `"/Users/<sie>/.local
   </TabItem>
 </Tabs>
 
-Fragen Sie nun in einem neuen Gespräch: *„Liste meine YNAB-Budgets auf.“* Der Agent ruft
+Fragen Sie nun in einem neuen Gespräch: *„Liste meine YNAB-Plans auf.“* Der Agent ruft
 [`list_plans`](/avenir-mcp/de/reference/tools/list-plans/) auf – Ihr Client fragt Sie
-vielleicht um Erlaubnis – und antwortet mit ihren Namen. Hier das Demo-Budget, das in
+vielleicht um Erlaubnis – und antwortet mit ihren Namen. Hier der Demo-Plan, der in
 dieser gesamten Dokumentation verwendet wird:
 
 <Code code={budgets} lang="json" title="list_plans" />

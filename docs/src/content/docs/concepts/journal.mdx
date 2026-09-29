@@ -36,7 +36,7 @@ Undoing it appends a marker; nothing is ever rewritten:
 | Field | Meaning |
 |---|---|
 | `operation_id` | 12 random hexadecimal characters |
-| `plan_id` | the budget changed |
+| `plan_id` | the plan changed |
 | `kind` | `categorize`, `budget`, `reconcile` or `create` |
 | `applied_at` | ISO 8601, UTC, to the second |
 | `moves` | for `categorize`: each transaction's category before and after |
@@ -50,9 +50,9 @@ Undoing it appends a marker; nothing is ever rewritten:
 
 ## Which operation undo picks
 
-`undo_operation` without an id takes the **most recent operation of the budget that is
+`undo_operation` without an id takes the **most recent operation of the plan that is
 still in effect**: not undone, and not itself an undo. With an id, that operation, if it
-is still in effect. Otherwise: *“Nothing to undo: no operation of this budget is still in
+is still in effect. Otherwise: *“Nothing to undo: no operation of this plan is still in
 effect.”*
 
 ## What undo restores

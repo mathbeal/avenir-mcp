@@ -51,6 +51,6 @@ avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schre
 | Prompt | Argumente | Beschreibung |
 |---|---|---|
 | `classify_pending` | `plan_id` | Classify the transactions waiting for a category. |
-| `monthly_review` | `plan_id`, `month` (optional) | Review a budget month: where the money went and what needs attention. |
+| `monthly_review` | `plan_id`, `month` (optional) | Review a month of a plan: where the money went and what needs attention. |
 | `reconcile` | `plan_id`, `account_id`, `bank_balance` | Reconcile an account with the balance the bank shows. |
-| `plan_next_month` | `plan_id` | Prepare next month's budget from the forecast and this month's categories. |
+| `plan_next_month` | `plan_id` | Prepare next month's category amounts from the forecast and this month's categories. |

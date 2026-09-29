@@ -14,7 +14,7 @@ ends with a check, so you know it worked before moving on.
 <Steps>
 
 1. [Install uv](#install-uv), the tool that runs avenir-mcp.
-2. [Get a YNAB token](#get-a-ynab-token), avenir-mcp's access to your budgets.
+2. [Get a YNAB token](#get-a-ynab-token), avenir-mcp's access to your plans.
 3. [Check that avenir-mcp starts](#check-that-avenir-mcp-starts), by hand, once.
 4. [Add avenir-mcp to your client](#add-avenir-mcp-to-your-client).
 5. [Check it works](#check-it-works) with a first question.
@@ -26,7 +26,7 @@ ends with a check, so you know it worked before moving on.
 
 | | Why | Where to get it |
 |---|---|---|
-| **A YNAB account** | avenir-mcp reads and changes *your* budgets | [app.ynab.com](https://app.ynab.com) |
+| **A YNAB account** | avenir-mcp reads and changes *your* plans | [app.ynab.com](https://app.ynab.com) |
 | **An MCP client** | the application you talk to; it starts avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
 | **uv** | downloads and runs avenir-mcp, and the Python it needs, in an isolated environment | the next step |
 
@@ -79,7 +79,7 @@ to the `PATH` of new terminals only: open a new one. Details in
 </Steps>
 
 <Aside type="danger" title="Treat the token like a password">
-A personal access token can **read and change every budget** of your account; YNAB
+A personal access token can **read and change every plan** of your account; YNAB
 offers no read-only token. Never paste it into a chat with an AI, a shared file, an
 issue or a repository. avenir-mcp never logs it and never returns it in an answer.
 </Aside>
@@ -268,9 +268,9 @@ Linux) or `where uvx` (Windows) — for instance `"/Users/<you>/.local/bin/uvx"`
   </TabItem>
 </Tabs>
 
-Now ask, in a new conversation: *“List my YNAB budgets.”* The agent calls
+Now ask, in a new conversation: *“List my YNAB plans.”* The agent calls
 [`list_plans`](/avenir-mcp/reference/tools/list-plans/) — your client may ask you to
-allow it — and answers with their names. Here, the demo budget used throughout this
+allow it — and answers with their names. Here, the demo plan used throughout this
 documentation:
 
 <Code code={budgets} lang="json" title="list_plans" />

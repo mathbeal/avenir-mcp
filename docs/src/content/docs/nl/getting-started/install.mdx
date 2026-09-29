@@ -14,7 +14,7 @@ Elke stap eindigt met een controle, zodat je weet dat het gelukt is voordat je v
 <Steps>
 
 1. [uv installeren](#uv-installeren), het programma dat avenir-mcp uitvoert.
-2. [Een YNAB-token aanmaken](#een-ynab-token-aanmaken), de toegang van avenir-mcp tot je budgetten.
+2. [Een YNAB-token aanmaken](#een-ynab-token-aanmaken), de toegang van avenir-mcp tot je plans.
 3. [Controleren of avenir-mcp start](#controleren-of-avenir-mcp-start), één keer met de hand.
 4. [avenir-mcp aan je client toevoegen](#avenir-mcp-aan-je-client-toevoegen).
 5. [Controleren of het werkt](#controleren-of-het-werkt), met een eerste vraag.
@@ -26,7 +26,7 @@ Elke stap eindigt met een controle, zodat je weet dat het gelukt is voordat je v
 
 | | Waarom | Waar je het vindt |
 |---|---|---|
-| **Een YNAB-account** | avenir-mcp leest en wijzigt *jouw* budgetten | [app.ynab.com](https://app.ynab.com) |
+| **Een YNAB-account** | avenir-mcp leest en wijzigt *jouw* plans | [app.ynab.com](https://app.ynab.com) |
 | **Een MCP-client** | de applicatie waarmee je praat; die start avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
 | **uv** | downloadt en draait avenir-mcp, en de Python die het nodig heeft, in een geïsoleerde omgeving | de volgende stap |
 
@@ -79,7 +79,7 @@ voegt uv alleen toe aan het `PATH` van nieuwe terminals: open een nieuwe. Detail
 </Steps>
 
 <Aside type="danger" title="Behandel het token als een wachtwoord">
-Een personal access token kan **elk budget van je account lezen en wijzigen**; YNAB biedt
+Een personal access token kan **elk plan van je account lezen en wijzigen**; YNAB biedt
 geen token dat alleen kan lezen. Plak het nooit in een chat met een AI, een gedeeld
 bestand, een issue of een repository. avenir-mcp logt het nooit en geeft het nooit terug in
 een antwoord.
@@ -270,9 +270,9 @@ Linux) of `where uvx` (Windows) – bijvoorbeeld `"/Users/<jij>/.local/bin/uvx"`
   </TabItem>
 </Tabs>
 
-Vraag nu in een nieuw gesprek: *„Toon mijn YNAB-budgetten.“* De agent roept
+Vraag nu in een nieuw gesprek: *„Toon mijn YNAB-plans.“* De agent roept
 [`list_plans`](/avenir-mcp/nl/reference/tools/list-plans/) aan – je client vraagt je misschien
-om toestemming – en antwoordt met hun namen. Hier het demobudget dat in deze hele
+om toestemming – en antwoordt met hun namen. Hier het demoplan dat in deze hele
 documentatie wordt gebruikt:
 
 <Code code={budgets} lang="json" title="list_plans" />

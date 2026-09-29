@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp geeft een agent 20 tools, 4 resources en 4 prompts voor je YNAB-budgetten. Deze
+avenir-mcp geeft een agent 20 tools, 4 resources en 4 prompts voor je YNAB-plans. Deze
 pagina ordent ze naar wat je wilt doen. Elke regel geeft een zin die je tegen de agent kunt
 zeggen; de agent kiest de tool.
 
@@ -28,14 +28,14 @@ toegewezen.
 
 | Je zegt | Tool | |
 |---|---|---|
-| *„Welke budgetten heb ik?“* | [`list_plans`](/avenir-mcp/nl/reference/tools/list-plans/) | L |
+| *„Welke plans heb ik?“* | [`list_plans`](/avenir-mcp/nl/reference/tools/list-plans/) | L |
 | *„Wat staat er op mijn rekeningen?“* | [`list_accounts`](/avenir-mcp/nl/reference/tools/list-accounts/) | L |
 | *„Welke categoriegroepen zijn er?“* | [`list_category_groups`](/avenir-mcp/nl/reference/tools/list-category-groups/) | L |
 | *„Welke transactie is mijn bon van 86,40 van de 12e?“* | [`find_transactions`](/avenir-mcp/nl/reference/tools/find-transactions/) – op datum, exact bedrag en rekening, gecategoriseerd of niet | L |
 | *„Waardoor zit Restaurants deze maand over budget?“* | [`find_transactions`](/avenir-mcp/nl/reference/tools/find-transactions/) – op categorie, gesplitste regels inbegrepen, of op begunstigde, hoe de bank hem ook noemt | L |
 | *„Welke rekeningen moeten vóór de 10e betaald worden?“* | [`list_scheduled_transactions`](/avenir-mcp/nl/reference/tools/list-scheduled-transactions/) – geplande transacties herhaald volgens hun frequentie, inkomend en uitgaand | L |
 
-De budgetten, rekeningen en categorieën worden ook aangeboden als
+De plans, rekeningen en categorieën worden ook aangeboden als
 [resources](/avenir-mcp/nl/reference/resources-and-prompts/) die je client zonder toolaanroep
 aan een gesprek kan koppelen.
 
@@ -115,10 +115,10 @@ een hele taak. In Claude Code zijn het slash-commando's van de server `avenir-mc
 
 | Prompt | Argumenten | Wat hij doet |
 |---|---|---|
-| `classify_pending` | budget | suggesties, jouw keuzes, één bevestigde batch, het id om ongedaan te maken |
-| `monthly_review` | budget, maand | totalen, wat opvalt, voorgestelde correcties |
-| `reconcile` | budget, rekening, banksaldo | het verschil uitgelegd, dan een bevestigde afstemming |
-| `plan_next_month` | budget | prognose en aannames, dan de bedragen van volgende maand |
+| `classify_pending` | plan | suggesties, jouw keuzes, één bevestigde batch, het id om ongedaan te maken |
+| `monthly_review` | plan, maand | totalen, wat opvalt, voorgestelde correcties |
+| `reconcile` | plan, rekening, banksaldo | het verschil uitgelegd, dan een bevestigde afstemming |
+| `plan_next_month` | plan | prognose en aannames, dan de bedragen van volgende maand |
 
 ## Ingebouwd
 

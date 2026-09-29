@@ -15,9 +15,9 @@ conversation without a tool call — and **prompts** — workflows the user star
 | URI | Type | Content |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | how to use avenir-mcp's tools, and the YNAB method in brief |
-| `ynab://plans` | `application/json` | the budgets the token can read |
-| `ynab://plans/{plan_id}/categories` | `application/json` | the budget's assignable categories, by group |
-| `ynab://plans/{plan_id}/accounts` | `application/json` | the budget's open accounts and balances |
+| `ynab://plans` | `application/json` | the plans the token can read |
+| `ynab://plans/{plan_id}/categories` | `application/json` | the plan's assignable categories, by group |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | the plan's open accounts and balances |
 
 Each read of a `ynab://` resource costs one YNAB request. In Claude Code, attach one with
 `@` in the prompt.

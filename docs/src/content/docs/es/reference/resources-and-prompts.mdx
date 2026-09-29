@@ -14,9 +14,9 @@ trabajo que lanza el usuario.
 | URI | Tipo | Contenido |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | cómo usar las herramientas de avenir-mcp, y el método YNAB en breve |
-| `ynab://plans` | `application/json` | los presupuestos que el token puede leer |
-| `ynab://plans/{plan_id}/categories` | `application/json` | las categorías asignables del presupuesto, por grupo |
-| `ynab://plans/{plan_id}/accounts` | `application/json` | las cuentas abiertas del presupuesto y sus saldos |
+| `ynab://plans` | `application/json` | los planes que el token puede leer |
+| `ynab://plans/{plan_id}/categories` | `application/json` | las categorías asignables del plan, por grupo |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | las cuentas abiertas del plan y sus saldos |
 
 Cada lectura de un recurso `ynab://` cuesta una petición a YNAB. En Claude Code, adjunte
 uno con `@` en el prompt.

@@ -20,7 +20,7 @@ YNAB stocke chaque montant en nombre entier de **milliunités** : 1,00 vaut `100
 
 Sommes, différences et proratas sont calculés en milliunités, puis convertis une seule
 fois : aucune erreur d'arrondi ne crée ni ne perd un centime. Les montants sont dans la
-devise du budget ; les dépenses sont négatives, les entrées positives.
+devise du plan ; les dépenses sont négatives, les entrées positives.
 
 ## Parler à YNAB
 
@@ -55,9 +55,9 @@ d'où `set_category_budget` et `get_budget_vs_actual`.
 
 ## La copie locale des transactions
 
-La plupart des outils ont besoin des transactions du budget : trouver ce qui attend,
+La plupart des outils ont besoin des transactions du plan : trouver ce qui attend,
 apprendre de l'historique, comparer avec la banque, prévoir. Tout télécharger à chaque
-appel serait lent et consommerait le quota de YNAB. avenir-mcp garde une copie par budget, en
+appel serait lent et consommerait le quota de YNAB. avenir-mcp garde une copie par plan, en
 mémoire, et la rafraîchit par la **synchronisation incrémentale** de YNAB :
 
 1. Le premier chargement demande toutes les transactions et garde le `server_knowledge`
@@ -67,11 +67,11 @@ mémoire, et la rafraîchit par la **synchronisation incrémentale** de YNAB :
 3. avenir-mcp les fusionne dans sa copie : une transaction modifiée remplace l'ancienne, une
    transaction supprimée est retirée.
 
-Avec l'identifiant d'un budget, la copie est rafraîchie par synchronisation
+Avec l'identifiant d'un plan, la copie est rafraîchie par synchronisation
 incrémentale. Avec `last-used`, qui désigne le dernier plan ouvert dans YNAB et peut
 changer d'un appel à l'autre, les transactions sont chargées en entier à chaque fois —
-toujours une seule requête — pour ne jamais mélanger deux budgets. Avec plusieurs
-budgets, passez l'identifiant donné par `list_plans`.
+toujours une seule requête — pour ne jamais mélanger deux plans. Avec plusieurs
+plans, passez l'identifiant donné par `list_plans`.
 
 La copie vit aussi longtemps que le processus du serveur. Les lectures filtrées — par
 date ou par catégorie — la contournent.
@@ -86,7 +86,7 @@ vide laisse la liste complète intacte.
 ## Le quota de YNAB
 
 YNAB autorise **200 requêtes par heure** et par jeton, sur une fenêtre glissante. Le coût
-de chaque outil, cache froid, est mesuré sur le budget de démonstration et indiqué sur sa
+de chaque outil, cache froid, est mesuré sur le plan de démonstration et indiqué sur sa
 [page de référence](/avenir-mcp/fr/reference/tools/) :
 
 | Coût | Outils |

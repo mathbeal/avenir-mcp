@@ -12,7 +12,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 <FileTree>
 - avenir_mcp/ — the server (see [Architecture](/avenir-mcp/concepts/architecture/))
 - tests/ — unit tests, protocol tests, documentation and hygiene tests
-- evals/ — the demo budget, a stand-in for YNAB's API, the agent evaluation
+- evals/ — the demo plan, a stand-in for YNAB's API, the agent evaluation
 - docsgen/ — generates the tool reference, the error catalogue and the examples
 - docs/ — this site (Astro Starlight, English, French, Spanish, German, Dutch)
 - AGENTS.md — the contract for contributors, human or not
@@ -54,7 +54,7 @@ CI also runs `typos`, `zizmor` on the workflows, `pip-audit` on the locked depen
 the documentation build with the tests of its own code, CodeQL and the OpenSSF Scorecard
 (once the repository is public), a weekly comparison of YNAB's API with its snapshot
 (`just api-drift`), and the official MCP Inspector
-(`just inspect`), which checks the server as a client sees it on the demo budget: its
+(`just inspect`), which checks the server as a client sees it on the demo plan: its
 lists, the portability of its tool schemas, and one call of each kind. The test suite runs on Linux and macOS with Python 3.12,
 3.13 and 3.14, and on Windows with Python 3.14 (on a pull request, macOS tries 3.14 only:
 its runners cost ten Linux ones); coverage is enforced on Linux and macOS,
@@ -72,7 +72,7 @@ alone.
 | Update | Handling |
 |---|---|
 | development tools, CI actions, the documentation site (minor and patch) | grouped, merged by itself once CI passes |
-| `fastmcp`, `httpx`, `pydantic` — they run in front of users' budgets | one pull request each, reviewed by hand; the evaluation runs before a `fastmcp` update |
+| `fastmcp`, `httpx`, `pydantic` — they run in front of users' plans | one pull request each, reviewed by hand; the evaluation runs before a `fastmcp` update |
 | any major version | one pull request each, reviewed by hand |
 | a known vulnerability | at once, whatever the day |
 
@@ -105,7 +105,7 @@ just docs                  # build the site in every language; broken links fail
 just docs-serve            # live preview on http://localhost:4321/avenir-mcp/
 ```
 
-`docsgen` runs avenir-mcp on the demo budget and writes what it really answers, with the
+`docsgen` runs avenir-mcp on the demo plan and writes what it really answers, with the
 date fixed and random ids replaced. Hand-written pages exist in English, French,
 Spanish, German and Dutch; a test fails when one is missing.
 

@@ -1,6 +1,6 @@
 ---
 title: Je eerste gesprek
-description: Een begeleide rondleiding, aanroep voor aanroep, met de echte antwoorden van het demobudget.
+description: Een begeleide rondleiding, aanroep voor aanroep, met de echte antwoorden van het demoplan.
 sidebar:
   order: 2
 ---
@@ -12,7 +12,7 @@ import balances from '@snippets/category_balances.json?raw';
 import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 
-Deze rondleiding volgt een echt gesprek op het demobudget, een verzonnen huishouden met een
+Deze rondleiding volgt een echt gesprek op het demoplan, een verzonnen huishouden met een
 betaalrekening en een spaarrekening. Bij elke stap zie je wat je zegt, welke tool de agent
 met welke argumenten aanroept, wat avenir-mcp antwoordt en wat de agent je vertelt. Je
 eigen antwoorden hebben dezelfde vorm, met je eigen cijfers.
@@ -32,7 +32,7 @@ De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
 
 > **Claude:** Twee rekeningen: Checking met 3.512,66, alles verwerkt, en Savings met 600,00.
 
-Saldi zijn in de valuta van je budget. `cleared_balance` is wat de bank al heeft
+Saldi zijn in de valuta van je plan. `cleared_balance` is wat de bank al heeft
 getoond; `uncleared_balance` is wat ze nog niet heeft getoond.
 
 ## 2. Zien hoe de maand gaat

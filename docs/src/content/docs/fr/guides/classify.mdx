@@ -31,7 +31,7 @@ obtenez quand même les propositions ; vous les appliquez alors dans YNAB.
 
 2. **L'agent lit ce qui attend.** Il appelle `suggest_categories` avec
    `{"plan_id": "last-used"}`. avenir-mcp télécharge une seule fois les transactions du
-   budget (trois requêtes YNAB, quel que soit leur nombre) et répond avec une page de
+   plan (trois requêtes YNAB, quel que soit leur nombre) et répond avec une page de
    transactions en attente, de la plus récente à la plus ancienne :
 
    <Code code={pending} lang="json" title="suggest_categories — les 3 premières sur 6" />
@@ -107,11 +107,11 @@ Détails et exemples : [Suggestions](/avenir-mcp/fr/concepts/suggestions/).
 
 | Message | Signification | Suite |
 |---|---|---|
-| `Transaction … is not in this budget` | un identifiant que `suggest_categories` n'a pas renvoyé | l'agent relit la liste |
+| `Transaction … is not in this plan` | un identifiant que `suggest_categories` n'a pas renvoyé | l'agent relit la liste |
 | `Transaction … is a transfer between accounts` | un virement ne prend pas de catégorie dans YNAB | il est écarté |
 | `Transaction … is split across categories` | une transaction ventilée porte ses catégories sur ses lignes | à modifier dans YNAB |
 | `Transaction … is assigned twice` | deux affectations pour une transaction | l'agent en garde une |
-| `The budget changed between the preview and the answer` | quelqu'un a modifié une transaction entre-temps | un nouvel aperçu est produit |
+| `The plan changed between the preview and the answer` | quelqu'un a modifié une transaction entre-temps | un nouvel aperçu est produit |
 
 <Aside type="caution" title="Le texte bancaire n'est pas fiable">
 Les noms de bénéficiaires et les mémos viennent des banques et des commerçants. Un mémo

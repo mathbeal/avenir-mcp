@@ -16,7 +16,7 @@ block or in the shell that starts it. Nothing else is read: no configuration fil
 |---|---|---|
 | `YNAB_API_KEY` | — (**required**, or `YNAB_API_KEY_FILE`) | Your YNAB personal access token. |
 | `YNAB_API_KEY_FILE` | unset | A file holding the token, used when `YNAB_API_KEY` is unset. |
-| `AVENIR_MCP_WRITE` | unset: read-only | `1` registers the tools that change your budget. |
+| `AVENIR_MCP_WRITE` | unset: read-only | `1` registers the tools that change your plan. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | unset | `1` accepts only a yes given in the client: no confirmation codes. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP address. |
@@ -35,7 +35,7 @@ block or in the shell that starts it. Nothing else is read: no configuration fil
 
 Your personal access token, from YNAB → Account Settings → Developer Settings. Without
 it, any tool that calls YNAB fails with `YNAB_API_KEY environment variable is not set`.
-It grants full read and write access to every budget of the account.
+It grants full read and write access to every plan of the account.
 
 ### `YNAB_API_KEY_FILE`
 
@@ -127,7 +127,7 @@ collector — see
 ### `AVENIR_MCP_YNAB_URL`
 
 The API's base address. Only useful to point avenir-mcp at a stand-in, as the evaluation and
-the documentation generator do with their demo budget server. It must start with
+the documentation generator do with their demo plan server. It must start with
 `https://` — plain `http://` is accepted only for `127.0.0.1` or `localhost` — because
 every request carries your token.
 
@@ -135,7 +135,7 @@ every request carries your token.
 
 | Argument | Accepted values |
 |---|---|
-| `plan_id` | a budget id from `list_plans`, or `last-used` |
+| `plan_id` | a plan id from `list_plans`, or `last-used` |
 | `month` | `current`, or the first day of a month: `YYYY-MM-01` |
 | `until` | a month, `YYYY-MM`, up to 24 months ahead |
 | dates | `YYYY-MM-DD` |

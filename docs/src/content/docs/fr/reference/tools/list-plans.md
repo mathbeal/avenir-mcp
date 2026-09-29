@@ -35,10 +35,10 @@ aucun.
 
 | Champ | Type | Description |
 |---|---|---|
-| `id` | string | YNAB id of the budget, to pass as plan_id. |
-| `name` | string | Budget name. |
-| `first_month` | string \| null | First month with data, YYYY-MM-01; null for an empty budget. |
-| `last_month` | string \| null | Last month with data, YYYY-MM-01; null for an empty budget. |
+| `id` | string | YNAB id of the plan, to pass as plan_id. |
+| `name` | string | Plan name. |
+| `first_month` | string \| null | First month with data, YYYY-MM-01; null for an empty plan. |
+| `last_month` | string \| null | Last month with data, YYYY-MM-01; null for an empty plan. |
 
 ## Exemple
 

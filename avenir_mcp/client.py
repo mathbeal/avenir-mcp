@@ -404,8 +404,8 @@ async def get_transactions(
     if uncategorized_only:
         params["type"] = "uncategorized"
 
-    # Delta sync, only for a named budget and no filter: "last-used" may name another
-    # budget from one call to the next, and changes are counted per budget.
+    # Delta sync, only for a named plan and no filter: "last-used" may name another
+    # plan from one call to the next, and changes are counted per plan.
     cache_key = plan_id
     cached = not since_date and not uncategorized_only and plan_id != LAST_USED
     if cached and cache_key in _CACHE:

@@ -18,7 +18,7 @@ is `-12340`. avenir-mcp converts at the boundary and never shows milliunits to t
 | agent → YNAB | `round(amount × 1000)`: 111.32 becomes exactly `111320` |
 
 Sums, differences and prorating are computed in milliunits, then converted once, so no
-rounding error can create or lose a cent. Amounts are in the budget's own currency;
+rounding error can create or lose a cent. Amounts are in the plan's own currency;
 spending is negative, money in positive.
 
 ## Talking to YNAB
@@ -53,9 +53,9 @@ where YNAB keeps it, for the money assigned to a category (`budgeted`, shown as
 
 ## The local copy of transactions
 
-Most tools need the budget's transactions: to find what is pending, to learn from
+Most tools need the plan's transactions: to find what is pending, to learn from
 history, to compare with the bank, to forecast. Downloading them all on every call would
-be slow and would spend YNAB's quota. avenir-mcp keeps a copy per budget, in memory, and
+be slow and would spend YNAB's quota. avenir-mcp keeps a copy per plan, in memory, and
 refreshes it with YNAB's **delta sync**:
 
 1. The first load asks for every transaction and keeps YNAB's `server_knowledge`, a
@@ -65,10 +65,10 @@ refreshes it with YNAB's **delta sync**:
 3. avenir-mcp merges them into its copy: a changed transaction replaces the old one, a
    deleted one is removed.
 
-With a budget's id, the copy is refreshed by delta sync. With `last-used`, which
-names whichever budget you last opened in YNAB and may change between two calls,
-transactions are loaded in full every time — still one request — so two budgets are
-never mixed. With several budgets, pass the id from `list_plans`.
+With a plan's id, the copy is refreshed by delta sync. With `last-used`, which
+names whichever plan you last opened in YNAB and may change between two calls,
+transactions are loaded in full every time — still one request — so two plans are
+never mixed. With several plans, pass the id from `list_plans`.
 
 The copy lives as long as the server process. Filtered reads — by date or by category —
 bypass it.
@@ -82,7 +82,7 @@ A test now checks that an empty delta leaves the full list intact.
 ## YNAB's rate limit
 
 YNAB allows **200 requests per hour** per token, over a rolling window. What each tool
-costs, on a cold cache, is measured on the demo budget and stated on its
+costs, on a cold cache, is measured on the demo plan and stated on its
 [reference page](/avenir-mcp/reference/tools/):
 
 | Cost | Tools |

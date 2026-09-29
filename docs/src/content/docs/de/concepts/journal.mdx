@@ -36,7 +36,7 @@ Das Rückgängigmachen hängt eine Markierung an; nichts wird je überschrieben:
 | Feld | Bedeutung |
 |---|---|
 | `operation_id` | 12 zufällige Hexadezimalzeichen |
-| `plan_id` | das geänderte Budget |
+| `plan_id` | der geänderte Plan |
 | `kind` | `categorize`, `budget`, `reconcile` oder `create` |
 | `applied_at` | ISO 8601, UTC, sekundengenau |
 | `moves` | für `categorize`: die Kategorie jeder Transaktion vorher und nachher |
@@ -50,10 +50,10 @@ Das Rückgängigmachen hängt eine Markierung an; nichts wird je überschrieben:
 
 ## Welche Operation das Rückgängigmachen wählt
 
-`undo_operation` ohne ID nimmt die **jüngste noch wirksame Operation des Budgets**:
+`undo_operation` ohne ID nimmt die **jüngste noch wirksame Operation des Plans**:
 nicht rückgängig gemacht und selbst kein Rückgängigmachen. Mit einer ID diese
 Operation, sofern sie noch wirksam ist. Andernfalls: *„Nothing to undo: no operation of
-this budget is still in effect.“*
+this plan is still in effect.“*
 
 ## Was das Rückgängigmachen wiederherstellt
 

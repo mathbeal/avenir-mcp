@@ -16,9 +16,9 @@ startet.
 | URI | Typ | Inhalt |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | wie die Tools von avenir-mcp zu nutzen sind, und die Methode von YNAB in Kürze |
-| `ynab://plans` | `application/json` | die Budgets, die das Token lesen kann |
-| `ynab://plans/{plan_id}/categories` | `application/json` | die zuweisbaren Kategorien des Budgets, nach Gruppe |
-| `ynab://plans/{plan_id}/accounts` | `application/json` | die offenen Konten des Budgets und ihre Salden |
+| `ynab://plans` | `application/json` | die Plans, die das Token lesen kann |
+| `ynab://plans/{plan_id}/categories` | `application/json` | die zuweisbaren Kategorien des Plans, nach Gruppe |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | die offenen Konten des Plans und ihre Salden |
 
 Jedes Lesen einer Ressource `ynab://` kostet eine YNAB-Anfrage. In Claude Code hängen Sie
 eine mit `@` im Prompt an.

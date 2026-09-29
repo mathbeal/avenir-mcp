@@ -36,7 +36,7 @@ L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
 | Champ | Sens |
 |---|---|
 | `operation_id` | 12 caractères hexadécimaux aléatoires |
-| `plan_id` | le budget modifié |
+| `plan_id` | le plan modifié |
 | `kind` | `categorize`, `budget`, `reconcile` ou `create` |
 | `applied_at` | ISO 8601, UTC, à la seconde |
 | `moves` | pour `categorize` : la catégorie de chaque transaction avant et après |
@@ -50,10 +50,10 @@ L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
 
 ## Quelle opération est annulée
 
-Sans identifiant, `undo_operation` prend **l'opération la plus récente du budget encore
+Sans identifiant, `undo_operation` prend **l'opération la plus récente du plan encore
 en vigueur** : non annulée, et qui n'est pas elle-même une annulation. Avec un
 identifiant, cette opération, si elle est encore en vigueur. Sinon : *« Nothing to
-undo: no operation of this budget is still in effect. »*
+undo: no operation of this plan is still in effect. »*
 
 ## Ce que rétablit l'annulation
 

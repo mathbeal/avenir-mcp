@@ -20,7 +20,7 @@ sidebar:
 </details>
 
 <details>
-<summary>The tools that change my budget are missing</summary>
+<summary>The tools that change my plan are missing</summary>
 
 avenir-mcp is read-only unless its environment contains `AVENIR_MCP_WRITE=1` — exactly `1`.
 Restart the server after changing it.
@@ -49,9 +49,9 @@ update `YNAB_API_KEY`.
 <details>
 <summary><code>YNAB 404</code></summary>
 
-A budget, account, category or month that YNAB does not know. Ids come from
+A plan, account, category or month that YNAB does not know. Ids come from
 `list_plans`, `list_accounts`, `list_category_groups` or `get_category_balances`;
-months must exist in the budget.
+months must exist in the plan.
 
 </details>
 
@@ -75,7 +75,7 @@ once; after a server restart, ask for a new preview.
 </details>
 
 <details>
-<summary><code>The budget changed between the preview and the answer</code></summary>
+<summary><code>The plan changed between the preview and the answer</code></summary>
 
 Something changed a transaction between the preview and your answer — you in YNAB, an
 import, another agent. Ask again: the new preview reflects the current state.
@@ -85,7 +85,7 @@ import, another agent. Ask again: the new preview reflects the current state.
 <details>
 <summary><code>Nothing to undo</code></summary>
 
-No operation of this budget is still in effect in this machine's journal: it was already
+No operation of this plan is still in effect in this machine's journal: it was already
 undone, made elsewhere, or the journal file changed. See
 [Journal and undo](/avenir-mcp/concepts/journal/).
 

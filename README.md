@@ -12,13 +12,13 @@
 [![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
 
-> 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB budget
+> 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB plan
 > and help you plan what comes next.
 >
-> 🇫🇷 **avenir-mcp** permet à un agent IA de lire votre budget YNAB et de vous aider
+> 🇫🇷 **avenir-mcp** permet à un agent IA de lire votre plan YNAB et de vous aider
 > à préparer la suite.
 
-Ask Claude — or any [MCP](https://modelcontextprotocol.io) client — about your budget
+Ask Claude — or any [MCP](https://modelcontextprotocol.io) client — about your plan
 in plain words: where the money went, what still needs a category, whether an account
 matches the bank, when money would run out. Every change is previewed, confirmed by
 you, and can be undone.
@@ -53,7 +53,7 @@ the documentation shows.
 
 - **Tools for tasks, not endpoints.** Classify a month of transactions, reconcile an
   account, forecast your balance: one tool each, not a wrapper of YNAB's API.
-- **Read-only by default.** Tools that change your budget exist only when you enable
+- **Read-only by default.** Tools that change your plan exist only when you enable
   them.
 - **Preview, confirm, undo.** Every write shows what will change and waits for your
   yes; `undo_operation` reverts it.
@@ -112,7 +112,7 @@ git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
 uv sync
 just check        # lint, types, tests at 100 % coverage, vocabulary, lockfile
 just docs-serve   # the documentation, live
-just evaluate     # a real agent on the demo budget (uses your Claude plan)
+just evaluate     # a real agent on the demo plan (uses your Claude plan)
 ```
 
 Read [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md) before opening a

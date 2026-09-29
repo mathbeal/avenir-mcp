@@ -1,21 +1,21 @@
 ---
 title: Sicherheit durch Design
-description: Das Bedrohungsmodell und die sechs Schutzmechanismen zwischen einem Agenten und Ihrem Budget.
+description: Das Bedrohungsmodell und die sechs Schutzmechanismen zwischen einem Agenten und Ihrem Plan.
 sidebar:
   order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Ein Agent, der Ihr Budget ändern kann, darf Sie nie überraschen. Diese Seite sagt, wovor
+Ein Agent, der Ihren Plan ändern kann, darf Sie nie überraschen. Diese Seite sagt, wovor
 avenir-mcp schützt und wie.
 
 ## Was auf dem Spiel steht
 
 | Gut | Risiko |
 |---|---|
-| Ihr YNAB-Token | es liest und ändert **jedes** Budget des Kontos; YNAB hat kein Token nur zum Lesen |
-| Ihr Budget | eine falsche oder ungewollte Änderung: eine Kategorie, ein Betrag, eine gelöschte Transaktion |
+| Ihr YNAB-Token | es liest und ändert **jeden** Plan des Kontos; YNAB hat kein Token nur zum Lesen |
+| Ihr Plan | eine falsche oder ungewollte Änderung: eine Kategorie, ein Betrag, eine gelöschte Transaktion |
 | Ihre Daten | Beträge, Empfänger und Verwendungszwecke, die Ihren Rechner verlassen oder in Dateien landen |
 
 | Bedrohung | Beispiel |
@@ -37,7 +37,7 @@ Tool welche fehlen.
 
 Jede Schreibaktion außer `approve_transactions` berechnet zuerst ihre genauen Änderungen
 und wendet nichts an, bis Sie zustimmen, über den eigenen Dialog Ihres Clients oder einen
-an diese Vorschau gebundenen Einmalcode. Ändert sich das Budget zwischen der Vorschau und
+an diese Vorschau gebundenen Einmalcode. Ändert sich der Plan zwischen der Vorschau und
 Ihrer Antwort, wird die Antwort abgelehnt. Einzelheiten:
 [Bestätigung](/avenir-mcp/de/concepts/confirmation/).
 
@@ -79,7 +79,7 @@ einem Verwendungszweck und prüft, dass der Agent sie ignoriert.
 
 - Ein Test schlägt fehl, wenn das Repository eine IBAN, ein YNAB-Token, eine
   Kontoauszugsdatei, einen absoluten Home-Pfad oder ein Finder-Duplikat enthält.
-- Beispiele der Dokumentation stammen nur aus einem erfundenen Demo-Budget.
+- Beispiele der Dokumentation stammen nur aus einem erfundenen Demo-Plan.
 - Abhängigkeiten sind festgepinnt und werden in der CI auf bekannte Schwachstellen
   geprüft; GitHub Actions sind per Commit festgepinnt und mit zizmor geprüft.
 

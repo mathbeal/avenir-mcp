@@ -47,7 +47,7 @@ llamada. avenir-mcp usa el ida y vuelta *input required*:
    `input_responses` y el `request_state` recibido. FastMCP sella ese estado en la red y
    rechaza cualquier alteración.
 4. avenir-mcp recalcula el plan y su huella. Si difieren del `request_state` — alguien
-   modificó el presupuesto entretanto — la llamada falla con *«The budget changed between
+   modificó el plan entretanto — la llamada falla con *«The plan changed between
    the preview and the answer»* y no se escribe nada.
 
 ### 2. El cliente admite elicitación, protocolo anterior
@@ -81,7 +81,7 @@ primera ejecución de la [evaluación](/avenir-mcp/es/project/evaluation/).
 | Formato | 11 caracteres seguros para URL (`secrets.token_urlsafe(8)`) |
 | Vida útil | 600 segundos, con un reloj monótono |
 | Uso | único: un código se consume en su primer uso, aunque no coincida |
-| Alcance | la huella de un objeto en un presupuesto |
+| Alcance | la huella de un objeto en un plan |
 | Almacenamiento | solo la memoria del servidor: un reinicio olvida todos los códigos |
 
 Un código desconocido, caducado, ya usado o emitido para otros cambios se rechaza con:

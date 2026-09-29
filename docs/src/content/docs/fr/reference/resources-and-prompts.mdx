@@ -14,9 +14,9 @@ travail que l'utilisateur lance.
 | URI | Type | Contenu |
 |---|---|---|
 | `avenir-mcp://guide` | `text/markdown` | comment utiliser les outils d'avenir-mcp, et la méthode YNAB en bref |
-| `ynab://plans` | `application/json` | les budgets que le jeton peut lire |
-| `ynab://plans/{plan_id}/categories` | `application/json` | les catégories assignables du budget, par groupe |
-| `ynab://plans/{plan_id}/accounts` | `application/json` | les comptes ouverts du budget et leurs soldes |
+| `ynab://plans` | `application/json` | les plans que le jeton peut lire |
+| `ynab://plans/{plan_id}/categories` | `application/json` | les catégories assignables du plan, par groupe |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | les comptes ouverts du plan et leurs soldes |
 
 Chaque lecture d'une ressource `ynab://` coûte une requête YNAB. Dans Claude Code, joignez
 une ressource avec `@` dans le prompt.

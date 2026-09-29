@@ -30,7 +30,7 @@ alleen leest krijg je nog steeds de suggesties; je past ze dan in YNAB toe.
    > **Jij:** Categoriseer alles wat op een categorie wacht.
 
 2. **De agent leest wat openstaat.** Hij roept `suggest_categories` aan met
-   `{"plan_id": "last-used"}`. avenir-mcp downloadt de transacties van het budget één keer
+   `{"plan_id": "last-used"}`. avenir-mcp downloadt de transacties van het plan één keer
    (drie YNAB-verzoeken, hoeveel het er ook zijn) en antwoordt met een pagina openstaande
    transacties, de nieuwste eerst:
 
@@ -107,11 +107,11 @@ Details en voorbeelden: [Suggesties](/avenir-mcp/nl/concepts/suggestions/).
 
 | Melding | Betekenis | Wat er dan gebeurt |
 |---|---|---|
-| `Transaction … is not in this budget` | een id dat `suggest_categories` niet heeft teruggegeven | de agent leest de lijst opnieuw |
+| `Transaction … is not in this plan` | een id dat `suggest_categories` niet heeft teruggegeven | de agent leest de lijst opnieuw |
 | `Transaction … is a transfer between accounts` | overboekingen krijgen in YNAB geen categorie | ze wordt overgeslagen |
 | `Transaction … is split across categories` | een gesplitste transactie draagt haar categorieën op haar regels | wijzig haar in YNAB |
 | `Transaction … is assigned twice` | twee toewijzingen voor één transactie | de agent houdt er één |
-| `The budget changed between the preview and the answer` | iemand heeft intussen een transactie gewijzigd | er wordt een nieuw voorbeeld gemaakt |
+| `The plan changed between the preview and the answer` | iemand heeft intussen een transactie gewijzigd | er wordt een nieuw voorbeeld gemaakt |
 
 <Aside type="caution" title="Banktekst is niet betrouwbaar">
 Namen van begunstigden en omschrijvingen komen van banken en winkeliers. Een omschrijving

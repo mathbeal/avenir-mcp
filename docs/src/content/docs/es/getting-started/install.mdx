@@ -14,7 +14,7 @@ termina con una comprobación: sabrá que ha funcionado antes de seguir.
 <Steps>
 
 1. [Instalar uv](#instalar-uv), la herramienta que ejecuta avenir-mcp.
-2. [Obtener un token de YNAB](#obtener-un-token-de-ynab), el acceso de avenir-mcp a sus presupuestos.
+2. [Obtener un token de YNAB](#obtener-un-token-de-ynab), el acceso de avenir-mcp a sus planes.
 3. [Primer arranque a mano](#primer-arranque-a-mano), una sola vez.
 4. [Añadir avenir-mcp a su cliente](#añadir-avenir-mcp-a-su-cliente).
 5. [Comprobar que funciona](#comprobar-que-funciona) con una primera pregunta.
@@ -26,7 +26,7 @@ termina con una comprobación: sabrá que ha funcionado antes de seguir.
 
 | | Por qué | Dónde conseguirlo |
 |---|---|---|
-| **Una cuenta de YNAB** | avenir-mcp lee y modifica *sus* presupuestos | [app.ynab.com](https://app.ynab.com) |
+| **Una cuenta de YNAB** | avenir-mcp lee y modifica *sus* planes | [app.ynab.com](https://app.ynab.com) |
 | **Un cliente MCP** | la aplicación con la que habla; es la que arranca avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
 | **uv** | descarga y ejecuta avenir-mcp, y el Python que necesita, en un entorno aislado | el paso siguiente |
 
@@ -78,7 +78,7 @@ añade uv al `PATH` de los terminales nuevos: abra uno nuevo. Detalles en la
 </Steps>
 
 <Aside type="danger" title="Trate el token como una contraseña">
-Un token de acceso personal puede **leer y modificar todos los presupuestos** de su
+Un token de acceso personal puede **leer y modificar todos los planes** de su
 cuenta; YNAB no ofrece tokens de solo lectura. No lo pegue nunca en un chat con una IA,
 un archivo compartido, un issue o un repositorio. avenir-mcp nunca lo registra ni lo
 devuelve en una respuesta.
@@ -268,9 +268,9 @@ Linux) o `where uvx` (Windows) — por ejemplo `"/Users/<usted>/.local/bin/uvx"`
   </TabItem>
 </Tabs>
 
-Pregunte ahora, en una conversación nueva: *«Lista mis presupuestos de YNAB.»* El agente
+Pregunte ahora, en una conversación nueva: *«Lista mis planes de YNAB.»* El agente
 llama a [`list_plans`](/avenir-mcp/es/reference/tools/list-plans/) — su cliente puede
-pedirle permiso — y responde con sus nombres. Aquí, el presupuesto de demostración usado
+pedirle permiso — y responde con sus nombres. Aquí, el plan de demostración usado
 en toda esta documentación:
 
 <Code code={budgets} lang="json" title="list_plans" />

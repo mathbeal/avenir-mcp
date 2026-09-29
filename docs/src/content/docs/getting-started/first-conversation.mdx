@@ -1,6 +1,6 @@
 ---
 title: Your first conversation
-description: A guided tour, call by call, with the real answers of the demo budget.
+description: A guided tour, call by call, with the real answers of the demo plan.
 sidebar:
   order: 2
 ---
@@ -12,7 +12,7 @@ import balances from '@snippets/category_balances.json?raw';
 import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 
-This tour follows a real conversation on the demo budget, an invented household with a
+This tour follows a real conversation on the demo plan, an invented household with a
 checking and a savings account. For each step you see what you say, which tool the agent
 calls with which arguments, what avenir-mcp answers, and what the agent tells you. Your own
 answers will have the same shape, with your own figures.
@@ -32,7 +32,7 @@ The agent calls `list_accounts` with `{"plan_id": "last-used"}`:
 
 > **Claude:** Two accounts: Checking at 3,512.66, all cleared, and Savings at 600.00.
 
-Balances are in your budget's currency. `cleared_balance` is what the bank has already
+Balances are in your plan's currency. `cleared_balance` is what the bank has already
 shown; `uncleared_balance` is what it has not.
 
 ## 2. See how the month is going

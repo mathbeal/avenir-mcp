@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp da a un agente 20 herramientas, 4 recursos y 4 prompts sobre sus presupuestos de
+avenir-mcp da a un agente 20 herramientas, 4 recursos y 4 prompts sobre sus planes de
 YNAB. Esta página los lista según lo que quiera hacer. Cada fila da una frase que puede
 decir al agente; el agente elige la herramienta.
 
@@ -28,14 +28,14 @@ esa categoría.
 
 | Usted dice | Herramienta | |
 |---|---|---|
-| *«¿Qué presupuestos tengo?»* | [`list_plans`](/avenir-mcp/es/reference/tools/list-plans/) | L |
+| *«¿Qué planes tengo?»* | [`list_plans`](/avenir-mcp/es/reference/tools/list-plans/) | L |
 | *«¿Qué hay en mis cuentas?»* | [`list_accounts`](/avenir-mcp/es/reference/tools/list-accounts/) | L |
 | *«¿Qué grupos de categorías existen?»* | [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/) | L |
 | *«¿Qué transacción es mi ticket de 86,40 del día 12?»* | [`find_transactions`](/avenir-mcp/es/reference/tools/find-transactions/) — por fechas, importe exacto y cuenta, con categoría o sin ella | L |
 | *«¿Qué hizo que Restaurants se pasara este mes?»* | [`find_transactions`](/avenir-mcp/es/reference/tools/find-transactions/) — por categoría, líneas divididas incluidas, o por beneficiario, sea cual sea la etiqueta bancaria | L |
 | *«¿Qué facturas vencen antes del día 10?»* | [`list_scheduled_transactions`](/avenir-mcp/es/reference/tools/list-scheduled-transactions/) — las transacciones programadas repetidas según su frecuencia, con el dinero que entra y sale | L |
 
-Los presupuestos, cuentas y categorías también se sirven como
+Los planes, cuentas y categorías también se sirven como
 [recursos](/avenir-mcp/es/reference/resources-and-prompts/) que su cliente puede adjuntar
 a una conversación sin llamar a una herramienta.
 
@@ -115,10 +115,10 @@ por una tarea completa. En Claude Code son comandos slash del servidor `avenir-m
 
 | Prompt | Argumentos | Qué hace |
 |---|---|---|
-| `classify_pending` | presupuesto | sugerencias, sus elecciones, un lote confirmado, el id para deshacer |
-| `monthly_review` | presupuesto, mes | totales, lo que destaca, correcciones propuestas |
-| `reconcile` | presupuesto, cuenta, saldo bancario | la diferencia explicada, luego una conciliación confirmada |
-| `plan_next_month` | presupuesto | previsión y supuestos, luego los importes del mes siguiente |
+| `classify_pending` | plan | sugerencias, sus elecciones, un lote confirmado, el id para deshacer |
+| `monthly_review` | plan, mes | totales, lo que destaca, correcciones propuestas |
+| `reconcile` | plan, cuenta, saldo bancario | la diferencia explicada, luego una conciliación confirmada |
+| `plan_next_month` | plan | previsión y supuestos, luego los importes del mes siguiente |
 
 ## De serie
 

@@ -36,7 +36,7 @@ Ongedaan maken voegt een markering toe; er wordt nooit iets herschreven:
 | Veld | Betekenis |
 |---|---|
 | `operation_id` | 12 willekeurige hexadecimale tekens |
-| `plan_id` | het gewijzigde budget |
+| `plan_id` | het gewijzigde plan |
 | `kind` | `categorize`, `budget`, `reconcile` of `create` |
 | `applied_at` | ISO 8601, UTC, op de seconde |
 | `moves` | voor `categorize`: de categorie van elke transactie ervoor en erna |
@@ -50,9 +50,9 @@ Ongedaan maken voegt een markering toe; er wordt nooit iets herschreven:
 
 ## Welke operatie ongedaan maken kiest
 
-`undo_operation` zonder id neemt de **meest recente operatie van het budget die nog van
+`undo_operation` zonder id neemt de **meest recente operatie van het plan die nog van
 kracht is**: niet ongedaan gemaakt, en zelf geen ongedaanmaking. Met een id die operatie,
-als ze nog van kracht is. Anders: *„Nothing to undo: no operation of this budget is still
+als ze nog van kracht is. Anders: *„Nothing to undo: no operation of this plan is still
 in effect.“*
 
 ## Wat ongedaan maken herstelt

@@ -3,8 +3,8 @@ title: avenir-mcp
 description: Ein inoffizieller Open-Source-MCP-Server für YNAB, gebaut für Agenten. Standardmäßig nur lesend; jede Änderung wird als Vorschau gezeigt, bestätigt und lässt sich rückgängig machen.
 template: splash
 hero:
-  title: Ihr YNAB-Budget, in klaren Worten.
-  tagline: Mit avenir-mcp können Claude und andere KI-Agenten Ihr Budget lesen, kategorisieren, abgleichen und vorausberechnen. Standardmäßig nur lesend; jede Änderung wird als Vorschau gezeigt, von Ihnen bestätigt und lässt sich rückgängig machen.
+  title: Ihr YNAB-Plan, in klaren Worten.
+  tagline: Mit avenir-mcp können Claude und andere KI-Agenten Ihren Plan lesen, kategorisieren, abgleichen und vorausberechnen. Standardmäßig nur lesend; jede Änderung wird als Vorschau gezeigt, von Ihnen bestätigt und lässt sich rückgängig machen.
   actions:
     - text: Loslegen
       link: /avenir-mcp/de/getting-started/install/
@@ -63,7 +63,7 @@ die er Ihnen in klare Worte fasst.
 
 Der Agent ruft [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/)
 mit `{"month": "2026-08-01"}` auf und erhält für jede Kategorie, was budgetiert und was
-ausgegeben wurde. Hier diese Antwort auf dem Demo-Budget, als Grafik:
+ausgegeben wurde. Hier diese Antwort auf dem Demo-Plan, als Grafik:
 
 <BudgetChart rows={august} month="2026-08-01" />
 
@@ -74,12 +74,12 @@ ausgegeben wurde. Hier diese Antwort auf dem Demo-Budget, als Grafik:
 <details>
 <summary>Die Rohantwort</summary>
 
-<Code code={augustRaw} lang="json" title="get_budget_vs_actual — Demo-Budget" />
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — Demo-Plan" />
 
 </details>
 
 Jedes Beispiel in dieser Dokumentation ist eine echte Antwort von avenir-mcp auf einem
-erfundenen Demo-Budget.
+erfundenen Demo-Plan.
 
 ## Die Dokumentation erkunden
 
