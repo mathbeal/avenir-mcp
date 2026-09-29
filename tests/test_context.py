@@ -124,6 +124,26 @@ def test_guide_only_names_tools_that_exist() -> None:
     assert named <= _tool_names() | PROMPTS
 
 
+@pytest.mark.parametrize("mode", ["auto", "legacy"])
+def test_guide_is_given_as_server_instructions(mode: str) -> None:
+    """A client that passes the server's instructions to its model gives it the guide,
+    whichever protocol generation it negotiates, without having to attach a resource."""
+
+    async def run() -> tuple[str | None, str]:
+        async with Client(server.mcp, mode=mode) as mcp_client:
+            if mode == "legacy":
+                assert mcp_client.initialize_result is not None
+                instructions = mcp_client.initialize_result.instructions
+            else:
+                instructions = mcp_client.instructions
+            contents = await mcp_client.read_resource("avenir-mcp://guide")
+            return instructions, str(contents[0].text)
+
+    instructions, guide = asyncio.run(run())
+    assert instructions == guide
+    assert 'Users often still say "budget"' in guide
+
+
 def test_prompts_are_listed_with_their_arguments() -> None:
     """Each workflow is a prompt the user can pick."""
     prompts = {p.name: p for p in _run(lambda c: c.list_prompts())}

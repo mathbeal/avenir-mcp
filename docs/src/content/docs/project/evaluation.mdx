@@ -60,6 +60,8 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-26 | Sonnet | 15/15 | 2.1 | `find_transactions` filters by category and payee; a task asks which payments made Restaurants overspent |
 | 2026-09-26 | Sonnet | 16/16 | 2.0 | `list_scheduled_transactions`; a task asks which scheduled payments fall between 1 and 10 October |
 | 2026-09-26 | Sonnet | 17/17 | 1.9 | `forecast_balance` projects YNAB's scheduled transactions; a task asks which yearly payment the forecast expects in October |
+| 2026-09-28 | Sonnet | 17/17 | 1.9 | *plan* wherever YNAB now says plan, in the descriptions and the prompts |
+| 2026-09-28 | Sonnet | 17/17 | 2.4 | the guide is also the server's instructions: the agent now calls `list_plans` first in 13 tasks out of 17 (3 before), one more YNAB request, so as not to work on the wrong plan |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A

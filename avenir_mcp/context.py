@@ -52,6 +52,10 @@ GUIDE = """# avenir-mcp: how to work with this YNAB server
 - True expenses (yearly taxes, insurance) are budgeted a little every month.
 """
 
+# Also the server's instructions: a client that passes them to its model gives it the
+# guide from the first message, without the user attaching the resource.
+mcp.instructions = GUIDE
+
 
 def _dump(data: Any) -> str:
     """Serialise a resource's data as compact JSON, keeping non-ASCII text readable.
