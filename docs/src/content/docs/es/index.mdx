@@ -61,14 +61,13 @@ que este le explica con palabras sencillas.
 > **Usted:** ¿Cómo fue agosto?
 
 El agente llama a [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/)
-con `{"month": "2026-08-01"}` y recibe, para cada categoría, lo presupuestado y lo
-gastado. Esta es esa respuesta sobre el plan de demostración, en forma de gráfico:
+con `{"month": "2026-08-01"}` y recibe, para cada categoría, lo presupuestado, lo gastado y lo que queda. Esta es esa respuesta sobre el plan de demostración, en forma de gráfico:
 
 <BudgetChart rows={august} month="2026-08-01" />
 
-> **Claude:** Agosto quedó dentro del presupuesto en todo. El alquiler, el teléfono y la
-> electricidad consumieron el 90 % o más del suyo, las suscripciones casi lo mismo, la
-> compra cerca de la mitad. Los 200,00 apartados para vacaciones siguen intactos.
+> **Claude:** Agosto quedó dentro del presupuesto en todo: ninguna categoría está
+> excedida. Las facturas están pagadas, quedan 207,49 para la compra y 58,00 para el tenis, y
+> los 200,00 apartados para vacaciones siguen intactos.
 
 <details>
 <summary>La respuesta en bruto</summary>
