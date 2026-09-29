@@ -746,6 +746,24 @@ async def set_transactions_cleared(plan_id: str, tx_ids: list[str], cleared: str
     return list(data["data"].get("transaction_ids", []))
 
 
+async def set_flags(plan_id: str, changes: list[tuple[str, str | None]]) -> list[str]:
+    """Set or remove the flag of transactions in one bulk request.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+        changes: (transaction id, colour) pairs; None removes the flag.
+
+    Returns:
+        The ids of the transactions YNAB updated.
+    """
+    if not changes:
+        return []
+    logger.info("Setting the flag of %d transactions", len(changes))
+    body = {"transactions": [{"id": tx_id, "flag_color": color} for tx_id, color in changes]}
+    data = await _patch(f"/plans/{plan_id}/transactions", body)
+    return list(data["data"].get("transaction_ids", []))
+
+
 async def delete_transaction(plan_id: str, tx_id: str) -> None:
     """Delete one transaction.
 

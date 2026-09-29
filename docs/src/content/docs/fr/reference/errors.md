@@ -83,6 +83,16 @@ Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
 - `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
+## [`flag_transactions`](/avenir-mcp/fr/reference/tools/flag-transactions/)
+
+- `Give at least one flag.`
+- `Transaction {twice} is named twice: give one flag each.`
+- `Transaction {unknown} is not in this plan: use a transaction_id from find_transactions.`
+- `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
+
 ## [`move_money`](/avenir-mcp/fr/reference/tools/move-money/)
 
 - `Give two different categories: money moves from one to another.`

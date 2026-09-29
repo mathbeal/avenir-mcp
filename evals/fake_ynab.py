@@ -133,7 +133,7 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         names = {c["id"]: c["name"] for c in self.categories()}
         for update in updates:
             tx = self.transactions[update["id"]]
-            for key in ("category_id", "cleared", "approved"):
+            for key in ("category_id", "cleared", "approved", "flag_color"):
                 if key in update:
                     tx[key] = update[key]
             if "subtransactions" in update:

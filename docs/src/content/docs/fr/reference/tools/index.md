@@ -31,6 +31,7 @@ avenir-mcp déclare ces outils. Les outils de lecture sont toujours disponibles 
 | [`approve_transactions`](/avenir-mcp/fr/reference/tools/approve-transactions/) | Mark transactions as approved, i.e. reviewed (clears YNAB's "unapproved" badge). |
 | [`create_category`](/avenir-mcp/fr/reference/tools/create-category/) | Create a category in a group, after the user confirms. |
 | [`create_transactions`](/avenir-mcp/fr/reference/tools/create-transactions/) | Create transactions on an account, e.g. ones the bank import missed, after the user confirms. |
+| [`flag_transactions`](/avenir-mcp/fr/reference/tools/flag-transactions/) | Set or remove the coloured flag of transactions, after the user confirms. |
 | [`import_transactions`](/avenir-mcp/fr/reference/tools/import-transactions/) | Import the latest transactions from the plan's linked bank accounts into YNAB. |
 | [`move_money`](/avenir-mcp/fr/reference/tools/move-money/) | Move money budgeted in one category to another for a month, after the user confirms. |
 | [`reconcile_account`](/avenir-mcp/fr/reference/tools/reconcile-account/) | Compare an account with the balance your bank shows, then reconcile it. |

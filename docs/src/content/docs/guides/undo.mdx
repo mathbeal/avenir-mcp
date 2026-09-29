@@ -41,6 +41,7 @@ operation's answer carries its `operation_id`.
 | `apply_categories` | each transaction's previous category | its category changed again since |
 | `set_category_budget` | the previous amount | the amount changed again since |
 | `move_money` | both previous amounts | either amount changed again since (then neither is touched) |
+| `flag_transactions` | each transaction's previous flag | its flag changed again since |
 | `reconcile_account` | *cleared* status; deletes the adjustment | a transaction is no longer reconciled |
 | `create_transactions` | deletes the created transactions | one was already deleted |
 

@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 22 tools, 4 resources and 4 prompts over your YNAB plans. This
+avenir-mcp gives an agent 23 tools, 4 resources and 4 prompts over your YNAB plans. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -56,6 +56,7 @@ Guide: [Review a month](/avenir-mcp/guides/monthly-review/).
 | *“Fetch my bank's latest transactions.”* | [`import_transactions`](/avenir-mcp/reference/tools/import-transactions/) — what Import does in YNAB, applied at once | W |
 | *“What still needs a category?”* | [`suggest_categories`](/avenir-mcp/reference/tools/suggest-categories/) — pending transactions, with a suggestion when your history is clear | R |
 | *“Yes, apply that.”* | [`apply_categories`](/avenir-mcp/reference/tools/apply-categories/) — one confirmed batch | W ↺ |
+| *“Flag the ones I should check in YNAB.”* | [`flag_transactions`](/avenir-mcp/reference/tools/flag-transactions/) — a coloured flag, to look at in YNAB | W ↺ |
 | *“Split this receipt: 81.15 groceries, 5.25 household.”* | [`split_transaction`](/avenir-mcp/reference/tools/split-transaction/) — one transaction across several categories; undone in YNAB, not here | W |
 | *“Mark them as reviewed.”* | [`approve_transactions`](/avenir-mcp/reference/tools/approve-transactions/) — clears YNAB's *unapproved* flag | W |
 

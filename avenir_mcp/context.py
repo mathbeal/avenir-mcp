@@ -38,6 +38,8 @@ GUIDE = """# avenir-mcp: how to work with this YNAB server
   then `apply_categories`.
 - Reconcile an account: ask for the balance the bank shows, then `reconcile_account`.
   If there is a difference, explain it from the answer; adjust only if the user asks.
+- Something the user should check (a likely duplicate, an unknown charge): propose
+  `flag_transactions` rather than deciding; ask which colour means what to them.
 - Review a month: `get_monthly_summary`, then `get_category_balances` and
   `get_spending_trends` where something stands out.
 - Plan: `forecast_balance` says when money would run out; check its assumptions with

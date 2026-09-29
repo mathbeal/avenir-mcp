@@ -49,9 +49,9 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 | `PUT /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | planned | Change a coming payment, after reading them is in place. |
 | `DELETE /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | planned | Cancel a coming payment, after reading them is in place. |
 | `GET /plans/{plan_id}/settings` | planned | The plan's currency and formats, to show amounts with their currency. |
-| `GET /plans/{plan_id}/transactions` | covered | `apply_categories`, `find_transactions`, `forecast_balance`, `reconcile_account`, `split_transaction`, `suggest_categories`, `undo_operation` |
+| `GET /plans/{plan_id}/transactions` | covered | `apply_categories`, `find_transactions`, `flag_transactions`, `forecast_balance`, `reconcile_account`, `split_transaction`, `suggest_categories`, `undo_operation` |
 | `POST /plans/{plan_id}/transactions` | covered | `create_transactions`, `reconcile_account` |
-| `PATCH /plans/{plan_id}/transactions` | covered | `apply_categories`, `approve_transactions`, `reconcile_account`, `split_transaction`, `undo_operation` |
+| `PATCH /plans/{plan_id}/transactions` | covered | `apply_categories`, `approve_transactions`, `flag_transactions`, `reconcile_account`, `split_transaction`, `undo_operation` |
 | `POST /plans/{plan_id}/transactions/import` | covered | `import_transactions` |
 | `GET /plans/{plan_id}/transactions/{transaction_id}` | excluded | Transactions are read in one request for the whole plan, then kept in sync. |
 | `PUT /plans/{plan_id}/transactions/{transaction_id}` | planned | Edit one transaction: memo, flag, payee, date or amount. |
