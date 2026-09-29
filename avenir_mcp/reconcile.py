@@ -67,16 +67,15 @@ def _duplicates(transactions: list[dict[str, Any]]) -> list[list[str]]:
         Pairs of transaction ids, oldest first within a pair.
     """
     pairs: list[list[str]] = []
-    ordered = sorted(transactions, key=lambda tx: tx["date"])
-    for i, first in enumerate(ordered):
-        for second in ordered[i + 1 :]:
-            gap = date.fromisoformat(second["date"]) - date.fromisoformat(first["date"])
-            if gap.days > DUPLICATE_WINDOW_DAYS:
+    ordered = [
+        (tx, date.fromisoformat(tx["date"]), normalize_payee(tx.get("payee_name") or ""))
+        for tx in sorted(transactions, key=lambda tx: tx["date"])
+    ]
+    for i, (first, first_day, first_payee) in enumerate(ordered):
+        for second, second_day, second_payee in ordered[i + 1 :]:
+            if (second_day - first_day).days > DUPLICATE_WINDOW_DAYS:
                 break
-            same_payee = normalize_payee(first.get("payee_name") or "") == normalize_payee(
-                second.get("payee_name") or ""
-            )
-            if first["amount"] == second["amount"] and same_payee:
+            if first["amount"] == second["amount"] and first_payee == second_payee:
                 pairs.append([first["id"], second["id"]])
     return pairs
 
