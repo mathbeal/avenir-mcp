@@ -106,6 +106,13 @@ harmlos, etwa der Wortlaut einer Meldung.
 Vorschlägen vorbereiten) etwa 30 ms: Die Zeit eines Werkzeugs vergeht beim Warten auf
 YNAB, nicht beim Rechnen.
 
+`just fuzz` führt die Hypothesis-Eigenschaften mit je 50.000 statt 100 Beispielen aus (einige
+Minuten; `just fuzz 200000` für mehr), auf dem, was von außen kommt: Buchungstexte der Bank,
+beschädigte Journale, HTTP-Header, Beträge, Cursor. Ein Fehlschlag wird gespeichert und beim
+nächsten Lauf, auf den kleinsten Fall verkleinert, wiederholt. Die CI tut das jede Nacht mit
+200.000. Der erste Lauf fand ein Byte im Journal, das kein Text war (0x80) und als rohe
+Codec-Fehlermeldung statt als zu korrigierende Zeile erschien.
+
 ## Dokumentation
 
 ```bash

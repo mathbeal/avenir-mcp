@@ -107,17 +107,17 @@ class Journal:
         undone: set[str] = set()
         if not self._path.exists():
             return entries, undone
-        with self._path.open(encoding="utf-8") as file:
-            for number, line in enumerate(file, start=1):
-                if not line.strip():
+        with self._path.open("rb") as file:
+            for number, raw in enumerate(file, start=1):
+                if not raw.strip():
                     continue
                 try:
-                    data = json.loads(line)
+                    data = json.loads(raw.decode("utf-8"))
                     if isinstance(data, dict) and isinstance(data.get("undone"), str):
                         undone.add(data["undone"])
                     else:
                         entries.append(Entry.model_validate(data))
-                except (json.JSONDecodeError, ValidationError) as error:
+                except (UnicodeDecodeError, json.JSONDecodeError, ValidationError) as error:
                     raise ValueError(
                         f"{self._path}, line {number}, is not a journal entry: fix or remove "
                         "that line, or move the file aside to start a new journal."
