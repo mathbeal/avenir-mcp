@@ -78,3 +78,19 @@ def test_writes_can_be_enabled_again() -> None:
     server.configure(enable_writes=False)
     server.configure(enable_writes=True)
     assert "apply_categories" in {t.name for t in _tools()}
+
+
+def test_configuring_again_and_again_adds_nothing_to_the_server() -> None:
+    """Each call switches the same gate: a thousand calls leave the server as one call does.
+
+    configure used to add a visibility filter per call; the test suite calls it twice per
+    test, and past some 570 tests FastMCP ran out of recursion depth looking a tool up.
+    """
+    before = len(server.mcp.transforms)
+    for _ in range(500):
+        server.configure(enable_writes=False)
+        server.configure(enable_writes=True)
+    assert len(server.mcp.transforms) == before
+    assert "apply_categories" in {t.name for t in _tools()}
+    server.configure(enable_writes=False)
+    assert "apply_categories" not in {t.name for t in _tools()}
