@@ -10,9 +10,9 @@ setup:
 check: lint types test vocabulary lock
 
 lint:
-    uv run ruff format --check avenir_mcp tests evals docsgen
-    uv run pylint avenir_mcp tests evals docsgen
-    uv run ruff check avenir_mcp tests evals docsgen
+    uv run ruff format --check avenir_mcp tests evals docsgen benchmarks
+    uv run pylint avenir_mcp tests evals docsgen benchmarks
+    uv run ruff check avenir_mcp tests evals docsgen benchmarks
     uv run deptry .
 
 types:
@@ -28,10 +28,14 @@ vocabulary:
 lock:
     uv lock --check
 
+# Time the computing functions on a five-year plan of about 9,000 transactions.
+bench:
+    uv run pytest benchmarks -o addopts="" -p no:cacheprovider --benchmark-only --benchmark-sort=name --benchmark-columns=min,median,mean,rounds
+
 # Reformat.
 fix:
-    uv run ruff check --select I --fix avenir_mcp tests evals docsgen
-    uv run ruff format avenir_mcp tests evals docsgen
+    uv run ruff check --select I --fix avenir_mcp tests evals docsgen benchmarks
+    uv run ruff format avenir_mcp tests evals docsgen benchmarks
 
 # Look for secrets in every commit of every branch, as CI does (needs Docker).
 # It mounts the repository that holds the history, so a worktree works too.

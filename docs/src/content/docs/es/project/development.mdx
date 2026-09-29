@@ -98,6 +98,11 @@ Las pruebas se escriben primero. Ninguna prueba llama a YNAB.
 a propósito el código, unas 1.500 veces, y comprueba que una prueba falla cada vez. Los
 cambios que ninguna prueba detecta señalan las pruebas que escribir; muchos son inofensivos, como la redacción de un mensaje.
 
+`just bench` mide cuánto tardan los módulos de cálculo sobre un plan generado de cinco años,
+unas 9.000 transacciones (pytest-benchmark). En un portátil, la operación más lenta (preparar
+una página de sugerencias) tarda unos 30 ms: el tiempo de una herramienta se va en esperar a
+YNAB, no en calcular.
+
 ## Documentación
 
 ```bash

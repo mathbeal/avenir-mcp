@@ -46,9 +46,9 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: true
-      - run: uv run ruff format --check avenir_mcp tests evals docsgen
-      - run: uv run pylint avenir_mcp tests evals docsgen
-      - run: uv run ruff check avenir_mcp tests evals docsgen
+      - run: uv run ruff format --check avenir_mcp tests evals docsgen benchmarks
+      - run: uv run pylint avenir_mcp tests evals docsgen benchmarks
+      - run: uv run ruff check avenir_mcp tests evals docsgen benchmarks
       - run: uv run deptry .
 
   types:
@@ -66,6 +66,8 @@ jobs:
         with:
           enable-cache: true
       - run: uv run mypy
+      # Each benchmark once, untimed: they keep working without slowing CI down.
+      - run: uv run pytest benchmarks -o addopts="" -p no:cacheprovider --benchmark-disable
 
   tests:
     name: pytest ${{ matrix.python-version }} on ${{ matrix.os }}

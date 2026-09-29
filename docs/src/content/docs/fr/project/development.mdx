@@ -99,6 +99,11 @@ Les tests sont écrits d'abord. Aucun test n'appelle YNAB.
 volontairement le code, quelque 1 500 fois, et vérifie qu'un test échoue à chaque fois. Les
 modifications qu'aucun test ne remarque désignent les tests à écrire ; beaucoup sont anodines, comme la formulation d'un message.
 
+`just bench` mesure la durée des modules de calcul sur un plan généré de cinq ans, environ
+9 000 transactions (pytest-benchmark). Sur un portable, l'opération la plus lente (préparer
+une page de suggestions) prend environ 30 ms : le temps d'un outil passe à attendre YNAB, pas
+à calculer.
+
 ## Documentation
 
 ```bash
