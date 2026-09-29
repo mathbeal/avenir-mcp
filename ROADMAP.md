@@ -8,15 +8,15 @@ Newest first.
 
 ## What comparable servers offer, and what follows from it
 
-Surveyed on 2026-09-29, on the public YNAB MCP servers with the most use. They fall in
-three families:
+Surveyed on 2026-09-29, on the public YNAB MCP servers with the most use (not named
+here: the point is what they offer, not who). They fall in three families:
 
-- **API mirrors** (e.g. rgarcia's): one tool per endpoint. Complete, but the agent does
+- **API mirrors**: one tool per endpoint. Complete, but the agent does
   the work and pays for it in context; writes are not previewed.
-- **Wide toolboxes** (e.g. auzroz's, some sixty tools; calebl's): budget moves, auto
+- **Wide toolboxes**, up to some sixty tools: budget moves, auto
   assign, transaction edits and deletes, file import, spending by payee, cash flow, net
   worth, savings opportunities, spending pace.
-- **Task servers** (e.g. oliverames', dizzlkheinz's `ynab-mcpb`, Maronato's): recurring
+- **Task servers**: recurring
   and subscription detection, budget health, credit-card audit, merged categories,
   money movements, undo history, write modes, receipts.
 
