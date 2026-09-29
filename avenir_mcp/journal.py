@@ -132,7 +132,8 @@ class Journal:
             plan_id: The plan it changed.
             kind: categorize, reconcile, budget or create.
             moves: Category changes, for a recategorisation.
-            details: What undoing another kind needs: identifiers, and a budget change's amounts before and after.
+            details: What undoing another kind needs: identifiers, and a budget
+                change's amounts before and after.
 
         Returns:
             The new operation's id.
