@@ -14,18 +14,18 @@ antes de modificar nada. Esta página describe exactamente lo que hace.
 
 Cada herramienta construye un **objeto**: el cambio exacto, en forma de datos.
 
-| Herramienta | Sujeto |
+| Herramienta | Objeto |
 |---|---|
 | `apply_categories` | la lista de cambios (transacción, categoría después) |
 | `set_category_budget` | categoría, mes (resuelto), importe en miliunidades |
 | `update_category` | categoría, nombre nuevo, grupo nuevo |
 | `create_category` | grupo, nombre |
 | `create_transactions` | cuenta, las transacciones, `approved` |
-| `split_transaction` | transacción, las líneas (importe, categoría, nota) |
+| `split_transaction` | transacción, las líneas (importe, categoría, memo) |
 | `reconcile_account` | cuenta, saldo bancario, diferencia a ajustar |
 | `undo_operation` | el id de la operación |
 
-Su **huella** es el SHA-256 del JSON `[plan_id, objeto]`, con claves ordenadas; para
+Su **huella** es el SHA-256 del JSON `[plan_id, subject]`, con claves ordenadas; para
 una lista de cambios, el orden de los elementos no importa. Una respuesta o un código
 solo confirma el objeto cuya huella lleva.
 
@@ -120,6 +120,6 @@ Solo los clientes que admiten la elicitación MCP pueden entonces escribir.
 | `create_transactions` | *Create 1 transaction(s) on Checking?* y una línea por transacción |
 | `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* y una línea por categoría, con el aviso de que solo YNAB puede deshacerla |
 | `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
-| `undo_operation` | *Undo: recategorise 2 transaction(s)?*, o el tipo de deshacer |
+| `undo_operation` | *Undo: recategorise 2 transaction(s)?*, o el tipo de anulación |
 
 Las preguntas están en inglés, como las respuestas de las herramientas.

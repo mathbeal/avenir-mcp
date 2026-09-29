@@ -15,7 +15,7 @@ programa hace, en su equipo, con los datos que obtiene a través de la API de YN
 |---|---|---|
 | Usted, en su equipo | avenir-mcp mientras se ejecuta, y su diario | esta página |
 | YNAB | su plan, como siempre: avenir-mcp lo lee, y lo modifica cuando usted confirma, con su propio token | [la política de privacidad de YNAB](https://www.ynab.com/privacy-policy/) |
-| Su proveedor de modelo | los resultados de herramientas que su cliente MCP envía a su modelo: cuentas, categorías, beneficiarios, importes, notas | la de su proveedor; ninguna con un [modelo local](/avenir-mcp/es/guides/choose-a-model/#modelos-locales) |
+| Su proveedor de modelo | los resultados de herramientas que su cliente MCP envía a su modelo: cuentas, categorías, beneficiarios, importes, memos | la de su proveedor; ninguna con un [modelo local](/avenir-mcp/es/guides/choose-a-model/#modelos-locales) |
 | El editor de avenir-mcp | nada | — |
 
 ## Qué maneja avenir-mcp
@@ -24,14 +24,14 @@ programa hace, en su equipo, con los datos que obtiene a través de la API de YN
   `YNAB_API_KEY_FILE`. Se guarda en memoria como valor secreto, se envía solo a la API de
   YNAB por HTTPS, y nunca se registra, se muestra, se devuelve al agente ni se escribe en
   disco. Permanece donde usted lo puso: la configuración de su cliente MCP, o ese archivo.
-- **Los datos de su plan**: cuentas, categorías, transacciones, beneficiarios y notas. Se
+- **Los datos de su plan**: cuentas, categorías, transacciones, beneficiarios y memos. Se
   piden a YNAB cuando una herramienta los necesita, se guardan
   [en memoria](/avenir-mcp/es/concepts/data-and-sync/#la-copia-local-de-las-transacciones)
   para que la siguiente petición pida solo lo que cambió, y se devuelven a su agente como
   resultados de herramientas. Nunca se escriben en disco.
 - **El [diario](/avenir-mcp/es/concepts/journal/).** Tras cada cambio que usted confirma,
   una línea de identificadores: qué transacción pasó de qué categoría a cuál, y lo que
-  necesita una operación de deshacer. Nunca un importe, un beneficiario ni una nota. El
+  necesita una operación de deshacer. Nunca un importe, un beneficiario ni un memo. El
   archivo solo lo puede leer su cuenta de usuario.
 - **Los códigos de confirmación.** En memoria, de un solo uso, válidos 10 minutos.
 - **Los registros de diagnóstico.** En stderr, solo identificadores y recuentos, avisos y
@@ -44,7 +44,7 @@ programa hace, en su equipo, con los datos que obtiene a través de la API de YN
   [muestra y se confirma](/avenir-mcp/es/concepts/confirmation/) antes de enviarse.
 - **El token es un valor secreto en el código**: mostrado, registrado o en un error,
   aparece como `**********`.
-- **El texto bancario es un dato.** Beneficiarios y notas vienen de bancos y de
+- **El texto bancario es un dato.** Beneficiarios y memos vienen de bancos y de
   desconocidos; se devuelven como datos, nunca como instrucciones para el agente.
 - **El transporte HTTP se queda en este equipo.** Escucha en `127.0.0.1` por defecto, y
   se niega a permitir cambios sin su propio token.
