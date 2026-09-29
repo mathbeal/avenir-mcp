@@ -1,7 +1,5 @@
 """Tests for client.py — YNAB API wrapper."""
 
-# pylint: disable=redefined-outer-name
-
 from __future__ import annotations
 
 import asyncio

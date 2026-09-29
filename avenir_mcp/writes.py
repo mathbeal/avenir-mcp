@@ -14,7 +14,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from pydantic import TypeAdapter  # pylint: disable=import-error
+from pydantic import TypeAdapter
 
 from avenir_mcp.client import milliunit_to_amount
 from avenir_mcp.journal import Move

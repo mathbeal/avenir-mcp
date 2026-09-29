@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 from typing import Annotated, Any
 
-from fastmcp import Context  # pylint: disable=import-error
-from fastmcp.exceptions import ToolError  # pylint: disable=import-error
-from mcp.types import InputRequiredResult  # pylint: disable=import-error
+from fastmcp import Context
+from fastmcp.exceptions import ToolError
+from mcp.types import InputRequiredResult
 from pydantic import Field
 
 from avenir_mcp import app, client, journal
@@ -54,7 +54,7 @@ class CategoryUpdate(Model):
         "open_world_hint": True,
     },
 )
-async def update_category(  # pylint: disable=too-many-arguments,too-many-locals
+async def update_category(  # pylint: disable=too-many-arguments
     plan_id: str,
     category_id: str,
     ctx: Context,
@@ -173,7 +173,7 @@ class BudgetChange(Model):
         "open_world_hint": True,
     },
 )
-async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     plan_id: str,
     month: str,
     category_id: str,
