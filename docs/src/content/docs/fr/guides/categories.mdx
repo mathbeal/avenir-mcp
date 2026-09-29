@@ -9,6 +9,7 @@ import { Code, Aside } from '@astrojs/starlight/components';
 import groups from '@snippets/fr/list_category_groups.json?raw';
 import create from '@snippets/fr/create_category_preview.json?raw';
 import rename from '@snippets/fr/update_category_preview.json?raw';
+import target from '@snippets/fr/target_preview.json?raw';
 import budget from '@snippets/fr/budget_preview.json?raw';
 
 **Objectif :** garder une structure de catégories fidèle à votre vie, et donner à chaque
@@ -53,6 +54,17 @@ rappelez l'outil avec l'ancien nom et l'ancien groupe, que donne la réponse.
 Le montant est **absolu** : il remplace ce qui était budgété. `month` vaut `"current"` ou
 `YYYY-MM-01` ; `"current"` est converti en mois réel, pour qu'une annulation ultérieure
 porte sur le bon mois.
+
+## Fixer l'objectif d'une catégorie
+
+Demandez *« mets de côté 1 200 pour les vacances d'ici juin 2027 »* ou *« 50 par mois pour
+la voiture »* : `set_category_target` fixe l'objectif que YNAB suit pour la catégorie, un
+montant à une date, ou chaque mois, semaine ou année ; sans montant, il retire l'objectif.
+L'annulation rétablit l'objectif précédent, sauf s'il avait été créé dans l'application YNAB
+comme financement mensuel, solde cible ou remboursement de dette et qu'il est remplacé ou
+retiré ; la question le dit avant que vous confirmiez.
+
+<Code code={target} lang="json" title="set_category_target" />
 
 ## Annuler
 

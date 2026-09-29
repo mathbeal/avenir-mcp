@@ -9,6 +9,7 @@ import { Code, Aside } from '@astrojs/starlight/components';
 import groups from '@snippets/es/list_category_groups.json?raw';
 import create from '@snippets/es/create_category_preview.json?raw';
 import rename from '@snippets/es/update_category_preview.json?raw';
+import target from '@snippets/es/target_preview.json?raw';
 import budget from '@snippets/es/budget_preview.json?raw';
 
 **Objetivo:** mantener la estructura de categorías acorde con su vida, y dar a cada
@@ -53,6 +54,17 @@ nuevo con el nombre y el grupo anteriores, que da la respuesta.
 El importe es **absoluto**: sustituye lo presupuestado. `month` es `"current"` o
 `AAAA-MM-01`; `"current"` se resuelve al mes real para que una anulación posterior actúe
 sobre el correcto.
+
+## Fijar el objetivo de una categoría
+
+Pida *«ahorra 1.200 para las vacaciones antes de junio de 2027»* o *«aparta 50 al mes para el
+coche»*: `set_category_target` fija el objetivo que YNAB sigue para la categoría, un importe
+para una fecha, o cada mes, semana o año; sin importe, quita el objetivo. Deshacer restaura
+el objetivo anterior, salvo si se creó en la aplicación de YNAB como financiación mensual,
+saldo objetivo o pago de deuda y se sustituye o se quita; la pregunta lo dice antes de que
+confirme.
+
+<Code code={target} lang="json" title="set_category_target" />
 
 ## Deshacer
 

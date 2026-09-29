@@ -22,6 +22,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_charges,
     tools_classify,
     tools_flags,
+    tools_targets,
     tools_undo,
 )
 from avenir_mcp.app import WRITE_TAG, configure, mcp, today

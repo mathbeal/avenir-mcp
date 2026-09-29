@@ -743,6 +743,25 @@ async def update_category(
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
+async def set_category_target(
+    plan_id: str, category_id: str, fields: dict[str, Any]
+) -> dict[str, Any]:
+    """Set, change or remove a category's target.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+        category_id: Category to update.
+        fields: goal_target in milliunits (None removes the target), and optionally
+            goal_target_date, goal_frequency and goal_needs_whole_amount.
+
+    Returns:
+        The updated category dict.
+    """
+    logger.info("Setting the target of category %s", category_id)
+    data = await _patch(f"/plans/{plan_id}/categories/{category_id}", {"category": fields})
+    return data["data"]["category"]  # type: ignore[no-any-return]
+
+
 async def set_transactions_cleared(plan_id: str, tx_ids: list[str], cleared: str) -> list[str]:
     """Set the cleared status of transactions in one bulk request.
 

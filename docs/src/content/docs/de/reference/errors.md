@@ -122,6 +122,17 @@ Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error call
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
 - `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
+## [`set_category_target`](/avenir-mcp/de/reference/tools/set-category-target/)
+
+- `Category {category_id} is not in this plan: use a category_id from get_category_balances or list_category_groups.`
+- `Give either a date or a frequency, not both: YNAB refuses the two.`
+- `To remove the target, give no amount, no date and no frequency.`
+- `The amount must be greater than 0; to remove the target, give none.`
+- `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
+
 ## [`split_transaction`](/avenir-mcp/de/reference/tools/split-transaction/)
 
 - `Transaction {transaction_id} is not in this plan: use a transaction_id returned by suggest_categories.`

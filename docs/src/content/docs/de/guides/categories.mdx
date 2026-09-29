@@ -9,6 +9,7 @@ import { Code, Aside } from '@astrojs/starlight/components';
 import groups from '@snippets/de/list_category_groups.json?raw';
 import create from '@snippets/de/create_category_preview.json?raw';
 import rename from '@snippets/de/update_category_preview.json?raw';
+import target from '@snippets/de/target_preview.json?raw';
 import budget from '@snippets/de/budget_preview.json?raw';
 
 **Ziel:** die Struktur der Kategorien an Ihr Leben anpassen und jeder Kategorie ihren
@@ -55,6 +56,17 @@ nennt.
 Der Betrag ist **absolut**: Er ersetzt, was budgetiert war. `month` ist `"current"` oder
 `YYYY-MM-01`; `"current"` wird in den tatsächlichen Monat aufgelöst, damit ein späteres
 Rückgängigmachen den richtigen trifft.
+
+## Das Ziel einer Kategorie festlegen
+
+Bitten Sie *„spare bis Juni 2027 1.200 für den Urlaub“* oder *„leg jeden Monat 50 fürs Auto
+zurück“*: `set_category_target` legt das Ziel fest, das YNAB für die Kategorie verfolgt, einen
+Betrag bis zu einem Datum oder jeden Monat, jede Woche oder jedes Jahr; ohne Betrag entfernt
+es das Ziel. Rückgängig machen stellt das vorherige Ziel wieder her, außer es wurde in der
+YNAB-App als monatliche Finanzierung, Zielsaldo oder Schuldentilgung angelegt und wird ersetzt
+oder entfernt; die Frage sagt das, bevor Sie bestätigen.
+
+<Code code={target} lang="json" title="set_category_target" />
 
 ## Rückgängig machen
 

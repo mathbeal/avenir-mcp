@@ -9,6 +9,7 @@ import { Code, Aside } from '@astrojs/starlight/components';
 import groups from '@snippets/nl/list_category_groups.json?raw';
 import create from '@snippets/nl/create_category_preview.json?raw';
 import rename from '@snippets/nl/update_category_preview.json?raw';
+import target from '@snippets/nl/target_preview.json?raw';
 import budget from '@snippets/nl/budget_preview.json?raw';
 
 **Doel:** de indeling van je categorieën bij je leven laten passen, en elke categorie haar
@@ -53,6 +54,17 @@ je opnieuw aan met de vorige naam en groep, die het antwoord noemt.
 Het bedrag is **absoluut**: het vervangt wat er gebudgetteerd was. `month` is `"current"`
 of `YYYY-MM-01`; `"current"` wordt omgezet naar de werkelijke maand, zodat een latere
 ongedaanmaking de juiste maand treft.
+
+## Het doel van een categorie instellen
+
+Vraag *„spaar 1.200 voor de vakantie vóór juni 2027“* of *„zet elke maand 50 opzij voor de
+auto“*: `set_category_target` stelt het doel in dat YNAB voor de categorie volgt, een bedrag
+vóór een datum, of elke maand, week of elk jaar; zonder bedrag haalt het het doel weg.
+Ongedaan maken zet het vorige doel terug, behalve als het in de YNAB-app is aangemaakt als
+maandelijkse financiering, doelsaldo of schuldaflossing en wordt vervangen of weggehaald; de
+vraag zegt dat voordat je bevestigt.
+
+<Code code={target} lang="json" title="set_category_target" />
 
 ## Ongedaan maken
 

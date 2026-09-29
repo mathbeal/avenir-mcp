@@ -66,7 +66,7 @@ that the agent ignores it.
 
 - The token stays in the environment; it is never logged, returned or written.
 - Transactions live in memory while the server runs; nothing is cached on disk.
-- The journal holds identifiers, and the amounts a budget change or a move assigned before and after, in a file created with owner-only permissions.
+- The journal holds identifiers, and the amounts a budget change or a move assigned before and after and the target to restore, in a file created with owner-only permissions.
 - Diagnostics go to stderr at `WARNING` by default.
 
 ## In the project itself

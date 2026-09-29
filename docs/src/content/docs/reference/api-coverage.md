@@ -19,10 +19,10 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 | `POST /plans/{plan_id}/accounts` | excluded | Accounts are opened in YNAB, where the bank connection is set up. |
 | `GET /plans/{plan_id}/accounts/{account_id}` | excluded | list_accounts gives every account in the same single request. |
 | `GET /plans/{plan_id}/accounts/{account_id}/transactions` | excluded | find_transactions filters the plan's transactions by account, in one request. |
-| `GET /plans/{plan_id}/categories` | covered | `apply_categories`, `create_category`, `create_transactions`, `find_recurring_charges`, `find_transactions`, `forecast_balance`, `list_category_groups`, `list_scheduled_transactions`, `reconcile_account`, `split_transaction`, `suggest_categories`, `undo_operation`, `update_category`, `ynab://plans/{plan_id}/categories` |
+| `GET /plans/{plan_id}/categories` | covered | `apply_categories`, `create_category`, `create_transactions`, `find_recurring_charges`, `find_transactions`, `forecast_balance`, `list_category_groups`, `list_scheduled_transactions`, `reconcile_account`, `set_category_target`, `split_transaction`, `suggest_categories`, `undo_operation`, `update_category`, `ynab://plans/{plan_id}/categories` |
 | `POST /plans/{plan_id}/categories` | covered | `create_category` |
 | `GET /plans/{plan_id}/categories/{category_id}` | excluded | The category list gives every category in one request. |
-| `PATCH /plans/{plan_id}/categories/{category_id}` | covered | `update_category` |
+| `PATCH /plans/{plan_id}/categories/{category_id}` | covered | `set_category_target`, `undo_operation`, `update_category` |
 | `GET /plans/{plan_id}/categories/{category_id}/transactions` | excluded | find_transactions filters the plan's transactions by category, split lines included, in one request. |
 | `POST /plans/{plan_id}/category_groups` | planned | Create a group, for a category that belongs in none of the existing ones. |
 | `PATCH /plans/{plan_id}/category_groups/{category_group_id}` | planned | Rename or hide a group. |
@@ -88,6 +88,7 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `move_money` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
 | `reconcile_account` | `GET /accounts`, `GET /categories`, `GET /transactions` | `POST /transactions`, `PATCH /transactions` |
 | `set_category_budget` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
+| `set_category_target` | `GET /categories` | `PATCH /categories/{category_id}` |
 | `split_transaction` | `GET /accounts`, `GET /categories`, `GET /transactions` | `PATCH /transactions` |
-| `undo_operation` | `GET /categories`, `GET /months/{month}`, `GET /transactions` | `PATCH /months/{month}/categories/{category_id}`, `PATCH /transactions`, `DELETE /transactions/{transaction_id}` |
+| `undo_operation` | `GET /categories`, `GET /months/{month}`, `GET /transactions` | `PATCH /categories/{category_id}`, `PATCH /months/{month}/categories/{category_id}`, `PATCH /transactions`, `DELETE /transactions/{transaction_id}` |
 | `update_category` | `GET /categories` | `PATCH /categories/{category_id}` |

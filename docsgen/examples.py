@@ -165,6 +165,11 @@ CALLS: list[Call] = [
         {"plan_id": BUDGET, "category_group_id": "grp-everyday", "name": "Pets"},
     ),
     Call(
+        "target_preview",
+        "set_category_target",
+        {"plan_id": BUDGET, "category_id": "cat-holidays", "amount": 1200, "by_date": "2027-06-01"},
+    ),
+    Call(
         "update_category_preview",
         "update_category",
         {"plan_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},

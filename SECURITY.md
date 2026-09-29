@@ -27,7 +27,7 @@ What the server does:
   client that supports elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
   identifiers, the amounts a budget change or a move assigned before and after, and the
-  colours of a flag change, readable by
+  colours of a flag change, and a target to restore, readable by
   its owner only
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
   Keep your MCP client's per-call confirmation on for it.

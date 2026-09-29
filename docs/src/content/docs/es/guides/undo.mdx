@@ -43,6 +43,7 @@ respuesta de cada operación aplicada lleva su `operation_id`.
 | `set_category_budget` | el importe anterior | el importe ha vuelto a cambiar |
 | `move_money` | los dos importes anteriores | uno de los dos importes ha vuelto a cambiar (entonces no se toca ninguno) |
 | `flag_transactions` | la bandera anterior de cada transacción | su bandera ha vuelto a cambiar |
+| `set_category_target` | el objetivo anterior | el objetivo ha vuelto a cambiar; un tipo que la API de YNAB no sabe crear (financiación mensual, saldo objetivo, pago de deuda) ya no se puede deshacer una vez sustituido o quitado, como anuncia la pregunta |
 | `reconcile_account` | el estado *cleared*; borra el ajuste | una transacción ya no está conciliada |
 | `create_transactions` | borra las transacciones creadas | una ya fue borrada |
 
