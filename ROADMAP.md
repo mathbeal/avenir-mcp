@@ -24,9 +24,11 @@ avenir-mcp stays on its line (fewer tools, each a task; every write previewed,
 confirmed and undoable; local only). Measured against that line, the gaps worth
 closing, in order of value per tool added:
 
-1. **Move money between categories** (`move_money`, one confirmation, one undo). *In
-   review.* The first gesture of a monthly review; every toolbox above has it.
-2. **Import from linked accounts** (`import_transactions`). *In review.*
+1. **Move money between categories** (`move_money`, one confirmation, one undo). *Done.*
+   The first gesture of a monthly review; every toolbox above has it.
+2. **Import from linked accounts** (`import_transactions`). *Done.* Also done since:
+   `flag_transactions` (mark what the user should check, undoable) and the bank link state
+   in `list_accounts`.
 3. **Subscriptions and recurring charges** as a read-only answer. `forecast.recurring`
    already finds them for the projection; exposing them answers "what am I subscribed
    to, and what did it cost this year?" with no new YNAB request.
