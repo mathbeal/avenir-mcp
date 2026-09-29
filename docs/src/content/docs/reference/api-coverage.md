@@ -57,3 +57,36 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 | `PUT /plans/{plan_id}/transactions/{transaction_id}` | planned | Edit one transaction: memo, flag, payee, date or amount. |
 | `DELETE /plans/{plan_id}/transactions/{transaction_id}` | covered | `undo_operation` |
 | `GET /user` | excluded | The user's id tells an agent nothing about the money. |
+
+## By tool
+
+What each tool and resource reads and writes, paths without the leading `/plans/{plan_id}`. A tool calls only what the case at hand needs: `undo_operation` the operations of the kind it undoes, `get_spending_trends` one month per month asked.
+
+| Tool or resource | Reads | Writes |
+|---|---|---|
+| `find_transactions` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
+| `forecast_balance` | `GET /accounts`, `GET /categories`, `GET /scheduled_transactions`, `GET /transactions` | — |
+| `get_budget_vs_actual` | `GET /months/{month}` | — |
+| `get_category_balances` | `GET /months/{month}` | — |
+| `get_monthly_summary` | `GET /months/{month}` | — |
+| `get_spending_trends` | `GET /months`, `GET /months/{month}` | — |
+| `list_accounts` | `GET /accounts` | — |
+| `list_category_groups` | `GET /categories` | — |
+| `list_plans` | `GET /plans` | — |
+| `list_scheduled_transactions` | `GET /accounts`, `GET /categories`, `GET /scheduled_transactions` | — |
+| `suggest_categories` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
+| `ynab://plans` | `GET /plans` | — |
+| `ynab://plans/{plan_id}/accounts` | `GET /accounts` | — |
+| `ynab://plans/{plan_id}/categories` | `GET /categories` | — |
+| `apply_categories` | `GET /accounts`, `GET /categories`, `GET /transactions` | `PATCH /transactions` |
+| `approve_transactions` | — | `PATCH /transactions` |
+| `create_category` | `GET /categories` | `POST /categories` |
+| `create_transactions` | `GET /accounts`, `GET /categories` | `POST /transactions` |
+| `flag_transactions` | `GET /transactions` | `PATCH /transactions` |
+| `import_transactions` | — | `POST /transactions/import` |
+| `move_money` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
+| `reconcile_account` | `GET /accounts`, `GET /categories`, `GET /transactions` | `POST /transactions`, `PATCH /transactions` |
+| `set_category_budget` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
+| `split_transaction` | `GET /accounts`, `GET /categories`, `GET /transactions` | `PATCH /transactions` |
+| `undo_operation` | `GET /categories`, `GET /months/{month}`, `GET /transactions` | `PATCH /months/{month}/categories/{category_id}`, `PATCH /transactions`, `DELETE /transactions/{transaction_id}` |
+| `update_category` | `GET /categories` | `PATCH /categories/{category_id}` |

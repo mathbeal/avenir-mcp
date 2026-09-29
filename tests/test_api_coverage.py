@@ -96,3 +96,31 @@ def test_the_check_passes_fails_and_updates(
     assert "--update" in capsys.readouterr().out
     assert api.main(["--update"]) == 0
     assert json.loads(snapshot.read_text(encoding="utf-8"))["operations"][0]["path"] == "/plans/a"
+
+
+def _tool_rows() -> dict[str, tuple[str, str]]:
+    """The page's per-tool table: each tool or resource with what it reads and writes."""
+    page = api.page()
+    table = page[page.index("| Tool or resource | Reads | Writes |") :]
+    rows = {}
+    for line in table.splitlines()[2:]:
+        if not line.startswith("| `"):
+            break
+        label, reads, writes = (cell.strip() for cell in line.strip("|").split(" | "))
+        rows[label.strip("`")] = (reads, writes)
+    return rows
+
+
+def test_the_page_lists_every_tool_and_resource_once_with_its_operations() -> None:
+    """One row per tool or resource, as found by following the code."""
+    used, _ = api.used()
+    assert set(_tool_rows()) == {label for labels in used.values() for label in labels}
+
+
+def test_a_tool_reads_with_get_and_writes_with_the_other_methods() -> None:
+    """apply_categories reads transactions and writes them; list_plans only reads."""
+    rows = _tool_rows()
+    reads, writes = rows["apply_categories"]
+    assert "`GET /transactions`" in reads
+    assert writes == "`PATCH /transactions`"
+    assert rows["list_plans"] == ("`GET /plans`", "—")
