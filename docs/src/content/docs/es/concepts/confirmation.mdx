@@ -12,26 +12,26 @@ antes de modificar nada. Esta página describe exactamente lo que hace.
 
 ## Qué se confirma
 
-Cada herramienta construye un **sujeto**: el cambio exacto, como datos.
+Cada herramienta construye un **objeto**: el cambio exacto, en forma de datos.
 
 | Herramienta | Sujeto |
 |---|---|
 | `apply_categories` | la lista de cambios (transacción, categoría después) |
 | `set_category_budget` | categoría, mes (resuelto), importe en miliunidades |
-| `update_category` | categoría, nombre después, grupo después |
+| `update_category` | categoría, nombre nuevo, grupo nuevo |
 | `create_category` | grupo, nombre |
 | `create_transactions` | cuenta, las transacciones, `approved` |
 | `split_transaction` | transacción, las líneas (importe, categoría, nota) |
 | `reconcile_account` | cuenta, saldo bancario, diferencia a ajustar |
 | `undo_operation` | el id de la operación |
 
-Su **huella** es el SHA-256 del JSON `[plan_id, sujeto]`, con claves ordenadas; para
+Su **huella** es el SHA-256 del JSON `[plan_id, objeto]`, con claves ordenadas; para
 una lista de cambios, el orden de los elementos no importa. Una respuesta o un código
-solo confirma el sujeto cuya huella lleva.
+solo confirma el objeto cuya huella lleva.
 
 ## Tres maneras de preguntar
 
-`ask` mira lo que el cliente declaró al conectarse y elige:
+`ask` comprueba lo que el cliente declaró al conectarse y elige una de estas vías:
 
 ### 1. El cliente admite elicitación, protocolo 2026-07-28
 
@@ -81,7 +81,7 @@ primera ejecución de la [evaluación](/avenir-mcp/es/project/evaluation/).
 | Formato | 11 caracteres seguros para URL (`secrets.token_urlsafe(8)`) |
 | Vida útil | 600 segundos, con un reloj monótono |
 | Uso | único: un código se consume en su primer uso, aunque no coincida |
-| Alcance | la huella de un sujeto en un presupuesto |
+| Alcance | la huella de un objeto en un presupuesto |
 | Almacenamiento | solo la memoria del servidor: un reinicio olvida todos los códigos |
 
 Un código desconocido, caducado, ya usado o emitido para otros cambios se rechaza con:
@@ -95,7 +95,7 @@ herramientas y el recurso `avenir-mcp://guide`. Los clientes que admiten elicita
 garantía más fuerte: el usuario responde directamente al cliente.
 </Aside>
 
-## Exigir su propia respuesta
+## Exigir la respuesta del propio usuario
 
 Un código de confirmación demuestra que existió una vista previa, no que usted la leyó.
 Con `AVENIR_MCP_REQUIRE_ELICITATION=1`:
