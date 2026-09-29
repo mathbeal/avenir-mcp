@@ -10,7 +10,7 @@ from typing import Literal
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
-from pydantic import Field  # pylint: disable=import-error
+from pydantic import Field
 
 from avenir_mcp import app, client, forecast, journal, reconcile, schedule
 from avenir_mcp.amounts import Amount
