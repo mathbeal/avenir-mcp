@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.mathbeal/avenir-mcp",
+  "description": "Unofficial MCP server for YNAB: read-only by default, every change previewed and undoable.",
+  "repository": {
+    "url": "https://github.com/mathbeal/avenir-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://mathbeal.github.io/avenir-mcp/",
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "avenir-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "YNAB_API_KEY",
+          "description": "Your YNAB personal access token (YNAB > Account settings > Developer settings).",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "AVENIR_MCP_WRITE",
+          "description": "Set to 1 to expose the write tools; read-only otherwise.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

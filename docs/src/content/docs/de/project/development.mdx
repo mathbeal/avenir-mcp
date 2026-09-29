@@ -143,3 +143,6 @@ Siehe [Evaluierung](/avenir-mcp/de/project/evaluation/).
   `avenir_mcp.__version__` setzen und ein GitHub-Release veröffentlichen. Der Workflow
   `publish` baut, führt `twine check --strict` aus und lädt über Trusted Publishing auf PyPI
   hoch: Es wird kein Token gespeichert.
+- Danach die MCP-Registry: `server.json` trägt dieselbe Version (ein Test prüft das); führen
+  Sie `mcp-publisher login github` und dann `mcp-publisher publish` aus. Die Zeile `mcp-name:`
+  in der README belegt, dass das PyPI-Paket Ihnen gehört.
