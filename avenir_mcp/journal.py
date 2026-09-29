@@ -1,9 +1,10 @@
 """A local, append-only record of the writes made through the server.
 
 Each applied operation is one JSON line holding identifiers: which transaction
-moved from which category to which. A budget change also keeps the amounts
-assigned before and after, which undo restores. Undoing an operation appends a
-line that marks it undone. A transaction's amount, payee and memo are never stored.
+moved from which category to which. A budget change or a move also keeps the
+amounts assigned before and after, and a flag change the colours, which undo
+restores. Undoing an operation appends a line that marks it undone. A
+transaction's amount, payee and memo are never stored.
 """
 
 from __future__ import annotations
