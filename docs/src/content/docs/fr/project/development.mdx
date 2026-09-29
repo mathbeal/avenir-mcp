@@ -142,3 +142,6 @@ Voir [Évaluation](/avenir-mcp/fr/project/evaluation/).
   `avenir_mcp.__version__`, puis une release GitHub. Le workflow `publish` construit,
   lance `twine check --strict` et envoie sur PyPI par Trusted Publishing : aucun jeton
   n'est stocké.
+- Puis le registre MCP : `server.json` porte la même version (un test le vérifie) ; lancez
+  `mcp-publisher login github`, puis `mcp-publisher publish`. La ligne `mcp-name:` du README
+  prouve que le paquet PyPI vous appartient.
