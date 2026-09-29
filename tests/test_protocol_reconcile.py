@@ -170,7 +170,6 @@ def test_unknown_account_is_a_tool_error(bank: _Bank) -> None:
 
 def test_declined_reconciliation_changes_nothing(bank: _Bank) -> None:
     """If the user says no, statuses stay as they are."""
-
     data = call("reconcile_account", _args(70.0), decline).structured_content
     assert data["status"] == "declined"
     assert bank.status("t2") == "cleared"
@@ -190,7 +189,6 @@ def test_undo_reconcile_without_elicitation_needs_the_code(bank: _Bank) -> None:
 
 def test_declined_undo_of_a_reconciliation_changes_nothing(bank: _Bank) -> None:
     """If the user refuses the undo, the account stays reconciled."""
-
     call("reconcile_account", _args(70.0), accept)
     data = call("undo_operation", {"plan_id": "b1"}, decline).structured_content
     assert data["status"] == "declined"

@@ -43,6 +43,7 @@ bestand `.pth` van een bewerkbare installatie verbergen, dat Python dan negeert.
 | opmaak | `ruff format --check` | een bestand niet is opgemaakt |
 | lint | `pylint` | de score onder 10,00 ligt |
 | ruff | `ruff check` | een docstring van het pakket niet in Google-stijl is of een argument, de returnwaarde of een opgeworpen exceptie weglaat; imports niet gesorteerd zijn; de beveiligingscontroles van bandit een riskant patroon vinden (TLS niet gecontroleerd, een shellcommando, een wachtwoord in de code…) |
+| docstrings | `pydoclint` | een docstring van het pakket de argumenten in een andere volgorde noemt dan de signatuur, een type geeft dat de annotatie al geeft, of alleen een samenvatting is voor een functie die argumenten neemt of een waarde teruggeeft |
 | afhankelijkheden | `deptry .` | de code een pakket importeert dat `pyproject.toml` niet declareert, of er een declareert dat ze niet gebruikt |
 | types | `mypy` (strikt) | welke typefout ook |
 | tests | `pytest` | een test faalt, er **welke waarschuwing ook** optreedt, of de dekking van regels **of vertakkingen** onder 100 % ligt |

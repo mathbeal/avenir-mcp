@@ -155,6 +155,7 @@ dev = [
     { name = "hypothesis" },
     { name = "mutmut" },
     { name = "mypy" },
+    { name = "pydoclint" },
     { name = "pylint" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
@@ -180,6 +181,7 @@ dev = [
     { name = "hypothesis", specifier = "==6.168.1" },
     { name = "mutmut", specifier = "==3.8.0" },
     { name = "mypy", specifier = "==2.3.1" },
+    { name = "pydoclint", specifier = "==0.10.1" },
     { name = "pylint", specifier = "==4.0.9" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-benchmark", specifier = "==5.3.0" },
@@ -561,6 +563,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e0/4d/f332313098c1de1b2d2ff91cf2674415cc7cddab2ca1b01ae29774bd5fdf/docstring_parser-0.18.0.tar.gz", hash = "sha256:292510982205c12b1248696f44959db3cdd1740237a968ea1e2e7a900eeb2015", size = 29341, upload-time = "2026-04-14T04:09:19.867Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/5f/ed01f9a3cdffbd5a008556fc7b2a08ddb1cc6ace7effa7340604b1d16699/docstring_parser-0.18.0-py3-none-any.whl", hash = "sha256:b3fcbed555c47d8479be0796ef7e19c2670d428d72e96da63f3a40122860374b", size = 22484, upload-time = "2026-04-14T04:09:18.638Z" },
+]
+
+[[package]]
+name = "docstring-parser-fork"
+version = "0.0.16"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/ce/48b17c6c24d0af112f73721a90fac245450e548b82b53169260720f60d07/docstring_parser_fork-0.0.16.tar.gz", hash = "sha256:9ecf861ceab8b87d1297a71001c15a1956ad02e87434ee6473643a5988094f7c", size = 36360, upload-time = "2026-07-03T07:27:46.668Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/69/427c34e61827818942b48ececd7c892b8f58ba4ce4cfc89ba9fd8dbe8a8d/docstring_parser_fork-0.0.16-py3-none-any.whl", hash = "sha256:c024c97af582d6acf85a14f0b332b3a2ab08626648d251c25e47191f33064386", size = 25253, upload-time = "2026-07-03T07:27:45.591Z" },
 ]
 
 [[package]]
@@ -1549,6 +1560,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/68/ca/31c57507b13119d7d3cfa1576dad2911a4861e3be07b579395f4e9d393f9/pydantic_settings-2.15.0.tar.gz", hash = "sha256:694b793e84f766ba76a90ebdefc01d0a9a045dab0382bee70393da93712ad117", size = 261253, upload-time = "2026-08-07T09:24:57.419Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/30/a4/2bffa9f8e804325a09867f0e9d30795c80ea9f8d62560bd1b6ad6220eb2f/pydantic_settings-2.15.0-py3-none-any.whl", hash = "sha256:0ba092c291c94baceb5eff768aa0d56400a457585bc0175925a5a5510303da42", size = 69413, upload-time = "2026-08-07T09:24:55.839Z" },
+]
+
+[[package]]
+name = "pydoclint"
+version = "0.10.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "docstring-parser-fork" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/76/01/af79b4a9f6288fddd8503ffeb544b15db1f648dfbaa992dbc98159a04805/pydoclint-0.10.1.tar.gz", hash = "sha256:baa2ec9a1d1d60fbcf56fd56d75fbf37b426dfb620a04696ab3365025f44749c", size = 228567, upload-time = "2026-09-28T06:43:14.992Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/33/50/6ea5e79c1df40aa1cee86a0cc2e1cece6eb1c5dc72e77acbd165a273be3a/pydoclint-0.10.1-py3-none-any.whl", hash = "sha256:e78be46fb82fa8068d16a5a8e8b17d11835d1a809b2702a2d0761801e956e97a", size = 93569, upload-time = "2026-09-28T06:43:13.81Z" },
 ]
 
 [[package]]

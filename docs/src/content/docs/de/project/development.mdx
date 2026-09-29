@@ -44,6 +44,7 @@ dann ignoriert.
 | Format | `ruff format --check` | eine Datei nicht formatiert ist |
 | Lint | `pylint` | die Bewertung unter 10,00 liegt |
 | ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…) |
+| Docstrings | `pydoclint` | ein Docstring des Pakets die Argumente in anderer Reihenfolge als die Signatur nennt, einen Typ angibt, den die Annotation schon angibt, oder nur eine Zusammenfassung ist, obwohl die Funktion Argumente nimmt oder einen Wert zurückgibt |
 | Abhängigkeiten | `deptry .` | der Code ein Paket importiert, das `pyproject.toml` nicht deklariert, oder eines deklariert, das er nicht nutzt |
 | Typen | `mypy` (strikt) | irgendein Typfehler |
 | Tests | `pytest` | ein Test fehlschlägt, **irgendeine Warnung** ausgelöst wird oder die Abdeckung der Zeilen **oder Zweige** unter 100 % liegt |

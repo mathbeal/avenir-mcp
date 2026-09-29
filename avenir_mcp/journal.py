@@ -59,7 +59,11 @@ class Entry(Model):
 
 
 def default_path() -> Path:
-    """Return AVENIR_MCP_JOURNAL, or journal.jsonl in the XDG state directory."""
+    """Locate the journal.
+
+    Returns:
+        AVENIR_MCP_JOURNAL when set, otherwise journal.jsonl in the XDG state directory.
+    """
     configured = os.getenv("AVENIR_MCP_JOURNAL")
     if configured:
         return Path(configured)

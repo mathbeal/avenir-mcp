@@ -43,6 +43,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | format | `ruff format --check` | a file is not formatted |
 | lint | `pylint` | the score is below 10.00 |
 | ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…) |
+| docstrings | `pydoclint` | a docstring of the package lists the arguments in another order than the signature, gives a type the annotation already gives, or is a bare summary for a function that takes arguments or returns a value |
 | dependencies | `deptry .` | the code imports a package `pyproject.toml` does not declare, or declares one it does not use |
 | types | `mypy` (strict) | any type error |
 | tests | `pytest` | a test fails, **any warning** is raised, or coverage of lines **or branches** is below 100 % |

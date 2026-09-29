@@ -273,7 +273,7 @@ def prepare(  # pylint: disable=too-many-arguments
     threshold: float | None = None,
     off_budget: set[str] | frozenset[str] = frozenset(),
 ) -> Triage:
-    """Return one page of pending transactions, newest first, with suggestions.
+    """Page through the pending transactions, newest first, with suggestions.
 
     Args:
         transactions: All the plan's transactions (history and pending).
@@ -282,6 +282,10 @@ def prepare(  # pylint: disable=too-many-arguments
         cursor: ``next_cursor`` of the previous page, or None for the first page.
         threshold: Confidence needed for a suggestion; defaults to the classifier's.
         off_budget: Ids of tracking accounts, whose transactions take no category.
+
+    Returns:
+        One page, the total pending, the cursor of the next page and, on the first page,
+        the categories to choose from.
 
     Raises:
         ValueError: If ``cursor`` was not issued by this function.
