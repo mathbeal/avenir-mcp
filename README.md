@@ -3,6 +3,11 @@
 <!-- mcp-name: io.github.mathbeal/avenir-mcp -->
 
 [![Works with YNAB](https://api.ynab.com/papi/works_with_ynab.svg)](https://api.ynab.com/)
+[![YNAB API terms: self-checked](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml)
+
+Self-checked on every change against YNAB's API terms of 2025-05-28 (naming, attribution,
+YNAB's own image, a personal token for its owner only, the hourly limit); a weekly job
+turns the badge red when YNAB changes its terms. Not reviewed or endorsed by YNAB.
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![MCP Inspector](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml)
@@ -49,7 +54,7 @@ the documentation shows.
 > connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website
 > can be found at https://www.ynab.com. The names YNAB and You Need A Budget, as well as
 > related names, tradenames, marks, trademarks, emblems, and images are registered
-> trademarks of YNAB; they are named here only to say which service avenir-mcp works with.
+> trademarks of YNAB. They are named here only to say which service avenir-mcp works with.
 >
 > avenir-mcp is for **personal use on your own machine, with your own YNAB token**. Running it
 > as a public or shared server is not supported. It is provided as is, without warranty,

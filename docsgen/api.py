@@ -12,7 +12,6 @@ when YNAB added, removed or renamed an operation; `--update` rewrites the snapsh
 
 from __future__ import annotations
 
-import argparse
 import ast
 import json
 import re
@@ -23,7 +22,7 @@ from typing import Any
 
 import httpx
 
-from docsgen import errors
+from docsgen import errors, snapshots
 
 ROOT = Path(__file__).resolve().parent.parent
 CLIENT = ROOT / "avenir_mcp" / "client.py"
@@ -291,11 +290,9 @@ def main(argv: list[str] | None = None) -> int:
     Returns:
         0 when nothing changed (or the snapshot was updated), 1 otherwise.
     """
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--update", action="store_true", help="rewrite the snapshot")
-    options = parser.parse_args(argv)
+    update = snapshots.update_requested(argv, __doc__)
     live = _live()
-    if options.update:
+    if update:
         SNAPSHOT.parent.mkdir(exist_ok=True)
         SNAPSHOT.write_text(json.dumps(live, indent=1) + "\n", encoding="utf-8")
         print(

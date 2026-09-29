@@ -143,6 +143,9 @@ fail-on = ["useless-suppression"]
 testpaths = ["tests"]
 filterwarnings = ["error"]
 xfail_strict = true
+markers = [
+    "ynab_terms: a rule of YNAB's API terms that the self-checked badge promises",
+]
 addopts = "--strict-markers --strict-config --cov=avenir_mcp --cov-branch --cov-report=term-missing --cov-fail-under=100"
 
 # docsgen is a development tool, not in the package (only avenir_mcp ships): it may use

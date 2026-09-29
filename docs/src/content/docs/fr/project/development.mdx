@@ -45,6 +45,7 @@ alors.
 | lint | `pylint` | la note est sous 10,00 |
 | ruff | `ruff check` | une docstring du paquet n'est pas au format Google ou omet un argument, la valeur de retour ou une exception levée ; les imports ne sont pas triés ; les contrôles de sécurité de bandit trouvent un motif risqué (TLS non vérifié, commande shell, mot de passe dans le code…) |
 | docstrings | `pydoclint` | une docstring du paquet liste les arguments dans un autre ordre que la signature, donne un type que l'annotation donne déjà, ou se réduit à un résumé pour une fonction qui prend des arguments ou renvoie une valeur |
+| Conditions de l'API YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | une règle des conditions de l'API YNAB n'est pas respectée (nommage, mention mot pour mot, image officielle de YNAB, jeton réservé à son titulaire, limite de requêtes par heure), ou YNAB a changé ses conditions depuis la date vérifiée ; le badge du README l'affiche |
 | dépendances | `deptry .` | le code importe un paquet que `pyproject.toml` ne déclare pas, ou en déclare un qu'il n'utilise pas |
 | types | `mypy` (strict) | une erreur de type |
 | tests | `pytest` | un test échoue, **un avertissement** est émis, ou la couverture des lignes **ou des branches** est sous 100 % |

@@ -44,6 +44,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | lint | `pylint` | la nota es inferior a 10,00 |
 | ruff | `ruff check` | un docstring del paquete no sigue el estilo Google u omite un argumento, el valor devuelto o una excepción lanzada; los imports no están ordenados; los controles de seguridad de bandit encuentran un patrón de riesgo (TLS sin verificar, un comando shell, una contraseña en el código…) |
 | docstrings | `pydoclint` | un docstring del paquete enumera los argumentos en otro orden que la firma, da un tipo que la anotación ya da, o se reduce a un resumen en una función que recibe argumentos o devuelve un valor |
+| Condiciones de la API de YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | no se cumple una regla de las condiciones de la API de YNAB (nombre, mención palabra por palabra, imagen oficial de YNAB, token solo para su titular, límite de solicitudes por hora), o YNAB cambió sus condiciones desde la fecha comprobada; el distintivo del README lo muestra |
 | dependencias | `deptry .` | el código importa un paquete que `pyproject.toml` no declara, o declara uno que no usa |
 | tipos | `mypy` (estricto) | cualquier error de tipos |
 | pruebas | `pytest` | una prueba falla, se emite **cualquier aviso**, o la cobertura de líneas **o ramas** es inferior al 100 % |
