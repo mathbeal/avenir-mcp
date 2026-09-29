@@ -101,7 +101,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 
-Walk-throughs with real answers: [Use cases](https://mathbeal.github.io/avenir-mcp/use-cases/classify/).
+Walk-throughs with real answers: [Use cases](https://mathbeal.github.io/avenir-mcp/guides/classify/).
 Every tool, resource and prompt: [Reference](https://mathbeal.github.io/avenir-mcp/reference/tools/).
 
 ## Development

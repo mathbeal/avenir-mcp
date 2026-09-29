@@ -41,7 +41,7 @@ instructions. Nothing is changed here: assign with apply_categories.
 | Nombre | Tipo | Obligatorio | Por defecto | Descripción |
 |---|---|---|---|---|
 | `plan_id` | string | sí | — | YNAB plan id or 'last-used'. |
-| `limit` | integer | no | `50` | Maximum number of transactions in the page (default 50). |
+| `limit` | integer | no | `50` | Maximum number of transactions in the page, 1 to 200 (default 50). |
 | `cursor` | string \| null | no | `null` | next_cursor from the previous page; omit for the first page. |
 
 ## Devuelve

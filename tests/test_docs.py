@@ -58,3 +58,30 @@ def test_every_snippet_is_used_by_a_page() -> None:
     text = "\n".join(p.read_text(encoding="utf-8") for p in CONTENT.rglob("*.md*"))
     unused = [p.name for p in pages.SNIPPETS.glob("*.json") if f"@snippets/{p.name}" not in text]
     assert not unused
+
+
+_SITE_LINK = re.compile(r"https://mathbeal\.github\.io/avenir-mcp/([^\s)>#\"']*)")
+
+
+def _page_exists(path: str) -> bool:
+    stem = CONTENT / path.strip("/") if path.strip("/") else CONTENT / "index"
+    candidates = [stem.with_suffix(".md"), stem.with_suffix(".mdx")]
+    candidates += [stem / "index.md", stem / "index.mdx"]
+    return any(candidate.is_file() for candidate in candidates)
+
+
+def test_every_link_to_the_site_from_the_repository_reaches_a_page() -> None:
+    """A link from the README or another root file to the site names a page that exists.
+
+    The site checks its own links when it builds; nothing checks the ones pointing
+    at it from outside, and a page renamed there leaves them on a 404.
+    """
+    root = CONTENT.parents[3]
+    sources = [*sorted(root.glob("*.md")), root / "pyproject.toml"]
+    broken = [
+        f"{source.name}: {path}"
+        for source in sources
+        for path in _SITE_LINK.findall(source.read_text(encoding="utf-8"))
+        if not _page_exists(path)
+    ]
+    assert not broken, f"links to no page of the site: {broken}"
