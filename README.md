@@ -11,6 +11,7 @@
 [![docstrings](https://img.shields.io/badge/docstrings-Google%20style%2C%20ruff-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
+[![last commit](https://img.shields.io/github/last-commit/mathbeal/avenir-mcp)](https://github.com/mathbeal/avenir-mcp/commits/main)
 
 > 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB plan
 > and help you plan what comes next.
@@ -24,6 +25,8 @@ matches the bank, when money would run out. Every change is previewed, confirmed
 you, and can be undone.
 
 **📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
+
+[English](https://mathbeal.github.io/avenir-mcp/) · [Français](https://mathbeal.github.io/avenir-mcp/fr/) · [Español](https://mathbeal.github.io/avenir-mcp/es/) · [Deutsch](https://mathbeal.github.io/avenir-mcp/de/) · [Nederlands](https://mathbeal.github.io/avenir-mcp/nl/)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
@@ -66,6 +69,14 @@ the documentation shows.
 
 You need [uv](https://docs.astral.sh/uv/) and a YNAB personal access token
 (YNAB → Account Settings → Developer Settings → New Token).
+
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_avenir--mcp-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=avenir-mcp&inputs=%5B%7B%22id%22%3A%22ynab_token%22%2C%22type%22%3A%22promptString%22%2C%22description%22%3A%22YNAB%20personal%20access%20token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22avenir-mcp%22%5D%2C%22env%22%3A%7B%22YNAB_API_KEY%22%3A%22%24%7Binput%3Aynab_token%7D%22%7D%7D)
+[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=avenir-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJhdmVuaXItbWNwIl0sImVudiI6eyJZTkFCX0FQSV9LRVkiOiJ5b3VyLXRva2VuIn19)
+
+One click installs avenir-mcp **read-only**: VS Code asks for your token in a password box and keeps it in its secret
+storage; in Cursor, replace `your-token` in the server's settings. Add `AVENIR_MCP_WRITE=1` to allow changes.
+
+Or by hand:
 
 ```bash
 # Claude Code

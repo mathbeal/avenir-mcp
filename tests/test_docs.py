@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import re
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -85,3 +88,32 @@ def test_every_link_to_the_site_from_the_repository_reaches_a_page() -> None:
         if not _page_exists(path)
     ]
     assert not broken, f"links to no page of the site: {broken}"
+
+
+def _install_link(prefix: str) -> str:
+    readme = (CONTENT.parents[3] / "README.md").read_text(encoding="utf-8")
+    found = re.search(rf"\]\(({re.escape(prefix)}[^)]+)\)", readme)
+    assert found, f"no install button linking to {prefix} in the README"
+    return found.group(1)
+
+
+def test_the_vs_code_button_installs_avenir_mcp_and_asks_for_the_token_hidden() -> None:
+    """The VS Code button runs uvx avenir-mcp, read-only, the token typed into a password box."""
+    query = parse_qs(
+        urlsplit(_install_link("https://insiders.vscode.dev/redirect/mcp/install?")).query
+    )
+    config = json.loads(query["config"][0])
+    (token,) = json.loads(query["inputs"][0])
+    assert query["name"] == ["avenir-mcp"]
+    assert (config["command"], config["args"]) == ("uvx", ["avenir-mcp"])
+    assert config["env"] == {"YNAB_API_KEY": f"${{input:{token['id']}}}"}
+    assert (token["type"], token["password"]) == ("promptString", True)
+
+
+def test_the_cursor_button_installs_avenir_mcp_read_only() -> None:
+    """The Cursor button runs uvx avenir-mcp without write access, with a token to fill in."""
+    query = parse_qs(urlsplit(_install_link("https://cursor.com/en/install-mcp?")).query)
+    config = json.loads(base64.b64decode(query["config"][0]))
+    assert query["name"] == ["avenir-mcp"]
+    assert (config["command"], config["args"]) == ("uvx", ["avenir-mcp"])
+    assert config["env"] == {"YNAB_API_KEY": "your-token"}
