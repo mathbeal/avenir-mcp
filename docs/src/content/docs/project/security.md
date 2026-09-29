@@ -33,7 +33,8 @@ What the server does:
   used a code on its own after reading a planted memo, then undid the change. Use a
   client that supports elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
-  identifiers only, readable by its owner only
+  identifiers, and the amounts a budget change assigned before and after, readable by
+  its owner only
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
   Keep your MCP client's per-call confirmation on for it.
 

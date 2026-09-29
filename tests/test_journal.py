@@ -72,6 +72,20 @@ def test_journal_file_is_private_and_holds_no_amounts_or_names(tmp_path: Path) -
     assert "amount" not in text and "payee" not in text
 
 
+def test_a_budget_change_keeps_its_amounts_and_nothing_about_transactions(tmp_path: Path) -> None:
+    """A budget line holds the amounts assigned before and after, which undo restores; no payee."""
+    path = tmp_path / "journal.jsonl"
+    journal.Journal(path).record(
+        "b1",
+        "budget",
+        [],
+        {"month": "2026-09-01", "category_id": "c1", "from": 120000, "to": 150000},
+    )
+    text = path.read_text(encoding="utf-8")
+    assert '"from":120000' in text and '"to":150000' in text
+    assert "payee" not in text and "memo" not in text
+
+
 def test_missing_journal_is_empty(tmp_path: Path) -> None:
     """Before the first write there is nothing to undo."""
     assert journal.Journal(tmp_path / "none.jsonl").find("b1") is None
