@@ -41,9 +41,13 @@ def test_hooks_lint_and_format_with_ruff_as_ci_does() -> None:
 
 
 def test_hooks_hunt_typos_and_audit_workflows_like_the_justfile() -> None:
-    """Same commands as `just hygiene` and CI, not older pinned mirrors with other verdicts."""
+    """Same commands as the justfile and CI, not older pinned mirrors with other verdicts."""
     recipe = (ROOT / "justfile").read_text(encoding="utf-8")
-    for command in ("uvx typos", "uvx zizmor --persona=regular .github/workflows/"):
+    for command in (
+        "uvx typos",
+        "uvx zizmor --persona=regular .github/workflows/",
+        "uvx pydoclint==0.10.1 avenir_mcp",
+    ):
         assert command in recipe
         assert any(entry.startswith(command) for entry in _entries()), command
     assert "crate-ci/typos" not in HOOKS and "zizmor-pre-commit" not in HOOKS
