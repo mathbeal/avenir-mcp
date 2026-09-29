@@ -126,8 +126,11 @@ def test_guide_only_names_tools_that_exist() -> None:
 
 @pytest.mark.parametrize("mode", ["auto", "legacy"])
 def test_guide_is_given_as_server_instructions(mode: str) -> None:
-    """A client that passes the server's instructions to its model gives it the guide,
-    whichever protocol generation it negotiates, without having to attach a resource."""
+    """The guide reaches the model as the server's instructions, whatever the protocol.
+
+    A client that passes them on needs no resource attached, whichever protocol
+    generation it negotiates.
+    """
 
     async def run() -> tuple[str | None, str]:
         async with Client(server.mcp, mode=mode) as mcp_client:

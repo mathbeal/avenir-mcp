@@ -66,7 +66,6 @@ def test_same_amount_changes_nothing(month: FakeMonth) -> None:
 
 def test_declined_budget_change_writes_nothing(month: FakeMonth) -> None:
     """If the user says no, the amount stays."""
-
     assert call("set_category_budget", _ARGS, decline).structured_content["status"] == "declined"
     assert not month.sets
 

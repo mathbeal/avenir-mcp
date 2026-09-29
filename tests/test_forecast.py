@@ -394,7 +394,7 @@ def test_a_schedule_matches_the_longer_bank_label_of_its_payee() -> None:
 
 
 def test_a_schedule_matches_whole_words_only_and_its_own_direction() -> None:
-    """ "ACME" does not cover "ACMEVILLE STORE", and an inflow schedule does not cover a payment."""
+    """A schedule for "ACME" does not cover "ACMEVILLE STORE", nor an inflow a payment."""
     scheduled = frozenset({("ACME", False)})
     assert not forecast.is_scheduled("ACMEVILLE STORE", False, scheduled)
     assert not forecast.is_scheduled("ACME", True, scheduled)

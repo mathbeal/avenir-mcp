@@ -14,7 +14,7 @@ repos:
       - id: trailing-whitespace
 
   # Every tool runs as CI and the justfile run it: ruff and lexdrift from the
-  # lockfile, typos and zizmor through uvx. Two versions of a tool give two verdicts.
+  # lockfile, typos, zizmor and pydoclint through uvx. Two versions of a tool give two verdicts.
   - repo: local
     hooks:
       - id: ruff-check
@@ -39,6 +39,12 @@ repos:
         name: typos
         entry: uvx typos .
         language: system
+        pass_filenames: false
+      - id: pydoclint
+        name: pydoclint (docstrings match signatures)
+        entry: uvx pydoclint==0.10.1 avenir_mcp
+        language: system
+        files: ^avenir_mcp/.*\.py$
         pass_filenames: false
       - id: zizmor
         name: zizmor

@@ -17,6 +17,7 @@ class FakeFlags:
     """Transactions and their flags, as YNAB holds them, and the changes asked of it."""
 
     def __init__(self) -> None:
+        """Start with no flag, a blue flag and an empty one, as YNAB returns them."""
         self.flags: dict[str, str | None] = {"t1": None, "t2": "blue", "t3": ""}
         self.sent: list[list[tuple[str, str | None]]] = []
 

@@ -21,6 +21,11 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
     """The demo budget's mutable state."""
 
     def __init__(self, language: str = "") -> None:
+        """Start from the demo budget as it is on every run, named in one language.
+
+        Args:
+            language: A documentation language, or "" for English.
+        """
         self.language = language
         self.transactions = {tx["id"]: tx for tx in demo.transactions(language)}
         self.knowledge = 1

@@ -162,3 +162,40 @@ def test_descriptions_carry_no_docstring_sections() -> None:
         if any(section in text for section in ("Args:", "Returns:", "Raises:"))
     }
     assert not leaking
+
+
+def _undescribed(schema: dict[str, Any], defs: dict[str, Any], path: str) -> list[str]:
+    """Every property under a schema without a description, following $ref once each."""
+    missing = []
+    for name, field in schema.get("properties", {}).items():
+        if not field.get("description") and "$ref" not in field and name != "result":
+            missing.append(f"{path}.{name}")
+        missing += _undescribed(field, defs, f"{path}.{name}")
+    for key in ("items", "additionalProperties"):
+        if isinstance(schema.get(key), dict):
+            missing += _undescribed(schema[key], defs, path)
+    for option in schema.get("anyOf", []) + schema.get("allOf", []):
+        missing += _undescribed(option, defs, path)
+    ref = schema.get("$ref", "").removeprefix("#/$defs/")
+    if ref and ref in defs:
+        missing += _undescribed(defs.pop(ref), defs, ref)
+    return missing
+
+
+def test_every_parameter_and_answer_field_is_described_to_the_agent() -> None:
+    """Args of a tool's docstring and field docstrings of its models reach the schemas.
+
+    A parameter or field without a description is one the agent must guess; the
+    wrapper `result` that FastMCP adds around a list is the only exception.
+    """
+
+    async def run() -> Any:
+        async with Client(server.mcp) as mcp_client:
+            return await mcp_client.list_tools()
+
+    missing = []
+    for tool in asyncio.run(run()):
+        for kind, schema in (("in", tool.input_schema), ("out", tool.output_schema or {})):
+            defs = dict(schema.get("$defs", {}))
+            missing += _undescribed(schema, defs, f"{tool.name} ({kind})")
+    assert missing == []

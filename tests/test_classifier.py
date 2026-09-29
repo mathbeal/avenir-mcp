@@ -93,7 +93,7 @@ def test_known_payee_high_confidence_auto_classify() -> None:
 
 
 def test_threshold_boundary_auto_classify() -> None:
-    """confidence == threshold should set auto_classify=True."""
+    """Confidence == threshold should set auto_classify=True."""
     history = {"AWS": {"c2": 9, "c1": 1}}  # confidence = 0.9
     result = classifier.score_payee("AWS", history, _CATEGORIES, threshold=0.90)
     assert result.confidence == 0.9
