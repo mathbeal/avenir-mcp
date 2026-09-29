@@ -130,6 +130,8 @@ def test_declined_creation_writes_nothing(ledger: _Ledger) -> None:
         ({"transactions": [dict(_ITEM, payee_name="")]}, "transactions.0.payee_name"),
         ({"transactions": [dict(_ITEM, payee_name="x" * 201)]}, "transactions.0.payee_name"),
         ({"transactions": [dict(_ITEM, memo="x" * 501)]}, "transactions.0.memo"),
+        ({"transactions": [dict(_ITEM, payee_name="Shop\x00")]}, "U+0000"),
+        ({"transactions": [dict(_ITEM, memo="Receipt\x00\x00 attached")]}, "U+0000"),
     ],
 )
 def test_invalid_creation_is_a_tool_error(
@@ -137,8 +139,8 @@ def test_invalid_creation_is_a_tool_error(
 ) -> None:
     """Bad account, category, date, field name or length is refused before anything is asked.
 
-    YNAB refuses a payee_name over 200 characters and a memo over 500: checked here, the
-    user is not asked to confirm a change YNAB would then reject.
+    YNAB refuses a payee_name over 200 characters, a memo over 500, and a NUL character
+    anywhere: checked here, the user is not asked to confirm a change YNAB would then reject.
     """
     result = call("create_transactions", _args(**change))
     assert result.is_error

@@ -8,6 +8,9 @@ zero-width character could make one name look like another.
 from __future__ import annotations
 
 import unicodedata
+from typing import Annotated
+
+from pydantic import AfterValidator
 
 MAX_TEXT = 80
 
@@ -15,6 +18,27 @@ MAX_PAYEE = 200
 """YNAB refuses a payee_name longer than this."""
 MAX_MEMO = 500
 """YNAB refuses a memo longer than this."""
+
+
+def _without_nul(value: str) -> str:
+    """Refuse the one character YNAB rejects in any text: NUL.
+
+    Args:
+        value: A payee name or memo about to be sent to YNAB.
+
+    Returns:
+        The value, unchanged.
+
+    Raises:
+        ValueError: If it contains U+0000, with what to do.
+    """
+    if "\x00" in value:
+        raise ValueError("contains a NUL character (U+0000), which YNAB refuses: remove it")
+    return value
+
+
+YnabText = Annotated[str, AfterValidator(_without_nul)]
+"""Text avenir-mcp sends to YNAB: without NUL, which YNAB answers with a 400."""
 
 # Control characters, line and paragraph separators: shown as a space.
 _BREAKS = {"Cc", "Zl", "Zp"}

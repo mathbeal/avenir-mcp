@@ -109,3 +109,12 @@ def test_lines_that_do_not_add_up_are_refused_before_asking(ynab: AsyncMock) -> 
     assert result.is_error
     assert "-85.15" in result.content[0].text
     ynab.assert_not_called()
+
+
+def test_a_memo_with_a_nul_character_is_refused_before_asking(ynab: AsyncMock) -> None:
+    """YNAB answers 400 to a NUL character: the line is refused before the user is asked."""
+    lines = [_LINES[0], dict(_LINES[1], memo="Dish\x00soap")]
+    result = call("split_transaction", _args(lines=lines), accept)
+    assert result.is_error
+    assert "U+0000" in result.content[0].text
+    ynab.assert_not_called()
