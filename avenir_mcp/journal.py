@@ -1,8 +1,9 @@
 """A local, append-only record of the writes made through the server.
 
-Each applied operation is one JSON line holding identifiers only: which
-transaction moved from which category to which. Undoing an operation appends
-a line that marks it undone. Amounts, payees and memos are never stored.
+Each applied operation is one JSON line holding identifiers: which transaction
+moved from which category to which. A budget change also keeps the amounts
+assigned before and after, which undo restores. Undoing an operation appends a
+line that marks it undone. A transaction's amount, payee and memo are never stored.
 """
 
 from __future__ import annotations
@@ -131,7 +132,8 @@ class Journal:
             plan_id: The plan it changed.
             kind: categorize, reconcile, budget or create.
             moves: Category changes, for a recategorisation.
-            details: What undoing another kind needs, as identifiers only.
+            details: What undoing another kind needs: identifiers, and a budget
+                change's amounts before and after.
 
         Returns:
             The new operation's id.
