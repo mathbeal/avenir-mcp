@@ -37,7 +37,7 @@ Ongedaan maken voegt een markering toe; er wordt nooit iets herschreven:
 |---|---|
 | `operation_id` | 12 willekeurige hexadecimale tekens |
 | `plan_id` | het gewijzigde plan |
-| `kind` | `categorize`, `budget`, `reconcile` of `create` |
+| `kind` | `categorize`, `budget`, `move`, `reconcile` of `create` |
 | `applied_at` | ISO 8601, UTC, op de seconde |
 | `moves` | voor `categorize`: de categorie van elke transactie ervoor en erna |
 | `details` | voor de andere soorten, wat ongedaan maken nodig heeft (hieronder) |
@@ -45,6 +45,7 @@ Ongedaan maken voegt een markering toe; er wordt nooit iets herschreven:
 | `kind` | `details` |
 |---|---|
 | `budget` | `month`, `category_id`, `from` en `to` in milliunits |
+| `move` | `month`, en `changes`: voor elk van de twee categorieën `category_id`, `from` en `to` in milliunits |
 | `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (of `null`) |
 | `create` | `transaction_ids` |
 
@@ -61,6 +62,7 @@ in effect.“*
 |---|---|---|---|
 | `categorize` | elke transactie terug naar haar vorige categorie | haar categorie is nog die van de operatie | die transactie blijft ongemoeid en staat in `conflicts` |
 | `budget` | het vorige bedrag | het bedrag is nog dat van de operatie | niets geschreven; `conflicts` noemt de categorie |
+| `move` | beide vorige bedragen | beide bedragen zijn nog die van de operatie | niets geschreven; `conflicts` noemt de categorie die veranderde |
 | `reconcile` | *reconciled* transacties terug naar *cleared*; de correctie verwijderd | elke transactie is nog *reconciled* | de niet meer afgestemde worden overgeslagen |
 | `create` | de aangemaakte transacties verwijderd | elke transactie bestaat nog | de al verwijderde staan in `conflicts` |
 

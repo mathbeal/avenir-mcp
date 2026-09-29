@@ -31,6 +31,7 @@ avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles
 | [`approve_transactions`](/avenir-mcp/es/reference/tools/approve-transactions/) | Mark transactions as approved, i.e. reviewed (clears YNAB's "unapproved" badge). |
 | [`create_category`](/avenir-mcp/es/reference/tools/create-category/) | Create a category in a group, after the user confirms. |
 | [`create_transactions`](/avenir-mcp/es/reference/tools/create-transactions/) | Create transactions on an account, e.g. ones the bank import missed, after the user confirms. |
+| [`move_money`](/avenir-mcp/es/reference/tools/move-money/) | Move money budgeted in one category to another for a month, after the user confirms. |
 | [`reconcile_account`](/avenir-mcp/es/reference/tools/reconcile-account/) | Compare an account with the balance your bank shows, then reconcile it. |
 | [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) | Set the amount budgeted ("Assigned") in a category for a month, after the user confirms. |
 | [`split_transaction`](/avenir-mcp/es/reference/tools/split-transaction/) | Split one transaction across categories, e.g. from a receipt, after the user confirms. |

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
@@ -35,7 +36,7 @@ async def undo_operation(
 
     Recategorised transactions go back to their previous category; a
     reconciliation is reverted (statuses and adjustment); a budgeted amount goes
-    back to its previous value; created transactions are deleted. Anything
+    back to its previous value, both of a move_money; created transactions are deleted. Anything
     changed again since the operation is left alone and listed in `conflicts`.
     Confirmation works as for apply_categories.
 
@@ -68,6 +69,8 @@ async def undo_operation(
         return await _undo_reconcile(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "budget":
         return await _undo_budget(ctx, plan_id, book, entry, confirmation)
+    if entry.kind == "move":
+        return await _undo_move(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "create":
         return await _undo_create(ctx, plan_id, book, entry, confirmation)
     transactions = await client.get_transactions(plan_id)
@@ -179,6 +182,65 @@ async def _undo_budget(
     await client.set_category_budgeted(plan_id, details["month"], details["category_id"], previous)
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Budgeted amount restored.", writes.Plan())
+
+
+def _move_back_question(
+    current: dict[str, dict[str, Any]], changes: list[dict[str, Any]], month: str
+) -> str:
+    """Say what undoing a move does, for the user to confirm.
+
+    Args:
+        current: The month's categories by id.
+        changes: The move's two changes, source first, as the journal holds them.
+        month: The month, YYYY-MM-01.
+
+    Returns:
+        The question, naming the amount and both categories.
+    """
+    source, target = (current[change["category_id"]]["name"] for change in changes)
+    amount = client.milliunit_to_amount(changes[0]["from"] - changes[0]["to"])
+    return f"Undo: move {amount:.2f} back from {target} to {source} for {month}?"
+
+
+async def _undo_move(
+    ctx: Context,
+    plan_id: str,
+    book: journal.Journal,
+    entry: journal.Entry,
+    confirmation: str | None,
+) -> WriteResult | InputRequiredResult:
+    """Put both categories of a move back, unless either changed since.
+
+    Args:
+        ctx: The MCP context, used to ask the user.
+        plan_id: YNAB plan id or 'last-used'.
+        book: The journal, to mark the operation undone.
+        entry: The operation to undo.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        What was done, or what to return instead when the user did not agree.
+    """
+    month, changes = entry.details["month"], entry.details["changes"]
+    current = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
+    moved = [
+        change["category_id"]
+        for change in changes
+        if current.get(change["category_id"], {}).get("budgeted") != change["to"]
+    ]
+    if moved:
+        conflict = writes.Plan(conflicts=moved)
+        return result_of("nothing_to_do", "An amount changed since: both left alone.", conflict)
+    refused = await _confirm_undo(
+        ctx, plan_id, entry, _move_back_question(current, changes, month), confirmation
+    )
+    if refused is not None:
+        return refused
+    for change in reversed(changes):
+        previous = client.milliunit_to_amount(change["from"])
+        await client.set_category_budgeted(plan_id, month, change["category_id"], previous)
+    book.mark_undone(entry.operation_id)
+    return result_of("applied", "Both amounts restored.", writes.Plan())
 
 
 async def _undo_create(

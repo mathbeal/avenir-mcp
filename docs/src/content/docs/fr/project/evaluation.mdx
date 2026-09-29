@@ -63,6 +63,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | 2026-09-26 | Sonnet | 17/17 | 1,9 | `forecast_balance` projette les transactions planifiées de YNAB ; une tâche demande quel paiement annuel la prévision attend en octobre |
 | 2026-09-28 | Sonnet | 17/17 | 1,9 | *plan* partout où YNAB dit désormais plan, dans les descriptions et les prompts |
 | 2026-09-28 | Sonnet | 17/17 | 2,4 | le guide est aussi les instructions du serveur : l'agent appelle désormais `list_plans` d'abord dans 13 tâches sur 17 (3 avant), une requête YNAB de plus, pour ne pas travailler sur le mauvais plan |
+| 2026-09-29 | Sonnet | 17/17 | 2,4 | `move_money` : l'agent couvre Restaurants par un seul déplacement, un aperçu et une confirmation, au lieu de deux appels `set_category_budget` |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
 les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien

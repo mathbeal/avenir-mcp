@@ -37,7 +37,7 @@ L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
 |---|---|
 | `operation_id` | 12 caractères hexadécimaux aléatoires |
 | `plan_id` | le plan modifié |
-| `kind` | `categorize`, `budget`, `reconcile` ou `create` |
+| `kind` | `categorize`, `budget`, `move`, `reconcile` ou `create` |
 | `applied_at` | ISO 8601, UTC, à la seconde |
 | `moves` | pour `categorize` : la catégorie de chaque transaction avant et après |
 | `details` | pour les autres sortes, ce qu'exige l'annulation (ci-dessous) |
@@ -45,6 +45,7 @@ L'annuler ajoute un marqueur ; rien n'est jamais réécrit :
 | `kind` | `details` |
 |---|---|
 | `budget` | `month`, `category_id`, `from` et `to` en milliunités |
+| `move` | `month`, et `changes` : pour chacune des deux catégories, `category_id`, `from` et `to` en milliunités |
 | `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (ou `null`) |
 | `create` | `transaction_ids` |
 
@@ -61,6 +62,7 @@ undo: no operation of this plan is still in effect. »*
 |---|---|---|---|
 | `categorize` | chaque transaction retrouve sa catégorie précédente | sa catégorie est toujours celle que l'opération a mise | cette transaction est laissée telle quelle et listée dans `conflicts` |
 | `budget` | l'ancien montant | le montant est toujours celui que l'opération a mis | rien d'écrit ; `conflicts` nomme la catégorie |
+| `move` | les deux anciens montants | les deux montants sont toujours ceux que l'opération a mis | rien d'écrit ; `conflicts` nomme la catégorie qui a changé |
 | `reconcile` | les transactions *rapprochées* repassent *pointées* ; l'ajustement est supprimé | chacune est toujours *rapprochée* | celles qui ne le sont plus sont ignorées |
 | `create` | les transactions créées sont supprimées | chacune existe encore | celles déjà supprimées sont listées dans `conflicts` |
 

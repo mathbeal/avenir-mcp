@@ -117,3 +117,66 @@ def test_the_cursor_button_installs_avenir_mcp_read_only() -> None:
     assert query["name"] == ["avenir-mcp"]
     assert (config["command"], config["args"]) == ("uvx", ["avenir-mcp"])
     assert config["env"] == {"YNAB_API_KEY": "your-token"}
+
+
+def _tool_counts() -> tuple[int, int]:
+    """How many tools a client lists read-only, and how many writes add."""
+    import asyncio  # pylint: disable=import-outside-toplevel
+
+    from avenir_mcp import server  # pylint: disable=import-outside-toplevel
+
+    async def listed(writes: bool) -> int:
+        server.configure(enable_writes=writes)
+        try:
+            return len(await server.mcp.list_tools())
+        finally:
+            server.configure(enable_writes=False)
+
+    read, every = asyncio.run(listed(False)), asyncio.run(listed(True))
+    return read, every - read
+
+
+_WORDS = {9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
+
+
+def test_the_tool_counts_written_in_the_pages_are_the_servers() -> None:
+    """Every page that counts the tools says what a client actually lists."""
+    read, write = _tool_counts()
+    total = read + write
+    expected = {
+        "getting-started/features.mdx": [f"gives an agent {total} tools"],
+        "guides/run-options.mdx": [
+            f"{read} read-only tools; the {write} write tools",
+            f"all {total} tools",
+        ],
+        "getting-started/install.mdx": [
+            f"`avenir-mcp` shows its {read} tools",
+            f"running, with {read}\n    tools",
+            f"lists **{total}** tools instead of {read}",
+            f"| Tools listed | {read} | {total} |",
+        ],
+        "guides/choose-a-model.mdx": [f"the right one of {total} tools"],
+        "reference/configuration.mdx": [f"registers the {write} write tools"],
+        "index.mdx": [f"The {_WORDS[write]} write tools"],
+    }
+    for page, phrases in expected.items():
+        text = (CONTENT / page).read_text(encoding="utf-8")
+        for phrase in phrases:
+            assert phrase in text, f"{page} should say {phrase!r}"
+
+
+@pytest.mark.parametrize("language", TRANSLATED)
+def test_every_translation_counts_the_same_tools(language: str) -> None:
+    """The totals written in each translation are the server's too."""
+    read, write = _tool_counts()
+    total = read + write
+    for page, numbers in {
+        "getting-started/features.mdx": [total],
+        "guides/run-options.mdx": [read, write, total],
+        "guides/choose-a-model.mdx": [total],
+        "reference/configuration.mdx": [write],
+        "getting-started/install.mdx": [read, total],
+    }.items():
+        text = (CONTENT / language / page).read_text(encoding="utf-8")
+        for number in numbers:
+            assert re.search(rf"\b{number}\b", text), f"{language}/{page} lacks {number}"

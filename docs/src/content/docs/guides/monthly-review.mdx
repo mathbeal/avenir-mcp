@@ -10,7 +10,7 @@ import summary from '@snippets/monthly_summary.json?raw';
 import balances from '@snippets/category_balances.json?raw';
 import usage from '@snippets/budget_vs_actual.json?raw';
 import trends from '@snippets/spending_trends.json?raw';
-import budget from '@snippets/budget_preview.json?raw';
+import move from '@snippets/move_preview.json?raw';
 import badMonth from '@snippets/bad_month.json?raw';
 
 **Goal:** understand a month — income, spending, what is left to assign — and correct
@@ -20,7 +20,7 @@ what went off track.
 [`get_category_balances`](/avenir-mcp/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/), and
-[`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/) to fix.
+[`move_money`](/avenir-mcp/reference/tools/move-money/) to fix.
 **Prompt:** `monthly_review`.
 
 ## The conversation
@@ -66,9 +66,9 @@ what went off track.
    >
    > **You:** Yes.
 
-   Two `set_category_budget` calls, each previewed before → after:
+   One `move_money` call: both categories in one preview, one confirmation, one undo:
 
-   <Code code={budget} lang="json" title="set_category_budget — preview" />
+   <Code code={move} lang="json" title="move_money — preview" />
 
 </Steps>
 
@@ -80,8 +80,8 @@ what went off track.
   <Code code={badMonth} lang="text" title="get_monthly_summary — month 2026-13-01" />
 - Hidden categories and YNAB's internal ones (*Inflow: Ready to Assign*) are left out of
   every review.
-- `set_category_budget` sets an **absolute** amount, not a change: moving 30 is two
-  calls, one lowering Tennis from 80 to 50, one raising Restaurants from 120 to 150.
-  Each can be undone.
+- `move_money` moves an **amount**: Tennis goes from 80 to 50 and Restaurants from 120 to 150
+  together, and `undo_operation` puts both back. To set one category's total instead,
+  `set_category_budget` takes an **absolute** amount.
 - The `avenir-mcp://guide` resource reminds agents of the YNAB method: overspending is fixed
   by moving money, not ignored.

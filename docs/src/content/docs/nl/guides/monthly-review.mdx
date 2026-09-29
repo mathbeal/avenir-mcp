@@ -10,7 +10,7 @@ import summary from '@snippets/monthly_summary.json?raw';
 import balances from '@snippets/category_balances.json?raw';
 import usage from '@snippets/budget_vs_actual.json?raw';
 import trends from '@snippets/spending_trends.json?raw';
-import budget from '@snippets/budget_preview.json?raw';
+import move from '@snippets/move_preview.json?raw';
 import badMonth from '@snippets/bad_month.json?raw';
 
 **Doel:** een maand begrijpen – inkomsten, uitgaven, wat er nog toe te wijzen is – en
@@ -20,7 +20,7 @@ corrigeren wat uit de koers is geraakt.
 [`get_category_balances`](/avenir-mcp/nl/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/), en
-[`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/) om te corrigeren.
+[`move_money`](/avenir-mcp/nl/reference/tools/move-money/) om te corrigeren.
 **Prompt:** `monthly_review`.
 
 ## Het gesprek
@@ -67,9 +67,9 @@ corrigeren wat uit de koers is geraakt.
    >
    > **Jij:** Ja.
 
-   Twee aanroepen van `set_category_budget`, elk met voorbeeld ervoor → erna:
+   Eén aanroep van `move_money`: beide categorieën in één voorbeeld, één bevestiging, één ongedaanmaking:
 
-   <Code code={budget} lang="json" title="set_category_budget — voorbeeld" />
+   <Code code={move} lang="json" title="move_money — voorbeeld" />
 
 </Steps>
 
@@ -81,8 +81,8 @@ corrigeren wat uit de koers is geraakt.
   <Code code={badMonth} lang="text" title="get_monthly_summary — maand 2026-13-01" />
 - Verborgen categorieën en de interne van YNAB (*Inflow: Ready to Assign*) worden bij elke
   doorname weggelaten.
-- `set_category_budget` zet een **absoluut** bedrag, geen wijziging: 30 verschuiven zijn
-  twee aanroepen, één die Tennis verlaagt van 80 naar 50, één die Restaurants verhoogt van
-  120 naar 150. Elke aanroep is ongedaan te maken.
+- `move_money` verschuift een **bedrag**: Tennis gaat van 80 naar 50 en Restaurants van 120
+  naar 150, allebei tegelijk, en `undo_operation` zet beide terug. Om het bedrag van één
+  categorie in te stellen, neemt `set_category_budget` een **absoluut** bedrag.
 - De resource `avenir-mcp://guide` herinnert agents aan de methode van YNAB: een
   overschrijding los je op door geld te verschuiven, niet door haar te negeren.

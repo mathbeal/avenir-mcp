@@ -10,7 +10,7 @@ import summary from '@snippets/monthly_summary.json?raw';
 import balances from '@snippets/category_balances.json?raw';
 import usage from '@snippets/budget_vs_actual.json?raw';
 import trends from '@snippets/spending_trends.json?raw';
-import budget from '@snippets/budget_preview.json?raw';
+import move from '@snippets/move_preview.json?raw';
 import badMonth from '@snippets/bad_month.json?raw';
 
 **Objectif :** comprendre un mois — revenus, dépenses, ce qui reste à assigner — et
@@ -20,8 +20,7 @@ corriger ce qui a dérapé.
 [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/), et
-[`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/) pour
-corriger. **Prompt :** `monthly_review`.
+[`move_money`](/avenir-mcp/fr/reference/tools/move-money/) pour corriger. **Prompt :** `monthly_review`.
 
 ## La conversation
 
@@ -67,9 +66,9 @@ corriger. **Prompt :** `monthly_review`.
    >
    > **Vous :** Oui.
 
-   Deux appels `set_category_budget`, chacun prévisualisé avant → après :
+   Un seul appel `move_money` : les deux catégories dans un aperçu, une confirmation, une annulation :
 
-   <Code code={budget} lang="json" title="set_category_budget — aperçu" />
+   <Code code={move} lang="json" title="move_money — aperçu" />
 
 </Steps>
 
@@ -81,8 +80,8 @@ corriger. **Prompt :** `monthly_review`.
   <Code code={badMonth} lang="text" title="get_monthly_summary — mois 2026-13-01" />
 - Les catégories masquées et les catégories internes de YNAB (*Inflow: Ready to Assign*)
   sont écartées de tous les bilans.
-- `set_category_budget` fixe un montant **absolu**, pas une variation : déplacer 30,
-  ce sont deux appels, l'un qui baisse Tennis de 80 à 50, l'autre qui monte Restaurants
-  de 120 à 150. Chacun est annulable.
+- `move_money` déplace un **montant** : Tennis passe de 80 à 50 et Restaurants de 120 à 150
+  ensemble, et `undo_operation` remet les deux en place. Pour fixer le total d'une seule catégorie,
+  `set_category_budget` prend un montant **absolu**.
 - La ressource `avenir-mcp://guide` rappelle la méthode YNAB aux agents : un dépassement se
   corrige en déplaçant de l'argent, pas en l'ignorant.

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import logging
+from typing import Annotated, Any
 
 from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
+from pydantic import Field
 
 from avenir_mcp import app, client, journal
 from avenir_mcp.amounts import Amount
@@ -243,6 +245,201 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         update={
             "status": "applied",
             "message": f"Applied. undo_operation with operation_id {operation_id} reverts it.",
+            "operation_id": operation_id,
+        }
+    )
+
+
+class CategoryMove(Model):
+    """One side of a move: a category's amount budgeted before and after."""
+
+    category_id: str
+    """The category."""
+    name: str
+    """Category name."""
+    from_amount: float
+    """Amount budgeted before."""
+    to_amount: float
+    """Amount budgeted after."""
+    available_after: float
+    """Amount available in the category once the move is applied; negative means overspent."""
+
+
+class MoneyMove(Model):
+    """The outcome of move_money."""
+
+    status: WriteStatus
+    """Outcome: applied, confirmation_required (nothing changed yet; pass the code back once the
+    user agrees), or declined (the user said no).
+    """
+    message: str
+    """What happened and what to do next, for the agent to relay."""
+    month: str
+    """Month changed, YYYY-MM-01 ('current' is resolved)."""
+    amount: float
+    """Amount moved, in currency units."""
+    from_category: CategoryMove
+    """The category the money is taken from."""
+    to_category: CategoryMove
+    """The category the money goes to."""
+    confirmation: str | None
+    """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
+    confirmation_required.
+    """
+    operation_id: str | None
+    """Journal id of the applied operation, for undo_operation; null unless status is applied."""
+
+
+def _side(category: dict[str, Any], change: int) -> CategoryMove:
+    """Describe one category of a move.
+
+    Args:
+        category: The month category, as YNAB returns it, in milliunits.
+        change: Milliunits added to its budgeted amount (negative when taken).
+
+    Returns:
+        Its name and amounts before and after, in currency units.
+    """
+    return CategoryMove(
+        category_id=category["id"],
+        name=category["name"],
+        from_amount=client.milliunit_to_amount(category["budgeted"]),
+        to_amount=client.milliunit_to_amount(category["budgeted"] + change),
+        available_after=client.milliunit_to_amount(category["balance"] + change),
+    )
+
+
+async def _set_both(plan_id: str, month: str, source: CategoryMove, target: CategoryMove) -> None:
+    """Take from the source, then give to the target; if the second write fails, undo the first.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        source: The category the money is taken from.
+        target: The category the money goes to.
+
+    Raises:
+        ToolError: If YNAB refused the target, saying whether the source was put back.
+    """
+    await client.set_category_budgeted(plan_id, month, source.category_id, source.to_amount)
+    try:
+        await client.set_category_budgeted(plan_id, month, target.category_id, target.to_amount)
+    except RuntimeError as error:
+        refused = f"YNAB refused to change {target.name} ({error})"
+        try:
+            await client.set_category_budgeted(
+                plan_id, month, source.category_id, source.from_amount
+            )
+        except RuntimeError as again:
+            raise ToolError(
+                f"{refused}, then putting {source.name} back failed too ({again}): "
+                f"set {source.name} back to {source.from_amount:.2f} in YNAB."
+            ) from again
+        raise ToolError(
+            f"{refused}; {source.name} is back to {source.from_amount:.2f}: nothing was moved."
+        ) from error
+
+
+@mcp.tool(
+    tags={WRITE_TAG},
+    annotations={
+        "title": "Move money between categories",
+        "read_only_hint": False,
+        "destructive_hint": True,
+        "idempotent_hint": False,
+        "open_world_hint": True,
+    },
+)
+async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    plan_id: str,
+    month: str,
+    from_category_id: str,
+    to_category_id: str,
+    amount: Annotated[
+        Amount, Field(gt=0, description="How much to move, in currency units, greater than 0.")
+    ],
+    ctx: Context,
+    confirmation: str | None = None,
+) -> MoneyMove | InputRequiredResult:
+    """Move money budgeted in one category to another for a month, after the user confirms.
+
+    The way to cover overspending: one preview, one confirmation and one
+    undo_operation for both categories, where set_category_budget would take two.
+    The amount is what moves, in currency units, not a new total. The result gives
+    both categories before and after, and what each will have available.
+    Confirmation works as for apply_categories.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: 'YYYY-MM-01' or 'current'.
+        from_category_id: Category the money is taken from (from get_category_balances).
+        to_category_id: Category the money goes to (from get_category_balances).
+        amount: How much to move, in currency units, greater than 0.
+        ctx: The MCP context, used to ask the user.
+        confirmation: Code from a previous "confirmation_required" result.
+
+    Returns:
+        Both categories before and after, or an input request the client answers by asking the
+        user (protocol 2026-07-28).
+
+    Raises:
+        ToolError: If the month is malformed, a category is not in the plan, both are the same,
+            YNAB refuses the change, or the confirmation code is refused.
+    """
+    logger.info("Tool called: move_money(month=%r)", month)
+    check_month(month)
+    month = app.resolve_month(month)
+    if from_category_id == to_category_id:
+        raise ToolError("Give two different categories: money moves from one to another.")
+    categories = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
+    for category_id in (from_category_id, to_category_id):
+        if category_id not in categories:
+            raise ToolError(
+                f"Category {category_id} is not in this plan: "
+                "use a category_id from get_category_balances."
+            )
+    moved = client.amount_to_milliunit(amount)
+    source = _side(categories[from_category_id], -moved)
+    target = _side(categories[to_category_id], moved)
+    result = MoneyMove(
+        status="applied",
+        message="",
+        month=month,
+        amount=client.milliunit_to_amount(moved),
+        from_category=source,
+        to_category=target,
+        confirmation=None,
+        operation_id=None,
+    )
+    question = (
+        f"Move {result.amount:.2f} from {source.name} to {target.name} for {month}?\n"
+        f"- {source.name}: {source.from_amount:.2f} → {source.to_amount:.2f}\n"
+        f"- {target.name}: {target.from_amount:.2f} → {target.to_amount:.2f}"
+    )
+    subject = {"from": from_category_id, "to": to_category_id, "month": month, "amount": moved}
+    stop = await gate(ctx, plan_id, subject, question, confirmation)
+    if stop is not None:
+        return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
+    await _set_both(plan_id, month, source, target)
+    operation_id = journal.Journal(journal.default_path()).record(
+        plan_id,
+        "move",
+        [],
+        {
+            "month": month,
+            "changes": [
+                {
+                    "category_id": side.category_id,
+                    "from": categories[side.category_id]["budgeted"],
+                    "to": client.amount_to_milliunit(side.to_amount),
+                }
+                for side in (source, target)
+            ],
+        },
+    )
+    return result.model_copy(
+        update={
+            "message": f"Moved. undo_operation with operation_id {operation_id} moves it back.",
             "operation_id": operation_id,
         }
     )

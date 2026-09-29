@@ -40,7 +40,8 @@ GUIDE = """# avenir-mcp: how to work with this YNAB server
 - Review a month: `get_monthly_summary`, then `get_category_balances` and
   `get_spending_trends` where something stands out.
 - Plan: `forecast_balance` says when money would run out; check its assumptions with
-  the user. `set_category_budget` moves money between categories for a month.
+  the user. `move_money` moves money from one category to another for a month, in
+  one confirmed and undoable step; `set_category_budget` sets one category's amount.
 - Missing transactions: `create_transactions`; new categories: `create_category`;
   renaming or moving one: `update_category`.
 
@@ -195,7 +196,7 @@ def monthly_review(plan_id: str, month: str = "current") -> str:
    overspent categories.
 2. Call `get_category_balances` and `get_spending_trends` to explain what stands out.
 3. Summarise in a few lines, then propose concrete fixes, such as moving money to
-   an overspent category with `set_category_budget`. Change nothing before I agree."""
+   an overspent category with `move_money`. Change nothing before I agree."""
 
 
 @mcp.prompt

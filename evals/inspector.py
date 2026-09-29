@@ -9,6 +9,7 @@ the lists of tools, resources and prompts, the portability of the tool schemas
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import subprocess  # noqa: S404  # nosec B404 - runs npx with a fixed argument list
@@ -17,13 +18,31 @@ import tempfile
 from collections.abc import Callable
 from typing import Any
 
+from fastmcp import Client
+
 from evals import demo_budget, fake_ynab
 
 INSPECTOR = "@modelcontextprotocol/inspector@2.8.0"
-TOOLS = 20
-RESOURCES = 2
-TEMPLATES = 2
-PROMPTS = 4
+
+
+async def _in_process() -> dict[str, int]:
+    """Count what the server registers, writes enabled, seen from inside the process.
+
+    Inspector, over stdio, must list the same: the counts are never written by hand.
+
+    Returns:
+        How many tools, resources, resource templates and prompts the server offers.
+    """
+    from avenir_mcp import server  # pylint: disable=import-outside-toplevel
+
+    server.configure(enable_writes=True)
+    async with Client(server.mcp) as mcp_client:
+        return {
+            "tools": len(await mcp_client.list_tools()),
+            "resources": len(await mcp_client.list_resources()),
+            "resourceTemplates": len(await mcp_client.list_resource_templates()),
+            "prompts": len(await mcp_client.list_prompts()),
+        }
 
 
 def _inspector(env: dict[str, str], *options: str) -> dict[str, Any]:
@@ -56,14 +75,15 @@ def _checks() -> list[tuple[str, list[str], Callable[[dict[str, Any]], bool]]]:
         (name, Inspector options, check of the answer) triples.
     """
     budget = demo_budget.PLAN_ID
+    count = asyncio.run(_in_process())
     return [
         ("tools, schemas portable", ["--method", "tools/list", "--strict"],
-         lambda d: len(d["tools"]) == TOOLS),
+         lambda d: len(d["tools"]) == count["tools"]),
         ("resources", ["--method", "resources/list"],
-         lambda d: len(d["resources"]) == RESOURCES),
+         lambda d: len(d["resources"]) == count["resources"]),
         ("resource templates", ["--method", "resources/templates/list"],
-         lambda d: len(d["resourceTemplates"]) == TEMPLATES),
-        ("prompts", ["--method", "prompts/list"], lambda d: len(d["prompts"]) == PROMPTS),
+         lambda d: len(d["resourceTemplates"]) == count["resourceTemplates"]),
+        ("prompts", ["--method", "prompts/list"], lambda d: len(d["prompts"]) == count["prompts"]),
         ("list_plans on the demo budget",
          ["--method", "tools/call", "--tool-name", "list_plans"],
          lambda d: not d.get("isError") and d["structuredContent"]["result"][0]["id"] == budget),

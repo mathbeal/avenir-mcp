@@ -10,7 +10,7 @@ import summary from '@snippets/monthly_summary.json?raw';
 import balances from '@snippets/category_balances.json?raw';
 import usage from '@snippets/budget_vs_actual.json?raw';
 import trends from '@snippets/spending_trends.json?raw';
-import budget from '@snippets/budget_preview.json?raw';
+import move from '@snippets/move_preview.json?raw';
 import badMonth from '@snippets/bad_month.json?raw';
 
 **Objetivo:** entender un mes — ingresos, gastos, lo que queda por asignar — y corregir
@@ -20,8 +20,7 @@ lo que se desvió.
 [`get_category_balances`](/avenir-mcp/es/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/), y
-[`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) para
-corregir. **Prompt:** `monthly_review`.
+[`move_money`](/avenir-mcp/es/reference/tools/move-money/) para corregir. **Prompt:** `monthly_review`.
 
 ## La conversación
 
@@ -65,9 +64,9 @@ corregir. **Prompt:** `monthly_review`.
    >
    > **Usted:** Sí.
 
-   Dos llamadas a `set_category_budget`, cada una previsualizada antes → después:
+   Una sola llamada a `move_money`: las dos categorías en una vista previa, una confirmación, una anulación:
 
-   <Code code={budget} lang="json" title="set_category_budget — vista previa" />
+   <Code code={move} lang="json" title="move_money — vista previa" />
 
 </Steps>
 
@@ -79,8 +78,8 @@ corregir. **Prompt:** `monthly_review`.
   <Code code={badMonth} lang="text" title="get_monthly_summary — mes 2026-13-01" />
 - Las categorías ocultas y las internas de YNAB (*Inflow: Ready to Assign*) quedan fuera
   de toda revisión.
-- `set_category_budget` fija un importe **absoluto**, no una variación: mover 30 son dos
-  llamadas, una que baja Tennis de 80 a 50 y otra que sube Restaurants de 120 a 150.
-  Cada una se puede deshacer.
+- `move_money` mueve un **importe**: Tennis pasa de 80 a 50 y Restaurants de 120 a 150 a la
+  vez, y `undo_operation` restaura los dos. Para fijar el total de una sola categoría,
+  `set_category_budget` toma un importe **absoluto**.
 - El recurso `avenir-mcp://guide` recuerda a los agentes el método YNAB: un exceso se corrige
   moviendo dinero, no se ignora.

@@ -63,6 +63,7 @@ escriben: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-26 | Sonnet | 17/17 | 1,9 | `forecast_balance` proyecta las transacciones programadas de YNAB; una tarea pregunta qué pago anual espera la previsión en octubre |
 | 2026-09-28 | Sonnet | 17/17 | 1,9 | *plan* donde YNAB dice ahora plan, en las descripciones y los prompts |
 | 2026-09-28 | Sonnet | 17/17 | 2,4 | la guía es también las instrucciones del servidor: el agente llama ahora primero a `list_plans` en 13 tareas de 17 (3 antes), una petición a YNAB más, para no trabajar sobre el plan equivocado |
+| 2026-09-29 | Sonnet | 17/17 | 2,4 | `move_money`: el agente cubre Restaurants con un solo movimiento, una vista previa y una confirmación, en lugar de dos llamadas a `set_category_budget` |
 
 La primera ejecución encontró un defecto real: los clientes sin interfaz cierran todas
 las preguntas de confirmación, y avenir-mcp contaba un cierre como un rechazo, así que ninguna

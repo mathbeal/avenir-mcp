@@ -37,7 +37,7 @@ Deshacerla añade un marcador; nunca se reescribe nada:
 |---|---|
 | `operation_id` | 12 caracteres hexadecimales aleatorios |
 | `plan_id` | el plan modificado |
-| `kind` | `categorize`, `budget`, `reconcile` o `create` |
+| `kind` | `categorize`, `budget`, `move`, `reconcile` o `create` |
 | `applied_at` | ISO 8601, UTC, al segundo |
 | `moves` | para `categorize`: la categoría de cada transacción antes y después |
 | `details` | para los demás tipos, lo que necesita la anulación (abajo) |
@@ -45,6 +45,7 @@ Deshacerla añade un marcador; nunca se reescribe nada:
 | `kind` | `details` |
 |---|---|
 | `budget` | `month`, `category_id`, `from` y `to` en miliunidades |
+| `move` | `month`, y `changes`: para cada una de las dos categorías, `category_id`, `from` y `to` en miliunidades |
 | `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (o `null`) |
 | `create` | `transaction_ids` |
 
@@ -60,6 +61,7 @@ vigente. Si no: *«Nothing to undo: no operation of this plan is still in effect
 |---|---|---|---|
 | `categorize` | cada transacción recupera su categoría anterior | su categoría sigue siendo la que puso la operación | esa transacción se deja igual y se lista en `conflicts` |
 | `budget` | el importe anterior | el importe sigue siendo el que puso la operación | nada escrito; `conflicts` nombra la categoría |
+| `move` | los dos importes anteriores | los dos importes siguen siendo los que puso la operación | nada escrito; `conflicts` nombra la categoría que cambió |
 | `reconcile` | las transacciones *reconciled* vuelven a *cleared*; se borra el ajuste | cada una sigue *reconciled* | las que ya no lo están se omiten |
 | `create` | se borran las transacciones creadas | cada una sigue existiendo | las ya borradas se listan en `conflicts` |
 

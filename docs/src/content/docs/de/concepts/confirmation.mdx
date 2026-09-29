@@ -18,6 +18,7 @@ Jedes Tool baut einen **Gegenstand**: die genaue Änderung, als Daten.
 |---|---|
 | `apply_categories` | die Liste der Änderungen (Transaktion, Kategorie danach) |
 | `set_category_budget` | Kategorie, Monat (aufgelöst), Betrag in Milliunits |
+| `move_money` | beide Kategorien, Monat (aufgelöst), umgeschichteter Betrag in Milliunits |
 | `update_category` | Kategorie, Name danach, Gruppe danach |
 | `create_category` | Gruppe, Name |
 | `create_transactions` | Konto, die Transaktionen, `approved` |
@@ -121,6 +122,7 @@ Die Fragen stammen vom Server und sind auf Englisch:
 |---|---|
 | `apply_categories` | *Recategorise 2 transaction(s)?*, dann eine Zeile je Änderung: Datum, Empfänger, Betrag, vorher → nachher |
 | `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `move_money` | *Move 30.00 from Tennis to Restaurants for 2026-09-01?*, dann eine Zeile je Kategorie, vorher → nachher |
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?*, dann eine Zeile je Transaktion |
