@@ -88,6 +88,8 @@ Respuesta sobre el presupuesto de demostración:
 - `Give either a date or a frequency, not both: YNAB refuses the two.`
 - `To remove the target, give no amount, no date and no frequency.`
 - `The amount must be greater than 0; to remove the target, give none.`
+- `YNAB takes neither a date nor a frequency on a category paired to a loan account: give an amount alone.`
+- `YNAB takes no frequency on a credit card payment category: give an amount alone, or a date.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`

@@ -29,6 +29,8 @@ NEED_BY_DATE = _cat(
     goal_needs_whole_amount=False,
 )
 MONTHLY_FUNDING = _cat(goal_type="MF", goal_target=30_000)
+CARD = _cat(name="Visa", category_group_name=targets.CARD_GROUP)
+LOAN = _cat(name="Car loan", goal_type="DEBT", goal_target=250_000)
 
 
 @pytest.mark.parametrize(
@@ -138,6 +140,43 @@ def test_contradictory_targets_are_refused(
     """YNAB refuses a date with a frequency; a removal takes neither; amounts are positive."""
     with pytest.raises(ValueError, match=expected):
         targets.plan(_cat(), amount=amount, date=date, frequency=frequency)
+
+
+def test_an_amount_alone_on_a_card_category_is_monthly_funding() -> None:
+    """YNAB gives a credit card payment category monthly funding, and the preview says so."""
+    change = targets.plan(CARD, amount=150.0, date=None, frequency=None)
+    assert change.fields == {"goal_target": 150_000}
+    assert change.after == "150.00 (monthly funding)"
+    assert change.undo == {"goal_target": None}
+
+
+def test_a_new_amount_on_a_loan_category_keeps_its_debt_payment() -> None:
+    """Only the amount changes: the debt payment stays, and undo sets the amount back."""
+    change = targets.plan(LOAN, amount=300.0, date=None, frequency=None)
+    assert change.after == "300.00 (debt payment)"
+    assert change.undo == {"goal_target": 250_000}
+
+
+@pytest.mark.parametrize(
+    ("category", "date", "frequency", "expected"),
+    [
+        (CARD, None, "monthly", "no frequency on a credit card payment category"),
+        (LOAN, None, "weekly", "neither a date nor a frequency on a category paired"),
+        (LOAN, "2027-01-01", None, "neither a date nor a frequency on a category paired"),
+    ],
+)
+def test_what_card_and_loan_categories_do_not_take_is_refused_first(
+    category: dict[str, Any], date: str | None, frequency: str | None, expected: str
+) -> None:
+    """YNAB refuses these after the user confirms; they are refused before asking."""
+    with pytest.raises(ValueError, match=expected):
+        targets.plan(category, amount=100.0, date=date, frequency=frequency)
+
+
+def test_a_date_on_a_card_category_is_allowed() -> None:
+    """YNAB lists no limit on a date for a credit card payment category: it is sent."""
+    change = targets.plan(CARD, amount=900.0, date="2027-03-01", frequency=None)
+    assert change.fields == {"goal_target": 900_000, "goal_target_date": "2027-03-01"}
 
 
 def test_nothing_to_change_is_said() -> None:
