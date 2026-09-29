@@ -23,6 +23,13 @@ class FakeTargets:
         self.categories: dict[str, dict[str, Any]] = {
             "c-hol": {"id": "c-hol", "name": "Holidays", "goal_type": None, "goal_target": None},
             "c-car": {"id": "c-car", "name": "Car", "goal_type": "MF", "goal_target": 30_000},
+            "c-visa": {
+                "id": "c-visa",
+                "name": "Visa",
+                "category_group_name": "Credit Card Payments",
+                "goal_type": None,
+                "goal_target": None,
+            },
         }
         self.sent: list[tuple[str, dict[str, Any]]] = []
 
@@ -191,12 +198,16 @@ def test_declined_target_changes_nothing(ynab: FakeTargets) -> None:
         ({"category_id": "c-hol", "amount": -1.0}, "greater than 0"),
         ({"category_id": "c-hol", "frequency": "monthly"}, "no date"),
         ({"category_id": "c-hol", "amount": 10.0, "frequency": "daily"}, "frequency"),
+        (
+            {"category_id": "c-visa", "amount": 10.0, "frequency": "monthly"},
+            "no frequency on a credit card payment category",
+        ),
     ],
 )
 def test_invalid_targets_are_refused_before_asking(
     ynab: FakeTargets, args: dict[str, Any], expected: str
 ) -> None:
-    """Unknown category, a date with a frequency, a negative amount, an unknown rhythm."""
+    """Refused first: unknown category, date and frequency, bad amount or rhythm, card rhythm."""
     result = call("set_category_target", {"plan_id": "b1", **args}, accept)
     assert result.is_error
     assert expected in result.content[0].text
