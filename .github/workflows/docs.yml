@@ -16,7 +16,7 @@ env:
 
 jobs:
   build:
-    name: build the site in English, French and Spanish
+    name: build the site in every language
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -35,7 +35,7 @@ jobs:
       # The build's own code: the plugin that sets the name avenir-mcp apart.
       - run: npm test
         working-directory: docs
-      # Starlight in three languages; a broken internal link fails the build.
+      # Starlight in every language; a broken internal link fails the build.
       - run: npm run build
         working-directory: docs
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

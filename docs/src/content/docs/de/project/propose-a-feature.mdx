@@ -1,0 +1,75 @@
+---
+title: Eine Funktion vorschlagen
+description: Wie Sie ein neues Tool oder einen neuen Ablauf vorschlagen, was einen Vorschlag leicht annehmbar macht und was danach geschieht.
+sidebar:
+  order: 5
+---
+
+import { Steps, Aside, LinkButton } from '@astrojs/starlight/components';
+
+avenir-mcp wächst aus echten Nutzungen eines Budgets. Wenn Sie eine Aufgabe von Hand
+erledigen, die ein Agent für Sie tun könnte, oder eine Antwort klarer sein könnte,
+schlagen Sie es vor. Vorschläge werden öffentlich in den GitHub-Issues des Projekts
+behandelt; Sie brauchen ein GitHub-Konto.
+
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml" icon="external">Einen Funktionswunsch eröffnen</LinkButton>
+
+## Wie Sie vorschlagen
+
+<Steps>
+
+1. **Prüfen Sie, dass es ihn noch nicht gibt.** Lesen Sie die
+   [Roadmap](/avenir-mcp/de/project/limitations/#roadmap) und durchsuchen Sie die
+   [offenen Vorschläge](https://github.com/mathbeal/avenir-mcp/issues?q=is%3Aissue+label%3Aenhancement).
+   Gibt es Ihren schon, fügen Sie ein 👍 und Ihren Anwendungsfall hinzu, statt ein neues
+   Issue zu eröffnen.
+
+2. **Eröffnen Sie einen Funktionswunsch.** Das Formular fragt vier Dinge (auf Englisch):
+
+   | Frage | Wozu |
+   |---|---|
+   | Was möchten Sie tun? | die Aufgabe, in Ihren Worten – nicht das Tool, das Sie sich vorstellen |
+   | Was würden Sie dem Agenten sagen? | ein Satz, den Sie tippen würden, und die Antwort, die Sie erwarten |
+   | Was passiert heute? | was die aktuellen Tools tun und warum es nicht reicht |
+   | Ändert es das Budget? | eine Schreibaktion braucht eine Vorschau, eine Bestätigung und ein Rückgängigmachen |
+
+3. **Verfolgen Sie die Diskussion.** Fragen kommen als Kommentare zum Issue; GitHub
+   benachrichtigt Sie.
+
+</Steps>
+
+<Aside type="danger" title="Fügen Sie niemals echte Finanzdaten ein">
+Issues sind öffentlich. Fügen Sie keine Transaktionen, Salden, Kontonamen, Empfänger,
+Bildschirmfotos von YNAB oder Ihr Token ein. Erfinden Sie die Zahlen: *„ein Abo über
+12,99, das 14,99 wurde“* reicht, um den Bedarf zu verstehen.
+</Aside>
+
+## Was gut passt
+
+Ein Vorschlag ist leichter anzunehmen, wenn er:
+
+- **eine Aufgabe** beschreibt, keinen YNAB-Endpunkt zum Verpacken – siehe
+  [Architektur](/avenir-mcp/de/concepts/architecture/);
+- mit der **öffentlichen API von YNAB** und einem Personal Access Token funktioniert;
+- sich **auf einem erfundenen Budget testen** lässt, wie der Rest von avenir-mcp;
+- wenn er schreibt, **als Vorschau gezeigt, bestätigt und rückgängig gemacht** werden kann
+  – siehe [Sicherheit durch Design](/avenir-mcp/de/concepts/safety/).
+
+Vorschläge, die Ihre Daten an einen anderen Dienst senden oder ohne Ihre Bestätigung
+handeln würden, werden abgelehnt.
+
+## Was danach geschieht
+
+| Status | Bedeutung |
+|---|---|
+| offen, `enhancement` | eingegangen; Kommentare fragen vielleicht nach Einzelheiten |
+| auf der [Roadmap](/avenir-mcp/de/project/limitations/#roadmap) | angenommen und geplant |
+| mit einem Pull Request geschlossen | ausgeliefert: siehe das [Changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) |
+| geschlossen, `wontfix` | abgelehnt, mit Begründung |
+
+## Andere Arten zu helfen
+
+- **Etwas ist kaputt?** Eröffnen Sie einen [Fehlerbericht](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml).
+- **Ein Sicherheitsproblem?** Melden Sie es vertraulich: siehe [Sicherheit](/avenir-mcp/de/project/security/).
+- **Sie möchten es selbst bauen?** Sagen Sie es zuerst im Issue, dann lesen Sie
+  [Einen Pull Request vorschlagen](/avenir-mcp/de/project/pull-requests/).

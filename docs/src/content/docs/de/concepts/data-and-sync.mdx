@@ -1,0 +1,117 @@
+---
+title: Daten und Synchronisation
+description: Beträge und Milliunits, die lokale Kopie der Transaktionen, Delta-Synchronisation, das Anfragelimit von YNAB und seine Fehler.
+sidebar:
+  order: 5
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Beträge
+
+YNAB speichert jeden Betrag als ganze Zahl von **Milliunits**: 1,00 ist `1000`, −12,34
+ist `-12340`. avenir-mcp rechnet an der Grenze um und zeigt dem Agenten nie Milliunits:
+
+| Richtung | Regel |
+|---|---|
+| YNAB → Agent | `milliunits / 1000` |
+| Agent → YNAB | `round(amount × 1000)`: 111,32 wird genau `111320` |
+
+Summen, Differenzen und anteilige Aufteilungen werden in Milliunits berechnet und dann
+einmal umgerechnet, sodass kein Rundungsfehler einen Cent erzeugen oder verlieren kann.
+Beträge sind in der Währung des Budgets; Ausgaben sind negativ, Eingänge positiv.
+
+## Mit YNAB sprechen
+
+`client.py` ist das einzige Modul, das die [API von YNAB](https://api.ynab.com/) aufruft:
+
+| | |
+|---|---|
+| Basis-URL | `https://api.ynab.com/v1` oder `AVENIR_MCP_YNAB_URL` |
+| Authentifizierung | `Authorization: Bearer <YNAB_API_KEY>` bei jeder Anfrage |
+| Verwendete Methoden | `GET` zum Lesen; `PATCH`, `POST` und `DELETE` auf Transaktionen, Kategorien und Monatsbudgets |
+| Fehler | jeder 4xx- oder 5xx-Status kommt als `Error calling tool '<tool>': YNAB <status>: <detail>` zurück, mit der eigenen Erklärung von YNAB |
+
+`plan_id` akzeptiert `last-used`: YNAB setzt dafür den Plan ein, den Sie zuletzt geöffnet
+haben.
+
+### Plans, früher Budgets
+
+YNAB [hat Budgets in Plans umbenannt](https://www.ynab.com/blog/budget-tab-breakdown), in
+seinen Apps und in seiner API: Die Spezifikation dokumentiert nur noch Pfade `/plans`.
+avenir-mcp folgt ihr: Sein Client ruft `/plans` auf, und seine Tools sagen
+`list_plans` und `plan_id`. Das Wort *budget* bleibt, wo YNAB es behält, für das einer
+Kategorie zugewiesene Geld (`budgeted`, angezeigt als *Assigned*), daher
+`set_category_budget` und `get_budget_vs_actual`.
+
+### Die Referenzen von YNAB
+
+- [Dokumentation der YNAB-API](https://api.ynab.com/) – Endpunkte, Authentifizierung, Anfragelimit
+- [OpenAPI-Spezifikation](https://api.ynab.com/papi/open_api_spec.yaml) – die Quelle der
+  Seite [YNAB-API-Abdeckung](/avenir-mcp/de/reference/api-coverage/)
+- [We Renamed the Budget Tab to Plan](https://www.ynab.com/blog/budget-tab-breakdown) – die Ankündigung von YNAB
+- [Navigating Multiple Plans in YNAB](https://support.ynab.com/en_us/navigating-multiple-plans-r1qeOvbC5)
+- [How to Adjust Your Plan Settings](https://support.ynab.com/en_us/how-to-adjust-your-plan-settings-SyFt35cAq)
+
+## Die lokale Kopie der Transaktionen
+
+Die meisten Tools brauchen die Transaktionen des Budgets: um Ausstehendes zu finden,
+aus der Historie zu lernen, mit der Bank zu vergleichen, vorauszurechnen. Sie bei jedem
+Aufruf alle herunterzuladen wäre langsam und würde das Kontingent von YNAB verbrauchen.
+avenir-mcp hält eine Kopie je Budget im Speicher und aktualisiert sie mit der
+**Delta-Synchronisation** von YNAB:
+
+1. Das erste Laden fragt nach jeder Transaktion und behält den `server_knowledge` von
+   YNAB, einen Änderungszähler.
+2. Das nächste Laden sendet `last_knowledge_of_server` und erhält **nur, was sich seither
+   geändert hat**: neue, geänderte und gelöschte Transaktionen.
+3. avenir-mcp führt sie in seine Kopie zusammen: Eine geänderte Transaktion ersetzt die
+   alte, eine gelöschte wird entfernt.
+
+Mit der ID eines Budgets wird die Kopie per Delta-Synchronisation aktualisiert. Mit
+`last-used`, das das zuletzt in YNAB geöffnete Budget meint und sich zwischen zwei
+Aufrufen ändern kann, werden die Transaktionen jedes Mal vollständig geladen – immer noch
+eine Anfrage –, damit zwei Budgets nie vermischt werden. Bei mehreren Budgets übergeben
+Sie die ID aus `list_plans`.
+
+Die Kopie lebt so lange wie der Serverprozess. Gefilterte Lesevorgänge – nach Datum oder
+nach Kategorie – umgehen sie.
+
+<Aside type="note">
+Eine frühe Version behielt nur den Zähler, nicht die Transaktionen: Jedes Laden nach dem
+ersten lieferte nur die Änderungen, meist nichts, und die Vorschläge fanden nie eine
+Historie. Ein Test prüft jetzt, dass ein leeres Delta die vollständige Liste unversehrt
+lässt.
+</Aside>
+
+## Das Anfragelimit von YNAB
+
+YNAB erlaubt **200 Anfragen pro Stunde** und Token, in einem gleitenden Fenster. Was jedes
+Tool bei leerem Cache kostet, wird auf dem Demo-Budget gemessen und auf seiner
+[Referenzseite](/avenir-mcp/de/reference/tools/) angegeben:
+
+| Kosten | Tools |
+|---|---|
+| 0 | jeder durch die Prüfung abgelehnte Aufruf (ein fehlerhafter Monat, ein leerer Name…) |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, eine Vorschau von `set_category_budget` |
+| 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 3 | `find_transactions`, `list_scheduled_transactions`, `suggest_categories` (eine ganze Seite), `apply_categories`, eine Vorschau von `split_transaction` |
+| 4 | `forecast_balance` |
+| 1 + N | `get_spending_trends` über N Monate |
+
+Das Anwenden einer bestätigten Schreibaktion fügt eine eigene Anfrage hinzu (ein
+gebündeltes `PATCH` für beliebig viele Transaktionen). Mit warmem Cache kostet das erneute
+Lesen der Transaktionen eine kleine Delta-Anfrage.
+
+Ist das Kontingent aufgebraucht, antwortet YNAB mit `429`, ohne zu sagen, wann es wieder
+geht; daher **wiederholt avenir-mcp nichts**: Es gibt `… YNAB 429: …` zurück und sendet
+10 Minuten lang überhaupt keine Anfrage. Außerdem hört es von selbst bei **180 Anfragen**
+in der letzten Stunde auf, lässt den Rest anderen Apps mit demselben Token und sagt, in
+wie vielen Minuten die nächste Anfrage gehen kann. In beiden Fällen wird der Agent
+angewiesen, es Ihnen zu sagen und es vorher nicht erneut zu versuchen.
+
+## Was nie gespeichert wird
+
+avenir-mcp legt keine Kopie auf der Festplatte ab. Die Transaktionen leben im Speicher,
+solange der Server läuft; das [Journal](/avenir-mcp/de/concepts/journal/) enthält nur
+IDs; das Token bleibt in der Umgebung und wird nie protokolliert.

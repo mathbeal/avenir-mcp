@@ -1,0 +1,58 @@
+---
+title: Eine Änderung rückgängig machen
+description: Die letzte Operation oder eine genannte zurücknehmen, ohne spätere Arbeit zu überschreiben.
+sidebar:
+  order: 7
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import undo from '@snippets/undo_preview.json?raw';
+
+**Ziel:** eine über avenir-mcp vorgenommene Änderung zurücknehmen.
+
+**Tool:** [`undo_operation`](/avenir-mcp/de/reference/tools/undo-operation/).
+
+## Das Gespräch
+
+<Steps>
+
+1. **Fragen.**
+
+   > **Sie:** Mach das rückgängig.
+
+2. **Der Agent zeigt das Rückgängigmachen als Vorschau.** `undo_operation` mit
+   `{"plan_id": "last-used"}` findet die letzte noch wirksame Operation des Budgets und
+   zeigt, was ihr Rückgängigmachen ändern würde – hier zwei Transaktionen, die wieder
+   keine Kategorie haben:
+
+   <Code code={undo} lang="json" title="undo_operation — Vorschau" />
+
+3. **Sie bestätigen.** Der vorherige Zustand wird wiederhergestellt, und die Operation
+   wird im Journal als rückgängig gemacht markiert.
+
+</Steps>
+
+Um eine ältere Operation rückgängig zu machen, nennen Sie ihre ID: *„mach Operation
+3f9a… rückgängig“*. Die Antwort jeder angewendeten Operation trägt ihre `operation_id`.
+
+## Was sich rückgängig machen lässt
+
+| Operation | Rückgängig stellt wieder her | Bleibt unberührt, wenn |
+|---|---|---|
+| `apply_categories` | die vorherige Kategorie jeder Transaktion | ihre Kategorie sich seither erneut geändert hat |
+| `set_category_budget` | den vorherigen Betrag | der Betrag sich seither erneut geändert hat |
+| `reconcile_account` | den Status *cleared*; löscht die Anpassung | eine Transaktion nicht mehr abgeglichen ist |
+| `create_transactions` | löscht die angelegten Transaktionen | eine bereits gelöscht wurde |
+
+Alles, was unberührt bleibt, wird in `conflicts` aufgeführt: Rückgängigmachen überschreibt
+nie spätere Arbeit.
+
+**Nicht rückgängig zu machen:** `update_category` (rufen Sie es erneut mit dem vorherigen
+Namen und der vorherigen Gruppe auf), `create_category` (blenden Sie die Kategorie in YNAB
+aus), `split_transaction` (die API von YNAB kann eine Aufteilung nicht ändern: bearbeiten
+Sie sie in YNAB), `approve_transactions` (die Freigabe ist ein Prüfkennzeichen).
+
+<Aside type="note">
+Ein Rückgängigmachen lässt sich selbst nicht rückgängig machen, und es funktioniert auf
+dem Rechner, dessen [Journal](/avenir-mcp/de/concepts/journal/) die Operation erfasst hat.
+</Aside>

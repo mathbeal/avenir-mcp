@@ -1,0 +1,88 @@
+---
+title: Einen Monat auswerten
+description: Sehen, wohin das Geld gegangen ist, erkennen, was auffällt, und Geld umschichten, um Budgetüberschreitungen auszugleichen.
+sidebar:
+  order: 3
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import summary from '@snippets/monthly_summary.json?raw';
+import balances from '@snippets/category_balances.json?raw';
+import usage from '@snippets/budget_vs_actual.json?raw';
+import trends from '@snippets/spending_trends.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+import badMonth from '@snippets/bad_month.json?raw';
+
+**Ziel:** einen Monat verstehen – Einnahmen, Ausgaben, was noch zuzuweisen ist – und
+korrigieren, was aus dem Ruder gelaufen ist.
+
+**Tools:** [`get_monthly_summary`](/avenir-mcp/de/reference/tools/get-monthly-summary/),
+[`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/),
+[`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/),
+[`get_spending_trends`](/avenir-mcp/de/reference/tools/get-spending-trends/) und
+[`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/) zum Korrigieren.
+**Prompt:** `monthly_review`.
+
+## Das Gespräch
+
+<Steps>
+
+1. **Fragen.**
+
+   > **Sie:** Geh den September mit mir durch.
+
+2. **Der Monat auf einen Blick.** `get_monthly_summary` mit `month: "2026-09-01"` antwortet
+   in wenigen Zeilen – eine YNAB-Anfrage:
+
+   <Code code={summary} lang="json" title="get_monthly_summary" />
+
+   | Feld | Bedeutet |
+   |---|---|
+   | `income` | in diesem Monat nach Ready to Assign eingegangenes Geld |
+   | `budgeted` | in diesem Monat insgesamt Kategorien zugewiesen |
+   | `activity` | in Kategorien ausgegeben (negativ) und eingenommen |
+   | `ready_to_assign` | Geld ohne Aufgabe – negativ, wenn Sie mehr zugewiesen haben, als Sie haben |
+   | `overspent` | Kategorien, deren verfügbarer Saldo negativ ist |
+
+3. **Die Einzelheiten.** `get_category_balances` listet jede Kategorie mit einem Betrag:
+
+   <Code code={balances} lang="json" title="get_category_balances (erste Einträge)" />
+
+   `get_budget_vs_actual` gibt den verbrauchten Anteil jedes Budgets an – ein
+   `utilization_pct` über 100 bedeutet überzogen:
+
+   <Code code={usage} lang="json" title="get_budget_vs_actual (erste Einträge)" />
+
+4. **Der Trend.** Ist Restaurants diesen Monat hoch oder jeden Monat?
+   `get_spending_trends` mit `months_count: 3` gibt die Ausgaben je Kategorie, Monat für
+   Monat:
+
+   <Code code={trends} lang="json" title="get_spending_trends (Auszug)" />
+
+5. **Die Korrektur.** Eine Budgetüberschreitung wird ausgeglichen, indem Geld aus einer Kategorie
+   mit Spielraum umgeschichtet wird:
+
+   > **Claude:** Restaurants liegt 22,50 darüber. Tennis hat 80 verfügbar und noch nichts
+   > ausgegeben. 30 von Tennis nach Restaurants umschichten?
+   >
+   > **Sie:** Ja.
+
+   Zwei Aufrufe von `set_category_budget`, jeder mit Vorschau vorher → nachher:
+
+   <Code code={budget} lang="json" title="set_category_budget — Vorschau" />
+
+</Steps>
+
+## Gut zu wissen
+
+- `month` ist `"current"` oder der erste Tag eines Monats, `YYYY-MM-01`. Alles andere wird
+  abgelehnt, bevor YNAB aufgerufen wird, ohne Kosten:
+
+  <Code code={badMonth} lang="text" title="get_monthly_summary — Monat 2026-13-01" />
+- Ausgeblendete Kategorien und die internen von YNAB (*Inflow: Ready to Assign*) werden
+  bei jeder Auswertung ausgelassen.
+- `set_category_budget` setzt einen **absoluten** Betrag, keine Änderung: 30
+  umzuschichten sind zwei Aufrufe, einer senkt Tennis von 80 auf 50, einer hebt
+  Restaurants von 120 auf 150. Jeder lässt sich rückgängig machen.
+- Die Ressource `avenir-mcp://guide` erinnert Agenten an die Methode von YNAB: Eine
+  Budgetüberschreitung wird durch Umschichten ausgeglichen, nicht ignoriert.

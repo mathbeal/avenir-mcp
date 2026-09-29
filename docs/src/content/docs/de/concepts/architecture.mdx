@@ -1,0 +1,100 @@
+---
+title: Architektur
+description: Wie der Server aufgebaut ist, was jedes Modul tut und was während eines Aufrufs geschieht.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Steps } from '@astrojs/starlight/components';
+
+avenir-mcp ist ein Python-Paket auf Basis von [FastMCP](https://gofastmcp.com). Sein
+Aufbau hält drei Dinge getrennt: **was mit YNAB spricht**, **was rechnet** und **was der
+Agent sieht**.
+
+## Module
+
+<FileTree>
+- avenir_mcp/
+  - server.py — Einstiegspunkt: Transport, Log-Stufe, Nur-Lese-Richtlinie
+  - app.py — die FastMCP-Instanz, das Tag `write`, Prüfung des Monats, Log-Filter
+  - tools_budget.py — lesende Tools nahe an YNAB und `approve_transactions`
+  - tools_classify.py — `suggest_categories`, `apply_categories`
+  - tools_accounts.py — `reconcile_account`, `forecast_balance`, `create_transactions`
+  - tools_categories.py — `create_category`, `update_category`, `set_category_budget`
+  - tools_undo.py — `undo_operation`, für jede Art von Operation
+  - context.py — Ressourcen und Prompts
+  - confirm.py — Vorschau, Bestätigung, Anwendung, Journal
+  - client.py — der einzige Code, der mit YNAB spricht
+  - journal.py — der einzige Code, der auf die Festplatte schreibt
+  - triage.py — ausstehende Transaktionen und Vorschläge, rein
+  - classifier.py — Normalisierung der Empfänger und Bewertung, rein
+  - writes.py — Pläne, Rückgängig-Pläne, Bestätigungscodes, rein
+  - reconcile.py — Kontoanalyse, rein
+  - forecast.py — wiederkehrende Belastungen und Hochrechnung, rein
+  - analytics.py — Monatsübersicht, Salden, Trends, rein
+</FileTree>
+
+| Schicht | Module | Regel |
+|---|---|---|
+| Tools | `tools_*.py`, `context.py` | erklären, was der Agent sieht; orchestrieren; rechnen nie |
+| Bestätigung | `confirm.py` | der einzige Weg, den jede bestätigte Schreibaktion nimmt |
+| Logik | `triage`, `classifier`, `writes`, `reconcile`, `forecast`, `analytics` | reine Funktionen: kein Netzwerk, keine Festplatte, vollständig mit Unit-Tests abgedeckt |
+| E/A | `client.py` (HTTP), `journal.py` (Festplatte) | die einzigen Seiteneffekte |
+
+Beträge überqueren die E/A-Grenze in den *Milliunits* von YNAB und verlassen die Logik in
+Währungseinheiten: Kein Tool gibt je Milliunits zurück.
+
+## Ein lesender Aufruf
+
+<Steps>
+
+1. Der Client ruft `get_monthly_summary` mit `{"plan_id": "last-used", "month":
+   "2026-09-01"}` auf.
+2. FastMCP prüft die Argumente gegen das Eingabeschema des Tools.
+3. Das Tool prüft `month` (`app.check_month`) vor jeder Anfrage: Ein fehlerhafter
+   Monat wird mit einer Meldung abgelehnt, ohne Kosten.
+4. `client.get_month` sendet ein `GET /plans/last-used/months/2026-09-01` an YNAB.
+5. `analytics.month_overview` behält die Summen und die überzogenen Kategorien, in
+   Währungseinheiten.
+6. FastMCP prüft die Antwort gegen das Ausgabeschema und gibt sie als
+   `structuredContent` zurück, mit ihrem JSON-Text für ältere Clients.
+
+</Steps>
+
+## Ein schreibender Aufruf
+
+<Steps>
+
+1. Der Client ruft `apply_categories` mit Zuordnungen auf.
+2. Das Tool liest den aktuellen Zustand (`client.get_transactions`,
+   `client.get_categories`) und fragt `writes.plan_categorization`, was sich ändern
+   würde. Ungültige Zuordnungen werden hier abgelehnt, bevor irgendetwas gefragt wird.
+3. `confirm.write_plan` fragt den Nutzer über den Kanal, den der Client unterstützt –
+   siehe [Bestätigung](/avenir-mcp/de/concepts/confirmation/). Bis die Antwort Ja lautet,
+   gibt es die Vorschau zurück.
+4. Bei Ja wendet ein einziges gebündeltes `PATCH /plans/{id}/transactions` jede Änderung an.
+5. `journal.Journal.record` hängt die Operation an das Journal an; ihre ID geht an
+   den Agenten zurück, für das [Rückgängigmachen](/avenir-mcp/de/concepts/journal/).
+
+</Steps>
+
+## Registrierung und Nur-Lese-Modus
+
+Jedes Tool wird beim Import mit MCP-Annotationen registriert (`readOnlyHint`,
+`destructiveHint`, `idempotentHint`, `openWorldHint`); schreibende Tools tragen
+zusätzlich das Tag `write`. Beim Start ruft `server.main` `app.configure(enable_writes=...)`
+auf, das jedes mit `write` markierte Tool deaktiviert, außer bei
+`AVENIR_MCP_WRITE=1`. Ein deaktiviertes Tool ist weder aufgelistet noch aufrufbar. Ein
+Test schlägt fehl, wenn einem Tool Annotationen fehlen oder wenn sein Tag und sein
+`readOnlyHint` sich widersprechen.
+
+## Abhängigkeiten
+
+| Paket | Wozu |
+|---|---|
+| `fastmcp` | der MCP-Server: Protokoll, Schemas, Transporte |
+| `httpx` | HTTP-Anfragen an YNAB |
+| `pydantic` | ohnehin von fastmcp verlangt; macht aus den Docstrings der Felder Beschreibungen im Schema |
+
+Zur Laufzeit nichts weiter. Eine Abhängigkeit hinzuzufügen verlangt eine schriftliche
+Begründung ([AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md)).

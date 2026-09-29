@@ -25,5 +25,14 @@
     "guides/categories": "Organizar las categorías",
     "guides/missing-transactions": "Añadir transacciones que faltan",
     "concepts/journal": "Registro y deshacer"
+  },
+  "de": {
+    "guides/classify": "Ausstehende Transaktionen kategorisieren",
+    "guides/reconcile": "Ein Konto abgleichen",
+    "guides/monthly-review": "Einen Monat auswerten",
+    "guides/plan-ahead": "Vorausplanen",
+    "guides/categories": "Kategorien ordnen",
+    "guides/missing-transactions": "Fehlende Transaktionen ergänzen",
+    "concepts/journal": "Journal und Rückgängig"
   }
 }

@@ -1,0 +1,90 @@
+---
+title: Prognose
+description: Wie forecast_balance wiederkehrende Belastungen findet, den Rest mittelt und den Saldo Tag für Tag hochrechnet.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`forecast_balance` rechnet den Saldo Ihrer Konten Monat für Monat hoch, bis zu 24 Monate
+im Voraus. Es trennt **was wiederkehrt**, auf seinen Tag gesetzt, von **was schwankt**,
+über die Tage verteilt, und gibt jede Annahme zurück.
+
+## Konten und Ausgangspunkt
+
+Die Konten sind die in `account_ids` angegebenen, sonst jedes offene Budgetkonto. Der
+Anfangssaldo ist die Summe ihrer heutigen Salden; die Historie sind ihre Transaktionen,
+ohne Umbuchungen und gelöschte.
+
+## Wiederkehrende Belastungen und Einnahmen
+
+Über die **letzten 4 vollen Monate** (der laufende Monat ist unvollständig und wird
+ausgelassen) werden Transaktionen nach
+[normalisiertem Empfänger](/avenir-mcp/de/concepts/suggestions/#einen-händler-erkennen) und
+Richtung gruppiert. Eine Gruppe **kehrt wieder**, wenn:
+
+- sie in mindestens **3** der 4 Monate vorkommt und
+- die Summe jedes Monats höchstens **20 %** vom Median der Monatssummen abweicht.
+
+Sie wird dann jeden Monat mit ihrem **Median**betrag hochgerechnet, am **Mediantag**, an
+dem sie anfiel (bei Bedarf am letzten Tag eines kürzeren Monats).
+
+## Geplante Transaktionen
+
+Die geplanten Transaktionen der hochgerechneten Konten, von morgen bis zum Ende des
+Horizonts, fallen auf ihre Termine, in ihrem YNAB-Rhythmus wiederholt – eine jährliche
+Versicherung eingeschlossen. Ein Empfänger mit einer Planung wird allein durch sie
+hochgerechnet, auch wenn die Bank ihn ausführlich bezeichnet (eine Planung „Acme Payroll“
+deckt „ACME PAYROLL - ACME PAYROLL - REF-FF01“ ab: Jedes Wort ihres Namens steht in der
+Bezeichnung): Er verlässt die wiederkehrenden Belastungen und die Durchschnitte und wird
+so nie doppelt gezählt. Eine Umbuchung zwischen zwei hochgerechneten Konten wird
+ausgelassen, da sie keine der Summen ändert; eine Umbuchung auf ein anderes Konto zählt
+als Ausgang. Sie werden in `assumptions.scheduled` zurückgegeben.
+
+## Alles andere
+
+| Annahme | Standard | Überschreiben |
+|---|---|---|
+| Sonstige Ausgaben | der Durchschnitt der Ausgänge der letzten **3** vollen Monate, ohne wiederkehrende Belastungen | `variable_monthly` |
+| Einnahmen | der Durchschnitt der Eingänge der letzten 3 vollen Monate, ohne wiederkehrende Einnahmen | `monthly_income` |
+| Einmalige Beträge | keine | `one_offs`: `{date, amount, label}` |
+
+Wenn Sie `monthly_income` angeben, **ersetzt** es die in der Historie gefundenen
+Einnahmen und die geplanten Eingänge, Gehalt eingeschlossen, sodass ein Gehalt nie doppelt
+gezählt wird.
+
+## Die Hochrechnung
+
+Monat für Monat, Tag für Tag ab morgen:
+
+- **Wiederkehrende Beträge** fallen auf ihren Tag; im laufenden Monat nur die, die noch
+  kommen.
+- **Sonstige Ausgaben und Einnahmen** werden gleichmäßig auf die verbleibenden Tage
+  verteilt, in ganzen Cent. Für den laufenden Monat wird, was seit dem 1. bereits
+  ausgegeben oder eingenommen wurde (außerhalb wiederkehrender Empfänger), von den
+  Monatsdurchschnitten abgezogen: Nur der Rest wird hochgerechnet.
+- **Geplante Transaktionen und einmalige Beträge** fallen auf ihr Datum, sofern es nach
+  heute und innerhalb des Horizonts liegt.
+
+Für jeden Monat gibt die Antwort `start`, `inflows`, `outflows`, `end` und `lowest` an,
+den niedrigsten Saldo eines Tages im Monat. `first_shortfall` ist der erste Monat, dessen
+`lowest` unter null liegt.
+
+## Grenzen
+
+<Aside type="caution">
+Eine Prognose schreibt Ihre jüngste Vergangenheit fort. Denken Sie daran, dass:
+
+- Durchschnitte alles Ungewöhnliche der letzten 3 Monate enthalten – Urlaub, eine
+  jährliche Steuer, einen großen Kauf;
+- eine vierteljährliche oder jährliche Belastung ohne Planung in YNAB nach dieser
+  Definition nicht wiederkehrt: Planen Sie sie in YNAB oder fügen Sie sie als einmaligen
+  Betrag hinzu;
+- unregelmäßig gezahlte Einnahmen gemittelt werden: Geben Sie `monthly_income` an, wenn
+  Sie es besser wissen;
+- nur die gewählten Konten hochgerechnet werden; auf andere Konten verschobenes Geld sieht
+  ausgegeben aus.
+</Aside>
+
+Der Horizont `until` ist ein Monat, `YYYY-MM`, vom laufenden Monat bis 24 Monate im Voraus.

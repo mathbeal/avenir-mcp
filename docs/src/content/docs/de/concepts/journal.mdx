@@ -1,0 +1,76 @@
+---
+title: Journal und Rückgängig
+description: Das lokale Verzeichnis der angewendeten Operationen, sein Format und was das Rückgängigmachen genau wiederherstellt.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Jede bestätigte Schreibaktion wird in einem lokalen Journal erfasst, damit
+`undo_operation` sie später zurücknehmen kann – auch nach einem Neustart des Servers.
+
+## Wo
+
+| | |
+|---|---|
+| Standarddatei | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, sonst `~/.local/state/avenir-mcp/journal.jsonl` |
+| Gewählte Datei | `AVENIR_MCP_JOURNAL` |
+| Berechtigungen | mit `0600` angelegt: nur für Sie les- und schreibbar |
+| Inhalt | nur IDs – kein Betrag, kein Empfänger, kein Verwendungszweck, kein Token |
+
+## Format
+
+JSON Lines, nur anhängend. Eine angewendete Operation ist eine Zeile:
+
+```json
+{"operation_id":"5f2c9a1e7b30","plan_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+```
+
+Das Rückgängigmachen hängt eine Markierung an; nichts wird je überschrieben:
+
+```json
+{"undone":"5f2c9a1e7b30"}
+```
+
+| Feld | Bedeutung |
+|---|---|
+| `operation_id` | 12 zufällige Hexadezimalzeichen |
+| `plan_id` | das geänderte Budget |
+| `kind` | `categorize`, `budget`, `reconcile` oder `create` |
+| `applied_at` | ISO 8601, UTC, sekundengenau |
+| `moves` | für `categorize`: die Kategorie jeder Transaktion vorher und nachher |
+| `details` | für die anderen Arten, was das Rückgängigmachen braucht (unten) |
+
+| `kind` | `details` |
+|---|---|
+| `budget` | `month`, `category_id`, `from` und `to` in Milliunits |
+| `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (oder `null`) |
+| `create` | `transaction_ids` |
+
+## Welche Operation das Rückgängigmachen wählt
+
+`undo_operation` ohne ID nimmt die **jüngste noch wirksame Operation des Budgets**:
+nicht rückgängig gemacht und selbst kein Rückgängigmachen. Mit einer ID diese
+Operation, sofern sie noch wirksam ist. Andernfalls: *„Nothing to undo: no operation of
+this budget is still in effect.“*
+
+## Was das Rückgängigmachen wiederherstellt
+
+| `kind` | Rückgängig | Zuerst geprüft | Wenn die Prüfung fehlschlägt |
+|---|---|---|---|
+| `categorize` | jede Transaktion zurück auf ihre vorherige Kategorie | ihre Kategorie ist noch die, die die Operation gesetzt hat | diese Transaktion bleibt unberührt und wird in `conflicts` aufgeführt |
+| `budget` | den vorherigen Betrag | der Betrag ist noch der, den die Operation gesetzt hat | nichts geschrieben; `conflicts` nennt die Kategorie |
+| `reconcile` | *reconciled* Transaktionen zurück auf *cleared*; die Anpassung gelöscht | jede ist noch *reconciled* | die nicht mehr abgeglichenen werden übersprungen |
+| `create` | die angelegten Transaktionen gelöscht | jede existiert noch | die bereits gelöschten werden in `conflicts` aufgeführt |
+
+Das Rückgängigmachen wird wie jede Schreibaktion als Vorschau gezeigt und bestätigt. Das
+Rückgängigmachen einer Operation `categorize` erfasst sich selbst als Operation und
+markiert beide als rückgängig gemacht, sodass ein Rückgängigmachen nicht rückgängig
+gemacht werden kann.
+
+<Aside type="note">
+Das Journal ist lokal: Eine Operation, die von einem anderen Rechner aus vorgenommen
+wurde oder bevor die Journaldatei geändert oder gelöscht wurde, lässt sich von hier aus
+nicht rückgängig machen. Das Löschen der Datei vergisst die Historie und sonst nichts.
+</Aside>

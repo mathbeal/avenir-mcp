@@ -10,7 +10,7 @@ import pytest
 from docsgen import pages
 
 CONTENT = pages.CONTENT
-TRANSLATED = ("fr", "es")
+TRANSLATED = ("fr", "es", "de")
 REGENERATE = "run `uv run python -m docsgen` and commit the result"
 
 
@@ -30,7 +30,7 @@ def test_generated_files_are_current() -> None:
 
 @pytest.mark.parametrize("language", TRANSLATED)
 def test_every_written_page_is_translated(language: str) -> None:
-    """French and Spanish have every hand-written page English has, and no other."""
+    """Each translation has every hand-written page English has, and no other."""
     generated = {p for p in pages.generated() if p.suffix == ".md"}
     english = _english_pages() - {p.relative_to(CONTENT) for p in generated}
     translated = {

@@ -1,0 +1,86 @@
+---
+title: Ein Konto abgleichen
+description: Ein Konto mit dem Kontostand vergleichen, den Ihre Bank zeigt, jede Differenz erklären und es dann als abgeglichen markieren.
+sidebar:
+  order: 2
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import gap from '@snippets/reconcile_gap.json?raw';
+
+**Ziel:** sicherstellen, dass YNAB mit Ihrer Bank übereinstimmt, die Ursache finden, wenn
+nicht, und das Konto als abgeglichen markieren, sobald es passt.
+
+**Bevor Sie beginnen:** der Kontostand, den Ihre Bank heute zeigt, und Schreiben
+aktiviert, um das Konto als abgeglichen zu markieren (die Diagnose funktioniert auch nur
+lesend).
+
+**Tool:** [`reconcile_account`](/avenir-mcp/de/reference/tools/reconcile-account/).
+**Prompt:** `reconcile`.
+
+## Das Gespräch
+
+<Steps>
+
+1. **Fragen, mit dem Kontostand der Bank.**
+
+   > **Sie:** Meine Bank zeigt 3.440,80 auf meinem Girokonto. Stimmt YNAB damit überein?
+
+2. **Der Agent vergleicht.** Er ruft `reconcile_account` mit
+   `{"plan_id": "last-used", "account_id": "acc-checking", "bank_balance": 3440.80}` auf.
+   avenir-mcp summiert die *cleared* Transaktionen des Kontos (die, die die Bank bereits
+   gezeigt hat) und vergleicht. Sie weichen ab, also **wird nichts geschrieben**:
+
+   <Code code={gap} lang="json" title="reconcile_account — Differenz gefunden" />
+
+3. **Der Agent erklärt die Differenz.**
+
+   > **Claude:** YNAB zählt 71,86 mehr als die Bank. Zwei identische Zahlungen an Market
+   > Fresh über 71,86 am 19. September sehen aus wie ein Import, der doppelt kam.
+
+   Die Antwort bietet drei Spuren: `explained_by` (eine ausstehende Transaktion, deren
+   Betrag genau der Differenz entspricht), `uncleared` (was die Bank noch nicht gezeigt
+   hat) und `possible_duplicates` (gleicher Betrag und Händler, höchstens 3 Tage
+   auseinander, in den letzten 60 Tagen).
+
+4. **Sie beheben die Ursache** – hier löschen Sie das Duplikat in YNAB.
+
+5. **Fragen Sie erneut.** Stimmen die Salden überein, zeigt avenir-mcp den Abgleich als
+   Vorschau: Jede *cleared* Transaktion des Kontos wird *reconciled*. Sie bestätigen; er
+   wird in einer Anfrage angewendet und im Journal erfasst.
+
+</Steps>
+
+## Wenn sich die Differenz nicht erklären lässt
+
+Manchmal bleibt eine kleine Differenz: eine nie importierte Gebühr, ein alter Fehler. Nur
+wenn Sie darum bitten, ruft der Agent erneut mit `adjust=true` auf:
+
+- eine Transaktion **Balance adjustment** über die Differenz wird auf dem Konto angelegt,
+  mit heutigem Datum, in *Ready to Assign*, mit dem Verwendungszweck *Entered by
+  reconcile_account*;
+- dann wird das Konto abgeglichen, die Anpassung eingeschlossen.
+
+<Aside type="caution">
+Eine Anpassung verdeckt ein Problem, statt es zu lösen. avenir-mcp nimmt nie von sich aus
+eine vor, und die Evaluierung prüft, dass ein Agent, dem *„ändere nichts“* gesagt wurde,
+es auch nicht tut.
+</Aside>
+
+## Rückgängig machen
+
+`undo_operation` setzt jede abgeglichene Transaktion auf *cleared* zurück und löscht die
+Anpassung, falls eine vorgenommen wurde. Siehe
+[Eine Änderung rückgängig machen](/avenir-mcp/de/guides/undo/).
+
+## Status
+
+| `status` | Bedeutung |
+|---|---|
+| `difference_found` | die Salden weichen ab; nichts geschrieben; lesen Sie `analysis` |
+| `nothing_to_do` | die Salden stimmen überein und nichts bleibt abzugleichen |
+| `confirmation_required` | die Salden stimmen überein (oder `adjust` wurde verlangt); wartet auf Ihr Ja |
+| `applied` | abgeglichen; `operation_id` zum Rückgängigmachen |
+| `declined` | Sie haben Nein gesagt; nichts geschrieben |
+
+Wie der Vergleich funktioniert: [Abgleich](/avenir-mcp/de/concepts/reconciliation/).

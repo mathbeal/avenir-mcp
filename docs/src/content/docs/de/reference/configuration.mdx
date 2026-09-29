@@ -1,0 +1,150 @@
+---
+title: Konfiguration
+description: Jede Umgebungsvariable, die avenir-mcp liest, mit ihrem Standardwert, ihrer Wirkung und einem Beispiel.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+avenir-mcp liest seine Konfiguration aus Umgebungsvariablen, die im Block `env` Ihres
+MCP-Clients oder in der Shell gesetzt werden, die es startet. Sonst wird nichts gelesen:
+keine Konfigurationsdatei.
+
+## Übersicht
+
+| Variable | Standard | Bedeutung |
+|---|---|---|
+| `YNAB_API_KEY` | — (**Pflicht**, oder `YNAB_API_KEY_FILE`) | Ihr YNAB Personal Access Token. |
+| `YNAB_API_KEY_FILE` | nicht gesetzt | Eine Datei mit dem Token, verwendet, wenn `YNAB_API_KEY` nicht gesetzt ist. |
+| `AVENIR_MCP_WRITE` | nicht gesetzt: nur lesend | `1` registriert die Tools, die Ihr Budget ändern. |
+| `AVENIR_MCP_REQUIRE_ELICITATION` | nicht gesetzt | `1` akzeptiert nur ein im Client gegebenes Ja: keine Bestätigungscodes. |
+| `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` oder `http`. |
+| `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-Adresse. |
+| `AVENIR_MCP_PORT` | `8103` | HTTP-Port. |
+| `AVENIR_MCP_HTTP_TOKEN` | nicht gesetzt | Token, das HTTP-Clients vorweisen müssen; Pflicht beim Schreiben über HTTP. |
+| `AVENIR_MCP_JOURNAL` | siehe unten | Journaldatei, vom Rückgängigmachen genutzt. |
+| `XDG_STATE_HOME` | `~/.local/state` | Wo das Journal standardmäßig liegt. |
+| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Nötige Sicherheit, um eine Kategorie vorzuschlagen. |
+| `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Diagnosestufe. |
+| `AVENIR_MCP_LOG_FORMAT` | `text` | `json` schreibt ein JSON-Objekt pro Zeile. |
+| `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adresse der API. |
+
+## Einzelheiten
+
+### `YNAB_API_KEY`
+
+Ihr Personal Access Token, aus YNAB → Account Settings → Developer Settings. Ohne es
+schlägt jedes Tool, das YNAB aufruft, mit `YNAB_API_KEY environment variable is not
+set` fehl. Es gewährt vollen Lese- und Schreibzugriff auf jedes Budget des Kontos.
+
+### `YNAB_API_KEY_FILE`
+
+Der Pfad einer Datei, die nur das Token enthält, verwendet, wenn `YNAB_API_KEY` nicht
+gesetzt ist: Das Token erscheint dann in keiner Konfiguration eines MCP-Clients. Die Datei
+darf nur für Sie lesbar sein (`chmod 600`); andernfalls lehnt avenir-mcp sie ab und sagt
+es. Unter macOS, nachdem Sie das Token kopiert haben:
+
+```bash
+mkdir -p ~/.config/avenir-mcp
+(umask 077; pbpaste > ~/.config/avenir-mcp/ynab-token)   # das gerade kopierte Token
+```
+
+Geben Sie dann `YNAB_API_KEY_FILE` im Block `env` des Clients den vollständigen Pfad der
+Datei.
+
+Unter macOS erspart der **Schlüsselbund** die Datei ganz: Speichern Sie das Token einmal
+und lassen Sie es den Client beim Start lesen.
+
+```bash
+security add-generic-password -a "$USER" -s avenir-ynab -w   # fragt verdeckt nach dem Token
+```
+
+```json
+"command": "/bin/sh",
+"args": ["-c", "YNAB_API_KEY=$(security find-generic-password -s avenir-ynab -w) exec uvx avenir-mcp"]
+```
+
+macOS fragt vielleicht einmal, ob `security` den Eintrag lesen darf.
+
+### `AVENIR_MCP_WRITE`
+
+Genau `1` registriert die 9 schreibenden Tools. Jeder andere Wert oder keiner lässt
+den Server nur lesend: Diese Tools sind dann weder aufgelistet noch aufrufbar. Wird
+einmal beim Start gelesen.
+
+### `AVENIR_MCP_REQUIRE_ELICITATION`
+
+Genau `1`: Eine Schreibaktion wird erst angewendet, nachdem der Nutzer im eigenen
+Bestätigungsfeld des Clients Ja gesagt hat. Bestätigungscodes werden weder ausgegeben noch
+akzeptiert, eine weggeklickte Frage zählt als Nein, und ein Client, der nicht fragen kann,
+erhält einen Fehler. Nutzen Sie es, wenn das Modell einen Code weitergeben könnte, ohne Sie
+zu fragen – siehe
+[Bestätigung](/avenir-mcp/de/concepts/confirmation/#die-eigene-antwort-des-nutzers-verlangen).
+
+### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
+
+`stdio` (Standard) für einen Client, der den Server selbst startet. `http` stellt
+Streamable HTTP unter `http://{HOST}:{PORT}/mcp` bereit.
+
+```bash
+AVENIR_MCP_TRANSPORT=http AVENIR_MCP_PORT=9000 YNAB_API_KEY=… uvx avenir-mcp
+```
+
+<Aside type="danger">
+Der Verkehr ist einfaches HTTP: Belassen Sie `AVENIR_MCP_HOST` auf `127.0.0.1`. `HOST` und
+`PORT` ohne Präfix werden absichtlich ignoriert: Shells setzen `HOST` oft auf den Namen des
+Rechners.
+</Aside>
+
+### `AVENIR_MCP_HTTP_TOKEN`
+
+Über HTTP ein Geheimnis, das jede Anfrage als `Authorization: Bearer <token>` tragen muss;
+andere erhalten `401`. **Pflicht bei `AVENIR_MCP_WRITE=1`**: Ohne es weigert sich der
+Server zu starten. Erzeugen Sie eines mit `openssl rand -hex 32`. Über stdio ignoriert.
+Unabhängig vom Token müssen die Header `Host` und `Origin` diesen Rechner nennen. Siehe
+[Über HTTP betreiben](/avenir-mcp/de/guides/run-options/#über-http-betreiben).
+
+### `AVENIR_MCP_JOURNAL` und `XDG_STATE_HOME`
+
+Das Journal der angewendeten Operationen. Standard: `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`
+oder `~/.local/state/avenir-mcp/journal.jsonl`, wenn `XDG_STATE_HOME` nicht gesetzt ist.
+Der Ordner wird bei Bedarf angelegt. Siehe
+[Journal und Rückgängig](/avenir-mcp/de/concepts/journal/).
+
+### `AVENIR_MCP_CONFIDENCE_THRESHOLD`
+
+Eine Zahl zwischen 0 und 1: der Anteil der Historie eines Empfängers, der übereinstimmen
+muss, bevor eine Kategorie vorgeschlagen wird. `0.90` schlägt seltener vor und liegt öfter
+richtig; `0.70` schlägt mehr vor. Wird beim Start gelesen. Siehe
+[Vorschläge](/avenir-mcp/de/concepts/suggestions/).
+
+### `AVENIR_MCP_LOG_LEVEL`
+
+`DEBUG`, `INFO`, `WARNING` (Standard), `ERROR`. Diagnosen gehen nach stderr. Bei `INFO`
+wird jeder Tool-Aufruf und jede YNAB-Anfrage protokolliert – nur IDs und
+Anzahlen, nie Empfänger, Beträge oder Namen; das Token nie. `DEBUG` fügt die eigenen
+Meldungen der MCP-Bibliothek hinzu, die die Anfragen selbst enthalten können.
+
+### `AVENIR_MCP_LOG_FORMAT`
+
+`text` (Standard): eine lesbare Zeile pro Ereignis. `json`: ein JSON-Objekt pro Zeile, für
+einen Log-Kollektor – siehe
+[Protokolle an ein Log-System senden](/avenir-mcp/de/guides/run-options/#protokolle-an-ein-log-system-senden).
+
+### `AVENIR_MCP_YNAB_URL`
+
+Die Basisadresse der API. Nur nützlich, um avenir-mcp auf einen Ersatz zu richten, wie es
+die Evaluierung und der Dokumentationsgenerator mit ihrem Server für das Demo-Budget tun.
+Sie muss mit `https://` beginnen – einfaches `http://` wird nur für `127.0.0.1` oder
+`localhost` akzeptiert –, weil jede Anfrage Ihr Token trägt.
+
+## Tool-Argumente, die Sie oft sehen
+
+| Argument | Akzeptierte Werte |
+|---|---|
+| `plan_id` | eine Budget-ID aus `list_plans` oder `last-used` |
+| `month` | `current` oder der erste Tag eines Monats: `YYYY-MM-01` |
+| `until` | ein Monat, `YYYY-MM`, bis zu 24 Monate im Voraus |
+| Daten | `YYYY-MM-DD` |
+| Beträge | Währungseinheiten; negativ für Ausgaben |

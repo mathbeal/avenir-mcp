@@ -74,9 +74,9 @@ Coverage is enforced at 100 %, branches included.
 uv sync
 just check              # lint, types, tests at 100 %, vocabulary, lockfile
 uv run python -m docsgen  # when a tool, resource, prompt or answer changed
-just docs               # the site builds in EN, FR and ES, every link valid
+just docs               # the site builds in every language, every link valid
 ```
 
 A test fails when the generated tool reference or an example no longer matches the
-code, and when a hand-written page is missing in French or Spanish. When a change affects how an agent uses the tools, run
+code, and when a hand-written page is missing in a translation. When a change affects how an agent uses the tools, run
 `just evaluate` (a real agent on the demo budget) and commit its report.

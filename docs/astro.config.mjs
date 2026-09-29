@@ -40,6 +40,7 @@ export default defineConfig({
         root: { label: 'English', lang: 'en' },
         fr: { label: 'Français', lang: 'fr' },
         es: { label: 'Español', lang: 'es' },
+        de: { label: 'Deutsch', lang: 'de' },
       },
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/mathbeal/avenir-mcp' }],
       editLink: { baseUrl: 'https://github.com/mathbeal/avenir-mcp/edit/main/docs/' },
@@ -52,7 +53,7 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Getting started',
-          translations: { fr: 'Premiers pas', es: 'Primeros pasos' },
+          translations: { fr: 'Premiers pas', es: 'Primeros pasos', de: 'Erste Schritte' },
           items: [
             'getting-started/install',
             'getting-started/first-conversation',
@@ -61,21 +62,21 @@ export default defineConfig({
         },
         {
           label: 'Guides',
-          translations: { fr: 'Guides', es: 'Guías' },
+          translations: { fr: 'Guides', es: 'Guías', de: 'Anleitungen' },
           items: [{ autogenerate: { directory: 'guides' } }],
         },
         {
           label: 'Concepts',
-          translations: { fr: 'Concepts', es: 'Conceptos' },
+          translations: { fr: 'Concepts', es: 'Conceptos', de: 'Konzepte' },
           items: [{ autogenerate: { directory: 'concepts' } }],
         },
         {
           label: 'Reference',
-          translations: { fr: 'Référence', es: 'Referencia' },
+          translations: { fr: 'Référence', es: 'Referencia', de: 'Referenz' },
           items: [
             {
               label: 'Tools',
-              translations: { fr: 'Outils', es: 'Herramientas' },
+              translations: { fr: 'Outils', es: 'Herramientas', de: 'Tools' },
               collapsed: true,
               items: [{ autogenerate: { directory: 'reference/tools' } }],
             },
@@ -87,7 +88,7 @@ export default defineConfig({
         },
         {
           label: 'Project',
-          translations: { fr: 'Projet', es: 'Proyecto' },
+          translations: { fr: 'Projet', es: 'Proyecto', de: 'Projekt' },
           items: [{ autogenerate: { directory: 'project' } }],
         },
       ],

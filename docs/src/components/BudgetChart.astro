@@ -85,11 +85,39 @@ const texts = {
       Holidays: 'Vacaciones',
     } as Record<string, string>,
   },
+  de: {
+    title: 'Verbrauchter Anteil jedes Budgets',
+    source: 'Antwort von get_budget_vs_actual auf das Demo-Budget',
+    budget: 'Budget',
+    of: 'von',
+    used: 'verbraucht',
+    table: 'Als Tabelle anzeigen',
+    category: 'Kategorie',
+    budgeted: 'Budgetiert',
+    spent: 'Ausgegeben',
+    untouched: 'unberührt',
+    note: 'Kategorienamen ins Deutsche übertragen; die Rohantwort behält die des Demo-Budgets.',
+    names: {
+      Bills: 'Rechnungen',
+      Everyday: 'Alltag',
+      Fun: 'Freizeit',
+      'Savings goals': 'Sparziele',
+      Rent: 'Miete',
+      Electricity: 'Strom',
+      Phone: 'Telefon',
+      Groceries: 'Lebensmittel',
+      Restaurants: 'Restaurants',
+      Transport: 'Verkehr',
+      Tennis: 'Tennis',
+      Subscriptions: 'Abonnements',
+      Holidays: 'Urlaub',
+    } as Record<string, string>,
+  },
 };
 
 const lang = Astro.locals.starlightRoute.lang as keyof typeof texts;
 const t = texts[lang] ?? texts.en;
-const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES' }[lang] ?? 'en-US';
+const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', de: 'de-DE' }[lang] ?? 'en-US';
 const money = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pct = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
 const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(

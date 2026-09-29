@@ -1,0 +1,79 @@
+---
+title: Vorausplanen
+description: Den Kontostand Monat für Monat vorausberechnen, seine Annahmen prüfen und den nächsten Monat budgetieren.
+sidebar:
+  order: 4
+---
+
+import { Code, Steps, Aside } from '@astrojs/starlight/components';
+import projection from '@snippets/forecast.json?raw';
+
+**Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
+
+**Tools:** [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/), dann
+[`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/).
+**Prompt:** `plan_next_month`.
+
+## Das Gespräch
+
+<Steps>
+
+1. **Fragen, mit dem, was Sie wissen.**
+
+   > **Sie:** Wenn ich 3.200 im Monat verdiene, rutschen meine Konten vor Jahresende unter
+   > null?
+
+2. **Der Agent rechnet voraus.** `forecast_balance` mit `{"until": "2026-12",
+   "monthly_income": 3200}` – zwei YNAB-Anfragen:
+
+   <Code code={projection} lang="json" title="forecast_balance (Auszug)" />
+
+3. **Der Agent liest Ihnen die Annahmen vor**, vor der Schlussfolgerung:
+
+   > **Claude:** Ausgehend von 4.112,66 auf Checking und Savings, mit 3.200 Eingang im
+   > Monat, Ihren wiederkehrenden Belastungen (Miete 950, Lebensmittel etwa 182,58, Strom
+   > 64,20, der Zug 45, Tennis 22, Telefon 19,99, Streamflix 13,49) und etwa 69 sonstigen
+   > Ausgaben wächst der Saldo weiter: Der Tiefpunkt, 4.112,66, ist heute. Kommt etwas,
+   > das ich hinzufügen sollte?
+
+4. **Sie korrigieren.** Fügen Sie hinzu, was die Historie nicht wissen kann:
+
+   > **Sie:** Die Grundsteuer, 1.426, am 15. Oktober.
+
+   Der Agent ruft erneut mit `one_offs: [{"date": "2026-10-15", "amount": -1426,
+   "label": "property tax"}]` auf.
+
+</Steps>
+
+## Was die Prognose annimmt
+
+| Annahme | Woher sie kommt | Ändern mit |
+|---|---|---|
+| Anfangssaldo | der heutige Saldo der offenen Budgetkonten | `account_ids` |
+| Wiederkehrende Belastungen und Einnahmen | derselbe Empfänger in 3 der letzten 4 vollen Monate, jeden Monat höchstens 20 % von seinem Median entfernt | — (in `assumptions.recurring` zurückgegeben) |
+| Sonstige Ausgaben | Durchschnitt der letzten 3 vollen Monate, ohne wiederkehrende Belastungen | `variable_monthly` |
+| Einnahmen | was Sie angeben; sonst der Durchschnitt der letzten 3 Monate | `monthly_income` |
+| Einmalige Beträge | nur, was Sie angeben | `one_offs` |
+
+Einzelheiten: [Prognose](/avenir-mcp/de/concepts/forecasting/).
+
+## Die Antwort lesen
+
+- `months[].start`, `inflows`, `outflows`, `end`: Saldo und Flüsse des Monats.
+- `months[].lowest`: der Tiefpunkt innerhalb des Monats, Tag für Tag – der, der Ihnen
+  sagt, ob eine Zahlung platzen würde.
+- `first_shortfall`: der erste Monat, dessen Tiefpunkt unter null liegt, oder `null`.
+
+<Aside type="caution" title="Eine Hochrechnung, keine Vorhersage">
+Sie schreibt Ihre letzten Monate fort. Ein Urlaub, eine jährliche Steuer oder ein
+einmaliger Kauf darin verschiebt die Durchschnitte; eine neue Ausgabe bleibt unsichtbar,
+bis Sie sie hinzufügen. Lesen Sie die Annahmen vor der Schlussfolgerung.
+</Aside>
+
+## Dann den nächsten Monat budgetieren
+
+> **Sie:** Bereite daraus das Budget für Oktober vor.
+
+Der Agent schlägt die Beträge des nächsten Monats Kategorie für Kategorie vor –
+wiederkehrende Belastungen zuerst, dann der Rest nach den jüngsten Ausgaben – und wendet
+die, die Sie annehmen, mit `set_category_budget` an, jede als eigene Änderung mit Vorschau.
