@@ -48,6 +48,9 @@ commit_parsers = [
   { message = "^refactor",        group = "Changed" },
   { message = "^docs",            group = "Documentation" },
   { message = "^test",            group = "Tests" },
+  # The commit that cuts a release carries its own changelog: listing it would
+  # make the file one line short of the history it was generated from.
+  { message = "^chore\\(release\\)", skip = true },
   { message = "^(build|ci|chore)", group = "Internal" },
   { message = "^revert",          group = "Reverted" },
   { message = "^release",         skip = true },
