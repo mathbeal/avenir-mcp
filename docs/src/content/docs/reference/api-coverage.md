@@ -82,6 +82,9 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `approve_transactions` | — | `PATCH /transactions` |
 | `create_category` | `GET /categories` | `POST /categories` |
 | `create_transactions` | `GET /accounts`, `GET /categories` | `POST /transactions` |
+| `flag_transactions` | `GET /transactions` | `PATCH /transactions` |
+| `import_transactions` | — | `POST /transactions/import` |
+| `move_money` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
 | `reconcile_account` | `GET /accounts`, `GET /categories`, `GET /transactions` | `POST /transactions`, `PATCH /transactions` |
 | `set_category_budget` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
 | `split_transaction` | `GET /accounts`, `GET /categories`, `GET /transactions` | `PATCH /transactions` |
