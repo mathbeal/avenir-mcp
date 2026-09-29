@@ -72,7 +72,7 @@ Antwort auf dem Demo-Budget:
     {
       "category_id": "cat-restaurants",
       "name": "Restaurants",
-      "group": "Everyday",
+      "group": "Alltag",
       "balance": -22.5
     }
   ]

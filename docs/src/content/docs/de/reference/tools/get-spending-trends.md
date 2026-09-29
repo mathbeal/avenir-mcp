@@ -51,7 +51,7 @@ Antwort auf dem Demo-Budget:
 
 ```json
 {
-  "Rent": [
+  "Miete": [
     {
       "month": "2026-07-01",
       "amount": 950.0
@@ -65,7 +65,7 @@ Antwort auf dem Demo-Budget:
       "amount": 950.0
     }
   ],
-  "Electricity": [
+  "Strom": [
     {
       "month": "2026-07-01",
       "amount": 64.2
@@ -79,7 +79,7 @@ Antwort auf dem Demo-Budget:
       "amount": 0.0
     }
   ],
-  "Phone": [
+  "Handy": [
     {
       "month": "2026-07-01",
       "amount": 19.99
@@ -93,7 +93,7 @@ Antwort auf dem Demo-Budget:
       "amount": 19.99
     }
   ],
-  "Groceries": [
+  "Lebensmittel": [
     {
       "month": "2026-07-01",
       "amount": 172.89
@@ -121,7 +121,7 @@ Antwort auf dem Demo-Budget:
       "amount": 142.5
     }
   ],
-  "Transport": [
+  "Mobilität": [
     {
       "month": "2026-07-01",
       "amount": 45.0
@@ -149,7 +149,7 @@ Antwort auf dem Demo-Budget:
       "amount": 0.0
     }
   ],
-  "Subscriptions": [
+  "Abos": [
     {
       "month": "2026-07-01",
       "amount": 13.49
@@ -163,7 +163,7 @@ Antwort auf dem Demo-Budget:
       "amount": 0.0
     }
   ],
-  "Holidays": [
+  "Urlaub": [
     {
       "month": "2026-07-01",
       "amount": 0.0

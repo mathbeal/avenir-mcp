@@ -8,6 +8,11 @@ extend-exclude = [
   "docs/src/content/docs/es/",
   "docs/src/content/docs/de/",
   "docs/src/content/docs/nl/",
+  # Examples captured on the demo budget named in those languages.
+  "docs/src/snippets/fr/",
+  "docs/src/snippets/es/",
+  "docs/src/snippets/de/",
+  "docs/src/snippets/nl/",
   # Labels and titles of the generated pages, in every language.
   "docsgen/guide_titles.json",
   "docsgen/labels.json",
@@ -22,3 +27,6 @@ Conceptos = "Conceptos"
 Projet = "Projet"
 Referenz = "Referenz"
 Naslag = "Naslag"
+# The demo budget's names in French and Spanish (evals/demo_budget.py).
+Projets = "Projets"
+Restaurantes = "Restaurantes"

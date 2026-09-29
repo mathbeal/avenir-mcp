@@ -54,7 +54,7 @@ Antwoord op het demobudget:
 [
   {
     "id": "demo-budget",
-    "name": "Demo household",
+    "name": "Demohuishouden",
     "first_month": "2026-06-01",
     "last_month": "2026-09-01"
   }

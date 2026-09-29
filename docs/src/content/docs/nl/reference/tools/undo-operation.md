@@ -80,7 +80,7 @@ Antwoord op het demobudget:
       "amount": -8.4,
       "payee": "CB BOULANGERIE DU PORT FACT 160926 525130******1",
       "from_category_id": "cat-groceries",
-      "from_category": "Groceries",
+      "from_category": "Boodschappen",
       "to_category_id": null,
       "to_category": null
     },
@@ -90,7 +90,7 @@ Antwoord op het demobudget:
       "amount": -45.0,
       "payee": "RAIL CO",
       "from_category_id": "cat-transport",
-      "from_category": "Transport",
+      "from_category": "Vervoer",
       "to_category_id": null,
       "to_category": null
     }

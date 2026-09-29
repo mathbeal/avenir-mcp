@@ -55,19 +55,19 @@ Antwoord op het demobudget:
 [
   {
     "id": "grp-bills",
-    "name": "Bills"
+    "name": "Vaste lasten"
   },
   {
     "id": "grp-everyday",
-    "name": "Everyday"
+    "name": "Dagelijks"
   },
   {
     "id": "grp-fun",
-    "name": "Fun"
+    "name": "Vrije tijd"
   },
   {
     "id": "grp-savings-goals",
-    "name": "Savings goals"
+    "name": "Spaardoelen"
   }
 ]
 ```

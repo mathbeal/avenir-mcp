@@ -51,7 +51,7 @@ Respuesta sobre el presupuesto de demostración:
 
 ```json
 {
-  "Rent": [
+  "Alquiler": [
     {
       "month": "2026-07-01",
       "amount": 950.0
@@ -65,7 +65,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 950.0
     }
   ],
-  "Electricity": [
+  "Luz": [
     {
       "month": "2026-07-01",
       "amount": 64.2
@@ -79,7 +79,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 0.0
     }
   ],
-  "Phone": [
+  "Teléfono": [
     {
       "month": "2026-07-01",
       "amount": 19.99
@@ -93,7 +93,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 19.99
     }
   ],
-  "Groceries": [
+  "Supermercado": [
     {
       "month": "2026-07-01",
       "amount": 172.89
@@ -107,7 +107,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 0.0
     }
   ],
-  "Restaurants": [
+  "Restaurantes": [
     {
       "month": "2026-07-01",
       "amount": 61.5
@@ -121,7 +121,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 142.5
     }
   ],
-  "Transport": [
+  "Transporte": [
     {
       "month": "2026-07-01",
       "amount": 45.0
@@ -135,7 +135,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 0.0
     }
   ],
-  "Tennis": [
+  "Tenis": [
     {
       "month": "2026-07-01",
       "amount": 22.0
@@ -149,7 +149,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 0.0
     }
   ],
-  "Subscriptions": [
+  "Suscripciones": [
     {
       "month": "2026-07-01",
       "amount": 13.49
@@ -163,7 +163,7 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 0.0
     }
   ],
-  "Holidays": [
+  "Vacaciones": [
     {
       "month": "2026-07-01",
       "amount": 0.0

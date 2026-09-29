@@ -28,16 +28,17 @@ def security() -> str:
 
 def generated() -> dict[Path, str]:
     """Every generated file and its expected content."""
-    captures = examples.capture_all()
+    captures = {language: examples.capture_all(language) for language in reference.LANGUAGES}
     files = {
         CONTENT / "project" / "security.md": security(),
         CONTENT / "reference" / "api-coverage.md": api.page(),
     }
     for relative, text in reference.generate(captures).items():
         files[CONTENT / relative] = text
-    for name, capture in captures.items():
-        files[SNIPPETS / f"{name}.json"] = capture.text
-    for scheme, svg in readme.charts(captures["forecast"].text).items():
+    for language, by_name in captures.items():
+        for name, capture in by_name.items():
+            files[SNIPPETS / language / f"{name}.json"] = capture.text
+    for scheme, svg in readme.charts(captures[""]["forecast"].text).items():
         files[ROOT / ".github" / "assets" / f"forecast-{scheme}.svg"] = svg
     return files
 
@@ -46,12 +47,12 @@ def write_all() -> None:
     """Write every generated file, and remove generated files that no longer exist."""
     files = generated()
     for folder in (
-        SNIPPETS,
+        *(SNIPPETS / lang for lang in reference.LANGUAGES),
         *(CONTENT / lang / "reference" / "tools" for lang in reference.LANGUAGES),
     ):
         if folder.exists():
             for old in folder.iterdir():
-                if old not in files:
+                if old.is_file() and old not in files:
                     old.unlink()
     for path, text in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)

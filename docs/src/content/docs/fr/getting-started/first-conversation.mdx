@@ -6,11 +6,11 @@ sidebar:
 ---
 
 import { Code, Aside, Steps } from '@astrojs/starlight/components';
-import accounts from '@snippets/list_accounts.json?raw';
-import summary from '@snippets/monthly_summary.json?raw';
-import balances from '@snippets/category_balances.json?raw';
-import pending from '@snippets/suggest_categories.json?raw';
-import preview from '@snippets/apply_preview.json?raw';
+import accounts from '@snippets/fr/list_accounts.json?raw';
+import summary from '@snippets/fr/monthly_summary.json?raw';
+import balances from '@snippets/fr/category_balances.json?raw';
+import pending from '@snippets/fr/suggest_categories.json?raw';
+import preview from '@snippets/fr/apply_preview.json?raw';
 
 Cette visite suit une vraie conversation sur le plan de démonstration, un foyer inventé
 avec un compte courant et un compte d'épargne. Pour chaque étape : ce que vous dites,
@@ -31,7 +31,7 @@ L'agent appelle `list_accounts` avec `{"plan_id": "last-used"}` :
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude :** Deux comptes : Checking à 3 512,66, entièrement pointé, et Savings à
+> **Claude :** Deux comptes : Compte courant à 3 512,66, entièrement pointé, et Épargne à
 > 600,00.
 
 Les soldes sont dans la devise de votre plan. `cleared_balance` est ce que la banque a
@@ -86,7 +86,7 @@ L'agent appelle `apply_categories` avec les deux affectations. **Rien ne change 
 <Steps>
 
 1. avenir-mcp a calculé exactement ce qui changerait : deux transactions, d'aucune catégorie
-   vers Groceries et Transport.
+   vers Courses et Transports.
 2. Votre client vous pose la question — une case à cocher s'il gère l'élicitation MCP,
    ou l'agent vous relaie l'aperçu et attend.
 3. Vous dites oui. L'agent rappelle l'outil avec votre réponse (ou le code

@@ -55,19 +55,19 @@ Respuesta sobre el presupuesto de demostración:
 [
   {
     "id": "grp-bills",
-    "name": "Bills"
+    "name": "Facturas"
   },
   {
     "id": "grp-everyday",
-    "name": "Everyday"
+    "name": "Día a día"
   },
   {
     "id": "grp-fun",
-    "name": "Fun"
+    "name": "Ocio"
   },
   {
     "id": "grp-savings-goals",
-    "name": "Savings goals"
+    "name": "Metas de ahorro"
   }
 ]
 ```

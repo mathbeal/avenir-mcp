@@ -33,7 +33,7 @@ esa categoría.
 | *«¿Por qué no llegan mis movimientos bancarios?»* | [`list_accounts`](/avenir-mcp/es/reference/tools/list-accounts/) — la conexión bancaria de cada cuenta (activa, con error, ninguna) y su última conciliación | L |
 | *«¿Qué grupos de categorías existen?»* | [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/) | L |
 | *«¿Qué transacción es mi ticket de 86,40 del día 12?»* | [`find_transactions`](/avenir-mcp/es/reference/tools/find-transactions/) — por fechas, importe exacto y cuenta, con categoría o sin ella | L |
-| *«¿Qué hizo que Restaurants se pasara este mes?»* | [`find_transactions`](/avenir-mcp/es/reference/tools/find-transactions/) — por categoría, líneas divididas incluidas, o por beneficiario, sea cual sea la etiqueta bancaria | L |
+| *«¿Qué hizo que Restaurantes se pasara este mes?»* | [`find_transactions`](/avenir-mcp/es/reference/tools/find-transactions/) — por categoría, líneas divididas incluidas, o por beneficiario, sea cual sea la etiqueta bancaria | L |
 | *«¿Qué facturas vencen antes del día 10?»* | [`list_scheduled_transactions`](/avenir-mcp/es/reference/tools/list-scheduled-transactions/) — las transacciones programadas repetidas según su frecuencia, con el dinero que entra y sale | L |
 
 Los planes, cuentas y categorías también se sirven como
@@ -47,7 +47,7 @@ a una conversación sin llamar a una herramienta.
 | *«¿Cómo va septiembre?»* | [`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/) — ingresos, presupuestado, gastado, Ready to Assign, categorías excedidas | L |
 | *«Muéstrame todas las categorías.»* | [`get_category_balances`](/avenir-mcp/es/reference/tools/get-category-balances/) — presupuestado, gastado y disponible por categoría | L |
 | *«¿Qué presupuestos están casi agotados?»* | [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/) — parte consumida de cada presupuesto | L |
-| *«¿Restaurants está alto todos los meses?»* | [`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/) — gasto por categoría durante N meses | L |
+| *«¿El gasto en Restaurantes es alto todos los meses?»* | [`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/) — gasto por categoría durante N meses | L |
 
 Guía: [Revisar un mes](/avenir-mcp/es/guides/monthly-review/).
 
@@ -85,8 +85,8 @@ como mucho). Guías: [Conciliar una cuenta](/avenir-mcp/es/guides/reconcile/),
 | Usted dice | Herramienta | |
 |---|---|---|
 | *«¿Bajaré de cero antes de diciembre?»* | [`forecast_balance`](/avenir-mcp/es/reference/tools/forecast-balance/) — mes a mes, con sus supuestos | L |
-| *«Pon 150 en Restaurants para septiembre.»* | [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) | E ↺ |
-| *«Mueve 30 de Tennis a Restaurants.»* | [`move_money`](/avenir-mcp/es/reference/tools/move-money/) — las dos categorías en una confirmación | E ↺ |
+| *«Pon 150 en Restaurantes para septiembre.»* | [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) | E ↺ |
+| *«Mueve 30 de Tenis a Restaurantes.»* | [`move_money`](/avenir-mcp/es/reference/tools/move-money/) — las dos categorías en una confirmación | E ↺ |
 
 La previsión coloca las transacciones programadas de YNAB en sus fechas, encuentra los
 cargos recurrentes en su historial, promedia el resto y le deja indicar sus ingresos e
@@ -98,8 +98,8 @@ importes puntuales. Guía:
 
 | Usted dice | Herramienta | |
 |---|---|---|
-| *«Crea una categoría Pets en Everyday.»* | [`create_category`](/avenir-mcp/es/reference/tools/create-category/) | E |
-| *«Cambia el nombre de Tennis a Sport.»* | [`update_category`](/avenir-mcp/es/reference/tools/update-category/) — también mueve una categoría a otro grupo | E |
+| *«Crea una categoría Mascotas en el grupo Día a día.»* | [`create_category`](/avenir-mcp/es/reference/tools/create-category/) | E |
+| *«Cambia el nombre de Tenis a Deporte.»* | [`update_category`](/avenir-mcp/es/reference/tools/update-category/) — también mueve una categoría a otro grupo | E |
 
 Guía: [Organizar categorías](/avenir-mcp/es/guides/categories/).
 

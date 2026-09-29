@@ -6,11 +6,11 @@ sidebar:
 ---
 
 import { Code, Aside, Steps } from '@astrojs/starlight/components';
-import accounts from '@snippets/list_accounts.json?raw';
-import summary from '@snippets/monthly_summary.json?raw';
-import balances from '@snippets/category_balances.json?raw';
-import pending from '@snippets/suggest_categories.json?raw';
-import preview from '@snippets/apply_preview.json?raw';
+import accounts from '@snippets/de/list_accounts.json?raw';
+import summary from '@snippets/de/monthly_summary.json?raw';
+import balances from '@snippets/de/category_balances.json?raw';
+import pending from '@snippets/de/suggest_categories.json?raw';
+import preview from '@snippets/de/apply_preview.json?raw';
 
 Diese Tour folgt einem echten Gespräch auf dem Demo-Plan, einem erfundenen Haushalt mit
 einem Girokonto und einem Sparkonto. Für jeden Schritt sehen Sie, was Sie sagen, welches
@@ -31,7 +31,7 @@ Der Agent ruft `list_accounts` mit `{"plan_id": "last-used"}` auf:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Zwei Konten: Checking mit 3.512,66, alles gebucht, und Savings mit 600,00.
+> **Claude:** Zwei Konten: Girokonto mit 3.512,66, alles gebucht, und Sparkonto mit 600,00.
 
 Die Salden sind in der Währung Ihres Plans. `cleared_balance` ist, was die Bank bereits
 gezeigt hat; `uncleared_balance` ist, was sie noch nicht gezeigt hat.
@@ -86,7 +86,7 @@ nichts:**
 <Steps>
 
 1. avenir-mcp hat genau berechnet, was sich ändern würde: zwei Transaktionen, von keiner
-   Kategorie zu Groceries und Transport.
+   Kategorie zu Lebensmittel und Mobilität.
 2. Ihr Client zeigt Ihnen die Frage – ein Bestätigungsfeld, wenn er MCP-Elicitation
    unterstützt, oder der Agent gibt die Vorschau weiter und wartet.
 3. Sie sagen Ja. Der Agent ruft erneut auf, mit Ihrer Antwort (oder dem Code `confirmation`).

@@ -56,11 +56,30 @@ def test_every_environment_variable_is_documented(language: str) -> None:
     assert not {name for name in used if f"`{name}`" not in page}
 
 
-def test_every_snippet_is_used_by_a_page() -> None:
-    """No example is generated for nothing."""
-    text = "\n".join(p.read_text(encoding="utf-8") for p in CONTENT.rglob("*.md*"))
-    unused = [p.name for p in pages.SNIPPETS.glob("*.json") if f"@snippets/{p.name}" not in text]
+def _language_pages(language: str) -> list[Path]:
+    """A language's pages: English is the content root, less the translations."""
+    pages_ = (CONTENT / language).rglob("*.md*")
+    return [p for p in pages_ if language or p.relative_to(CONTENT).parts[0] not in TRANSLATED]
+
+
+@pytest.mark.parametrize("language", ("", *TRANSLATED))
+def test_every_snippet_is_used_by_a_page(language: str) -> None:
+    """No example is generated for nothing, in any language."""
+    text = "\n".join(p.read_text(encoding="utf-8") for p in _language_pages(language))
+    prefix = f"@snippets/{language}/" if language else "@snippets/"
+    folder = pages.SNIPPETS / language
+    unused = [p.name for p in folder.glob("*.json") if f"{prefix}{p.name}" not in text]
     assert not unused
+
+
+@pytest.mark.parametrize("language", ("", *TRANSLATED))
+def test_a_page_shows_the_examples_of_its_own_language(language: str) -> None:
+    """A French page shows the demo budget named in French: its categories match its prose."""
+    text = "\n".join(p.read_text(encoding="utf-8") for p in _language_pages(language))
+    imported = re.findall(r"@snippets/([^'\"]+)", text)
+    prefix = f"{language}/" if language else ""
+    assert imported
+    assert [name for name in imported if not re.fullmatch(f"{prefix}[^/]+", name)] == []
 
 
 _SITE_LINK = re.compile(r"https://mathbeal\.github\.io/avenir-mcp/([^\s)>#\"']*)")

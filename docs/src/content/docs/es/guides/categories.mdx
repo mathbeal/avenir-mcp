@@ -6,10 +6,10 @@ sidebar:
 ---
 
 import { Code, Aside } from '@astrojs/starlight/components';
-import groups from '@snippets/list_category_groups.json?raw';
-import create from '@snippets/create_category_preview.json?raw';
-import rename from '@snippets/update_category_preview.json?raw';
-import budget from '@snippets/budget_preview.json?raw';
+import groups from '@snippets/es/list_category_groups.json?raw';
+import create from '@snippets/es/create_category_preview.json?raw';
+import rename from '@snippets/es/update_category_preview.json?raw';
+import budget from '@snippets/es/budget_preview.json?raw';
 
 **Objetivo:** mantener la estructura de categorías acorde con su vida, y dar a cada
 categoría su importe.
@@ -21,7 +21,7 @@ categoría su importe.
 
 ## Crear una categoría
 
-> **Usted:** Crea una categoría Pets en Everyday.
+> **Usted:** Crea una categoría Mascotas en el grupo Día a día.
 
 El agente encuentra el id del grupo con `list_category_groups` (los grupos de sistema de
 YNAB se omiten):
@@ -36,7 +36,7 @@ Un nombre ya usado en el grupo se rechaza, sin importar mayúsculas y minúscula
 
 ## Renombrar o mover una categoría
 
-> **Usted:** Cambia el nombre de Tennis a Sport.
+> **Usted:** Cambia el nombre de Tenis a Deporte.
 
 <Code code={rename} lang="json" title="update_category — vista previa" />
 
@@ -46,7 +46,7 @@ nuevo con el nombre y el grupo anteriores, que da la respuesta.
 
 ## Fijar el importe de una categoría
 
-> **Usted:** Pon 150 en Restaurants para septiembre.
+> **Usted:** Pon 150 en Restaurantes para septiembre.
 
 <Code code={budget} lang="json" title="set_category_budget — vista previa" />
 

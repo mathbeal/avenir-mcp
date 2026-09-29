@@ -61,8 +61,8 @@ Réponse sur le budget de démonstration :
 [
   {
     "id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Loyer",
+    "group": "Charges fixes",
     "budgeted": 950.0,
     "actual": 950.0,
     "balance": 0.0,
@@ -70,8 +70,8 @@ Réponse sur le budget de démonstration :
   },
   {
     "id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Électricité",
+    "group": "Charges fixes",
     "budgeted": 70.0,
     "actual": 0.0,
     "balance": 70.0,
@@ -79,8 +79,8 @@ Réponse sur le budget de démonstration :
   },
   {
     "id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Téléphone",
+    "group": "Charges fixes",
     "budgeted": 20.0,
     "actual": 19.99,
     "balance": 0.01,
@@ -88,8 +88,8 @@ Réponse sur le budget de démonstration :
   },
   {
     "id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Courses",
+    "group": "Quotidien",
     "budgeted": 400.0,
     "actual": 0.0,
     "balance": 400.0,

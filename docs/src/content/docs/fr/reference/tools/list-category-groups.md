@@ -55,19 +55,19 @@ Réponse sur le budget de démonstration :
 [
   {
     "id": "grp-bills",
-    "name": "Bills"
+    "name": "Charges fixes"
   },
   {
     "id": "grp-everyday",
-    "name": "Everyday"
+    "name": "Quotidien"
   },
   {
     "id": "grp-fun",
-    "name": "Fun"
+    "name": "Loisirs"
   },
   {
     "id": "grp-savings-goals",
-    "name": "Savings goals"
+    "name": "Projets"
   }
 ]
 ```

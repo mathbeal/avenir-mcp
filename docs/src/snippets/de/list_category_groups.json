@@ -1,0 +1,18 @@
+[
+  {
+    "id": "grp-bills",
+    "name": "Fixkosten"
+  },
+  {
+    "id": "grp-everyday",
+    "name": "Alltag"
+  },
+  {
+    "id": "grp-fun",
+    "name": "Freizeit"
+  },
+  {
+    "id": "grp-savings-goals",
+    "name": "Sparziele"
+  }
+]

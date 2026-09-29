@@ -64,32 +64,32 @@ Antwort auf dem Demo-Budget:
 [
   {
     "category_id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Miete",
+    "group": "Fixkosten",
     "budgeted": 950.0,
     "activity": -950.0,
     "balance": 0.0
   },
   {
     "category_id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Strom",
+    "group": "Fixkosten",
     "budgeted": 70.0,
     "activity": 0.0,
     "balance": 70.0
   },
   {
     "category_id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Handy",
+    "group": "Fixkosten",
     "budgeted": 20.0,
     "activity": -19.99,
     "balance": 0.01
   },
   {
     "category_id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Lebensmittel",
+    "group": "Alltag",
     "budgeted": 400.0,
     "activity": 0.0,
     "balance": 400.0

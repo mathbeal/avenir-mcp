@@ -89,10 +89,10 @@ Antwort auf dem Demo-Budget:
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
       "memo": null,
-      "account": "Checking",
+      "account": "Girokonto",
       "suggestion": {
         "category_id": "cat-groceries",
-        "category_name": "Groceries",
+        "category_name": "Lebensmittel",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -103,10 +103,10 @@ Antwort auf dem Demo-Budget:
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
       "memo": null,
-      "account": "Checking",
+      "account": "Girokonto",
       "suggestion": {
         "category_id": "cat-groceries",
-        "category_name": "Groceries",
+        "category_name": "Lebensmittel",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -117,10 +117,10 @@ Antwort auf dem Demo-Budget:
       "amount": -45.0,
       "payee": "RAIL CO",
       "memo": null,
-      "account": "Checking",
+      "account": "Girokonto",
       "suggestion": {
         "category_id": "cat-transport",
-        "category_name": "Transport",
+        "category_name": "Mobilität",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -134,13 +134,13 @@ Antwort auf dem Demo-Budget:
     },
     {
       "category_id": "cat-rent",
-      "name": "Rent",
-      "group": "Bills"
+      "name": "Miete",
+      "group": "Fixkosten"
     },
     {
       "category_id": "cat-power",
-      "name": "Electricity",
-      "group": "Bills"
+      "name": "Strom",
+      "group": "Fixkosten"
     },
     "… 7 more"
   ],

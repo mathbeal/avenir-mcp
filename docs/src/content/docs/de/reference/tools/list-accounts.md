@@ -64,7 +64,7 @@ Antwort auf dem Demo-Budget:
 [
   {
     "id": "acc-checking",
-    "name": "Checking",
+    "name": "Girokonto",
     "type": "checking",
     "on_budget": true,
     "closed": false,
@@ -76,7 +76,7 @@ Antwort auf dem Demo-Budget:
   },
   {
     "id": "acc-savings",
-    "name": "Savings",
+    "name": "Sparkonto",
     "type": "savings",
     "on_budget": true,
     "closed": false,

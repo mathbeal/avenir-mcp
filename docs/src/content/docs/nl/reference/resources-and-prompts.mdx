@@ -25,7 +25,7 @@ een met `@` in de prompt.
 ### `ynab://plans`
 
 ```json
-[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+[{"plan_id":"demo-budget","name":"Demohuishouden","last_modified_on":"2026-09-20"}]
 ```
 
 ### `ynab://plans/{plan_id}/categories`
@@ -34,8 +34,8 @@ Groepen in de volgorde van YNAB; de interne groep van YNAB (*Inflow: Ready to As
 wordt weggelaten.
 
 ```json
-[{"group":"Bills","categories":[{"category_id":"cat-rent","name":"Rent"},{"category_id":"cat-power","name":"Electricity"},{"category_id":"cat-phone","name":"Phone"}]},
- {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
+[{"group":"Vaste lasten","categories":[{"category_id":"cat-rent","name":"Huur"},{"category_id":"cat-power","name":"Stroom"},{"category_id":"cat-phone","name":"Telefoon"}]},
+ {"group":"Dagelijks","categories":[{"category_id":"cat-groceries","name":"Boodschappen"},"…"]}]
 ```
 
 ### `ynab://plans/{plan_id}/accounts`
@@ -43,8 +43,8 @@ wordt weggelaten.
 Gesloten rekeningen worden weggelaten; saldi in valuta-eenheden.
 
 ```json
-[{"account_id":"acc-checking","name":"Checking","type":"checking","on_budget":true,"balance":3512.66},
- {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
+[{"account_id":"acc-checking","name":"Betaalrekening","type":"checking","on_budget":true,"balance":3512.66},
+ {"account_id":"acc-savings","name":"Spaarrekening","type":"savings","on_budget":true,"balance":600.0}]
 ```
 
 ### `avenir-mcp://guide`

@@ -72,7 +72,7 @@ Antwoord op het demobudget:
     {
       "category_id": "cat-restaurants",
       "name": "Restaurants",
-      "group": "Everyday",
+      "group": "Dagelijks",
       "balance": -22.5
     }
   ]

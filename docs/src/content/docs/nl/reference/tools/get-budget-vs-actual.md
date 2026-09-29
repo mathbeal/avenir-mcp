@@ -61,8 +61,8 @@ Antwoord op het demobudget:
 [
   {
     "id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Huur",
+    "group": "Vaste lasten",
     "budgeted": 950.0,
     "actual": 950.0,
     "balance": 0.0,
@@ -70,8 +70,8 @@ Antwoord op het demobudget:
   },
   {
     "id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Stroom",
+    "group": "Vaste lasten",
     "budgeted": 70.0,
     "actual": 0.0,
     "balance": 70.0,
@@ -79,8 +79,8 @@ Antwoord op het demobudget:
   },
   {
     "id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Telefoon",
+    "group": "Vaste lasten",
     "budgeted": 20.0,
     "actual": 19.99,
     "balance": 0.01,
@@ -88,8 +88,8 @@ Antwoord op het demobudget:
   },
   {
     "id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Boodschappen",
+    "group": "Dagelijks",
     "budgeted": 400.0,
     "actual": 0.0,
     "balance": 400.0,

@@ -89,10 +89,10 @@ Respuesta sobre el presupuesto de demostración:
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
       "memo": null,
-      "account": "Checking",
+      "account": "Cuenta corriente",
       "suggestion": {
         "category_id": "cat-groceries",
-        "category_name": "Groceries",
+        "category_name": "Supermercado",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -103,10 +103,10 @@ Respuesta sobre el presupuesto de demostración:
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
       "memo": null,
-      "account": "Checking",
+      "account": "Cuenta corriente",
       "suggestion": {
         "category_id": "cat-groceries",
-        "category_name": "Groceries",
+        "category_name": "Supermercado",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -117,10 +117,10 @@ Respuesta sobre el presupuesto de demostración:
       "amount": -45.0,
       "payee": "RAIL CO",
       "memo": null,
-      "account": "Checking",
+      "account": "Cuenta corriente",
       "suggestion": {
         "category_id": "cat-transport",
-        "category_name": "Transport",
+        "category_name": "Transporte",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -134,13 +134,13 @@ Respuesta sobre el presupuesto de demostración:
     },
     {
       "category_id": "cat-rent",
-      "name": "Rent",
-      "group": "Bills"
+      "name": "Alquiler",
+      "group": "Facturas"
     },
     {
       "category_id": "cat-power",
-      "name": "Electricity",
-      "group": "Bills"
+      "name": "Luz",
+      "group": "Facturas"
     },
     "… 7 more"
   ],

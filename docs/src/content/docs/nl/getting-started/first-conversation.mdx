@@ -6,11 +6,11 @@ sidebar:
 ---
 
 import { Code, Aside, Steps } from '@astrojs/starlight/components';
-import accounts from '@snippets/list_accounts.json?raw';
-import summary from '@snippets/monthly_summary.json?raw';
-import balances from '@snippets/category_balances.json?raw';
-import pending from '@snippets/suggest_categories.json?raw';
-import preview from '@snippets/apply_preview.json?raw';
+import accounts from '@snippets/nl/list_accounts.json?raw';
+import summary from '@snippets/nl/monthly_summary.json?raw';
+import balances from '@snippets/nl/category_balances.json?raw';
+import pending from '@snippets/nl/suggest_categories.json?raw';
+import preview from '@snippets/nl/apply_preview.json?raw';
 
 Deze rondleiding volgt een echt gesprek op het demoplan, een verzonnen huishouden met een
 betaalrekening en een spaarrekening. Bij elke stap zie je wat je zegt, welke tool de agent
@@ -30,7 +30,7 @@ De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Twee rekeningen: Checking met 3.512,66, alles verwerkt, en Savings met 600,00.
+> **Claude:** Twee rekeningen: Betaalrekening met 3.512,66, alles verwerkt, en Spaarrekening met 600,00.
 
 Saldi zijn in de valuta van je plan. `cleared_balance` is wat de bank al heeft
 getoond; `uncleared_balance` is wat ze nog niet heeft getoond.
@@ -85,7 +85,7 @@ niets:**
 <Steps>
 
 1. avenir-mcp heeft precies berekend wat er zou veranderen: twee transacties, van geen
-   categorie naar Groceries en Transport.
+   categorie naar Boodschappen en Vervoer.
 2. Je client laat je de vraag zien – een bevestigingsvenster als hij MCP-elicitation
    ondersteunt, of de agent geeft het voorbeeld door en wacht.
 3. Je zegt ja. De agent roept opnieuw aan met je antwoord (of de code `confirmation`).

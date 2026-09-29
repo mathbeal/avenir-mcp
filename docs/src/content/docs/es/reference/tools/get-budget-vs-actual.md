@@ -61,8 +61,8 @@ Respuesta sobre el presupuesto de demostración:
 [
   {
     "id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Alquiler",
+    "group": "Facturas",
     "budgeted": 950.0,
     "actual": 950.0,
     "balance": 0.0,
@@ -70,8 +70,8 @@ Respuesta sobre el presupuesto de demostración:
   },
   {
     "id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Luz",
+    "group": "Facturas",
     "budgeted": 70.0,
     "actual": 0.0,
     "balance": 70.0,
@@ -79,8 +79,8 @@ Respuesta sobre el presupuesto de demostración:
   },
   {
     "id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Teléfono",
+    "group": "Facturas",
     "budgeted": 20.0,
     "actual": 19.99,
     "balance": 0.01,
@@ -88,8 +88,8 @@ Respuesta sobre el presupuesto de demostración:
   },
   {
     "id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Supermercado",
+    "group": "Día a día",
     "budgeted": 400.0,
     "actual": 0.0,
     "balance": 400.0,

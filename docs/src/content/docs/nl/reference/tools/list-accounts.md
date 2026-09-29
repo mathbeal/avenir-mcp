@@ -64,7 +64,7 @@ Antwoord op het demobudget:
 [
   {
     "id": "acc-checking",
-    "name": "Checking",
+    "name": "Betaalrekening",
     "type": "checking",
     "on_budget": true,
     "closed": false,
@@ -76,7 +76,7 @@ Antwoord op het demobudget:
   },
   {
     "id": "acc-savings",
-    "name": "Savings",
+    "name": "Spaarrekening",
     "type": "savings",
     "on_budget": true,
     "closed": false,

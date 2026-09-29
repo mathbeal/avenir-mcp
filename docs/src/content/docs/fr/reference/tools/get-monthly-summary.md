@@ -72,7 +72,7 @@ Réponse sur le budget de démonstration :
     {
       "category_id": "cat-restaurants",
       "name": "Restaurants",
-      "group": "Everyday",
+      "group": "Quotidien",
       "balance": -22.5
     }
   ]

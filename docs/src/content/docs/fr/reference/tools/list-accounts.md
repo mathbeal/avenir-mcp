@@ -64,7 +64,7 @@ Réponse sur le budget de démonstration :
 [
   {
     "id": "acc-checking",
-    "name": "Checking",
+    "name": "Compte courant",
     "type": "checking",
     "on_budget": true,
     "closed": false,
@@ -76,7 +76,7 @@ Réponse sur le budget de démonstration :
   },
   {
     "id": "acc-savings",
-    "name": "Savings",
+    "name": "Épargne",
     "type": "savings",
     "on_budget": true,
     "closed": false,

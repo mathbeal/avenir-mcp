@@ -89,10 +89,10 @@ Antwoord op het demobudget:
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
       "memo": null,
-      "account": "Checking",
+      "account": "Betaalrekening",
       "suggestion": {
         "category_id": "cat-groceries",
-        "category_name": "Groceries",
+        "category_name": "Boodschappen",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -103,10 +103,10 @@ Antwoord op het demobudget:
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
       "memo": null,
-      "account": "Checking",
+      "account": "Betaalrekening",
       "suggestion": {
         "category_id": "cat-groceries",
-        "category_name": "Groceries",
+        "category_name": "Boodschappen",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -117,10 +117,10 @@ Antwoord op het demobudget:
       "amount": -45.0,
       "payee": "RAIL CO",
       "memo": null,
-      "account": "Checking",
+      "account": "Betaalrekening",
       "suggestion": {
         "category_id": "cat-transport",
-        "category_name": "Transport",
+        "category_name": "Vervoer",
         "confidence": 1.0
       },
       "possible_transfer_with": null
@@ -134,13 +134,13 @@ Antwoord op het demobudget:
     },
     {
       "category_id": "cat-rent",
-      "name": "Rent",
-      "group": "Bills"
+      "name": "Huur",
+      "group": "Vaste lasten"
     },
     {
       "category_id": "cat-power",
-      "name": "Electricity",
-      "group": "Bills"
+      "name": "Stroom",
+      "group": "Vaste lasten"
     },
     "… 7 more"
   ],

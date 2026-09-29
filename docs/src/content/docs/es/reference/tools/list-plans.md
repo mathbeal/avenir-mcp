@@ -54,7 +54,7 @@ Respuesta sobre el presupuesto de demostración:
 [
   {
     "id": "demo-budget",
-    "name": "Demo household",
+    "name": "Hogar de demostración",
     "first_month": "2026-06-01",
     "last_month": "2026-09-01"
   }

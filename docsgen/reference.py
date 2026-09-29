@@ -285,16 +285,20 @@ async def _server_view() -> tuple[list[Any], tuple[Any, Any, Any]]:
     return tools, context
 
 
-def generate(captures: dict[str, Capture]) -> dict[str, str]:
-    """Relative path under the content folder -> page, for every language."""
+def generate(captures: dict[str, dict[str, Capture]]) -> dict[str, str]:
+    """Relative path under the content folder -> page, for every language.
+
+    Args:
+        captures: Each language's captures, on the demo budget named in that language.
+    """
     tools, context = asyncio.run(_server_view())
     messages = errors.tool_errors()
-    by_tool: dict[str, Capture] = {}
-    for capture in captures.values():
-        if not capture.is_error:
-            by_tool.setdefault(capture.tool, capture)
     pages: dict[str, str] = {}
     for language in LANGUAGES:
+        by_tool: dict[str, Capture] = {}
+        for capture in captures[language].values():
+            if not capture.is_error:
+                by_tool.setdefault(capture.tool, capture)
         base = f"{language}/reference" if language else "reference"
         pages[f"{base}/tools/index.md"] = index_page(tools, context, language)
         pages[f"{base}/errors.md"] = errors_page(tools, messages, language)

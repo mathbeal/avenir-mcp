@@ -26,7 +26,7 @@ eine mit `@` im Prompt an.
 ### `ynab://plans`
 
 ```json
-[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+[{"plan_id":"demo-budget","name":"Demo-Haushalt","last_modified_on":"2026-09-20"}]
 ```
 
 ### `ynab://plans/{plan_id}/categories`
@@ -35,8 +35,8 @@ Gruppen in der Reihenfolge von YNAB; die interne Gruppe von YNAB (*Inflow: Ready
 Assign*) wird ausgelassen.
 
 ```json
-[{"group":"Bills","categories":[{"category_id":"cat-rent","name":"Rent"},{"category_id":"cat-power","name":"Electricity"},{"category_id":"cat-phone","name":"Phone"}]},
- {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
+[{"group":"Fixkosten","categories":[{"category_id":"cat-rent","name":"Miete"},{"category_id":"cat-power","name":"Strom"},{"category_id":"cat-phone","name":"Handy"}]},
+ {"group":"Alltag","categories":[{"category_id":"cat-groceries","name":"Lebensmittel"},"…"]}]
 ```
 
 ### `ynab://plans/{plan_id}/accounts`
@@ -44,8 +44,8 @@ Assign*) wird ausgelassen.
 Geschlossene Konten werden ausgelassen; Salden in Währungseinheiten.
 
 ```json
-[{"account_id":"acc-checking","name":"Checking","type":"checking","on_budget":true,"balance":3512.66},
- {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
+[{"account_id":"acc-checking","name":"Girokonto","type":"checking","on_budget":true,"balance":3512.66},
+ {"account_id":"acc-savings","name":"Sparkonto","type":"savings","on_budget":true,"balance":600.0}]
 ```
 
 ### `avenir-mcp://guide`

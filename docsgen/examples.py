@@ -57,6 +57,42 @@ _APPLY = {
     ],
 }
 
+# What the documented writes type in, in each documentation language.
+_TYPED: dict[str, dict[str, str]] = {
+    "fr": {
+        "not imported by the bank": "non importé par la banque",
+        "Pets": "Animaux",
+        "Sport": "Sport",
+    },
+    "es": {
+        "not imported by the bank": "no importado por el banco",
+        "Pets": "Mascotas",
+        "Sport": "Deporte",
+    },
+    "de": {
+        "not imported by the bank": "nicht von der Bank importiert",
+        "Pets": "Haustiere",
+        "Sport": "Sport",
+    },
+    "nl": {
+        "not imported by the bank": "niet door de bank geïmporteerd",
+        "Pets": "Huisdieren",
+        "Sport": "Sport",
+    },
+}
+
+
+def _typed(data: Any, language: str) -> Any:
+    """The same arguments, with what a person types written in their language."""
+    if isinstance(data, dict):
+        return {key: _typed(value, language) for key, value in data.items()}
+    if isinstance(data, list):
+        return [_typed(item, language) for item in data]
+    if isinstance(data, str):
+        return _TYPED.get(language, {}).get(data, data)
+    return data
+
+
 CALLS: list[Call] = [
     Call("list_plans", "list_plans", {}),
     Call("list_accounts", "list_accounts", {"plan_id": BUDGET}),
@@ -190,18 +226,21 @@ async def _apply_first(mcp_client: Client[Any], tool: str, args: dict[str, Any])
     await mcp_client.call_tool(tool, {**args, "confirmation": code}, raise_on_error=False)
 
 
-async def _capture() -> dict[str, Capture]:
+async def _capture(language: str) -> dict[str, Capture]:
     from avenir_mcp import client, server  # pylint: disable=import-outside-toplevel
 
     server.configure(enable_writes=True)
+    # Each language replays the same calls: the demo is not YNAB's hourly allowance.
+    client.PACE.reset()
     captures: dict[str, Capture] = {}
     async with Client(server.mcp) as mcp_client:
         for call in CALLS:
+            args = _typed(call.args, language)
             if call.after_applying:
                 await _apply_first(mcp_client, *call.after_applying)
             client._CACHE.clear()  # pylint: disable=protected-access
             before = fake_ynab.STATE.requests
-            result = await mcp_client.call_tool(call.tool, call.args, raise_on_error=False)
+            result = await mcp_client.call_tool(call.tool, args, raise_on_error=False)
             requests = fake_ynab.STATE.requests - before
             if result.is_error:
                 text = result.content[0].text + "\n"
@@ -213,13 +252,13 @@ async def _capture() -> dict[str, Capture]:
                     _trim(_placeholders(data), call.keep), indent=2, ensure_ascii=False
                 )
                 text += "\n"
-            captures[call.name] = Capture(call.tool, call.args, text, result.is_error, requests)
+            captures[call.name] = Capture(call.tool, args, text, result.is_error, requests)
     return captures
 
 
-def capture_all() -> dict[str, Capture]:
-    """Run every documented call against a fresh demo budget."""
-    fake_ynab.STATE = fake_ynab.DemoBudget()
+def capture_all(language: str = "") -> dict[str, Capture]:
+    """Run every documented call against a fresh demo budget, named in one language."""
+    fake_ynab.STATE = fake_ynab.DemoBudget(language)
     demo = fake_ynab.serve()
     try:
         with tempfile.TemporaryDirectory() as work:
@@ -229,7 +268,7 @@ def capture_all() -> dict[str, Capture]:
                 "AVENIR_MCP_JOURNAL": str(Path(work) / "journal.jsonl"),
             }
             with patch.dict(os.environ, env), patch("avenir_mcp.app.today", lambda: TODAY):
-                return asyncio.run(_capture())
+                return asyncio.run(_capture(language))
     finally:
         demo.shutdown()
         demo.server_close()

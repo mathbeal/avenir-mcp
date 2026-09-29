@@ -1,0 +1,18 @@
+[
+  {
+    "id": "grp-bills",
+    "name": "Facturas"
+  },
+  {
+    "id": "grp-everyday",
+    "name": "Día a día"
+  },
+  {
+    "id": "grp-fun",
+    "name": "Ocio"
+  },
+  {
+    "id": "grp-savings-goals",
+    "name": "Metas de ahorro"
+  }
+]

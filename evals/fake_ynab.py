@@ -20,8 +20,9 @@ from evals import demo_budget as demo
 class DemoBudget:  # pylint: disable=too-many-instance-attributes
     """The demo budget's mutable state."""
 
-    def __init__(self) -> None:
-        self.transactions = {tx["id"]: tx for tx in demo.transactions()}
+    def __init__(self, language: str = "") -> None:
+        self.language = language
+        self.transactions = {tx["id"]: tx for tx in demo.transactions(language)}
         self.knowledge = 1
         self.changed_at = {tx_id: 1 for tx_id in self.transactions}
         self.budgeted: dict[tuple[str, str], int] = {}
@@ -38,9 +39,9 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         return [
             {
                 "id": cat_id,
-                "name": name,
-                "category_group_id": f"grp-{group.lower().replace(' ', '-')}",
-                "category_group_name": group,
+                "name": demo.named(name, self.language),
+                "category_group_id": demo.group_id(group),
+                "category_group_name": demo.named(group, self.language),
                 "hidden": False,
                 "deleted": False,
             }
@@ -96,8 +97,8 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         """The two demo accounts with balances from their transactions."""
         result = []
         for acc_id, name, kind in (
-            (demo.CHECKING, "Checking", "checking"),
-            (demo.SAVINGS, "Savings", "savings"),
+            (demo.CHECKING, demo.named("Checking", self.language), "checking"),
+            (demo.SAVINGS, demo.named("Savings", self.language), "savings"),
         ):
             txs = [
                 t
@@ -163,7 +164,9 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                 "category_id": None,
                 "transfer_account_id": None,
                 "deleted": False,
-                "account_name": "Checking" if item["account_id"] == demo.CHECKING else "Savings",
+                "account_name": demo.named(
+                    "Checking" if item["account_id"] == demo.CHECKING else "Savings", self.language
+                ),
                 **item,
             }
             self.touch(tx_id)
@@ -204,7 +207,7 @@ class Handler(BaseHTTPRequestHandler):
             if (method, path) == ("GET", "/plans"):
                 budget = {
                     "id": demo.PLAN_ID,
-                    "name": "Demo household",
+                    "name": demo.named("Demo household", STATE.language),
                     "last_modified_on": "2026-09-20",
                     "first_month": demo.MONTHS[0],
                     "last_month": demo.MONTHS[-1],
@@ -220,12 +223,14 @@ class Handler(BaseHTTPRequestHandler):
             if method == "GET" and rest == "/categories":
                 groups = [
                     {
-                        "id": f"grp-{name.lower().replace(' ', '-')}",
-                        "name": name,
+                        "id": demo.group_id(name),
+                        "name": demo.named(name, STATE.language),
                         "hidden": False,
                         "deleted": False,
                         "categories": [
-                            c for c in STATE.categories() if c["category_group_name"] == name
+                            c
+                            for c in STATE.categories()
+                            if c["category_group_id"] == demo.group_id(name)
                         ],
                     }
                     for name in STATE.groups
@@ -255,7 +260,10 @@ class Handler(BaseHTTPRequestHandler):
                 data = {"transactions": txs, "server_knowledge": STATE.knowledge}
                 return self._send(200, {"data": data})
             if method == "GET" and rest == "/scheduled_transactions":
-                data = {"scheduled_transactions": demo.scheduled(), "server_knowledge": 1}
+                data = {
+                    "scheduled_transactions": demo.scheduled(STATE.language),
+                    "server_knowledge": 1,
+                }
                 return self._send(200, {"data": data})
             if method == "PATCH" and rest == "/transactions":
                 ids = STATE.patch_transactions(self._body()["transactions"])
