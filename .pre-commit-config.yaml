@@ -1,3 +1,6 @@
+# Evaluation reports (evals/run.py) and the changelog (git-cliff) stay as generated.
+exclude: ^(evals/results/|CHANGELOG\.md$)
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -10,19 +13,19 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
 
-  # Formatters and linters come from the lockfile, not from separately pinned
-  # mirrors: two versions of a tool give two verdicts.
+  # Every tool runs as CI and the justfile run it: ruff and lexdrift from the
+  # lockfile, typos and zizmor through uvx. Two versions of a tool give two verdicts.
   - repo: local
     hooks:
-      - id: isort
-        name: isort
-        entry: uv run isort
+      - id: ruff-check
+        name: ruff check (lint, imports, bandit)
+        entry: uv run ruff check --fix
         language: system
         types: [python]
         require_serial: true
-      - id: black
-        name: black
-        entry: uv run black
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
         language: system
         types: [python]
         require_serial: true
@@ -32,13 +35,14 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
-
-  - repo: https://github.com/crate-ci/typos
-    rev: v1.28.4
-    hooks:
       - id: typos
-
-  - repo: https://github.com/woodruffw/zizmor-pre-commit
-    rev: v1.0.1
-    hooks:
+        name: typos
+        entry: uvx typos .
+        language: system
+        pass_filenames: false
       - id: zizmor
+        name: zizmor
+        entry: uvx zizmor --persona=regular .github/workflows/
+        language: system
+        files: ^\.github/workflows/
+        pass_filenames: false
