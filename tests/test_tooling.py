@@ -33,7 +33,7 @@ def test_every_uv_run_hook_is_a_locked_dev_tool() -> None:
 
 
 def test_hooks_lint_and_format_with_ruff_as_ci_does() -> None:
-    """ruff sorts imports and formats; black and isort are gone from the project."""
+    """Ruff sorts imports and formats; black and isort are gone from the project."""
     entries = _entries()
     assert "uv run ruff check --fix" in entries
     assert "uv run ruff format" in entries
