@@ -15,6 +15,7 @@ class FakeMonth:
     """Categories of one month, and the amounts the tools set, as YNAB would hold them."""
 
     def __init__(self, names: dict[str, str], budgeted: dict[str, int]) -> None:
+        """Start with each category's name and budgeted milliunits, nothing spent yet."""
         self.names = names
         self.budgeted = budgeted
         self.spent = dict.fromkeys(budgeted, 0)
