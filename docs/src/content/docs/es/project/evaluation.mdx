@@ -66,7 +66,7 @@ escriben: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-29 | Sonnet | 17/17 | 2,4 | `move_money`: el agente cubre Restaurants con un solo movimiento, una vista previa y una confirmación, en lugar de dos llamadas a `set_category_budget` |
 | 2026-09-29 | Sonnet | 17/17 | 2,3 | `import_transactions` entra en el flujo de clasificación de la guía: el plan de demostración no tiene conexión bancaria, y el agente nunca importa sin motivo |
 | 2026-09-29 | Sonnet | 17/17 | 2,5 | `flag_transactions` añadido; la guía propone una bandera en lugar de una decisión cuando algo hay que revisarlo. Ninguna tarea la llama sin que se pida |
-| 2026-09-29 | Sonnet | 17/17 | 2,3 | `list_accounts` da la conexión bancaria de cada cuenta y su última conciliación; la guía comprueba la conexión antes de crear transacciones que faltan |
+| 2026-09-29 | Sonnet | 17/17 | 2,4 | `list_accounts` da la conexión bancaria de cada cuenta y su última conciliación; la guía comprueba la conexión antes de crear transacciones que faltan |
 
 La primera ejecución encontró un defecto real: los clientes sin interfaz cierran todas
 las preguntas de confirmación, y avenir-mcp contaba un cierre como un rechazo, así que ninguna
