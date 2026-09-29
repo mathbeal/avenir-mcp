@@ -1,0 +1,35 @@
+[
+  {
+    "category_id": "cat-rent",
+    "name": "Huur",
+    "group": "Vaste lasten",
+    "budgeted": 950.0,
+    "activity": -950.0,
+    "balance": 0.0
+  },
+  {
+    "category_id": "cat-power",
+    "name": "Stroom",
+    "group": "Vaste lasten",
+    "budgeted": 70.0,
+    "activity": 0.0,
+    "balance": 70.0
+  },
+  {
+    "category_id": "cat-phone",
+    "name": "Telefoon",
+    "group": "Vaste lasten",
+    "budgeted": 20.0,
+    "activity": -19.99,
+    "balance": 0.01
+  },
+  {
+    "category_id": "cat-groceries",
+    "name": "Boodschappen",
+    "group": "Dagelijks",
+    "budgeted": 400.0,
+    "activity": 0.0,
+    "balance": 400.0
+  },
+  "… 5 more"
+]

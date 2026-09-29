@@ -61,8 +61,8 @@ Antwort auf dem Demo-Budget:
 [
   {
     "id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Miete",
+    "group": "Fixkosten",
     "budgeted": 950.0,
     "actual": 950.0,
     "balance": 0.0,
@@ -70,8 +70,8 @@ Antwort auf dem Demo-Budget:
   },
   {
     "id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Strom",
+    "group": "Fixkosten",
     "budgeted": 70.0,
     "actual": 0.0,
     "balance": 70.0,
@@ -79,8 +79,8 @@ Antwort auf dem Demo-Budget:
   },
   {
     "id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Handy",
+    "group": "Fixkosten",
     "budgeted": 20.0,
     "actual": 19.99,
     "balance": 0.01,
@@ -88,8 +88,8 @@ Antwort auf dem Demo-Budget:
   },
   {
     "id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Lebensmittel",
+    "group": "Alltag",
     "budgeted": 400.0,
     "actual": 0.0,
     "balance": 400.0,

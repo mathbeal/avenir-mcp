@@ -64,32 +64,32 @@ Respuesta sobre el presupuesto de demostración:
 [
   {
     "category_id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Alquiler",
+    "group": "Facturas",
     "budgeted": 950.0,
     "activity": -950.0,
     "balance": 0.0
   },
   {
     "category_id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Luz",
+    "group": "Facturas",
     "budgeted": 70.0,
     "activity": 0.0,
     "balance": 70.0
   },
   {
     "category_id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Teléfono",
+    "group": "Facturas",
     "budgeted": 20.0,
     "activity": -19.99,
     "balance": 0.01
   },
   {
     "category_id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Supermercado",
+    "group": "Día a día",
     "budgeted": 400.0,
     "activity": 0.0,
     "balance": 400.0

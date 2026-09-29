@@ -55,19 +55,19 @@ Antwort auf dem Demo-Budget:
 [
   {
     "id": "grp-bills",
-    "name": "Bills"
+    "name": "Fixkosten"
   },
   {
     "id": "grp-everyday",
-    "name": "Everyday"
+    "name": "Alltag"
   },
   {
     "id": "grp-fun",
-    "name": "Fun"
+    "name": "Freizeit"
   },
   {
     "id": "grp-savings-goals",
-    "name": "Savings goals"
+    "name": "Sparziele"
   }
 ]
 ```

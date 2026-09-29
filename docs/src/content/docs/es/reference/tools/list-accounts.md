@@ -64,7 +64,7 @@ Respuesta sobre el presupuesto de demostración:
 [
   {
     "id": "acc-checking",
-    "name": "Checking",
+    "name": "Cuenta corriente",
     "type": "checking",
     "on_budget": true,
     "closed": false,
@@ -76,7 +76,7 @@ Respuesta sobre el presupuesto de demostración:
   },
   {
     "id": "acc-savings",
-    "name": "Savings",
+    "name": "Ahorro",
     "type": "savings",
     "on_budget": true,
     "closed": false,

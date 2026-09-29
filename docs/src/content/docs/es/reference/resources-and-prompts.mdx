@@ -24,7 +24,7 @@ uno con `@` en el prompt.
 ### `ynab://plans`
 
 ```json
-[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+[{"plan_id":"demo-budget","name":"Hogar de demostración","last_modified_on":"2026-09-20"}]
 ```
 
 ### `ynab://plans/{plan_id}/categories`
@@ -33,8 +33,8 @@ Los grupos en el orden de YNAB; el grupo interno de YNAB (*Inflow: Ready to Assi
 omite.
 
 ```json
-[{"group":"Bills","categories":[{"category_id":"cat-rent","name":"Rent"},{"category_id":"cat-power","name":"Electricity"},{"category_id":"cat-phone","name":"Phone"}]},
- {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
+[{"group":"Facturas","categories":[{"category_id":"cat-rent","name":"Alquiler"},{"category_id":"cat-power","name":"Luz"},{"category_id":"cat-phone","name":"Teléfono"}]},
+ {"group":"Día a día","categories":[{"category_id":"cat-groceries","name":"Supermercado"},"…"]}]
 ```
 
 ### `ynab://plans/{plan_id}/accounts`
@@ -42,8 +42,8 @@ omite.
 Las cuentas cerradas se omiten; saldos en unidades monetarias.
 
 ```json
-[{"account_id":"acc-checking","name":"Checking","type":"checking","on_budget":true,"balance":3512.66},
- {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
+[{"account_id":"acc-checking","name":"Cuenta corriente","type":"checking","on_budget":true,"balance":3512.66},
+ {"account_id":"acc-savings","name":"Ahorro","type":"savings","on_budget":true,"balance":600.0}]
 ```
 
 ### `avenir-mcp://guide`

@@ -6,12 +6,12 @@ sidebar:
 ---
 
 import { Code, Steps } from '@astrojs/starlight/components';
-import summary from '@snippets/monthly_summary.json?raw';
-import balances from '@snippets/category_balances.json?raw';
-import usage from '@snippets/budget_vs_actual.json?raw';
-import trends from '@snippets/spending_trends.json?raw';
-import move from '@snippets/move_preview.json?raw';
-import badMonth from '@snippets/bad_month.json?raw';
+import summary from '@snippets/es/monthly_summary.json?raw';
+import balances from '@snippets/es/category_balances.json?raw';
+import usage from '@snippets/es/budget_vs_actual.json?raw';
+import trends from '@snippets/es/spending_trends.json?raw';
+import move from '@snippets/es/move_preview.json?raw';
+import badMonth from '@snippets/es/bad_month.json?raw';
 
 **Objetivo:** entender un mes — ingresos, gastos, lo que queda por asignar — y corregir
 lo que se desvió.
@@ -52,15 +52,15 @@ lo que se desvió.
 
    <Code code={usage} lang="json" title="get_budget_vs_actual (primeras entradas)" />
 
-4. **La tendencia.** ¿Restaurants está alto este mes o todos los meses?
+4. **La tendencia.** ¿Restaurantes está alto este mes o todos los meses?
    `get_spending_trends` con `months_count: 3` da el gasto por categoría, mes a mes:
 
    <Code code={trends} lang="json" title="get_spending_trends (extracto)" />
 
 5. **La corrección.** Un exceso se cubre moviendo dinero desde una categoría con margen:
 
-   > **Claude:** Restaurants se ha pasado 22,50. Tennis tiene 80 disponibles y nada
-   > gastado. ¿Muevo 30 de Tennis a Restaurants?
+   > **Claude:** Restaurantes se ha pasado 22,50. Tenis tiene 80 disponibles y nada
+   > gastado. ¿Muevo 30 de Tenis a Restaurantes?
    >
    > **Usted:** Sí.
 
@@ -78,7 +78,7 @@ lo que se desvió.
   <Code code={badMonth} lang="text" title="get_monthly_summary — mes 2026-13-01" />
 - Las categorías ocultas y las internas de YNAB (*Inflow: Ready to Assign*) quedan fuera
   de toda revisión.
-- `move_money` mueve un **importe**: Tennis pasa de 80 a 50 y Restaurants de 120 a 150 a la
+- `move_money` mueve un **importe**: Tenis pasa de 80 a 50 y Restaurantes de 120 a 150 a la
   vez, y `undo_operation` restaura los dos. Para fijar el total de una sola categoría,
   `set_category_budget` toma un importe **absoluto**.
 - El recurso `avenir-mcp://guide` recuerda a los agentes el método YNAB: un exceso se corrige

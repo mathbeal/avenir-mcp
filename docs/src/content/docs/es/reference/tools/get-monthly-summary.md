@@ -71,8 +71,8 @@ Respuesta sobre el presupuesto de demostración:
   "overspent": [
     {
       "category_id": "cat-restaurants",
-      "name": "Restaurants",
-      "group": "Everyday",
+      "name": "Restaurantes",
+      "group": "Día a día",
       "balance": -22.5
     }
   ]

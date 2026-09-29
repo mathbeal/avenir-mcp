@@ -1,0 +1,18 @@
+[
+  {
+    "id": "grp-bills",
+    "name": "Charges fixes"
+  },
+  {
+    "id": "grp-everyday",
+    "name": "Quotidien"
+  },
+  {
+    "id": "grp-fun",
+    "name": "Loisirs"
+  },
+  {
+    "id": "grp-savings-goals",
+    "name": "Projets"
+  }
+]

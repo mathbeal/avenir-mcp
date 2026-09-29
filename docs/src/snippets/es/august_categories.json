@@ -1,0 +1,83 @@
+[
+  {
+    "id": "cat-rent",
+    "name": "Alquiler",
+    "group": "Facturas",
+    "budgeted": 950.0,
+    "actual": 950.0,
+    "balance": 0.0,
+    "utilization_pct": 100.0
+  },
+  {
+    "id": "cat-power",
+    "name": "Luz",
+    "group": "Facturas",
+    "budgeted": 70.0,
+    "actual": 64.2,
+    "balance": 5.8,
+    "utilization_pct": 91.7
+  },
+  {
+    "id": "cat-phone",
+    "name": "Teléfono",
+    "group": "Facturas",
+    "budgeted": 20.0,
+    "actual": 19.99,
+    "balance": 0.01,
+    "utilization_pct": 99.9
+  },
+  {
+    "id": "cat-groceries",
+    "name": "Supermercado",
+    "group": "Día a día",
+    "budgeted": 400.0,
+    "actual": 192.51,
+    "balance": 207.49,
+    "utilization_pct": 48.1
+  },
+  {
+    "id": "cat-restaurants",
+    "name": "Restaurantes",
+    "group": "Día a día",
+    "budgeted": 120.0,
+    "actual": 89.1,
+    "balance": 30.9,
+    "utilization_pct": 74.2
+  },
+  {
+    "id": "cat-transport",
+    "name": "Transporte",
+    "group": "Día a día",
+    "budgeted": 90.0,
+    "actual": 45.0,
+    "balance": 45.0,
+    "utilization_pct": 50.0
+  },
+  {
+    "id": "cat-tennis",
+    "name": "Tenis",
+    "group": "Ocio",
+    "budgeted": 80.0,
+    "actual": 22.0,
+    "balance": 58.0,
+    "utilization_pct": 27.5
+  },
+  {
+    "id": "cat-subscriptions",
+    "name": "Suscripciones",
+    "group": "Ocio",
+    "budgeted": 15.0,
+    "actual": 13.49,
+    "balance": 1.51,
+    "utilization_pct": 89.9
+  },
+  {
+    "id": "cat-holidays",
+    "name": "Vacaciones",
+    "group": "Metas de ahorro",
+    "budgeted": 200.0,
+    "actual": 0.0,
+    "balance": 200.0,
+    "utilization_pct": 0.0
+  }
+]

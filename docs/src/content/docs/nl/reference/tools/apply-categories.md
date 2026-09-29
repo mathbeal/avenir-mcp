@@ -94,7 +94,7 @@ Antwoord op het demobudget:
       "from_category_id": null,
       "from_category": null,
       "to_category_id": "cat-groceries",
-      "to_category": "Groceries"
+      "to_category": "Boodschappen"
     },
     {
       "transaction_id": "tx-049",
@@ -104,7 +104,7 @@ Antwoord op het demobudget:
       "from_category_id": null,
       "from_category": null,
       "to_category_id": "cat-transport",
-      "to_category": "Transport"
+      "to_category": "Vervoer"
     }
   ],
   "unchanged_count": 0,

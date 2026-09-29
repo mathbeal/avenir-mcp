@@ -27,8 +27,6 @@ const texts = {
     budgeted: 'Budgeted',
     spent: 'Spent',
     remaining: 'Left',
-    note: '',
-    names: {} as Record<string, string>,
   },
   fr: {
     title: 'Ce qui reste dans chaque catégorie',
@@ -39,22 +37,6 @@ const texts = {
     budgeted: 'Budgété',
     spent: 'Dépensé',
     remaining: 'Restant',
-    note: 'Noms des catégories adaptés au français ; la réponse brute garde ceux du plan de démonstration.',
-    names: {
-      Bills: 'Factures',
-      Everyday: 'Quotidien',
-      Fun: 'Loisirs',
-      'Savings goals': 'Épargne',
-      Rent: 'Loyer',
-      Electricity: 'Électricité',
-      Phone: 'Téléphone',
-      Groceries: 'Courses',
-      Restaurants: 'Restaurants',
-      Transport: 'Transports',
-      Tennis: 'Tennis',
-      Subscriptions: 'Abonnements',
-      Holidays: 'Vacances',
-    } as Record<string, string>,
   },
   es: {
     title: 'Lo que queda en cada categoría',
@@ -65,22 +47,6 @@ const texts = {
     budgeted: 'Presupuestado',
     spent: 'Gastado',
     remaining: 'Disponible',
-    note: 'Nombres de categorías adaptados al español; la respuesta en bruto conserva los del plan de demostración.',
-    names: {
-      Bills: 'Facturas',
-      Everyday: 'Día a día',
-      Fun: 'Ocio',
-      'Savings goals': 'Ahorro',
-      Rent: 'Alquiler',
-      Electricity: 'Electricidad',
-      Phone: 'Teléfono',
-      Groceries: 'Compra',
-      Restaurants: 'Restaurantes',
-      Transport: 'Transporte',
-      Tennis: 'Tennis',
-      Subscriptions: 'Suscripciones',
-      Holidays: 'Vacaciones',
-    } as Record<string, string>,
   },
   de: {
     title: 'Was in jeder Kategorie übrig bleibt',
@@ -91,22 +57,6 @@ const texts = {
     budgeted: 'Budgetiert',
     spent: 'Ausgegeben',
     remaining: 'Übrig',
-    note: 'Kategorienamen ins Deutsche übertragen; die Rohantwort behält die des Demo-Plans.',
-    names: {
-      Bills: 'Rechnungen',
-      Everyday: 'Alltag',
-      Fun: 'Freizeit',
-      'Savings goals': 'Sparziele',
-      Rent: 'Miete',
-      Electricity: 'Strom',
-      Phone: 'Telefon',
-      Groceries: 'Lebensmittel',
-      Restaurants: 'Restaurants',
-      Transport: 'Verkehr',
-      Tennis: 'Tennis',
-      Subscriptions: 'Abonnements',
-      Holidays: 'Urlaub',
-    } as Record<string, string>,
   },
   nl: {
     title: 'Wat er in elke categorie overblijft',
@@ -117,22 +67,6 @@ const texts = {
     budgeted: 'Gebudgetteerd',
     spent: 'Uitgegeven',
     remaining: 'Over',
-    note: 'Categorienamen vertaald naar het Nederlands; het ruwe antwoord houdt die van het demoplan.',
-    names: {
-      Bills: 'Rekeningen',
-      Everyday: 'Dagelijks',
-      Fun: 'Vrije tijd',
-      'Savings goals': 'Spaardoelen',
-      Rent: 'Huur',
-      Electricity: 'Elektriciteit',
-      Phone: 'Telefoon',
-      Groceries: 'Boodschappen',
-      Restaurants: 'Restaurants',
-      Transport: 'Vervoer',
-      Tennis: 'Tennis',
-      Subscriptions: 'Abonnementen',
-      Holidays: 'Vakantie',
-    } as Record<string, string>,
   },
 };
 
@@ -144,7 +78,6 @@ const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeri
   new Date(`${Astro.props.month}T00:00:00Z`),
 );
 
-const label = (name: string) => t.names[name] ?? name;
 // Groups in YNAB's order; within a group, the most left first.
 const groups = [...new Set(Astro.props.rows.map((r) => r.group))].map((group) => ({
   group,
@@ -161,7 +94,7 @@ const width = labelW + plotW + 96;
 const layout: ({ kind: 'group'; name: string; y: number } | { kind: 'row'; row: Row; y: number })[] = [];
 let cursor = top;
 for (const g of groups) {
-  layout.push({ kind: 'group', name: label(g.group), y: cursor });
+  layout.push({ kind: 'group', name: g.group, y: cursor });
   cursor += headH;
   for (const row of g.rows) {
     layout.push({ kind: 'row', row, y: cursor });
@@ -175,7 +108,7 @@ const x = (v: number) => labelW + ((v - low) / (high - low || 1)) * plotW;
 const colon = lang === 'fr' ? ' : ' : ': ';
 const tipOf = (r: Row) =>
   [
-    label(r.name),
+    r.name,
     r.balance < 0
       ? `${t.overspent} ${money.format(-r.balance)}`
       : `${t.remaining}${colon}${money.format(r.balance)}`,
@@ -220,7 +153,7 @@ function bar(x0: number, x1: number, y: number): string {
             <g class={over ? 'row over' : 'row'} data-tip={tip} tabindex="0" aria-label={tip}>
               <rect class="hit" x="0" y={item.y} width={width} height={rowH} />
               <text class="name" x={labelW - 12} y={y + barH / 2} dominant-baseline="middle" text-anchor="end">
-                {label(r.name)}
+                {r.name}
               </text>
               <path class="fill" d={bar(x(0), end, y)} />
               <text
@@ -238,7 +171,7 @@ function bar(x0: number, x1: number, y: number): string {
     </svg>
     <div class="tip" role="status" hidden></div>
   </div>
-  <p class="source">{t.source}{t.note && <><br />{t.note}</>}</p>
+  <p class="source">{t.source}</p>
   <details>
     <summary>{t.table}</summary>
     <table>
@@ -249,7 +182,7 @@ function bar(x0: number, x1: number, y: number): string {
         {
           rows.map((r) => (
             <tr>
-              <td>{label(r.group)} · {label(r.name)}</td>
+              <td>{r.group} · {r.name}</td>
               <td>{money.format(r.budgeted)}</td>
               <td>{money.format(r.actual)}</td>
               <td>{money.format(r.balance)}</td>

@@ -94,7 +94,7 @@ Respuesta sobre el presupuesto de demostración:
       "from_category_id": null,
       "from_category": null,
       "to_category_id": "cat-groceries",
-      "to_category": "Groceries"
+      "to_category": "Supermercado"
     },
     {
       "transaction_id": "tx-049",
@@ -104,7 +104,7 @@ Respuesta sobre el presupuesto de demostración:
       "from_category_id": null,
       "from_category": null,
       "to_category_id": "cat-transport",
-      "to_category": "Transport"
+      "to_category": "Transporte"
     }
   ],
   "unchanged_count": 0,

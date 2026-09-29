@@ -54,7 +54,7 @@ Antwort auf dem Demo-Budget:
 [
   {
     "id": "demo-budget",
-    "name": "Demo household",
+    "name": "Demo-Haushalt",
     "first_month": "2026-06-01",
     "last_month": "2026-09-01"
   }

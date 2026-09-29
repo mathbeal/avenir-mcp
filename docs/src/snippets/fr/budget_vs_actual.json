@@ -1,0 +1,39 @@
+[
+  {
+    "id": "cat-rent",
+    "name": "Loyer",
+    "group": "Charges fixes",
+    "budgeted": 950.0,
+    "actual": 950.0,
+    "balance": 0.0,
+    "utilization_pct": 100.0
+  },
+  {
+    "id": "cat-power",
+    "name": "Électricité",
+    "group": "Charges fixes",
+    "budgeted": 70.0,
+    "actual": 0.0,
+    "balance": 70.0,
+    "utilization_pct": 0.0
+  },
+  {
+    "id": "cat-phone",
+    "name": "Téléphone",
+    "group": "Charges fixes",
+    "budgeted": 20.0,
+    "actual": 19.99,
+    "balance": 0.01,
+    "utilization_pct": 99.9
+  },
+  {
+    "id": "cat-groceries",
+    "name": "Courses",
+    "group": "Quotidien",
+    "budgeted": 400.0,
+    "actual": 0.0,
+    "balance": 400.0,
+    "utilization_pct": 0.0
+  },
+  "… 5 more"
+]

@@ -1,0 +1,67 @@
+{
+  "pending_count": 6,
+  "suggested_count": 5,
+  "items": [
+    {
+      "transaction_id": "tx-050",
+      "date": "2026-09-19",
+      "amount": -71.86,
+      "payee": "CB MARKET FRESH FACT 190926 525130******1",
+      "memo": null,
+      "account": "Girokonto",
+      "suggestion": {
+        "category_id": "cat-groceries",
+        "category_name": "Lebensmittel",
+        "confidence": 1.0
+      },
+      "possible_transfer_with": null
+    },
+    {
+      "transaction_id": "tx-051",
+      "date": "2026-09-19",
+      "amount": -71.86,
+      "payee": "CB MARKET FRESH FACT 190926 525130******1",
+      "memo": null,
+      "account": "Girokonto",
+      "suggestion": {
+        "category_id": "cat-groceries",
+        "category_name": "Lebensmittel",
+        "confidence": 1.0
+      },
+      "possible_transfer_with": null
+    },
+    {
+      "transaction_id": "tx-049",
+      "date": "2026-09-18",
+      "amount": -45.0,
+      "payee": "RAIL CO",
+      "memo": null,
+      "account": "Girokonto",
+      "suggestion": {
+        "category_id": "cat-transport",
+        "category_name": "Mobilität",
+        "confidence": 1.0
+      },
+      "possible_transfer_with": null
+    }
+  ],
+  "categories": [
+    {
+      "category_id": "cat-inflow",
+      "name": "Inflow: Ready to Assign",
+      "group": "Internal Master Category"
+    },
+    {
+      "category_id": "cat-rent",
+      "name": "Miete",
+      "group": "Fixkosten"
+    },
+    {
+      "category_id": "cat-power",
+      "name": "Strom",
+      "group": "Fixkosten"
+    },
+    "… 7 more"
+  ],
+  "next_cursor": "b2Zmc2V0OjM="
+}

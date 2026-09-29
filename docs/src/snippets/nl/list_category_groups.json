@@ -1,0 +1,18 @@
+[
+  {
+    "id": "grp-bills",
+    "name": "Vaste lasten"
+  },
+  {
+    "id": "grp-everyday",
+    "name": "Dagelijks"
+  },
+  {
+    "id": "grp-fun",
+    "name": "Vrije tijd"
+  },
+  {
+    "id": "grp-savings-goals",
+    "name": "Spaardoelen"
+  }
+]

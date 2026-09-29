@@ -64,32 +64,32 @@ Antwoord op het demobudget:
 [
   {
     "category_id": "cat-rent",
-    "name": "Rent",
-    "group": "Bills",
+    "name": "Huur",
+    "group": "Vaste lasten",
     "budgeted": 950.0,
     "activity": -950.0,
     "balance": 0.0
   },
   {
     "category_id": "cat-power",
-    "name": "Electricity",
-    "group": "Bills",
+    "name": "Stroom",
+    "group": "Vaste lasten",
     "budgeted": 70.0,
     "activity": 0.0,
     "balance": 70.0
   },
   {
     "category_id": "cat-phone",
-    "name": "Phone",
-    "group": "Bills",
+    "name": "Telefoon",
+    "group": "Vaste lasten",
     "budgeted": 20.0,
     "activity": -19.99,
     "balance": 0.01
   },
   {
     "category_id": "cat-groceries",
-    "name": "Groceries",
-    "group": "Everyday",
+    "name": "Boodschappen",
+    "group": "Dagelijks",
     "budgeted": 400.0,
     "activity": 0.0,
     "balance": 400.0

@@ -81,7 +81,7 @@ Antwoord op het demobudget:
 {
   "status": "difference_found",
   "message": "YNAB's cleared balance differs from the bank by -71.86. Nothing was changed. Check explained_by, uncleared and possible_duplicates with the user; call again once fixed, or with adjust=true to record the gap as an adjustment.",
-  "account": "Checking",
+  "account": "Betaalrekening",
   "analysis": {
     "account_id": "acc-checking",
     "bank_balance": 3440.8,

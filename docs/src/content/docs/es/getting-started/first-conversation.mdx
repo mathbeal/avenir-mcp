@@ -6,11 +6,11 @@ sidebar:
 ---
 
 import { Code, Aside, Steps } from '@astrojs/starlight/components';
-import accounts from '@snippets/list_accounts.json?raw';
-import summary from '@snippets/monthly_summary.json?raw';
-import balances from '@snippets/category_balances.json?raw';
-import pending from '@snippets/suggest_categories.json?raw';
-import preview from '@snippets/apply_preview.json?raw';
+import accounts from '@snippets/es/list_accounts.json?raw';
+import summary from '@snippets/es/monthly_summary.json?raw';
+import balances from '@snippets/es/category_balances.json?raw';
+import pending from '@snippets/es/suggest_categories.json?raw';
+import preview from '@snippets/es/apply_preview.json?raw';
 
 Esta visita sigue una conversación real sobre el plan de demostración, un hogar
 inventado con una cuenta corriente y una de ahorro. En cada paso verá lo que usted dice,
@@ -31,7 +31,7 @@ El agente llama a `list_accounts` con `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Dos cuentas: Checking con 3.512,66, todo punteado, y Savings con 600,00.
+> **Claude:** Dos cuentas: Cuenta corriente con 3.512,66, todo punteado, y Ahorro con 600,00.
 
 Los saldos están en la moneda de su plan. `cleared_balance` es lo que el banco ya
 ha mostrado; `uncleared_balance`, lo que todavía no.
@@ -45,7 +45,7 @@ El agente llama a `get_monthly_summary` con `{"plan_id": "last-used", "month":
 
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
-> **Claude:** Septiembre va según lo previsto salvo Restaurants, excedida en 22,50.
+> **Claude:** Septiembre va según lo previsto salvo la categoría Restaurantes, excedida en 22,50.
 > Quedan 1.820,00 por asignar.
 
 Solo se listan las categorías excedidas. Para el detalle, pídalo:
@@ -86,7 +86,7 @@ nada:**
 <Steps>
 
 1. avenir-mcp ha calculado exactamente lo que cambiaría: dos transacciones, de ninguna
-   categoría a Groceries y Transport.
+   categoría a Supermercado y Transporte.
 2. Su cliente le muestra la pregunta — un cuadro de confirmación si admite la
    elicitación MCP, o el agente le transmite la vista previa y espera.
 3. Usted dice que sí. El agente vuelve a llamar con su respuesta (o el código

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "acc-checking",
+    "name": "Cuenta corriente",
+    "type": "checking",
+    "on_budget": true,
+    "closed": false,
+    "balance": 3512.66,
+    "cleared_balance": 3512.66,
+    "uncleared_balance": 0.0
+  },
+  {
+    "id": "acc-savings",
+    "name": "Ahorro",
+    "type": "savings",
+    "on_budget": true,
+    "closed": false,
+    "balance": 600.0,
+    "cleared_balance": 600.0,
+    "uncleared_balance": 0.0
+  }
+]

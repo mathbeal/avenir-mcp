@@ -51,7 +51,7 @@ Antwoord op het demobudget:
 
 ```json
 {
-  "Rent": [
+  "Huur": [
     {
       "month": "2026-07-01",
       "amount": 950.0
@@ -65,7 +65,7 @@ Antwoord op het demobudget:
       "amount": 950.0
     }
   ],
-  "Electricity": [
+  "Stroom": [
     {
       "month": "2026-07-01",
       "amount": 64.2
@@ -79,7 +79,7 @@ Antwoord op het demobudget:
       "amount": 0.0
     }
   ],
-  "Phone": [
+  "Telefoon": [
     {
       "month": "2026-07-01",
       "amount": 19.99
@@ -93,7 +93,7 @@ Antwoord op het demobudget:
       "amount": 19.99
     }
   ],
-  "Groceries": [
+  "Boodschappen": [
     {
       "month": "2026-07-01",
       "amount": 172.89
@@ -121,7 +121,7 @@ Antwoord op het demobudget:
       "amount": 142.5
     }
   ],
-  "Transport": [
+  "Vervoer": [
     {
       "month": "2026-07-01",
       "amount": 45.0
@@ -149,7 +149,7 @@ Antwoord op het demobudget:
       "amount": 0.0
     }
   ],
-  "Subscriptions": [
+  "Abonnementen": [
     {
       "month": "2026-07-01",
       "amount": 13.49
@@ -163,7 +163,7 @@ Antwoord op het demobudget:
       "amount": 0.0
     }
   ],
-  "Holidays": [
+  "Vakantie": [
     {
       "month": "2026-07-01",
       "amount": 0.0

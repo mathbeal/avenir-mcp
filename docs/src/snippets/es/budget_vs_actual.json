@@ -1,0 +1,39 @@
+[
+  {
+    "id": "cat-rent",
+    "name": "Alquiler",
+    "group": "Facturas",
+    "budgeted": 950.0,
+    "actual": 950.0,
+    "balance": 0.0,
+    "utilization_pct": 100.0
+  },
+  {
+    "id": "cat-power",
+    "name": "Luz",
+    "group": "Facturas",
+    "budgeted": 70.0,
+    "actual": 0.0,
+    "balance": 70.0,
+    "utilization_pct": 0.0
+  },
+  {
+    "id": "cat-phone",
+    "name": "Teléfono",
+    "group": "Facturas",
+    "budgeted": 20.0,
+    "actual": 19.99,
+    "balance": 0.01,
+    "utilization_pct": 99.9
+  },
+  {
+    "id": "cat-groceries",
+    "name": "Supermercado",
+    "group": "Día a día",
+    "budgeted": 400.0,
+    "actual": 0.0,
+    "balance": 400.0,
+    "utilization_pct": 0.0
+  },
+  "… 5 more"
+]
