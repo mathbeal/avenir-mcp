@@ -22,11 +22,11 @@ Chaque outil construit un **sujet** : le changement exact, sous forme de donnée
 | `update_category` | catégorie, nom après, groupe après |
 | `create_category` | groupe, nom |
 | `create_transactions` | compte, les transactions, `approved` |
-| `split_transaction` | transaction, les lignes (montant, catégorie, note) |
+| `split_transaction` | transaction, les lignes (montant, catégorie, mémo) |
 | `reconcile_account` | compte, solde bancaire, écart à ajuster |
 | `undo_operation` | l'identifiant de l'opération |
 
-Son **empreinte** est le SHA-256 du JSON `[plan_id, sujet]`, clés triées ; pour une
+Son **empreinte** est le SHA-256 du JSON `[plan_id, subject]`, clés triées ; pour une
 liste de changements, l'ordre des éléments est indifférent. Une réponse ou un code ne
 confirme jamais que le sujet dont il porte l'empreinte.
 

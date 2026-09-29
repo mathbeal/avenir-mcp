@@ -71,7 +71,7 @@ réécrire.
    git commit -s -m "feat: list subscriptions whose price went up"
    ```
 
-   `-s` signe le commit : vous certifiez le
+   `-s` ajoute le *sign-off* au commit : vous certifiez le
    [Developer Certificate of Origin](https://developercertificate.org) — vous avez écrit
    le changement, ou avez le droit de le proposer sous licence MIT.
 
@@ -91,7 +91,7 @@ réécrire.
 
 | Étape | À quoi s'attendre |
 |---|---|
-| CI | les mêmes contrôles que `just check` et `just hygiene`, sous Linux, macOS et Windows, la construction de la documentation, le MCP Inspector, des commits signés et un titre qui commence par la nature du changement ; **CI passed** et **MCP Inspector** doivent être au vert. Pour une première contribution, un mainteneur approuve d'abord l'exécution. |
+| CI | les mêmes contrôles que `just check` et `just hygiene`, sous Linux, macOS et Windows, la construction de la documentation, le MCP Inspector, des commits avec sign-off et un titre qui commence par la nature du changement ; **CI passed** et **MCP Inspector** doivent être au vert. Pour une première contribution, un mainteneur approuve d'abord l'exécution. |
 | Relecture | des commentaires sur le code ; poussez de nouveaux commits sur la même branche pour y répondre |
 | Fusion | regroupée en un seul commit sur `main`, avec le titre de votre pull request comme message |
 | Version | votre changement apparaît dans le [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) de la version suivante |
@@ -104,7 +104,7 @@ réécrire.
 - **Des écritures sûres** : un outil qui modifie le plan prévisualise, attend la
   confirmation et s'annule — voir [Sécurité par conception](/avenir-mcp/fr/concepts/safety/).
 - **Aucune donnée financière réelle**, nulle part : code, tests, documentation, captures.
-- **Chaque commit signé** (`git commit -s`).
+- **Chaque commit avec sign-off** (`git commit -s`).
 
 Le contrat complet est dans [AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md), qui s'applique aux
 personnes comme aux agents de code.
