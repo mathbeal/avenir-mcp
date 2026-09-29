@@ -58,7 +58,6 @@ dev = [
     "pyyaml==6.0.3",
     "types-pyyaml==6.0.12.20260906",
     "pytest-benchmark==5.3.0",
-    "pydoclint==0.10.1",
 ]
 
 [build-system]
@@ -102,6 +101,8 @@ preview = true
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+# Run with `uvx` (just lint, CI), not installed: pydoclint needs a fork of docstring_parser
+# that takes the place of the one fastmcp needs.
 # What ruff's DOC rules do not check yet: arguments in the signature's order, no type in
 # a docstring (the annotation is the only one), and a summary-only docstring checked too.
 # Raises stay with ruff (DOC502 is ignored on purpose); model fields are checked through

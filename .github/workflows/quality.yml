@@ -49,7 +49,7 @@ jobs:
       - run: uv run ruff format --check avenir_mcp tests evals docsgen benchmarks
       - run: uv run pylint avenir_mcp tests evals docsgen benchmarks
       - run: uv run ruff check avenir_mcp tests evals docsgen benchmarks
-      - run: uv run pydoclint avenir_mcp
+      - run: uvx pydoclint==0.10.1 avenir_mcp
       - run: uv run deptry .
 
   types:

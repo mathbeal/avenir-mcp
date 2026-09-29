@@ -13,7 +13,7 @@ lint:
     uv run ruff format --check avenir_mcp tests evals docsgen benchmarks
     uv run pylint avenir_mcp tests evals docsgen benchmarks
     uv run ruff check avenir_mcp tests evals docsgen benchmarks
-    uv run pydoclint avenir_mcp
+    uvx pydoclint==0.10.1 avenir_mcp
     uv run deptry .
 
 types:
