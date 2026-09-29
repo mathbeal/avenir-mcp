@@ -14,10 +14,8 @@ from pydantic import Field  # pylint: disable=import-error
 from avenir_mcp.amounts import Amount
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 from avenir_mcp.model import Model
-from avenir_mcp.text import untrusted
+from avenir_mcp.text import MAX_MEMO, untrusted
 from avenir_mcp.triage import internal_uncategorized
-
-MAX_MEMO = 500
 
 
 class SplitLine(Model):

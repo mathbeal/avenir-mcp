@@ -127,12 +127,19 @@ def test_declined_creation_writes_nothing(ledger: _Ledger) -> None:
         ({"transactions": [dict(_ITEM, payee="typo")]}, "transactions.0.payee"),
         ({"transactions": [dict(_ITEM, date="2026-10-01")]}, "future"),
         ({"transactions": []}, "at least one"),
+        ({"transactions": [dict(_ITEM, payee_name="")]}, "transactions.0.payee_name"),
+        ({"transactions": [dict(_ITEM, payee_name="x" * 201)]}, "transactions.0.payee_name"),
+        ({"transactions": [dict(_ITEM, memo="x" * 501)]}, "transactions.0.memo"),
     ],
 )
 def test_invalid_creation_is_a_tool_error(
     ledger: _Ledger, change: dict[str, Any], expected: str
 ) -> None:
-    """Bad account, category, date or field name is refused before anything is asked."""
+    """Bad account, category, date, field name or length is refused before anything is asked.
+
+    YNAB refuses a payee_name over 200 characters and a memo over 500: checked here, the
+    user is not asked to confirm a change YNAB would then reject.
+    """
     result = call("create_transactions", _args(**change))
     assert result.is_error
     assert expected in result.content[0].text
@@ -159,3 +166,13 @@ def test_payee_cannot_forge_lines_in_the_question(ledger: _Ledger) -> None:
     call("create_transactions", _args(transactions=[item]), accept_and_keep)
     assert len(asked[0].splitlines()) == 2
     assert ledger.created[0][0][0]["payee_name"] == item["payee_name"]
+
+
+def test_the_schema_tells_agents_ynabs_length_limits() -> None:
+    """The input schema carries YNAB's limits, so an agent can respect them before calling."""
+    from .mcp_helpers import tool_schema  # pylint: disable=import-outside-toplevel
+
+    item = tool_schema("create_transactions")["properties"]["transactions"]["items"]["properties"]
+    assert item["payee_name"]["maxLength"] == 200
+    assert item["payee_name"]["minLength"] == 1
+    assert item["memo"]["anyOf"][0]["maxLength"] == 500

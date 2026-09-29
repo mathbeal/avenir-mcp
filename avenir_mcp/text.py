@@ -11,6 +11,11 @@ import unicodedata
 
 MAX_TEXT = 80
 
+MAX_PAYEE = 200
+"""YNAB refuses a payee_name longer than this."""
+MAX_MEMO = 500
+"""YNAB refuses a memo longer than this."""
+
 # Control characters, line and paragraph separators: shown as a space.
 _BREAKS = {"Cc", "Zl", "Zp"}
 # Format characters (zero-width, direction overrides, soft hyphen): dropped.
