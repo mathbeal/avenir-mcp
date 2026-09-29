@@ -12,6 +12,7 @@ sidebar:
 | Codes de confirmation | gardés en mémoire : un redémarrage du serveur les oublie | redemander un aperçu |
 | Annulation | locale à la machine dont le journal a enregistré l'opération ; une annulation ne s'annule pas | refaire le changement |
 | `approve_transactions` | s'applique aussitôt, sans aperçu | il ne lève que le marqueur de revue de YNAB |
+| `import_transactions` | s'applique aussitôt, sans aperçu ; non annulable ici | il n'apporte que ce que la banque a déjà ; supprimer une transaction dans YNAB pour revenir en arrière |
 | `update_category`, `create_category` | non annulables ; l'API YNAB ne peut pas supprimer une catégorie | renommer à nouveau ; masquer la catégorie dans YNAB |
 | Transport HTTP | HTTP simple, un seul jeton partagé, pas de comptes | le garder sur `127.0.0.1`, ou utiliser stdio |
 | Serveur public ou partagé | non pris en charge : pas de comptes, et les conditions de YNAB imposent OAuth pour les plans d'autrui | chacun fait tourner son propre avenir-mcp — voir les [mentions légales](/avenir-mcp/fr/project/legal/) |

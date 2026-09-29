@@ -132,6 +132,7 @@ CALLS: list[Call] = [
         "update_category",
         {"plan_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},
     ),
+    Call("import", "import_transactions", {"plan_id": BUDGET}),
     Call(
         "approve",
         "approve_transactions",

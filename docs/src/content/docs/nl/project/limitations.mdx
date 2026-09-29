@@ -12,6 +12,7 @@ sidebar:
 | Bevestigingscodes | in het geheugen bewaard: een herstart van de server vergeet ze | vraag opnieuw om een nieuw voorbeeld |
 | Ongedaan maken | beperkt tot de computer waarvan het journaal de operatie heeft vastgelegd; een ongedaanmaking kan niet ongedaan worden gemaakt | de wijziging opnieuw doen |
 | `approve_transactions` | wordt meteen toegepast, zonder voorbeeld | het haalt alleen de controlemarkering van YNAB weg |
+| `import_transactions` | wordt meteen toegepast, zonder voorbeeld; hier niet ongedaan te maken | het haalt alleen op wat de bank al heeft; verwijder een transactie in YNAB om haar terug te draaien |
 | `update_category`, `create_category` | niet ongedaan te maken; de API van YNAB kan geen categorie verwijderen | terug hernoemen; de categorie in YNAB verbergen |
 | HTTP-transport | gewoon HTTP, één gedeeld token, geen gebruikersaccounts | houd het op `127.0.0.1`, of gebruik stdio |
 | Openbare of gedeelde server | niet ondersteund: geen gebruikersaccounts, en de voorwaarden van YNAB eisen OAuth voor de plans van anderen | ieder draait een eigen avenir-mcp – zie de [juridische informatie](/avenir-mcp/nl/project/legal/) |

@@ -12,6 +12,7 @@ sidebar:
 | Confirmation codes | kept in memory: a server restart forgets them | ask again for a new preview |
 | Undo | local to the machine whose journal recorded the operation; an undo cannot be undone | redo the change |
 | `approve_transactions` | applies at once, without preview | it only clears YNAB's review flag |
+| `import_transactions` | applies at once, without preview; not undoable here | it only brings in what the bank already has; delete a transaction in YNAB to take it back |
 | `update_category`, `create_category` | not undoable; YNAB's API cannot delete a category | rename back; hide the category in YNAB |
 | HTTP transport | plain HTTP, one shared token, no user accounts | keep it on `127.0.0.1`, or use stdio |
 | Public or shared server | not supported: no user accounts, and YNAB's terms require OAuth for others' plans | each person runs their own avenir-mcp — see the [legal notice](/avenir-mcp/project/legal/) |

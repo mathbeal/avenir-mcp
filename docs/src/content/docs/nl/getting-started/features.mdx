@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp geeft een agent 21 tools, 4 resources en 4 prompts voor je YNAB-plans. Deze
+avenir-mcp geeft een agent 22 tools, 4 resources en 4 prompts voor je YNAB-plans. Deze
 pagina ordent ze naar wat je wilt doen. Elke regel geeft een zin die je tegen de agent kunt
 zeggen; de agent kiest de tool.
 
@@ -54,6 +54,7 @@ Handleiding: [Een maand doornemen](/avenir-mcp/nl/guides/monthly-review/).
 
 | Je zegt | Tool | |
 |---|---|---|
+| *„Haal de nieuwste transacties van mijn bank op.“* | [`import_transactions`](/avenir-mcp/nl/reference/tools/import-transactions/) – wat Import in YNAB doet, meteen toegepast | S |
 | *„Wat heeft nog een categorie nodig?“* | [`suggest_categories`](/avenir-mcp/nl/reference/tools/suggest-categories/) – openstaande transacties, met een suggestie als je geschiedenis duidelijk is | L |
 | *„Ja, pas dat toe.“* | [`apply_categories`](/avenir-mcp/nl/reference/tools/apply-categories/) – één bevestigde batch | S ↺ |
 | *„Splits deze bon: 81,15 boodschappen, 5,25 huishouden.“* | [`split_transaction`](/avenir-mcp/nl/reference/tools/split-transaction/) – één transactie over meerdere categorieën; ongedaan te maken in YNAB, niet hier | S |

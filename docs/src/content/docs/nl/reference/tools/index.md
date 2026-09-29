@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-avenir-mcp biedt deze tools aan. Leestools zijn altijd beschikbaar; schrijftools bestaan alleen met `AVENIR_MCP_WRITE=1`, en ze krijgen allemaal behalve `approve_transactions` een voorbeeld en een bevestiging.
+avenir-mcp biedt deze tools aan. Leestools zijn altijd beschikbaar; schrijftools bestaan alleen met `AVENIR_MCP_WRITE=1`, en ze krijgen allemaal behalve `approve_transactions` en `import_transactions` een voorbeeld en een bevestiging.
 
 ## Lezen
 
@@ -31,6 +31,7 @@ avenir-mcp biedt deze tools aan. Leestools zijn altijd beschikbaar; schrijftools
 | [`approve_transactions`](/avenir-mcp/nl/reference/tools/approve-transactions/) | Mark transactions as approved, i.e. reviewed (clears YNAB's "unapproved" badge). |
 | [`create_category`](/avenir-mcp/nl/reference/tools/create-category/) | Create a category in a group, after the user confirms. |
 | [`create_transactions`](/avenir-mcp/nl/reference/tools/create-transactions/) | Create transactions on an account, e.g. ones the bank import missed, after the user confirms. |
+| [`import_transactions`](/avenir-mcp/nl/reference/tools/import-transactions/) | Import the latest transactions from the plan's linked bank accounts into YNAB. |
 | [`move_money`](/avenir-mcp/nl/reference/tools/move-money/) | Move money budgeted in one category to another for a month, after the user confirms. |
 | [`reconcile_account`](/avenir-mcp/nl/reference/tools/reconcile-account/) | Compare an account with the balance your bank shows, then reconcile it. |
 | [`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/) | Set the amount budgeted ("Assigned") in a category for a month, after the user confirms. |

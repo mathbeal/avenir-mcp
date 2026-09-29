@@ -9,6 +9,7 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 import approved from '@snippets/approve.json?raw';
+import imported from '@snippets/import.json?raw';
 
 **Ziel:** Jede von Ihrer Bank importierte Transaktion erhält die richtige Kategorie, ohne
 dass Sie sie in YNAB einzeln durchgehen.
@@ -96,6 +97,11 @@ Einzelheiten und Beispiele: [Vorschläge](/avenir-mcp/de/concepts/suggestions/).
 
 ## Varianten
 
+- **Transaktionen noch nicht da:** Sagen Sie *„importiere zuerst die neuesten Transaktionen
+  meiner Bank“*; `import_transactions` tut, was Import in YNAB tut, sofort angewendet, da
+  es nichts löscht und nichts ändert:
+
+  <Code code={imported} lang="json" title="import_transactions" />
 - **Ein Konto oder ein Zeitraum:** Sagen Sie *„nur das Girokonto“*; der Agent filtert die
   Liste, bevor er anwendet.
 - **Viele Transaktionen:** Der Agent blättert mit `next_cursor` und wendet dann in einem

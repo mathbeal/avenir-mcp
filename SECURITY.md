@@ -30,6 +30,8 @@ What the server does:
   its owner only
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
   Keep your MCP client's per-call confirmation on for it.
+- `import_transactions` acts immediately too: it asks YNAB to import what the linked
+  banks already have, as the app's Import does, and deletes or changes nothing.
 
 ## Untrusted text and prompt injection
 

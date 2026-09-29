@@ -33,11 +33,12 @@ UNDOABLE = {
     "reconcile_account",
     "create_transactions",
 }
-UNCONFIRMED_WRITES = {"approve_transactions"}
+UNCONFIRMED_WRITES = {"approve_transactions", "import_transactions"}
 
 # Tool -> the page that shows it at work.
 GUIDES = {
     "suggest_categories": "guides/classify",
+    "import_transactions": "guides/classify",
     "apply_categories": "guides/classify",
     "reconcile_account": "guides/reconcile",
     "get_monthly_summary": "guides/monthly-review",

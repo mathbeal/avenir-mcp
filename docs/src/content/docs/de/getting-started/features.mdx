@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gibt einem Agenten 21 Tools, 4 Ressourcen und 4 Prompts für Ihre
+avenir-mcp gibt einem Agenten 22 Tools, 4 Ressourcen und 4 Prompts für Ihre
 YNAB-Plans. Diese Seite ordnet sie nach dem, was Sie tun möchten. Jede Zeile nennt einen
 Satz, den Sie dem Agenten sagen können; der Agent wählt das Tool.
 
@@ -54,6 +54,7 @@ Anleitung: [Einen Monat auswerten](/avenir-mcp/de/guides/monthly-review/).
 
 | Sie sagen | Tool | |
 |---|---|---|
+| *„Hol die neuesten Transaktionen meiner Bank.“* | [`import_transactions`](/avenir-mcp/de/reference/tools/import-transactions/) – was Import in YNAB tut, sofort angewendet | S |
 | *„Was braucht noch eine Kategorie?“* | [`suggest_categories`](/avenir-mcp/de/reference/tools/suggest-categories/) – ausstehende Transaktionen, mit Vorschlag, wenn Ihre Historie eindeutig ist | L |
 | *„Ja, wende das an.“* | [`apply_categories`](/avenir-mcp/de/reference/tools/apply-categories/) – ein bestätigter Stapel | S ↺ |
 | *„Teile diesen Beleg auf: 81,15 Lebensmittel, 5,25 Haushalt.“* | [`split_transaction`](/avenir-mcp/de/reference/tools/split-transaction/) – eine Transaktion auf mehrere Kategorien; in YNAB rückgängig zu machen, nicht hier | S |

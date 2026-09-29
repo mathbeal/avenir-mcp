@@ -87,10 +87,6 @@ reason = "Moves of money grouped as the user made them, for the monthly review."
 status = "planned"
 reason = "Moves of money grouped as the user made them in a month, for the monthly review."
 
-[operations.importTransactions]
-status = "planned"
-reason = "Fetch the bank's latest transactions before classifying or reconciling."
-
 [operations.getTransactionById]
 status = "excluded"
 reason = "Transactions are read in one request for the whole plan, then kept in sync."

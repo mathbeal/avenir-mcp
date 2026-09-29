@@ -155,7 +155,7 @@ def test_descriptions_carry_no_docstring_sections() -> None:
             server.configure(enable_writes=False)
 
     found = asyncio.run(descriptions())
-    assert len(found) == 29
+    assert len(found) == 30
     leaking = {
         name
         for name, text in found.items()

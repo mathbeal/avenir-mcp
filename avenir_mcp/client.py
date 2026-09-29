@@ -288,16 +288,18 @@ async def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
     return await _request("patch", path, json=body)
 
 
-async def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    """POST a JSON body to a YNAB API path.
+async def _post(path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
+    """POST to a YNAB API path, with a JSON body when the operation takes one.
 
     Args:
         path: The API path.
-        body: The JSON body.
+        body: The JSON body; None for an operation that takes none.
 
     Returns:
         The response's JSON body.
     """
+    if body is None:
+        return await _request("post", path)
     return await _request("post", path, json=body)
 
 
@@ -619,6 +621,20 @@ async def create_transactions(
         "transaction_ids": payload.get("transaction_ids", []),
         "duplicate_import_ids": payload.get("duplicate_import_ids", []),
     }
+
+
+async def import_transactions(plan_id: str) -> list[str]:
+    """Ask YNAB to import the transactions its linked accounts have, as the app's Import does.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+
+    Returns:
+        The ids of the transactions imported; empty when the banks had nothing new.
+    """
+    logger.info("Importing transactions from linked accounts")
+    data = await _post(f"/plans/{plan_id}/transactions/import")
+    return list(data["data"]["transaction_ids"])
 
 
 async def approve_transactions(plan_id: str, tx_ids: list[str]) -> dict[str, int]:

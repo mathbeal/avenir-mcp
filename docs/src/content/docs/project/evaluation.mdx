@@ -63,6 +63,7 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-28 | Sonnet | 17/17 | 1.9 | *plan* wherever YNAB now says plan, in the descriptions and the prompts |
 | 2026-09-28 | Sonnet | 17/17 | 2.4 | the guide is also the server's instructions: the agent now calls `list_plans` first in 13 tasks out of 17 (3 before), one more YNAB request, so as not to work on the wrong plan |
 | 2026-09-29 | Sonnet | 17/17 | 2.4 | `move_money`: the agent covers Restaurants with one move, one preview and one confirmation, instead of two `set_category_budget` calls |
+| 2026-09-29 | Sonnet | 17/17 | 2.3 | `import_transactions` joins the guide's classify workflow: the demo plan has no bank connection, and the agent never imports without a reason |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A
