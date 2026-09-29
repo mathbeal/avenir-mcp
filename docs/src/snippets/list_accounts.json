@@ -7,7 +7,9 @@
     "closed": false,
     "balance": 3512.66,
     "cleared_balance": 3512.66,
-    "uncleared_balance": 0.0
+    "uncleared_balance": 0.0,
+    "bank_link": "healthy",
+    "last_reconciled": "2026-08-31"
   },
   {
     "id": "acc-savings",
@@ -17,6 +19,8 @@
     "closed": false,
     "balance": 600.0,
     "cleared_balance": 600.0,
-    "uncleared_balance": 0.0
+    "uncleared_balance": 0.0,
+    "bank_link": "none",
+    "last_reconciled": null
   }
 ]

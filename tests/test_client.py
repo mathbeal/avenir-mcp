@@ -486,6 +486,8 @@ def test_get_accounts_skips_deleted_and_converts_balances() -> None:
             "balance": 1250.0,
             "cleared_balance": 1250.0,
             "uncleared_balance": 0.0,
+            "bank_link": "none",
+            "last_reconciled": None,
         },
     ]
 

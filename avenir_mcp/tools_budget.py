@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import date, timedelta
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from pydantic import Field  # pylint: disable=import-error
@@ -61,6 +61,11 @@ class Account(Model):
     """Balance of the transactions the bank has shown."""
     uncleared_balance: float
     """Balance of the transactions the bank has not shown yet."""
+    bank_link: Literal["healthy", "broken", "none"]
+    """Whether YNAB imports this account from the bank: broken means the connection
+    needs the user's attention in YNAB, and no new transaction will come in until then."""
+    last_reconciled: str | None
+    """Date (YYYY-MM-DD) of the last reconciliation, or None if never reconciled."""
 
 
 class ImportResult(Model):
@@ -284,9 +289,11 @@ async def list_category_groups(plan_id: str) -> list[CategoryGroup]:
     }
 )
 async def list_accounts(plan_id: str) -> list[Account]:
-    """List the plan's accounts with their current balances (in currency units).
+    """List the plan's accounts with their balances, bank link and last reconciliation.
 
-    Use it to reconcile YNAB with the bank.
+    Use it to reconcile YNAB with the bank, and to tell the user when a bank link is
+    broken (no transaction comes in until they fix it in YNAB) or when an account has
+    not been reconciled for months. Balances are in currency units.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
