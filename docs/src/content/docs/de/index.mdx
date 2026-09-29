@@ -62,14 +62,13 @@ die er Ihnen in klare Worte fasst.
 > **Sie:** Wie lief der August?
 
 Der Agent ruft [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/)
-mit `{"month": "2026-08-01"}` auf und erhält für jede Kategorie, was budgetiert und was
-ausgegeben wurde. Hier diese Antwort auf dem Demo-Plan, als Grafik:
+mit `{"month": "2026-08-01"}` auf und erhält für jede Kategorie, was budgetiert, was ausgegeben wurde und was übrig ist. Hier diese Antwort auf dem Demo-Plan, als Grafik:
 
 <BudgetChart rows={august} month="2026-08-01" />
 
-> **Claude:** Der August blieb überall im Budget. Miete, Telefon und Strom haben 90 % oder
-> mehr ihres Budgets verbraucht, Abonnements fast ebenso viel, Lebensmittel etwa die
-> Hälfte. Die 200,00 für den Urlaub sind unberührt.
+> **Claude:** Der August blieb überall im Budget: Keine Kategorie ist überzogen. Die
+> Rechnungen sind bezahlt, für Lebensmittel sind 207,49 übrig und für Tennis 58,00, und die
+> 200,00 für den Urlaub sind unberührt.
 
 <details>
 <summary>Die Rohantwort</summary>

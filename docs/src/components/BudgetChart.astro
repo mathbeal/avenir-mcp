@@ -1,13 +1,16 @@
 ---
-// Share of each budget used in a month, drawn from a real get_budget_vs_actual answer.
-// One series, one hue (validated light and dark); the 100 % line is the budget.
-// Hover shows the amounts; a table gives the same numbers without the picture.
+// What is left in each category at the end of a month (YNAB's Available), drawn from a
+// real get_budget_vs_actual answer. A share of the budget used says little about a bill
+// (paying the electricity is not "92 %" of anything); the amount left says the same for
+// every category. One series, one hue (validated light and dark), bars from zero; an
+// overspent category turns to the status colour and says so in words.
+// Hover shows budgeted, spent and left; a table gives the same numbers without the picture.
 interface Row {
   name: string;
   group: string;
   budgeted: number;
   actual: number;
-  utilization_pct: number;
+  balance: number;
 }
 interface Props {
   rows: Row[];
@@ -16,30 +19,26 @@ interface Props {
 
 const texts = {
   en: {
-    title: 'Share of each budget used',
+    title: 'What is left in each category',
     source: 'Answer of get_budget_vs_actual on the demo plan',
-    budget: 'budget',
-    of: 'of',
-    used: 'used',
+    overspent: 'overspent by',
     table: 'Show as a table',
     category: 'Category',
     budgeted: 'Budgeted',
     spent: 'Spent',
-    untouched: 'untouched',
+    remaining: 'Left',
     note: '',
     names: {} as Record<string, string>,
   },
   fr: {
-    title: 'Part de chaque budget consommée',
+    title: 'Ce qui reste dans chaque catégorie',
     source: 'Réponse de get_budget_vs_actual sur le plan de démonstration',
-    budget: 'budget',
-    of: 'sur',
-    used: 'consommé',
+    overspent: 'dépassé de',
     table: 'Afficher en tableau',
     category: 'Catégorie',
     budgeted: 'Budgété',
     spent: 'Dépensé',
-    untouched: 'intact',
+    remaining: 'Restant',
     note: 'Noms des catégories adaptés au français ; la réponse brute garde ceux du plan de démonstration.',
     names: {
       Bills: 'Factures',
@@ -52,22 +51,20 @@ const texts = {
       Groceries: 'Courses',
       Restaurants: 'Restaurants',
       Transport: 'Transports',
-      Tennis: 'Escalade',
+      Tennis: 'Tennis',
       Subscriptions: 'Abonnements',
       Holidays: 'Vacances',
     } as Record<string, string>,
   },
   es: {
-    title: 'Parte de cada presupuesto consumida',
+    title: 'Lo que queda en cada categoría',
     source: 'Respuesta de get_budget_vs_actual sobre el plan de demostración',
-    budget: 'presupuesto',
-    of: 'de',
-    used: 'consumido',
+    overspent: 'excedido en',
     table: 'Ver como tabla',
     category: 'Categoría',
     budgeted: 'Presupuestado',
     spent: 'Gastado',
-    untouched: 'intacto',
+    remaining: 'Disponible',
     note: 'Nombres de categorías adaptados al español; la respuesta en bruto conserva los del plan de demostración.',
     names: {
       Bills: 'Facturas',
@@ -80,22 +77,20 @@ const texts = {
       Groceries: 'Compra',
       Restaurants: 'Restaurantes',
       Transport: 'Transporte',
-      Tennis: 'Pádel',
+      Tennis: 'Tennis',
       Subscriptions: 'Suscripciones',
       Holidays: 'Vacaciones',
     } as Record<string, string>,
   },
   de: {
-    title: 'Verbrauchter Anteil jedes Budgets',
+    title: 'Was in jeder Kategorie übrig bleibt',
     source: 'Antwort von get_budget_vs_actual auf den Demo-Plan',
-    budget: 'Budget',
-    of: 'von',
-    used: 'verbraucht',
+    overspent: 'überzogen um',
     table: 'Als Tabelle anzeigen',
     category: 'Kategorie',
     budgeted: 'Budgetiert',
     spent: 'Ausgegeben',
-    untouched: 'unberührt',
+    remaining: 'Übrig',
     note: 'Kategorienamen ins Deutsche übertragen; die Rohantwort behält die des Demo-Plans.',
     names: {
       Bills: 'Rechnungen',
@@ -114,16 +109,14 @@ const texts = {
     } as Record<string, string>,
   },
   nl: {
-    title: 'Verbruikt deel van elk budget',
+    title: 'Wat er in elke categorie overblijft',
     source: 'Antwoord van get_budget_vs_actual op het demoplan',
-    budget: 'budget',
-    of: 'van',
-    used: 'verbruikt',
+    overspent: 'overschreden met',
     table: 'Als tabel tonen',
     category: 'Categorie',
     budgeted: 'Gebudgetteerd',
     spent: 'Uitgegeven',
-    untouched: 'onaangeroerd',
+    remaining: 'Over',
     note: 'Categorienamen vertaald naar het Nederlands; het ruwe antwoord houdt die van het demoplan.',
     names: {
       Bills: 'Rekeningen',
@@ -147,27 +140,24 @@ const lang = Astro.locals.starlightRoute.lang as keyof typeof texts;
 const t = texts[lang] ?? texts.en;
 const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', de: 'de-DE', nl: 'nl-NL' }[lang] ?? 'en-US';
 const money = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const pct = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
 const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
   new Date(`${Astro.props.month}T00:00:00Z`),
 );
 
 const label = (name: string) => t.names[name] ?? name;
-// Groups in YNAB's order; within a group, the most used budget first.
+// Groups in YNAB's order; within a group, the most left first.
 const groups = [...new Set(Astro.props.rows.map((r) => r.group))].map((group) => ({
   group,
-  rows: Astro.props.rows
-    .filter((r) => r.group === group)
-    .sort((a, b) => b.utilization_pct - a.utilization_pct),
+  rows: Astro.props.rows.filter((r) => r.group === group).sort((a, b) => b.balance - a.balance),
 }));
 const rows = groups.flatMap((g) => g.rows);
-const labelW = 136;
-const plotW = 440;
-const rowH = 30;
-const headH = 28;
-const barH = 14;
-const top = 30;
-const width = labelW + plotW + 64;
+const labelW = 128;
+const plotW = 340;
+const rowH = 24;
+const headH = 22;
+const barH = 12;
+const top = 6;
+const width = labelW + plotW + 96;
 const layout: ({ kind: 'group'; name: string; y: number } | { kind: 'row'; row: Row; y: number })[] = [];
 let cursor = top;
 for (const g of groups) {
@@ -178,16 +168,28 @@ for (const g of groups) {
     cursor += rowH;
   }
 }
-const height = cursor + 8;
-const max = Math.max(100, ...rows.map((r) => r.utilization_pct));
-const x = (v: number) => labelW + (v / max) * plotW;
+const height = cursor + 4;
+const low = Math.min(0, ...rows.map((r) => r.balance));
+const high = Math.max(0, ...rows.map((r) => r.balance));
+const x = (v: number) => labelW + ((v - low) / (high - low || 1)) * plotW;
+const colon = lang === 'fr' ? ' : ' : ': ';
+const tipOf = (r: Row) =>
+  [
+    label(r.name),
+    r.balance < 0
+      ? `${t.overspent} ${money.format(-r.balance)}`
+      : `${t.remaining}${colon}${money.format(r.balance)}`,
+    `${t.budgeted}${colon}${money.format(r.budgeted)}`,
+    `${t.spent}${colon}${money.format(r.actual)}`,
+  ].join(' · ');
 
-// A bar anchored on the left, with a 4 px rounded data end on the right.
+// A bar anchored on zero, with a 4 px rounded data end away from it.
 function bar(x0: number, x1: number, y: number): string {
-  const w = Math.max(0, x1 - x0);
-  if (w === 0) return '';
+  const w = Math.abs(x1 - x0);
+  if (w < 0.5) return '';
   const r = Math.min(4, w / 2, barH / 2);
-  return `M${x0},${y} H${x1 - r} Q${x1},${y} ${x1},${y + r} V${y + barH - r} Q${x1},${y + barH} ${x1 - r},${y + barH} H${x0} Z`;
+  const s = x1 > x0 ? 1 : -1;
+  return `M${x0},${y} H${x1 - s * r} Q${x1},${y} ${x1},${y + r} V${y + barH - r} Q${x1},${y + barH} ${x1 - s * r},${y + barH} H${x0} Z`;
 }
 ---
 
@@ -198,47 +200,37 @@ function bar(x0: number, x1: number, y: number): string {
   </figcaption>
   <div class="plot">
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${t.title}, ${monthName}`}>
-      {
-        [0, 50, 100].map((v) => (
-          <g class={v === 100 ? 'ref' : 'grid'}>
-            <line x1={x(v)} x2={x(v)} y1={top - 8} y2={height - 4} />
-            <text x={x(v)} y={top - 14} text-anchor="middle">
-              {v === 100 ? `${pct.format(v)} % · ${t.budget}` : `${pct.format(v)} %`}
-            </text>
-          </g>
-        ))
-      }
+      <line class="zero" x1={x(0)} x2={x(0)} y1={top} y2={height - 2} />
       {
         layout.map((item) => {
           if (item.kind === 'group') {
             return (
-              <text class="group" x="0" y={item.y + headH / 2 + 4} dominant-baseline="middle">
+              <text class="group" x="0" y={item.y + headH / 2 + 3} dominant-baseline="middle">
                 {item.name}
               </text>
             );
           }
           const r = item.row;
           const y = item.y + (rowH - barH) / 2;
-          const tip = `${label(r.name)} — ${money.format(r.actual)} ${t.of} ${money.format(r.budgeted)} (${pct.format(r.utilization_pct)} % ${t.used})`;
-          const value =
-            r.utilization_pct >= 90
-              ? `${pct.format(r.utilization_pct)} %`
-              : r.actual === 0
-                ? t.untouched
-                : '';
+          const tip = tipOf(r);
+          const over = r.balance < 0;
+          const end = x(r.balance);
+          const value = over ? `${t.overspent} ${money.format(-r.balance)}` : money.format(r.balance);
           return (
-            <g class="row" data-tip={tip} tabindex="0" aria-label={tip}>
+            <g class={over ? 'row over' : 'row'} data-tip={tip} tabindex="0" aria-label={tip}>
               <rect class="hit" x="0" y={item.y} width={width} height={rowH} />
               <text class="name" x={labelW - 12} y={y + barH / 2} dominant-baseline="middle" text-anchor="end">
                 {label(r.name)}
               </text>
-              <path class="track" d={bar(x(0), x(100), y)} />
-              <path class="fill" d={bar(x(0), x(r.utilization_pct), y)} />
-              {value && (
-                <text class="value" x={x(Math.min(r.utilization_pct, 100)) + 8} y={y + barH / 2} dominant-baseline="middle">
-                  {value}
-                </text>
-              )}
+              <path class="fill" d={bar(x(0), end, y)} />
+              <text
+                class="value"
+                x={over ? x(0) + 8 : Math.max(end, x(0)) + 8}
+                y={y + barH / 2}
+                dominant-baseline="middle"
+              >
+                {value}
+              </text>
             </g>
           );
         })
@@ -251,7 +243,7 @@ function bar(x0: number, x1: number, y: number): string {
     <summary>{t.table}</summary>
     <table>
       <thead>
-        <tr><th>{t.category}</th><th>{t.budgeted}</th><th>{t.spent}</th><th>{t.used}</th></tr>
+        <tr><th>{t.category}</th><th>{t.budgeted}</th><th>{t.spent}</th><th>{t.remaining}</th></tr>
       </thead>
       <tbody>
         {
@@ -260,7 +252,7 @@ function bar(x0: number, x1: number, y: number): string {
               <td>{label(r.group)} · {label(r.name)}</td>
               <td>{money.format(r.budgeted)}</td>
               <td>{money.format(r.actual)}</td>
-              <td>{pct.format(r.utilization_pct)} %</td>
+              <td>{money.format(r.balance)}</td>
             </tr>
           ))
         }
@@ -300,7 +292,8 @@ function bar(x0: number, x1: number, y: number): string {
   .budget-chart {
     /* Bar colours validated with the dataviz palette checks, one per theme. */
     --viz-bar: #1a9e8c;
-    --viz-track: color-mix(in srgb, var(--sl-color-gray-5) 45%, transparent);
+    --viz-critical: #d03b3b;
+    max-width: 40rem;
     margin: 1.5rem 0 0;
     padding: 1.25rem 1.25rem 1rem;
     border: 1px solid var(--sl-color-hairline-light);
@@ -310,7 +303,6 @@ function bar(x0: number, x1: number, y: number): string {
 
   :global(:root[data-theme='light']) .budget-chart {
     --viz-bar: #008a7a;
-    --viz-track: var(--sl-color-gray-6);
   }
 
   figcaption {
@@ -336,26 +328,14 @@ function bar(x0: number, x1: number, y: number): string {
   svg {
     display: block;
     width: 100%;
-    min-width: 32rem;
+    min-width: 26rem;
     height: auto;
     font-family: var(--sl-font);
   }
 
-  .grid line {
-    stroke: var(--sl-color-hairline-light);
+  .zero {
+    stroke: var(--sl-color-gray-4);
     stroke-width: 1;
-  }
-
-  .ref line {
-    stroke: var(--sl-color-gray-3);
-    stroke-width: 1.5;
-    stroke-dasharray: 4 3;
-  }
-
-  .grid text,
-  .ref text {
-    fill: var(--sl-color-gray-3);
-    font-size: 11px;
   }
 
   .name {
@@ -375,12 +355,13 @@ function bar(x0: number, x1: number, y: number): string {
     font-variant-numeric: tabular-nums;
   }
 
-  .track {
-    fill: var(--viz-track);
-  }
-
   .fill {
     fill: var(--viz-bar);
+  }
+
+  /* Overspent: the reserved status colour, always with the words beside it. */
+  .over .fill {
+    fill: var(--viz-critical);
   }
 
   .hit {
