@@ -10,7 +10,7 @@ import pytest
 from docsgen import pages
 
 CONTENT = pages.CONTENT
-TRANSLATED = ("fr", "es", "de")
+TRANSLATED = ("fr", "es", "de", "nl")
 REGENERATE = "run `uv run python -m docsgen` and commit the result"
 
 

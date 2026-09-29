@@ -1,0 +1,88 @@
+---
+title: Prognose
+description: Hoe forecast_balance terugkerende kosten vindt, de rest middelt en het saldo dag voor dag vooruitberekent.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`forecast_balance` berekent het saldo van je rekeningen maand voor maand vooruit, tot 24
+maanden vooruit. Het scheidt **wat terugkeert**, op zijn dag geplaatst, van **wat
+varieert**, over de dagen verdeeld, en geeft elke aanname terug.
+
+## Rekeningen en beginpunt
+
+De rekeningen zijn die in `account_ids`, of anders elke open budgetrekening. Het
+beginsaldo is de som van hun saldi vandaag; de geschiedenis zijn hun transacties, zonder
+overboekingen en verwijderde transacties.
+
+## Terugkerende kosten en inkomsten
+
+Over de **laatste 4 volle maanden** (de huidige maand is onvolledig en wordt weggelaten)
+worden transacties gegroepeerd per
+[genormaliseerde begunstigde](/avenir-mcp/nl/concepts/suggestions/#een-winkelier-herkennen) en
+richting. Een groep **keert terug** als:
+
+- ze voorkomt in minstens **3** van de 4 maanden, en
+- het totaal van elke maand binnen **20 %** van het mediane maandtotaal ligt.
+
+Ze wordt dan elke maand vooruitberekend met haar **mediane** maandbedrag, op de **mediane
+dag** waarop ze viel (zo nodig de laatste dag van een kortere maand).
+
+## Geplande transacties
+
+De geplande transacties van de vooruitberekende rekeningen, van morgen tot het einde van de
+horizon, vallen op hun data, herhaald volgens hun frequentie in YNAB – een jaarlijkse
+verzekering inbegrepen. Een begunstigde met een planning wordt alleen door die planning
+vooruitberekend, ook als de bank hem uitgebreid omschrijft (een planning „Acme Payroll“
+dekt „ACME PAYROLL - ACME PAYROLL - REF-FF01“: elk woord van haar naam staat in de
+omschrijving): hij verlaat de terugkerende kosten en de gemiddelden, zodat hij nooit twee
+keer wordt geteld. Een overboeking tussen twee vooruitberekende rekeningen wordt
+weggelaten, omdat ze geen van beide totalen verandert; een overboeking naar een andere
+rekening telt als uitgaand geld. Ze worden teruggegeven in `assumptions.scheduled`.
+
+## Al het andere
+
+| Aanname | Standaard | Overschrijven |
+|---|---|---|
+| Overige uitgaven | het gemiddelde van de uitgaven van de laatste **3** volle maanden, zonder terugkerende kosten | `variable_monthly` |
+| Inkomsten | het gemiddelde van de inkomsten van de laatste 3 volle maanden, zonder terugkerende inkomsten | `monthly_income` |
+| Eenmalige bedragen | geen | `one_offs`: `{date, amount, label}` |
+
+Als je `monthly_income` opgeeft, **vervangt** het de inkomsten uit de geschiedenis en de
+geplande inkomende bedragen, salaris inbegrepen, zodat een salaris nooit twee keer wordt
+geteld.
+
+## De projectie
+
+Maand voor maand, dag voor dag vanaf morgen:
+
+- **Terugkerende bedragen** vallen op hun dag; in de huidige maand alleen die nog komen.
+- **Overige uitgaven en inkomsten** worden gelijk verdeeld over de resterende dagen, in
+  hele centen. Voor de huidige maand wordt wat sinds de 1e al is uitgegeven of ontvangen
+  (buiten terugkerende begunstigden) van de maandgemiddelden afgetrokken: alleen wat
+  overblijft wordt vooruitberekend.
+- **Geplande transacties en eenmalige bedragen** vallen op hun datum, als die na vandaag
+  en binnen de horizon ligt.
+
+Voor elke maand geeft het antwoord `start`, `inflows`, `outflows`, `end` en `lowest`, het
+laagste saldo van welke dag ook in de maand. `first_shortfall` is de eerste maand waarvan
+`lowest` onder nul ligt.
+
+## Grenzen
+
+<Aside type="caution">
+Een prognose trekt je recente verleden door. Houd er rekening mee dat:
+
+- gemiddelden alles bevatten wat ongewoon was in de laatste 3 maanden – vakanties, een
+  jaarlijkse belasting, een grote aankoop;
+- een kwartaal- of jaarlijkse kostenpost zonder planning in YNAB volgens deze definitie
+  niet terugkeert: plan haar in YNAB, of voeg haar toe als eenmalig bedrag;
+- onregelmatig betaald inkomen wordt gemiddeld: geef `monthly_income` op als je het beter
+  weet;
+- alleen de gekozen rekeningen worden vooruitberekend; geld dat naar andere rekeningen
+  gaat, lijkt uitgegeven.
+</Aside>
+
+De horizon `until` is een maand, `YYYY-MM`, van de huidige maand tot 24 maanden vooruit.

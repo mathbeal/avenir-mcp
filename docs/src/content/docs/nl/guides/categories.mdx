@@ -1,0 +1,67 @@
+---
+title: Categorieën ordenen
+description: Categorieën aanmaken, hernoemen en verplaatsen, en bepalen hoeveel elke categorie krijgt.
+sidebar:
+  order: 6
+---
+
+import { Code, Aside } from '@astrojs/starlight/components';
+import groups from '@snippets/list_category_groups.json?raw';
+import create from '@snippets/create_category_preview.json?raw';
+import rename from '@snippets/update_category_preview.json?raw';
+import budget from '@snippets/budget_preview.json?raw';
+
+**Doel:** de indeling van je categorieën bij je leven laten passen, en elke categorie haar
+bedrag geven.
+
+**Tools:** [`list_category_groups`](/avenir-mcp/nl/reference/tools/list-category-groups/),
+[`create_category`](/avenir-mcp/nl/reference/tools/create-category/),
+[`update_category`](/avenir-mcp/nl/reference/tools/update-category/),
+[`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/).
+
+## Een categorie aanmaken
+
+> **Jij:** Maak een categorie Pets in Everyday.
+
+De agent zoekt het id van de groep met `list_category_groups` (de systeemgroepen van YNAB
+worden weggelaten):
+
+<Code code={groups} lang="json" title="list_category_groups" />
+
+en toont dan het aanmaken als voorbeeld:
+
+<Code code={create} lang="json" title="create_category — voorbeeld" />
+
+Een naam die al in de groep bestaat, wordt geweigerd, ongeacht hoofdletters.
+
+## Een categorie hernoemen of verplaatsen
+
+> **Jij:** Hernoem Tennis naar Sport.
+
+<Code code={rename} lang="json" title="update_category — voorbeeld" />
+
+Geef `category_group_id` door om de categorie naar een andere groep te verplaatsen, met of
+zonder nieuwe naam. Transacties en bedragen blijven eraan gekoppeld. Om terug te gaan, roep
+je opnieuw aan met de vorige naam en groep, die het antwoord noemt.
+
+## Het bedrag van een categorie instellen
+
+> **Jij:** Zet 150 in Restaurants voor september.
+
+<Code code={budget} lang="json" title="set_category_budget — voorbeeld" />
+
+Het bedrag is **absoluut**: het vervangt wat er gebudgetteerd was. `month` is `"current"`
+of `YYYY-MM-01`; `"current"` wordt omgezet naar de werkelijke maand, zodat een latere
+ongedaanmaking de juiste maand treft.
+
+## Ongedaan maken
+
+| Tool | Ongedaan maken |
+|---|---|
+| `set_category_budget` | `undo_operation` zet het vorige bedrag terug, tenzij het sindsdien is veranderd |
+| `update_category` | opnieuw aanroepen met de vorige naam en groep |
+| `create_category` | de categorie in YNAB verbergen – de API kan er geen verwijderen |
+
+<Aside type="note">
+Elke wijziging op deze pagina krijg je eerst te zien en wacht op je bevestiging.
+</Aside>

@@ -7,6 +7,7 @@ extend-exclude = [
   "docs/src/content/docs/fr/",
   "docs/src/content/docs/es/",
   "docs/src/content/docs/de/",
+  "docs/src/content/docs/nl/",
   # Labels and titles of the generated pages, in every language.
   "docsgen/guide_titles.json",
   "docsgen/labels.json",
@@ -20,3 +21,4 @@ extend-exclude = [
 Conceptos = "Conceptos"
 Projet = "Projet"
 Referenz = "Referenz"
+Naslag = "Naslag"

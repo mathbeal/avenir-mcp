@@ -1,0 +1,348 @@
+---
+title: Installatie
+description: Stap voor stap, van niets tot een werkende avenir-mcp in je MCP-client – uv installeren, een YNAB-token aanmaken, avenir-mcp toevoegen, controleren dat het werkt, en dan wijzigingen toestaan.
+sidebar:
+  order: 1
+---
+
+import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
+import budgets from '@snippets/list_plans.json?raw';
+
+Deze pagina brengt je in ongeveer tien minuten van niets naar een werkende avenir-mcp.
+Elke stap eindigt met een controle, zodat je weet dat het gelukt is voordat je verdergaat.
+
+<Steps>
+
+1. [uv installeren](#uv-installeren), het programma dat avenir-mcp uitvoert.
+2. [Een YNAB-token aanmaken](#een-ynab-token-aanmaken), de toegang van avenir-mcp tot je budgetten.
+3. [Controleren of avenir-mcp start](#controleren-of-avenir-mcp-start), één keer met de hand.
+4. [avenir-mcp aan je client toevoegen](#avenir-mcp-aan-je-client-toevoegen).
+5. [Controleren of het werkt](#controleren-of-het-werkt), met een eerste vraag.
+6. [Wijzigingen toestaan](#wijzigingen-toestaan), als de agent voor je mag opruimen.
+
+</Steps>
+
+## Wat je nodig hebt
+
+| | Waarom | Waar je het vindt |
+|---|---|---|
+| **Een YNAB-account** | avenir-mcp leest en wijzigt *jouw* budgetten | [app.ynab.com](https://app.ynab.com) |
+| **Een MCP-client** | de applicatie waarmee je praat; die start avenir-mcp | Claude Code, Claude Desktop, Cursor, VS Code… |
+| **uv** | downloadt en draait avenir-mcp, en de Python die het nodig heeft, in een geïsoleerde omgeving | de volgende stap |
+
+Je hoeft Python **niet** te installeren, de repository **niet** te klonen en geen virtuele
+omgeving aan te maken: uv doet dat allemaal.
+
+## uv installeren
+
+<Tabs syncKey="os">
+  <TabItem label="macOS / Linux">
+    In een terminal:
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+    Of met Homebrew: `brew install uv`.
+  </TabItem>
+  <TabItem label="Windows">
+    In PowerShell:
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+    Of met WinGet: `winget install --id=astral-sh.uv -e`.
+  </TabItem>
+</Tabs>
+
+**Sluit de terminal en open hem opnieuw**, en controleer dan:
+
+```bash
+uv --version
+```
+
+Er verschijnt een versie, zoals `uv 0.12.19`. *Command not found*? Het installatieprogramma
+voegt uv alleen toe aan het `PATH` van nieuwe terminals: open een nieuwe. Details in de
+[documentatie van uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+## Een YNAB-token aanmaken
+
+<Steps>
+
+1. Log in bij YNAB **in een webbrowser** op [app.ynab.com](https://app.ynab.com) – de
+   mobiele apps tonen de ontwikkelaarsinstellingen niet.
+2. Klik linksboven op je naam en dan op **Account Settings**.
+3. Open **Developer Settings**.
+4. Klik onder **Personal Access Tokens** op **New Token**, voer je YNAB-wachtwoord in en
+   klik op **Generate**.
+5. Kopieer het token dat bovenaan de pagina staat: een lange reeks letters, cijfers en
+   streepjes. **YNAB toont het maar één keer.** Ben je het kwijt, maak dan een nieuw aan
+   en trek het oude in.
+
+</Steps>
+
+<Aside type="danger" title="Behandel het token als een wachtwoord">
+Een personal access token kan **elk budget van je account lezen en wijzigen**; YNAB biedt
+geen token dat alleen kan lezen. Plak het nooit in een chat met een AI, een gedeeld
+bestand, een issue of een repository. avenir-mcp logt het nooit en geeft het nooit terug in
+een antwoord.
+</Aside>
+
+## Controleren of avenir-mcp start
+
+Voordat je een client instelt, draai je avenir-mcp één keer met de hand. Zo wordt het
+gedownload en zie je dat het start.
+
+<Tabs syncKey="os">
+  <TabItem label="macOS / Linux">
+    ```bash
+    YNAB_API_KEY=jouw-token uvx avenir-mcp
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    $env:YNAB_API_KEY = "jouw-token"; uvx avenir-mcp
+    ```
+  </TabItem>
+</Tabs>
+
+De eerste keer worden avenir-mcp en Python gedownload: een paar seconden tot een minuut.
+Daarna **wordt er niets getoond en keert het commando niet terug** – dat hoort zo:
+avenir-mcp wacht tot een client met hem praat. Druk op **Ctrl+C** om het te stoppen.
+
+Verschijnt er in plaats daarvan een fout? Zie [Probleemoplossing](/avenir-mcp/nl/project/troubleshooting/).
+
+## avenir-mcp aan je client toevoegen
+
+Kies je client. Deze configuraties zijn **alleen lezen**: avenir-mcp kan vragen
+beantwoorden maar niets wijzigen. [Wijzigingen toestaan](#wijzigingen-toestaan) komt
+daarna.
+
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    In een terminal:
+    ```bash
+    claude mcp add avenir-mcp --scope user \
+      --env YNAB_API_KEY=jouw-token \
+      -- uvx avenir-mcp
+    ```
+
+    | Deel | Betekenis |
+    |---|---|
+    | `claude mcp add avenir-mcp` | een MCP-server met de naam `avenir-mcp` registreren |
+    | `--scope user` | voor al je projecten; laat het weg om hem alleen voor de huidige map te registreren |
+    | `--env YNAB_API_KEY=…` | de omgeving waarmee avenir-mcp start |
+    | `--` | wat volgt is het commando dat de server start |
+    | `uvx avenir-mcp` | dat commando |
+
+    Claude Code bewaart dit, token inbegrepen, in `~/.claude.json`, alleen leesbaar voor jou.
+  </TabItem>
+  <TabItem label="Claude Desktop">
+    1. Open Claude Desktop, dan **Settings → Developer → Edit Config**. Zo opent
+       `claude_desktop_config.json`:
+       - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+       - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+    2. Is het bestand leeg, plak dan dit alles. Staan er al servers in, voeg dan alleen het
+       blok `"avenir-mcp": { … }` toe binnen de bestaande `mcpServers`, met een komma na de
+       vorige regel.
+       ```json
+       {
+         "mcpServers": {
+           "avenir-mcp": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "jouw-token" }
+           }
+         }
+       }
+       ```
+    3. Sla op, **sluit Claude Desktop dan helemaal af** – ⌘Q op macOS, of via het pictogram
+       in het systeemvak op Windows – en open het opnieuw.
+  </TabItem>
+  <TabItem label="Cursor">
+    1. Maak of open `~/.cursor/mcp.json` (alle projecten) of `.cursor/mcp.json` in een
+       project, en voeg toe:
+       ```json
+       {
+         "mcpServers": {
+           "avenir-mcp": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "jouw-token" }
+           }
+         }
+       }
+       ```
+    2. Open **Cursor Settings → MCP** en controleer dat `avenir-mcp` aanstaat.
+  </TabItem>
+  <TabItem label="VS Code">
+    1. Maak `.vscode/mcp.json` in je werkruimte:
+       ```json
+       {
+         "servers": {
+           "avenir-mcp": {
+             "type": "stdio",
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "jouw-token" }
+           }
+         }
+       }
+       ```
+    2. Voer het commando **MCP: List Servers** uit, kies `avenir-mcp` en dan **Start Server**.
+    3. Gebruik het vanuit Copilot Chat in de modus **Agent**.
+  </TabItem>
+  <TabItem label="Gemini CLI">
+    1. Open `~/.gemini/settings.json` (maak het aan als dat nodig is) en voeg toe:
+       ```json
+       {
+         "mcpServers": {
+           "avenir-mcp": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "jouw-token" }
+           }
+         }
+       }
+       ```
+    2. Start `gemini` en typ `/mcp`: `avenir-mcp` staat erbij met zijn tools. Het model is dat van Gemini CLI.
+  </TabItem>
+  <TabItem label="Codex CLI">
+    1. Open `~/.codex/config.toml` (maak het aan als dat nodig is) en voeg toe:
+       ```toml
+       [mcp_servers.avenir]
+       command = "uvx"
+       args = ["avenir-mcp"]
+       env = { YNAB_API_KEY = "jouw-token" }
+       ```
+    2. Start `codex` en typ `/mcp`: `avenir-mcp` staat erbij met zijn tools. Het model is dat van Codex.
+  </TabItem>
+  <TabItem label="LM Studio">
+    Voor een model dat op je eigen computer draait – zie [Een model kiezen](/avenir-mcp/nl/guides/choose-a-model/#lokale-modellen).
+
+    1. Open in LM Studio het tabblad **Program** van de rechterzijbalk, dan **Install → Edit mcp.json**, en voeg toe:
+       ```json
+       {
+         "mcpServers": {
+           "avenir-mcp": {
+             "command": "uvx",
+             "args": ["avenir-mcp"],
+             "env": { "YNAB_API_KEY": "jouw-token" }
+           }
+         }
+       }
+       ```
+    2. Sla op, laad een model dat toolgebruik ondersteunt en begin een chat: LM Studio vraagt het vóór elke toolaanroep.
+  </TabItem>
+  <TabItem label="Andere clients">
+    Elke MCP-client die servers via **stdio** start, werkt. Geef hem:
+
+    | Instelling | Waarde |
+    |---|---|
+    | commando | `uvx` |
+    | argumenten | `avenir-mcp` |
+    | omgeving | `YNAB_API_KEY` = je token |
+
+    Voor clients die in plaats daarvan met een URL verbinden, zie
+    [Via HTTP draaien](/avenir-mcp/nl/guides/run-options/#via-http-draaien).
+  </TabItem>
+</Tabs>
+
+<Aside type="tip" title="„uvx not found“ in een desktopapplicatie">
+Grafische applicaties zien niet altijd het `PATH` van je terminal. Vindt de client `uvx`
+niet, vervang dan `"uvx"` door het volledige pad, dat je krijgt met `which uvx` (macOS,
+Linux) of `where uvx` (Windows) – bijvoorbeeld `"/Users/<jij>/.local/bin/uvx"`.
+</Aside>
+
+## Controleren of het werkt
+
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    ```bash
+    claude mcp list
+    ```
+    avenir-mcp hoort verbonden te zijn:
+    ```text
+    avenir-mcp: uvx avenir-mcp - ✔ Connected
+    ```
+    Start dan `claude` en typ `/mcp`: `avenir-mcp` toont zijn 9 tools.
+  </TabItem>
+  <TabItem label="Andere clients">
+    Open de lijst met MCP-servers of tools van de client: `avenir-mcp` hoort te draaien, met
+    9 tools.
+  </TabItem>
+</Tabs>
+
+Vraag nu in een nieuw gesprek: *„Toon mijn YNAB-budgetten.“* De agent roept
+[`list_plans`](/avenir-mcp/nl/reference/tools/list-plans/) aan – je client vraagt je misschien
+om toestemming – en antwoordt met hun namen. Hier het demobudget dat in deze hele
+documentatie wordt gebruikt:
+
+<Code code={budgets} lang="json" title="list_plans" />
+
+avenir-mcp werkt. Ga verder met [je eerste gesprek](/avenir-mcp/nl/getting-started/first-conversation/),
+of sta eerst wijzigingen toe.
+
+## Wijzigingen toestaan
+
+Om de agent transacties te laten categoriseren, geld tussen categorieën te laten
+verschuiven of rekeningen te laten afstemmen, voeg je `AVENIR_MCP_WRITE=1` toe aan de
+omgeving van avenir-mcp.
+
+<Tabs syncKey="client">
+  <TabItem label="Claude Code">
+    Verwijder avenir-mcp en voeg het opnieuw toe met de extra variabele:
+    ```bash
+    claude mcp remove avenir-mcp --scope user
+    claude mcp add avenir-mcp --scope user \
+      --env YNAB_API_KEY=jouw-token \
+      --env AVENIR_MCP_WRITE=1 \
+      -- uvx avenir-mcp
+    ```
+  </TabItem>
+  <TabItem label="JSON-configuraties">
+    Voeg de variabele toe naast het token, sla op en herstart de client:
+    ```json
+    "env": { "YNAB_API_KEY": "jouw-token", "AVENIR_MCP_WRITE": "1" }
+    ```
+  </TabItem>
+  <TabItem label="Codex CLI (TOML)">
+    Voeg de variabele toe naast het token in `~/.codex/config.toml` en herstart Codex:
+    ```toml
+    env = { YNAB_API_KEY = "jouw-token", AVENIR_MCP_WRITE = "1" }
+    ```
+  </TabItem>
+</Tabs>
+
+De waarde moet precies `1` zijn. Controleer: de client toont nu **20** tools in plaats van 11.
+
+| | Alleen lezen (standaard) | Met `AVENIR_MCP_WRITE=1` |
+|---|---|---|
+| Getoonde tools | 11 | 20 |
+| Categoriseren, budgetteren, afstemmen, aanmaken | — | met voorbeeld, door jou bevestigd, ongedaan te maken |
+| Als de agent iets verkeerd begrijpt | er kan niets veranderen | een wijziging die je hebt bevestigd en ongedaan kunt maken |
+
+<Aside type="caution" title="Als je client je niets kan vragen">
+Sommige clients kunnen je geen vraag stellen (MCP-elicitation). avenir-mcp geeft de agent
+dan een eenmalige code, en het is aan de agent om je de wijzigingen te laten zien en op je
+ja te wachten. In [onze evaluatie](/avenir-mcp/nl/project/evaluation/) gebruikte één model op de
+acht, misleid door een omschrijving die in een transactie was geplant, zo'n code op eigen
+houtje, en maakte zijn wijziging daarna ongedaan. Zodat alleen jij kunt bevestigen, voeg je
+`AVENIR_MCP_REQUIRE_ELICITATION=1` toe als je client elicitation ondersteunt: codes zijn dan
+uitgeschakeld.
+</Aside>
+
+Elke wijziging krijg je te zien voordat ze wordt toegepast: zie
+[Veilig door ontwerp](/avenir-mcp/nl/concepts/safety/).
+
+## Bijwerken, verwijderen, intrekken
+
+| Om te | Doe je |
+|---|---|
+| **Bijwerken** | `uvx` haalt zelf af en toe nieuwe versies op; forceer het met `uvx --refresh avenir-mcp` |
+| **Verwijderen** | `claude mcp remove avenir-mcp --scope user`, of verwijder het item `avenir-mcp` uit de configuratie van de client |
+| **Opruimen** | het enige bestand van avenir-mcp op je computer is zijn [journaal](/avenir-mcp/nl/concepts/journal/), in `~/.local/state/avenir-mcp/` |
+| **Het token intrekken** | YNAB → Account Settings → Developer Settings → **Revoke** naast het token |
+
+## Verder
+
+- [Je eerste gesprek](/avenir-mcp/nl/getting-started/first-conversation/): een begeleide rondleiding.
+- [Functies](/avenir-mcp/nl/getting-started/features/): alles wat avenir-mcp kan.
+- [Configuratie](/avenir-mcp/nl/reference/configuration/): elke omgevingsvariabele.

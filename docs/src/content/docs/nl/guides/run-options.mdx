@@ -1,0 +1,125 @@
+---
+title: Kiezen hoe avenir-mcp draait
+description: Alleen lezen of schrijven, stdio of HTTP, waar het journaal staat en hoeveel er wordt gelogd.
+sidebar:
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+avenir-mcp wordt ingesteld met omgevingsvariabelen, gezet in het blok `env` van je
+MCP-client. De volledige lijst staat in [Configuratie](/avenir-mcp/nl/reference/configuration/).
+
+## Alleen lezen of schrijven
+
+| Instelling | Effect |
+|---|---|
+| niets (standaard) | 11 leestools; de 9 schrijftools worden niet getoond en zijn niet aan te roepen |
+| `AVENIR_MCP_WRITE=1` | alle 20 tools; elke schrijfactie behalve `approve_transactions` krijgt een voorbeeld en een bevestiging |
+
+Elke andere waarde (`0`, `true`, `yes`) houdt de server alleen lezend: alleen `1` schakelt
+schrijven in.
+
+## Via stdio draaien (standaard)
+
+Je client start avenir-mcp als subproces en praat ermee via zijn standaardinvoer en
+-uitvoer. Er luistert niets op het netwerk. Dat doen alle voorbeelden in
+[Installatie](/avenir-mcp/nl/getting-started/install/).
+
+## Via HTTP draaien
+
+Voor een client die met een URL verbindt, of om één server op je computer te delen tussen
+meerdere clients. Maak eerst een lang willekeurig token aan, dat clients moeten tonen:
+
+```bash
+export AVENIR_MCP_HTTP_TOKEN=$(openssl rand -hex 32)
+```
+
+Start dan de server:
+
+```bash
+AVENIR_MCP_TRANSPORT=http \
+AVENIR_MCP_HOST=127.0.0.1 \
+AVENIR_MCP_PORT=8103 \
+YNAB_API_KEY=jouw-token \
+uvx avenir-mcp
+```
+
+Hij luistert op `http://127.0.0.1:8103/mcp` (streamable HTTP). Wijs je client daarheen,
+met het token in een header `Authorization` – met Claude Code:
+
+```bash
+claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
+  --header "Authorization: Bearer $AVENIR_MCP_HTTP_TOKEN"
+```
+
+Via HTTP wordt elk verzoek gecontroleerd voordat het een tool bereikt:
+
+| Controle | Geweigerd met | Houdt tegen |
+|---|---|---|
+| de header `Host` noemt deze computer (`127.0.0.1`, `localhost`, `::1`) | `421` | een webpagina die de server via DNS-rebinding bereikt |
+| een header `Origin`, als die er is, is die van deze server | `403` | een pagina van een andere site die in je browser draait |
+| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, als er een token is ingesteld | `401` | elk ander programma op je computer of netwerk |
+
+Met `AVENIR_MCP_WRITE=1` is het token **verplicht**: zonder token weigert de server te
+starten. Alleen lezen via HTTP werkt zonder token, alleen met de eerste twee controles.
+
+<Aside type="danger" title="Houd hem op je computer">
+Houd `AVENIR_MCP_HOST=127.0.0.1`: het verkeer is gewoon HTTP, niet versleuteld. Bind nooit
+`0.0.0.0`, publiceer de poort nooit op alle interfaces met Docker of een router, en zet de
+server nooit op het internet.
+</Aside>
+
+## Waar het journaal staat
+
+Toegepaste operaties worden vastgelegd zodat ze ongedaan kunnen worden gemaakt. Standaard is
+het journaal `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, of
+`~/.local/state/avenir-mcp/journal.jsonl` als `XDG_STATE_HOME` niet is ingesteld. Kies een
+ander bestand met `AVENIR_MCP_JOURNAL`. Zie
+[Journaal en ongedaan maken](/avenir-mcp/nl/concepts/journal/).
+
+## Diagnose
+
+avenir-mcp schrijft diagnoses naar **stderr** – nooit naar stdout, dat in stdio-modus van
+het protocol is – op het niveau van `AVENIR_MCP_LOG_LEVEL`, standaard `WARNING`:
+
+| Niveau | Je ziet |
+|---|---|
+| `WARNING` (standaard) | alleen problemen |
+| `INFO` | elke toolaanroep en elk YNAB-verzoek |
+| `DEBUG` | alles, inclusief de eigen meldingen van de MCP-bibliotheek |
+
+Een verwachte fout (een verkeerd geschreven maand, een onbekende rekening) wordt op één
+regel gelogd; een echte storing houdt haar traceback. Het token wordt nooit gelogd.
+
+## Logs naar een logsysteem sturen
+
+Voor een collector zoals Vector, Fluent Bit, Promtail of een Datadog-agent vraag je om
+JSON en schrijf je stderr naar een bestand dat de collector leest. In de configuratie van
+de client:
+
+```json
+"command": "/bin/sh",
+"args": ["-c", "exec uvx avenir-mcp 2>>\"$HOME/.local/state/avenir-mcp/avenir.log\""],
+"env": { "YNAB_API_KEY": "jouw-token", "AVENIR_MCP_LOG_FORMAT": "json", "AVENIR_MCP_LOG_LEVEL": "INFO" }
+```
+
+Elke regel ziet er dan zo uit:
+
+```json
+{"time":"2026-09-25T09:12:04.120+00:00","level":"INFO","logger":"avenir_mcp.client","message":"Fetching accounts for budget demo-budget"}
+```
+
+Draait de server via HTTP als dienst, dan bewaart de dienstbeheerder stderr: systemd stuurt
+het naar het journal, launchd naar het bestand dat `StandardErrorPath` noemt.
+
+Vanaf `INFO` bevatten meldingen alleen id's en aantallen – nooit begunstigden, bedragen of
+categorienamen – zodat logs je computer kunnen verlaten zonder je financiële gegevens.
+Bewaar `DEBUG` voor lokale probleemoplossing.
+
+## Drempel voor suggesties
+
+`AVENIR_MCP_CONFIDENCE_THRESHOLD` (standaard `0.90`) is het deel van de geschiedenis van een
+begunstigde dat moet overeenkomen voordat een categorie wordt voorgesteld. Verlaag hem om
+meer suggesties te krijgen, die minder vaak kloppen. Zie
+[Suggesties](/avenir-mcp/nl/concepts/suggestions/).

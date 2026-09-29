@@ -14,7 +14,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 - tests/ — unit tests, protocol tests, documentation and hygiene tests
 - evals/ — the demo budget, a stand-in for YNAB's API, the agent evaluation
 - docsgen/ — generates the tool reference, the error catalogue and the examples
-- docs/ — this site (Astro Starlight, English, French, Spanish, German)
+- docs/ — this site (Astro Starlight, English, French, Spanish, German, Dutch)
 - AGENTS.md — the contract for contributors, human or not
 - justfile — every command below
 - pyproject.toml, uv.lock — the Python project, locked
@@ -107,7 +107,7 @@ just docs-serve            # live preview on http://localhost:4321/avenir-mcp/
 
 `docsgen` runs avenir-mcp on the demo budget and writes what it really answers, with the
 date fixed and random ids replaced. Hand-written pages exist in English, French,
-Spanish and German; a test fails when one is missing.
+Spanish, German and Dutch; a test fails when one is missing.
 
 ## Evaluation
 

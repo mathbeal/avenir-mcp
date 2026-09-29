@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time. English is preferred; French, Spanish and German are welcome.
+        Thanks for taking the time. English is preferred; French, Spanish, German and Dutch are welcome.
 
         **Never paste real transactions, balances, account names, payees or tokens.**
         Invent the figures: this issue is public.

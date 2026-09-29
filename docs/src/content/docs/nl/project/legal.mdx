@@ -1,0 +1,81 @@
+---
+title: Juridische informatie
+description: Wie avenir-mcp uitgeeft, waarvoor het bedoeld is, wat het niet belooft, en waar je gegevens naartoe gaan.
+sidebar:
+  order: 7
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Niet verbonden aan YNAB
+
+“We are not affiliated, associated, or in any way officially connected with YNAB or any of
+its subsidiaries or affiliates.” We zijn op geen enkele manier verbonden, geassocieerd of
+officieel gelieerd aan YNAB of een van zijn dochterondernemingen of gelieerde bedrijven.
+YNAB en You Need A Budget zijn geregistreerde handelsmerken van YNAB, hier alleen genoemd
+om te zeggen met welke dienst avenir-mcp werkt. avenir-mcp gebruikt de openbare API van YNAB
+met het eigen toegangstoken van elke gebruiker.
+
+## Waarvoor avenir-mcp bedoeld is
+
+avenir-mcp is bedoeld voor **persoonlijk gebruik**: één persoon draait het **op de eigen
+computer**, met **het eigen YNAB-token**, voor de eigen budgetten.
+
+<Aside type="caution" title="Niet ondersteund: een openbare of gedeelde server">
+avenir-mcp draaien als openbare of gedeelde MCP-server – het voor anderen hosten, zijn
+HTTP-transport op het internet zetten, of YNAB-tokens van anderen verzamelen – is **geen
+bedoeld gebruik** en wordt niet ondersteund:
+
+- De API-voorwaarden van YNAB reserveren personal access tokens voor hun eigenaar; een
+  applicatie die door anderen wordt gebruikt, moet OAuth gebruiken, met een gepubliceerd
+  gegevensbeleid. avenir-mcp heeft geen van beide.
+- avenir-mcp heeft geen gebruikersaccounts, geen scheiding tussen gebruikers, en zijn
+  HTTP-transport is alleen voor deze computer gebouwd.
+
+Wie dat toch doet, doet het op eigen risico, en kan de voorwaarden van YNAB schenden.
+</Aside>
+
+## Geen garantie, geen financieel advies
+
+avenir-mcp wordt geleverd **zoals het is**, zonder enige garantie, onder de
+[MIT-licentie](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE). Het is **geen
+financieel advies**: prognoses trekken je recente verleden door en kunnen onjuist zijn.
+
+AI-agents maken fouten. Elke wijziging die avenir-mcp doet, krijg je eerst te zien en wacht
+op je bevestiging: **je blijft verantwoordelijk voor de wijzigingen die je bevestigt.** Lees
+elk voorbeeld, en gebruik [ongedaan maken](/avenir-mcp/nl/concepts/journal/) als er iets
+misging.
+
+## De AI-verordening van de EU
+
+avenir-mcp bevat **geen AI-model**. Zijn suggesties tellen welke categorieën een begunstigde
+eerder kreeg; zijn prognoses gebruiken medianen en gemiddelden. Het is een tool die een
+AI-agent aanroept, geen eigen AI-systeem. Het AI-systeem is je MCP-client en zijn model,
+waarvan de aanbieder – Anthropic, OpenAI, Google of een andere – de verplichtingen van
+Verordening (EU) 2024/1689 draagt. Het gebruiken voor je eigen budget is zuiver persoonlijk,
+niet-professioneel gebruik, en avenir-mcp wordt uitgebracht onder een vrije
+opensourcelicentie. Het beoordeelt de kredietwaardigheid van niemand, het kredietgebruik
+dat de verordening als hoog risico aanmerkt.
+
+Dit is de lezing van de uitgever, geen juridisch advies. Een gehoste, commerciële versie die
+een model bevat, zou om een nieuwe beoordeling vragen.
+
+## Waar je gegevens naartoe gaan
+
+- avenir-mcp stuurt je budgetgegevens alleen naar **YNAB**, en naar de **aanbieder van het
+  model** dat je MCP-client gebruikt (geen, met een
+  [lokaal model](/avenir-mcp/nl/guides/choose-a-model/#lokale-modellen)).
+- De uitgever van avenir-mcp ontvangt **niets**: geen telemetrie, geen account, geen server.
+- Deze documentatiesite plaatst **geen cookies** en draait **geen analytics**; haar
+  lettertypen worden door de site zelf geleverd.
+
+## Uitgever en host
+
+| | |
+|---|---|
+| Uitgever | Mathieu Beal ([mathbeal](https://github.com/mathbeal) op GitHub), als particulier, niet-professioneel |
+| Contact | [GitHub-issues](https://github.com/mathbeal/avenir-mcp/issues); beveiligingsmeldingen vertrouwelijk, zie [Beveiliging](/avenir-mcp/nl/project/security/) |
+| Host | GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, Verenigde Staten |
+
+Andere namen – Claude, GPT, Gemini, Cursor, VS Code, LM Studio – zijn handelsmerken van hun
+eigenaren en worden alleen genoemd om te zeggen waarmee avenir-mcp werkt.

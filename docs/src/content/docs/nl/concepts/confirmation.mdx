@@ -1,0 +1,126 @@
+---
+title: Bevestiging
+description: Hoe een schrijfactie op de gebruiker wacht – elicitation in beide protocolgeneraties, eenmalige codes, en wat een antwoord aan zijn voorbeeld koppelt.
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Elke schrijfactie behalve `approve_transactions` gaat door één functie, `confirm.ask`,
+voordat ze iets wijzigt. Deze pagina beschrijft precies wat die doet.
+
+## Wat er wordt bevestigd
+
+Elke tool bouwt een **onderwerp**: de exacte wijziging, als gegevens.
+
+| Tool | Onderwerp |
+|---|---|
+| `apply_categories` | de lijst met wijzigingen (transactie, categorie erna) |
+| `set_category_budget` | categorie, maand (omgezet), bedrag in milliunits |
+| `update_category` | categorie, naam erna, groep erna |
+| `create_category` | groep, naam |
+| `create_transactions` | rekening, de transacties, `approved` |
+| `reconcile_account` | rekening, banksaldo, te corrigeren verschil |
+| `split_transaction` | transactie, de regels (bedrag, categorie, omschrijving) |
+| `undo_operation` | het id van de operatie |
+
+De **vingerafdruk** is de SHA-256 van de JSON `[plan_id, subject]`, met gesorteerde
+sleutels; bij een lijst met wijzigingen doet de volgorde van de elementen er niet toe. Een
+antwoord of een code bevestigt alleen het onderwerp waarvan het de vingerafdruk draagt.
+
+## Drie manieren om te vragen
+
+`ask` kijkt wat de client bij het verbinden heeft gemeld en kiest er één:
+
+### 1. De client ondersteunt elicitation, protocol 2026-07-28
+
+In het huidige MCP-protocol kan een server de client tijdens een aanroep geen eigen verzoek
+sturen. avenir-mcp gebruikt de rondgang *input required*:
+
+1. De eerste aanroep geeft in plaats van het antwoord van de tool een `InputRequiredResult`
+   terug. Dat bevat één verzoek, `confirm`, een formulier met één booleaans veld `value`,
+   waarvan de melding het voorbeeld is (tot 20 wijzigingen, dan *„… and N more“*), en een
+   `request_state`: de vingerafdruk.
+2. De client toont het formulier. De gebruiker vinkt aan, of weigert.
+3. De client roept de tool opnieuw aan met dezelfde argumenten, het antwoord in
+   `input_responses` en de ontvangen `request_state`. FastMCP verzegelt die toestand
+   onderweg en weigert manipulatie.
+4. avenir-mcp berekent het plan en zijn vingerafdruk opnieuw. Verschillen ze van
+   `request_state` – iemand heeft het budget intussen gewijzigd – dan faalt de aanroep met
+   *„The budget changed between the preview and the answer“* en wordt er niets geschreven.
+
+### 2. De client ondersteunt elicitation, ouder protocol
+
+De server vraagt het tijdens de aanroep (`ctx.elicit`) met hetzelfde ja/nee-formulier, en
+wacht op het antwoord.
+
+### 3. De client ondersteunt geen elicitation
+
+De eerste aanroep geeft `status: "confirmation_required"`, het voorbeeld en een
+**bevestigingscode** terug. De agent laat de gebruiker het voorbeeld zien en roept, alleen
+als die akkoord gaat, opnieuw aan met dezelfde argumenten plus `confirmation`.
+
+## Hoe antwoorden worden gelezen
+
+| Antwoord | Resultaat |
+|---|---|
+| formulier geaccepteerd, vakje aangevinkt | `applied` |
+| formulier geaccepteerd, vakje **niet** aangevinkt | `declined` |
+| `decline` | `declined` – niets geschreven |
+| `cancel` (weggeklikt, of een client die het niet kan tonen) | terugval op een bevestigingscode |
+
+Wegklikken is geen weigering: clients zonder interface klikken elke vraag weg, en dat als
+*nee* behandelen zou elke schrijfactie onmogelijk maken – het defect dat de
+[evaluatie](/avenir-mcp/nl/project/evaluation/) van avenir-mcp bij haar eerste run vond.
+
+## Bevestigingscodes
+
+| Eigenschap | Waarde |
+|---|---|
+| Formaat | 11 URL-veilige tekens (`secrets.token_urlsafe(8)`) |
+| Levensduur | 600 seconden, op een monotone klok |
+| Gebruik | één keer: een code is bij het eerste gebruik verbruikt, ook als hij niet klopt |
+| Bereik | de vingerafdruk van één onderwerp in één budget |
+| Opslag | alleen het geheugen van de server: een herstart vergeet elke code |
+
+Een code die onbekend, verlopen of al gebruikt is, of voor andere wijzigingen is
+uitgegeven, wordt geweigerd met: *„This confirmation code is unknown, expired, already
+used, or was issued for different changes. Call again without confirmation to get a new
+preview.“*
+
+<Aside type="caution">
+Een code bewijst dat er een voorbeeld is gemaakt, niet dat iemand het heeft gelezen. De
+agent mag hem pas teruggeven nadat de gebruiker akkoord is gegaan; de beschrijvingen van de
+tools en de resource `avenir-mcp://guide` zeggen dat. Clients die elicitation ondersteunen
+geven een sterkere garantie: de gebruiker antwoordt de client rechtstreeks.
+</Aside>
+
+## Het eigen antwoord van de gebruiker eisen
+
+Een bevestigingscode bewijst dat er een voorbeeld bestond, niet dat jij het hebt gelezen.
+Met `AVENIR_MCP_REQUIRE_ELICITATION=1`:
+
+| Situatie | Zonder de variabele | Met de variabele |
+|---|---|---|
+| de client kan het vragen, je zegt ja | `applied` | `applied` |
+| vraag weggeklikt | een bevestigingscode | `declined` |
+| de client kan het niet vragen | een bevestigingscode | fout: er is niets gewijzigd |
+| er wordt een code `confirmation` doorgegeven | gecontroleerd, dan toegepast | fout: codes zijn uitgeschakeld |
+
+Alleen clients die MCP-elicitation ondersteunen, kunnen dan schrijven.
+
+## Wat de gebruiker ziet
+
+De vragen komen van de server en zijn in het Engels:
+
+| Tool | Vraag |
+|---|---|
+| `apply_categories` | *Recategorise 2 transaction(s)?*, dan één regel per wijziging: datum, begunstigde, bedrag, ervoor → erna |
+| `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
+| `create_category` | *Create category 'Pets' in Everyday?* |
+| `create_transactions` | *Create 1 transaction(s) on Checking?*, dan één regel per transactie |
+| `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?*, dan één regel per categorie, en een waarschuwing dat alleen YNAB het ongedaan kan maken |
+| `reconcile_account` | *Reconcile Checking: mark 49 cleared transaction(s) reconciled?* |
+| `undo_operation` | *Undo: recategorise 2 transaction(s)?*, of het soort ongedaanmaking |

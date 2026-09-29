@@ -1,0 +1,90 @@
+---
+title: avenir-mcp
+description: Een onofficiële opensource-MCP-server voor YNAB, gebouwd voor agents. Standaard alleen lezen; elke wijziging krijg je eerst te zien, bevestig je en kun je ongedaan maken.
+template: splash
+hero:
+  title: Je YNAB-budget, in gewone woorden.
+  tagline: Met avenir-mcp kunnen Claude en andere AI-agents je budget lezen, categoriseren, afstemmen en vooruitberekenen. Standaard alleen lezen; elke wijziging krijg je eerst te zien, bevestig je zelf en kun je ongedaan maken.
+  actions:
+    - text: Aan de slag
+      link: /avenir-mcp/nl/getting-started/install/
+      icon: right-arrow
+    - text: Bekijk een gesprek
+      link: /avenir-mcp/nl/getting-started/first-conversation/
+      variant: secondary
+---
+
+import { Card, CardGrid, LinkCard, Code } from '@astrojs/starlight/components';
+import Stats from '../../../components/Stats.astro';
+import WriteFlow from '../../../components/WriteFlow.astro';
+import BudgetChart from '../../../components/BudgetChart.astro';
+import august from '@snippets/august_categories.json';
+import augustRaw from '@snippets/august_categories.json?raw';
+
+<Stats />
+
+## Waarom avenir-mcp
+
+<CardGrid>
+  <Card title="Tools voor taken, niet voor endpoints" icon="rocket">
+    Een maand aan transacties categoriseren, een rekening afstemmen met de bank, het saldo
+    vooruitberekenen, een maand doornemen: elke taak is één tool, geen tien API-aanroepen
+    die de agent aan elkaar moet rijgen.
+  </Card>
+  <Card title="Standaard alleen lezen" icon="seti:lock">
+    De negen schrijftools worden niet getoond en zijn niet aan te roepen totdat je
+    `AVENIR_MCP_WRITE=1` instelt. Een agent kan niet wijzigen wat hij niet ziet.
+  </Card>
+  <Card title="Antwoorden die een agent kan lezen" icon="document">
+    Valuta-eenheden, nooit milliunits. Getypeerde uitvoerschema's met een beschrijving
+    voor elk veld, paginering en fouten die zeggen wat er moet worden verbeterd.
+  </Card>
+  <Card title="Zuinig met het quotum van YNAB" icon="seti:clock">
+    Een lokale kopie van je transacties, bijgewerkt met delta-synchronisatie: de meeste
+    tools kosten één of twee van de 200 verzoeken die YNAB per uur toestaat.
+  </Card>
+</CardGrid>
+
+## Elke wijziging op jouw voorwaarden
+
+<WriteFlow />
+
+Categorieën, bedragen, afstemmingen en aangemaakte transacties kun je allemaal ongedaan
+maken. Hoe het werkt: [Bevestiging](/avenir-mcp/nl/concepts/confirmation/) en
+[Journaal en ongedaan maken](/avenir-mcp/nl/concepts/journal/).
+
+## Echte antwoorden, geen proza
+
+Tools geven gestructureerde gegevens terug waar de agent op kan vertrouwen – en die hij
+voor jou in gewone woorden uitlegt.
+
+> **Jij:** Hoe ging augustus?
+
+De agent roept [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/)
+aan met `{"month": "2026-08-01"}` en krijgt voor elke categorie wat er gebudgetteerd en
+wat er uitgegeven is. Hier dat antwoord op het demobudget, als grafiek:
+
+<BudgetChart rows={august} month="2026-08-01" />
+
+> **Claude:** Augustus bleef overal binnen budget. Huur, telefoon en elektriciteit gebruikten
+> 90 % of meer van hun budget, abonnementen bijna evenveel, boodschappen ongeveer de helft.
+> De 200,00 voor vakantie is onaangeroerd.
+
+<details>
+<summary>Het ruwe antwoord</summary>
+
+<Code code={augustRaw} lang="json" title="get_budget_vs_actual — demobudget" />
+
+</details>
+
+Elk voorbeeld in deze documentatie is een echt antwoord van avenir-mcp op een verzonnen
+demobudget.
+
+## De documentatie verkennen
+
+<CardGrid>
+  <LinkCard title="Aan de slag" description="In vijf minuten geïnstalleerd, daarna een begeleid eerste gesprek." href="/avenir-mcp/nl/getting-started/install/" />
+  <LinkCard title="Handleidingen" description="Categoriseren, afstemmen, een maand doornemen, vooruit plannen – stap voor stap." href="/avenir-mcp/nl/guides/classify/" />
+  <LinkCard title="Concepten" description="Architectuur, veiligheid, bevestiging, suggesties, prognose." href="/avenir-mcp/nl/concepts/architecture/" />
+  <LinkCard title="Naslag" description="Elke tool: parameters, resultaat, kosten, fouten, voorbeeld." href="/avenir-mcp/nl/reference/tools/" />
+</CardGrid>

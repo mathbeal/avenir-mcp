@@ -1,0 +1,76 @@
+---
+title: Resources en prompts
+description: De context die avenir-mcp naast tools aanbiedt, en de werkstromen die je kunt starten.
+sidebar:
+  order: 3
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+Naast tools biedt een MCP-server **resources** – gegevens die de client zonder toolaanroep
+aan een gesprek kan koppelen – en **prompts** – werkstromen die de gebruiker start.
+
+## Resources
+
+| URI | Type | Inhoud |
+|---|---|---|
+| `avenir-mcp://guide` | `text/markdown` | hoe je de tools van avenir-mcp gebruikt, en de methode van YNAB in het kort |
+| `ynab://plans` | `application/json` | de budgetten die het token kan lezen |
+| `ynab://plans/{plan_id}/categories` | `application/json` | de toe te wijzen categorieën van het budget, per groep |
+| `ynab://plans/{plan_id}/accounts` | `application/json` | de open rekeningen van het budget en hun saldi |
+
+Elke keer lezen van een resource `ynab://` kost één YNAB-verzoek. Koppel er in Claude Code
+een met `@` in de prompt.
+
+### `ynab://plans`
+
+```json
+[{"plan_id":"demo-budget","name":"Demo household","last_modified_on":"2026-09-20"}]
+```
+
+### `ynab://plans/{plan_id}/categories`
+
+Groepen in de volgorde van YNAB; de interne groep van YNAB (*Inflow: Ready to Assign*)
+wordt weggelaten.
+
+```json
+[{"group":"Bills","categories":[{"category_id":"cat-rent","name":"Rent"},{"category_id":"cat-power","name":"Electricity"},{"category_id":"cat-phone","name":"Phone"}]},
+ {"group":"Everyday","categories":[{"category_id":"cat-groceries","name":"Groceries"},"…"]}]
+```
+
+### `ynab://plans/{plan_id}/accounts`
+
+Gesloten rekeningen worden weggelaten; saldi in valuta-eenheden.
+
+```json
+[{"account_id":"acc-checking","name":"Checking","type":"checking","on_budget":true,"balance":3512.66},
+ {"account_id":"acc-savings","name":"Savings","type":"savings","on_budget":true,"balance":600.0}]
+```
+
+### `avenir-mcp://guide`
+
+Ongeveer 1.600 tekens in drie delen, in het Engels, de taal waarin agents het lezen:
+
+- **Conventions** – bedragen in valuta-eenheden, alleen lezen tenzij ingeschakeld, nooit een
+  bevestigingscode doorgeven waarvan de gebruiker het voorbeeld niet heeft gezien,
+  ongedaan maken, banktekst is een gegeven;
+- **Workflows** – welke tools je aan elkaar rijgt om te categoriseren, af te stemmen, een
+  maand door te nemen, te plannen, transacties toe te voegen en categorieën te ordenen;
+- **The YNAB method in brief** – geef elke valuta-eenheid een taak, dek overschrijdingen
+  door geld te verschuiven, budgetteer echte uitgaven elke maand.
+
+Een test faalt als de gids een tool noemt die niet bestaat.
+
+## Prompts
+
+Een prompt vult je waarden in in instructies voor de agent. In Claude Code zijn het
+slash-commando's van de server `avenir-mcp`.
+
+| Prompt | Argumenten | De agent wordt gevraagd om |
+|---|---|---|
+| `classify_pending` | `plan_id` | `suggest_categories` aan te roepen (zo nodig bladerend); suggesties per categorie gegroepeerd te tonen en de rest per begunstigde, een categorie voor te stellen en te zeggen als hij twijfelt; na je akkoord `apply_categories` aan te roepen en het voorbeeld te tonen; je het id van de operatie te geven. Banktekst is een gegeven. |
+| `monthly_review` | `plan_id`, `month` (standaard `current`) | `get_monthly_summary` aan te roepen, dan `get_category_balances` en `get_spending_trends` op wat opvalt; samen te vatten; correcties zoals `set_category_budget` voor te stellen, zonder iets te wijzigen voordat je akkoord gaat |
+| `reconcile` | `plan_id`, `account_id`, `bank_balance` | `reconcile_account` aan te roepen; een verschil uit het antwoord uit te leggen en je te helpen het op te lossen; alleen te corrigeren als je erom vraagt; de afstemming met je te bevestigen |
+| `plan_next_month` | `plan_id` | `forecast_balance` voor drie maanden aan te roepen en de aannames te tonen, opnieuw te draaien met je correcties; de huidige maand te lezen met `get_category_balances`; de bedragen van volgende maand zo voor te stellen dat elke valuta-eenheid een taak heeft; de bedragen die je accepteert toe te passen, één `set_category_budget` tegelijk |
+
+Een test faalt als een prompt een tool noemt die niet bestaat.

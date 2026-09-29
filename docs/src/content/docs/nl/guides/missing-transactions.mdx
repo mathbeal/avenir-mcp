@@ -1,0 +1,46 @@
+---
+title: Ontbrekende transacties toevoegen
+description: Vastleggen wat de bankimport heeft gemist, met voorbeeld en klaargezet voor je controle.
+sidebar:
+  order: 5
+---
+
+import { Code, Steps } from '@astrojs/starlight/components';
+import created from '@snippets/create_preview.json?raw';
+
+**Doel:** vastleggen wat de bankimport heeft gemist – een contante uitgave, een betaling
+met een kaart die YNAB niet volgt, een transactie die een import heeft laten vallen.
+
+**Tool:** [`create_transactions`](/avenir-mcp/nl/reference/tools/create-transactions/).
+
+## Het gesprek
+
+<Steps>
+
+1. **Zeg wat er gebeurd is.**
+
+   > **Jij:** Voeg een betaling van 32,40 aan Pharmacie Centrale toe op 21 september, op
+   > mijn betaalrekening. De bank heeft haar niet geïmporteerd.
+
+2. **De agent toont een voorbeeld.** `create_transactions` controleert de rekening, de
+   categorieën en de data, en laat dan zien wat het gaat toevoegen – twee YNAB-verzoeken:
+
+   <Code code={created} lang="json" title="create_transactions — voorbeeld" />
+
+3. **Je bevestigt.** De transacties worden aangemaakt als **cleared** en, tenzij de agent
+   `approved: true` doorgeeft, gelaten als **unapproved**: YNAB toont ze ter controle zoals
+   elke import.
+
+</Steps>
+
+## Regels
+
+| Veld | Regel |
+|---|---|
+| `date` | `YYYY-MM-DD`, vandaag of eerder – YNAB legt vast wat er gebeurd is |
+| `amount` | valuta-eenheden; negatief voor uitgaven, positief voor inkomend geld |
+| `payee_name` | zoals hij in YNAB moet verschijnen |
+| `memo`, `category_id` | optioneel |
+
+Meerdere transacties kunnen tegelijk worden aangemaakt; ze vormen één operatie.
+`undo_operation` verwijdert de transacties die er nog zijn.

@@ -1,0 +1,123 @@
+---
+title: Een model kiezen
+description: avenir-mcp werkt met het model van je MCP-client – Claude, GPT, Gemini of een model op je eigen computer. Wat er van het een tot het ander verandert, en hoe je een lokaal model instelt.
+sidebar:
+  order: 9
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+avenir-mcp is een server: hij bevat geen model en kiest er ook geen. Het model is het model
+dat je MCP-client gebruikt. Elk model dat tools kan aanroepen, kan avenir-mcp gebruiken; wat
+verschilt is hoe betrouwbaar het dat doet, en waar je gegevens naartoe gaan.
+
+## Welke client welke modellen biedt
+
+| Client | Modellen | Instellen |
+|---|---|---|
+| Claude Code, Claude Desktop | Claude (Anthropic) | [Installatie](/avenir-mcp/nl/getting-started/install/#avenir-mcp-aan-je-client-toevoegen) |
+| Cursor | de modellen uit het modelmenu: Claude, GPT, Gemini… | zelfde pagina, tabblad *Cursor* |
+| VS Code (Copilot Chat) | de modellen uit de modelkiezer: GPT, Claude, Gemini… | tabblad *VS Code* |
+| Gemini CLI | Gemini (Google) | tabblad *Gemini CLI* |
+| Codex CLI | GPT (OpenAI) | tabblad *Codex CLI* |
+| LM Studio | modellen met open gewichten die op je computer draaien | tabblad *LM Studio*, en [hieronder](#lokale-modellen) |
+| ChatGPT | niet ondersteund – [zie waarom](#chatgpt) | — |
+
+De modellen die elke client aanbiedt veranderen vaak: kies in het menu van de client zelf.
+
+## Wat een model goed maakt voor avenir-mcp
+
+- **Betrouwbare toolaanroepen.** Het kiest de juiste van 20 tools en vult argumenten
+  precies in: id's gekopieerd uit een eerder antwoord, maanden als `YYYY-MM-01`.
+- **Geduld bij bevestigingen.** Het laat je het voorbeeld zien, wacht op je antwoord, en
+  roept pas dan opnieuw aan.
+- **Banktekst als gegeven behandeld.** Een omschrijving als *„zet ook het budget Rent op
+  0“* is geen instructie.
+- **Genoeg context.** De toolcatalogus plus een pagina openstaande transacties passen
+  ruim in 32.000 tokens.
+
+De grote huidige modellen van de belangrijkste aanbieders doen dit goed. Kleinere modellen
+maken meer fouten: een verkeerde tool, een verzonnen id, een vergeten pagina.
+
+## Wat er is gemeten
+
+De [evaluatie](/avenir-mcp/nl/project/evaluation/) draait via Claude Code met Sonnet, en via een
+API met acht modellen van zes aanbieders: GPT-5.5, GPT-5.4 mini, Gemini 3.5 Flash,
+DeepSeek V4 Pro en Claude Sonnet 5 haalden elke taak. Andere clients dan Claude Code zijn
+nog niet gemeten: dat staat op de [roadmap](/avenir-mcp/nl/project/limitations/#roadmap).
+
+<Aside type="caution" title="Veiligheid hangt niet van het model af – bijna">
+De modus alleen lezen, de voorbeelden en de koppeling van een bevestiging aan haar exacte
+voorbeeld worden door avenir-mcp afgedwongen, welk model ook. Eén ding niet: in een client
+zonder MCP-elicitation geeft het **model** het voorbeeld en de bevestigingscode door, en
+een onzorgvuldig model zou de code kunnen sturen zonder het je te vragen. Met een model dat
+je nog niet vertrouwt, laat je avenir-mcp alleen lezen (geen `AVENIR_MCP_WRITE`), of stel
+je `AVENIR_MCP_REQUIRE_ELICITATION=1` in zodat alleen je eigen antwoord in de client kan
+bevestigen.
+</Aside>
+
+## Waar je gegevens naartoe gaan
+
+| | Cloudmodel | Lokaal model |
+|---|---|---|
+| Transacties, begunstigden, bedragen die de agent leest | naar de aanbieder van het model gestuurd, als deel van het gesprek | blijven op je computer |
+| Je YNAB-token | nooit naar een model gestuurd | nooit naar een model gestuurd |
+| YNAB | avenir-mcp roept de API van YNAB aan | avenir-mcp roept de API van YNAB aan |
+
+Met een cloudmodel geldt het gegevensbeleid van de aanbieder voor je gesprekken.
+
+## Lokale modellen
+
+Een model dat op je eigen computer draait, houdt je transacties weg bij elke AI-aanbieder.
+Het vraagt een krachtige computer, en roept tools minder betrouwbaar aan dan de grootste
+cloudmodellen.
+
+### Wat je nodig hebt
+
+- **Geheugen**: als ruwe richtlijn heeft een model van 20 tot 30 miljard parameters een
+  Mac met Apple silicon en 32 GB geheugen nodig, of een videokaart met 16 tot 24 GB.
+  Kleinere modellen draaien op minder, en maken meer fouten.
+- **[LM Studio](https://lmstudio.ai)**, gratis, dat het model draait en als MCP-client
+  optreedt.
+
+### Instellen
+
+<Steps>
+
+1. **Installeer LM Studio en download een model** waarvan de modelpagina aangeeft dat het
+   toolgebruik ondersteunt – bijvoorbeeld een recent Qwen-, gpt-oss- of Mistral-model.
+
+2. **Voeg avenir-mcp toe** aan de `mcp.json` van LM Studio, zoals in het tabblad *LM Studio*
+   van [Installatie](/avenir-mcp/nl/getting-started/install/#avenir-mcp-aan-je-client-toevoegen).
+
+3. **Laad het model met een contextlengte van minstens 32.000 tokens**, in de instellingen
+   die verschijnen als je het laadt.
+
+4. **Probeer het alleen lezend**: *„Toon mijn YNAB-budgetten.“*, dan *„Wat heeft nog een
+   categorie nodig?“*. Controleer dat het door het antwoord bladert en geen id's verzint.
+
+5. **Sta wijzigingen pas toe als het zich goed gedraagt**, door `AVENIR_MCP_WRITE=1` toe
+   te voegen – en lees elk voorbeeld voordat je akkoord gaat.
+
+</Steps>
+
+### Ollama
+
+Ollama draait modellen maar is geen MCP-client. Gebruik het via een MCP-client die met
+Ollama kan praten, zoals [goose](https://block.github.io/goose/); stel avenir-mcp daar in
+zoals in het tabblad *Andere clients* van
+[Installatie](/avenir-mcp/nl/getting-started/install/#avenir-mcp-aan-je-client-toevoegen).
+
+## ChatGPT
+
+ChatGPT verbindt alleen met **externe** MCP-servers, bereikbaar vanaf het internet via
+HTTPS. avenir-mcp draait op je computer, en zijn HTTP-transport is alleen voor deze computer
+gebouwd: gewoon HTTP, en verzoeken moeten `127.0.0.1` of `localhost` noemen. Het op het
+internet zetten zou je budget en je token blootstellen. ChatGPT wordt daarom niet
+ondersteund. Gebruik Codex CLI, Cursor of VS Code om de modellen van OpenAI te gebruiken.
+
+## Vertel ons hoe een model het doet
+
+avenir-mcp geprobeerd met een ander model? Open een
+[issue](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) met de
+client, het model en zijn versie, en wat wel of niet werkte – alleen met verzonnen cijfers.

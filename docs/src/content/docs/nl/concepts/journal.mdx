@@ -1,0 +1,75 @@
+---
+title: Journaal en ongedaan maken
+description: Het lokale register van toegepaste operaties, zijn formaat, en wat ongedaan maken precies herstelt.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Elke bevestigde schrijfactie wordt vastgelegd in een lokaal journaal, zodat
+`undo_operation` haar later kan terugdraaien – ook nadat de server opnieuw is gestart.
+
+## Waar
+
+| | |
+|---|---|
+| Standaardbestand | `$XDG_STATE_HOME/avenir-mcp/journal.jsonl`, anders `~/.local/state/avenir-mcp/journal.jsonl` |
+| Gekozen bestand | `AVENIR_MCP_JOURNAL` |
+| Rechten | aangemaakt met `0600`: alleen voor jou leesbaar en schrijfbaar |
+| Inhoud | alleen id's – geen bedrag, geen begunstigde, geen omschrijving, geen token |
+
+## Formaat
+
+JSON Lines, alleen toevoegen. Een toegepaste operatie is één regel:
+
+```json
+{"operation_id":"5f2c9a1e7b30","plan_id":"demo-budget","kind":"categorize","applied_at":"2026-09-25T09:12:04+00:00","moves":[{"transaction_id":"tx-048","from_category_id":null,"to_category_id":"cat-groceries"}],"details":{}}
+```
+
+Ongedaan maken voegt een markering toe; er wordt nooit iets herschreven:
+
+```json
+{"undone":"5f2c9a1e7b30"}
+```
+
+| Veld | Betekenis |
+|---|---|
+| `operation_id` | 12 willekeurige hexadecimale tekens |
+| `plan_id` | het gewijzigde budget |
+| `kind` | `categorize`, `budget`, `reconcile` of `create` |
+| `applied_at` | ISO 8601, UTC, op de seconde |
+| `moves` | voor `categorize`: de categorie van elke transactie ervoor en erna |
+| `details` | voor de andere soorten, wat ongedaan maken nodig heeft (hieronder) |
+
+| `kind` | `details` |
+|---|---|
+| `budget` | `month`, `category_id`, `from` en `to` in milliunits |
+| `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (of `null`) |
+| `create` | `transaction_ids` |
+
+## Welke operatie ongedaan maken kiest
+
+`undo_operation` zonder id neemt de **meest recente operatie van het budget die nog van
+kracht is**: niet ongedaan gemaakt, en zelf geen ongedaanmaking. Met een id die operatie,
+als ze nog van kracht is. Anders: *„Nothing to undo: no operation of this budget is still
+in effect.“*
+
+## Wat ongedaan maken herstelt
+
+| `kind` | Ongedaan maken | Eerst gecontroleerd | Als de controle faalt |
+|---|---|---|---|
+| `categorize` | elke transactie terug naar haar vorige categorie | haar categorie is nog die welke de operatie heeft gezet | die transactie blijft ongemoeid en staat in `conflicts` |
+| `budget` | het vorige bedrag | het bedrag is nog dat welke de operatie heeft gezet | niets geschreven; `conflicts` noemt de categorie |
+| `reconcile` | *reconciled* transacties terug naar *cleared*; de correctie verwijderd | elke transactie is nog *reconciled* | de niet meer afgestemde worden overgeslagen |
+| `create` | de aangemaakte transacties verwijderd | elke transactie bestaat nog | de al verwijderde staan in `conflicts` |
+
+Ongedaan maken krijgt een voorbeeld en een bevestiging zoals elke schrijfactie. Het ongedaan
+maken van een operatie `categorize` legt de ongedaanmaking zelf vast als operatie en
+markeert beide als ongedaan, zodat een ongedaanmaking niet ongedaan kan worden gemaakt.
+
+<Aside type="note">
+Het journaal is lokaal: een operatie die vanaf een andere computer is gedaan, of voordat het
+journaalbestand werd gewijzigd of verwijderd, kan van hieruit niet ongedaan worden gemaakt.
+Het bestand verwijderen vergeet de geschiedenis en verder niets.
+</Aside>

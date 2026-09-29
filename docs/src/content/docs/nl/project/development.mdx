@@ -1,0 +1,129 @@
+---
+title: Ontwikkeling
+description: Indeling van de repository, installatie, de controles van de CI, tests, gegenereerde documentatie en releases.
+sidebar:
+  order: 1
+---
+
+import { FileTree, Aside } from '@astrojs/starlight/components';
+
+## Indeling
+
+<FileTree>
+- avenir_mcp/ — de server (zie [Architectuur](/avenir-mcp/nl/concepts/architecture/))
+- tests/ — unittests, protocoltests, documentatie- en hygiënetests
+- evals/ — het demobudget, een vervanger voor de API van YNAB, de evaluatie van agents
+- docsgen/ — genereert de toolnaslag, de foutencatalogus en de voorbeelden
+- docs/ — deze site (Astro Starlight, Engels, Frans, Spaans, Duits, Nederlands)
+- AGENTS.md — het contract voor bijdragers, mens of niet
+- justfile — elk commando hieronder
+- pyproject.toml, uv.lock — het Python-project, vastgelegd
+</FileTree>
+
+## Installeren
+
+```bash
+git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
+uv sync            # Python 3.14 en de vastgelegde afhankelijkheden
+just check         # elke controle die de CI draait
+```
+
+<Aside type="tip">
+Staat het project in een map die iCloud Drive synchroniseert, houd de virtuele omgeving dan
+erbuiten: `UV_PROJECT_ENVIRONMENT=~/.local/share/avenir-mcp/venv uv sync`. iCloud kan het
+bestand `.pth` van een bewerkbare installatie verbergen, dat Python dan negeert.
+</Aside>
+
+## De controles
+
+`just check` draait, in de volgorde van de CI:
+
+| Controle | Commando | Faalt als |
+|---|---|---|
+| opmaak | `ruff format --check` | een bestand niet is opgemaakt |
+| lint | `pylint` | de score onder 10,00 ligt |
+| ruff | `ruff check` | een docstring van het pakket niet in Google-stijl is of een argument, de returnwaarde of een opgeworpen exceptie weglaat; imports niet gesorteerd zijn; de beveiligingscontroles van bandit een riskant patroon vinden (TLS niet gecontroleerd, een shellcommando, een wachtwoord in de code…) |
+| afhankelijkheden | `deptry .` | de code een pakket importeert dat `pyproject.toml` niet declareert, of er een declareert dat ze niet gebruikt |
+| types | `mypy` (strikt) | welke typefout ook |
+| tests | `pytest` | een test faalt, er **welke waarschuwing ook** optreedt, of de dekking van regels **of vertakkingen** onder 100 % ligt |
+| woordenschat | `lexdrift check avenir_mcp --baseline lexdrift.lock` | er een nieuw woord verschijnt voor een idee dat al een naam heeft |
+| lock | `uv lock --check` | `uv.lock` niet overeenkomt met `pyproject.toml` |
+
+De CI draait ook `typos`, `zizmor` op de workflows, `pip-audit` op de vastgelegde
+afhankelijkheden, `gitleaks` op elke commit van de geschiedenis (`just secrets`, met
+Docker), de build van de documentatie met de tests van haar eigen code, CodeQL en de
+OpenSSF Scorecard (zodra de repository openbaar is), een wekelijkse vergelijking van de API
+van YNAB met zijn momentopname (`just api-drift`), en de officiële MCP Inspector
+(`just inspect`), die de server controleert zoals een client hem op het demobudget ziet:
+zijn lijsten, de overdraagbaarheid van zijn toolschema's, en één aanroep van elk soort. De
+testsuite draait op Linux en macOS met Python 3.12, 3.13 en 3.14, en op Windows met Python
+3.14 (bij een pull request probeert macOS alleen 3.14: zijn runners kosten evenveel als tien
+Linux-runners); de dekking wordt afgedwongen op Linux en macOS, waar de controles van
+bestandsrechten gelden. Python 3.15 draait ook, als experiment: een fout daar is een
+waarschuwing, geen rode controle. Bij een pull request moet elke commit afgetekend zijn
+(sign-off) en moet de titel met het soort wijziging beginnen. Twee controles moeten groen
+zijn: **CI passed**, die voor elke job van de kwaliteitsworkflow staat, en **MCP
+Inspector**, een eigen workflow zodat zijn badge hem alleen toont.
+
+## Afhankelijkheden
+
+[Renovate](https://docs.renovatebot.com) opent elke maandagochtend pull requests:
+
+| Update | Behandeling |
+|---|---|
+| ontwikkeltools, CI-actions, de documentatiesite (minor en patch) | gegroepeerd, vanzelf samengevoegd zodra de CI groen is |
+| `fastmcp`, `httpx`, `pydantic` – ze draaien vóór de budgetten van gebruikers | elk een eigen pull request, met de hand beoordeeld; de evaluatie draait vóór een update van `fastmcp` |
+| elke major-versie | elk een eigen pull request, met de hand beoordeeld |
+| een bekende kwetsbaarheid | meteen, op welke dag ook |
+
+Een nieuwe release wacht drie dagen voordat Renovate haar voorstelt, zodat een kapotte of
+kwaadaardige versie die snel wordt ingetrokken het project nooit bereikt.
+
+## Tests
+
+| Soort | Bestanden | Wat ze controleren |
+|---|---|---|
+| Unit | `test_classifier`, `test_triage`, `test_writes`, `test_reconcile`, `test_forecast`, `test_analytics`, `test_journal`, `test_client` | de pure logica en de HTTP-client, met verzonnen gegevens |
+| Eigenschappen | `test_properties` | met Hypothesis, regels die voor elke invoer gelden: bedragen overleven de heen- en terugweg, verdelen houdt elke cent, maanden tellen op, cursors, banktekst, vingerafdrukken van bevestigingen |
+| Protocol | `test_protocol*`, `test_context`, `test_policy` | tools via een MCP-client in het geheugen: schema's, annotaties, bevestigingspaden, ongedaan maken |
+| Documentatie | `test_docs` | gegenereerde pagina's en voorbeelden komen overeen met de code; elke pagina bestaat in elke vertaling; elke omgevingsvariabele is gedocumenteerd |
+| API-dekking | `test_api_coverage` | elke operatie van de API van YNAB wordt door een tool gebruikt, is gepland of met een reden weggelaten; de client roept alleen gedocumenteerde paden aan |
+| Hygiëne | `test_hygiene` | geen IBAN, token, afschrift, thuispad of Finder-kopie in de repository |
+| Evaluatie | `test_evals` | de eigen controles van de evaluatie kloppen |
+
+Tests worden eerst geschreven. Geen enkele test roept YNAB aan.
+
+`just mutate` draait mutatietests (mutmut) op de modules die rekenen: het verandert de code
+expres, zo'n 1.500 keer, en controleert dat er elke keer een test faalt. De wijzigingen die
+geen enkele test opmerkt, wijzen naar de tests die nog geschreven moeten worden; veel zijn
+onschuldig, zoals de formulering van een melding.
+
+## Documentatie
+
+```bash
+uv run python -m docsgen   # toolpagina's, foutencatalogus, voorbeelden
+just docs                  # bouwt de site in elke taal; kapotte links falen
+just docs-serve            # live voorbeeld op http://localhost:4321/avenir-mcp/
+```
+
+`docsgen` draait avenir-mcp op het demobudget en schrijft op wat het werkelijk antwoordt,
+met vaste datum en vervangen willekeurige id's. Met de hand geschreven pagina's bestaan in
+het Engels, Frans, Spaans, Duits en Nederlands; een test faalt als er een ontbreekt.
+
+## Evaluatie
+
+```bash
+just evaluate    # alle taken, Sonnet, ongeveer 1 USD van je Claude-abonnement
+uv run python -m evals.run --task classify --model haiku
+```
+
+Zie [Evaluatie](/avenir-mcp/nl/project/evaluation/).
+
+## Commits en releases
+
+- Commitberichten beginnen met een type – `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
+  `build:`, `ci:`, `chore:` – omdat git-cliff er `CHANGELOG.md` uit genereert.
+- Om te releasen: `just changelog`, committen, tag `vX.Y.Z` passend bij
+  `avenir_mcp.__version__`, en een GitHub-release publiceren. De workflow `publish` bouwt,
+  draait `twine check --strict` en uploadt naar PyPI via Trusted Publishing: er wordt geen
+  token opgeslagen.
