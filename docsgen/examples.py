@@ -96,6 +96,17 @@ CALLS: list[Call] = [
         },
     ),
     Call(
+        "move_preview",
+        "move_money",
+        {
+            "plan_id": BUDGET,
+            "month": "2026-09-01",
+            "from_category_id": "cat-tennis",
+            "to_category_id": "cat-restaurants",
+            "amount": 30,
+        },
+    ),
+    Call(
         "create_preview",
         "create_transactions",
         {

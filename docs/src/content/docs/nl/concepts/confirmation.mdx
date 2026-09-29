@@ -18,6 +18,7 @@ Elke tool bouwt een **object**: de exacte wijziging, als gegevens.
 |---|---|
 | `apply_categories` | de lijst met wijzigingen (transactie, categorie erna) |
 | `set_category_budget` | categorie, maand (omgezet), bedrag in milliunits |
+| `move_money` | beide categorieën, maand (omgezet), verschoven bedrag in milliunits |
 | `update_category` | categorie, naam erna, groep erna |
 | `create_category` | groep, naam |
 | `create_transactions` | rekening, de transacties, `approved` |
@@ -118,6 +119,7 @@ De vragen komen van de server en zijn in het Engels:
 |---|---|
 | `apply_categories` | *Recategorise 2 transaction(s)?*, dan één regel per wijziging: datum, begunstigde, bedrag, ervoor → erna |
 | `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `move_money` | *Move 30.00 from Tennis to Restaurants for 2026-09-01?*, dan één regel per categorie, ervoor → erna |
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?*, dan één regel per transactie |

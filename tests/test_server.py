@@ -48,6 +48,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "update_category",
             "create_category",
             "set_category_budget",
+            "move_money",
             "create_transactions",
             "approve_transactions",
         ]

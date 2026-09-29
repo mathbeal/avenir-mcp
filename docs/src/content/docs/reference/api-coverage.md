@@ -29,9 +29,9 @@ YNAB's API 1.87.0 has 44 operations: 13 used by avenir-mcp, 14 planned, 17 left 
 | `GET /plans/{plan_id}/money_movement_groups` | planned | Moves of money grouped as the user made them, for the monthly review. |
 | `GET /plans/{plan_id}/money_movements` | planned | Money moved between categories, for the monthly review. |
 | `GET /plans/{plan_id}/months` | covered | `get_spending_trends` |
-| `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_monthly_summary`, `get_spending_trends`, `set_category_budget`, `undo_operation` |
+| `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_monthly_summary`, `get_spending_trends`, `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/categories/{category_id}` | excluded | A month's categories come in one request with the month. |
-| `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` | covered | `set_category_budget`, `undo_operation` |
+| `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` | covered | `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/money_movement_groups` | planned | Moves of money grouped as the user made them in a month, for the monthly review. |
 | `GET /plans/{plan_id}/months/{month}/money_movements` | planned | Money moved between categories in a month, for the monthly review. |
 | `GET /plans/{plan_id}/months/{month}/transactions` | excluded | find_transactions reads the plan's transactions from a date, in one request. |

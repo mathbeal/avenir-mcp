@@ -37,7 +37,7 @@ Das Rückgängigmachen hängt eine Markierung an; nichts wird je überschrieben:
 |---|---|
 | `operation_id` | 12 zufällige Hexadezimalzeichen |
 | `plan_id` | der geänderte Plan |
-| `kind` | `categorize`, `budget`, `reconcile` oder `create` |
+| `kind` | `categorize`, `budget`, `move`, `reconcile` oder `create` |
 | `applied_at` | ISO 8601, UTC, sekundengenau |
 | `moves` | für `categorize`: die Kategorie jeder Transaktion vorher und nachher |
 | `details` | für die anderen Arten, was das Rückgängigmachen braucht (unten) |
@@ -45,6 +45,7 @@ Das Rückgängigmachen hängt eine Markierung an; nichts wird je überschrieben:
 | `kind` | `details` |
 |---|---|
 | `budget` | `month`, `category_id`, `from` und `to` in Milliunits |
+| `move` | `month` und `changes`: für jede der beiden Kategorien `category_id`, `from` und `to` in Milliunits |
 | `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (oder `null`) |
 | `create` | `transaction_ids` |
 
@@ -61,6 +62,7 @@ this plan is still in effect.“*
 |---|---|---|---|
 | `categorize` | jede Transaktion zurück auf ihre vorherige Kategorie | ihre Kategorie ist noch die, die die Operation gesetzt hat | diese Transaktion bleibt unberührt und wird in `conflicts` aufgeführt |
 | `budget` | den vorherigen Betrag | der Betrag ist noch der, den die Operation gesetzt hat | nichts geschrieben; `conflicts` nennt die Kategorie |
+| `move` | beide vorherigen Beträge | beide Beträge sind noch die, die die Operation gesetzt hat | nichts geschrieben; `conflicts` nennt die geänderte Kategorie |
 | `reconcile` | *reconciled* Transaktionen zurück auf *cleared*; die Anpassung gelöscht | jede ist noch *reconciled* | die nicht mehr abgeglichenen werden übersprungen |
 | `create` | die angelegten Transaktionen gelöscht | jede existiert noch | die bereits gelöschten werden in `conflicts` aufgeführt |
 

@@ -47,7 +47,7 @@ class Entry(Model):
     plan_id: str = Field(validation_alias=AliasChoices("plan_id", "budget_id"))
     """Plan the operation changed."""
     kind: str
-    """categorize, reconcile, budget or create."""
+    """categorize, reconcile, budget, move or create."""
     applied_at: str
     """When it was applied, ISO 8601 in UTC."""
     moves: list[Move]
@@ -129,7 +129,7 @@ class Journal:
 
         Args:
             plan_id: The plan it changed.
-            kind: categorize, reconcile, budget or create.
+            kind: categorize, reconcile, budget, move or create.
             moves: Category changes, for a recategorisation.
             details: What undoing another kind needs, as identifiers only.
 

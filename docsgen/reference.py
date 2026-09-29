@@ -26,7 +26,13 @@ GUIDE_TITLES: dict[str, dict[str, str]] = json.loads(
     (HERE / "guide_titles.json").read_text(encoding="utf-8")
 )
 
-UNDOABLE = {"apply_categories", "set_category_budget", "reconcile_account", "create_transactions"}
+UNDOABLE = {
+    "apply_categories",
+    "set_category_budget",
+    "move_money",
+    "reconcile_account",
+    "create_transactions",
+}
 UNCONFIRMED_WRITES = {"approve_transactions"}
 
 # Tool -> the page that shows it at work.
@@ -40,6 +46,7 @@ GUIDES = {
     "get_spending_trends": "guides/monthly-review",
     "forecast_balance": "guides/plan-ahead",
     "set_category_budget": "guides/categories",
+    "move_money": "guides/monthly-review",
     "create_transactions": "guides/missing-transactions",
     "create_category": "guides/categories",
     "update_category": "guides/categories",

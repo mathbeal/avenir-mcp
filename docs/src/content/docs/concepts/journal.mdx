@@ -37,7 +37,7 @@ Undoing it appends a marker; nothing is ever rewritten:
 |---|---|
 | `operation_id` | 12 random hexadecimal characters |
 | `plan_id` | the plan changed |
-| `kind` | `categorize`, `budget`, `reconcile` or `create` |
+| `kind` | `categorize`, `budget`, `move`, `reconcile` or `create` |
 | `applied_at` | ISO 8601, UTC, to the second |
 | `moves` | for `categorize`: each transaction's category before and after |
 | `details` | for the other kinds, what undoing needs (below) |
@@ -45,6 +45,7 @@ Undoing it appends a marker; nothing is ever rewritten:
 | `kind` | `details` |
 |---|---|
 | `budget` | `month`, `category_id`, `from` and `to` in milliunits |
+| `move` | `month`, and `changes`: for each of the two categories, `category_id`, `from` and `to` in milliunits |
 | `reconcile` | `account_id`, `reconciled_ids`, `adjustment_id` (or `null`) |
 | `create` | `transaction_ids` |
 
@@ -61,6 +62,7 @@ effect.”*
 |---|---|---|---|
 | `categorize` | each transaction back to its previous category | its category is still the one the operation set | that transaction is left alone and listed in `conflicts` |
 | `budget` | the previous amount | the amount is still the one the operation set | nothing written; `conflicts` names the category |
+| `move` | both previous amounts | both amounts are still the ones the operation set | nothing written; `conflicts` names the category that changed |
 | `reconcile` | *reconciled* transactions back to *cleared*; the adjustment deleted | each is still *reconciled* | those no longer reconciled are skipped |
 | `create` | the created transactions deleted | each still exists | those already deleted are listed in `conflicts` |
 

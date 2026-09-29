@@ -18,6 +18,7 @@ Each tool builds a **subject**: the exact change, as data.
 |---|---|
 | `apply_categories` | the list of changes (transaction, category after) |
 | `set_category_budget` | category, month (resolved), amount in milliunits |
+| `move_money` | both categories, month (resolved), amount moved in milliunits |
 | `update_category` | category, name after, group after |
 | `create_category` | group, name |
 | `create_transactions` | account, the transactions, `approved` |
@@ -115,6 +116,7 @@ Only clients that support MCP elicitation can then write.
 |---|---|
 | `apply_categories` | *Recategorise 2 transaction(s)?* then one line per change: date, payee, amount, before → after |
 | `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `move_money` | *Move 30.00 from Tennis to Restaurants for 2026-09-01?* then one line per category, before → after |
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?* then one line per transaction |
