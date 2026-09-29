@@ -10,6 +10,7 @@ import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 import approved from '@snippets/approve.json?raw';
 import imported from '@snippets/import.json?raw';
+import flagged from '@snippets/flag_preview.json?raw';
 
 **Goal:** every transaction imported from your bank gets the right category, without going
 through them one by one in YNAB.
@@ -99,6 +100,11 @@ Details and examples: [Suggestions](/avenir-mcp/concepts/suggestions/).
   and changes nothing:
 
   <Code code={imported} lang="json" title="import_transactions" />
+- **Something to check first:** the September import brought *Market Fresh* in twice. Ask
+  *“flag the second one so I check it in YNAB”*: `flag_transactions` sets a coloured flag,
+  after confirmation, and `undo_operation` removes it:
+
+  <Code code={flagged} lang="json" title="flag_transactions — preview" />
 - **One account or one period:** ask *“only the checking account”*; the agent filters
   the list before applying.
 - **Many transactions:** the agent pages with `next_cursor`, then applies in one or a

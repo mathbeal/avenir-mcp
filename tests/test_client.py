@@ -968,3 +968,18 @@ def test_scheduled_transactions_are_read_from_the_plan() -> None:
     assert found == [{"id": "s1"}]
     url = ctx.__aenter__.return_value.get.call_args.args[0]
     assert url == "https://api.ynab.com/v1/plans/b1/scheduled_transactions"
+
+
+def test_set_flags_sends_one_bulk_patch_and_null_removes_a_flag() -> None:
+    """Flags go in one request; None becomes null, which YNAB reads as no flag."""
+    ctx = _async_client_returning({"data": {"transaction_ids": ["t1", "t2"]}})
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            ids = asyncio.run(client.set_flags("b1", [("t1", "red"), ("t2", None)]))
+            nothing = asyncio.run(client.set_flags("b1", []))
+    sent = ctx.__aenter__.return_value.patch.call_args.kwargs["json"]
+    assert sent == {
+        "transactions": [{"id": "t1", "flag_color": "red"}, {"id": "t2", "flag_color": None}]
+    }
+    assert ids == ["t1", "t2"]
+    assert nothing == []

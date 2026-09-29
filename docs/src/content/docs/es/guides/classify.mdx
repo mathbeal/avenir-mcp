@@ -10,6 +10,7 @@ import pending from '@snippets/suggest_categories.json?raw';
 import preview from '@snippets/apply_preview.json?raw';
 import approved from '@snippets/approve.json?raw';
 import imported from '@snippets/import.json?raw';
+import flagged from '@snippets/flag_preview.json?raw';
 
 **Objetivo:** que cada transacción importada de su banco reciba la categoría correcta,
 sin recorrerlas una a una en YNAB.
@@ -102,6 +103,11 @@ Detalles y ejemplos: [Sugerencias](/avenir-mcp/es/concepts/suggestions/).
   porque no borra ni cambia nada:
 
   <Code code={imported} lang="json" title="import_transactions" />
+- **Algo que revisar antes:** la importación de septiembre trajo *Market Fresh* dos veces.
+  Pida *«marca la segunda con una bandera, la revisaré en YNAB»*: `flag_transactions` pone
+  una bandera de color, tras la confirmación, y `undo_operation` la quita:
+
+  <Code code={flagged} lang="json" title="flag_transactions — vista previa" />
 - **Una cuenta o un periodo:** pida *«solo la cuenta corriente»*; el agente filtra la
   lista antes de aplicar.
 - **Muchas transacciones:** el agente pagina con `next_cursor` y aplica en uno o varios

@@ -9,7 +9,7 @@ from fastmcp import Context  # pylint: disable=import-error
 from fastmcp.exceptions import ToolError  # pylint: disable=import-error
 from mcp.types import InputRequiredResult  # pylint: disable=import-error
 
-from avenir_mcp import client, journal, writes
+from avenir_mcp import client, flags, journal, writes
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteResult, ask, not_applied, result_of, write_plan
 
@@ -36,7 +36,8 @@ async def undo_operation(
 
     Recategorised transactions go back to their previous category; a
     reconciliation is reverted (statuses and adjustment); a budgeted amount goes
-    back to its previous value, both of a move_money; created transactions are deleted. Anything
+    back to its previous value, both of a move_money; created transactions are deleted; flags
+    go back to their previous colour. Anything
     changed again since the operation is left alone and listed in `conflicts`.
     Confirmation works as for apply_categories.
 
@@ -73,6 +74,8 @@ async def undo_operation(
         return await _undo_move(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "create":
         return await _undo_create(ctx, plan_id, book, entry, confirmation)
+    if entry.kind == "flag":
+        return await _undo_flag(ctx, plan_id, book, entry, confirmation)
     transactions = await client.get_transactions(plan_id)
     categories = await client.get_categories(plan_id)
     plan = writes.plan_undo(transactions, categories, entry.moves)
@@ -279,3 +282,41 @@ async def _undo_create(
         await client.delete_transaction(plan_id, tx_id)
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Created transactions deleted.", writes.Plan(conflicts=gone))
+
+
+async def _undo_flag(
+    ctx: Context,
+    plan_id: str,
+    book: journal.Journal,
+    entry: journal.Entry,
+    confirmation: str | None,
+) -> WriteResult | InputRequiredResult:
+    """Put flags back to their previous colour, except those changed since.
+
+    Args:
+        ctx: The MCP context, used to ask the user.
+        plan_id: YNAB plan id or 'last-used'.
+        book: The journal, to mark the operation undone.
+        entry: The operation to undo.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        What was done, the flags changed since as conflicts, or what to return instead when
+        the user did not agree.
+    """
+    now = {tx["id"]: flags.current(tx) for tx in await client.get_transactions(plan_id)}
+    changes = entry.details["changes"]
+    back = [
+        c for c in changes if c["transaction_id"] in now and now[c["transaction_id"]] == c["to"]
+    ]
+    moved = [c["transaction_id"] for c in changes if c not in back]
+    if not back:
+        conflict = writes.Plan(conflicts=moved)
+        return result_of("nothing_to_do", "Every flag changed since: left alone.", conflict)
+    question = f"Undo: put back the flag of {len(back)} transaction(s)?"
+    refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
+    if refused is not None:
+        return refused
+    await client.set_flags(plan_id, [(c["transaction_id"], c["from"]) for c in back])
+    book.mark_undone(entry.operation_id)
+    return result_of("applied", "Flags restored.", writes.Plan(conflicts=moved))

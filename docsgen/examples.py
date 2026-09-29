@@ -133,6 +133,12 @@ CALLS: list[Call] = [
         {"plan_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},
     ),
     Call("import", "import_transactions", {"plan_id": BUDGET}),
+    # The duplicate import of 19 September, flagged for the user to check in YNAB.
+    Call(
+        "flag_preview",
+        "flag_transactions",
+        {"plan_id": BUDGET, "flags": [{"transaction_id": "tx-051", "color": "orange"}]},
+    ),
     Call(
         "approve",
         "approve_transactions",

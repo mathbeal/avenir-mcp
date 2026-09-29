@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp da a un agente 22 herramientas, 4 recursos y 4 prompts sobre sus planes de
+avenir-mcp da a un agente 23 herramientas, 4 recursos y 4 prompts sobre sus planes de
 YNAB. Esta página los lista según lo que quiera hacer. Cada fila da una frase que puede
 decir al agente; el agente elige la herramienta.
 
@@ -57,6 +57,7 @@ Guía: [Revisar un mes](/avenir-mcp/es/guides/monthly-review/).
 | *«Trae las últimas transacciones de mi banco.»* | [`import_transactions`](/avenir-mcp/es/reference/tools/import-transactions/) — lo que hace Import en YNAB, aplicado al momento | E |
 | *«¿Qué queda sin categoría?»* | [`suggest_categories`](/avenir-mcp/es/reference/tools/suggest-categories/) — transacciones pendientes, con una sugerencia cuando su historial es claro | L |
 | *«Sí, aplícalo.»* | [`apply_categories`](/avenir-mcp/es/reference/tools/apply-categories/) — un lote confirmado | E ↺ |
+| *«Marca con una bandera las que debo revisar en YNAB.»* | [`flag_transactions`](/avenir-mcp/es/reference/tools/flag-transactions/) — una bandera de color, para mirar en YNAB | E ↺ |
 | *«Divide este ticket: 81,15 en comida, 5,25 en hogar.»* | [`split_transaction`](/avenir-mcp/es/reference/tools/split-transaction/) — una transacción en varias categorías; se deshace en YNAB, no aquí | E |
 | *«Márcalas como revisadas.»* | [`approve_transactions`](/avenir-mcp/es/reference/tools/approve-transactions/) — quita la marca *unapproved* de YNAB | E |
 
