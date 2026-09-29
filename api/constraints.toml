@@ -1,0 +1,154 @@
+# The rules YNAB's specification states on what its operations take, for every
+# operation avenir-mcp uses, and what avenir-mcp does with each.
+#
+# The rules are read from the specification into api/ynab-operations.json: each
+# sentence of a field's description that limits it, and each maximum length.
+# tests/test_api_constraints.py fails when a rule of an operation avenir-mcp uses has
+# no entry here, when an entry names a rule no longer there, or when a test named
+# here does not exist. The weekly check (docsgen.api) fails when YNAB adds, rewords or
+# removes a rule.
+#
+# status:
+#   "tested"          a test shows avenir-mcp keeps to it: `tests` names them
+#   "not-applicable"  avenir-mcp never sends what the rule is about: `reason` says why
+#   "gap"             avenir-mcp does not keep to it yet: `reason` says what goes wrong
+#
+# Before writing a tool that sends YNAB something new, read the rules of that body
+# here first: each one becomes a test, or a reason.
+
+[[rule]]
+rule = "NewTransaction.import_id: maxLength 36"
+status = "not-applicable"
+reason = "create_transactions takes no import_id from the agent, and avenir-mcp sends none."
+
+[[rule]]
+rule = "SaveCategory.category_group_id: An internal category group may not be specified."
+status = "tested"
+tests = [
+  "tests/test_client.py::test_get_category_groups_skips_hidden_deleted_and_internal",
+  "tests/test_protocol_categories.py::test_invalid_new_category_is_a_tool_error",
+  "tests/test_protocol_categories.py::test_invalid_update_is_a_tool_error",
+]
+
+[[rule]]
+rule = "SaveCategory.goal_frequency: Cannot be combined with goal_target_date and is not supported for Credit Card Payment categories or categories paired to a loan account."
+status = "tested"
+tests = [
+  "tests/test_targets.py::test_contradictory_targets_are_refused",
+  "tests/test_targets.py::test_what_card_and_loan_categories_do_not_take_is_refused_first",
+  "tests/test_protocol_targets.py::test_invalid_targets_are_refused_before_asking",
+]
+
+[[rule]]
+rule = "SaveCategory.goal_frequency: Requires goal_target."
+status = "tested"
+tests = ["tests/test_targets.py::test_contradictory_targets_are_refused"]
+
+[[rule]]
+rule = "SaveCategory.goal_needs_whole_amount: Only supported for 'NEED' goals, and not supported for Credit Card Payment categories or categories paired to a loan account."
+status = "tested"
+tests = ["tests/test_targets.py::test_what_recreates_a_target_is_known_or_none"]
+
+[[rule]]
+rule = "SaveCategory.goal_needs_whole_amount: Whether the goal requires the full target amount each period."
+status = "not-applicable"
+reason = "It says what the field means, not what YNAB refuses."
+
+[[rule]]
+rule = "SaveCategory.goal_target: If goal_type is not specified, it will default to 'NEED', or to 'MF' for Credit Card Payment categories and 'DEBT' for categories paired to a loan account."
+status = "tested"
+tests = [
+  "tests/test_targets.py::test_an_amount_alone_on_a_category_without_target_is_monthly",
+  "tests/test_targets.py::test_an_amount_alone_on_a_card_category_is_monthly_funding",
+  "tests/test_targets.py::test_a_new_amount_on_a_loan_category_keeps_its_debt_payment",
+]
+# A loan category without a target yet cannot be recognised: the API does not say
+# which categories are paired to a loan. targets.py says so.
+
+[[rule]]
+rule = "SaveCategory.goal_target_date: Not supported for categories paired to a loan account."
+status = "tested"
+tests = ["tests/test_targets.py::test_what_card_and_loan_categories_do_not_take_is_refused_first"]
+
+[[rule]]
+rule = "SaveSubTransaction.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied."
+status = "gap"
+reason = "split_transaction accepts a credit card payment category for a line: YNAB ignores it, and the line is left without a category."
+
+[[rule]]
+rule = "SaveSubTransaction.memo: maxLength 500"
+status = "tested"
+tests = ["tests/test_split.py::test_memo_longer_than_ynab_allows_is_refused_by_the_schema"]
+
+[[rule]]
+rule = "SaveSubTransaction.payee_name: maxLength 200"
+status = "not-applicable"
+reason = "split_transaction sends a line's amount, category and memo, never a payee."
+
+[[rule]]
+rule = "SaveTransactionWithIdOrImportId.import_id: You may not provide both an `id` and an `import_id` and updating an `import_id` on an existing transaction is not allowed."
+status = "not-applicable"
+reason = "Every update avenir-mcp sends names the transaction by its id, never by an import_id."
+
+[[rule]]
+rule = "SaveTransactionWithIdOrImportId.import_id: maxLength 36"
+status = "not-applicable"
+reason = "Every update avenir-mcp sends names the transaction by its id, never by an import_id."
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.amount: Split transaction amounts cannot be changed and if a different amount is supplied it will be ignored."
+status = "not-applicable"
+reason = "No update avenir-mcp sends carries an amount."
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.approved: If not supplied, transaction will be unapproved by default."
+status = "tested"
+tests = ["tests/test_client.py::test_create_transactions_can_leave_them_for_review"]
+# create_transactions always sends approved, so the default never decides.
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied."
+status = "gap"
+reason = "apply_categories and create_transactions accept a credit card payment category: YNAB ignores it, while avenir-mcp reports it applied and journals it."
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.category_id: If an existing transaction is a split, the `category_id` cannot be changed."
+status = "tested"
+tests = ["tests/test_writes.py::test_plan_rejects_a_split_transaction"]
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.date: Future dates (scheduled transactions) are not permitted."
+status = "tested"
+tests = ["tests/test_protocol_create.py::test_invalid_creation_is_a_tool_error"]
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.date: Split transaction dates cannot be changed and if a different date is supplied it will be ignored."
+status = "not-applicable"
+reason = "No update avenir-mcp sends carries a date."
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.memo: maxLength 500"
+status = "tested"
+tests = [
+  "tests/test_protocol_create.py::test_the_schema_tells_agents_ynabs_length_limits",
+  "tests/test_protocol_create.py::test_invalid_creation_is_a_tool_error",
+]
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.payee_name: maxLength 200"
+status = "tested"
+tests = [
+  "tests/test_protocol_create.py::test_the_schema_tells_agents_ynabs_length_limits",
+  "tests/test_protocol_create.py::test_invalid_creation_is_a_tool_error",
+]
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.subtransactions: Splits are not allowed on tracking accounts or on transfers between on-budget accounts; a transfer to a tracking account can be a split."
+status = "tested"
+tests = ["tests/test_split.py::test_what_cannot_be_split_is_refused_with_what_to_do"]
+# Stricter than YNAB: split_transaction also refuses a transfer to a tracking account.
+
+[[rule]]
+rule = "SaveTransactionWithOptionalFields.subtransactions: Updating `subtransactions` on an existing split transaction is not supported and will return an error."
+status = "tested"
+tests = ["tests/test_split.py::test_what_cannot_be_split_is_refused_with_what_to_do"]

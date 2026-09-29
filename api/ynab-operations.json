@@ -39,7 +39,16 @@
   {
    "id": "createCategory",
    "method": "POST",
-   "path": "/plans/{plan_id}/categories"
+   "path": "/plans/{plan_id}/categories",
+   "rules": [
+    "SaveCategory.category_group_id: An internal category group may not be specified.",
+    "SaveCategory.goal_frequency: Cannot be combined with goal_target_date and is not supported for Credit Card Payment categories or categories paired to a loan account.",
+    "SaveCategory.goal_frequency: Requires goal_target.",
+    "SaveCategory.goal_needs_whole_amount: Only supported for 'NEED' goals, and not supported for Credit Card Payment categories or categories paired to a loan account.",
+    "SaveCategory.goal_needs_whole_amount: Whether the goal requires the full target amount each period.",
+    "SaveCategory.goal_target: If goal_type is not specified, it will default to 'NEED', or to 'MF' for Credit Card Payment categories and 'DEBT' for categories paired to a loan account.",
+    "SaveCategory.goal_target_date: Not supported for categories paired to a loan account."
+   ]
   },
   {
    "id": "getCategoryById",
@@ -49,7 +58,16 @@
   {
    "id": "updateCategory",
    "method": "PATCH",
-   "path": "/plans/{plan_id}/categories/{category_id}"
+   "path": "/plans/{plan_id}/categories/{category_id}",
+   "rules": [
+    "SaveCategory.category_group_id: An internal category group may not be specified.",
+    "SaveCategory.goal_frequency: Cannot be combined with goal_target_date and is not supported for Credit Card Payment categories or categories paired to a loan account.",
+    "SaveCategory.goal_frequency: Requires goal_target.",
+    "SaveCategory.goal_needs_whole_amount: Only supported for 'NEED' goals, and not supported for Credit Card Payment categories or categories paired to a loan account.",
+    "SaveCategory.goal_needs_whole_amount: Whether the goal requires the full target amount each period.",
+    "SaveCategory.goal_target: If goal_type is not specified, it will default to 'NEED', or to 'MF' for Credit Card Payment categories and 'DEBT' for categories paired to a loan account.",
+    "SaveCategory.goal_target_date: Not supported for categories paired to a loan account."
+   ]
   },
   {
    "id": "getTransactionsByCategory",
@@ -59,12 +77,20 @@
   {
    "id": "createCategoryGroup",
    "method": "POST",
-   "path": "/plans/{plan_id}/category_groups"
+   "path": "/plans/{plan_id}/category_groups",
+   "rules": [
+    "SaveCategoryGroup.name: The name must be a maximum of 50 characters.",
+    "SaveCategoryGroup.name: maxLength 50"
+   ]
   },
   {
    "id": "updateCategoryGroup",
    "method": "PATCH",
-   "path": "/plans/{plan_id}/category_groups/{category_group_id}"
+   "path": "/plans/{plan_id}/category_groups/{category_group_id}",
+   "rules": [
+    "SaveCategoryGroup.name: The name must be a maximum of 50 characters.",
+    "SaveCategoryGroup.name: maxLength 50"
+   ]
   },
   {
    "id": "getMoneyMovementGroups",
@@ -129,7 +155,10 @@
   {
    "id": "createPayee",
    "method": "POST",
-   "path": "/plans/{plan_id}/payees"
+   "path": "/plans/{plan_id}/payees",
+   "rules": [
+    "PostPayee.name: maxLength 500"
+   ]
   },
   {
    "id": "getPayeeById",
@@ -139,7 +168,10 @@
   {
    "id": "updatePayee",
    "method": "PATCH",
-   "path": "/plans/{plan_id}/payees/{payee_id}"
+   "path": "/plans/{plan_id}/payees/{payee_id}",
+   "rules": [
+    "SavePayee.name: maxLength 500"
+   ]
   },
   {
    "id": "getPayeeLocationsByPayee",
@@ -159,7 +191,12 @@
   {
    "id": "createScheduledTransaction",
    "method": "POST",
-   "path": "/plans/{plan_id}/scheduled_transactions"
+   "path": "/plans/{plan_id}/scheduled_transactions",
+   "rules": [
+    "SaveScheduledTransaction.category_id: Credit Card Payment categories are not permitted.",
+    "SaveScheduledTransaction.memo: maxLength 500",
+    "SaveScheduledTransaction.payee_name: maxLength 200"
+   ]
   },
   {
    "id": "getScheduledTransactionById",
@@ -169,7 +206,12 @@
   {
    "id": "updateScheduledTransaction",
    "method": "PUT",
-   "path": "/plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}"
+   "path": "/plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}",
+   "rules": [
+    "SaveScheduledTransaction.category_id: Credit Card Payment categories are not permitted.",
+    "SaveScheduledTransaction.memo: maxLength 500",
+    "SaveScheduledTransaction.payee_name: maxLength 200"
+   ]
   },
   {
    "id": "deleteScheduledTransaction",
@@ -189,12 +231,45 @@
   {
    "id": "createTransaction",
    "method": "POST",
-   "path": "/plans/{plan_id}/transactions"
+   "path": "/plans/{plan_id}/transactions",
+   "rules": [
+    "NewTransaction.import_id: maxLength 36",
+    "SaveSubTransaction.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied.",
+    "SaveSubTransaction.memo: maxLength 500",
+    "SaveSubTransaction.payee_name: maxLength 200",
+    "SaveTransactionWithOptionalFields.amount: Split transaction amounts cannot be changed and if a different amount is supplied it will be ignored.",
+    "SaveTransactionWithOptionalFields.approved: If not supplied, transaction will be unapproved by default.",
+    "SaveTransactionWithOptionalFields.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied.",
+    "SaveTransactionWithOptionalFields.category_id: If an existing transaction is a split, the `category_id` cannot be changed.",
+    "SaveTransactionWithOptionalFields.date: Future dates (scheduled transactions) are not permitted.",
+    "SaveTransactionWithOptionalFields.date: Split transaction dates cannot be changed and if a different date is supplied it will be ignored.",
+    "SaveTransactionWithOptionalFields.memo: maxLength 500",
+    "SaveTransactionWithOptionalFields.payee_name: maxLength 200",
+    "SaveTransactionWithOptionalFields.subtransactions: Splits are not allowed on tracking accounts or on transfers between on-budget accounts; a transfer to a tracking account can be a split.",
+    "SaveTransactionWithOptionalFields.subtransactions: Updating `subtransactions` on an existing split transaction is not supported and will return an error."
+   ]
   },
   {
    "id": "updateTransactions",
    "method": "PATCH",
-   "path": "/plans/{plan_id}/transactions"
+   "path": "/plans/{plan_id}/transactions",
+   "rules": [
+    "SaveSubTransaction.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied.",
+    "SaveSubTransaction.memo: maxLength 500",
+    "SaveSubTransaction.payee_name: maxLength 200",
+    "SaveTransactionWithIdOrImportId.import_id: You may not provide both an `id` and an `import_id` and updating an `import_id` on an existing transaction is not allowed.",
+    "SaveTransactionWithIdOrImportId.import_id: maxLength 36",
+    "SaveTransactionWithOptionalFields.amount: Split transaction amounts cannot be changed and if a different amount is supplied it will be ignored.",
+    "SaveTransactionWithOptionalFields.approved: If not supplied, transaction will be unapproved by default.",
+    "SaveTransactionWithOptionalFields.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied.",
+    "SaveTransactionWithOptionalFields.category_id: If an existing transaction is a split, the `category_id` cannot be changed.",
+    "SaveTransactionWithOptionalFields.date: Future dates (scheduled transactions) are not permitted.",
+    "SaveTransactionWithOptionalFields.date: Split transaction dates cannot be changed and if a different date is supplied it will be ignored.",
+    "SaveTransactionWithOptionalFields.memo: maxLength 500",
+    "SaveTransactionWithOptionalFields.payee_name: maxLength 200",
+    "SaveTransactionWithOptionalFields.subtransactions: Splits are not allowed on tracking accounts or on transfers between on-budget accounts; a transfer to a tracking account can be a split.",
+    "SaveTransactionWithOptionalFields.subtransactions: Updating `subtransactions` on an existing split transaction is not supported and will return an error."
+   ]
   },
   {
    "id": "importTransactions",
@@ -209,7 +284,22 @@
   {
    "id": "updateTransaction",
    "method": "PUT",
-   "path": "/plans/{plan_id}/transactions/{transaction_id}"
+   "path": "/plans/{plan_id}/transactions/{transaction_id}",
+   "rules": [
+    "SaveSubTransaction.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied.",
+    "SaveSubTransaction.memo: maxLength 500",
+    "SaveSubTransaction.payee_name: maxLength 200",
+    "SaveTransactionWithOptionalFields.amount: Split transaction amounts cannot be changed and if a different amount is supplied it will be ignored.",
+    "SaveTransactionWithOptionalFields.approved: If not supplied, transaction will be unapproved by default.",
+    "SaveTransactionWithOptionalFields.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied.",
+    "SaveTransactionWithOptionalFields.category_id: If an existing transaction is a split, the `category_id` cannot be changed.",
+    "SaveTransactionWithOptionalFields.date: Future dates (scheduled transactions) are not permitted.",
+    "SaveTransactionWithOptionalFields.date: Split transaction dates cannot be changed and if a different date is supplied it will be ignored.",
+    "SaveTransactionWithOptionalFields.memo: maxLength 500",
+    "SaveTransactionWithOptionalFields.payee_name: maxLength 200",
+    "SaveTransactionWithOptionalFields.subtransactions: Splits are not allowed on tracking accounts or on transfers between on-budget accounts; a transfer to a tracking account can be a split.",
+    "SaveTransactionWithOptionalFields.subtransactions: Updating `subtransactions` on an existing split transaction is not supported and will return an error."
+   ]
   },
   {
    "id": "deleteTransaction",

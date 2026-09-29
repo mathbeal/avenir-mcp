@@ -6,8 +6,16 @@ code from each tool and resource to the HTTP client; `api/coverage.toml` says wh
 each other one is planned or left out. Tests check that every operation is one or
 the other, and that the client calls only documented paths.
 
+The snapshot also keeps, for each operation that takes a body, the rules the
+specification states on what it takes: each sentence of a field's description that
+limits it ("not supported", "cannot", "will be ignored"…) and each maximum length.
+`api/constraints.toml` says, for every rule of an operation avenir-mcp uses, which
+test covers it, why it does not apply, or that it is a known gap. A rule YNAB adds
+or rewords is caught by the same weekly check.
+
 `python -m docsgen.api` compares the snapshot with the live specification and fails
-when YNAB added, removed or renamed an operation; `--update` rewrites the snapshot.
+when YNAB added, removed or renamed an operation, or changed one of its rules;
+`--update` rewrites the snapshot.
 """
 
 from __future__ import annotations
@@ -28,6 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CLIENT = ROOT / "avenir_mcp" / "client.py"
 SNAPSHOT = ROOT / "api" / "ynab-operations.json"
 COVERAGE = ROOT / "api" / "coverage.toml"
+CONSTRAINTS = ROOT / "api" / "constraints.toml"
 SPEC_URL = "https://api.ynab.com/papi/open_api_spec.yaml"
 METHODS = ("get", "post", "put", "patch", "delete")
 STATUSES = ("covered", "planned", "excluded")
@@ -37,6 +46,90 @@ ANNOUNCEMENT_URL = (
 )
 
 
+# Words by which a field's description limits what YNAB takes. A sentence that only
+# describes the field is caught too at times: constraints.toml says so.
+_RULE = re.compile(
+    r"not supported|cannot|may not|must|requires|will be ignored|not permitted|not allowed"
+    r"|return an error|default",
+    re.IGNORECASE,
+)
+
+
+def _ref(node: dict[str, Any]) -> str | None:
+    """Name the schema a node points to, if it does.
+
+    Args:
+        node: A part of the specification.
+
+    Returns:
+        The schema's name, or None.
+    """
+    ref = node.get("$ref")
+    return str(ref).rsplit("/", 1)[-1] if ref else None
+
+
+def _field_rules(name: str, field: str, prop: dict[str, Any]) -> list[str]:
+    """The rules a field's description and keywords state.
+
+    Args:
+        name: The schema's name.
+        field: The field's name.
+        prop: The field's definition.
+
+    Returns:
+        One line per rule, e.g. "SaveCategory.goal_frequency: Requires goal_target.".
+    """
+    text = " ".join(str(prop.get("description") or "").split())
+    rules = [s for s in re.split(r"(?<=\.)\s+", text) if _RULE.search(s)]
+    if "maxLength" in prop:
+        rules.append(f"maxLength {prop['maxLength']}")
+    return [f"{name}.{field}: {rule}" for rule in rules]
+
+
+def _rules(schemas: dict[str, Any], name: str, seen: set[str]) -> list[str]:
+    """Collect the rules of a schema and of every schema it contains.
+
+    Args:
+        schemas: The specification's schemas.
+        name: The schema to start from.
+        seen: Schemas already visited, so that each is read once.
+
+    Returns:
+        The rules, one line each.
+    """
+    if name in seen:
+        return []
+    seen.add(name)
+    schema = schemas[name]
+    found: list[str] = []
+    for part in schema.get("allOf", [schema]):
+        if inner := _ref(part):
+            found += _rules(schemas, inner, seen)
+            continue
+        for field, prop in part.get("properties", {}).items():
+            found += _field_rules(name, field, prop)
+            nested = [prop, prop.get("items", {}), *prop.get("allOf", []), *prop.get("oneOf", [])]
+            for node in nested:
+                if inner := _ref(node):
+                    found += _rules(schemas, inner, seen)
+    return found
+
+
+def _body_rules(spec: dict[str, Any], op: dict[str, Any]) -> list[str]:
+    """The rules on the body an operation takes.
+
+    Args:
+        spec: The specification, parsed.
+        op: One of its operations.
+
+    Returns:
+        The rules, sorted; empty for an operation without a body.
+    """
+    body = op.get("requestBody", {}).get("content", {}).get("application/json", {})
+    name = _ref(body.get("schema", {}))
+    return sorted(set(_rules(spec["components"]["schemas"], name, set()))) if name else []
+
+
 def operations(spec: dict[str, Any]) -> dict[str, Any]:
     """Keep what the coverage needs from an OpenAPI specification.
 
@@ -44,14 +137,17 @@ def operations(spec: dict[str, Any]) -> dict[str, Any]:
         spec: The specification, parsed.
 
     Returns:
-        Its version and its operations: id, method and path, sorted by path.
+        Its version and its operations: id, method and path, sorted by path, and the
+        rules on the body of those that take one.
     """
-    found = [
-        {"id": op["operationId"], "method": method.upper(), "path": path}
-        for path, item in spec["paths"].items()
-        for method, op in item.items()
-        if method in METHODS
-    ]
+    found = []
+    for path, item in spec["paths"].items():
+        for method, op in item.items():
+            if method in METHODS:
+                entry = {"id": op["operationId"], "method": method.upper(), "path": path}
+                if rules := _body_rules(spec, op):
+                    entry["rules"] = rules
+                found.append(entry)
     found.sort(key=lambda op: (op["path"], METHODS.index(op["method"].lower())))
     return {"version": spec["info"]["version"], "operations": found}
 
@@ -73,6 +169,32 @@ def coverage() -> dict[str, dict[str, Any]]:
     """
     with COVERAGE.open("rb") as file:
         return tomllib.load(file)["operations"]  # type: ignore[no-any-return]
+
+
+def constraints() -> list[dict[str, Any]]:
+    """Read what avenir-mcp does with each rule of the operations it uses.
+
+    Returns:
+        One entry per rule: the rule, its status (tested, not-applicable or gap), and
+        the tests that cover it or the reason.
+    """
+    with CONSTRAINTS.open("rb") as file:
+        return tomllib.load(file)["rule"]  # type: ignore[no-any-return]
+
+
+def used_rules() -> dict[str, list[str]]:
+    """The rules of the operations avenir-mcp uses, each with those operations.
+
+    Returns:
+        Each rule with the ids of the used operations whose body it limits.
+    """
+    users, _ = used()
+    rules: dict[str, list[str]] = {}
+    for op in snapshot()["operations"]:
+        if op["id"] in users:
+            for rule in op.get("rules", []):
+                rules.setdefault(rule, []).append(op["id"])
+    return rules
 
 
 def _template(node: ast.expr) -> str | None:
@@ -160,7 +282,8 @@ def differences(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
         new: The live specification's operations.
 
     Returns:
-        One line per operation added, removed or moved to another path; empty when
+        One line per operation added, removed or moved to another path, and per rule
+        added or removed; empty when
         nothing changed.
     """
     before = {op["id"]: op for op in old["operations"]}
@@ -173,12 +296,17 @@ def differences(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
         f"removed: {before[i]['method']} {before[i]['path']} ({i})"
         for i in before.keys() - after.keys()
     ]
+    both = before.keys() & after.keys()
     lines += [
         f"changed: {i} {before[i]['method']} {before[i]['path']}"
         f" -> {after[i]['method']} {after[i]['path']}"
-        for i in before.keys() & after.keys()
-        if before[i] != after[i]
+        for i in both
+        if (before[i]["method"], before[i]["path"]) != (after[i]["method"], after[i]["path"])
     ]
+    for i in both:
+        old_rules, new_rules = set(before[i].get("rules", [])), set(after[i].get("rules", []))
+        lines += [f"rule added: {i} {rule}" for rule in new_rules - old_rules]
+        lines += [f"rule removed: {i} {rule}" for rule in old_rules - new_rules]
     return sorted(lines)
 
 
@@ -305,7 +433,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     print(f"YNAB's API changed ({snapshot()['version']} -> {live['version']}):")
     print("\n".join(f"- {line}" for line in changes))
-    print("Run `uv run python -m docsgen.api --update`, then classify them in api/coverage.toml.")
+    print(
+        "Run `uv run python -m docsgen.api --update`, then classify them in api/coverage.toml"
+        " and api/constraints.toml."
+    )
     return 1
 
 

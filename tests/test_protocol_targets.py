@@ -40,9 +40,11 @@ class FakeTargets:
     async def set_category_target(
         self, _plan_id: str, category_id: str, fields: dict[str, Any]
     ) -> dict[str, Any]:
-        """Record and apply the change the way YNAB does."""
+        """Record and apply the change the way YNAB does, and refuse what YNAB refuses."""
         self.sent.append((category_id, fields))
         cat = self.categories[category_id]
+        if "goal_frequency" in fields and cat.get("category_group_name") == "Credit Card Payments":
+            raise ValueError("YNAB: goal_frequency is not supported for this category")
         if fields.get("goal_target") is None:
             cat.update(goal_type=None, goal_target=None, goal_target_date=None)
         elif "goal_target_date" in fields:

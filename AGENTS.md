@@ -57,6 +57,15 @@ fails otherwise, and when the client calls a path YNAB does not document. A week
 workflow fails when YNAB changes its API: `uv run python -m docsgen.api --update`,
 then classify what changed.
 
+**Every rule YNAB states on what a tool sends is accounted for.** The snapshot also
+keeps the rules the specification writes in each field's description ("not
+supported for…", "cannot be combined with…", "will be ignored") and each maximum
+length. `api/constraints.toml` gives each rule of an operation a tool uses its
+tests, the reason it does not apply, or marks it a gap; `tests/test_api_constraints.py`
+fails otherwise. Before writing a tool that sends YNAB a new body, read its rules
+there: each one becomes a test before the tool is written. A fake YNAB in the tests
+refuses what YNAB refuses, or a test of the refusal proves nothing.
+
 **A secret is never a plain string.** The YNAB token and AVENIR_MCP_HTTP_TOKEN
 become a pydantic `SecretStr` where they are read, and `get_secret_value()` is
 called only where the value is sent or compared. A secret field of a model is a
