@@ -13,7 +13,10 @@ import pytest
 from .mcp_helpers import accept, call, decline
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking"}]
-_CATS = [{"id": "c-food", "name": "Groceries"}]
+_CATS = [
+    {"id": "c-food", "name": "Groceries"},
+    {"id": "c-visa", "name": "Visa", "category_group_name": "Credit Card Payments"},
+]
 _ITEM = {
     "date": "2026-09-20",
     "amount": -12.5,
@@ -123,6 +126,7 @@ def test_declined_creation_writes_nothing(ledger: _Ledger) -> None:
     [
         ({"account_id": "nope"}, "list_accounts"),
         ({"transactions": [dict(_ITEM, category_id="c-404")]}, "c-404"),
+        ({"transactions": [dict(_ITEM, category_id="c-visa")]}, "pays a credit card"),
         ({"transactions": [dict(_ITEM, date="20/09/2026")]}, "transactions.0.date"),
         ({"transactions": [dict(_ITEM, payee="typo")]}, "transactions.0.payee"),
         ({"transactions": [dict(_ITEM, date="2026-10-01")]}, "future"),
@@ -138,6 +142,8 @@ def test_invalid_creation_is_a_tool_error(
     ledger: _Ledger, change: dict[str, Any], expected: str
 ) -> None:
     """Bad account, category, date, field name or length is refused before anything is asked.
+
+    A credit card payment category too: YNAB would ignore it on the transaction.
 
     YNAB refuses a payee_name over 200 characters, a memo over 500, and a NUL character
     anywhere: checked here, the user is not asked to confirm a change YNAB would then reject.

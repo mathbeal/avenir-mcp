@@ -144,6 +144,27 @@ INTERNAL_GROUP = "Internal Master Category"
 TRANSFER_WINDOW_DAYS = 3
 
 
+CARD_GROUP = "Credit Card Payments"
+"""The internal group of the categories that pay credit cards."""
+CARD_CATEGORY = (
+    "pays a credit card: YNAB ignores it on a transaction. Choose the category of what "
+    "was paid for."
+)
+"""Why a credit card payment category is refused on a transaction or a split line."""
+
+
+def card_payments(categories: list[dict[str, Any]]) -> set[str]:
+    """Find the categories that pay credit cards: YNAB ignores them on a transaction.
+
+    Args:
+        categories: The plan's categories.
+
+    Returns:
+        Their ids; empty when the plan has no credit card.
+    """
+    return {c["id"] for c in categories if c.get("category_group_name") == CARD_GROUP}
+
+
 def internal_uncategorized(categories: list[dict[str, Any]]) -> set[str]:
     """Find YNAB's internal "Uncategorized" category: no choice, and no category.
 

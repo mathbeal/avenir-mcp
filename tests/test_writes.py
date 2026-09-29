@@ -11,6 +11,7 @@ from avenir_mcp import writes
 _CATEGORIES: list[dict[str, Any]] = [
     {"id": "c-food", "name": "Groceries"},
     {"id": "c-fun", "name": "Leisure"},
+    {"id": "c-visa", "name": "Visa", "category_group_name": "Credit Card Payments"},
 ]
 
 
@@ -101,6 +102,16 @@ def test_plan_rejects_a_transfer() -> None:
             [_tx("t1", transfer_account_id="acc-2")],
             _CATEGORIES,
             [writes.Assignment(transaction_id="t1", category_id="c-food")],
+        )
+
+
+def test_plan_rejects_a_credit_card_payment_category() -> None:
+    """YNAB ignores it on a transaction: refused, rather than reported applied."""
+    with pytest.raises(ValueError, match="c-visa pays a credit card"):
+        writes.plan_categorization(
+            [_tx("t1")],
+            _CATEGORIES,
+            [writes.Assignment(transaction_id="t1", category_id="c-visa")],
         )
 
 

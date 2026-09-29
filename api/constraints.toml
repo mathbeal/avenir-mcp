@@ -72,8 +72,8 @@ tests = ["tests/test_targets.py::test_what_card_and_loan_categories_do_not_take_
 
 [[rule]]
 rule = "SaveSubTransaction.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied."
-status = "gap"
-reason = "split_transaction accepts a credit card payment category for a line: YNAB ignores it, and the line is left without a category."
+status = "tested"
+tests = ["tests/test_split.py::test_a_line_to_a_credit_card_payment_category_is_refused"]
 
 [[rule]]
 rule = "SaveSubTransaction.memo: maxLength 500"
@@ -108,8 +108,11 @@ tests = ["tests/test_client.py::test_create_transactions_can_leave_them_for_revi
 
 [[rule]]
 rule = "SaveTransactionWithOptionalFields.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied."
-status = "gap"
-reason = "apply_categories and create_transactions accept a credit card payment category: YNAB ignores it, while avenir-mcp reports it applied and journals it."
+status = "tested"
+tests = [
+  "tests/test_writes.py::test_plan_rejects_a_credit_card_payment_category",
+  "tests/test_protocol_create.py::test_invalid_creation_is_a_tool_error",
+]
 
 [[rule]]
 rule = "SaveTransactionWithOptionalFields.category_id: If an existing transaction is a split, the `category_id` cannot be changed."

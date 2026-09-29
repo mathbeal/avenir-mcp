@@ -19,6 +19,7 @@ from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.confirm import WriteStatus, gate, merged
 from avenir_mcp.model import Model
 from avenir_mcp.text import MAX_MEMO, MAX_PAYEE, YnabText, untrusted
+from avenir_mcp.triage import CARD_CATEGORY, card_payments
 
 logger = logging.getLogger(__name__)
 
@@ -454,17 +455,20 @@ class CreateResult(Model):
     """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
-def _check_new(items: list[NewTransaction], categories: dict[str, str], now: date) -> None:
+def _check_new(
+    items: list[NewTransaction], categories: dict[str, str], cards: set[str], now: date
+) -> None:
     """Refuse what YNAB would refuse, or what cannot be what the user meant.
 
     Args:
         items: The transactions to create.
         categories: The plan's category names by id.
+        cards: Ids of the categories that pay credit cards.
         now: Today.
 
     Raises:
         ToolError: If the list is empty, a date is in the future, or a category is not
-            in the plan.
+            in the plan or pays a credit card.
     """
     if not items:
         raise ToolError("Give at least one transaction to create.")
@@ -479,6 +483,8 @@ def _check_new(items: list[NewTransaction], categories: dict[str, str], now: dat
                 f"Category {category} is not in this plan: "
                 "use a category_id from get_category_balances."
             )
+        if category in cards:
+            raise ToolError(f"Category {category} {CARD_CATEGORY}")
 
 
 @mcp.tool(
@@ -527,8 +533,9 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
     accounts = {a["id"]: a["name"] for a in await client.get_accounts(plan_id)}
     if account_id not in accounts:
         raise ToolError(f"Account {account_id} is not in this plan: use an id from list_accounts.")
-    categories = {c["id"]: c["name"] for c in await client.get_categories(plan_id)}
-    _check_new(transactions, categories, app.today())
+    listed = await client.get_categories(plan_id)
+    categories = {c["id"]: c["name"] for c in listed}
+    _check_new(transactions, categories, card_payments(listed), app.today())
     preview = [
         NewTransactionPreview(
             date=item.date.isoformat(),
