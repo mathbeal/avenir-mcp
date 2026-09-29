@@ -18,7 +18,7 @@ from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.confirm import WriteStatus, gate, merged
 from avenir_mcp.model import Model
-from avenir_mcp.text import MAX_MEMO, MAX_PAYEE, untrusted
+from avenir_mcp.text import MAX_MEMO, MAX_PAYEE, YnabText, untrusted
 
 logger = logging.getLogger(__name__)
 
@@ -406,9 +406,9 @@ class NewTransaction(Model):
     """Date, YYYY-MM-DD, not in the future."""
     amount: Amount
     """Amount in currency units, negative for spending."""
-    payee_name: str = Field(min_length=1, max_length=MAX_PAYEE)
+    payee_name: YnabText = Field(min_length=1, max_length=MAX_PAYEE)
     """Payee as it should appear in YNAB; at most 200 characters."""
-    memo: str | None = Field(default=None, max_length=MAX_MEMO)
+    memo: YnabText | None = Field(default=None, max_length=MAX_MEMO)
     """Optional note; at most 500 characters."""
     category_id: str | None = None
     """Optional category id."""

@@ -14,7 +14,7 @@ from pydantic import Field  # pylint: disable=import-error
 from avenir_mcp.amounts import Amount
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 from avenir_mcp.model import Model
-from avenir_mcp.text import MAX_MEMO, untrusted
+from avenir_mcp.text import MAX_MEMO, YnabText, untrusted
 from avenir_mcp.triage import internal_uncategorized
 
 
@@ -25,7 +25,7 @@ class SplitLine(Model):
     """Amount in currency units, negative for spending; the lines add up to the transaction."""
     category_id: str
     """Category of this line."""
-    memo: str | None = Field(default=None, max_length=MAX_MEMO)
+    memo: YnabText | None = Field(default=None, max_length=MAX_MEMO)
     """Optional note for this line, e.g. what the receipt lists; at most 500 characters."""
 
 
