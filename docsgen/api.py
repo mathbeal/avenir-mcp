@@ -183,6 +183,41 @@ def differences(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
     return sorted(lines)
 
 
+def _short(op: dict[str, Any]) -> str:
+    """Name an operation by method and path, without the plan every path starts with.
+
+    Args:
+        op: An operation of the snapshot.
+
+    Returns:
+        E.g. "GET /transactions" for GET /plans/{plan_id}/transactions.
+    """
+    return f"{op['method']} {op['path'].removeprefix('/plans/{plan_id}') or '/'}"
+
+
+def by_tool(users: dict[str, list[str]], ops: list[dict[str, Any]]) -> list[str]:
+    """Write one table row per tool or resource: the operations it reads and writes.
+
+    Args:
+        users: Each used operation id with the tools and resources behind it.
+        ops: The snapshot's operations.
+
+    Returns:
+        The rows, read-only tools first, then alphabetically.
+    """
+    labels = {label for used_by in users.values() for label in used_by}
+    reads: dict[str, list[str]] = {label: [] for label in labels}
+    writes: dict[str, list[str]] = {label: [] for label in labels}
+    for op in ops:
+        for label in users.get(op["id"], []):
+            side = reads if op["method"] == "GET" else writes
+            side[label].append(f"`{_short(op)}`")
+    return [
+        f"| `{label}` | {', '.join(reads[label]) or '—'} | {', '.join(writes[label]) or '—'} |"
+        for label in sorted(labels, key=lambda label: (bool(writes[label]), label))
+    ]
+
+
 def page() -> str:
     """Write the documentation page listing every operation and what avenir-mcp does with it.
 
@@ -223,6 +258,13 @@ def page() -> str:
         f"{counts['excluded']} left out on purpose.\n\n"
         "| Operation | Status | Tools and resources, or why |\n|---|---|---|\n"
         + "\n".join(rows)
+        + "\n\n## By tool\n\n"
+        "What each tool and resource reads and writes, paths without the leading"
+        " `/plans/{plan_id}`. A tool calls only what the case at hand needs: `undo_operation`"
+        " the operations of the kind it undoes, `get_spending_trends` one month per month"
+        " asked.\n\n"
+        "| Tool or resource | Reads | Writes |\n|---|---|---|\n"
+        + "\n".join(by_tool(users, ops["operations"]))
         + "\n"
     )
 
