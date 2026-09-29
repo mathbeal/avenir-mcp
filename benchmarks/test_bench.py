@@ -55,6 +55,12 @@ def test_prepare_a_page_of_pending_transactions(benchmark: BenchmarkFixture) -> 
     assert benchmark(triage.prepare, TXS, CATS, limit=50).items
 
 
+def test_pair_transfers_among_3000_pending(benchmark: BenchmarkFixture) -> None:
+    """A plan imported but never categorised: three years of pending transactions."""
+    pending = [dict(tx, category_id=None) for tx in TXS[-3000:]]
+    benchmark(triage._transfer_pairs, pending)  # pylint: disable=protected-access
+
+
 def test_find_transactions_by_payee(benchmark: BenchmarkFixture) -> None:
     """find_transactions over a year, by a payee written as a person would."""
     found = benchmark(search.find, TXS, ACCOUNTS, CATS, since=date(2025, 9, 1), payee="merchant 07")
