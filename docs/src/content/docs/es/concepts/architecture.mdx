@@ -78,7 +78,7 @@ lógica en unidades monetarias: ninguna herramienta devuelve miliunidades.
 
 </Steps>
 
-## Registro y solo lectura
+## Registro de las herramientas y modo de solo lectura
 
 Cada herramienta se registra al importar con sus anotaciones MCP (`readOnlyHint`,
 `destructiveHint`, `idempotentHint`, `openWorldHint`); las de escritura llevan además la
@@ -95,5 +95,5 @@ herramienta no tiene anotaciones o si su etiqueta y su `readOnlyHint` se contrad
 | `httpx` | las peticiones HTTP a YNAB |
 | `pydantic` | ya requerido por fastmcp; convierte los docstrings de los campos en descripciones del esquema |
 
-Nada más en ejecución. Añadir una dependencia exige una justificación escrita
+Nada más en tiempo de ejecución. Añadir una dependencia exige una justificación escrita
 ([AGENTS.md](https://github.com/mathbeal/avenir-mcp/blob/main/AGENTS.md)).
