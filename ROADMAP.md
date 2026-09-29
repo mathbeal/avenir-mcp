@@ -6,6 +6,45 @@ previewed, confirmed and undoable; short, structured answers.
 
 Newest first.
 
+## What comparable servers offer, and what follows from it
+
+Surveyed on 2026-09-29, on the public YNAB MCP servers with the most use. They fall in
+three families:
+
+- **API mirrors** (e.g. rgarcia's): one tool per endpoint. Complete, but the agent does
+  the work and pays for it in context; writes are not previewed.
+- **Wide toolboxes** (e.g. auzroz's, some sixty tools; calebl's): budget moves, auto
+  assign, transaction edits and deletes, file import, spending by payee, cash flow, net
+  worth, savings opportunities, spending pace.
+- **Task servers** (e.g. oliverames', dizzlkheinz's `ynab-mcpb`, Maronato's): recurring
+  and subscription detection, budget health, credit-card audit, merged categories,
+  money movements, undo history, write modes, receipts.
+
+avenir-mcp stays on its line (fewer tools, each a task; every write previewed,
+confirmed and undoable; local only). Measured against that line, the gaps worth
+closing, in order of value per tool added:
+
+1. **Move money between categories** (`move_money`, one confirmation, one undo). *In
+   review.* The first gesture of a monthly review; every toolbox above has it.
+2. **Import from linked accounts** (`import_transactions`). *In review.*
+3. **Subscriptions and recurring charges** as a read-only answer. `forecast.recurring`
+   already finds them for the projection; exposing them answers "what am I subscribed
+   to, and what did it cost this year?" with no new YNAB request.
+4. **Payees**: list, and rename a bank label into the merchant's name (`getPayees`,
+   `updatePayee`, already planned). Renaming at the source improves every suggestion.
+5. **Scheduled transactions and targets**: the section below.
+6. **Edit a transaction** (date, amount, payee, memo). Needs a decision first: undo would
+   have to keep the old memo and payee in the journal, which today holds identifiers
+   and budgeted amounts only. Either the journal keeps them (said on the privacy page),
+   or edits stay without undo, like `approve_transactions`.
+7. **Money movements** in the monthly review (`getMoneyMovements`, planned): what was
+   moved between categories this month, and when.
+
+Left out on purpose: an endpoint-per-tool mirror; hosted OAuth for other people's
+plans (YNAB's terms, and the server is local); net worth and "savings opportunities"
+scores, which an agent computes better from `list_accounts` and the trends than a fixed
+formula does.
+
 ## Next: from a document to the year's schedules
 
 - The user gives the agent a document that sets future payments: a tax notice, a
