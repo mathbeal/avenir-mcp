@@ -104,6 +104,13 @@ unas 9.000 transacciones (pytest-benchmark). En un portátil, la operación más
 una página de sugerencias) tarda unos 30 ms: el tiempo de una herramienta se va en esperar a
 YNAB, no en calcular.
 
+`just fuzz` ejecuta las propiedades Hypothesis con 50.000 ejemplos cada una en lugar de 100
+(unos minutos; `just fuzz 200000` para ir más lejos), sobre lo que viene de fuera: etiquetas
+bancarias, diarios dañados, cabeceras HTTP, importes, cursores de paginación. Un fallo se guarda y se
+vuelve a ejecutar, reducido al caso más pequeño, en la ejecución siguiente. La CI lo hace
+cada noche con 200.000. La primera pasada encontró un byte del diario que no era texto
+(0x80) y aparecía como un error de códec en bruto en lugar de nombrar la línea que corregir.
+
 ## Documentación
 
 ```bash

@@ -103,6 +103,12 @@ test notices point to the tests to write; many are harmless, such as a message's
 transactions (pytest-benchmark). On a laptop the slowest, preparing a page of suggestions,
 takes about 30 ms: a tool's time is spent waiting for YNAB, not computing.
 
+`just fuzz` runs the Hypothesis properties with 50,000 examples each instead of 100 (a few
+minutes; `just fuzz 200000` for longer), on what comes from outside: bank labels, damaged
+journals, HTTP headers, amounts, cursors. A failure is saved and replayed, minimised, by
+the next run. CI does it every night with 200,000. The first run found a journal byte that
+was not text (0x80) surfacing as a bare codec error instead of the line to fix.
+
 ## Documentation
 
 ```bash

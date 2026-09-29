@@ -33,6 +33,12 @@ lock:
 bench:
     uv run pytest benchmarks -o addopts="" -p no:cacheprovider --benchmark-only --benchmark-sort=name --benchmark-columns=min,median,mean,rounds
 
+# Fuzz: every Hypothesis property with EXAMPLES examples each instead of 100, then replay
+# what failed (saved in .hypothesis/), minimised, like any test.
+fuzz examples="50000":
+    AVENIR_MCP_FUZZ_EXAMPLES={{examples}} uv run pytest tests/test_properties.py -o addopts="" -p no:cacheprovider -q --hypothesis-profile=fuzz
+    uv run pytest tests/test_properties.py -o addopts="" -p no:cacheprovider -q
+
 # Reformat.
 fix:
     uv run ruff check --select I --fix avenir_mcp tests evals docsgen benchmarks

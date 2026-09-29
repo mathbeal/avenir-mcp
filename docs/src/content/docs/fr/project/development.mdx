@@ -105,6 +105,13 @@ modifications qu'aucun test ne remarque désignent les tests à écrire ; beauco
 une page de suggestions) prend environ 30 ms : le temps d'un outil passe à attendre YNAB, pas
 à calculer.
 
+`just fuzz` lance les propriétés Hypothesis avec 50 000 exemples chacune au lieu de 100
+(quelques minutes ; `just fuzz 200000` pour aller plus loin), sur ce qui vient de l'extérieur :
+libellés bancaires, journaux abîmés, en-têtes HTTP, montants, curseurs de pagination. Un échec est
+enregistré et rejoué, réduit au plus petit cas, au lancement suivant. La CI le fait chaque
+nuit avec 200 000. Le premier passage a trouvé un octet du journal qui n'était pas du texte
+(0x80) et remontait en erreur de codec brute au lieu de nommer la ligne à corriger.
+
 ## Documentation
 
 ```bash

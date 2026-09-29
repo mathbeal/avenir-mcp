@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import asyncio
 import random
+import tempfile
 import unicodedata
 from datetime import date, timedelta
+from pathlib import Path
 from typing import Any
 
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from pydantic import SecretStr
 
-from avenir_mcp import client, forecast, text, triage, writes
+from avenir_mcp import classifier, client, forecast, http_auth, journal, text, triage, writes
 from avenir_mcp.amounts import MAX_AMOUNT
 
 # Every amount a tool accepts, in currency units, and the milliunits YNAB stores.
@@ -227,3 +231,58 @@ def test_a_preview_of_other_changes_hashes_differently(subject: dict[str, int]) 
     other = {**subject, key: subject[key] + 1}
     assert writes.fingerprint("b1", subject) != writes.fingerprint("b1", other)
     assert writes.fingerprint("b1", subject) != writes.fingerprint("b2", subject)
+
+
+# ---------------------------------------------------------------------------
+# Untrusted input: bank labels, a damaged journal, HTTP headers
+# ---------------------------------------------------------------------------
+
+
+@given(st.text(max_size=300))
+def test_any_bank_label_is_normalised_once_and_for_all(label: str) -> None:
+    """Whatever a bank writes, normalising never fails and a second pass changes nothing."""
+    merchant = classifier.normalize_payee(label)
+    assert classifier.normalize_payee(merchant) == merchant
+    assert merchant == merchant.upper().strip()
+
+
+@given(st.binary(max_size=400))
+def test_a_damaged_journal_says_which_line_to_fix(content: bytes) -> None:
+    """Any bytes in the journal: entries are read, or the error names the file and the line."""
+    with tempfile.TemporaryDirectory() as work:
+        path = Path(work) / "journal.jsonl"
+        path.write_bytes(content)
+        try:
+            journal.Journal(path).find("b1")
+        except ValueError as error:
+            assert str(path) in str(error)
+            assert "line" in str(error)
+
+
+_TOKEN = "fuzzed-token-0123456789"
+
+
+@given(st.lists(st.tuples(st.binary(max_size=40), st.binary(max_size=80)), max_size=6))
+def test_any_headers_are_refused_without_the_exact_token(
+    headers: list[tuple[bytes, bytes]],
+) -> None:
+    """Arbitrary header names and values never crash the guard: 401 unless the token is sent."""
+    sent: list[dict[str, Any]] = []
+    passed: list[bool] = []
+
+    async def app(*_: Any) -> None:
+        passed.append(True)
+
+    async def receive() -> dict[str, Any]:
+        return {"type": "http.request"}
+
+    async def send(message: dict[str, Any]) -> None:
+        sent.append(message)
+
+    guard = http_auth.BearerToken(app, SecretStr(_TOKEN))
+    scope = {"type": "http", "headers": [(name.lower(), value) for name, value in headers]}
+    asyncio.run(guard(scope, receive, send))  # type: ignore[arg-type]
+    authorization = next((v for n, v in headers if n.lower() == b"authorization"), b"")
+    carries = authorization == f"Bearer {_TOKEN}".encode()
+    assert passed == ([True] if carries else [])
+    assert carries or sent[0]["status"] == 401

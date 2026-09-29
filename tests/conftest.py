@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 
 import pytest
+from hypothesis import HealthCheck, settings
 
 from avenir_mcp import client, server
+
+# `just fuzz`: the same properties, many more examples each. What fails is saved in
+# .hypothesis/ and replayed, minimised, by the next ordinary run.
+settings.register_profile(
+    "fuzz",
+    max_examples=int(os.getenv("AVENIR_MCP_FUZZ_EXAMPLES", "50000")),
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
 
 
 @pytest.fixture(autouse=True)

@@ -160,6 +160,19 @@ def test_a_damaged_line_is_named_with_a_way_forward(tmp_path: Path, line: str) -
         journal.Journal(path).find("b1")
 
 
+def test_a_line_that_is_not_utf8_is_named_with_a_way_forward(tmp_path: Path) -> None:
+    """Bytes that are not text (a disk error, a stray copy) are named like any damaged line.
+
+    Found by Hypothesis: a single byte 0x80 used to surface as a bare codec error.
+    """
+    path = tmp_path / "journal.jsonl"
+    journal.Journal(path).record("b1", "categorize", _MOVES)
+    with path.open("ab") as file:
+        file.write(b"\x80\xff\n")
+    with pytest.raises(ValueError, match=r"line 2, is not a journal entry"):
+        journal.Journal(path).find("b1")
+
+
 def test_an_operation_recorded_with_budget_id_is_still_found(tmp_path: Path) -> None:
     """Journals written before YNAB's plans named the budget: those lines stay undoable."""
     path = tmp_path / "journal.jsonl"
