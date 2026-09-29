@@ -66,6 +66,7 @@ answers. Amounts are read as people write them: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-29 | Sonnet | 17/17 | 2.3 | `import_transactions` joins the guide's classify workflow: the demo plan has no bank connection, and the agent never imports without a reason |
 | 2026-09-29 | Sonnet | 17/17 | 2.5 | `flag_transactions` added; the guide proposes a flag rather than a decision when something needs checking. No task calls it unasked |
 | 2026-09-29 | Sonnet | 17/17 | 2.4 | `list_accounts` gives each account's bank link and last reconciliation; the guide checks the link before creating missing transactions |
+| 2026-09-29 | Sonnet | 18/18 | 2.2 | `find_recurring_charges`, and a task asking what a streaming subscription costs a year: the agent answers with the new tool |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A

@@ -7,6 +7,7 @@ sidebar:
 
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/es/forecast.json?raw';
+import recurring from '@snippets/es/recurring_charges.json?raw';
 
 **Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
 
@@ -68,6 +69,17 @@ Prolonga sus últimos meses. Unas vacaciones, un impuesto anual o una compra pun
 ellos empujan las medias; un gasto nuevo es invisible hasta que lo añade. Lea los
 supuestos antes de la conclusión.
 </Aside>
+
+## Los gastos que vuelven cada mes
+
+Pregunte *«¿a qué estoy suscrito y cuánto me cuesta al año?»*: `find_recurring_charges`
+enumera lo que el plan paga por un importe parecido casi todos los meses (3 de los 4
+últimos), del más caro al más barato en el año, con su categoría y si una transacción
+programada de YNAB ya lo cubre. También cuentan los gastos regulares en un mismo comercio
+(aquí, el supermercado); un cargo anual no aparece, salvo que tenga una transacción
+programada.
+
+<Code code={recurring} lang="json" title="find_recurring_charges" />
 
 ## Después, presupuestar el mes siguiente
 

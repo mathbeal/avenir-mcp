@@ -1,0 +1,74 @@
+{
+  "charges": [
+    {
+      "payee": "LANDLORD SARL",
+      "monthly_amount": -950.0,
+      "yearly_amount": -11400.0,
+      "day": 3,
+      "months_seen": 3,
+      "category": "Alquiler",
+      "scheduled": true
+    },
+    {
+      "payee": "MARKET FRESH",
+      "monthly_amount": -182.58,
+      "yearly_amount": -2190.96,
+      "day": 14,
+      "months_seen": 3,
+      "category": "Supermercado",
+      "scheduled": false
+    },
+    {
+      "payee": "POWERCO ENERGIE",
+      "monthly_amount": -64.2,
+      "yearly_amount": -770.4,
+      "day": 12,
+      "months_seen": 3,
+      "category": "Luz",
+      "scheduled": true
+    },
+    {
+      "payee": "RAIL CO",
+      "monthly_amount": -45.0,
+      "yearly_amount": -540.0,
+      "day": 18,
+      "months_seen": 3,
+      "category": "Transporte",
+      "scheduled": false
+    },
+    {
+      "payee": "TENNIS CLUB - PRELEV",
+      "monthly_amount": -22.0,
+      "yearly_amount": -264.0,
+      "day": 20,
+      "months_seen": 3,
+      "category": "Tenis",
+      "scheduled": false
+    },
+    {
+      "payee": "TELCO MOBILE - PRELEV",
+      "monthly_amount": -19.99,
+      "yearly_amount": -239.88,
+      "day": 8,
+      "months_seen": 3,
+      "category": "Teléfono",
+      "scheduled": true
+    },
+    {
+      "payee": "STREAMFLIX",
+      "monthly_amount": -13.49,
+      "yearly_amount": -161.88,
+      "day": 15,
+      "months_seen": 3,
+      "category": "Suscripciones",
+      "scheduled": false
+    }
+  ],
+  "yearly_total": -15567.12,
+  "months_looked_at": [
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08"
+  ]
+}

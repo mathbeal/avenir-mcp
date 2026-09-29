@@ -7,6 +7,7 @@ sidebar:
 
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/nl/forecast.json?raw';
+import recurring from '@snippets/nl/recurring_charges.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -69,6 +70,16 @@ Ze trekt je recente maanden door. Een vakantie, een jaarlijkse belasting of een 
 aankoop daarin verschuift de gemiddelden; een nieuwe uitgave blijft onzichtbaar tot je haar
 toevoegt. Lees de aannames vóór de conclusie.
 </Aside>
+
+## De uitgaven die elke maand terugkomen
+
+Vraag *„waar ben ik op geabonneerd, en wat kost het per jaar?“*: `find_recurring_charges`
+somt op wat het plan bijna elke maand (in 3 van de laatste 4) voor ongeveer hetzelfde bedrag
+betaalt, de duurste per jaar eerst, met de categorie en of een geplande transactie in YNAB
+het al dekt. Vaste uitgaven bij dezelfde winkel tellen ook mee (hier de boodschappen); een
+jaarlijkse betaling staat er niet in, tenzij er een planning voor is.
+
+<Code code={recurring} lang="json" title="find_recurring_charges" />
 
 ## Dan volgende maand budgetteren
 

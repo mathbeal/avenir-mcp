@@ -11,6 +11,7 @@ avenir-mcp biedt deze tools aan. Leestools zijn altijd beschikbaar; schrijftools
 
 | Tool | Samenvatting |
 |---|---|
+| [`find_recurring_charges`](/avenir-mcp/nl/reference/tools/find-recurring-charges/) | List the subscriptions and other charges paid every month, with their yearly cost. |
 | [`find_transactions`](/avenir-mcp/nl/reference/tools/find-transactions/) | Find transactions by date, amount, account, category or payee, categorised or not. |
 | [`forecast_balance`](/avenir-mcp/nl/reference/tools/forecast-balance/) | Project the balance month by month and say when money would run out. |
 | [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/) | Return a budget-vs-actual breakdown with utilisation percentage per category. |

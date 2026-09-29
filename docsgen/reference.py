@@ -48,6 +48,7 @@ GUIDES = {
     "get_budget_vs_actual": "guides/monthly-review",
     "get_spending_trends": "guides/monthly-review",
     "forecast_balance": "guides/plan-ahead",
+    "find_recurring_charges": "guides/plan-ahead",
     "set_category_budget": "guides/categories",
     "move_money": "guides/monthly-review",
     "create_transactions": "guides/missing-transactions",
