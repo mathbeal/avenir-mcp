@@ -1,0 +1,33 @@
+# Links checked by `just links` and the links workflow: every link of the README,
+# the root Markdown files and the hand-written documentation pages, in every language.
+# Internal links of the site are already checked when it builds.
+
+# Links to the site itself are checked elsewhere: Starlight when the site builds,
+# tests/test_docs.py for the README. Root-relative paths resolve to the site and
+# are left out below, so a page added by a pull request is not reported missing.
+base_url = "https://mathbeal.github.io"
+scheme = ["https", "http"]
+max_retries = 3
+retry_wait_time = 5
+timeout = 30
+max_concurrency = 8
+cache = true
+max_cache_age = "1d"
+# A site that refuses robots (403) or asks to slow down (429) is up.
+accept = ["200..=299", "403", "429"]
+
+exclude = [
+  # The documentation site: checked when it builds, see above.
+  '^https://mathbeal\.github\.io/',
+  # The server's own address in examples.
+  '^https?://(127\.0\.0\.1|localhost)',
+  # Placeholders in examples, not links.
+  '\{',
+  # Install buttons: they redirect into an editor, not to a page.
+  '^https://insiders\.vscode\.dev/redirect/mcp/install',
+  '^https://cursor\.com/en/install-mcp',
+  # GitHub pages that need a signed-in user or do not exist until used.
+  '^https://github\.com/mathbeal/avenir-mcp/(issues/new|edit|compare|pull/new)',
+  # YNAB's app answers only to a signed-in user.
+  '^https://app\.ynab\.com',
+]

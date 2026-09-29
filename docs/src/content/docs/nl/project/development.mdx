@@ -49,7 +49,8 @@ bestand `.pth` van een bewerkbare installatie verbergen, dat Python dan negeert.
 | woordenschat | `lexdrift check avenir_mcp --baseline lexdrift.lock` | er een nieuw woord verschijnt voor een idee dat al een naam heeft |
 | lock | `uv lock --check` | `uv.lock` niet overeenkomt met `pyproject.toml` |
 
-De CI draait ook `typos`, `zizmor` op de workflows, `pip-audit` op de vastgelegde
+De CI controleert ook met lychee elke link in de README en de documentatie (`just links`,
+en elke maandag, want een pagina elders kan verdwijnen), en draait `typos`, `zizmor` op de workflows, `pip-audit` op de vastgelegde
 afhankelijkheden, `gitleaks` op elke commit van de geschiedenis (`just secrets`, met
 Docker), de build van de documentatie met de tests van haar eigen code, CodeQL en de
 OpenSSF Scorecard (zodra de repository openbaar is), een wekelijkse vergelijking van de API

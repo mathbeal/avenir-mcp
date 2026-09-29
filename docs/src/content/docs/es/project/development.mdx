@@ -49,7 +49,8 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | vocabulario | `lexdrift check avenir_mcp --baseline lexdrift.lock` | aparece una palabra nueva para una idea ya nombrada |
 | bloqueo | `uv lock --check` | `uv.lock` no corresponde a `pyproject.toml` |
 
-La CI ejecuta además `gitleaks` sobre cada commit del historial (`just secrets`, con
+La CI ejecuta además lychee sobre cada enlace del README y de la documentación (`just links`,
+y cada lunes, porque una página externa puede desaparecer), `gitleaks` sobre cada commit del historial (`just secrets`, con
 Docker), `typos`, `zizmor` sobre los workflows, `pip-audit` sobre las
 dependencias bloqueadas, la construcción de la documentación con las pruebas de su propio
 código, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), una comparación semanal de

@@ -38,6 +38,11 @@ fix:
 secrets:
     docker run --rm -v "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)"):/repo" zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git /repo --redact --log-opts=--all
 
+# Check every link of the README and the hand-written documentation, as CI does
+# (needs Docker). Links inside the site are checked when it builds (`just docs`).
+links:
+    docker run --rm -v "$PWD:/input" -w /input lycheeverse/lychee@sha256:eaff3e0a13603c9a701accfcc84f44158bb77bf36ecfa4622b626056c3463892 --config lychee.toml --no-progress README.md CONTRIBUTING.md SECURITY.md AGENTS.md "docs/src/content/docs/**/*.md" "docs/src/content/docs/**/*.mdx"
+
 # Audit the workflows and hunt typos, as CI does.
 hygiene:
     uvx typos .
@@ -80,7 +85,7 @@ inspect:
 evaluate:
     uv run python -m evals.run
 
-# Regenerate the tool reference and the examples, then build the site (EN, FR, ES).
+# Regenerate the tool reference and the examples, then build the site in every language.
 docs:
     uv run python -m docsgen
     npm --prefix docs ci

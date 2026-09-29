@@ -32,6 +32,10 @@ COVERAGE = ROOT / "api" / "coverage.toml"
 SPEC_URL = "https://api.ynab.com/papi/open_api_spec.yaml"
 METHODS = ("get", "post", "put", "patch", "delete")
 STATUSES = ("covered", "planned", "excluded")
+# YNAB took the announcement down; the archived copy is the one that still answers.
+ANNOUNCEMENT_URL = (
+    "https://web.archive.org/web/20260112213044/https://www.ynab.com/blog/budget-tab-breakdown"
+)
 
 
 def operations(spec: dict[str, Any]) -> dict[str, Any]:
@@ -212,7 +216,7 @@ def page() -> str:
         ":::\n\n"
         "Source: YNAB's [OpenAPI specification](" + SPEC_URL + "), documented at"
         " [api.ynab.com](https://api.ynab.com/). YNAB renamed budgets to plans"
-        " ([announcement](https://www.ynab.com/blog/budget-tab-breakdown)): the"
+        " ([announcement](" + ANNOUNCEMENT_URL + ")): the"
         " operations say plan.\n\n"
         f"YNAB's API {ops['version']} has {len(ops['operations'])} operations: "
         f"{counts['covered']} used by avenir-mcp, {counts['planned']} planned, "

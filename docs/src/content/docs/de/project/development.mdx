@@ -50,7 +50,8 @@ dann ignoriert.
 | Vokabular | `lexdrift check avenir_mcp --baseline lexdrift.lock` | ein neues Wort für eine bereits benannte Idee auftaucht |
 | Lock | `uv lock --check` | `uv.lock` nicht zu `pyproject.toml` passt |
 
-Die CI führt außerdem `typos` aus, `zizmor` auf den Workflows, `pip-audit` auf den
+Die CI prüft außerdem mit lychee jeden Link der README und der Dokumentation (`just links`,
+und jeden Montag, denn eine fremde Seite kann verschwinden), führt `typos` aus, `zizmor` auf den Workflows, `pip-audit` auf den
 festgeschriebenen Abhängigkeiten, `gitleaks` auf jedem Commit der Historie (`just secrets`,
 mit Docker), den Build der Dokumentation mit den Tests ihres eigenen Codes, CodeQL und die
 OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen Vergleich der

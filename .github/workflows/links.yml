@@ -1,0 +1,48 @@
+name: links
+
+# Every link of the README and the hand-written documentation must lead somewhere:
+# on each pull request that touches them, on main, and every Monday, since a page
+# elsewhere can disappear without anything changing here. Links inside the site
+# are checked when it builds (docs workflow).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "**.md"
+      - "**.mdx"
+      - "lychee.toml"
+      - "docsgen/**"
+      - ".github/workflows/links.yml"
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lychee:
+    name: every link leads somewhere
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --config lychee.toml --no-progress
+            README.md CONTRIBUTING.md SECURITY.md AGENTS.md
+            "docs/src/content/docs/**/*.md" "docs/src/content/docs/**/*.mdx"
+          fail: true
+          jobSummary: true
+        env:
+          # Read-only token: GitHub counts requests per token, not per runner.
+          GITHUB_TOKEN: ${{ github.token }}
