@@ -7,6 +7,8 @@ import re
 import tomllib
 from pathlib import Path
 
+import pytest
+
 from avenir_mcp import __version__
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,6 +47,7 @@ def test_the_descriptions_fit_on_one_line_and_name_ynab() -> None:
     assert "ynab" in PROJECT["keywords"]
 
 
+@pytest.mark.ynab_terms
 def test_no_name_starts_with_ynab_as_ynab_forbids() -> None:
     """YNAB's API terms: a name may say "YNAB" only after "for" ("Tools for YNAB")."""
     names = [PROJECT["name"], SERVER["name"], README.splitlines()[0]]

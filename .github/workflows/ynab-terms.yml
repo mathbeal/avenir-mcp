@@ -1,0 +1,45 @@
+name: YNAB API terms
+
+# The "YNAB API terms: self-checked" badge. On every change, the tests marked ynab_terms
+# check the rules of YNAB's API Terms of Service (dated in api/ynab-terms.json); every
+# Monday, the terms YNAB publishes are compared with that snapshot, so the badge turns
+# red when YNAB changes its terms, until they are read and the checks adapted.
+# Self-checked: YNAB has not reviewed avenir-mcp.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "41 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  UV_FROZEN: "1"
+
+jobs:
+  rules:
+    name: Rules of the terms
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - run: uv run pytest -m ynab_terms -o addopts="" -p no:cacheprovider
+  current:
+    name: Terms still those checked
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - run: uv run python -m docsgen.terms

@@ -114,6 +114,7 @@ def test_messages_other_than_requests_pass_through() -> None:
     assert seen == ["lifespan"]
 
 
+@pytest.mark.ynab_terms
 def test_the_token_never_shows_when_printed_or_logged(monkeypatch: pytest.MonkeyPatch) -> None:
     """What main() hands to FastMCP, and the guard itself, print a mask, not the token."""
     monkeypatch.setenv("AVENIR_MCP_TRANSPORT", "http")
