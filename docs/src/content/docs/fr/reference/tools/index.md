@@ -17,7 +17,7 @@ avenir-mcp déclare ces outils. Les outils de lecture sont toujours disponibles 
 | [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/) | Budgeted, spent (activity) and available (balance) per category for a month. |
 | [`get_monthly_summary`](/avenir-mcp/fr/reference/tools/get-monthly-summary/) | A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories. |
 | [`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/) | Return monthly spending trends per category over the last N months. |
-| [`list_accounts`](/avenir-mcp/fr/reference/tools/list-accounts/) | List the plan's accounts with their current balances (in currency units). |
+| [`list_accounts`](/avenir-mcp/fr/reference/tools/list-accounts/) | List the plan's accounts with their balances, bank link and last reconciliation. |
 | [`list_category_groups`](/avenir-mcp/fr/reference/tools/list-category-groups/) | List the category groups a new category can be created in. |
 | [`list_plans`](/avenir-mcp/fr/reference/tools/list-plans/) | List all YNAB plans accessible with the current API key. |
 | [`list_scheduled_transactions`](/avenir-mcp/fr/reference/tools/list-scheduled-transactions/) | List the scheduled transactions due between two dates: bills, salary, transfers. |

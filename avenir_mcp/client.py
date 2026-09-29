@@ -553,6 +553,20 @@ async def set_category_budgeted(
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
+def _bank_link(account: dict[str, Any]) -> str:
+    """Say whether YNAB imports the account from the bank, and whether that works.
+
+    Args:
+        account: An account as YNAB returns it.
+
+    Returns:
+        "healthy", "broken" (linked, but the connection is in error) or "none".
+    """
+    if not account.get("direct_import_linked"):
+        return "none"
+    return "broken" if account.get("direct_import_in_error") else "healthy"
+
+
 async def get_accounts(plan_id: str) -> list[dict[str, Any]]:
     """Return the non-deleted accounts of a plan, balances in currency units.
 
@@ -561,7 +575,7 @@ async def get_accounts(plan_id: str) -> list[dict[str, Any]]:
 
     Returns:
         List of dicts: id, name, type, on_budget, closed, balance,
-        cleared_balance, uncleared_balance.
+        cleared_balance, uncleared_balance, bank_link, last_reconciled.
     """
     logger.info("Fetching accounts for plan %s", plan_id)
     data = await _get(f"/plans/{plan_id}/accounts")
@@ -575,6 +589,8 @@ async def get_accounts(plan_id: str) -> list[dict[str, Any]]:
             "balance": milliunit_to_amount(acc["balance"]),
             "cleared_balance": milliunit_to_amount(acc["cleared_balance"]),
             "uncleared_balance": milliunit_to_amount(acc["uncleared_balance"]),
+            "bank_link": _bank_link(acc),
+            "last_reconciled": (acc.get("last_reconciled_at") or "")[:10] or None,
         }
         for acc in data["data"]["accounts"]
         if not acc.get("deleted", False)

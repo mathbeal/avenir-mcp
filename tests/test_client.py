@@ -442,6 +442,41 @@ def test_set_category_budgeted_rounds_cents_exactly() -> None:
     assert sent == {"category": {"budgeted": 111320}}
 
 
+@pytest.mark.parametrize(
+    ("fields", "link", "reconciled"),
+    [
+        ({"direct_import_linked": True, "direct_import_in_error": False}, "healthy", None),
+        ({"direct_import_linked": True, "direct_import_in_error": True}, "broken", None),
+        ({"direct_import_linked": False, "direct_import_in_error": False}, "none", None),
+        ({}, "none", None),
+        ({"last_reconciled_at": "2026-08-31T18:02:11.000Z"}, "none", "2026-08-31"),
+        ({"last_reconciled_at": None}, "none", None),
+    ],
+)
+def test_an_account_says_whether_its_bank_link_works_and_when_it_was_reconciled(
+    fields: dict[str, Any], link: str, reconciled: str | None
+) -> None:
+    """The bank link is healthy, broken or absent; the last reconciliation is a date or None."""
+    account = {
+        "id": "a1",
+        "name": "Checking",
+        "type": "checking",
+        "on_budget": True,
+        "closed": False,
+        "deleted": False,
+        "balance": 0,
+        "cleared_balance": 0,
+        "uncleared_balance": 0,
+        **fields,
+    }
+    ctx = _async_client_returning({"data": {"accounts": [account]}})
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            [result] = asyncio.run(client.get_accounts("b1"))
+    assert result["bank_link"] == link
+    assert result["last_reconciled"] == reconciled
+
+
 def test_get_accounts_skips_deleted_and_converts_balances() -> None:
     """get_accounts returns open and closed (not deleted) accounts with euro balances."""
     payload = {
@@ -486,6 +521,8 @@ def test_get_accounts_skips_deleted_and_converts_balances() -> None:
             "balance": 1250.0,
             "cleared_balance": 1250.0,
             "uncleared_balance": 0.0,
+            "bank_link": "none",
+            "last_reconciled": None,
         },
     ]
 

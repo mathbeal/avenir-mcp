@@ -1,6 +1,6 @@
 ---
 title: "list_accounts"
-description: "List the plan's accounts with their current balances (in currency units)."
+description: "List the plan's accounts with their balances, bank link and last reconciliation."
 ---
 
 :::note[Generado]
@@ -9,9 +9,11 @@ Generado desde el código con `python -m docsgen`; una prueba falla si deja de c
 
 ## Qué hace
 
-List the plan's accounts with their current balances (in currency units).
+List the plan's accounts with their balances, bank link and last reconciliation.
 
-Use it to reconcile YNAB with the bank.
+Use it to reconcile YNAB with the bank, and to tell the user when a bank link is
+broken (no transaction comes in until they fix it in YNAB) or when an account has
+not been reconciled for months. Balances are in currency units.
 
 ## Comportamiento
 
@@ -43,6 +45,8 @@ Use it to reconcile YNAB with the bank.
 | `balance` | number | Balance of all transactions. |
 | `cleared_balance` | number | Balance of the transactions the bank has shown. |
 | `uncleared_balance` | number | Balance of the transactions the bank has not shown yet. |
+| `bank_link` | "healthy" \| "broken" \| "none" | Whether YNAB imports this account from the bank: broken means the connection needs the user's attention in YNAB, and no new transaction will come in until then. |
+| `last_reconciled` | string \| null | Date (YYYY-MM-DD) of the last reconciliation, or None if never reconciled. |
 
 ## Ejemplo
 
@@ -66,7 +70,9 @@ Respuesta sobre el presupuesto de demostración:
     "closed": false,
     "balance": 3512.66,
     "cleared_balance": 3512.66,
-    "uncleared_balance": 0.0
+    "uncleared_balance": 0.0,
+    "bank_link": "healthy",
+    "last_reconciled": "2026-08-31"
   },
   {
     "id": "acc-savings",
@@ -76,7 +82,9 @@ Respuesta sobre el presupuesto de demostración:
     "closed": false,
     "balance": 600.0,
     "cleared_balance": 600.0,
-    "uncleared_balance": 0.0
+    "uncleared_balance": 0.0,
+    "bank_link": "none",
+    "last_reconciled": null
   }
 ]
 ```

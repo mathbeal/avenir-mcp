@@ -66,6 +66,7 @@ schrijven: `3,512.66`, `3 512,66`, `-22.5`.
 | 2026-09-29 | Sonnet | 17/17 | 2,4 | `move_money`: de agent dekt Restaurants met één verschuiving, één voorbeeld en één bevestiging, in plaats van twee aanroepen van `set_category_budget` |
 | 2026-09-29 | Sonnet | 17/17 | 2,3 | `import_transactions` komt in de categoriseerstroom van de gids: het demoplan heeft geen bankkoppeling, en de agent importeert nooit zonder reden |
 | 2026-09-29 | Sonnet | 17/17 | 2,5 | `flag_transactions` toegevoegd; de gids stelt een vlag voor in plaats van een beslissing als er iets na te kijken is. Geen taak roept het ongevraagd aan |
+| 2026-09-29 | Sonnet | 17/17 | 2,3 | `list_accounts` geeft de bankkoppeling van elke rekening en de laatste afstemming; de gids controleert de koppeling voordat ontbrekende transacties worden aangemaakt |
 
 De eerste run vond een echt defect: clients zonder interface klikken elke bevestigingsvraag
 weg, en avenir-mcp telde wegklikken als weigering, zodat geen enkele schrijfactie ooit door

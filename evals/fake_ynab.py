@@ -117,6 +117,12 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                     "balance": total,
                     "cleared_balance": cleared,
                     "uncleared_balance": total - cleared,
+                    # The checking account is imported from the bank; savings is kept by hand.
+                    "direct_import_linked": acc_id == demo.CHECKING,
+                    "direct_import_in_error": False,
+                    "last_reconciled_at": (
+                        "2026-08-31T18:02:11.000Z" if acc_id == demo.CHECKING else None
+                    ),
                 }
             )
         return result

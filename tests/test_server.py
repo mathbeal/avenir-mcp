@@ -223,6 +223,8 @@ def test_list_accounts_delegates_to_client() -> None:
             "type": "savings",
             "name": "Old savings",
             "id": "a9",
+            "bank_link": "broken",
+            "last_reconciled": "2026-03-31",
         }
     ]
     with patch("avenir_mcp.client.get_accounts", new=AsyncMock(return_value=accounts)) as mock_fn:
