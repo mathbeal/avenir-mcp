@@ -9,7 +9,7 @@ from fastmcp import Context
 from fastmcp.exceptions import ToolError
 from mcp.types import InputRequiredResult
 
-from avenir_mcp import client, flags, journal, writes
+from avenir_mcp import client, flags, journal, targets, writes
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteResult, ask, not_applied, result_of, write_plan
 
@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
         "open_world_hint": True,
     },
 )
+# One branch per kind of operation, each a direct call: docsgen's API coverage follows
+# calls from the tools down to YNAB, and a table of functions would hide them.
+# pylint: disable-next=too-many-return-statements
 async def undo_operation(
     plan_id: str,
     ctx: Context,
@@ -37,7 +40,7 @@ async def undo_operation(
     Recategorised transactions go back to their previous category; a
     reconciliation is reverted (statuses and adjustment); a budgeted amount goes
     back to its previous value, both of a move_money; created transactions are deleted; flags
-    go back to their previous colour. Anything
+    go back to their previous colour; a target goes back to what it was. Anything
     changed again since the operation is left alone and listed in `conflicts`.
     Confirmation works as for apply_categories.
 
@@ -76,6 +79,8 @@ async def undo_operation(
         return await _undo_create(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "flag":
         return await _undo_flag(ctx, plan_id, book, entry, confirmation)
+    if entry.kind == "target":
+        return await _undo_target(ctx, plan_id, book, entry, confirmation)
     transactions = await client.get_transactions(plan_id)
     categories = await client.get_categories(plan_id)
     plan = writes.plan_undo(transactions, categories, entry.moves)
@@ -320,3 +325,40 @@ async def _undo_flag(
     await client.set_flags(plan_id, [(c["transaction_id"], c["from"]) for c in back])
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Flags restored.", writes.Plan(conflicts=moved))
+
+
+async def _undo_target(
+    ctx: Context,
+    plan_id: str,
+    book: journal.Journal,
+    entry: journal.Entry,
+    confirmation: str | None,
+) -> WriteResult | InputRequiredResult:
+    """Put a category's target back, unless it changed since.
+
+    Args:
+        ctx: The MCP context, used to ask the user.
+        plan_id: YNAB plan id or 'last-used'.
+        book: The journal, to mark the operation undone.
+        entry: The operation to undo.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        What was done, the category as a conflict when its target changed since, or what
+        to return instead when the user did not agree.
+    """
+    details = entry.details
+    category = next(
+        (c for c in await client.get_categories(plan_id) if c["id"] == details["category_id"]),
+        None,
+    )
+    if category is None or targets.describe(category) != details["after"]:
+        conflict = writes.Plan(conflicts=[details["category_id"]])
+        return result_of("nothing_to_do", "The target changed since: left alone.", conflict)
+    question = f"Undo: set the target of {category['name']} back?"
+    refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
+    if refused is not None:
+        return refused
+    await client.set_category_target(plan_id, details["category_id"], details["undo"])
+    book.mark_undone(entry.operation_id)
+    return result_of("applied", "Target restored.", writes.Plan())

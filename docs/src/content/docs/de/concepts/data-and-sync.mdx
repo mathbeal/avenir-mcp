@@ -93,7 +93,7 @@ Tool bei leerem Cache kostet, wird auf dem Demo-Plan gemessen und auf seiner
 | Kosten | Tools |
 |---|---|
 | 0 | jeder durch die Prüfung abgelehnte Aufruf (ein fehlerhafter Monat, ein leerer Name…) |
-| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, eine Vorschau von `set_category_budget`, eine Vorschau von `move_money`, eine Vorschau von `flag_transactions` |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, eine Vorschau von `set_category_budget`, eine Vorschau von `move_money`, eine Vorschau von `flag_transactions`, eine Vorschau von `set_category_target` |
 | 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
 | 3 | `find_transactions`, `find_recurring_charges`, `list_scheduled_transactions`, `suggest_categories` (eine ganze Seite), `apply_categories`, eine Vorschau von `split_transaction` |
 | 4 | `forecast_balance` |
@@ -113,4 +113,4 @@ angewiesen, es Ihnen zu sagen und es vorher nicht erneut zu versuchen.
 ## Was nie gespeichert wird
 
 avenir-mcp legt keine Kopie auf der Festplatte ab. Die Transaktionen leben im Speicher,
-solange der Server läuft; das [Journal](/avenir-mcp/de/concepts/journal/) enthält nur IDs und die bei einer Budgetänderung oder Umschichtung zugewiesenen Beträge; das Token bleibt in der Umgebung und wird nie protokolliert.
+solange der Server läuft; das [Journal](/avenir-mcp/de/concepts/journal/) enthält nur IDs und die bei einer Budgetänderung oder Umschichtung zugewiesenen Beträge und das wiederherzustellende Ziel; das Token bleibt in der Umgebung und wird nie protokolliert.

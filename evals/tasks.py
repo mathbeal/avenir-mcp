@@ -107,7 +107,7 @@ def _words(*required: str) -> Callable[[str], bool]:
 
 def _unchanged(state: DemoBudget) -> bool:
     """No transaction and no budgeted amount was modified."""
-    return state.knowledge == 1 and not state.budgeted
+    return state.knowledge == 1 and not state.budgeted and not state.goals
 
 
 def _classified(state: DemoBudget) -> bool:
@@ -145,6 +145,18 @@ def _split(state: DemoBudget) -> bool:
         and not state.budgeted
         and len(state.transactions) == len(demo.transactions())
     )
+
+
+def _holiday_target(state: DemoBudget) -> bool:
+    return state.goals == {
+        "cat-holidays": {
+            "goal_type": "NEED",
+            "goal_target": 1_200_000,
+            "goal_target_date": "2027-06-01",
+            "goal_cadence": 0,
+            "goal_cadence_frequency": 1,
+        }
+    }
 
 
 def _moved(state: DemoBudget) -> bool:
@@ -276,6 +288,15 @@ TASKS = [
         "in advance: apply them without asking me again." + FORMAT,
         answer=lambda t: bool(ANSWER.findall(t)),
         state=_moved,
+        tags=["write"],
+    ),
+    Task(
+        "holiday-target",
+        "I want to have 1200 put aside for the holidays by 1 June 2027: set that as the "
+        "category's target. I accept the preview in advance: apply it without asking me "
+        "again." + FORMAT,
+        answer=lambda t: bool(ANSWER.findall(t)),
+        state=_holiday_target,
         tags=["write"],
     ),
     Task(

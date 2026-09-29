@@ -9,6 +9,7 @@ import { Code, Aside } from '@astrojs/starlight/components';
 import groups from '@snippets/list_category_groups.json?raw';
 import create from '@snippets/create_category_preview.json?raw';
 import rename from '@snippets/update_category_preview.json?raw';
+import target from '@snippets/target_preview.json?raw';
 import budget from '@snippets/budget_preview.json?raw';
 
 **Goal:** keep the category structure in line with your life, and give each category its
@@ -53,6 +54,16 @@ previous name and group, which the answer gives.
 The amount is **absolute**: it replaces what was budgeted. `month` is `"current"` or
 `YYYY-MM-01`; `"current"` is resolved to the actual month so that an undo later acts on
 the right one.
+
+## Set a category's target
+
+Ask *"save 1,200 for the holidays by June 2027"* or *"put aside 50 a month for the car"*:
+`set_category_target` sets the target YNAB tracks for the category, an amount by a date or
+each month, week or year; with no amount it removes the target. Undo restores the previous
+target, except one set in YNAB's app as monthly funding, a target balance or a debt payment
+when it is replaced or removed; the question says so before you confirm.
+
+<Code code={target} lang="json" title="set_category_target" />
 
 ## Undo
 

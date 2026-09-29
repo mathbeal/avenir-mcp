@@ -20,6 +20,7 @@ Each tool builds a **subject**: the exact change, as data.
 | `set_category_budget` | category, month (resolved), amount in milliunits |
 | `move_money` | both categories, month (resolved), amount moved in milliunits |
 | `flag_transactions` | the flags (transaction, colour after) |
+| `set_category_target` | category, the target fields sent (amount in milliunits, date or frequency) |
 | `update_category` | category, name after, group after |
 | `create_category` | group, name |
 | `create_transactions` | account, the transactions, `approved` |
@@ -119,6 +120,7 @@ Only clients that support MCP elicitation can then write.
 | `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
 | `move_money` | *Move 30.00 from Tennis to Restaurants for 2026-09-01?* then one line per category, before → after |
 | `flag_transactions` | *Change the flag of 2 transaction(s)?* then one line per transaction: date, payee, amount, colour before → after |
+| `set_category_target` | *Set the target of Holidays: no target → 1200.00 by 2027-06-01?*, and a warning when undo cannot restore the previous target |
 | `update_category` | *Change category 'Tennis' (Fun) to 'Sport' (Fun)?* |
 | `create_category` | *Create category 'Pets' in Everyday?* |
 | `create_transactions` | *Create 1 transaction(s) on Checking?* then one line per transaction |

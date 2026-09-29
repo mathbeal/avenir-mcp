@@ -2,9 +2,9 @@
 
 Each applied operation is one JSON line holding identifiers: which transaction
 moved from which category to which. A budget change or a move also keeps the
-amounts assigned before and after, and a flag change the colours, which undo
-restores. Undoing an operation appends a line that marks it undone. A
-transaction's amount, payee and memo are never stored.
+amounts assigned before and after, a flag change the colours, and a target the
+one to restore, which undo restores. Undoing an operation appends a line that
+marks it undone. A transaction's amount, payee and memo are never stored.
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ class Entry(Model):
     plan_id: str = Field(validation_alias=AliasChoices("plan_id", "budget_id"))
     """Plan the operation changed."""
     kind: str
-    """categorize, reconcile, budget, move or create."""
+    """categorize, reconcile, budget, move, create, flag or target."""
     applied_at: str
     """When it was applied, ISO 8601 in UTC."""
     moves: list[Move]
@@ -135,7 +135,7 @@ class Journal:
 
         Args:
             plan_id: The plan it changed.
-            kind: categorize, reconcile, budget, move, create or flag.
+            kind: categorize, reconcile, budget, move, create, flag or target.
             moves: Category changes, for a recategorisation.
             details: What undoing another kind needs: identifiers, and a budget
                 change's amounts before and after.

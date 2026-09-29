@@ -29,7 +29,7 @@ with the data it obtains through YNAB's API.
   so that the next request asks only for what changed, and returned to your agent as tool
   results. Never written to disk.
 - **The [journal](/avenir-mcp/concepts/journal/).** After each change you confirm, one
-  line of identifiers: which transaction moved from which category to which, and what an undo needs; for a budget change or a move, the amount assigned before and after. Never a transaction's amount, a payee or a memo. The file is readable by your user
+  line of identifiers: which transaction moved from which category to which, and what an undo needs; for a budget change or a move, the amount assigned before and after; for a target, the one to restore. Never a transaction's amount, a payee or a memo. The file is readable by your user
   account only.
 - **Confirmation codes.** In memory, single use, valid 10 minutes.
 - **Logs.** On stderr, identifiers and counts only, warnings and errors by default. Where

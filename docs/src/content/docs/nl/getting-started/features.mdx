@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp geeft een agent 24 tools, 4 resources en 4 prompts voor je YNAB-plans. Deze
+avenir-mcp geeft een agent 25 tools, 4 resources en 4 prompts voor je YNAB-plans. Deze
 pagina ordent ze naar wat je wilt doen. Elke regel geeft een zin die je tegen de agent kunt
 zeggen; de agent kiest de tool.
 
@@ -101,6 +101,7 @@ Hoe het werkt: [Prognose](/avenir-mcp/nl/concepts/forecasting/).
 |---|---|---|
 | *„Maak een categorie Huisdieren in de groep Dagelijks.“* | [`create_category`](/avenir-mcp/nl/reference/tools/create-category/) | S |
 | *„Hernoem Tennis naar Sport.“* | [`update_category`](/avenir-mcp/nl/reference/tools/update-category/) – verplaatst een categorie ook naar een andere groep | S |
+| *„Spaar 1.200 voor de vakantie vóór juni 2027.“* | [`set_category_target`](/avenir-mcp/nl/reference/tools/set-category-target/) – een bedrag vóór een datum, of elke maand, week of elk jaar | S ↺ |
 
 Handleiding: [Categorieën ordenen](/avenir-mcp/nl/guides/categories/).
 

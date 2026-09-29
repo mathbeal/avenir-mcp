@@ -983,3 +983,15 @@ def test_set_flags_sends_one_bulk_patch_and_null_removes_a_flag() -> None:
     }
     assert ids == ["t1", "t2"]
     assert nothing == []
+
+
+def test_set_category_target_patches_the_category_with_the_goal_fields() -> None:
+    """The target goes in one PATCH of the category; None removes it."""
+    ctx = _async_client_returning({"data": {"category": {"id": "c1", "goal_target": None}}})
+    with patch("httpx.AsyncClient", return_value=ctx):
+        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
+            done = asyncio.run(client.set_category_target("b1", "c1", {"goal_target": None}))
+    sent = ctx.__aenter__.return_value.patch.call_args
+    assert sent.args[0].endswith("/plans/b1/categories/c1")
+    assert sent.kwargs["json"] == {"category": {"goal_target": None}}
+    assert done == {"id": "c1", "goal_target": None}

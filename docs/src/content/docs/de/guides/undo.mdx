@@ -43,6 +43,7 @@ Um eine ältere Operation rückgängig zu machen, nennen Sie ihre ID: *„mach O
 | `set_category_budget` | den vorherigen Betrag | der Betrag sich seither erneut geändert hat |
 | `move_money` | beide vorherigen Beträge | einer der beiden Beträge sich seither erneut geändert hat (dann bleiben beide unberührt) |
 | `flag_transactions` | die vorherige Markierung jeder Buchung | ihre Markierung sich seither erneut geändert hat |
+| `set_category_target` | das vorherige Ziel | das Ziel sich seither erneut geändert hat; eine Art, die YNABs API nicht anlegen kann (monatliche Finanzierung, Zielsaldo, Schuldentilgung), ist nach Ersetzen oder Entfernen nicht mehr rückgängig zu machen, wie die Frage ankündigt |
 | `reconcile_account` | den Status *cleared*; löscht die Anpassung | eine Transaktion nicht mehr abgeglichen ist |
 | `create_transactions` | löscht die angelegten Transaktionen | eine bereits gelöscht wurde |
 

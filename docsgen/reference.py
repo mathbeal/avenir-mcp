@@ -33,6 +33,7 @@ UNDOABLE = {
     "reconcile_account",
     "create_transactions",
     "flag_transactions",
+    "set_category_target",
 }
 UNCONFIRMED_WRITES = {"approve_transactions", "import_transactions"}
 
@@ -54,6 +55,7 @@ GUIDES = {
     "create_transactions": "guides/missing-transactions",
     "create_category": "guides/categories",
     "update_category": "guides/categories",
+    "set_category_target": "guides/categories",
     "undo_operation": "concepts/journal",
 }
 

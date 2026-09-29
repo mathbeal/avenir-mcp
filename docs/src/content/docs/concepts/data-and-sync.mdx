@@ -88,7 +88,7 @@ costs, on a cold cache, is measured on the demo plan and stated on its
 | Cost | Tools |
 |---|---|
 | 0 | any call refused by validation (a malformed month, an empty name…) |
-| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a preview of `set_category_budget`, a preview of `move_money`, a preview of `flag_transactions` |
+| 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_category_balances`, `get_budget_vs_actual`, `approve_transactions`, a preview of `set_category_budget`, a preview of `move_money`, a preview of `flag_transactions`, a preview of `set_category_target` |
 | 2 | `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
 | 3 | `find_transactions`, `find_recurring_charges`, `list_scheduled_transactions`, `suggest_categories` (a whole page), `apply_categories`, a preview of `split_transaction` |
 | 4 | `forecast_balance` |
@@ -107,5 +107,5 @@ leave. Either way, the agent is told to tell you and not to retry before then.
 ## What is never stored
 
 avenir-mcp keeps no copy on disk. The transactions live in memory while the server runs; the
-[journal](/avenir-mcp/concepts/journal/) holds identifiers, and the amounts a budget change or a move assigned; the token stays in the
+[journal](/avenir-mcp/concepts/journal/) holds identifiers, and the amounts a budget change or a move assigned, and the target to restore; the token stays in the
 environment and is never logged.

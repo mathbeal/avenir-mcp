@@ -31,6 +31,8 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         self.knowledge = 1
         self.changed_at = {tx_id: 1 for tx_id in self.transactions}
         self.budgeted: dict[tuple[str, str], int] = {}
+        # Targets set during the run, by category: the demo plan starts with none.
+        self.goals: dict[str, dict[str, Any]] = {}
         self.groups = {name: [list(c) for c in cats] for name, cats in demo.GROUPS.items()}
         self.lock = threading.Lock()
         self.next_id = len(self.transactions)
@@ -49,6 +51,7 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                 "category_group_name": demo.named(group, self.language),
                 "hidden": False,
                 "deleted": False,
+                **self.goals.get(cat_id, {}),
             }
             for group, cats in self.groups.items()
             for cat_id, name in cats
@@ -156,6 +159,19 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             tx["category_name"] = names.get(tx["category_id"] or "")
             self.touch(tx["id"])
         return [u["id"] for u in updates]
+
+    def set_goal(self, cat_id: str, fields: dict[str, Any]) -> None:
+        """Set a category's target as YNAB does: a date or a frequency, or none at all."""
+        if fields.get("goal_target") is None:
+            self.goals.pop(cat_id, None)
+            return
+        goal = {"goal_type": "NEED", "goal_target": fields["goal_target"]}
+        cadences = {"monthly": 1, "weekly": 2, "yearly": 13}
+        if "goal_target_date" in fields:
+            goal |= {"goal_target_date": fields["goal_target_date"], "goal_cadence": 0}
+        else:
+            goal |= {"goal_cadence": cadences[fields.get("goal_frequency", "monthly")]}
+        self.goals[cat_id] = goal | {"goal_cadence_frequency": 1}
 
     def create_transactions(self, items: list[dict[str, Any]]) -> list[str]:
         """Add transactions."""
@@ -286,13 +302,22 @@ class Handler(BaseHTTPRequestHandler):
                 tx["deleted"] = True
                 STATE.touch(tx["id"])
                 return self._send(200, {"data": {"transaction": tx}})
-            budget_match = re.match(r"^/months/([^/]+)/categories/([^/]+)$", rest)
-            if method == "PATCH" and budget_match:
-                month, cat_id = budget_match.groups()
-                STATE.budgeted[(month, cat_id)] = self._body()["category"]["budgeted"]
-                cat = next(c for c in STATE.month(month)["categories"] if c["id"] == cat_id)
+            if method == "PATCH" and (cat := self._patch_category(rest)):
                 return self._send(200, {"data": {"category": cat}})
             return self._send(404, {"error": {"detail": f"Not in the demo: {method} {path}"}})
+
+    def _patch_category(self, rest: str) -> dict[str, Any] | None:
+        """A month's budgeted amount, or a category's target; None for any other path."""
+        if budget_match := re.match(r"^/months/([^/]+)/categories/([^/]+)$", rest):
+            month, cat_id = budget_match.groups()
+            STATE.budgeted[(month, cat_id)] = self._body()["category"]["budgeted"]
+            cats: list[dict[str, Any]] = STATE.month(month)["categories"]
+            return next(c for c in cats if c["id"] == cat_id)
+        if target_match := re.match(r"^/categories/([^/]+)$", rest):
+            cat_id = target_match.group(1)
+            STATE.set_goal(cat_id, self._body()["category"])
+            return next(c for c in STATE.categories() if c["id"] == cat_id)
+        return None
 
     def do_GET(self) -> None:  # noqa: N802  pylint: disable=invalid-name
         """GET."""

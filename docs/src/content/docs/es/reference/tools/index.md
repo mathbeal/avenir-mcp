@@ -37,6 +37,7 @@ avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles
 | [`move_money`](/avenir-mcp/es/reference/tools/move-money/) | Move money budgeted in one category to another for a month, after the user confirms. |
 | [`reconcile_account`](/avenir-mcp/es/reference/tools/reconcile-account/) | Compare an account with the balance your bank shows, then reconcile it. |
 | [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) | Set the amount budgeted ("Assigned") in a category for a month, after the user confirms. |
+| [`set_category_target`](/avenir-mcp/es/reference/tools/set-category-target/) | Set, change or remove a category's target, after the user confirms. |
 | [`split_transaction`](/avenir-mcp/es/reference/tools/split-transaction/) | Split one transaction across categories, e.g. from a receipt, after the user confirms. |
 | [`undo_operation`](/avenir-mcp/es/reference/tools/undo-operation/) | Undo an operation made through this server: the latest one, or the one named. |
 | [`update_category`](/avenir-mcp/es/reference/tools/update-category/) | Rename a category and/or move it to another group, after the user confirms. |

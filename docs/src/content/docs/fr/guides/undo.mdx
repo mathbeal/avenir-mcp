@@ -43,6 +43,7 @@ l'opération 3f9a… »*. La réponse de chaque opération appliquée porte son 
 | `set_category_budget` | l'ancien montant | le montant a de nouveau changé depuis |
 | `move_money` | les deux anciens montants | l'un des deux montants a de nouveau changé depuis (aucun n'est alors touché) |
 | `flag_transactions` | le drapeau précédent de chaque transaction | son drapeau a de nouveau changé depuis |
+| `set_category_target` | l'objectif précédent | l'objectif a de nouveau changé depuis ; un type que l'API de YNAB ne sait pas créer (financement mensuel, solde cible, remboursement de dette) n'est plus annulable une fois remplacé ou retiré, comme la question l'annonce |
 | `reconcile_account` | l'état *pointé* ; supprime l'ajustement | une transaction n'est plus rapprochée |
 | `create_transactions` | supprime les transactions créées | l'une a déjà été supprimée |
 
