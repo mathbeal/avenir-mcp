@@ -98,6 +98,10 @@ Tests are written first. No test calls YNAB.
 code on purpose, some 1,500 times, and checks that a test fails each time. The changes no
 test notices point to the tests to write; many are harmless, such as a message's wording.
 
+`just bench` times the modules that compute on a generated five-year plan, about 9,000
+transactions (pytest-benchmark). On a laptop the slowest, preparing a page of suggestions,
+takes about 30 ms: a tool's time is spent waiting for YNAB, not computing.
+
 ## Documentation
 
 ```bash
