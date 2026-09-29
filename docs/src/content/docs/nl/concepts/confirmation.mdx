@@ -12,9 +12,9 @@ voordat ze iets wijzigt. Deze pagina beschrijft precies wat die doet.
 
 ## Wat er wordt bevestigd
 
-Elke tool bouwt een **onderwerp**: de exacte wijziging, als gegevens.
+Elke tool bouwt een **object**: de exacte wijziging, als gegevens.
 
-| Tool | Onderwerp |
+| Tool | Object |
 |---|---|
 | `apply_categories` | de lijst met wijzigingen (transactie, categorie erna) |
 | `set_category_budget` | categorie, maand (omgezet), bedrag in milliunits |
@@ -27,7 +27,7 @@ Elke tool bouwt een **onderwerp**: de exacte wijziging, als gegevens.
 
 De **vingerafdruk** is de SHA-256 van de JSON `[plan_id, subject]`, met gesorteerde
 sleutels; bij een lijst met wijzigingen doet de volgorde van de elementen er niet toe. Een
-antwoord of een code bevestigt alleen het onderwerp waarvan het de vingerafdruk draagt.
+antwoord of een code bevestigt alleen het object waarvan het de vingerafdruk draagt.
 
 ## Drie manieren om te vragen
 
@@ -36,7 +36,7 @@ antwoord of een code bevestigt alleen het onderwerp waarvan het de vingerafdruk 
 ### 1. De client ondersteunt elicitation, protocol 2026-07-28
 
 In het huidige MCP-protocol kan een server de client tijdens een aanroep geen eigen verzoek
-sturen. avenir-mcp gebruikt de rondgang *input required*:
+sturen. avenir-mcp gebruikt de round trip *input required*:
 
 1. De eerste aanroep geeft in plaats van het antwoord van de tool een `InputRequiredResult`
    terug. Dat bevat één verzoek, `confirm`, een formulier met één booleaans veld `value`,
@@ -81,7 +81,7 @@ Wegklikken is geen weigering: clients zonder interface klikken elke vraag weg, e
 | Formaat | 11 URL-veilige tekens (`secrets.token_urlsafe(8)`) |
 | Levensduur | 600 seconden, op een monotone klok |
 | Gebruik | één keer: een code is bij het eerste gebruik verbruikt, ook als hij niet klopt |
-| Bereik | de vingerafdruk van één onderwerp in één plan |
+| Bereik | de vingerafdruk van één object in één plan |
 | Opslag | alleen het geheugen van de server: een herstart vergeet elke code |
 
 Een code die onbekend, verlopen of al gebruikt is, of voor andere wijzigingen is

@@ -15,7 +15,7 @@ computer doet met de gegevens die het via de API van YNAB krijgt.
 |---|---|---|
 | Jij, op je computer | avenir-mcp zolang het draait, en zijn journaal | deze pagina |
 | YNAB | je plan, zoals altijd: avenir-mcp leest het, en wijzigt het als je bevestigt, met je eigen token | [het privacybeleid van YNAB](https://www.ynab.com/privacy-policy/) |
-| Je modelaanbieder | de toolresultaten die je MCP-client naar zijn model stuurt: rekeningen, categorieën, begunstigden, bedragen, notities | dat van je aanbieder; geen met een [lokaal model](/avenir-mcp/nl/guides/choose-a-model/#lokale-modellen) |
+| Je modelaanbieder | de toolresultaten die je MCP-client naar zijn model stuurt: rekeningen, categorieën, begunstigden, bedragen, omschrijvingen | dat van je aanbieder; geen met een [lokaal model](/avenir-mcp/nl/guides/choose-a-model/#lokale-modellen) |
 | De uitgever van avenir-mcp | niets | — |
 
 ## Wat avenir-mcp verwerkt
@@ -26,16 +26,16 @@ computer doet met de gegevens die het via de API van YNAB krijgt.
   naar schijf geschreven. Het blijft waar je het neerzette: in de configuratie van je
   MCP-client, of in dat bestand.
 - **De gegevens van je plan**: rekeningen, categorieën, transacties, begunstigden en
-  notities. Bij YNAB opgehaald als een tool ze nodig heeft,
+  omschrijvingen. Bij YNAB opgehaald als een tool ze nodig heeft,
   [in het geheugen](/avenir-mcp/nl/concepts/data-and-sync/#de-lokale-kopie-van-transacties)
   bewaard zodat het volgende verzoek alleen de wijzigingen ophaalt, en aan je agent
   teruggegeven als toolresultaten. Nooit naar schijf geschreven.
 - **Het [journaal](/avenir-mcp/nl/concepts/journal/).** Na elke wijziging die je
-  bevestigt, één regel met ID's: welke transactie van welke categorie naar welke ging, en
-  wat ongedaan maken nodig heeft. Nooit een bedrag, een begunstigde of een notitie. Het
+  bevestigt, één regel met id's: welke transactie van welke categorie naar welke ging, en
+  wat ongedaan maken nodig heeft. Nooit een bedrag, een begunstigde of een omschrijving. Het
   bestand is alleen leesbaar voor je eigen gebruikersaccount.
 - **Bevestigingscodes.** In het geheugen, eenmalig bruikbaar, 10 minuten geldig.
-- **Diagnoselogs.** Op stderr, alleen ID's en aantallen, standaard waarschuwingen en
+- **Diagnoselogs.** Op stderr, alleen id's en aantallen, standaard waarschuwingen en
   fouten. Waar ze terechtkomen hangt af van je MCP-client.
 
 ## Hoe ze beveiligd zijn
@@ -45,7 +45,7 @@ computer doet met de gegevens die het via de API van YNAB krijgt.
   [getoond en bevestigd](/avenir-mcp/nl/concepts/confirmation/) voordat ze verstuurd wordt.
 - **Het token is in de code een geheime waarde**: getoond, gelogd of in een foutmelding
   verschijnt het als `**********`.
-- **Banktekst is data.** Begunstigden en notities komen van banken en vreemden; ze worden
+- **Banktekst is data.** Begunstigden en omschrijvingen komen van banken en vreemden; ze worden
   als data teruggegeven, nooit als instructies voor de agent.
 - **Het HTTP-transport blijft op deze computer.** Het luistert standaard op `127.0.0.1`
   en staat zonder eigen token geen wijzigingen toe.
