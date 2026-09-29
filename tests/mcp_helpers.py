@@ -29,3 +29,15 @@ def call(name: str, args: dict[str, Any], handler: Any = None) -> Any:
             return await mcp_client.call_tool(name, args, raise_on_error=False)
 
     return asyncio.run(run())
+
+
+def tool_schema(name: str) -> dict[str, Any]:
+    """The input schema a client sees for a tool."""
+
+    async def run() -> dict[str, Any]:
+        async with Client(server.mcp) as mcp_client:
+            tools = {tool.name: tool for tool in await mcp_client.list_tools()}
+            schema: dict[str, Any] = tools[name].input_schema
+            return schema
+
+    return asyncio.run(run())
