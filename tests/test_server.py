@@ -1,7 +1,5 @@
 """Tests for server.py — FastMCP instance and all 14 MCP tools."""
 
-# pylint: disable=redefined-outer-name
-
 from __future__ import annotations
 
 import asyncio

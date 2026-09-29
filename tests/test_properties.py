@@ -80,7 +80,7 @@ def _next_month(label: str) -> str:
     today=st.dates(min_value=date(2026, 1, 1), max_value=date(2027, 12, 31)),
     months=st.integers(min_value=0, max_value=6),
 )
-def test_projected_months_follow_on_and_add_up(  # pylint: disable=too-many-arguments
+def test_projected_months_follow_on_and_add_up(
     start: int, variable: int, income: int, today: date, months: int
 ) -> None:
     """Each month starts where the last ended, and ends at start plus inflows plus outflows."""

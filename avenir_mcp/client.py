@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-import httpx  # pylint: disable=import-error
-from pydantic import SecretStr  # pylint: disable=import-error
+import httpx
+from pydantic import SecretStr
 
 logger = logging.getLogger(__name__)
 

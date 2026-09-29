@@ -16,7 +16,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from pydantic import (  # pylint: disable=import-error
+from pydantic import (
     AliasChoices,
     ConfigDict,
     Field,

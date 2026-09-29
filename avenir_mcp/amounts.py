@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import Field  # pylint: disable=import-error
+from pydantic import Field
 
 MAX_AMOUNT = 1_000_000_000
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import Field  # pylint: disable=import-error
+from pydantic import Field
 
 from avenir_mcp.amounts import Amount
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount

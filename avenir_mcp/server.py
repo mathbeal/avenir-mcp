@@ -10,7 +10,7 @@ import os
 import sys
 from typing import Any
 
-from pydantic import SecretStr  # pylint: disable=import-error
+from pydantic import SecretStr
 
 from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     __version__,
