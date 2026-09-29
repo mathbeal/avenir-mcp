@@ -28,7 +28,7 @@ const texts = {
       ['Undo', 'Every applied change is journaled; undo restores it without overwriting later work.'],
     ],
     disclaimer:
-      '<strong>Unofficial project.</strong> We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget are registered trademarks of YNAB. avenir-mcp is provided as is, without warranty, and is not financial advice. <a href="/avenir-mcp/project/legal/">Legal notice</a>',
+      '<strong>Unofficial project.</strong> We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website can be found at <a href="https://www.ynab.com">https://www.ynab.com</a>. The names YNAB and You Need A Budget, as well as related names, tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB. avenir-mcp is provided as is, without warranty, and is not financial advice. <a href="/avenir-mcp/project/legal/">Legal notice</a>',
   },
   fr: {
     eyebrow: 'Serveur MCP open source non officiel pour YNAB',
@@ -58,7 +58,7 @@ const texts = {
       ['Annulation', 'Chaque changement appliqué est journalisé ; l’annulation le défait sans écraser le travail fait depuis.'],
     ],
     disclaimer:
-      '<strong>Projet non officiel.</strong> « We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. » Nous ne sommes ni affiliés, ni associés, ni liés officiellement à YNAB. YNAB et You Need A Budget sont des marques déposées de YNAB. avenir-mcp est fourni tel quel, sans garantie, et n’est pas un conseil financier. <a href="/avenir-mcp/fr/project/legal/">Mentions légales</a>',
+      '<strong>Projet non officiel.</strong> « We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website can be found at <a href="https://www.ynab.com">https://www.ynab.com</a>. The names YNAB and You Need A Budget, as well as related names, tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB. » Nous ne sommes ni affiliés, ni associés, ni liés officiellement de quelque manière que ce soit à YNAB ou à ses filiales et sociétés affiliées. Le site officiel de YNAB se trouve à l’adresse <a href="https://www.ynab.com">https://www.ynab.com</a>. Les noms YNAB et You Need A Budget, ainsi que les noms, dénominations commerciales, marques, emblèmes et images qui s’y rattachent, sont des marques déposées de YNAB. avenir-mcp est fourni tel quel, sans garantie, et n’est pas un conseil financier. <a href="/avenir-mcp/fr/project/legal/">Mentions légales</a>',
   },
   es: {
     eyebrow: 'Servidor MCP no oficial y de código abierto para YNAB',
@@ -88,7 +88,7 @@ const texts = {
       ['Deshacer', 'Cada cambio aplicado se anota en el diario; deshacer lo revierte sin sobrescribir el trabajo posterior.'],
     ],
     disclaimer:
-      '<strong>Proyecto no oficial.</strong> «We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.» No estamos afiliados, asociados ni conectados oficialmente con YNAB. YNAB y You Need A Budget son marcas registradas de YNAB. avenir-mcp se ofrece tal cual, sin garantía, y no es asesoramiento financiero. <a href="/avenir-mcp/es/project/legal/">Aviso legal</a>',
+      '<strong>Proyecto no oficial.</strong> «We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website can be found at <a href="https://www.ynab.com">https://www.ynab.com</a>. The names YNAB and You Need A Budget, as well as related names, tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB.» No estamos afiliados, asociados ni conectados oficialmente de ninguna manera con YNAB ni con sus filiales o empresas afiliadas. El sitio web oficial de YNAB se encuentra en <a href="https://www.ynab.com">https://www.ynab.com</a>. Los nombres YNAB y You Need A Budget, así como los nombres, nombres comerciales, marcas, emblemas e imágenes relacionados, son marcas registradas de YNAB. avenir-mcp se ofrece tal cual, sin garantía, y no es asesoramiento financiero. <a href="/avenir-mcp/es/project/legal/">Aviso legal</a>',
   },
   de: {
     eyebrow: 'Inoffizieller Open-Source-MCP-Server für YNAB',
@@ -118,7 +118,7 @@ const texts = {
       ['Rückgängig', 'Jede angewendete Änderung wird im Journal erfasst; das Rückgängigmachen stellt sie wieder her, ohne spätere Arbeit zu überschreiben.'],
     ],
     disclaimer:
-      '<strong>Inoffizielles Projekt.</strong> „We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.“ Wir sind mit YNAB weder verbunden noch assoziiert noch in irgendeiner Weise offiziell verknüpft. YNAB und You Need A Budget sind eingetragene Marken von YNAB. avenir-mcp wird ohne Gewähr bereitgestellt und ist keine Finanzberatung. <a href="/avenir-mcp/de/project/legal/">Rechtliche Hinweise</a>',
+      '<strong>Inoffizielles Projekt.</strong> „We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website can be found at <a href="https://www.ynab.com">https://www.ynab.com</a>. The names YNAB and You Need A Budget, as well as related names, tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB.“ Wir sind mit YNAB oder einer seiner Tochtergesellschaften oder verbundenen Unternehmen weder verbunden noch assoziiert noch in irgendeiner Weise offiziell verknüpft. Die offizielle Website von YNAB finden Sie unter <a href="https://www.ynab.com">https://www.ynab.com</a>. Die Namen YNAB und You Need A Budget sowie zugehörige Namen, Handelsnamen, Zeichen, Marken, Embleme und Bilder sind eingetragene Marken von YNAB. avenir-mcp wird ohne Gewähr bereitgestellt und ist keine Finanzberatung. <a href="/avenir-mcp/de/project/legal/">Rechtliche Hinweise</a>',
   },
   nl: {
     eyebrow: 'Onofficiële opensource-MCP-server voor YNAB',
@@ -148,7 +148,7 @@ const texts = {
       ['Ongedaan maken', 'Elke toegepaste wijziging staat in het journaal; ongedaan maken herstelt haar zonder later werk te overschrijven.'],
     ],
     disclaimer:
-      '<strong>Onofficieel project.</strong> “We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates.” We zijn op geen enkele manier verbonden, geassocieerd of officieel gelieerd aan YNAB. YNAB en You Need A Budget zijn geregistreerde handelsmerken van YNAB. avenir-mcp wordt geleverd zoals het is, zonder garantie, en is geen financieel advies. <a href="/avenir-mcp/nl/project/legal/">Juridische informatie</a>',
+      '<strong>Onofficieel project.</strong> “We are not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website can be found at <a href="https://www.ynab.com">https://www.ynab.com</a>. The names YNAB and You Need A Budget, as well as related names, tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB.” We zijn op geen enkele manier verbonden, geassocieerd of officieel gelieerd aan YNAB of een van zijn dochterondernemingen of gelieerde bedrijven. De officiële website van YNAB vind je op <a href="https://www.ynab.com">https://www.ynab.com</a>. De namen YNAB en You Need A Budget, evenals verwante namen, handelsnamen, merken, emblemen en afbeeldingen, zijn geregistreerde handelsmerken van YNAB. avenir-mcp wordt geleverd zoals het is, zonder garantie, en is geen financieel advies. <a href="/avenir-mcp/nl/project/legal/">Juridische informatie</a>',
   },
 } as const;
 

@@ -39,9 +39,10 @@ Both come from the invented demo plan: a real reply of Claude Sonnet, and the fo
 the documentation shows.
 
 > **Unofficial project.** We are not affiliated, associated, or in any way officially
-> connected with YNAB or any of its subsidiaries or affiliates. YNAB and You Need A Budget
-> are registered trademarks of YNAB, named here only to say which service avenir-mcp works
-> with.
+> connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website
+> can be found at https://www.ynab.com. The names YNAB and You Need A Budget, as well as
+> related names, tradenames, marks, trademarks, emblems, and images are registered
+> trademarks of YNAB; they are named here only to say which service avenir-mcp works with.
 >
 > avenir-mcp is for **personal use on your own machine, with your own YNAB token**. Running it
 > as a public or shared server is not supported. It is provided as is, without warranty,
