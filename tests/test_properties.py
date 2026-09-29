@@ -5,6 +5,7 @@ from __future__ import annotations
 import random
 import unicodedata
 from datetime import date, timedelta
+from typing import Any
 
 import pytest
 from hypothesis import given, settings
@@ -123,6 +124,57 @@ def test_any_other_cursor_is_refused_with_a_way_forward(cursor: str) -> None:
         assert "next_cursor" in str(error)
     else:
         assert offset >= 0
+
+
+# ---------------------------------------------------------------------------
+# Transfers between accounts
+# ---------------------------------------------------------------------------
+
+
+def _pairs_one_by_one(pending: list[dict[str, Any]]) -> dict[str, str]:
+    """The rule written plainly: each outflow takes the first inflow that mirrors it."""
+    pairs: dict[str, str] = {}
+    for tx in pending:
+        if tx["id"] in pairs or tx["amount"] >= 0:
+            continue
+        for other in pending:
+            days = date.fromisoformat(other["date"]) - date.fromisoformat(tx["date"])
+            if (
+                other["id"] not in pairs
+                and other["amount"] == -tx["amount"]
+                and other["account_id"] != tx["account_id"]
+                and abs(days.days) <= triage.TRANSFER_WINDOW_DAYS
+            ):
+                pairs[tx["id"]], pairs[other["id"]] = other["id"], tx["id"]
+                break
+    return pairs
+
+
+pending_transactions = st.lists(
+    st.tuples(
+        st.sampled_from([-30000, -12000, 12000, 30000, 45000]),
+        st.sampled_from(["acc-1", "acc-2", "acc-3"]),
+        st.integers(min_value=0, max_value=10),
+    ),
+    max_size=40,
+).map(
+    lambda rows: [
+        {
+            "id": f"t{i}",
+            "amount": amount,
+            "account_id": account,
+            "date": (date(2026, 9, 1) + timedelta(days=day)).isoformat(),
+        }
+        for i, (amount, account, day) in enumerate(rows)
+    ]
+)
+
+
+@given(pending_transactions)
+def test_transfer_pairing_follows_the_plain_rule(pending: list[dict[str, Any]]) -> None:
+    """Indexing by amount finds exactly the pairs the one-by-one rule finds, in the same order."""
+    found = triage._transfer_pairs(pending)  # pylint: disable=protected-access
+    assert found == _pairs_one_by_one(pending)
 
 
 # ---------------------------------------------------------------------------

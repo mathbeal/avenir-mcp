@@ -184,23 +184,30 @@ def _is_pending(tx: dict[str, Any], off_budget: set[str], uncategorized: set[str
 def _transfer_pairs(pending: list[dict[str, Any]]) -> dict[str, str]:
     """Pair pending transactions that look like both halves of one transfer.
 
+    Each outflow takes the first inflow of the opposite amount, on another account,
+    within TRANSFER_WINDOW_DAYS. Inflows are looked up by amount, so a plan with
+    thousands of pending transactions is paired in one pass rather than one per pair.
+
     Args:
         pending: The pending transactions.
 
     Returns:
         Each paired transaction's id mapped to its other half's.
     """
+    inflows: dict[int, list[tuple[dict[str, Any], date]]] = {}
+    for tx in pending:
+        if tx["amount"] > 0:
+            inflows.setdefault(tx["amount"], []).append((tx, date.fromisoformat(tx["date"])))
     pairs: dict[str, str] = {}
     for tx in pending:
         if tx["id"] in pairs or tx["amount"] >= 0:
             continue
         day = date.fromisoformat(tx["date"])
-        for other in pending:
+        for other, other_day in inflows.get(-tx["amount"], ()):
             if (
                 other["id"] not in pairs
-                and other["amount"] == -tx["amount"]
                 and other.get("account_id") != tx.get("account_id")
-                and abs((date.fromisoformat(other["date"]) - day).days) <= TRANSFER_WINDOW_DAYS
+                and abs((other_day - day).days) <= TRANSFER_WINDOW_DAYS
             ):
                 pairs[tx["id"]], pairs[other["id"]] = other["id"], tx["id"]
                 break
