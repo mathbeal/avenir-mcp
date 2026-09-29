@@ -104,8 +104,6 @@ onschuldig, zoals de formulering van een melding.
 zo'n 9.000 transacties (pytest-benchmark). Op een laptop duurt de traagste stap (een pagina met
 suggesties voorbereiden) ongeveer 30 ms: de tijd van een tool gaat op aan wachten op YNAB, niet aan rekenen.
 
-`just fuzz` draait de Hypothesis-eigenschappen met elk 50.000 voorbeelden in plaats van 100
-
 `just fuzz` draait de Hypothesis-eigenschappen (properties) met elk 50.000 voorbeelden in plaats van 100
 (een paar minuten; `just fuzz 200000` voor meer), op wat van buiten komt: bankomschrijvingen,
 beschadigde journalen, HTTP-headers, bedragen, paginacursors. Een fout wordt bewaard en bij de
