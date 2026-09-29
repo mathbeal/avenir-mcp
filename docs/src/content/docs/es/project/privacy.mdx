@@ -1,0 +1,91 @@
+---
+title: Privacidad
+description: Qué hace avenir-mcp con sus datos de YNAB, adónde van, cuánto tiempo se conservan y cómo borrarlos.
+sidebar:
+  order: 8
+---
+
+avenir-mcp es un programa que usted ejecuta por su cuenta, no un servicio. Su editor no
+opera ningún servidor y no recibe ninguno de sus datos. Esta página describe lo que el
+programa hace, en su equipo, con los datos que obtiene a través de la API de YNAB.
+
+## Quién ve sus datos
+
+| Quién | Qué | Bajo qué política |
+|---|---|---|
+| Usted, en su equipo | avenir-mcp mientras se ejecuta, y su diario | esta página |
+| YNAB | su plan, como siempre: avenir-mcp lo lee, y lo modifica cuando usted confirma, con su propio token | [la política de privacidad de YNAB](https://www.ynab.com/privacy-policy/) |
+| Su proveedor de modelo | los resultados de herramientas que su cliente MCP envía a su modelo: cuentas, categorías, beneficiarios, importes, notas | la de su proveedor; ninguna con un [modelo local](/avenir-mcp/es/guides/choose-a-model/#modelos-locales) |
+| El editor de avenir-mcp | nada | — |
+
+## Qué maneja avenir-mcp
+
+- **Su token de YNAB.** Se lee al arrancar en `YNAB_API_KEY`, o en el archivo indicado por
+  `YNAB_API_KEY_FILE`. Se guarda en memoria como valor secreto, se envía solo a la API de
+  YNAB por HTTPS, y nunca se registra, se muestra, se devuelve al agente ni se escribe en
+  disco. Permanece donde usted lo puso: la configuración de su cliente MCP, o ese archivo.
+- **Los datos de su plan**: cuentas, categorías, transacciones, beneficiarios y notas. Se
+  piden a YNAB cuando una herramienta los necesita, se guardan
+  [en memoria](/avenir-mcp/es/concepts/data-and-sync/#la-copia-local-de-las-transacciones)
+  para que la siguiente petición pida solo lo que cambió, y se devuelven a su agente como
+  resultados de herramientas. Nunca se escriben en disco.
+- **El [diario](/avenir-mcp/es/concepts/journal/).** Tras cada cambio que usted confirma,
+  una línea de identificadores: qué transacción pasó de qué categoría a cuál, y lo que
+  necesita una operación de deshacer. Nunca un importe, un beneficiario ni una nota. El
+  archivo solo lo puede leer su cuenta de usuario.
+- **Los códigos de confirmación.** En memoria, de un solo uso, válidos 10 minutos.
+- **Los registros de diagnóstico.** En stderr, solo identificadores y recuentos, avisos y
+  errores por defecto. Adónde van depende de su cliente MCP.
+
+## Cómo se protegen
+
+- **Solo lectura por defecto.** Las herramientas que modifican su plan solo existen si
+  usted define `AVENIR_MCP_WRITE=1`, y cada cambio se
+  [muestra y se confirma](/avenir-mcp/es/concepts/confirmation/) antes de enviarse.
+- **El token es un valor secreto en el código**: mostrado, registrado o en un error,
+  aparece como `**********`.
+- **El texto bancario es un dato.** Beneficiarios y notas vienen de bancos y de
+  desconocidos; se devuelven como datos, nunca como instrucciones para el agente.
+- **El transporte HTTP se queda en este equipo.** Escucha en `127.0.0.1` por defecto, y
+  se niega a permitir cambios sin su propio token.
+- **El código se comprueba en cada cambio**: análisis estático, búsqueda de secretos en
+  todo el historial y auditoría de las dependencias bloqueadas. Consulte
+  [Seguridad](/avenir-mcp/es/project/security/).
+
+## Cuánto tiempo se conservan
+
+| Dato | Se conserva |
+|---|---|
+| Datos del plan | mientras avenir-mcp se ejecuta; se borran al detenerse |
+| Códigos de confirmación | utilizables 10 minutos, y se borran al detenerse avenir-mcp; un código contiene una huella de la vista previa, nunca su contenido |
+| Diario | hasta que usted lo borre; avenir-mcp nunca lo recorta |
+| Token | donde usted lo guardó, hasta que lo quite o lo revoque |
+
+## Cómo borrarlos
+
+1. **Detenga avenir-mcp**, o cierre su cliente MCP: los datos del plan en memoria
+   desaparecen.
+2. **Borre el diario**: `~/.local/state/avenir-mcp/journal.jsonl`, o la ruta indicada en
+   `AVENIR_MCP_JOURNAL` o bajo `XDG_STATE_HOME`. Pierde el historial para deshacer, nada
+   más.
+3. **Revoque el token** en los
+   [ajustes de desarrollador de YNAB](https://app.ynab.com/settings/developer), y quítelo
+   de la configuración de su cliente o de su archivo.
+4. **Las conversaciones** con su agente las conservan su cliente MCP y su proveedor de
+   modelo, no avenir-mcp: bórrelas allí.
+
+Sus datos en YNAB permanecen en su cuenta de YNAB, bajo la política de YNAB.
+
+## No se recopila nada más
+
+avenir-mcp no tiene telemetría, ni cuenta, ni servidor. Este sitio de documentación no
+instala cookies ni usa analítica; sus fuentes las sirve el propio sitio. GitHub, que lo
+aloja, registra la dirección IP de los visitantes por motivos de seguridad, según la
+[declaración de privacidad de GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+## Cambios en esta página
+
+Una versión que cambie lo que avenir-mcp conserva o envía modifica esta página en la
+misma versión, y su [registro de cambios](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md)
+lo indica. Preguntas: [issues de GitHub](https://github.com/mathbeal/avenir-mcp/issues);
+el [aviso legal](/avenir-mcp/es/project/legal/) identifica al editor.

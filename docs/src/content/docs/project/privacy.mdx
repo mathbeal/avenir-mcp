@@ -1,0 +1,86 @@
+---
+title: Privacy
+description: What avenir-mcp does with your YNAB data, where it goes, how long it is kept, and how to erase it.
+sidebar:
+  order: 8
+---
+
+avenir-mcp is a program you run yourself, not a service. Its publisher runs no server and
+receives none of your data. This page describes what the program does on your machine
+with the data it obtains through YNAB's API.
+
+## Who sees your data
+
+| Who | What | Under whose policy |
+|---|---|---|
+| You, on your machine | avenir-mcp while it runs, and its journal | this page |
+| YNAB | your plan, as always: avenir-mcp reads it, and changes it when you confirm, with your own token | [YNAB's privacy policy](https://www.ynab.com/privacy-policy/) |
+| Your model provider | the tool results your MCP client sends to its model: accounts, categories, payees, amounts, memos | your provider's; nobody's with a [local model](/avenir-mcp/guides/choose-a-model/#local-models) |
+| The publisher of avenir-mcp | nothing | — |
+
+## What avenir-mcp handles
+
+- **Your YNAB token.** Read at start from `YNAB_API_KEY`, or from the file named by
+  `YNAB_API_KEY_FILE`. Kept in memory as a secret value, sent only to YNAB's API over
+  HTTPS, and never logged, printed, returned to the agent or written to disk. It stays
+  where you put it: your MCP client's configuration, or that file.
+- **Your plan's data**: accounts, categories, transactions, payees and memos. Fetched from
+  YNAB when a tool needs it, kept [in memory](/avenir-mcp/concepts/data-and-sync/#the-local-copy-of-transactions)
+  so that the next request asks only for what changed, and returned to your agent as tool
+  results. Never written to disk.
+- **The [journal](/avenir-mcp/concepts/journal/).** After each change you confirm, one
+  line of identifiers: which transaction moved from which category to which, and what an
+  undo needs. Never an amount, a payee or a memo. The file is readable by your user
+  account only.
+- **Confirmation codes.** In memory, single use, valid 10 minutes.
+- **Logs.** On stderr, identifiers and counts only, warnings and errors by default. Where
+  they end up depends on your MCP client.
+
+## How it is secured
+
+- **Read-only by default.** Tools that change your plan exist only when you set
+  `AVENIR_MCP_WRITE=1`, and each change is [previewed and confirmed](/avenir-mcp/concepts/confirmation/)
+  before it is sent.
+- **The token is a secret value in the code**: printed, logged or in an error, it shows
+  as `**********`.
+- **Bank text is data.** Payees and memos come from banks and strangers; they are returned
+  as data, never as instructions to the agent.
+- **The HTTP transport stays on this machine.** It listens on `127.0.0.1` by default, and
+  refuses to allow changes without its own token.
+- **The code is checked on every change**: static analysis, secret scanning of the whole
+  history, and an audit of the locked dependencies. See [Security](/avenir-mcp/project/security/).
+
+## How long it is kept
+
+| Data | Kept |
+|---|---|
+| Plan data | while avenir-mcp runs; gone when it stops |
+| Confirmation codes | usable 10 minutes, and gone when avenir-mcp stops; a code holds a fingerprint of the preview, never its content |
+| Journal | until you delete it; avenir-mcp never trims it |
+| Token | where you stored it, until you remove or revoke it |
+
+## How to erase it
+
+1. **Stop avenir-mcp**, or quit your MCP client: the plan data in memory is gone.
+2. **Delete the journal**: `~/.local/state/avenir-mcp/journal.jsonl`, or the path in
+   `AVENIR_MCP_JOURNAL` or under `XDG_STATE_HOME`. You lose the undo history, nothing else.
+3. **Revoke the token** in [YNAB's developer settings](https://app.ynab.com/settings/developer),
+   and remove it from your client's configuration or from its file.
+4. **Conversations** with your agent are kept by your MCP client and your model provider,
+   not by avenir-mcp: delete them there.
+
+Your data at YNAB stays in your YNAB account, under YNAB's policy.
+
+## Nothing else is collected
+
+avenir-mcp has no telemetry, no account and no server. This documentation site sets no
+cookies and runs no analytics; its fonts are served by the site itself. GitHub, which
+hosts it, records visitors' IP addresses for security, under the
+[GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+## Changes to this page
+
+A release that changes what avenir-mcp stores or sends changes this page in the same
+release, and its [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md)
+says so. Questions: [GitHub issues](https://github.com/mathbeal/avenir-mcp/issues); the
+[legal notice](/avenir-mcp/project/legal/) names the publisher.
