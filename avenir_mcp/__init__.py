@@ -1,3 +1,3 @@
 """avenir-mcp — an MCP server for YNAB, built for agents."""
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
