@@ -33,6 +33,7 @@ def _mcp_config(url: str, journal: Path) -> dict[str, Any]:
         "YNAB_API_KEY": "demo",
         "AVENIR_MCP_YNAB_URL": url,
         "AVENIR_MCP_WRITE": "1",
+        "AVENIR_MCP_NO_UPDATE_CHECK": "1",
         "AVENIR_MCP_JOURNAL": str(journal),
         "PATH": os.environ["PATH"],
     }

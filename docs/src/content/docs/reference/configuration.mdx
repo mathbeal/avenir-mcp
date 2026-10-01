@@ -27,6 +27,7 @@ block or in the shell that starts it. Nothing else is read: no configuration fil
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confidence needed to suggest a category. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Diagnostics level. |
 | `AVENIR_MCP_LOG_FORMAT` | `text` | `json` writes one JSON object per line. |
+| `AVENIR_MCP_NO_UPDATE_CHECK` | unset | `1` stops the daily check for a newer release on PyPI. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | API address. |
 
 ## Details
@@ -123,6 +124,16 @@ can contain the requests themselves.
 `text` (default): one readable line per event. `json`: one JSON object per line, for a log
 collector — see
 [Send logs to a log system](/avenir-mcp/guides/run-options/#send-logs-to-a-log-system).
+
+### `AVENIR_MCP_NO_UPDATE_CHECK`
+
+Unset (default): at start-up, at most once a day, the server asks PyPI
+(`https://pypi.org/pypi/avenir-mcp/json`) for the latest release, waiting 1.5 seconds at
+most, and remembers the answer in `latest-version.json` under `XDG_CACHE_HOME`
+(`~/.cache` by default). When a newer release exists, a line in the server's instructions
+tells the agent, which can tell you, and the same line is logged as a warning. Nothing about you or your plans is sent: it is one
+anonymous request, which PyPI sees coming from your address. The server never upgrades
+itself. `1`: no request at all; `DO_NOT_TRACK=1`, or a CI run (`CI=true`), has the same effect.
 
 ### `AVENIR_MCP_YNAB_URL`
 

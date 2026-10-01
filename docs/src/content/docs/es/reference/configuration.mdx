@@ -28,6 +28,7 @@ configuración.
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confianza necesaria para sugerir una categoría. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Nivel de los diagnósticos. |
 | `AVENIR_MCP_LOG_FORMAT` | `text` | `json` escribe un objeto JSON por línea. |
+| `AVENIR_MCP_NO_UPDATE_CHECK` | sin definir | `1` detiene la comprobación diaria de una versión más reciente en PyPI. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Dirección de la API. |
 
 ## Detalles
@@ -131,6 +132,17 @@ peticiones.
 `text` (por defecto): una línea legible por evento. `json`: un objeto JSON por línea,
 para un recolector de logs — vea
 [Enviar los logs a un sistema de logs](/avenir-mcp/es/guides/run-options/#enviar-los-logs-a-un-sistema-de-logs).
+
+### `AVENIR_MCP_NO_UPDATE_CHECK`
+
+Sin definir (por defecto): al arrancar, como mucho una vez al día, el servidor pregunta a
+PyPI (`https://pypi.org/pypi/avenir-mcp/json`) por la última versión, esperando como mucho
+1,5 segundos, y guarda la respuesta en `latest-version.json` bajo `XDG_CACHE_HOME`
+(`~/.cache` por defecto). Si hay una versión más reciente, una línea de sus instrucciones se
+lo dice al agente, que puede decírselo a usted, y la misma línea se registra como aviso. No se envía nada sobre usted ni sobre sus
+planes: es una petición anónima, que PyPI ve llegar desde su dirección. El servidor nunca
+se actualiza solo. `1`: ninguna petición; `DO_NOT_TRACK=1`, o una ejecución de integración
+continua (`CI=true`), tiene el mismo efecto.
 
 ### `AVENIR_MCP_YNAB_URL`
 

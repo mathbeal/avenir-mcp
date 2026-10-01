@@ -11,7 +11,7 @@ import pytest
 from fastmcp.exceptions import ToolError
 
 import avenir_mcp
-from avenir_mcp import server
+from avenir_mcp import server, updates
 
 # ---------------------------------------------------------------------------
 # FastMCP instance
@@ -294,3 +294,38 @@ def test_main_prints_the_version_and_stops(capsys: pytest.CaptureFixture[str]) -
 def test_today_is_the_real_date() -> None:
     """Tools reckon from the actual date unless a test fixes it."""
     assert server.today() == date.today()
+
+
+def test_main_adds_the_update_notice_to_the_instructions(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A newer release reaches the agent's instructions, and the logs as a warning."""
+    monkeypatch.delenv("AVENIR_MCP_TRANSPORT", raising=False)
+    guide = server.mcp.instructions
+    seen: dict[str, Any] = {}
+
+    def check(env: Any, current: str, now: Any) -> str:
+        seen.update(env=env, current=current, now=now)
+        return "Update: avenir-mcp 9.9.9 is available."
+
+    try:
+        with patch.object(updates, "check", check), patch.object(server.mcp, "run"):
+            server.main([])
+        assert server.mcp.instructions == f"{guide}\n\nUpdate: avenir-mcp 9.9.9 is available."
+        assert seen["current"] == avenir_mcp.__version__
+        assert seen["env"]["AVENIR_MCP_NO_UPDATE_CHECK"] == "1"
+        assert seen["now"].tzinfo is not None
+        assert "Update: avenir-mcp 9.9.9 is available." in caplog.text
+    finally:
+        server.mcp.instructions = guide
+
+
+def test_main_leaves_the_instructions_alone_when_up_to_date(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """No notice, no change: the guide stays exactly as written."""
+    monkeypatch.delenv("AVENIR_MCP_TRANSPORT", raising=False)
+    guide = server.mcp.instructions
+    with patch.object(updates, "check", return_value=None), patch.object(server.mcp, "run"):
+        server.main([])
+    assert server.mcp.instructions == guide

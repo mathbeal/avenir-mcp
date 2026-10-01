@@ -51,6 +51,15 @@ machine are refused (against DNS rebinding), and with `AVENIR_MCP_HTTP_TOKEN` se
 request must carry `Authorization: Bearer <token>`. Writes over HTTP require the token:
 without it the server refuses to start.
 
+## Network
+
+The server talks to YNAB's API (`api.ynab.com`), and, at most once a day at start-up, asks
+PyPI whether a newer avenir-mcp exists: one anonymous request to
+`https://pypi.org/pypi/avenir-mcp/json`, which sends nothing about you or your plans.
+`AVENIR_MCP_NO_UPDATE_CHECK=1` or `DO_NOT_TRACK=1` turns it off, and it never runs when `CI` is
+`true`. Only a plain version number from that answer
+can reach the agent, never other text.
+
 ## Intended use
 
 avenir-mcp runs for one person, on their machine, with their own YNAB token. Running it as

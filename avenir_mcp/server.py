@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import SecretStr
@@ -24,6 +25,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_flags,
     tools_targets,
     tools_undo,
+    updates,
 )
 from avenir_mcp.app import WRITE_TAG, configure, mcp, today
 from avenir_mcp.tools_accounts import create_transactions
@@ -92,6 +94,10 @@ def main(argv: list[str] | None = None) -> None:
     AVENIR_MCP_LOG_LEVEL, WARNING by default, as text or, with
     AVENIR_MCP_LOG_FORMAT=json, one JSON object per line.
 
+    Unless switched off (AVENIR_MCP_NO_UPDATE_CHECK=1, DO_NOT_TRACK=1 or a CI run),
+    the server asks PyPI at most once a day whether a newer release exists, and says
+    so in its instructions and as a warning in its logs (see updates).
+
     The HTTP address comes from AVENIR_MCP_HOST and AVENIR_MCP_PORT and defaults to
     127.0.0.1:8103, so the server is never reachable from the network by accident.
     Over HTTP, requests must name this machine (see http_options); writes also need
@@ -112,6 +118,10 @@ def main(argv: list[str] | None = None) -> None:
     )
     writes = os.getenv("AVENIR_MCP_WRITE") == "1"
     configure(enable_writes=writes)
+    update = updates.check(os.environ, __version__, datetime.now(UTC))
+    if update:
+        logger.warning("%s", update)
+        mcp.instructions = f"{mcp.instructions}\n\n{update}"
     if os.getenv("AVENIR_MCP_TRANSPORT", "stdio") == "http":
         host = os.getenv("AVENIR_MCP_HOST", "127.0.0.1")
         port = int(os.getenv("AVENIR_MCP_PORT", "8103"))
