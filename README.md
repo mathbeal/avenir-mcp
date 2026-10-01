@@ -11,14 +11,14 @@ turns the badge red when YNAB changes its terms. Not reviewed or endorsed by YNA
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![MCP Inspector](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml)
-[![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://mathbeal.github.io/avenir-mcp/)
+[![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://avenir-mcp.pages.dev/avenir-mcp/)
 
 [![PyPI](https://img.shields.io/pypi/v/avenir-mcp)](https://pypi.org/project/avenir-mcp/)
 [![python](https://img.shields.io/pypi/pyversions/avenir-mcp)](https://pypi.org/project/avenir-mcp/)
-[![coverage](https://img.shields.io/badge/coverage-100%25%20lines%20and%20branches-brightgreen)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
-[![types](https://img.shields.io/badge/types-mypy%20strict-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
-[![docstrings](https://img.shields.io/badge/docstrings-Google%20style%2C%20ruff-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
-[![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
+[![coverage](https://img.shields.io/badge/coverage-100%25%20lines%20and%20branches-brightgreen)](https://avenir-mcp.pages.dev/avenir-mcp/project/development/#the-checks)
+[![types](https://img.shields.io/badge/types-mypy%20strict-blue)](https://avenir-mcp.pages.dev/avenir-mcp/project/development/#the-checks)
+[![docstrings](https://img.shields.io/badge/docstrings-Google%20style%2C%20ruff-blue)](https://avenir-mcp.pages.dev/avenir-mcp/project/development/#the-checks)
+[![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://avenir-mcp.pages.dev/avenir-mcp/project/development/#the-checks)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15139/badge)](https://www.bestpractices.dev/projects/15139)
 [![last commit](https://img.shields.io/github/last-commit/mathbeal/avenir-mcp)](https://github.com/mathbeal/avenir-mcp/commits/main)
@@ -34,9 +34,9 @@ in plain words: where the money went, what still needs a category, whether an ac
 matches the bank, when money would run out. Every change is previewed, confirmed by
 you, and can be undone.
 
-**📖 Documentation: <https://mathbeal.github.io/avenir-mcp/>**
+**📖 Documentation: <https://avenir-mcp.pages.dev/avenir-mcp/>**
 
-[English](https://mathbeal.github.io/avenir-mcp/) · [Français](https://mathbeal.github.io/avenir-mcp/fr/) · [Español](https://mathbeal.github.io/avenir-mcp/es/) · [Deutsch](https://mathbeal.github.io/avenir-mcp/de/) · [Nederlands](https://mathbeal.github.io/avenir-mcp/nl/)
+[English](https://avenir-mcp.pages.dev/avenir-mcp/) · [Français](https://avenir-mcp.pages.dev/avenir-mcp/fr/) · [Español](https://avenir-mcp.pages.dev/avenir-mcp/es/) · [Deutsch](https://avenir-mcp.pages.dev/avenir-mcp/de/) · [Nederlands](https://avenir-mcp.pages.dev/avenir-mcp/nl/)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
@@ -60,7 +60,7 @@ the documentation shows.
 > avenir-mcp is for **personal use on your own machine, with your own YNAB token**. Running it
 > as a public or shared server is not supported. It is provided as is, without warranty,
 > and is not financial advice: you remain responsible for the changes you confirm. See the
-> [legal notice](https://mathbeal.github.io/avenir-mcp/project/legal/).
+> [legal notice](https://avenir-mcp.pages.dev/avenir-mcp/project/legal/).
 
 ## Why avenir-mcp
 
@@ -107,8 +107,8 @@ claude mcp add avenir-mcp --env YNAB_API_KEY=your-token --env AVENIR_MCP_WRITE=1
 ```
 
 Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
-[Install](https://mathbeal.github.io/avenir-mcp/getting-started/install/) ·
-[Configuration](https://mathbeal.github.io/avenir-mcp/reference/configuration/).
+[Install](https://avenir-mcp.pages.dev/avenir-mcp/getting-started/install/) ·
+[Configuration](https://avenir-mcp.pages.dev/avenir-mcp/reference/configuration/).
 
 ## What you can ask
 
@@ -123,8 +123,8 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 
-Walk-throughs with real answers: [Use cases](https://mathbeal.github.io/avenir-mcp/guides/classify/).
-Every tool, resource and prompt: [Reference](https://mathbeal.github.io/avenir-mcp/reference/tools/).
+Walk-throughs with real answers: [Use cases](https://avenir-mcp.pages.dev/avenir-mcp/guides/classify/).
+Every tool, resource and prompt: [Reference](https://avenir-mcp.pages.dev/avenir-mcp/reference/tools/).
 
 ## Development
 

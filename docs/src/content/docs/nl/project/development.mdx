@@ -126,11 +126,13 @@ het Engels, Frans, Spaans, Duits en Nederlands; een test faalt als er een ontbre
 
 ### Hosting
 
-De site wordt door de workflow `docs` op GitHub Pages gepubliceerd, en op Cloudflare
-Pages (`avenir-mcp.pages.dev`), dat hem vanuit de repository bouwt met `npm run build:cloudflare`.
-Beide serveren hem onder `/avenir-mcp/`; bij Cloudflare stuurt de root daarheen door.
-GitHub Pages kan geen beveiligingsheaders sturen; Cloudflare Pages stuurt die uit
-`docs/cloudflare/_headers` met elk bestand mee: een Content-Security-Policy, HSTS,
+De site staat op Cloudflare Pages (`avenir-mcp.pages.dev`), dat hem vanuit de repository
+bouwt met `npm run build:cloudflare` en onder `/avenir-mcp/` serveert; de root stuurt
+daarheen door. GitHub Pages, dat geen beveiligingsheaders kan sturen, stuurt alleen oude
+links door: de workflow `docs` publiceert daar voor elke pagina van de site een pagina die
+de lezer naar hetzelfde adres op Cloudflare stuurt, en een 404-pagina die hetzelfde doet
+voor elk ander pad. Cloudflare Pages stuurt de headers uit `docs/cloudflare/_headers` met
+elk bestand mee: een Content-Security-Policy, HSTS,
 `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, een referrer-policy, een
 permissions-policy en een opener-policy. Het beleid staat de eigen bestanden van de site
 toe en elk inline script en elke inline stijl van de gebouwde pagina's via de SHA-256,

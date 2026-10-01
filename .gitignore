@@ -37,6 +37,7 @@ site/
 docs/node_modules/
 docs/dist/
 docs/cloudflare-dist/
+docs/redirect-dist/
 docs/.astro/
 
 # lychee's cache of checked links

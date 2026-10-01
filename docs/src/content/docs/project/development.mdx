@@ -124,11 +124,13 @@ Spanish, German and Dutch; a test fails when one is missing.
 
 ### Hosting
 
-The site is published on GitHub Pages by the `docs` workflow, and on Cloudflare Pages
-(`avenir-mcp.pages.dev`), which builds it from the repository with `npm run build:cloudflare`.
-Both serve it under `/avenir-mcp/`; on Cloudflare the root redirects there. GitHub Pages
-cannot send security headers; Cloudflare Pages sends those of `docs/cloudflare/_headers`
-with every file: a Content-Security-Policy, HSTS, `X-Content-Type-Options: nosniff`,
+The site lives on Cloudflare Pages (`avenir-mcp.pages.dev`), which builds it from the
+repository with `npm run build:cloudflare` and serves it under `/avenir-mcp/`; the root
+redirects there. GitHub Pages, which cannot send security headers, only redirects old
+links: the `docs` workflow publishes there, for every page of the site, a page that sends
+the reader to the same address on Cloudflare, and a 404 page that does the same for any
+other path. Cloudflare Pages sends the headers of `docs/cloudflare/_headers` with every
+file: a Content-Security-Policy, HSTS, `X-Content-Type-Options: nosniff`,
 `X-Frame-Options: DENY`, a referrer policy, a permissions policy and an opener policy.
 The policy allows the site's own files and each inline script and style of the built
 pages by its SHA-256, computed at build time; `'wasm-unsafe-eval'` lets the search run

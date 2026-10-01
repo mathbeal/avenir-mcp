@@ -45,12 +45,16 @@ jobs:
       # _headers and _redirects. Fails if a security header is missing or weakened.
       - run: npm run build:cloudflare
         working-directory: docs
+      # What GitHub Pages publishes: no site, only a redirect from each page's old address
+      # to the same page on Cloudflare Pages, and a 404 page that does the same for the rest.
+      - run: npm run build:redirects
+        working-directory: docs
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: docs/dist
+          path: docs/redirect-dist
 
   deploy:
-    name: publish on GitHub Pages
+    name: publish the redirects on GitHub Pages
     # Pages needs a public repository on the free plan: publish once it is public.
     if: github.event_name == 'push' && github.event.repository.visibility == 'public'
     needs: build

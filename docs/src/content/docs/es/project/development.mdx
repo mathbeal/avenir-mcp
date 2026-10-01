@@ -126,10 +126,12 @@ mano existen en inglés, francés, español, alemán y neerlandés; una prueba f
 
 ### Alojamiento
 
-El sitio se publica en GitHub Pages con el workflow `docs`, y en Cloudflare Pages
-(`avenir-mcp.pages.dev`), que lo construye desde el repositorio con `npm run build:cloudflare`.
-Ambos lo sirven bajo `/avenir-mcp/`; en Cloudflare, la raíz redirige allí. GitHub Pages
-no puede enviar cabeceras de seguridad; Cloudflare Pages envía las de
+El sitio está alojado en Cloudflare Pages (`avenir-mcp.pages.dev`), que lo construye desde
+el repositorio con `npm run build:cloudflare` y lo sirve bajo `/avenir-mcp/`; la raíz
+redirige allí. GitHub Pages, que no puede enviar cabeceras de seguridad, solo redirige los
+enlaces antiguos: el workflow `docs` publica allí, para cada página del sitio, una página
+que lleva al lector a la misma dirección en Cloudflare, y una página 404 que hace lo mismo
+con cualquier otra ruta. Cloudflare Pages envía las cabeceras de
 `docs/cloudflare/_headers` con cada archivo: una Content-Security-Policy, HSTS,
 `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, una política de referente,
 una política de permisos y una política de apertura. La política autoriza los archivos

@@ -52,7 +52,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/mathbeal/avenir-mcp"
-Documentation = "https://mathbeal.github.io/avenir-mcp/"
+Documentation = "https://avenir-mcp.pages.dev/avenir-mcp/"
 Repository = "https://github.com/mathbeal/avenir-mcp"
 Issues = "https://github.com/mathbeal/avenir-mcp/issues"
 Changelog = "https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md"

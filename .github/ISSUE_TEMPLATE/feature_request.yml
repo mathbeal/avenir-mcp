@@ -56,7 +56,7 @@ body:
     attributes:
       label: Before submitting
       options:
-        - label: I searched the existing issues and the [roadmap](https://mathbeal.github.io/avenir-mcp/project/limitations/).
+        - label: I searched the existing issues and the [roadmap](https://avenir-mcp.pages.dev/avenir-mcp/project/limitations/).
           required: true
         - label: This issue contains no real financial data and no token.
           required: true

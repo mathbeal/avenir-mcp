@@ -85,7 +85,7 @@ def test_a_page_shows_the_examples_of_its_own_language(language: str) -> None:
     assert [name for name in imported if not re.fullmatch(f"{prefix}[^/]+", name)] == []
 
 
-_SITE_LINK = re.compile(r"https://mathbeal\.github\.io/avenir-mcp/([^\s)>#\"']*)")
+_SITE_LINK = re.compile(r"https://avenir-mcp\.pages\.dev/avenir-mcp/([^\s)>#\"']*)")
 
 
 def _page_exists(path: str) -> bool:

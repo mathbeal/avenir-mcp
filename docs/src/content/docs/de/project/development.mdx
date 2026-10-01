@@ -128,10 +128,12 @@ es auf Englisch, Französisch, Spanisch, Deutsch und Niederländisch; ein Test s
 
 ### Hosting
 
-Die Website wird vom Workflow `docs` auf GitHub Pages veröffentlicht und auf Cloudflare
-Pages (`avenir-mcp.pages.dev`), das sie aus dem Repository mit `npm run build:cloudflare`
-baut. Beide liefern sie unter `/avenir-mcp/` aus; bei Cloudflare leitet die Wurzel dorthin
-um. GitHub Pages kann keine Sicherheits-Header senden; Cloudflare Pages sendet die aus
+Die Website liegt auf Cloudflare Pages (`avenir-mcp.pages.dev`), das sie aus dem
+Repository mit `npm run build:cloudflare` baut und unter `/avenir-mcp/` ausliefert; die
+Wurzel leitet dorthin um. GitHub Pages, das keine Sicherheits-Header senden kann, leitet nur
+noch alte Links weiter: Der Workflow `docs` veröffentlicht dort für jede Seite der Website
+eine Seite, die Lesende zur gleichen Adresse bei Cloudflare schickt, und eine 404-Seite, die
+dasselbe für jeden anderen Pfad tut. Cloudflare Pages sendet die Header aus
 `docs/cloudflare/_headers` mit jeder Datei: eine Content-Security-Policy, HSTS,
 `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, eine Referrer-Policy, eine
 Permissions-Policy und eine Opener-Policy. Die Richtlinie erlaubt die eigenen Dateien der
