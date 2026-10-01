@@ -33,6 +33,7 @@ site/
 # documentation site (Starlight)
 docs/node_modules/
 docs/dist/
+docs/cloudflare-dist/
 docs/.astro/
 
 # lychee's cache of checked links

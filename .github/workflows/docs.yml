@@ -38,6 +38,10 @@ jobs:
       # Starlight in every language; a broken internal link fails the build.
       - run: npm run build
         working-directory: docs
+      # What Cloudflare Pages builds and serves: the site under /avenir-mcp/ with its
+      # _headers and _redirects. Fails if a security header is missing or weakened.
+      - run: npm run build:cloudflare
+        working-directory: docs
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: docs/dist

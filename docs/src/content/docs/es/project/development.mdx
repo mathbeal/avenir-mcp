@@ -124,6 +124,21 @@ just docs-serve            # vista previa en vivo en http://localhost:4321/aveni
 responde, con la fecha fijada y los ids aleatorios sustituidos. Las páginas escritas a
 mano existen en inglés, francés, español, alemán y neerlandés; una prueba falla si falta una.
 
+### Alojamiento
+
+El sitio se publica en GitHub Pages con el workflow `docs`, y en Cloudflare Pages
+(`avenir-mcp.pages.dev`), que lo construye desde el repositorio con `npm run build:cloudflare`.
+Ambos lo sirven bajo `/avenir-mcp/`; en Cloudflare, la raíz redirige allí. GitHub Pages
+no puede enviar cabeceras de seguridad; Cloudflare Pages envía las de
+`docs/cloudflare/_headers` con cada archivo: una Content-Security-Policy, HSTS,
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, una política de referente,
+una política de permisos y una política de apertura. La política autoriza los archivos
+del sitio y cada script o estilo en línea de las páginas construidas por su SHA-256,
+calculado al construir; `'wasm-unsafe-eval'` permite que la búsqueda ejecute su
+WebAssembly, y los atributos de estilo solo se autorizan mediante `style-src-attr`. La
+construcción falla, también en CI, si falta una cabecera requerida o se debilita. La
+variable de entorno `DOCS_SITE` fija la dirección de los enlaces canónicos y del mapa del sitio.
+
 ## Evaluación
 
 ```bash

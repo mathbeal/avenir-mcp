@@ -125,6 +125,21 @@ just docs-serve            # aperçu en direct sur http://localhost:4321/avenir-
 réellement, date fixée et identifiants aléatoires remplacés. Les pages écrites à la main
 existent en anglais, en français, en espagnol, en allemand et en néerlandais ; un test échoue s'il en manque une.
 
+### Hébergement
+
+Le site est publié sur GitHub Pages par le workflow `docs`, et sur Cloudflare Pages
+(`avenir-mcp.pages.dev`), qui le construit depuis le dépôt avec `npm run build:cloudflare`.
+Les deux le servent sous `/avenir-mcp/` ; sur Cloudflare, la racine y redirige. GitHub
+Pages ne peut pas envoyer d'en-têtes de sécurité ; Cloudflare Pages envoie ceux de
+`docs/cloudflare/_headers` avec chaque fichier : une Content-Security-Policy, HSTS,
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, une politique de référent,
+une politique de permissions et une politique d'ouverture. La politique autorise les
+fichiers du site et chaque script ou style en ligne des pages construites par son
+SHA-256, calculé à la construction ; `'wasm-unsafe-eval'` laisse la recherche exécuter
+son WebAssembly, et les attributs de style ne sont autorisés que par `style-src-attr`. La
+construction échoue, en CI aussi, si un en-tête requis manque ou est affaibli. La variable
+d'environnement `DOCS_SITE` fixe l'adresse des liens canoniques et du plan du site.
+
 ## Évaluation
 
 ```bash

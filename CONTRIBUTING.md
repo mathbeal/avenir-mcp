@@ -78,6 +78,12 @@ A page written by hand exists in every language: a test fails when an English
 page has no counterpart in a translation. Change them all together. Generated pages
 stay in English, and the other languages show them with a "not translated" notice.
 
+The site is published on GitHub Pages and on Cloudflare Pages, which builds it with
+`npm run build:cloudflare` and sends the security headers of `docs/cloudflare/_headers`
+(Content-Security-Policy, HSTS, `nosniff`, `X-Frame-Options`). The build computes the
+hash of every inline script and style for the policy, so a new one needs no change, and
+fails when a required header is missing or weakened.
+
 ## Proposing a feature
 
 Open a [feature request](https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml):

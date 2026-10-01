@@ -1,0 +1,4 @@
+# Cloudflare Pages: the site lives under /avenir-mcp/, as on GitHub Pages, so that
+# every link written as /avenir-mcp/... works on both hosts.
+/            /avenir-mcp/  301
+/index.html  /avenir-mcp/  301
