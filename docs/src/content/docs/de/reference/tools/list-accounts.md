@@ -68,8 +68,8 @@ Antwort auf dem Demo-Budget:
     "type": "checking",
     "on_budget": true,
     "closed": false,
-    "balance": 3512.66,
-    "cleared_balance": 3512.66,
+    "balance": 3328.5,
+    "cleared_balance": 3328.5,
     "uncleared_balance": 0.0,
     "bank_link": "healthy",
     "last_reconciled": "2026-08-31"

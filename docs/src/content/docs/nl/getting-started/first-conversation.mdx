@@ -30,7 +30,7 @@ De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Twee rekeningen: Betaalrekening met 3.512,66, alles verwerkt, en Spaarrekening met 600,00.
+> **Claude:** Twee rekeningen: Betaalrekening met 3.328,50, alles verwerkt, en Spaarrekening met 600,00.
 
 Saldi zijn in de valuta van je plan. `cleared_balance` is wat de bank al heeft
 getoond; `uncleared_balance` is wat ze nog niet heeft getoond.
@@ -45,7 +45,7 @@ De agent roept `get_monthly_summary` aan met `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** September verloopt volgens plan, behalve Restaurants, 22,50 over budget.
-> Er wacht nog 1.820,00 om toegewezen te worden.
+> Er wacht nog 1.729,32 om toegewezen te worden.
 
 Alleen categorieën die over budget zijn, worden vermeld. Vraag om de details:
 

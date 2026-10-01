@@ -72,30 +72,30 @@ Antwoord op het demobudget:
     "id": "cat-power",
     "name": "Stroom",
     "group": "Vaste lasten",
-    "budgeted": 70.0,
-    "actual": 0.0,
-    "balance": 70.0,
-    "utilization_pct": 0.0
+    "budgeted": 64.2,
+    "actual": 64.2,
+    "balance": 0.0,
+    "utilization_pct": 100.0
+  },
+  {
+    "id": "cat-internet",
+    "name": "Internet",
+    "group": "Vaste lasten",
+    "budgeted": 29.99,
+    "actual": 29.99,
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-phone",
     "name": "Telefoon",
     "group": "Vaste lasten",
-    "budgeted": 20.0,
+    "budgeted": 19.99,
     "actual": 19.99,
-    "balance": 0.01,
-    "utilization_pct": 99.9
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
-  {
-    "id": "cat-groceries",
-    "name": "Boodschappen",
-    "group": "Dagelijks",
-    "budgeted": 400.0,
-    "actual": 0.0,
-    "balance": 400.0,
-    "utilization_pct": 0.0
-  },
-  "… 5 more"
+  "… 6 more"
 ]
 ```
 

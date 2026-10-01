@@ -33,7 +33,7 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     """The figures the agent must find, computed from the invented budget."""
     assert tasks.RESTAURANTS_AUGUST == pytest.approx(89.10)
     assert tasks.RESTAURANTS_SEPTEMBER_OVER == pytest.approx(-22.5)
-    assert tasks.CHECKING == pytest.approx(3512.66)
+    assert tasks.CHECKING == pytest.approx(3328.50)
 
 
 def test_demo_server_answers_like_ynab() -> None:

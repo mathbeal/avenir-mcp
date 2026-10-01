@@ -14,7 +14,12 @@ SAVINGS = "acc-savings"
 
 GROUPS: dict[str, list[tuple[str, str]]] = {
     "Internal Master Category": [("cat-inflow", "Inflow: Ready to Assign")],
-    "Bills": [("cat-rent", "Rent"), ("cat-power", "Electricity"), ("cat-phone", "Phone")],
+    "Bills": [
+        ("cat-rent", "Rent"),
+        ("cat-power", "Electricity"),
+        ("cat-internet", "Internet"),
+        ("cat-phone", "Phone"),
+    ],
     "Everyday": [
         ("cat-groceries", "Groceries"),
         ("cat-restaurants", "Restaurants"),
@@ -38,6 +43,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Loyer",
         "Electricity": "Électricité",
         "Phone": "Téléphone",
+        "Internet": "Box internet",
         "Groceries": "Courses",
         "Restaurants": "Restaurants",
         "Transport": "Transports",
@@ -56,6 +62,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Alquiler",
         "Electricity": "Luz",
         "Phone": "Teléfono",
+        "Internet": "Fibra",
         "Groceries": "Supermercado",
         "Restaurants": "Restaurantes",
         "Transport": "Transporte",
@@ -74,6 +81,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Miete",
         "Electricity": "Strom",
         "Phone": "Handy",
+        "Internet": "Internet",
         "Groceries": "Lebensmittel",
         "Restaurants": "Restaurants",
         "Transport": "Mobilität",
@@ -92,6 +100,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Huur",
         "Electricity": "Stroom",
         "Phone": "Telefoon",
+        "Internet": "Internet",
         "Groceries": "Boodschappen",
         "Restaurants": "Restaurants",
         "Transport": "Vervoer",
@@ -112,16 +121,18 @@ def group_id(group: str) -> str:
     return f"grp-{group.lower().replace(' ', '-')}"
 
 
-# What is budgeted every month, in milliunits.
+# What is budgeted every month, in milliunits. A bill paid by a fixed plan is budgeted
+# at its exact amount: nothing is left in it once paid.
 BUDGETED: dict[str, int] = {
     "cat-rent": 950_000,
-    "cat-power": 70_000,
-    "cat-phone": 20_000,
+    "cat-power": 64_200,
+    "cat-internet": 29_990,
+    "cat-phone": 19_990,
     "cat-groceries": 400_000,
     "cat-restaurants": 120_000,
     "cat-transport": 90_000,
     "cat-tennis": 80_000,
-    "cat-subscriptions": 15_000,
+    "cat-subscriptions": 13_490,
     "cat-holidays": 200_000,
 }
 
@@ -146,6 +157,7 @@ def _month_transactions(month: str) -> list[tuple[str, str, int, str | None, str
     r1, r2 = restaurants[month[5:7]]
     return [
         (f"{y_m}-03", "LANDLORD SARL", -950_000, "cat-rent", CHECKING),
+        (f"{y_m}-06", "FIBERNET - PRELEV", -29_990, "cat-internet", CHECKING),
         (f"{y_m}-08", "TELCO MOBILE - PRELEV", -19_990, "cat-phone", CHECKING),
         (f"{y_m}-12", "POWERCO ENERGIE", -64_200, "cat-power", CHECKING),
         (f"{y_m}-15", "STREAMFLIX", -13_490, "cat-subscriptions", CHECKING),
@@ -166,7 +178,9 @@ def _september() -> list[tuple[str, str, int, str | None, str]]:
     """September so far: some classified, some pending, one duplicate."""
     return [
         ("2026-09-03", "LANDLORD SARL", -950_000, "cat-rent", CHECKING),
+        ("2026-09-06", "FIBERNET - PRELEV", -29_990, "cat-internet", CHECKING),
         ("2026-09-08", "TELCO MOBILE - PRELEV", -19_990, "cat-phone", CHECKING),
+        ("2026-09-12", "POWERCO ENERGIE", -64_200, "cat-power", CHECKING),
         ("2026-09-10", _card("CHEZ LUCIE", "2026-09-10"), -88_000, "cat-restaurants", CHECKING),
         ("2026-09-11", _card("SUSHI GO", "2026-09-11"), -54_500, "cat-restaurants", CHECKING),
         # Pending: known merchants, an unknown one, and an import that came twice.
@@ -225,6 +239,8 @@ def transactions(language: str = "") -> list[dict[str, Any]]:
 SCHEDULED: list[tuple[str, str, str, str, int, str, str | None, str, str | None]] = [
     ("sch-rent", "2026-06-03", "2026-10-03", "monthly", -950_000, "LANDLORD SARL", "cat-rent",
      CHECKING, None),
+    ("sch-internet", "2026-06-06", "2026-10-06", "monthly", -29_990, "FIBERNET - PRELEV",
+     "cat-internet", CHECKING, None),
     ("sch-phone", "2026-06-08", "2026-10-08", "monthly", -19_990, "TELCO MOBILE - PRELEV",
      "cat-phone", CHECKING, None),
     ("sch-power", "2026-06-12", "2026-10-12", "monthly", -64_200, "POWERCO ENERGIE", "cat-power",

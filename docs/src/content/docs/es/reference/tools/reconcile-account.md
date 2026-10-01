@@ -80,22 +80,22 @@ Respuesta sobre el presupuesto de demostración:
 ```json
 {
   "status": "difference_found",
-  "message": "YNAB's cleared balance differs from the bank by -71.86. Nothing was changed. Check explained_by, uncleared and possible_duplicates with the user; call again once fixed, or with adjust=true to record the gap as an adjustment.",
+  "message": "YNAB's cleared balance differs from the bank by 112.30. Nothing was changed. Check explained_by, uncleared and possible_duplicates with the user; call again once fixed, or with adjust=true to record the gap as an adjustment.",
   "account": "Cuenta corriente",
   "analysis": {
     "account_id": "acc-checking",
     "bank_balance": 3440.8,
-    "cleared_balance": 3512.66,
-    "working_balance": 3512.66,
-    "difference": -71.86,
-    "to_reconcile_count": 49,
+    "cleared_balance": 3328.5,
+    "working_balance": 3328.5,
+    "difference": 112.3,
+    "to_reconcile_count": 54,
     "uncleared_count": 0,
     "uncleared": [],
     "explained_by": [],
     "possible_duplicates": [
       [
-        "tx-050",
-        "tx-051"
+        "tx-055",
+        "tx-056"
       ]
     ]
   },

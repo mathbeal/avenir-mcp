@@ -30,7 +30,7 @@ The agent calls `list_accounts` with `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Two accounts: Checking at 3,512.66, all cleared, and Savings at 600.00.
+> **Claude:** Two accounts: Checking at 3,328.50, all cleared, and Savings at 600.00.
 
 Balances are in your plan's currency. `cleared_balance` is what the bank has already
 shown; `uncleared_balance` is what it has not.
@@ -45,7 +45,7 @@ The agent calls `get_monthly_summary` with `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** September is spending as planned except Restaurants, overspent by 22.50.
-> 1,820.00 is still waiting to be assigned.
+> 1,729.32 is still waiting to be assigned.
 
 Only overspent categories are listed. For the detail, ask for it:
 

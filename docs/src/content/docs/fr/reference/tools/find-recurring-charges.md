@@ -103,6 +103,15 @@ Réponse sur le budget de démonstration :
       "scheduled": false
     },
     {
+      "payee": "FIBERNET - PRELEV",
+      "monthly_amount": -29.99,
+      "yearly_amount": -359.88,
+      "day": 6,
+      "months_seen": 3,
+      "category": "Box internet",
+      "scheduled": true
+    },
+    {
       "payee": "TENNIS CLUB - PRELEV",
       "monthly_amount": -22.0,
       "yearly_amount": -264.0,
@@ -130,7 +139,7 @@ Réponse sur le budget de démonstration :
       "scheduled": false
     }
   ],
-  "yearly_total": -15567.12,
+  "yearly_total": -15927.0,
   "months_looked_at": [
     "2026-05",
     "2026-06",

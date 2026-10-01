@@ -72,30 +72,30 @@ Antwort auf dem Demo-Budget:
     "id": "cat-power",
     "name": "Strom",
     "group": "Fixkosten",
-    "budgeted": 70.0,
-    "actual": 0.0,
-    "balance": 70.0,
-    "utilization_pct": 0.0
+    "budgeted": 64.2,
+    "actual": 64.2,
+    "balance": 0.0,
+    "utilization_pct": 100.0
+  },
+  {
+    "id": "cat-internet",
+    "name": "Internet",
+    "group": "Fixkosten",
+    "budgeted": 29.99,
+    "actual": 29.99,
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-phone",
     "name": "Handy",
     "group": "Fixkosten",
-    "budgeted": 20.0,
+    "budgeted": 19.99,
     "actual": 19.99,
-    "balance": 0.01,
-    "utilization_pct": 99.9
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
-  {
-    "id": "cat-groceries",
-    "name": "Lebensmittel",
-    "group": "Alltag",
-    "budgeted": 400.0,
-    "actual": 0.0,
-    "balance": 400.0,
-    "utilization_pct": 0.0
-  },
-  "… 5 more"
+  "… 6 more"
 ]
 ```
 
