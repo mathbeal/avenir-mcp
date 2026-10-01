@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 from fastmcp import Client
 
-from avenir_mcp import server
+from avenir_mcp import app, server
 
 
 def _tools() -> list[Any]:
@@ -94,3 +95,34 @@ def test_configuring_again_and_again_adds_nothing_to_the_server() -> None:
     assert "apply_categories" in {t.name for t in _tools()}
     server.configure(enable_writes=False)
     assert "apply_categories" not in {t.name for t in _tools()}
+
+
+def test_read_only_descriptions_name_no_hidden_tool() -> None:
+    """Read-only, no visible tool points the agent to a tool it cannot see."""
+    server.configure(enable_writes=True)
+    every = {tool.name for tool in asyncio.run(server.mcp.list_tools())}
+    server.configure(enable_writes=False)
+    visible = asyncio.run(server.mcp.list_tools())
+    hidden = every - {tool.name for tool in visible}
+    assert hidden
+    for tool in visible:
+        named = {name for name in hidden if re.search(rf"\b{name}\b", tool.description or "")}
+        assert not named, f"{tool.name} names {sorted(named)}"
+
+
+def test_with_writes_the_descriptions_name_the_write_tools() -> None:
+    """With writes on, suggest_categories still routes to apply_categories."""
+    server.configure(enable_writes=True)
+    tools = {tool.name: tool for tool in asyncio.run(server.mcp.list_tools())}
+    assert "apply_categories" in (tools["suggest_categories"].description or "")
+    assert "create_category" in (tools["list_category_groups"].description or "")
+
+
+def test_every_read_only_wording_matches_its_description() -> None:
+    """A declared sentence that no longer appears would silently stop replacing anything."""
+    server.configure(enable_writes=True)
+    tools = {tool.name: tool for tool in asyncio.run(server.mcp.list_tools())}
+    wordings = app._READ_ONLY_WORDING  # pylint: disable=protected-access
+    assert wordings
+    for name, (sentence, _replacement) in wordings.items():
+        assert sentence in (tools[name].description or ""), name

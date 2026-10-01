@@ -11,7 +11,7 @@ from pydantic import Field
 
 from avenir_mcp import analytics, app, client, schedule, search
 from avenir_mcp.amounts import Amount
-from avenir_mcp.app import WRITE_TAG, check_month, mcp
+from avenir_mcp.app import WRITE_TAG, check_month, mcp, set_read_only_wording
 from avenir_mcp.model import Model
 
 MAX_TREND_MONTHS = 24
@@ -278,8 +278,8 @@ async def get_spending_trends(
 async def list_category_groups(plan_id: str) -> list[CategoryGroup]:
     """List the category groups a new category can be created in.
 
-    Hidden, deleted and system groups are left out. Pass a group id to
-    create_category, which is there only when the operator enabled writes.
+    Hidden, deleted and system groups are left out.
+    Pass a group id to create_category.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -527,3 +527,10 @@ async def import_transactions(plan_id: str) -> ImportResult:
             "need a category."
         ),
     )
+
+
+set_read_only_wording(
+    "list_category_groups",
+    "Pass a group id to create_category.",
+    "New categories are created in YNAB itself.",
+)

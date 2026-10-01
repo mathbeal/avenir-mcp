@@ -18,6 +18,21 @@ mcp = FastMCP("avenir-mcp")
 # Tools that change a plan carry this tag; read-only mode hides them.
 WRITE_TAG = "write"
 
+# Per tool, a sentence of its description that names a write tool, and the sentence
+# that replaces it while writes are off, so no description points to a hidden tool.
+_READ_ONLY_WORDING: dict[str, tuple[str, str]] = {}
+
+
+def set_read_only_wording(tool: str, sentence: str, replacement: str) -> None:
+    """Declare how a tool's description reads while writes are off.
+
+    Args:
+        tool: The tool's name.
+        sentence: A sentence of its description that names a write tool.
+        replacement: What the description says instead in read-only mode.
+    """
+    _READ_ONLY_WORDING[tool] = (sentence, replacement)
+
 
 class _WriteGate(Transform):
     """Hide the write tools, from the list and from calls, unless writes are enabled.
@@ -41,6 +56,21 @@ class _WriteGate(Transform):
         """
         return not self.open and WRITE_TAG in tool.tags
 
+    def _worded(self, tool: Tool) -> Tool:
+        """Give the tool as the client sees it: read-only wording while writes are off.
+
+        Args:
+            tool: A visible tool of the server.
+
+        Returns:
+            The tool, or a copy whose description names no write tool.
+        """
+        if self.open or tool.name not in _READ_ONLY_WORDING:
+            return tool
+        sentence, replacement = _READ_ONLY_WORDING[tool.name]
+        description = (tool.description or "").replace(sentence, replacement)
+        return tool.model_copy(update={"description": description})
+
     async def list_tools(self, tools: Sequence[Tool]) -> Sequence[Tool]:
         """List the tools, less the write tools while writes are off.
 
@@ -48,9 +78,9 @@ class _WriteGate(Transform):
             tools: The server's tools.
 
         Returns:
-            Those the client may see.
+            Those the client may see, worded for the mode.
         """
-        return [tool for tool in tools if not self._hidden(tool)]
+        return [self._worded(tool) for tool in tools if not self._hidden(tool)]
 
     async def get_tool(
         self, name: str, call_next: GetToolNext, *, version: VersionSpec | None = None
@@ -63,10 +93,10 @@ class _WriteGate(Transform):
             version: The version asked for, if any.
 
         Returns:
-            The tool, or None when it is unknown or hidden.
+            The tool, worded for the mode, or None when it is unknown or hidden.
         """
         tool = await call_next(name, version=version)
-        return None if tool is None or self._hidden(tool) else tool
+        return None if tool is None or self._hidden(tool) else self._worded(tool)
 
 
 _GATE = _WriteGate()
