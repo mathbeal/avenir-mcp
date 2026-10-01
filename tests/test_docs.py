@@ -112,6 +112,26 @@ def test_every_link_to_the_site_from_the_repository_reaches_a_page() -> None:
     assert not broken, f"links to no page of the site: {broken}"
 
 
+_REPOSITORY_FILE = re.compile(r"https://github\.com/mathbeal/avenir-mcp/(?:blob|tree)/main/([^\s)>\"`#]+)")
+
+
+def test_every_link_to_a_file_of_the_repository_names_one_that_exists() -> None:
+    """A link to a file of the repository on main names a file of this checkout.
+
+    The link check leaves these links out: a pull request that adds a file and links
+    to it would otherwise fail until it is merged.
+    """
+    root = CONTENT.parents[3]
+    sources = [*sorted(root.glob("*.md")), *sorted(CONTENT.rglob("*.md*"))]
+    broken = [
+        f"{source.relative_to(root)}: {path}"
+        for source in sources
+        for path in _REPOSITORY_FILE.findall(source.read_text(encoding="utf-8"))
+        if not (root / path).exists()
+    ]
+    assert not broken, f"links to no file of the repository: {broken}"
+
+
 def _install_link(prefix: str) -> str:
     readme = (CONTENT.parents[3] / "README.md").read_text(encoding="utf-8")
     found = re.search(rf"\]\(({re.escape(prefix)}[^)]+)\)", readme)
