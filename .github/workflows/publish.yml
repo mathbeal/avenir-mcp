@@ -31,7 +31,17 @@ jobs:
           echo "tag=$expected  version=$found"
           test "$expected" = "$found"
 
-      - run: uv build
+      # Every date inside the files is the tagged commit's: anyone can rebuild them from
+      # the tag and get the same bytes (SECURITY.md, "Rebuilding a release"). A second
+      # build checks it before anything is uploaded.
+      - name: build, twice, from the tagged commit
+        run: |
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
+          uv build -o dist
+          uv build --quiet -o "$RUNNER_TEMP/again"
+          (cd dist && sha256sum -- *) | tee "$RUNNER_TEMP/dist.sha256"
+          (cd "$RUNNER_TEMP/again" && sha256sum --check --strict -- "$RUNNER_TEMP/dist.sha256")
       - run: uv run --no-project --with twine twine check --strict dist/*
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

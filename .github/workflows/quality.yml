@@ -189,11 +189,34 @@ jobs:
           zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
           git /repo --redact --log-opts=--all
 
+  reproducible:
+    name: the build is reproducible
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      # Anyone can rebuild a release and compare it with PyPI's files: two builds of the
+      # same commit, the second with every source file touched, give the same bytes.
+      - name: build twice and compare
+        run: |
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          uv build --quiet -o "$RUNNER_TEMP/first"
+          find avenir_mcp tests -type f -exec touch {} +
+          uv build --quiet -o "$RUNNER_TEMP/second"
+          (cd "$RUNNER_TEMP/first" && sha256sum -- *) | tee "$RUNNER_TEMP/first.sha256"
+          (cd "$RUNNER_TEMP/second" && sha256sum --check --strict -- ../first.sha256)
+
   passed:
     name: CI passed
     # The one check branch protection requires: it stands for every job above.
     if: always()
-    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, secrets]
+    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, secrets, reproducible]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

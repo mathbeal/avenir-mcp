@@ -72,15 +72,23 @@ dev = [
     "pytest-benchmark==5.3.0",
 ]
 
+# hatchling builds the same wheel and sdist twice from the same commit: files in a fixed
+# order, every date set to SOURCE_DATE_EPOCH, no user or group name, and the same gzip
+# header. Pinned, so that a release can be rebuilt with the backend that built it.
 [build-system]
-requires = ["setuptools>=77"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
+[tool.hatch.version]
+path = "avenir_mcp/__init__.py"
+
+[tool.hatch.build.targets.wheel]
 packages = ["avenir_mcp"]
 
-[tool.setuptools.dynamic]
-version = { attr = "avenir_mcp.__version__" }
+# The package and its tests, as before; the documentation, evaluations and tooling stay
+# in the repository.
+[tool.hatch.build.targets.sdist]
+include = ["/avenir_mcp", "/tests"]
 
 [tool.mypy]
 strict = true
