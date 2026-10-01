@@ -21,6 +21,8 @@ path = [
     "lexdrift.lock",
     ".python-version",
     "docs/.nvmrc",
+    "docs/cloudflare/_headers",
+    "docs/cloudflare/_redirects",
 ]
 SPDX-FileCopyrightText = "2026 The avenir-mcp contributors"
 SPDX-License-Identifier = "MIT"
