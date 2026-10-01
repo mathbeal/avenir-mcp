@@ -20,6 +20,7 @@ turns the badge red when YNAB changes its terms. Not reviewed or endorsed by YNA
 [![docstrings](https://img.shields.io/badge/docstrings-Google%20style%2C%20ruff-blue)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![code style](https://img.shields.io/badge/code%20style-ruff-261230)](https://mathbeal.github.io/avenir-mcp/project/development/#the-checks)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15139/badge)](https://www.bestpractices.dev/projects/15139)
 [![last commit](https://img.shields.io/github/last-commit/mathbeal/avenir-mcp)](https://github.com/mathbeal/avenir-mcp/commits/main)
 
 > 🇬🇧 **avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB plan
