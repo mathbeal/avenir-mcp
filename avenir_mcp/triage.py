@@ -7,6 +7,7 @@ list of what is pending: no request per transaction.
 from __future__ import annotations
 
 import base64
+import string
 from datetime import date
 from typing import Any
 
@@ -114,6 +115,10 @@ def _encode_cursor(offset: int) -> str:
     return base64.urlsafe_b64encode(f"offset:{offset}".encode()).decode()
 
 
+# The characters of URL-safe Base64, padding included: anything else is not a cursor of ours.
+_CURSOR_ALPHABET = frozenset(string.ascii_letters + string.digits + "-_=")
+
+
 def _decode_cursor(cursor: str) -> int:
     """Decode a cursor made by :func:`_encode_cursor`.
 
@@ -127,6 +132,10 @@ def _decode_cursor(cursor: str) -> int:
         ValueError: If the cursor was not made by this module, saying what to pass.
     """
     try:
+        # Checked first: Python 3.15 warns that it will discard other characters, so an
+        # altered cursor could otherwise decode to another page.
+        if not set(cursor) <= _CURSOR_ALPHABET:
+            raise ValueError(cursor)
         prefix, _, value = base64.urlsafe_b64decode(cursor.encode()).decode().partition(":")
         if prefix != "offset" or not value.isdigit():
             raise ValueError(cursor)

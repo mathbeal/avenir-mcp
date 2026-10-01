@@ -119,6 +119,17 @@ def test_a_cursor_gives_back_its_offset(offset: int) -> None:
     assert triage._decode_cursor(cursor) == offset  # pylint: disable=protected-access
 
 
+def test_a_cursor_outside_the_url_safe_alphabet_is_refused() -> None:
+    """A cursor with a character URL-safe Base64 does not use is refused, not decoded around it.
+
+    Python 3.15 warns that such characters will be discarded: a cursor altered by one
+    could then decode to another page.
+    """
+    valid = triage._encode_cursor(12)  # pylint: disable=protected-access
+    with pytest.raises(ValueError, match="next_cursor"):
+        triage._decode_cursor(valid[:4] + "////" + valid[4:])  # pylint: disable=protected-access
+
+
 @given(st.text())
 def test_any_other_cursor_is_refused_with_a_way_forward(cursor: str) -> None:
     """Whatever an agent passes as a cursor, the answer is an offset or a clear refusal."""
