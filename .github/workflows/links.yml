@@ -42,7 +42,7 @@ jobs:
         with:
           args: >-
             --config lychee.toml --no-progress
-            README.md CONTRIBUTING.md SECURITY.md AGENTS.md ARCHITECTURE.md GOVERNANCE.md ROADMAP.md CODE_OF_CONDUCT.md
+            README.md CONTRIBUTING.md SECURITY.md AGENTS.md ARCHITECTURE.md GOVERNANCE.md SECURITY-REVIEW.md ROADMAP.md CODE_OF_CONDUCT.md
             "docs/src/content/docs/**/*.md" "docs/src/content/docs/**/*.mdx"
           fail: true
           jobSummary: true

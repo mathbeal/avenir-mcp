@@ -12,8 +12,9 @@ What the server does:
   with `AVENIR_MCP_WRITE=1`
 
 - it calls `api.ynab.com` over HTTPS, and nothing else
-- it reads the token from the environment, or from `YNAB_API_KEY_FILE` (a file readable
-  by its owner only, else refused), and never writes it anywhere
+- it reads the token from the environment, or from `YNAB_API_KEY_FILE` (on Linux and
+  macOS, a file other users can read is refused; on Windows, keep it in your profile),
+  and never writes it anywhere
 - `apply_categories`, `reconcile_account`, `set_category_budget`, `move_money`,
   `update_category`, `create_transactions`, `create_category`, `split_transaction`,
   `flag_transactions`, `set_category_target` and `undo_operation` change nothing until
@@ -29,7 +30,8 @@ What the server does:
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
   identifiers, the amounts a budget change or a move assigned before and after, and the
   colours of a flag change, and a target to restore, readable by
-  its owner only
+  its owner only (mode `0600` on Linux and macOS; on Windows, the permissions of its
+  folder apply)
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
   Keep your MCP client's per-call confirmation on for it.
 - `import_transactions` acts immediately too: it asks YNAB to import what the linked
@@ -249,6 +251,13 @@ a shared server (see [Intended use](#intended-use)).
 Beyond these: mypy checks types in strict mode, the tests cover every line and branch,
 mutation testing checks that they notice changes to the logic, and a nightly job fuzzes
 the Hypothesis properties with 200,000 examples each.
+
+### Security review
+
+The code was last reviewed against this assurance case on 2026-10-01, for version
+0.3.0: the scope, the method, the findings with their severity and status, and the
+risk that remains are in
+[SECURITY-REVIEW.md](https://github.com/mathbeal/avenir-mcp/blob/main/SECURITY-REVIEW.md).
 
 ### Residual risk
 
