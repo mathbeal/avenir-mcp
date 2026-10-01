@@ -82,7 +82,7 @@ jobs:
       matrix:
         # avenir-mcp runs on its users' machines: Linux and macOS are required.
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.12", "3.13", "3.14"]
+        python-version: ["3.12", "3.13", "3.14", "3.15"]
         experimental: [false]
         # A macOS runner costs ten Linux ones: a pull request tries the newest Python
         # there; main tries them all.
@@ -91,6 +91,8 @@ jobs:
             python-version: "3.12"
           - os: ${{ github.event_name == 'pull_request' && 'macos-latest' || 'none' }}
             python-version: "3.13"
+          - os: ${{ github.event_name == 'pull_request' && 'macos-latest' || 'none' }}
+            python-version: "3.14"
         include:
           # Windows is required too. POSIX-only checks (file permissions) are
           # skipped there, so coverage is enforced on Linux and macOS only.
@@ -98,12 +100,6 @@ jobs:
             python-version: "3.14"
             experimental: false
             coverage: "--cov-fail-under=0"
-          # 3.15 is a release candidate, and beartype (via fastmcp) does not import
-          # on it yet. Run it to learn when that changes: a failure is a warning on
-          # the run, not a red check on every pull request.
-          - os: ubuntu-latest
-            python-version: "3.15"
-            experimental: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
