@@ -74,27 +74,27 @@ Réponse sur le budget de démonstration :
     "category_id": "cat-power",
     "name": "Électricité",
     "group": "Charges fixes",
-    "budgeted": 70.0,
-    "activity": 0.0,
-    "balance": 70.0
+    "budgeted": 64.2,
+    "activity": -64.2,
+    "balance": 0.0
+  },
+  {
+    "category_id": "cat-internet",
+    "name": "Box internet",
+    "group": "Charges fixes",
+    "budgeted": 29.99,
+    "activity": -29.99,
+    "balance": 0.0
   },
   {
     "category_id": "cat-phone",
     "name": "Téléphone",
     "group": "Charges fixes",
-    "budgeted": 20.0,
+    "budgeted": 19.99,
     "activity": -19.99,
-    "balance": 0.01
+    "balance": 0.0
   },
-  {
-    "category_id": "cat-groceries",
-    "name": "Courses",
-    "group": "Quotidien",
-    "budgeted": 400.0,
-    "activity": 0.0,
-    "balance": 400.0
-  },
-  "… 5 more"
+  "… 6 more"
 ]
 ```
 

@@ -64,9 +64,9 @@ Réponse sur le budget de démonstration :
 {
   "month": "2026-09-01",
   "income": 0.0,
-  "budgeted": 1945.0,
-  "activity": -1112.49,
-  "ready_to_assign": 1820.0,
+  "budgeted": 1967.67,
+  "activity": -1206.68,
+  "ready_to_assign": 1729.32,
   "age_of_money": 18,
   "overspent": [
     {

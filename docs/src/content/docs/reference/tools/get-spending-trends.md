@@ -76,7 +76,21 @@ Answer on the demo budget:
     },
     {
       "month": "2026-09-01",
-      "amount": 0.0
+      "amount": 64.2
+    }
+  ],
+  "Internet": [
+    {
+      "month": "2026-07-01",
+      "amount": 29.99
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 29.99
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 29.99
     }
   ],
   "Phone": [

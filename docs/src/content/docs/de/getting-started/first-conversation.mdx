@@ -31,7 +31,7 @@ Der Agent ruft `list_accounts` mit `{"plan_id": "last-used"}` auf:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Zwei Konten: Girokonto mit 3.512,66, alles gebucht, und Sparkonto mit 600,00.
+> **Claude:** Zwei Konten: Girokonto mit 3.328,50, alles gebucht, und Sparkonto mit 600,00.
 
 Die Salden sind in der Währung Ihres Plans. `cleared_balance` ist, was die Bank bereits
 gezeigt hat; `uncleared_balance` ist, was sie noch nicht gezeigt hat.
@@ -46,7 +46,7 @@ Der Agent ruft `get_monthly_summary` mit `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** Der September verläuft wie geplant, bis auf Restaurants, um 22,50 überzogen.
-> 1.820,00 warten noch darauf, zugewiesen zu werden.
+> 1.729,32 warten noch darauf, zugewiesen zu werden.
 
 Nur überzogene Kategorien werden aufgeführt. Für die Einzelheiten fragen Sie danach:
 

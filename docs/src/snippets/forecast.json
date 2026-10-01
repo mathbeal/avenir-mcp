@@ -4,7 +4,7 @@
     "Checking",
     "Savings"
   ],
-  "start_balance": 4112.66,
+  "start_balance": 3928.5,
   "assumptions": {
     "recurring": [
       {
@@ -43,6 +43,17 @@
         "account": "Checking",
         "category": "Rent",
         "payee": "LANDLORD SARL",
+        "memo": null,
+        "frequency": "monthly",
+        "transfer": false
+      },
+      {
+        "scheduled_id": "sch-internet",
+        "date": "2026-10-06",
+        "amount": -29.99,
+        "account": "Checking",
+        "category": "Internet",
+        "payee": "FIBERNET - PRELEV",
         "memo": null,
         "frequency": "monthly",
         "transfer": false
@@ -91,52 +102,41 @@
         "frequency": "monthly",
         "transfer": false
       },
-      {
-        "scheduled_id": "sch-phone",
-        "date": "2026-11-08",
-        "amount": -19.99,
-        "account": "Checking",
-        "category": "Phone",
-        "payee": "TELCO MOBILE - PRELEV",
-        "memo": null,
-        "frequency": "monthly",
-        "transfer": false
-      },
-      "… 4 more"
+      "… 7 more"
     ]
   },
   "months": [
     {
       "month": "2026-09",
-      "start": 4112.66,
+      "start": 3928.5,
       "inflows": 3200.0,
       "outflows": 0.0,
-      "end": 7312.66,
-      "lowest": 4112.66
+      "end": 7128.5,
+      "lowest": 3928.5
     },
     {
       "month": "2026-10",
-      "start": 7312.66,
+      "start": 7128.5,
       "inflows": 3200.0,
-      "outflows": -1785.96,
-      "end": 8726.7,
-      "lowest": 6665.72
+      "outflows": -1815.95,
+      "end": 8512.55,
+      "lowest": 6481.56
     },
     {
       "month": "2026-11",
-      "start": 8726.7,
+      "start": 8512.55,
       "inflows": 3200.0,
-      "outflows": -1365.96,
-      "end": 10560.74,
-      "lowest": 8089.84
+      "outflows": -1395.95,
+      "end": 10316.6,
+      "lowest": 7875.69
     },
     {
       "month": "2026-12",
-      "start": 10560.74,
+      "start": 10316.6,
       "inflows": 3200.0,
-      "outflows": -1365.96,
-      "end": 12394.78,
-      "lowest": 9913.8
+      "outflows": -1395.95,
+      "end": 12120.65,
+      "lowest": 9669.66
     }
   ],
   "first_shortfall": null

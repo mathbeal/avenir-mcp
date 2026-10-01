@@ -12,19 +12,28 @@
     "id": "cat-power",
     "name": "Electricity",
     "group": "Bills",
-    "budgeted": 70.0,
+    "budgeted": 64.2,
     "actual": 64.2,
-    "balance": 5.8,
-    "utilization_pct": 91.7
+    "balance": 0.0,
+    "utilization_pct": 100.0
+  },
+  {
+    "id": "cat-internet",
+    "name": "Internet",
+    "group": "Bills",
+    "budgeted": 29.99,
+    "actual": 29.99,
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-phone",
     "name": "Phone",
     "group": "Bills",
-    "budgeted": 20.0,
+    "budgeted": 19.99,
     "actual": 19.99,
-    "balance": 0.01,
-    "utilization_pct": 99.9
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-groceries",
@@ -66,10 +75,10 @@
     "id": "cat-subscriptions",
     "name": "Subscriptions",
     "group": "Fun",
-    "budgeted": 15.0,
+    "budgeted": 13.49,
     "actual": 13.49,
-    "balance": 1.51,
-    "utilization_pct": 89.9
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-holidays",

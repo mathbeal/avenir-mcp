@@ -84,7 +84,7 @@ Answer on the demo budget:
   "suggested_count": 5,
   "items": [
     {
-      "transaction_id": "tx-050",
+      "transaction_id": "tx-055",
       "date": "2026-09-19",
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
@@ -98,7 +98,7 @@ Answer on the demo budget:
       "possible_transfer_with": null
     },
     {
-      "transaction_id": "tx-051",
+      "transaction_id": "tx-056",
       "date": "2026-09-19",
       "amount": -71.86,
       "payee": "CB MARKET FRESH FACT 190926 525130******1",
@@ -112,7 +112,7 @@ Answer on the demo budget:
       "possible_transfer_with": null
     },
     {
-      "transaction_id": "tx-049",
+      "transaction_id": "tx-054",
       "date": "2026-09-18",
       "amount": -45.0,
       "payee": "RAIL CO",
@@ -142,7 +142,7 @@ Answer on the demo budget:
       "name": "Electricity",
       "group": "Bills"
     },
-    "… 7 more"
+    "… 8 more"
   ],
   "next_cursor": "b2Zmc2V0OjM="
 }

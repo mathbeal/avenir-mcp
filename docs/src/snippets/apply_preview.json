@@ -4,21 +4,21 @@
   "changes": [
     {
       "transaction_id": "tx-048",
-      "date": "2026-09-16",
-      "amount": -8.4,
-      "payee": "CB BOULANGERIE DU PORT FACT 160926 525130******1",
-      "from_category_id": null,
-      "from_category": null,
+      "date": "2026-09-08",
+      "amount": -19.99,
+      "payee": "TELCO MOBILE - PRELEV",
+      "from_category_id": "cat-phone",
+      "from_category": "Phone",
       "to_category_id": "cat-groceries",
       "to_category": "Groceries"
     },
     {
       "transaction_id": "tx-049",
-      "date": "2026-09-18",
-      "amount": -45.0,
-      "payee": "RAIL CO",
-      "from_category_id": null,
-      "from_category": null,
+      "date": "2026-09-10",
+      "amount": -88.0,
+      "payee": "CB CHEZ LUCIE FACT 100926 525130******1",
+      "from_category_id": "cat-restaurants",
+      "from_category": "Restaurants",
       "to_category_id": "cat-transport",
       "to_category": "Transport"
     }

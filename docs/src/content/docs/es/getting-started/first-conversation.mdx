@@ -31,7 +31,7 @@ El agente llama a `list_accounts` con `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Dos cuentas: Cuenta corriente con 3.512,66, todo punteado, y Ahorro con 600,00.
+> **Claude:** Dos cuentas: Cuenta corriente con 3.328,50, todo punteado, y Ahorro con 600,00.
 
 Los saldos están en la moneda de su plan. `cleared_balance` es lo que el banco ya
 ha mostrado; `uncleared_balance`, lo que todavía no.
@@ -46,7 +46,7 @@ El agente llama a `get_monthly_summary` con `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** Septiembre va según lo previsto salvo la categoría Restaurantes, excedida en 22,50.
-> Quedan 1.820,00 por asignar.
+> Quedan 1.729,32 por asignar.
 
 Solo se listan las categorías excedidas. Para el detalle, pídalo:
 
