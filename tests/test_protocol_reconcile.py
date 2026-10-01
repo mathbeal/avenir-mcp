@@ -14,7 +14,7 @@ from fastmcp import Client
 
 from avenir_mcp import server
 
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking"}]
 _CATS = [
@@ -217,3 +217,14 @@ def test_adjustment_goes_to_ready_to_assign_dated_today(bank: _Bank) -> None:
         call("reconcile_account", _args(80.0, adjust=True), accept)
     assert bank.created[0]["category_id"] == "c-inflow"
     assert bank.created[0]["date"] == "2026-09-25"
+
+
+def test_an_account_name_cannot_forge_lines_in_the_question(bank: _Bank) -> None:
+    """An account name with a line break stays on one line, in the question and the answer."""
+    asked: list[str] = []
+    forged = AsyncMock(return_value=[{"id": "acc", "name": FORGED}])
+    with patch("avenir_mcp.client.get_accounts", forged):
+        data = call("reconcile_account", _args(70.0), asking(asked)).structured_content
+    assert one_line(asked[0])
+    assert data["account"] == FLAT
+    assert bank.status("t2") == "reconciled"

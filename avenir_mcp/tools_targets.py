@@ -16,6 +16,7 @@ from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteStatus, gate, merged
 from avenir_mcp.model import Model
+from avenir_mcp.text import untrusted
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +128,7 @@ async def set_category_target(  # pylint: disable=too-many-arguments,too-many-po
     result = TargetChange(
         status="applied",
         message="",
-        category=category["name"],
+        category=untrusted(category["name"]),
         before=change.before,
         after=change.after,
         undoable=change.undo is not None,
@@ -138,7 +139,7 @@ async def set_category_target(  # pylint: disable=too-many-arguments,too-many-po
         return result.model_copy(
             update={"status": "nothing_to_do", "message": "The target is already that one."}
         )
-    question = f"Set the target of {category['name']}: {change.before} → {change.after}?"
+    question = f"Set the target of {result.category}: {change.before} → {change.after}?"
     if change.undo is None:
         question += "\n" + _warning(change.before)
     subject = {"category": category_id, "fields": change.fields}

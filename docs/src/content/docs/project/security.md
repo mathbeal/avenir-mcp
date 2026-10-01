@@ -77,9 +77,11 @@ out of scope.
 
 ## Untrusted text in answers
 
-Payee names and memos are shown on one line, without control, zero-width or
-direction-override characters, and cut at 80 characters: bank text cannot add a forged
-line to a confirmation question. Amounts passed by an agent must be finite and within a
+Payee names, memos, and the names of accounts, categories and groups are shown on one
+line, without control, zero-width or direction-override characters, and cut at 80
+characters: text from a bank, from YNAB or from the agent cannot add a forged line to a
+confirmation question. A category name the agent gives `create_category` or
+`update_category` with a line break, control or format character is refused. Amounts passed by an agent must be finite and within a
 billion either way. `AVENIR_MCP_YNAB_URL` must use `https://`, except for `127.0.0.1` and
 `localhost`, so the token never travels in clear.
 
@@ -206,7 +208,7 @@ a shared server (see [Intended use](#intended-use)).
 
 | Weakness | Countermeasure | Code | Tests |
 |---|---|---|---|
-| Prompt injection through bank text (OWASP LLM01) | text shown on one line, without control, zero-width or direction characters, cut at 80 characters; the server's instructions say it is data; a write needs the user's confirmation | `text.untrusted`, `confirm.ONLY_THE_USER` | `test_text.py`, `test_protocol_writes.py::test_bank_text_cannot_forge_lines_in_the_question`, `test_evals.py::test_classify_fails_if_the_agent_obeys_a_memo` |
+| Prompt injection through bank text (OWASP LLM01) | text and names shown on one line, without control, zero-width or direction characters, cut at 80 characters; the server's instructions say it is data; a write needs the user's confirmation | `text.untrusted`, `text.one_line`, `confirm.ONLY_THE_USER` | `test_text.py`, `test_protocol_writes.py::test_bank_text_cannot_forge_lines_in_the_question`, the `*_cannot_forge_lines_*` tests of each write tool, `test_evals.py::test_classify_fails_if_the_agent_obeys_a_memo` |
 | Improper input validation (CWE-20) | every argument checked against its schema before any request (an allowlist: unknown fields refused); amounts finite and within a billion; page sizes and counts bounded; months and cursors in their format; text without NUL and within YNAB's lengths | `model.Model`, `amounts.Amount`, `app.check_month`, `text.YnabText` | `test_properties.py`, `test_protocol_bounds.py`, `test_server.py::test_month_tools_reject_a_malformed_month_with_a_way_forward`, `test_protocol_split.py` |
 | Path manipulation in requests to YNAB (CWE-22, CWE-918) | each path segment must be a plain id: no slash, dot segment, query or escape | `client._url` | `test_client.py::test_ids_that_would_change_the_request_are_refused` |
 | Cleartext transmission of the token (CWE-319) | `https://` required for YNAB's URL; plain HTTP only to this machine | `client._base_url` | `test_client.py::test_api_url_never_sends_the_token_in_clear` |

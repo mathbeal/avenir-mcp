@@ -13,6 +13,8 @@ from fastmcp.client.elicitation import ElicitResult
 
 from avenir_mcp import server
 
+from .mcp_helpers import FLAT, FORGED, asking, one_line
+
 _CATS = [
     {
         "id": "c-pharma",
@@ -193,4 +195,52 @@ def test_invalid_new_category_is_a_tool_error(
     result = _create_call({**_NEW, **change})
     assert result.is_error
     assert expected in result.content[0].text
+    create.assert_not_awaited()
+
+
+def test_update_names_from_ynab_cannot_forge_lines_in_the_question(update: AsyncMock) -> None:
+    """The category's and the groups' names stay on one line, in the question and the preview."""
+    cats = [{**_CATS[0], "name": FORGED, "category_group_name": FORGED}, _CATS[1]]
+    groups = [_GROUPS[0], {"id": "g-care", "name": FORGED}]
+    asked: list[str] = []
+    args = {"plan_id": "b1", "category_id": "c-pharma", "name": "Pharmacy"}
+    with (
+        patch("avenir_mcp.client.get_categories", AsyncMock(return_value=cats)),
+        patch("avenir_mcp.client.get_category_groups", AsyncMock(return_value=groups)),
+    ):
+        data = _call({**args, "category_group_id": "g-care"}, asking(asked)).structured_content
+    assert len(asked[0].splitlines()) == 1
+    assert asked[0].count(FLAT) == 3
+    assert (data["from_name"], data["from_group"], data["to_group"]) == (FLAT, FLAT, FLAT)
+    update.assert_awaited_once()
+
+
+@pytest.mark.parametrize("name", [FORGED, "Gym\u202e", "Gym\x00", "Gym\u2028Rent"])
+def test_a_new_name_that_would_break_the_line_is_refused(update: AsyncMock, name: str) -> None:
+    """A line break, control or format character in the new name is refused, saying why."""
+    result = _call({"plan_id": "b1", "category_id": "c-pharma", "name": name})
+    assert result.is_error
+    assert "line break" in result.content[0].text
+    update.assert_not_awaited()
+
+
+def test_create_group_name_from_ynab_cannot_forge_lines_in_the_question(
+    create: AsyncMock,
+) -> None:
+    """The group's name stays on one line, in the question and the preview."""
+    groups = [{"id": "g-health", "name": FORGED}]
+    asked: list[str] = []
+    with patch("avenir_mcp.client.get_category_groups", AsyncMock(return_value=groups)):
+        data = _create_call(_NEW, asking(asked)).structured_content
+    assert one_line(asked[0])
+    assert data["group"] == FLAT
+    create.assert_awaited_once()
+
+
+@pytest.mark.parametrize("name", [FORGED, "Gym\u200b", "Gym\rRent"])
+def test_a_category_name_that_would_break_the_line_is_refused(create: AsyncMock, name: str) -> None:
+    """The agent cannot create a category whose name adds a line to the question."""
+    result = _create_call({**_NEW, "name": name})
+    assert result.is_error
+    assert "line break" in result.content[0].text
     create.assert_not_awaited()

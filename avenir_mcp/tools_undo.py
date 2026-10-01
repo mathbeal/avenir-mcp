@@ -12,6 +12,7 @@ from mcp.types import InputRequiredResult
 from avenir_mcp import client, flags, journal, targets, writes
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteResult, ask, not_applied, result_of, write_plan
+from avenir_mcp.text import untrusted
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +184,9 @@ async def _undo_budget(
         conflict = writes.Plan(conflicts=[details["category_id"]])
         return result_of("nothing_to_do", "The amount changed since: left alone.", conflict)
     previous = client.milliunit_to_amount(details["from"])
-    question = f"Undo: set {current['name']} for {details['month']} back to {previous:.2f}?"
+    question = (
+        f"Undo: set {untrusted(current['name'])} for {details['month']} back to {previous:.2f}?"
+    )
     refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
     if refused is not None:
         return refused
@@ -205,7 +208,7 @@ def _move_back_question(
     Returns:
         The question, naming the amount and both categories.
     """
-    source, target = (current[change["category_id"]]["name"] for change in changes)
+    source, target = (untrusted(current[change["category_id"]]["name"]) for change in changes)
     amount = client.milliunit_to_amount(changes[0]["from"] - changes[0]["to"])
     return f"Undo: move {amount:.2f} back from {target} to {source} for {month}?"
 
@@ -355,7 +358,7 @@ async def _undo_target(
     if category is None or targets.describe(category) != details["after"]:
         conflict = writes.Plan(conflicts=[details["category_id"]])
         return result_of("nothing_to_do", "The target changed since: left alone.", conflict)
-    question = f"Undo: set the target of {category['name']} back?"
+    question = f"Undo: set the target of {untrusted(category['name'])} back?"
     refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
     if refused is not None:
         return refused

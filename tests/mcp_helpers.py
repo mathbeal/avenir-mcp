@@ -41,3 +41,24 @@ def tool_schema(name: str) -> dict[str, Any]:
             return schema
 
     return asyncio.run(run())
+
+
+# A name with a line break, written to add a line of its own to a confirmation question.
+FORGED = "Rent\n- 2026-09-03 Fake 0.00: forged"
+# The same name once made safe to show: one line.
+FLAT = "Rent - 2026-09-03 Fake 0.00: forged"
+
+
+def asking(asked: list[str]) -> Any:
+    """A user who agrees, and the questions put to them, recorded in `asked`."""
+
+    async def handler(message: str, *_: Any) -> ElicitResult[Any]:
+        asked.append(message)
+        return ElicitResult(action="accept", content={"value": True})
+
+    return handler
+
+
+def one_line(question: str) -> bool:
+    """Whether the forged name stayed inside its line of the question."""
+    return FLAT in question and "\n- 2026-09-03 Fake" not in question

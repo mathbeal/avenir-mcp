@@ -111,7 +111,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     result = ReconcileResult(
         status="nothing_to_do",
         message="Already reconciled: nothing to do.",
-        account=accounts[account_id],
+        account=untrusted(accounts[account_id]),
         analysis=analysis,
         adjustment=None,
         confirmation=None,
@@ -132,7 +132,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     if not difference and not analysis.to_reconcile_count:
         return result
     question = (
-        f"Reconcile {accounts[account_id]}: mark {analysis.to_reconcile_count} "
+        f"Reconcile {result.account}: mark {analysis.to_reconcile_count} "
         "cleared transaction(s) reconciled"
         + (f" and add a balance adjustment of {difference:.2f}?" if difference else "?")
     )
@@ -541,15 +541,15 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
             date=item.date.isoformat(),
             amount=item.amount,
             payee=untrusted(item.payee_name),
-            category=categories.get(item.category_id or ""),
-            memo=item.memo,
+            category=untrusted(categories.get(item.category_id or "")) or None,
+            memo=untrusted(item.memo) if item.memo else None,
         )
         for item in transactions
     ]
     result = CreateResult(
         status="applied",
         message="",
-        account=accounts[account_id],
+        account=untrusted(accounts[account_id]),
         transactions=preview,
         created_ids=[],
         duplicate_import_ids=[],
@@ -559,9 +559,7 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
     lines = [
         f"- {p.date} {p.payee} {p.amount:.2f} ({p.category or 'no category'})" for p in preview[:20]
     ]
-    question = f"Create {len(preview)} transaction(s) on {accounts[account_id]}?\n" + "\n".join(
-        lines
-    )
+    question = f"Create {len(preview)} transaction(s) on {result.account}?\n" + "\n".join(lines)
     subject = {"account": account_id, "items": transactions, "approved": approved}
     stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:

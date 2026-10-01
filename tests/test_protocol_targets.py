@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import FORGED, accept, asking, call, decline, one_line
 
 _FREQ = {"monthly": 1, "weekly": 2, "yearly": 13}
 
@@ -214,3 +214,20 @@ def test_invalid_targets_are_refused_before_asking(
     assert result.is_error
     assert expected in result.content[0].text
     assert not ynab.sent
+
+
+def test_a_category_name_cannot_forge_lines_in_the_question(ynab: FakeTargets) -> None:
+    """A category name with a line break stays on one line."""
+    ynab.categories["c-hol"]["name"] = FORGED
+    asked: list[str] = []
+    call("set_category_target", _HOLIDAYS, asking(asked))
+    assert one_line(asked[0])
+
+
+def test_a_category_name_cannot_forge_lines_in_the_undo_question(ynab: FakeTargets) -> None:
+    """Undoing a target names the category on one line."""
+    call("set_category_target", _HOLIDAYS, accept)
+    ynab.categories["c-hol"]["name"] = FORGED
+    asked: list[str] = []
+    call("undo_operation", {"plan_id": "b1"}, asking(asked))
+    assert one_line(asked[0])
