@@ -14,7 +14,7 @@ from fastmcp.client.elicitation import ElicitResult
 
 from avenir_mcp import confirm, server
 
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, call, decline
 
 _CATS = [
     {"id": "c-food", "name": "Groceries"},
@@ -291,4 +291,13 @@ def test_answer_to_an_outdated_preview_is_refused(budget: _Budget) -> None:
     )
     assert result.is_error
     assert "changed between the preview and the answer" in result.content[0].text
+    assert not budget.patches
+
+
+def test_category_names_are_previewed_on_one_line(budget: _Budget) -> None:
+    """A category name from YNAB with a line break is on one line in the preview."""
+    cats = [{"id": "c-food", "name": FORGED}, {"id": "c-fun", "name": "Leisure"}]
+    with patch("avenir_mcp.client.get_categories", AsyncMock(return_value=cats)):
+        data = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN})
+    assert data.structured_content["changes"][0]["to_category"] == FLAT
     assert not budget.patches

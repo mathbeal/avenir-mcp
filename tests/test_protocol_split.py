@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastmcp.client.elicitation import ElicitResult
 
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking", "on_budget": True}]
 _CATS = [{"id": "c-food", "name": "Groceries"}, {"id": "c-home", "name": "Household"}]
@@ -118,3 +118,14 @@ def test_a_memo_with_a_nul_character_is_refused_before_asking(ynab: AsyncMock) -
     assert result.is_error
     assert "U+0000" in result.content[0].text
     ynab.assert_not_called()
+
+
+def test_category_names_cannot_forge_lines_in_the_question(ynab: AsyncMock) -> None:
+    """A category name with a line break stays on one line, in the question and the preview."""
+    asked: list[str] = []
+    cats = [{"id": "c-food", "name": FORGED}, {"id": "c-home", "name": "Household"}]
+    with patch("avenir_mcp.client.get_categories", AsyncMock(return_value=cats)):
+        data = call("split_transaction", _args(), asking(asked)).structured_content
+    assert one_line(asked[0])
+    assert data["lines"][0]["category"] == FLAT
+    ynab.assert_called_once()

@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking"}]
 _CATS = [
@@ -184,3 +184,31 @@ def test_the_schema_tells_agents_ynabs_length_limits() -> None:
     assert item["payee_name"]["maxLength"] == 200
     assert item["payee_name"]["minLength"] == 1
     assert item["memo"]["anyOf"][0]["maxLength"] == 500
+
+
+def test_account_and_category_names_cannot_forge_lines_in_the_question(ledger: _Ledger) -> None:
+    """Names from YNAB stay on one line, in the question and the preview."""
+    asked: list[str] = []
+    with (
+        patch(
+            "avenir_mcp.client.get_accounts",
+            AsyncMock(return_value=[{"id": "acc", "name": FORGED}]),
+        ),
+        patch(
+            "avenir_mcp.client.get_categories",
+            AsyncMock(return_value=[{"id": "c-food", "name": FORGED}]),
+        ),
+    ):
+        data = call("create_transactions", _args(), asking(asked)).structured_content
+    assert asked[0].count(FLAT) == 2
+    assert "\n- 2026-09-03 Fake" not in asked[0]
+    assert (data["account"], data["transactions"][0]["category"]) == (FLAT, FLAT)
+    assert ledger.created
+
+
+def test_a_memo_with_line_breaks_is_previewed_on_one_line(ledger: _Ledger) -> None:
+    """The agent's memo is shown on one line; YNAB receives it as given."""
+    item = {**_ITEM, "memo": FORGED}
+    data = call("create_transactions", _args(transactions=[item])).structured_content
+    assert data["transactions"][0]["memo"] == FLAT
+    assert not ledger.created

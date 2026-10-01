@@ -46,6 +46,31 @@ _BREAKS = {"Cc", "Zl", "Zp"}
 _INVISIBLE = {"Cf"}
 
 
+def one_line(name: str) -> str:
+    """Refuse a name that would not show on one line of visible characters.
+
+    A name the agent chooses appears in the question the user confirms: a line break
+    in it would add a line of the agent's choosing.
+
+    Args:
+        name: A name about to be sent to YNAB, such as a new category's.
+
+    Returns:
+        The name, unchanged.
+
+    Raises:
+        ValueError: If it holds a line break, a control or a format character, with
+            what to do.
+    """
+    if any(unicodedata.category(char) in _BREAKS | _INVISIBLE for char in name):
+        raise ValueError(
+            f"{untrusted(name)!r} contains a line break, control or format character "
+            "(such as a zero-width or direction mark): give the name on one line, with "
+            "visible characters only."
+        )
+    return name
+
+
 def untrusted(text: str | None) -> str:
     """Make bank text safe to show: one line of visible characters.
 

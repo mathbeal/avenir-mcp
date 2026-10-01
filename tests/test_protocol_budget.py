@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 
 from .fake_month import FakeMonth, serving
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
 
 
 @pytest.fixture(name="month")
@@ -93,3 +93,21 @@ def test_declined_undo_keeps_the_new_amount(month: FakeMonth) -> None:
     undo = call("undo_operation", {"plan_id": "b1"}, decline).structured_content
     assert undo["status"] == "declined"
     assert month.sets == [("2026-10-01", "c-food", 150.0)]
+
+
+def test_a_category_name_cannot_forge_lines_in_the_question(month: FakeMonth) -> None:
+    """A category name with a line break stays on one line, in the question and the preview."""
+    month.names["c-food"] = FORGED
+    asked: list[str] = []
+    data = call("set_category_budget", _ARGS, asking(asked)).structured_content
+    assert one_line(asked[0])
+    assert data["category"] == FLAT
+
+
+def test_a_category_name_cannot_forge_lines_in_the_undo_question(month: FakeMonth) -> None:
+    """Undoing a budget change names the category on one line."""
+    call("set_category_budget", _ARGS, accept)
+    month.names["c-food"] = FORGED
+    asked: list[str] = []
+    call("undo_operation", {"plan_id": "b1"}, asking(asked))
+    assert one_line(asked[0])

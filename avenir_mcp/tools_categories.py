@@ -15,6 +15,7 @@ from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.confirm import WriteStatus, gate, merged
 from avenir_mcp.model import Model
+from avenir_mcp.text import one_line, untrusted
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,21 @@ class CategoryUpdate(Model):
     """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
     confirmation_required.
     """
+
+
+def _check_name(name: str) -> None:
+    """Refuse a category name the user could not read on one line.
+
+    Args:
+        name: The name the agent gave, stripped.
+
+    Raises:
+        ToolError: If it holds a line break, a control or a format character.
+    """
+    try:
+        one_line(name)
+    except ValueError as error:
+        raise ToolError(str(error)) from error
 
 
 @mcp.tool(
@@ -82,8 +98,8 @@ async def update_category(  # pylint: disable=too-many-arguments
         user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the category or group is not in the plan, the new name is empty,
-            or the confirmation code is refused.
+        ToolError: If the category or group is not in the plan, the new name is empty or
+            not on one line of visible characters, or the confirmation code is refused.
     """
     logger.info("Tool called: update_category")
     categories = {c["id"]: c for c in await client.get_categories(plan_id)}
@@ -101,15 +117,17 @@ async def update_category(  # pylint: disable=too-many-arguments
     if name is not None and not name.strip():
         raise ToolError("The new name is empty: give a name, or omit it to keep the current one.")
     new_name = name.strip() if name is not None else category["name"]
+    if name is not None:
+        _check_name(new_name)
     new_group = category_group_id or category["category_group_id"]
     result = CategoryUpdate(
         status="nothing_to_do",
         message="Nothing to change.",
         category_id=category_id,
-        from_name=category["name"],
-        to_name=new_name,
-        from_group=category.get("category_group_name", ""),
-        to_group=groups.get(new_group, ""),
+        from_name=untrusted(category["name"]),
+        to_name=untrusted(new_name),
+        from_group=untrusted(category.get("category_group_name", "")),
+        to_group=untrusted(groups.get(new_group, "")),
         confirmation=None,
     )
     if new_name == category["name"] and new_group == category["category_group_id"]:
@@ -117,7 +135,7 @@ async def update_category(  # pylint: disable=too-many-arguments
     subject = {"category_id": category_id, "name": new_name, "group": new_group}
     question = (
         f"Change category '{result.from_name}' ({result.from_group}) "
-        f"to '{new_name}' ({result.to_group})?"
+        f"to '{result.to_name}' ({result.to_group})?"
     )
     stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
@@ -218,7 +236,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         status="nothing_to_do",
         message="Nothing to change.",
         category_id=category_id,
-        category=category["name"],
+        category=untrusted(category["name"]),
         month=month,
         from_amount=client.milliunit_to_amount(before),
         to_amount=client.milliunit_to_amount(after),
@@ -228,7 +246,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     if before == after:
         return result
     question = (
-        f"Budget {category['name']} for {month}: {result.from_amount:.2f} → {result.to_amount:.2f}?"
+        f"Budget {result.category} for {month}: {result.from_amount:.2f} → {result.to_amount:.2f}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
     stop = await gate(ctx, plan_id, subject, question, confirmation)
@@ -302,7 +320,7 @@ def _side(category: dict[str, Any], change: int) -> CategoryMove:
     """
     return CategoryMove(
         category_id=category["id"],
-        name=category["name"],
+        name=untrusted(category["name"]),
         from_amount=client.milliunit_to_amount(category["budgeted"]),
         to_amount=client.milliunit_to_amount(category["budgeted"] + change),
         available_after=client.milliunit_to_amount(category["balance"] + change),
@@ -500,8 +518,9 @@ async def create_category(
         user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the group is not in the plan, the name is empty or already used in
-            the group, or the confirmation code is refused.
+        ToolError: If the group is not in the plan, the name is empty, not on one line of
+            visible characters or already used in the group, or the confirmation code is
+            refused.
     """
     logger.info("Tool called: create_category")
     groups = {g["id"]: g["name"] for g in await client.get_category_groups(plan_id)}
@@ -512,6 +531,7 @@ async def create_category(
     new_name = name.strip()
     if not new_name:
         raise ToolError("The name is empty: give the new category a name.")
+    _check_name(new_name)
     taken = {
         c["name"].casefold()
         for c in await client.get_categories(plan_id)
@@ -523,11 +543,11 @@ async def create_category(
         status="applied",
         message="",
         name=new_name,
-        group=groups[category_group_id],
+        group=untrusted(groups[category_group_id]),
         category_id=None,
         confirmation=None,
     )
-    question = f"Create category '{new_name}' in {result.group}?"
+    question = f"Create category '{result.name}' in {result.group}?"
     subject = {"group": category_group_id, "name": new_name}
     stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:

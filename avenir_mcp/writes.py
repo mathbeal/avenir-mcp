@@ -160,9 +160,9 @@ def plan_categorization(
                 amount=milliunit_to_amount(tx["amount"]),
                 payee=untrusted(tx.get("payee_name")),
                 from_category_id=current,
-                from_category=names.get(current) if current else None,
+                from_category=untrusted(names.get(current)) or None,
                 to_category_id=category_id,
-                to_category=names[category_id],
+                to_category=untrusted(names[category_id]),
             )
         )
     return Plan(changes=changes, unchanged_count=unchanged)
@@ -203,9 +203,9 @@ def plan_undo(
                 amount=milliunit_to_amount(tx["amount"]),
                 payee=untrusted(tx.get("payee_name")),
                 from_category_id=move.to_category_id,
-                from_category=names.get(move.to_category_id or ""),
+                from_category=untrusted(names.get(move.to_category_id or "")) or None,
                 to_category_id=before,
-                to_category=names.get(before) if before else None,
+                to_category=untrusted(names.get(before)) if before else None,
             )
         )
     return Plan(changes=changes, conflicts=conflicts)

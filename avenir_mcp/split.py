@@ -187,11 +187,11 @@ def plan_split(
         date=tx["date"],
         payee=untrusted(tx.get("payee_name")),
         amount=milliunit_to_amount(tx["amount"]),
-        from_category=names.get(current) if current else None,
+        from_category=untrusted(names.get(current)) or None,
         lines=[
             SplitLinePreview(
                 amount=line.amount,
-                category=names[line.category_id],
+                category=untrusted(names[line.category_id]),
                 memo=untrusted(line.memo) if line.memo else None,
             )
             for line in lines
