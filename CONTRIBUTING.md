@@ -20,7 +20,7 @@ token in `.env` (ignored by git, see `.env.example`) and point an MCP client or 
 ## Proposing a pull request
 
 The path, from the issue to the merge, is in the
-[documentation](https://mathbeal.github.io/avenir-mcp/project/pull-requests/): fork, branch,
+[documentation](https://avenir-mcp.pages.dev/avenir-mcp/project/pull-requests/): fork, branch,
 tests first, `just check`, then `gh pr create --fill` and the template's checklist.
 
 ## What gets merged
@@ -97,11 +97,13 @@ A page written by hand exists in every language: a test fails when an English
 page has no counterpart in a translation. Change them all together. Generated pages
 stay in English, and the other languages show them with a "not translated" notice.
 
-The site is published on GitHub Pages and on Cloudflare Pages, which builds it with
-`npm run build:cloudflare` and sends the security headers of `docs/cloudflare/_headers`
+The site lives on Cloudflare Pages, which builds it with `npm run build:cloudflare` and
+sends the security headers of `docs/cloudflare/_headers`
 (Content-Security-Policy, HSTS, `nosniff`, `X-Frame-Options`). The build computes the
 hash of every inline script and style for the policy, so a new one needs no change, and
-fails when a required header is missing or weakened.
+fails when a required header is missing or weakened. GitHub Pages only redirects old
+links: the `docs` workflow publishes there a page for every page of the site, and a 404
+page, that send the reader to the same address on Cloudflare.
 
 ## Code review
 
@@ -166,7 +168,7 @@ pull request or a commit after the fact.
 
 Open a [feature request](https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml):
 describe the task and what you would say to the agent, not the tool you imagine. The
-[documentation](https://mathbeal.github.io/avenir-mcp/project/propose-a-feature/) says what makes
+[documentation](https://avenir-mcp.pages.dev/avenir-mcp/project/propose-a-feature/) says what makes
 a proposal easy to accept.
 
 ## Reporting a bad suggestion or a confusing tool

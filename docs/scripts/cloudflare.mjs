@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 // Builds the site for Cloudflare Pages into cloudflare-dist/: the pages under /avenir-mcp/,
-// as on GitHub Pages, with the _redirects and _headers files of cloudflare/ at the root.
+// the address GitHub Pages used and now redirects from, with the _redirects and _headers files of cloudflare/ at the root.
 // The Content-Security-Policy allows each inline <script> and <style> of the built pages by
 // its hash, so the hashes are computed here, from the very files that are published.
 import { spawnSync } from 'node:child_process';

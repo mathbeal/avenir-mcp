@@ -4,7 +4,7 @@ avenir-mcp is an [MCP](https://modelcontextprotocol.io) server, written in Pytho
 [FastMCP](https://gofastmcp.com), that sits between an AI agent and the YNAB API. It
 runs on the user's machine, for one person, with that person's YNAB token. This file
 describes its high-level design; the
-[Architecture](https://mathbeal.github.io/avenir-mcp/concepts/architecture/) page of the
+[Architecture](https://avenir-mcp.pages.dev/avenir-mcp/concepts/architecture/) page of the
 documentation walks through a read call and a write call step by step.
 
 ## Data flow

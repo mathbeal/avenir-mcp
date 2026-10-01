@@ -4,7 +4,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Documentation
-    url: https://mathbeal.github.io/avenir-mcp/
+    url: https://avenir-mcp.pages.dev/avenir-mcp/
     about: Guides, concepts, the reference of every tool, and troubleshooting.
   - name: Report a vulnerability privately
     url: https://github.com/mathbeal/avenir-mcp/security/advisories/new

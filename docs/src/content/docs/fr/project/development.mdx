@@ -127,10 +127,12 @@ existent en anglais, en français, en espagnol, en allemand et en néerlandais ;
 
 ### Hébergement
 
-Le site est publié sur GitHub Pages par le workflow `docs`, et sur Cloudflare Pages
-(`avenir-mcp.pages.dev`), qui le construit depuis le dépôt avec `npm run build:cloudflare`.
-Les deux le servent sous `/avenir-mcp/` ; sur Cloudflare, la racine y redirige. GitHub
-Pages ne peut pas envoyer d'en-têtes de sécurité ; Cloudflare Pages envoie ceux de
+Le site est hébergé sur Cloudflare Pages (`avenir-mcp.pages.dev`), qui le construit depuis
+le dépôt avec `npm run build:cloudflare` et le sert sous `/avenir-mcp/` ; la racine y
+redirige. GitHub Pages, qui ne peut pas envoyer d'en-têtes de sécurité, ne fait plus que
+rediriger les anciens liens : le workflow `docs` y publie, pour chaque page du site, une
+page qui envoie le lecteur à la même adresse sur Cloudflare, et une page 404 qui fait de
+même pour tout autre chemin. Cloudflare Pages envoie les en-têtes de
 `docs/cloudflare/_headers` avec chaque fichier : une Content-Security-Policy, HSTS,
 `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, une politique de référent,
 une politique de permissions et une politique d'ouverture. La politique autorise les

@@ -8,7 +8,7 @@
 # Links to the site itself are checked elsewhere: Starlight when the site builds,
 # tests/test_docs.py for the README. Root-relative paths resolve to the site and
 # are left out below, so a page added by a pull request is not reported missing.
-base_url = "https://mathbeal.github.io"
+base_url = "https://avenir-mcp.pages.dev"
 scheme = ["https", "http"]
 max_retries = 3
 retry_wait_time = 5
@@ -21,7 +21,9 @@ accept = ["200..=299", "403", "429"]
 
 exclude = [
   # The documentation site: checked when it builds, see above.
-  '^https://mathbeal\.github\.io/',
+  '^https://avenir-mcp\.pages\.dev/',
+  # Its old address on GitHub Pages, which only redirects there.
+  '^https://mathbeal\.github\.io/avenir-mcp',
   # The server's own address in examples.
   '^https?://(127\.0\.0\.1|localhost)',
   # Placeholders in examples, not links.
