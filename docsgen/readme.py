@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The forecast chart at the top of the README, drawn from the documented example.
 
 The example is `forecast_balance` on the demo plan (`docs/src/snippets/forecast.json`),

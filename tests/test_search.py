@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for search.py — finding transactions by account, amount and dates."""
 
 from __future__ import annotations

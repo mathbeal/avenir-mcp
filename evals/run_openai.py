@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Run the evaluation with any model behind an OpenAI-compatible API.
 
 Usage: uv run python -m evals.run_openai --model MODEL [--task ID ...]

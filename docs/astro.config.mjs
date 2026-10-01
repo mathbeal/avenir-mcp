@@ -1,4 +1,7 @@
 // @ts-check
+// SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+// SPDX-License-Identifier: MIT
+
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';

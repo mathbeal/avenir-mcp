@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for text.py — bank text made safe to show to a person or an agent."""
 
 from __future__ import annotations

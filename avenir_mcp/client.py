@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """YNAB API v1 wrapper — async httpx client with in-memory delta-sync cache."""
 
 from __future__ import annotations

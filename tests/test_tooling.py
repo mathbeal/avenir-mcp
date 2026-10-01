@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The pre-commit hooks run the same tools, the same way, as CI and the justfile."""
 
 from __future__ import annotations

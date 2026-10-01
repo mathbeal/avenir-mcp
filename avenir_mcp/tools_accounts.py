@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Account-level tools: reconcile with the bank, forecast the balance."""
 
 from __future__ import annotations

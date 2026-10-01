@@ -52,7 +52,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | lock | `uv lock --check` | `uv.lock` does not match `pyproject.toml` |
 
 CI also runs lychee on every link of the README and the documentation (`just links`,
-and every Monday, since a page elsewhere can disappear), `typos`, `zizmor` on the workflows, two builds of the wheel and the sdist that must be identical bit for bit (`just reproducible`), `pip-audit` on the locked dependencies,
+and every Monday, since a page elsewhere can disappear), `typos`, `zizmor` on the workflows, `reuse lint` (every file states its copyright and licence), two builds of the wheel and the sdist that must be identical bit for bit (`just reproducible`), `pip-audit` on the locked dependencies,
 `gitleaks` on every commit of the history (`just secrets`, with Docker),
 the documentation build with the tests of its own code, CodeQL and the OpenSSF Scorecard
 (once the repository is public), a weekly comparison of YNAB's API with its snapshot

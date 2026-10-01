@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """A local, append-only record of the writes made through the server.
 
 Each applied operation is one JSON line holding identifiers: which transaction

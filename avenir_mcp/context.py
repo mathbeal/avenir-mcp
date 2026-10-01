@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Context the server offers besides tools: resources to attach, prompts to run.
 
 Resources are data an application can put in front of the model without a tool

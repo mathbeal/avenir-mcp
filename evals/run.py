@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Run the evaluation: a real Claude agent, avenir-mcp, and the demo budget.
 
 Usage: uv run python -m evals.run [--model sonnet] [--task ID ...]

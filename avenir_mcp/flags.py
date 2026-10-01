@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Plan flag changes: what each transaction's flag is, and what it would become."""
 
 from __future__ import annotations

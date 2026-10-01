@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Capture real tool answers on the demo budget, for the documentation.
 
 Every example in the docs is what avenir-mcp actually returns on the invented demo

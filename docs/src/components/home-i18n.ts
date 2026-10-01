@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+// SPDX-License-Identifier: MIT
+
 /** Short texts of the home page components, in each of the site's languages. */
 const texts = {
   en: {

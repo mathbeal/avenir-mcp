@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 # Run `just` to see the recipes.
 default:
     @just --list
@@ -54,10 +57,12 @@ secrets:
 links:
     docker run --rm -v "$PWD:/input" -w /input lycheeverse/lychee@sha256:eaff3e0a13603c9a701accfcc84f44158bb77bf36ecfa4622b626056c3463892 --config lychee.toml --no-progress README.md CONTRIBUTING.md SECURITY.md AGENTS.md ARCHITECTURE.md GOVERNANCE.md ROADMAP.md CODE_OF_CONDUCT.md "docs/src/content/docs/**/*.md" "docs/src/content/docs/**/*.mdx"
 
-# Audit the workflows and hunt typos, as CI does.
+# Audit the workflows, hunt typos, and check that every file states its copyright and
+# licence (REUSE), as CI does.
 hygiene:
     uvx typos .
     uvx zizmor --persona=regular .github/workflows/
+    uvx --from 'reuse[charset-normalizer]==6.2.0' reuse lint
 
 # Known vulnerabilities in the locked dependencies.
 audit:

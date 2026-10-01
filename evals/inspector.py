@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Check avenir-mcp the way a client sees it, with the official MCP Inspector.
 
 Starts the demo budget, runs the server over stdio through `npx

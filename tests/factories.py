@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Invented YNAB objects for tests, with every field YNAB sends."""
 
 from __future__ import annotations

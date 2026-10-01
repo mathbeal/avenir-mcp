@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Set, change or remove a category's target, after confirmation, and undo it."""
 
 from __future__ import annotations

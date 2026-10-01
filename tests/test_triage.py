@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for triage.py — one pass over the budget to prepare classification."""
 
 from __future__ import annotations

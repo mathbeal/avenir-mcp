@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """An invented household budget, the same on every run.
 
 Nothing here comes from a real account. Amounts are in milliunits, as YNAB

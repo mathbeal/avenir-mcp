@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: MCP Inspector
 
 # The server as a client sees it, through the official MCP Inspector, on the demo

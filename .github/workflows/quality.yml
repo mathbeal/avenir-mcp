@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: quality
 
 # On a pull request, and on main once merged; a push to a pull request's branch
@@ -137,7 +140,7 @@ jobs:
       - run: uvx lexdrift check avenir_mcp --baseline lexdrift.lock
 
   hygiene:
-    name: typos and workflow audit
+    name: typos, workflow audit, licences
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
@@ -150,6 +153,8 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - run: uvx typos .
       - run: uvx zizmor --persona=regular .github/workflows/
+      # Every file states its copyright and licence, in its first lines or in REUSE.toml.
+      - run: uvx --from 'reuse[charset-normalizer]==6.2.0' reuse lint
 
   audit:
     name: known vulnerabilities

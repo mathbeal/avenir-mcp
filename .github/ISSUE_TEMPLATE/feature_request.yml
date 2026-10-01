@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: Feature request
 description: Propose a new tool, a better answer, or a workflow avenir-mcp should support.
 title: "feat: "

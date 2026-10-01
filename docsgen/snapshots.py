@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """What the snapshot checks of docsgen share: comparing with YNAB, or updating."""
 
 from __future__ import annotations

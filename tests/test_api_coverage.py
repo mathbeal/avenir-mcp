@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Every operation of YNAB's API is used by a tool, planned, or left out with a reason."""
 
 from __future__ import annotations

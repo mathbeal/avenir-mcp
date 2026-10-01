@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """import_transactions through the MCP protocol: the bank's latest transactions, fetched."""
 
 from __future__ import annotations

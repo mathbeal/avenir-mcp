@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for analytics.py — budget/actual, trends, top payees."""
 
 from __future__ import annotations

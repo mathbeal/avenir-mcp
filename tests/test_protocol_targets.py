@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """set_category_target through the MCP protocol: preview, confirmation, undo."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for updates.py: telling the agent, once a day at most, that a newer release exists."""
 
 from __future__ import annotations

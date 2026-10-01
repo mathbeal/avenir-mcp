@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Calling the server through the MCP protocol, as a client would."""
 
 from __future__ import annotations

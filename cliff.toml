@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 # git-cliff — the changelog is generated from the history, not written by hand.
 # A hand-written changelog drifts from what was actually done and nobody
 # notices until a reader trusts it.

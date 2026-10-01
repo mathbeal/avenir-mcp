@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Amounts an agent may pass: finite, and within what a household budget can hold."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: Fuzz
 
 # Every night, the Hypothesis properties of tests/test_properties.py with 200,000

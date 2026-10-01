@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The dates on which scheduled transactions fall, between two dates.
 
 YNAB gives each scheduled transaction its next date and a frequency; the

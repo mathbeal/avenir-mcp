@@ -61,6 +61,25 @@ pull request.
 | Sorted imports; no risky pattern (bandit's rules) | `ruff check` (rules `I` and `S`) |
 | One word per idea in the code's vocabulary | `lexdrift check` |
 | Spelling in code and documentation | `typos` |
+| Copyright and licence stated for every file, as [SPDX](https://spdx.dev) tags ([REUSE](https://reuse.software)) | `reuse lint` |
+
+A new file starts with the project's two SPDX lines, after a shebang if it has one and
+before a module's docstring:
+
+```python
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+```
+
+This command writes them, with the current year:
+
+```bash
+uvx --from 'reuse[charset-normalizer]==6.2.0' reuse annotate --template avenir \
+  --copyright "The avenir-mcp contributors" --license MIT FILE
+```
+
+A file that cannot hold a comment (Markdown, JSON, an image, a lock file) is
+covered by `REUSE.toml` instead.
 
 [AGENTS.md](AGENTS.md) adds the rules specific to this project: secrets, untrusted text,
 tool descriptions written for an agent, pydantic models for structured data.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for server.py — FastMCP instance and all 14 MCP tools."""
 
 from __future__ import annotations

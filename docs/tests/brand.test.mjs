@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+// SPDX-License-Identifier: MIT
+
 // The name avenir-mcp is set apart in the text of a page, never in code or in a path.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

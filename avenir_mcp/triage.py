@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Prepare the classification of pending transactions in one pass.
 
 One download of the plan's transactions serves both as history and as the

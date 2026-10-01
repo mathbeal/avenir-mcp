@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """A category's target: what it is, what a change sends YNAB, and what brings it back.
 
 YNAB's API sets a target through three fields: an amount, then either a date (a

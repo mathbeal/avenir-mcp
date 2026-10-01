@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """What registries and search read about avenir-mcp agrees with the code, and with YNAB's rules."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """How get_accounts reports each account's bank link and last reconciliation."""
 
 from __future__ import annotations

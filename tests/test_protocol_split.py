@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """split_transaction through the MCP protocol: validate, preview, confirm, apply."""
 
 from __future__ import annotations

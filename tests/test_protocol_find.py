@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """find_transactions through the MCP protocol: one bounded read, no write."""
 
 from __future__ import annotations

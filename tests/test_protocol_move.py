@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """move_money through the MCP protocol: one preview, one confirmation, one undo."""
 
 from __future__ import annotations

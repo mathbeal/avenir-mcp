@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Compare an account with the balance the bank shows, and explain the gap.
 
 Pure computation on the plan's transactions: no request to YNAB. Sums are

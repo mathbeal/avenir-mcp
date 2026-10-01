@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+// SPDX-License-Identifier: MIT
+
 // Sets the name "avenir-mcp" apart from the prose around it: every mention in the
 // text of a page becomes <span class="brand">avenir-mcp</span>, styled in theme.css.
 // Code stays as written: a command or a config file is copied, not read.

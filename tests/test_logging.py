@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Diagnostics stay short, on stderr, and quiet by default."""
 
 from __future__ import annotations

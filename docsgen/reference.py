@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Write the reference pages from the server itself, in every language.
 
 One page per tool, in the manner of Ruff's rule pages: what it does, how it

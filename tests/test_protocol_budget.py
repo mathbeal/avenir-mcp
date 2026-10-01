@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """set_category_budget through the MCP protocol: preview, confirm, journal, undo."""
 
 from __future__ import annotations

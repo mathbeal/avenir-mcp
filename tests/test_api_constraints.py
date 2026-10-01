@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Every rule YNAB states on what avenir-mcp sends is tested, does not apply, or is a gap."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: OpenSSF Scorecard
 
 # The OpenSSF's score of the repository's security practices (branch protection,

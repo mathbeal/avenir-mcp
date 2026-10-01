@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The recurring charges a plan pays, and what each costs over a year.
 
 Built on the detection forecast_balance uses: a payee seen in 3 of the last 4 full

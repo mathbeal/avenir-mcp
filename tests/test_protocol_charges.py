@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """find_recurring_charges through the MCP protocol: read-only, three YNAB requests."""
 
 from __future__ import annotations

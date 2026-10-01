@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for targets.py: describing a category's target, and what brings it back."""
 
 from __future__ import annotations
