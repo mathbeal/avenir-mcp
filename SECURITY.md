@@ -136,6 +136,36 @@ distribution. The command prints `OK:` followed by the file name, or fails. PyPI
 shows the attestations on each file's page, under "Provenance". Each GitHub release
 carries a CycloneDX SBOM (`avenir-mcp.cdx.json`) of the locked dependencies.
 
+### Rebuilding a release
+
+The build is reproducible: the same commit gives the same wheel and sdist, bit for bit.
+The build backend is pinned in `pyproject.toml`, and every date inside the files is the
+commit's (`SOURCE_DATE_EPOCH`); the `publish` workflow builds that way, twice, and
+uploads only if both builds agree. CI checks it on every pull request
+(`just reproducible` does the same locally).
+
+To rebuild a release on Linux or macOS and compare it with the files on PyPI:
+
+```bash
+git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
+git checkout v0.4.0
+SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" uv build -o rebuilt
+curl -s https://pypi.org/pypi/avenir-mcp/0.4.0/json | python3 -c '
+import json, sys
+for f in json.load(sys.stdin)["urls"]:
+    print(f["digests"]["sha256"], f["filename"])' > pypi.sha256
+(cd rebuilt && sha256sum --check ../pypi.sha256)
+```
+
+Replace `0.4.0` with the version. Each file prints `OK`; any other answer means the file
+on PyPI is not what the tag builds. Keep git from changing line endings (no
+`core.autocrlf`).
+
+Releases up to 0.3.0 were built with setuptools, which writes the build machine's dates
+and user into the sdist: their wheel can be rebuilt bit for bit, their sdist only with
+the same content. For 0.3.0, set `SOURCE_DATE_EPOCH=1790875080` (the time of the
+release's checkout, which the wheel records) and the rebuilt wheel matches PyPI's.
+
 ## Assurance case
 
 Why the promises above hold: what avenir-mcp protects, from whom, and which code and

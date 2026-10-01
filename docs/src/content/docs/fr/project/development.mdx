@@ -54,7 +54,7 @@ alors.
 
 La CI lance aussi lychee sur chaque lien du README et de la documentation (`just links`,
 et chaque lundi, car une page ailleurs peut disparaître), `gitleaks` sur chaque commit de l'historique (`just secrets`, avec
-Docker), `typos`, `zizmor` sur les workflows, `pip-audit` sur les dépendances
+Docker), `typos`, `zizmor` sur les workflows, deux constructions du wheel et du sdist qui doivent être identiques au bit près (`just reproducible`), `pip-audit` sur les dépendances
 verrouillées, la construction de la documentation avec les tests de son propre code, CodeQL et
 l'OpenSSF Scorecard (une fois le dépôt public), une comparaison hebdomadaire de l'API YNAB
 avec son instantané (`just api-drift`), et
@@ -155,7 +155,8 @@ Voir [Évaluation](/avenir-mcp/fr/project/evaluation/).
   `refactor:`, `test:`, `build:`, `ci:`, `chore:` — car `CHANGELOG.md` en est généré par
   git-cliff.
 - Pour publier : `just changelog`, commit, étiquette `vX.Y.Z` égale à
-  `avenir_mcp.__version__`, puis une release GitHub. Le workflow `publish` construit,
+  `avenir_mcp.__version__`, puis une release GitHub. Le workflow `publish` construit
+  deux fois avec la date du commit étiqueté, s'arrête si les deux constructions diffèrent,
   lance `twine check --strict` et envoie sur PyPI par Trusted Publishing : aucun jeton
   n'est stocké.
 - Puis le registre MCP : `server.json` porte la même version (un test le vérifie) ; lancez

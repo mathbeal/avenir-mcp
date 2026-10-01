@@ -53,7 +53,7 @@ dann ignoriert.
 | Lock | `uv lock --check` | `uv.lock` nicht zu `pyproject.toml` passt |
 
 Die CI prüft außerdem mit lychee jeden Link der README und der Dokumentation (`just links`,
-und jeden Montag, denn eine fremde Seite kann verschwinden), führt `typos` aus, `zizmor` auf den Workflows, `pip-audit` auf den
+und jeden Montag, denn eine fremde Seite kann verschwinden), führt `typos` aus, `zizmor` auf den Workflows, zwei Builds von Wheel und Sdist, die bitgenau gleich sein müssen (`just reproducible`), `pip-audit` auf den
 festgeschriebenen Abhängigkeiten, `gitleaks` auf jedem Commit der Historie (`just secrets`,
 mit Docker), den Build der Dokumentation mit den Tests ihres eigenen Codes, CodeQL und die
 OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen Vergleich der
@@ -157,7 +157,8 @@ Siehe [Evaluierung](/avenir-mcp/de/project/evaluation/).
   wird.
 - Zum Veröffentlichen: `just changelog`, committen, Tag `vX.Y.Z` passend zu
   `avenir_mcp.__version__` setzen und ein GitHub-Release veröffentlichen. Der Workflow
-  `publish` baut, führt `twine check --strict` aus und lädt über Trusted Publishing auf PyPI
+  `publish` baut zweimal mit dem Datum des getaggten Commits, bricht ab, wenn die beiden Builds
+  voneinander abweichen, führt `twine check --strict` aus und lädt über Trusted Publishing auf PyPI
   hoch: Es wird kein Token gespeichert.
 - Danach die MCP-Registry: `server.json` trägt dieselbe Version (ein Test prüft das); führen
   Sie `mcp-publisher login github` und dann `mcp-publisher publish` aus. Die Zeile `mcp-name:`

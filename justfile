@@ -64,11 +64,26 @@ audit:
     uv export --frozen --no-emit-project --all-groups -o /tmp/avenir-req.txt
     uvx pip-audit --strict --disable-pip -r /tmp/avenir-req.txt
 
-# Build the wheel and the sdist, and check them.
+# Build the wheel and the sdist, and check them. Every date inside is the last commit's,
+# as in the release workflow, so the files match a release built from the same commit.
 build:
     rm -rf dist
-    uv build
+    SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" uv build
     uv run --no-project --with twine twine check --strict dist/*
+
+# Build twice, the second time with every source file touched, and fail unless the wheel
+# and the sdist are the same bit for bit, as CI does.
+reproducible:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+    out="$(mktemp -d)"
+    trap 'rm -rf "$out"' EXIT
+    uv build --quiet -o "$out/first"
+    find avenir_mcp tests -type f -exec touch {} +
+    uv build --quiet -o "$out/second"
+    (cd "$out/first" && sha256sum -- *) | tee "$out/first.sha256"
+    (cd "$out/second" && sha256sum --check --strict -- ../first.sha256)
 
 # Regenerate CHANGELOG.md from the commit history.
 changelog:
