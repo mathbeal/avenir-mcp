@@ -1,6 +1,6 @@
 ---
 title: "get_budget_vs_actual"
-description: "Return a budget-vs-actual breakdown with utilisation percentage per category."
+description: "Share of each category's budget spent in a month, to see what is over or close."
 ---
 
 :::note[Gegenereerd]
@@ -9,9 +9,13 @@ Gegenereerd uit de code door `python -m docsgen`; een test faalt zodra de pagina
 
 ## Doel
 
-Return a budget-vs-actual breakdown with utilisation percentage per category.
+Share of each category's budget spent in a month, to see what is over or close.
 
-Amounts in currency units; utilization_pct above 100 means over budget.
+Use it for "am I over budget?" or "which categories are nearly used up?".
+Amounts in currency units, spending as a positive number; utilization_pct above
+100 means over budget. For what is still available in each category use
+get_category_balances; for the month's totals, get_monthly_summary; for several
+months, get_spending_trends. One YNAB request; changes nothing.
 
 ## Gedrag
 

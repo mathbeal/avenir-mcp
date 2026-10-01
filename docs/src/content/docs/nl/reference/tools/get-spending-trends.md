@@ -1,6 +1,6 @@
 ---
 title: "get_spending_trends"
-description: "Return monthly spending trends per category over the last N months."
+description: "Spending per category, month by month, over the last N months."
 ---
 
 :::note[Gegenereerd]
@@ -9,10 +9,13 @@ Gegenereerd uit de code door `python -m docsgen`; een test faalt zodra de pagina
 
 ## Doel
 
-Return monthly spending trends per category over the last N months.
+Spending per category, month by month, over the last N months.
 
-The result maps each category name to its spending month by month, oldest
-first, in currency units.
+Use it for "is my grocery spending going up?" or to compare months. The result
+maps each category name to its spending month by month, oldest first, as a
+positive number in currency units. For a single month use get_category_balances
+or get_budget_vs_actual; for the months ahead, forecast_balance. One YNAB
+request for the list of months, then one per month; changes nothing.
 
 ## Gedrag
 
