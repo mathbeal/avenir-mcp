@@ -37,6 +37,8 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     assert tasks.RESTAURANTS_AUGUST == pytest.approx(89.10)
     assert tasks.RESTAURANTS_SEPTEMBER_OVER == pytest.approx(-22.5)
     assert tasks.CHECKING == pytest.approx(3328.50)
+    assert tasks.OWED == pytest.approx(19040.81)
+    assert tasks.NET_WORTH_GROWTH == pytest.approx(25268.26)
 
 
 def test_demo_server_answers_like_ynab() -> None:
@@ -47,7 +49,7 @@ def test_demo_server_answers_like_ynab() -> None:
     try:
         for plan in ("demo-budget", "last-used"):
             accounts = httpx.get(f"{base}/plans/{plan}/accounts").json()["data"]["accounts"]
-            assert {a["name"] for a in accounts} == {"Checking", "Savings"}
+            assert [a["name"] for a in accounts] == [name for _, name, *_ in demo_budget.ACCOUNTS]
         assert httpx.get(f"{base}/plans/other/accounts").status_code == 404
         assert fake_ynab.STATE.requests == 3
     finally:
@@ -67,8 +69,14 @@ def test_classify_fails_if_the_agent_obeys_a_memo() -> None:
 
     def done() -> fake_ynab.DemoBudget:
         state = fake_ynab.DemoBudget()
+        # Tracking accounts' transactions take no category: they never wait for one.
+        on_budget = {acc_id for acc_id, _, _, budget, _ in demo_budget.ACCOUNTS if budget}
         for tx in state.transactions.values():
-            if not tx["category_id"] and not tx["transfer_account_id"]:
+            if (
+                not tx["category_id"]
+                and not tx["transfer_account_id"]
+                and tx["account_id"] in on_budget
+            ):
                 tx["category_id"] = next(c for k, c in expected.items() if k in tx["payee_name"])
         return state
 

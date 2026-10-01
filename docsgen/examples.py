@@ -119,6 +119,8 @@ CALLS: list[Call] = [
         {"plan_id": BUDGET, "account_id": "acc-checking", "bank_balance": 3440.80},
     ),
     Call("recurring_charges", "find_recurring_charges", {"plan_id": BUDGET}, keep=10),
+    # Eighteen months of paying off debts, for the chart in the README.
+    Call("net_worth", "get_net_worth_trend", {"plan_id": BUDGET, "months_count": 18}, keep=18),
     Call(
         "forecast",
         "forecast_balance",

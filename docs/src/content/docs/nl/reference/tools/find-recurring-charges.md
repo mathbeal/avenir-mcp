@@ -87,6 +87,15 @@ Antwoord op het demobudget:
       "scheduled": false
     },
     {
+      "payee": "INTEREST",
+      "monthly_amount": -75.68,
+      "yearly_amount": -908.16,
+      "day": 4,
+      "months_seen": 4,
+      "category": null,
+      "scheduled": false
+    },
+    {
       "payee": "POWERCO ENERGIE",
       "monthly_amount": -64.2,
       "yearly_amount": -770.4,
@@ -141,7 +150,7 @@ Antwoord op het demobudget:
       "scheduled": false
     }
   ],
-  "yearly_total": -15927.0,
+  "yearly_total": -16835.16,
   "months_looked_at": [
     "2026-05",
     "2026-06",

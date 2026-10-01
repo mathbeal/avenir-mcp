@@ -8,6 +8,7 @@ sidebar:
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/es/forecast.json?raw';
 import recurring from '@snippets/es/recurring_charges.json?raw';
+import networth from '@snippets/es/net_worth.json?raw';
 
 **Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
 
@@ -80,6 +81,22 @@ programada de YNAB ya lo cubre. También cuentan los gastos regulares en un mism
 programada.
 
 <Code code={recurring} lang="json" title="find_recurring_charges" />
+
+## ¿Bajan las deudas?
+
+Pregunte *«¿estoy pagando mis deudas?»* o *«¿cómo ha cambiado mi patrimonio este año?»*:
+`get_net_worth_trend` da, a cada fin de mes, lo que tienen las cuentas (`assets`), lo que
+se debe (`debts`, en negativo, como lo muestra YNAB) y ambos juntos (`net_worth`). Las
+cuentas de seguimiento también cuentan: aquí el ahorro común, el préstamo del coche, un
+préstamo de estudios pagado en marzo de 2026 y el banco anterior, cerrado en mayo de 2026,
+cada uno contado en los meses en que aún tenía saldo. Los fines de mes pasados se reconstruyen a partir de los saldos de hoy, menos las
+transacciones fechadas después; el mes en curso muestra los de hoy.
+
+El prestamista carga cada mes los intereses del préstamo del coche en la cuenta del
+préstamo: la deuda baja menos que la cuota. Una reparación del coche y la Navidad aplanan
+cada una un mes.
+
+<Code code={networth} lang="json" title="get_net_worth_trend" />
 
 ## Después, presupuestar el mes siguiente
 

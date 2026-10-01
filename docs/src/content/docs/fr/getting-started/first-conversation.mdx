@@ -31,8 +31,9 @@ L'agent appelle `list_accounts` avec `{"plan_id": "last-used"}` :
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude :** Deux comptes : Compte courant à 3 328,50, entièrement pointé, et Épargne à
-> 600,00.
+> **Claude :** Dans le budget, Compte courant à 3 328,50, entièrement pointé, et Épargne à
+> 600,00. Suivis hors budget : le livret du foyer à 16 342,36, et le crédit auto, dont il
+> reste 19 040,81 à rembourser. Le prêt étudiant, remboursé, et l'ancienne banque sont clos.
 
 Les soldes sont dans la devise de votre plan. `cleared_balance` est ce que la banque a
 déjà montré ; `uncleared_balance`, ce qu'elle n'a pas encore montré.

@@ -8,6 +8,7 @@ sidebar:
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/de/forecast.json?raw';
 import recurring from '@snippets/de/recurring_charges.json?raw';
+import networth from '@snippets/de/net_worth.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -80,6 +81,22 @@ abdeckt. Regelmäßige Ausgaben beim selben Händler zählen auch (hier die Lebe
 jährliche Abbuchung erscheint nicht, außer sie hat eine Planung.
 
 <Code code={recurring} lang="json" title="find_recurring_charges" />
+
+## Sinken die Schulden?
+
+Fragen Sie *„Baue ich meine Schulden ab?“* oder *„Wie hat sich mein Vermögen dieses Jahr
+entwickelt?“*: `get_net_worth_trend` gibt zu jedem Monatsende an, was die Konten halten
+(`assets`), was geschuldet wird (`debts`, negativ, wie YNAB es zeigt) und beides zusammen
+(`net_worth`). Tracking-Konten zählen mit: hier das gemeinsame Sparkonto, der Autokredit, ein
+im März 2026 abbezahlter Studienkredit und die im Mai 2026 geschlossene alte Bank, jedes
+für die Monate, in denen es noch einen Saldo hatte. Vergangene Monatsenden werden aus den heutigen Salden rekonstruiert, abzüglich der
+später datierten Transaktionen; der laufende Monat zeigt die heutigen.
+
+Der Kreditgeber belastet die Zinsen des Autokredits jeden Monat auf dem Kreditkonto: Die
+Schuld sinkt um weniger als die Rate. Eine Autoreparatur und Weihnachten flachen je einen
+Monat ab.
+
+<Code code={networth} lang="json" title="get_net_worth_trend" />
 
 ## Dann den nächsten Monat budgetieren
 

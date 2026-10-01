@@ -44,12 +44,17 @@ you, and can be undone.
 </picture>
 
 <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-dark.svg">
+  <img alt="get_net_worth_trend on the demo plan: over 18 months the debts shrink from 27,198 to 19,041 despite the car loan's interest, the assets grow, and the net worth rises from −24,038 to +1,230, with a dip for a car repair and another at Christmas." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-light.svg" width="720">
+</picture>
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-dark.svg">
   <img alt="forecast_balance on the demo plan: the month-end balance rises from September to December, with each month's lowest day and a yearly insurance payment scheduled on 20 October." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-light.svg" width="720">
 </picture>
 
-Both come from the invented demo plan: a real reply of Claude Sonnet, and the forecast
-the documentation shows.
+All three come from the invented demo plan: a real reply of Claude Sonnet, and the net
+worth and the forecast the documentation shows.
 
 > **Unofficial project.** We are not affiliated, associated, or in any way officially
 > connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website
@@ -120,6 +125,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Which transaction is my 86.40 receipt from the 12th?" | `find_transactions` — by dates, exact amount and account, categorised or not |
 | "My bank shows 3,440.80. Does YNAB agree?" | `reconcile_account` — explains the gap, changes nothing until it matches |
 | "Will I go below zero before December?" | `forecast_balance` — month by month, with its assumptions |
+| "Am I paying off my debts?" | `get_net_worth_trend` — assets, debts and net worth at each month end |
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 

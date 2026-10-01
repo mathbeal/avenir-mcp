@@ -105,12 +105,9 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         }
 
     def accounts(self) -> list[dict[str, Any]]:
-        """The two demo accounts with balances from their transactions."""
+        """The demo accounts with balances from their transactions."""
         result = []
-        for acc_id, name, kind in (
-            (demo.CHECKING, demo.named("Checking", self.language), "checking"),
-            (demo.SAVINGS, demo.named("Savings", self.language), "savings"),
-        ):
+        for acc_id, name, kind, on_budget, closed in demo.ACCOUNTS:
             txs = [
                 t
                 for t in self.transactions.values()
@@ -121,10 +118,10 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             result.append(
                 {
                     "id": acc_id,
-                    "name": name,
+                    "name": demo.named(name, self.language),
                     "type": kind,
-                    "on_budget": True,
-                    "closed": False,
+                    "on_budget": on_budget,
+                    "closed": closed,
                     "deleted": False,
                     "balance": total,
                     "cleared_balance": cleared,

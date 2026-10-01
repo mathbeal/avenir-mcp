@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 25 tools, 4 resources and 4 prompts over your YNAB plans. This
+avenir-mcp gives an agent 26 tools, 4 resources and 4 prompts over your YNAB plans. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -85,6 +85,7 @@ and likely duplicates (same amount and merchant, at most 3 days apart). Guides:
 | You say | Tool | |
 |---|---|---|
 | *“Will I go below zero before December?”* | [`forecast_balance`](/avenir-mcp/reference/tools/forecast-balance/) — month by month, with its assumptions | R |
+| *“Am I paying off my debts?”* | [`get_net_worth_trend`](/avenir-mcp/reference/tools/get-net-worth-trend/) — assets, debts and net worth at each month end, tracking accounts included | R |
 | *“Put 150 in Restaurants for September.”* | [`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/) | W ↺ |
 | *“Move 30 from Tennis to Restaurants.”* | [`move_money`](/avenir-mcp/reference/tools/move-money/) — both categories in one confirmation | W ↺ |
 

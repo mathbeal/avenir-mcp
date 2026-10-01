@@ -43,6 +43,8 @@ def generated() -> dict[Path, str]:
             files[SNIPPETS / language / f"{name}.json"] = capture.text
     for scheme, svg in readme.charts(captures[""]["forecast"].text).items():
         files[ROOT / ".github" / "assets" / f"forecast-{scheme}.svg"] = svg
+    for scheme, svg in readme.net_worth_charts(captures[""]["net_worth"].text).items():
+        files[ROOT / ".github" / "assets" / f"networth-{scheme}.svg"] = svg
     return files
 
 

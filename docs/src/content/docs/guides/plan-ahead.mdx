@@ -8,6 +8,7 @@ sidebar:
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/forecast.json?raw';
 import recurring from '@snippets/recurring_charges.json?raw';
+import networth from '@snippets/net_worth.json?raw';
 
 **Goal:** know whether the money lasts, and when it would run out, before it does.
 
@@ -80,6 +81,22 @@ spending at one merchant counts too (groceries, here); a charge paid once a year
 unless it has a schedule.
 
 <Code code={recurring} lang="json" title="find_recurring_charges" />
+
+## Are the debts going down?
+
+Ask *"am I paying off my debts?"* or *"how did my net worth change over the year?"*:
+`get_net_worth_trend` gives, at each month end, what the accounts hold (`assets`), what is
+owed (`debts`, negative, as YNAB shows it) and the two together (`net_worth`). Tracking
+accounts count too: here the joint savings, the car loan, a student loan paid off in March
+2026 and the former bank closed in May 2026, each counted for the months it still had a
+balance. Past month ends are rebuilt
+from today's balances, less the transactions dated after them; the current month shows
+today's.
+
+The lender charges the car loan's interest on the loan account each month, so the debt
+falls by less than the payment; a car repair and Christmas each flatten a month.
+
+<Code code={networth} lang="json" title="get_net_worth_trend" />
 
 ## Then budget next month
 
