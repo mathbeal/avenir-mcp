@@ -104,9 +104,9 @@ Severity is rated for avenir-mcp's intended use: one person, on their own machin
 
 | Id | Severity | Finding | Status |
 |---|---|---|---|
-| SR-1 | Low | HTTP transport without a token serves the read tools to any local program or user | Open |
-| SR-2 | Low | Names in a confirmation question are not reduced to one line | Open |
-| SR-3 | Low | The release build runs tools that are not pinned to a version | Open |
+| SR-1 | Low | HTTP transport without a token serves the read tools to any local program or user | Fixed after 0.3.0, in the next release |
+| SR-2 | Low | Names in a confirmation question are not reduced to one line | Fixed after 0.3.0, in the next release |
+| SR-3 | Low | The release build runs tools that are not pinned to a version | Fixed: the build is reproducible and verified in CI (next release) |
 | SR-4 | Low | File permission checks apply on Linux and macOS only | Fixed in the documentation |
 | SR-5 | Info | An answer to a 2026-07-28 elicitation is not single-use | Open |
 | SR-6 | Info | Confirmation codes are shared by every session of a server | Accepted |
@@ -122,8 +122,13 @@ the token file and the journal, but not for this port. The HTTP transport is not
 default, and `SECURITY.md` says the token is what makes every request authenticate.
 
 Recommendation: require the token whenever the HTTP transport is used, or at least log
-a warning at start-up when it runs without one; refuse a token shorter than, say, 32
-characters.
+a warning at start-up when it runs without one.
+
+Status: fixed after 0.3.0, in the next release. Every request over HTTP now needs a
+token, read-only or not. When `AVENIR_MCP_HTTP_TOKEN` is unset, the server makes a random
+one at start-up and prints it once on stderr. A read-only HTTP setup without the variable
+has to send that token, or set the variable, after upgrading. Tokens are not checked for
+a minimum length.
 
 ### SR-2. Names in a confirmation question (Low)
 
@@ -137,6 +142,11 @@ question.
 
 Recommendation: pass every name through `text.untrusted` when building a question,
 and refuse control characters in a category name before sending it to YNAB.
+
+Status: fixed after 0.3.0, in the next release. Every confirmation question and preview
+shows the names of accounts, categories and groups, and memos, through `text.untrusted`,
+and a category name the agent gives with a line break, control or format character is
+refused. Each write tool has a test with a name written to forge a line.
 
 ### SR-3. Release build tools not pinned (Low)
 
@@ -152,6 +162,13 @@ Recommendation: pin the build backend and the tools of the build job to exact
 versions, make the sdist reproducible, and have the workflow build twice and compare
 before uploading, so that anyone can rebuild a release and compare it with PyPI's
 files.
+
+Status: fixed for the next release. The build backend is pinned, the wheel and the sdist
+are reproducible bit for bit, CI builds twice and compares them on every change, and the
+`publish` workflow uploads only when two builds of the tagged commit agree. `SECURITY.md`
+says how to rebuild a release and compare it with PyPI's files. uv and twine still come
+in their latest versions; a tampered tool would now give files that differ from an
+independent rebuild.
 
 ### SR-4. File permission checks on Windows (Low)
 
