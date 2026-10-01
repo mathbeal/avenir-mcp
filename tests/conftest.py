@@ -28,6 +28,12 @@ def reset_cache() -> None:
 
 
 @pytest.fixture(autouse=True)
+def no_update_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Never ask PyPI from a test: main() would otherwise check for a newer release."""
+    monkeypatch.setenv("AVENIR_MCP_NO_UPDATE_CHECK", "1")
+
+
+@pytest.fixture(autouse=True)
 def writes_enabled() -> Iterator[None]:
     """Start every test with write tools exposed, whatever an earlier test configured."""
     server.configure(enable_writes=True)

@@ -109,6 +109,7 @@ def main() -> int:
             "YNAB_API_KEY": "demo",
             "AVENIR_MCP_YNAB_URL": f"http://127.0.0.1:{server.server_port}/v1",
             "AVENIR_MCP_WRITE": "1",
+            "AVENIR_MCP_NO_UPDATE_CHECK": "1",
             "AVENIR_MCP_JOURNAL": os.path.join(work, "journal.jsonl"),
         }
         # A virtual environment outside the project (see the development page) goes along.

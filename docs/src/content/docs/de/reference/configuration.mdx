@@ -28,6 +28,7 @@ keine Konfigurationsdatei.
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Nötige Sicherheit, um eine Kategorie vorzuschlagen. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Diagnosestufe. |
 | `AVENIR_MCP_LOG_FORMAT` | `text` | `json` schreibt ein JSON-Objekt pro Zeile. |
+| `AVENIR_MCP_NO_UPDATE_CHECK` | nicht gesetzt | `1` beendet die tägliche Prüfung auf eine neuere Version bei PyPI. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adresse der API. |
 
 ## Einzelheiten
@@ -131,6 +132,16 @@ Meldungen der MCP-Bibliothek hinzu, die die Anfragen selbst enthalten können.
 `text` (Standard): eine lesbare Zeile pro Ereignis. `json`: ein JSON-Objekt pro Zeile, für
 einen Log-Kollektor – siehe
 [Protokolle an ein Log-System senden](/avenir-mcp/de/guides/run-options/#protokolle-an-ein-log-system-senden).
+
+### `AVENIR_MCP_NO_UPDATE_CHECK`
+
+Nicht gesetzt (Standard): Beim Start fragt der Server höchstens einmal am Tag PyPI
+(`https://pypi.org/pypi/avenir-mcp/json`) nach der neuesten Version, wartet dabei höchstens
+1,5 Sekunden und merkt sich die Antwort in `latest-version.json` unter `XDG_CACHE_HOME`
+(standardmäßig `~/.cache`). Gibt es eine neuere Version, teilt eine Zeile in seinen
+Anweisungen das dem Agenten mit, der es Ihnen sagen kann, und dieselbe Zeile wird als Warnung protokolliert. Nichts über Sie oder Ihre Plans
+wird gesendet: Es ist eine anonyme Anfrage, die PyPI von Ihrer Adresse kommen sieht. Der
+Server aktualisiert sich nie selbst. `1`: keine Anfrage; `DO_NOT_TRACK=1` oder ein CI-Lauf (`CI=true`) wirkt genauso.
 
 ### `AVENIR_MCP_YNAB_URL`
 

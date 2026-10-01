@@ -28,6 +28,7 @@ configuratiebestand.
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Benodigde zekerheid om een categorie voor te stellen. |
 | `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Diagnoseniveau. |
 | `AVENIR_MCP_LOG_FORMAT` | `text` | `json` schrijft één JSON-object per regel. |
+| `AVENIR_MCP_NO_UPDATE_CHECK` | niet gezet | `1` stopt de dagelijkse controle op een nieuwere versie op PyPI. |
 | `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adres van de API. |
 
 ## Details
@@ -130,6 +131,18 @@ MCP-bibliotheek toe, die de verzoeken zelf kunnen bevatten.
 `text` (standaard): één leesbare regel per gebeurtenis. `json`: één JSON-object per regel,
 voor een logcollector – zie
 [Logs naar een logsysteem sturen](/avenir-mcp/nl/guides/run-options/#logs-naar-een-logsysteem-sturen).
+
+### `AVENIR_MCP_NO_UPDATE_CHECK`
+
+Niet gezet (standaard): bij het starten vraagt de server hoogstens één keer per dag aan
+PyPI (`https://pypi.org/pypi/avenir-mcp/json`) wat de nieuwste versie is, wacht daarbij
+hoogstens 1,5 seconde en onthoudt het antwoord in `latest-version.json` onder
+`XDG_CACHE_HOME` (standaard `~/.cache`). Is er een nieuwere versie, dan zegt een regel in
+zijn instructies dat tegen de agent, die het jou kan vertellen, en dezelfde regel wordt als
+waarschuwing gelogd. Er wordt niets over jou of
+je plans verstuurd: het is één anoniem verzoek, dat PyPI van jouw adres ziet komen. De
+server werkt zichzelf nooit bij. `1`: geen verzoek; `DO_NOT_TRACK=1`, of een CI-run
+(`CI=true`), heeft hetzelfde effect.
 
 ### `AVENIR_MCP_YNAB_URL`
 
