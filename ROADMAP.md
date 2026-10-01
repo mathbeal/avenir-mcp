@@ -4,16 +4,76 @@ avenir-mcp starts as a thin layer over the YNAB API. The goal is a server design
 for agents: fewer tools, each one a task; read-only by default; every write
 previewed, confirmed and undoable; short, structured answers.
 
-Newest first.
+This file says what the project intends to do over the next twelve months, to
+October 2027, and what it will not do. The order is the intended one, not a promise of
+dates; when plans change, this file changes with them. Past milestones follow,
+newest first.
 
-## Next: from a document to the year's schedules
+## The next twelve months
+
+### Reports that answer a question about the future
+
+Read-only tools, each one a question a user asks about their money, computed from the
+plan as the existing reports are:
+
+- `get_net_worth_trend`: net worth month by month, assets and debts apart.
+- `get_runway`: how many months the money available would cover usual spending.
+- `get_savings_rate`: the share of income kept each month, and its trend.
+- `get_underfunded_targets`: the categories whose target is not met this month, and
+  what each still needs.
+- `get_debt_payoff_plan`: when each debt is paid off at the current payments, and with
+  an extra amount.
+- `get_age_of_money`: how YNAB's Age of Money changed month by month.
+
+### From a document to the year's schedules
+
+See the section below: write tools for scheduled transactions, one confirmed batch per
+document.
+
+### What YNAB's API offers and avenir-mcp does not use yet
+
+The operations marked "planned" in `api/coverage.toml`, each in a task: the plan's
+currency, to show amounts with it; payees, to clean the names bank imports give them;
+money moved between categories, for the monthly review; category groups; editing one
+transaction.
+
+### Around the server
+
+- A `.mcpb` bundle for one-click install in Claude Desktop.
+- Undo for `update_category`.
+- The evaluation run through other clients than Claude Code, and with local models.
+- A second maintainer (see [GOVERNANCE.md](GOVERNANCE.md)).
+
+## What avenir-mcp will not do
+
+- **Move real money.** It changes a YNAB plan, never a bank account: no payment, no
+  transfer between banks.
+- **Act without the user.** No write without a preview and the user's confirmation,
+  apart from marking transactions reviewed and asking YNAB to import from linked banks;
+  no automatic schedule, no background job.
+- **Serve several people.** No hosted or shared server, no user accounts: YNAB's terms
+  require OAuth for an application used by others.
+- **Give financial advice.** It reports and projects what the plan holds; the decisions
+  stay with the user.
+- **Read documents.** The agent reads a tax notice or a statement; avenir-mcp receives
+  what the agent extracted.
+- **Send data elsewhere.** No telemetry, no analytics, no service other than YNAB's API
+  and the once-a-day version check on PyPI.
+- **Wrap every endpoint.** An operation of YNAB's API becomes part of a tool only when a
+  task needs it; `api/coverage.toml` gives the reason for each one left out, such as the
+  locations of payees, which no task needs.
+- **Replace YNAB's app.** Accounts are opened, bank links fixed and categories deleted
+  in YNAB.
+
+## In progress: from a document to the year's schedules
 
 - The user gives the agent a document that sets future payments: a tax notice, a
   corrected tax schedule, a building's call for funds, a loan's amortisation table.
   The agent reads it; avenir-mcp never parses a document.
 - Write tools for scheduled transactions: create, change and delete, each previewed,
   confirmed and undoable.
-- A tool to set a category's target: amount, and date for a one-off need.
+- A tool to set a category's target: amount, and date for a one-off need. *Done
+  (`set_category_target`).*
 - One batch per document: a single preview of every schedule and target to create or
   change, one confirmation, one `undo_operation`.
 - A new document updates the schedules it replaces instead of adding duplicates,
