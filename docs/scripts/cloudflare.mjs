@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+// SPDX-License-Identifier: MIT
+
 // Builds the site for Cloudflare Pages into cloudflare-dist/: the pages under /avenir-mcp/,
 // as on GitHub Pages, with the _redirects and _headers files of cloudflare/ at the root.
 // The Content-Security-Policy allows each inline <script> and <style> of the built pages by

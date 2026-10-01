@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+// SPDX-License-Identifier: MIT
+
 // The site on Cloudflare Pages: the security headers it sends and the redirect to /avenir-mcp/.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
