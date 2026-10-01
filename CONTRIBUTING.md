@@ -1,5 +1,9 @@
 # Contributing
 
+Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md). How decisions
+are made and who does what: [GOVERNANCE.md](GOVERNANCE.md). How the code is organised:
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Getting set up
 
 ```bash
@@ -29,6 +33,37 @@ tests were written to pass.
 
 **Never paste real transactions, balances, account names or tokens** into an issue,
 a fixture or a log. Invent them.
+
+## Tests
+
+Every change to the behaviour comes with automated tests in `tests/`, added in the same
+pull request:
+
+- **New functionality** — a tool, an argument, a resource, a prompt, a new case
+  handled — comes with tests of what it does and of what it refuses.
+- **A bug fix** comes with a regression test that fails without the fix.
+
+The test is written first and seen to fail. Coverage of lines and branches stays at
+100 %: `just check` fails otherwise. A pull request without tests for what it changes
+is not merged. Documentation, CI and dependency updates are the exception.
+
+## Coding standards
+
+The code follows these guides, and the checks enforce them: `just check` and
+`just hygiene` run them locally, and the required **CI passed** check runs them on every
+pull request.
+
+| Guide | Enforced by |
+|---|---|
+| [PEP 8](https://peps.python.org/pep-0008/), as `ruff format` writes it (lines of 100 characters at most) | `ruff format --check`, `pylint` (score 10.00) |
+| [PEP 257](https://peps.python.org/pep-0257/) docstrings in the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings), complete: `Args:`, `Returns:`, `Raises:` | `ruff check` (rules `D` and `DOC`), `pydoclint` |
+| Type annotations everywhere, checked strictly | `mypy --strict` |
+| Sorted imports; no risky pattern (bandit's rules) | `ruff check` (rules `I` and `S`) |
+| One word per idea in the code's vocabulary | `lexdrift check` |
+| Spelling in code and documentation | `typos` |
+
+[AGENTS.md](AGENTS.md) adds the rules specific to this project: secrets, untrusted text,
+tool descriptions written for an agent, pydantic models for structured data.
 
 ## Documentation
 

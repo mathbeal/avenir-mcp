@@ -52,7 +52,7 @@ secrets:
 # Check every link of the README and the hand-written documentation, as CI does
 # (needs Docker). Links inside the site are checked when it builds (`just docs`).
 links:
-    docker run --rm -v "$PWD:/input" -w /input lycheeverse/lychee@sha256:eaff3e0a13603c9a701accfcc84f44158bb77bf36ecfa4622b626056c3463892 --config lychee.toml --no-progress README.md CONTRIBUTING.md SECURITY.md AGENTS.md "docs/src/content/docs/**/*.md" "docs/src/content/docs/**/*.mdx"
+    docker run --rm -v "$PWD:/input" -w /input lycheeverse/lychee@sha256:eaff3e0a13603c9a701accfcc84f44158bb77bf36ecfa4622b626056c3463892 --config lychee.toml --no-progress README.md CONTRIBUTING.md SECURITY.md AGENTS.md ARCHITECTURE.md GOVERNANCE.md ROADMAP.md CODE_OF_CONDUCT.md "docs/src/content/docs/**/*.md" "docs/src/content/docs/**/*.mdx"
 
 # Audit the workflows and hunt typos, as CI does.
 hygiene:

@@ -144,7 +144,7 @@ by hand: edit the commits, or the configuration in `cliff.toml`.
 - Structured data is a pydantic model, and docstrings follow the Google style
 - Call the project avenir-mcp everywhere
 - Smaller confirmation and forecast functions, as Sonar suggested
-- Drop the tools that safer ones replace
+- **Breaking:** Drop the tools that safer ones replace
 
 
 ### Documentation

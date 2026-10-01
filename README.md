@@ -136,7 +136,9 @@ just evaluate     # a real agent on the demo plan (uses your Claude plan)
 ```
 
 Read [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md) before opening a
-pull request. Security reports: [SECURITY.md](SECURITY.md).
+pull request. Security reports: [SECURITY.md](SECURITY.md). Also:
+[ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md),
+[GOVERNANCE.md](GOVERNANCE.md) and the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Licence
 
