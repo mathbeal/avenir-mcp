@@ -33,6 +33,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Office/Business :: Financial",
     "Typing :: Typed",
 ]
@@ -48,6 +49,9 @@ dependencies = [
     "mcp>=2.2.0,<3",
     "mcp-types>=2.2.0,<3",
     "starlette>=1.7.0,<2",
+    # fastmcp brings beartype, whose 0.22 does not import on Python 3.15 (typing no
+    # longer has no_type_check_decorator). Required here until fastmcp asks for 0.23.
+    "beartype>=0.23.0rc2; python_version >= '3.15'",
 ]
 
 [project.urls]
@@ -174,7 +178,14 @@ min-similarity-lines = 4
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    # Python 3.15 warns about a protocol of py-key-value (brought by fastmcp) checked
+    # without @runtime_checkable, and beartype then declines to check that library.
+    # Neither concerns avenir-mcp's code; to remove once py-key-value marks it.
+    "ignore:.*isn't explicitly decorated with @runtime_checkable:DeprecationWarning",
+    "ignore:Method key_value\\..*:beartype.roar.BeartypeClawDecorWarning",
+]
 xfail_strict = true
 markers = [
     "ynab_terms: a rule of YNAB's API terms that the self-checked badge promises",
@@ -185,6 +196,7 @@ addopts = "--strict-markers --strict-config --cov=avenir_mcp --cov-branch --cov-
 # the development dependency pyyaml, to read YNAB's specification. The benchmarks, likewise,
 # use pytest-benchmark.
 [tool.deptry.per_rule_ignores]
+DEP002 = ["beartype"]
 DEP004 = ["yaml", "pytest_benchmark"]
 
 # Dead code (`just lint`, CI): the same directories ruff reads, plus the whitelist, which
