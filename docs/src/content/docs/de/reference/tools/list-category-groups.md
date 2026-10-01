@@ -12,7 +12,7 @@ Aus dem Code erzeugt mit `python -m docsgen`; ein Test schlägt fehl, sobald die
 List the category groups a new category can be created in.
 
 Hidden, deleted and system groups are left out. Pass a group id to
-create_category.
+create_category, which is there only when the operator enabled writes.
 
 ## Verhalten
 

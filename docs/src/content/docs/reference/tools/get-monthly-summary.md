@@ -11,8 +11,10 @@ Generated from the code by `python -m docsgen`; a test fails when it no longer m
 
 A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories.
 
-Amounts in currency units; activity is negative for spending. Only
-overspent categories are listed; use get_category_balances for all of them.
+Use it first to review a month. Amounts in currency units; activity is negative
+for spending. Only overspent categories are listed: use get_category_balances
+for all of them, get_spending_trends to compare with earlier months, and
+forecast_balance for the months ahead. One YNAB request; changes nothing.
 
 ## Behaviour
 

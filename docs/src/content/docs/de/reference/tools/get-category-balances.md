@@ -11,10 +11,12 @@ Aus dem Code erzeugt mit `python -m docsgen`; ein Test schlägt fehl, sobald die
 
 Budgeted, spent (activity) and available (balance) per category for a month.
 
+Use it for "how much is left in Groceries?" or to list every category's money.
 Amounts in currency units; activity is negative for spending. Hidden and
 internal categories are left out, and so are categories with nothing
-budgeted, spent or available unless include_empty is true. Use
-get_budget_vs_actual for the share of each budget consumed.
+budgeted, spent or available unless include_empty is true. For the share of
+each budget consumed use get_budget_vs_actual; for the month's totals,
+get_monthly_summary. One YNAB request; changes nothing.
 
 ## Verhalten
 

@@ -137,10 +137,12 @@ async def get_category_balances(
 ) -> list[analytics.CategoryBalance]:
     """Budgeted, spent (activity) and available (balance) per category for a month.
 
+    Use it for "how much is left in Groceries?" or to list every category's money.
     Amounts in currency units; activity is negative for spending. Hidden and
     internal categories are left out, and so are categories with nothing
-    budgeted, spent or available unless include_empty is true. Use
-    get_budget_vs_actual for the share of each budget consumed.
+    budgeted, spent or available unless include_empty is true. For the share of
+    each budget consumed use get_budget_vs_actual; for the month's totals,
+    get_monthly_summary. One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -170,8 +172,10 @@ async def get_monthly_summary(
 ) -> analytics.MonthOverview:
     """A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories.
 
-    Amounts in currency units; activity is negative for spending. Only
-    overspent categories are listed; use get_category_balances for all of them.
+    Use it first to review a month. Amounts in currency units; activity is negative
+    for spending. Only overspent categories are listed: use get_category_balances
+    for all of them, get_spending_trends to compare with earlier months, and
+    forecast_balance for the months ahead. One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -197,9 +201,13 @@ async def get_budget_vs_actual(
     plan_id: str,
     month: str = "current",
 ) -> list[analytics.BudgetUsage]:
-    """Return a budget-vs-actual breakdown with utilisation percentage per category.
+    """Share of each category's budget spent in a month, to see what is over or close.
 
-    Amounts in currency units; utilization_pct above 100 means over budget.
+    Use it for "am I over budget?" or "which categories are nearly used up?".
+    Amounts in currency units, spending as a positive number; utilization_pct above
+    100 means over budget. For what is still available in each category use
+    get_category_balances; for the month's totals, get_monthly_summary; for several
+    months, get_spending_trends. One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -226,10 +234,13 @@ async def get_spending_trends(
     plan_id: str,
     months_count: Annotated[int, Field(ge=1, le=MAX_TREND_MONTHS)] = 3,
 ) -> dict[str, list[analytics.MonthSpending]]:
-    """Return monthly spending trends per category over the last N months.
+    """Spending per category, month by month, over the last N months.
 
-    The result maps each category name to its spending month by month, oldest
-    first, in currency units.
+    Use it for "is my grocery spending going up?" or to compare months. The result
+    maps each category name to its spending month by month, oldest first, as a
+    positive number in currency units. For a single month use get_category_balances
+    or get_budget_vs_actual; for the months ahead, forecast_balance. One YNAB
+    request for the list of months, then one per month; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -268,7 +279,7 @@ async def list_category_groups(plan_id: str) -> list[CategoryGroup]:
     """List the category groups a new category can be created in.
 
     Hidden, deleted and system groups are left out. Pass a group id to
-    create_category.
+    create_category, which is there only when the operator enabled writes.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -293,7 +304,9 @@ async def list_accounts(plan_id: str) -> list[Account]:
 
     Use it to reconcile YNAB with the bank, and to tell the user when a bank link is
     broken (no transaction comes in until they fix it in YNAB) or when an account has
-    not been reconciled for months. Balances are in currency units.
+    not been reconciled for months. Its ids are the account_ids other tools take.
+    Balances are in currency units. Every account comes in one response, closed
+    ones included, in one YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
