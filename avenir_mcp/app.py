@@ -12,7 +12,10 @@ from fastmcp.exceptions import ToolError
 from fastmcp.server.transforms import GetToolNext, Transform, VersionSpec
 from fastmcp.tools import Tool
 
-mcp = FastMCP("avenir-mcp")
+from avenir_mcp import __version__
+
+# The version clients see in the initialize answer: avenir-mcp's, not FastMCP's.
+mcp = FastMCP("avenir-mcp", version=__version__)
 
 
 # Tools that change a plan carry this tag; read-only mode hides them.

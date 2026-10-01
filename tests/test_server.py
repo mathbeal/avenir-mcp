@@ -8,6 +8,7 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastmcp import Client
 from fastmcp.exceptions import ToolError
 
 import avenir_mcp
@@ -287,6 +288,17 @@ def test_main_runs_http_on_configured_host_and_port(monkeypatch: pytest.MonkeyPa
         "127.0.0.2",
         9000,
     )
+
+
+def test_initialize_names_avenir_mcp_and_its_version() -> None:
+    """A client learns which avenir-mcp it talks to, not which FastMCP runs it."""
+
+    async def run() -> Any:
+        async with Client(server.mcp) as mcp_client:
+            return mcp_client.server_info
+
+    info = asyncio.run(run())
+    assert (info.name, info.version) == ("avenir-mcp", avenir_mcp.__version__)
 
 
 def test_main_prints_the_version_and_stops(capsys: pytest.CaptureFixture[str]) -> None:
