@@ -11,8 +11,8 @@ Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne corre
 
 List the category groups a new category can be created in.
 
-Hidden, deleted and system groups are left out. Pass a group id to
-create_category, which is there only when the operator enabled writes.
+Hidden, deleted and system groups are left out.
+Pass a group id to create_category.
 
 ## Comportement
 
