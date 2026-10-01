@@ -37,7 +37,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "fastmcp==4.0.9",
+    "fastmcp==4.0.10",
     "httpx>=0.28.1,<1",
     # Already required by fastmcp; declared because tool arguments, results and
     # journal entries are pydantic models, whose field docstrings become the
