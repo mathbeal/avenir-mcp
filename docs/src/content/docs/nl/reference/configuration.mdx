@@ -22,7 +22,7 @@ configuratiebestand.
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` of `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-adres. |
 | `AVENIR_MCP_PORT` | `8103` | HTTP-poort. |
-| `AVENIR_MCP_HTTP_TOKEN` | niet ingesteld | Token dat HTTP-clients moeten tonen; verplicht bij schrijven via HTTP. |
+| `AVENIR_MCP_HTTP_TOKEN` | niet ingesteld | Token dat HTTP-clients moeten tonen; niet ingesteld, dan wordt bij elke start een willekeurig token gemaakt. |
 | `AVENIR_MCP_JOURNAL` | zie hieronder | Journaalbestand, gebruikt door ongedaan maken. |
 | `XDG_STATE_HOME` | `~/.local/state` | Waar het journaal standaard staat. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Benodigde zekerheid om een categorie voor te stellen. |
@@ -100,8 +100,8 @@ voorvoegsel worden bewust genegeerd: shells zetten `HOST` vaak op de naam van de
 ### `AVENIR_MCP_HTTP_TOKEN`
 
 Via HTTP een geheim dat elk verzoek moet dragen als `Authorization: Bearer <token>`; andere
-krijgen `401`. **Verplicht bij `AVENIR_MCP_WRITE=1`**: zonder token weigert de server te
-starten. Maak er een aan met `openssl rand -hex 32`. Genegeerd via stdio. Welk token ook,
+krijgen `401`. **Via HTTP altijd verplicht**: is het niet ingesteld, dan maakt de server bij
+elke start een willekeurig token en toont het één keer op stderr. Maak er een aan met `openssl rand -hex 32`. Genegeerd via stdio. Welk token ook,
 de headers `Host` en `Origin` moeten deze computer noemen. Zie
 [Via HTTP draaien](/avenir-mcp/nl/guides/run-options/#via-http-draaien).
 

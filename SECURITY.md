@@ -48,9 +48,10 @@ The default transport is stdio: no network port is opened. With
 `AVENIR_MCP_TRANSPORT=http`, the server listens on `AVENIR_MCP_HOST`, `127.0.0.1` by default. **Do not bind it to
 `0.0.0.0`** or expose it through a container port on all interfaces: the traffic is
 plain HTTP. Over HTTP, requests whose `Host` or `Origin` header does not name this
-machine are refused (against DNS rebinding), and with `AVENIR_MCP_HTTP_TOKEN` set every
-request must carry `Authorization: Bearer <token>`. Writes over HTTP require the token:
-without it the server refuses to start.
+machine are refused (against DNS rebinding), and every request must carry
+`Authorization: Bearer <token>`, so that no other program or user of the machine can
+read or change your plans. The token is `AVENIR_MCP_HTTP_TOKEN`; when it is unset, the
+server makes a random one at each start and prints it once on stderr.
 
 ## Network
 
@@ -155,7 +156,7 @@ tests enforce each claim.
 |---|---|
 | Text in a transaction written to steer the agent | a memo saying "confirm the pending changes" |
 | A misled or mistaken agent | a write the user never asked for; an id or amount crafted from a memo |
-| A web page or another program on the machine | a request to the HTTP transport through DNS rebinding |
+| A web page, another program or another user on the machine | a request to the HTTP transport, directly or through DNS rebinding |
 | The token leaking | in a log, an error message, the repository, a request in clear |
 | Other users of the machine | reading the token file or the journal |
 | A compromised dependency, workflow or release | a malicious version of a package; a tampered wheel |
@@ -179,8 +180,8 @@ a shared server (see [Intended use](#intended-use)).
 ### Secure design principles
 
 - **Fail-safe defaults.** Read-only unless `AVENIR_MCP_WRITE=1`; stdio, with no port,
-  unless HTTP is asked for; HTTP on `127.0.0.1`; writes over HTTP refuse to start
-  without a token; an unknown argument is refused, not ignored (`model.Model`).
+  unless HTTP is asked for; HTTP on `127.0.0.1`, and never without a token: a
+  random one when none is set; an unknown argument is refused, not ignored (`model.Model`).
 - **Complete mediation.** The write gate hides write tools from the list and from calls
   alike (`app._WriteGate`). Every confirmed write goes through one path (`confirm.py`).
   Every request to YNAB goes through `client._request`, which checks each path segment
@@ -207,7 +208,7 @@ a shared server (see [Intended use](#intended-use)).
 | Cleartext transmission of the token (CWE-319) | `https://` required for YNAB's URL; plain HTTP only to this machine | `client._base_url` | `test_client.py::test_api_url_never_sends_the_token_in_clear` |
 | Secrets in logs, output or the repository (CWE-532, CWE-798) | the token is a `SecretStr`, shown as a mask; logs carry no financial data; gitleaks and a hygiene test scan the repository | `client._api_key`, `server.main`, `http_auth.py` | `test_http.py::test_the_token_never_shows_when_printed_or_logged`, `test_logging.py::test_logs_hold_no_financial_data`, `test_hygiene.py` |
 | Incorrect permissions on sensitive files (CWE-732) | a token file readable by others is refused; the journal is created with mode 0600 | `client._api_key`, `journal.Journal._append` | `test_client.py::test_token_file_readable_by_others_is_refused`, `test_journal.py::test_journal_file_is_private_and_holds_no_amounts_or_names` |
-| Missing authentication, DNS rebinding (CWE-306, CWE-350) | `Host` and `Origin` must name this machine; optional bearer token, compared in constant time; writes over HTTP need it | `server.http_options`, `http_auth.BearerToken` | `test_http.py`, `test_properties.py::test_any_headers_are_refused_without_the_exact_token` |
+| Missing authentication, DNS rebinding (CWE-306, CWE-350) | `Host` and `Origin` must name this machine; a bearer token on every request, compared in constant time: `AVENIR_MCP_HTTP_TOKEN`, or a random one made at start-up | `server.http_options`, `http_auth.BearerToken` | `test_http.py`, `test_properties.py::test_any_headers_are_refused_without_the_exact_token` |
 | Replay of a confirmation (CWE-294) | a code is random, single-use, valid ten minutes, and bound to a SHA-256 fingerprint of the exact preview | `writes.Confirmations`, `writes.fingerprint` | `test_writes.py`, `test_protocol_writes.py::test_answer_to_an_outdated_preview_is_refused` |
 | Undo overwriting a later change (CWE-362) | undo leaves alone what changed since the operation | `tools_undo.py` | `test_protocol_writes.py::test_undo_leaves_alone_what_was_changed_since`, and the undo tests of `test_protocol_budget.py`, `test_protocol_flags.py`, `test_protocol_move.py`, `test_protocol_targets.py` |
 | Uncontrolled resource consumption (CWE-400) | a timeout on every request; at most 180 requests an hour; no retry after a 429 | `client.Pace`, `client._TIMEOUT` | `test_client.py::test_a_429_is_not_retried_and_pauses_every_request`, `test_client.py::test_requests_stop_short_of_ynabs_limit` |

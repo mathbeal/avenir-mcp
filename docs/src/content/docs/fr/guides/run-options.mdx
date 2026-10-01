@@ -60,11 +60,12 @@ En HTTP, chaque requête est vérifiée avant d'atteindre un outil :
 |---|---|---|
 | l'en-tête `Host` désigne cette machine (`127.0.0.1`, `localhost`, `::1`) | `421` | une page web qui atteindrait le serveur par DNS rebinding |
 | un en-tête `Origin`, s'il est présent, est celui de ce serveur | `403` | une page d'un autre site, ouverte dans votre navigateur |
-| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, si un jeton est défini | `401` | tout autre programme de votre machine ou de votre réseau |
+| `Authorization: Bearer <jeton>`, avec `AVENIR_MCP_HTTP_TOKEN` ou le jeton affiché au démarrage | `401` | tout autre programme de votre machine ou de votre réseau |
 
-Avec `AVENIR_MCP_WRITE=1`, le jeton est **obligatoire** : sans lui, le serveur refuse de
-démarrer. La lecture seule en HTTP fonctionne sans jeton, avec les deux premières
-vérifications seulement.
+Le jeton est **toujours obligatoire**, en lecture seule comme en écriture. Si
+`AVENIR_MCP_HTTP_TOKEN` n'est pas défini, le serveur crée un jeton aléatoire au démarrage
+et l'affiche une fois sur stderr ; il change à chaque démarrage : définissez la variable
+pour donner à vos clients un jeton qui dure.
 
 <Aside type="danger" title="Gardez-le sur votre machine">
 Gardez `AVENIR_MCP_HOST=127.0.0.1` : le trafic est en HTTP simple, non chiffré. Ne liez

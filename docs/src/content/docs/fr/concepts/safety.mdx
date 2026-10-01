@@ -61,7 +61,7 @@ cache une consigne dans un mémo et vérifie que l'agent l'ignore.
 | Transport | Exposition |
 |---|---|
 | stdio (défaut) | aucune : le client démarre avenir-mcp comme sous-processus |
-| HTTP | écoute sur `127.0.0.1:8103` par défaut ; les requêtes doivent désigner cette machine (`Host`, `Origin`) et porter `AVENIR_MCP_HTTP_TOKEN` s'il est défini — obligatoire avec l'écriture. HTTP simple : gardez-le sur localhost |
+| HTTP | écoute sur `127.0.0.1:8103` par défaut ; les requêtes doivent désigner cette machine (`Host`, `Origin`) et porter un jeton : `AVENIR_MCP_HTTP_TOKEN`, ou un jeton aléatoire affiché au démarrage. HTTP simple : gardez-le sur localhost |
 
 ## Ce qui reste sur votre machine
 

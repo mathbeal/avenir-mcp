@@ -60,7 +60,7 @@ that the agent ignores it.
 | Transport | Exposure |
 |---|---|
 | stdio (default) | none: the client starts avenir-mcp as a subprocess |
-| HTTP | listens on `127.0.0.1:8103` by default; requests must name this machine (`Host`, `Origin`), and carry `AVENIR_MCP_HTTP_TOKEN` when set — required with writes. Plain HTTP: keep it on localhost |
+| HTTP | listens on `127.0.0.1:8103` by default; requests must name this machine (`Host`, `Origin`), and carry a token: `AVENIR_MCP_HTTP_TOKEN`, or a random one printed at start-up. Plain HTTP: keep it on localhost |
 
 ## What stays on your machine
 

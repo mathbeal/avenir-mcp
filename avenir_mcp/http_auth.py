@@ -36,7 +36,8 @@ class BearerToken:  # pylint: disable=too-few-public-methods
             given = Headers(scope=scope).get("authorization", "").encode()
             if not secrets.compare_digest(given, self.expected.get_secret_value()):
                 refusal = PlainTextResponse(
-                    "Unauthorized: send the header Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>.",
+                    "Unauthorized: send the header Authorization: Bearer <token>, with "
+                    "AVENIR_MCP_HTTP_TOKEN or the token avenir-mcp printed when it started.",
                     status_code=401,
                     headers={"WWW-Authenticate": "Bearer"},
                 )
@@ -45,13 +46,13 @@ class BearerToken:  # pylint: disable=too-few-public-methods
         await self.app(scope, receive, send)
 
 
-def middleware(token: SecretStr | None) -> list[Middleware]:
+def middleware(token: SecretStr) -> list[Middleware]:
     """Build the token check for the HTTP transport.
 
     Args:
-        token: AVENIR_MCP_HTTP_TOKEN, or None.
+        token: The token every request must carry.
 
     Returns:
-        The check when a token is configured, nothing otherwise.
+        The check.
     """
-    return [Middleware(BearerToken, token=token)] if token else []
+    return [Middleware(BearerToken, token=token)]

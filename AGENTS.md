@@ -70,6 +70,9 @@ refuses what YNAB refuses, or a test of the refusal proves nothing.
 become a pydantic `SecretStr` where they are read, and `get_secret_value()` is
 called only where the value is sent or compared. A secret field of a model is a
 `SecretStr` too. Printed, logged or in a repr, a secret shows as `**********`.
+The one exception is the token avenir-mcp makes for the HTTP transport when
+AVENIR_MCP_HTTP_TOKEN is unset: it is printed once on stderr, never logged, so the
+user can give it to a client.
 
 **Few dependencies.** `fastmcp` and `httpx`, pinned, and `pydantic`, which fastmcp
 already requires. Adding one needs a reason written in the pull request.

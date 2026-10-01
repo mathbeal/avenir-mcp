@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 import sys
 from datetime import UTC, datetime
 from typing import Any
@@ -68,19 +69,40 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def http_options(token: SecretStr | None) -> dict[str, Any]:
+def http_options(token: SecretStr) -> dict[str, Any]:
     """Say what guards the HTTP transport, besides listening on 127.0.0.1.
 
     The Host and Origin headers must name this machine, so a web page cannot reach
-    the server through DNS rebinding; with a token, every request must carry it.
+    the server through DNS rebinding; every request must carry the token, so no other
+    program or user of the machine can.
 
     Args:
-        token: AVENIR_MCP_HTTP_TOKEN, or None.
+        token: AVENIR_MCP_HTTP_TOKEN, or the one made at start-up.
 
     Returns:
         Keyword arguments for FastMCP's run().
     """
     return {"host_origin_protection": True, "middleware": http_auth.middleware(token)}
+
+
+def _new_http_token() -> str:
+    """Make a token for an HTTP server started without AVENIR_MCP_HTTP_TOKEN, and say it.
+
+    Printed once on stderr, not logged: the user needs it to connect a client, and
+    log files may be shipped elsewhere.
+
+    Returns:
+        A random token, valid until the server stops.
+    """
+    token = secrets.token_urlsafe(32)
+    print(
+        "avenir-mcp: AVENIR_MCP_HTTP_TOKEN is not set, so this run requires a token made "
+        f"for it:\n\n    Authorization: Bearer {token}\n\nIt changes at each start; set "
+        "AVENIR_MCP_HTTP_TOKEN to a long random value to keep one.",
+        file=sys.stderr,
+        flush=True,
+    )
+    return token
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -100,14 +122,12 @@ def main(argv: list[str] | None = None) -> None:
 
     The HTTP address comes from AVENIR_MCP_HOST and AVENIR_MCP_PORT and defaults to
     127.0.0.1:8103, so the server is never reachable from the network by accident.
-    Over HTTP, requests must name this machine (see http_options); writes also need
-    AVENIR_MCP_HTTP_TOKEN, which every request must then carry.
+    Over HTTP, requests must name this machine and carry a token (see http_options):
+    AVENIR_MCP_HTTP_TOKEN, or, when it is unset, a random token made at start-up and
+    printed once on stderr.
 
     Args:
         argv: The command-line arguments; None for sys.argv.
-
-    Raises:
-        SystemExit: If writes are enabled over HTTP without AVENIR_MCP_HTTP_TOKEN.
     """
     if (sys.argv[1:] if argv is None else argv) == ["--version"]:
         print(f"avenir-mcp {__version__}")
@@ -125,14 +145,8 @@ def main(argv: list[str] | None = None) -> None:
     if os.getenv("AVENIR_MCP_TRANSPORT", "stdio") == "http":
         host = os.getenv("AVENIR_MCP_HOST", "127.0.0.1")
         port = int(os.getenv("AVENIR_MCP_PORT", "8103"))
-        configured = os.getenv("AVENIR_MCP_HTTP_TOKEN")
         # Masked from here on: a repr of the options, logged or printed, shows no token.
-        token = SecretStr(configured) if configured else None
-        if writes and token is None:
-            sys.exit(
-                "AVENIR_MCP_WRITE=1 over HTTP needs AVENIR_MCP_HTTP_TOKEN: set it to a long "
-                "random value and send it as Authorization: Bearer <token>."
-            )
+        token = SecretStr(os.getenv("AVENIR_MCP_HTTP_TOKEN") or _new_http_token())
         logger.info("Starting avenir-mcp on %s:%d", host, port)
         mcp.run(transport="streamable-http", host=host, port=port, **http_options(token))
     else:
