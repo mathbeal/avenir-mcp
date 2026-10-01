@@ -124,6 +124,21 @@ just docs-serve            # live voorbeeld op http://localhost:4321/avenir-mcp/
 met vaste datum en vervangen willekeurige id's. Met de hand geschreven pagina's bestaan in
 het Engels, Frans, Spaans, Duits en Nederlands; een test faalt als er een ontbreekt.
 
+### Hosting
+
+De site wordt door de workflow `docs` op GitHub Pages gepubliceerd, en op Cloudflare
+Pages (`avenir-mcp.pages.dev`), dat hem vanuit de repository bouwt met `npm run build:cloudflare`.
+Beide serveren hem onder `/avenir-mcp/`; bij Cloudflare stuurt de root daarheen door.
+GitHub Pages kan geen beveiligingsheaders sturen; Cloudflare Pages stuurt die uit
+`docs/cloudflare/_headers` met elk bestand mee: een Content-Security-Policy, HSTS,
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, een referrer-policy, een
+permissions-policy en een opener-policy. Het beleid staat de eigen bestanden van de site
+toe en elk inline script en elke inline stijl van de gebouwde pagina's via de SHA-256,
+berekend bij het bouwen; `'wasm-unsafe-eval'` laat de zoekfunctie haar WebAssembly
+uitvoeren, en stijlattributen zijn alleen via `style-src-attr` toegestaan. De build faalt,
+ook in CI, als een vereiste header ontbreekt of verzwakt is. De omgevingsvariabele
+`DOCS_SITE` bepaalt het adres in canonieke links en in de sitemap.
+
 ## Evaluatie
 
 ```bash

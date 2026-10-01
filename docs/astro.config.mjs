@@ -7,7 +7,8 @@ import { satteri } from '@astrojs/markdown-satteri';
 import { brand } from './src/plugins/brand.mjs';
 
 export default defineConfig({
-  site: 'https://mathbeal.github.io',
+  // The address in canonical links and the sitemap; the Cloudflare Pages build sets its own.
+  site: process.env.DOCS_SITE || 'https://mathbeal.github.io',
   base: '/avenir-mcp',
   // The name avenir-mcp is set apart in the text of every page (see the plugin).
   markdown: { processor: satteri({ hastPlugins: [brand] }) },
