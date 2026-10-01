@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tell the agent, once a day at most, that a newer avenir-mcp is on PyPI.
 
 A server pinned to a version, or started from a cached copy, never learns that a

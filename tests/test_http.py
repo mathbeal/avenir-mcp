@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The HTTP transport: only this machine's pages and clients holding the token get in."""
 
 from __future__ import annotations

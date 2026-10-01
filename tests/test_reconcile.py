@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for reconcile.py — comparing an account with the bank's balance."""
 
 from __future__ import annotations

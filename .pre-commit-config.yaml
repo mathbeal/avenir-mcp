@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 # Evaluation reports (evals/run.py) and the changelog (git-cliff) stay as generated.
 exclude: ^(evals/results/|CHANGELOG\.md$)
 
@@ -14,7 +17,7 @@ repos:
       - id: trailing-whitespace
 
   # Every tool runs as CI and the justfile run it: ruff and lexdrift from the
-  # lockfile, typos, zizmor and pydoclint through uvx. Two versions of a tool give two verdicts.
+  # lockfile, typos, zizmor, pydoclint and reuse through uvx. Two versions of a tool give two verdicts.
   - repo: local
     hooks:
       - id: ruff-check
@@ -45,6 +48,11 @@ repos:
         entry: uvx pydoclint==0.10.1 avenir_mcp
         language: system
         files: ^avenir_mcp/.*\.py$
+        pass_filenames: false
+      - id: reuse
+        name: reuse lint (copyright and licence of every file)
+        entry: uvx --from reuse[charset-normalizer]==6.2.0 reuse lint
+        language: system
         pass_filenames: false
       - id: zizmor
         name: zizmor

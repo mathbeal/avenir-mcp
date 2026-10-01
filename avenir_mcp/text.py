@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Text written by banks, merchants and anyone who can pay you, made safe to show.
 
 Payee names and memos are untrusted. Shown as they are, a line break could add a

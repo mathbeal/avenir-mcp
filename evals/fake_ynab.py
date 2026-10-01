@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """A local stand-in for YNAB's API, serving the demo budget.
 
 Only what avenir-mcp calls is implemented, with YNAB's response shapes. State lives

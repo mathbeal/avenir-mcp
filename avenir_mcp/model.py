@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The base of the server's structured data: tool arguments, results and journal entries."""
 
 from __future__ import annotations

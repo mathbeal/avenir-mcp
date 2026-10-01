@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Confirm a write with the user, then apply and journal it.
 
 A client that supports elicitation asks the user: on a 2026-07-28 connection the

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: YNAB API terms
 
 # The "YNAB API terms: self-checked" badge. On every change, the tests marked ynab_terms

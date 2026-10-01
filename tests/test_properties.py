@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Properties that hold for any input, checked on thousands of generated cases (Hypothesis)."""
 
 from __future__ import annotations

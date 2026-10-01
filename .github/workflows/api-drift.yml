@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: YNAB API drift
 
 # Every Monday, compare the snapshot of YNAB's API (api/ynab-operations.json) with

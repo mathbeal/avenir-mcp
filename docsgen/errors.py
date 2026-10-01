@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Find, in the source, every error message each tool can return.
 
 Starting from a tool's function, calls are followed through the package (bare

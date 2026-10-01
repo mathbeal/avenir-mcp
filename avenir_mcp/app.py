@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The MCP server instance and what decides which tools it exposes."""
 
 from __future__ import annotations

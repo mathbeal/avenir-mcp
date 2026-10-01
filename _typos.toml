@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 [files]
 # Agent replies archived by the evaluation, cut to their last characters: quoted
 # as produced, not text to correct.

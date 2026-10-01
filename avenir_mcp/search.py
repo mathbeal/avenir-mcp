@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Find transactions by account, amount and dates, whatever their category.
 
 Nothing here talks to YNAB. suggest_categories only shows what waits for a

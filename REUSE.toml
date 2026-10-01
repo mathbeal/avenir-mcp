@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
+# Copyright and licence of the files that cannot carry a comment, or should not: every
+# other file states them in its first lines. `reuse lint` checks that no file is left out
+# (`just hygiene`, and the quality workflow).
+version = 1
+
+# Markdown, whose first line is a title or front matter; JSON, which has no comments;
+# images; lock files; one-line version files; Astro components, whose first line is
+# their script fence; generated documentation pages and examples, and the evaluation's
+# reports, which docsgen and evals/run.py write.
+[[annotations]]
+path = [
+    "**/*.md",
+    "**/*.mdx",
+    "**/*.json",
+    "**/*.svg",
+    "**/*.astro",
+    "uv.lock",
+    "lexdrift.lock",
+    ".python-version",
+    "docs/.nvmrc",
+]
+SPDX-FileCopyrightText = "2026 The avenir-mcp contributors"
+SPDX-License-Identifier = "MIT"
+
+# Snapshots of YNAB's API specification and terms, kept to notice when either changes:
+# the operations' ids and paths, the sentences that limit a field, and the attribution
+# YNAB's terms require. The names and quoted text are YNAB's; what the project adds
+# around them is under the project's licence.
+[[annotations]]
+path = ["api/ynab-operations.json", "api/ynab-terms.json"]
+SPDX-FileCopyrightText = "2026 The avenir-mcp contributors"
+SPDX-License-Identifier = "MIT"
+
+# The Contributor Covenant 2.1, with the project's contact for reports.
+[[annotations]]
+path = "CODE_OF_CONDUCT.md"
+precedence = "override"
+SPDX-FileCopyrightText = "Contributor Covenant contributors <https://www.contributor-covenant.org>"
+SPDX-License-Identifier = "CC-BY-4.0"

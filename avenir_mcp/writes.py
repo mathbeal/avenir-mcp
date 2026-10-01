@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Plan a change to a plan and confirm it before it happens.
 
 Nothing here talks to YNAB. A plan says exactly what would change; a

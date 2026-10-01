@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """YNAB's API terms, as avenir-mcp checks itself against them, and YNAB's changes caught.
 
 YNAB publishes its API Terms of Service on api.ynab.com with a "Last updated" date and

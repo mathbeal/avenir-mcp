@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for schedule.py — the dates on which scheduled transactions fall."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """A bearer token for the HTTP transport, so only clients you configured get in."""
 
 from __future__ import annotations

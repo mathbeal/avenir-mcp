@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Payee-to-category classifier based on YNAB transaction history."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 # The operations of YNAB's API that avenir-mcp does not use, and why.
 #
 # The operations it uses are not listed: they are found by following the code, from

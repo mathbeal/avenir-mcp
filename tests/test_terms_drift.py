@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Reading YNAB's API terms from its page, and noticing when YNAB changes them."""
 
 from __future__ import annotations

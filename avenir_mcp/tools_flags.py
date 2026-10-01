@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Flag transactions for the user to look at, after confirmation, and undo it."""
 
 from __future__ import annotations

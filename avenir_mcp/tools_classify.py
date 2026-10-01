@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Classify pending transactions: suggest, apply after confirmation, undo."""
 
 from __future__ import annotations

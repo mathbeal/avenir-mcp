@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: changelog
 
 # Only on a tag. A commit cannot contain its own changelog entry, so on an

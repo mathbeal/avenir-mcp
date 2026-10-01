@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 # Links checked by `just links` and the links workflow: every link of the README,
 # the root Markdown files and the hand-written documentation pages, in every language.
 # Internal links of the site are already checked when it builds.

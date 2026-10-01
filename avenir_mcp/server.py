@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Entry point of the avenir-mcp MCP server.
 
 Importing the tool modules registers their tools on the shared server instance.

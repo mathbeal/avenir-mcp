@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: dco
 
 # Every commit of a pull request certifies the Developer Certificate of Origin

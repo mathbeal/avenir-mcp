@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tests for charges.py: the recurring charges a plan pays, and what they cost over a year."""
 
 from __future__ import annotations

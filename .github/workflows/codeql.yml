@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: CodeQL
 
 # GitHub's code scanning, on the Python code and the workflows. Free on a public

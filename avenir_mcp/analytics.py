@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Financial analytics computed from YNAB data — pure functions, no I/O."""
 
 from __future__ import annotations

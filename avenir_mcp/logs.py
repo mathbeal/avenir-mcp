@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Diagnostics on stderr, as readable text or as one JSON object per line.
 
 stdout belongs to the MCP protocol in stdio mode, so nothing is ever logged there.

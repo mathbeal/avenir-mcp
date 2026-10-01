@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: pull request title
 
 # Pull requests are squashed: the title becomes the commit message, and the

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """create_transactions through the MCP protocol: validate, preview, confirm, undo."""
 
 from __future__ import annotations

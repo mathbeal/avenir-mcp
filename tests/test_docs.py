@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The documentation cannot drift from the code, nor one language from another."""
 
 from __future__ import annotations

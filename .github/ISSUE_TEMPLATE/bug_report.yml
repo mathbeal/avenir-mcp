@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 name: Bug report
 description: A tool fails, answers wrongly, or an agent is misled by an answer.
 title: "fix: "

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Plan how one transaction is split across categories, e.g. from a receipt.
 
 Nothing here talks to YNAB. The plan checks what YNAB would refuse, and what

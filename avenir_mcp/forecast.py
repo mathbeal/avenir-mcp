@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Project an account's balance month by month.
 
 Three sources, each an assumption the caller can see and change: charges that

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Where the generated documentation goes, and what it contains."""
 
 from __future__ import annotations

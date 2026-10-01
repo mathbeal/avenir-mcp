@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """A heavy invented plan: five years of a busy household, in YNAB's shapes.
 
 About 150 transactions a month for 60 months (some 9,000), 60 merchants whose bank

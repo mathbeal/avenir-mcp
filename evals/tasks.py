@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Evaluation tasks: what a user asks, and how to tell the agent got it right.
 
 Expected figures are computed from the demo data directly, never copied from

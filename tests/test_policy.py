@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Every tool says what it does, and writes are off unless enabled."""
 
 from __future__ import annotations

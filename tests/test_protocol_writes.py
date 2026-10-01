@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Writes through the MCP protocol: preview, confirmation, journal and undo."""
 
 from __future__ import annotations

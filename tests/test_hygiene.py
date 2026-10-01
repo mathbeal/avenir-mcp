@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """The repository must never carry real financial data or secrets."""
 
 from __future__ import annotations

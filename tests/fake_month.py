@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """A fake YNAB month for the budget tools: each category's budgeted and spent milliunits."""
 
 from __future__ import annotations

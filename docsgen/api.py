@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """YNAB's API against avenir-mcp: every operation classified, and YNAB's changes caught.
 
 `api/ynab-operations.json` is a snapshot of the operations YNAB's OpenAPI

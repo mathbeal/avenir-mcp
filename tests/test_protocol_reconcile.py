@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """reconcile_account through the MCP protocol: diagnose, confirm, reconcile, undo."""
 
 from __future__ import annotations

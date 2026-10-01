@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Tools close to the YNAB API: plans, accounts, categories, single transactions."""
 
 from __future__ import annotations

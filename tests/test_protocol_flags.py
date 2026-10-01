@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """flag_transactions through the MCP protocol: validate, preview, confirm, apply, undo."""
 
 from __future__ import annotations

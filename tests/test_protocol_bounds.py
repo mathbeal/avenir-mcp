@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Numeric arguments are bounded in the schema, so an agent sees the range before calling."""
 
 from __future__ import annotations

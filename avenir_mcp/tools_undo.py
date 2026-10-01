@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Undo an operation recorded in the journal, whatever its kind."""
 
 from __future__ import annotations

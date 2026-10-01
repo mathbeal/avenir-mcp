@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """Change categories: create, rename or move one, set the amount budgeted for a month."""
 
 from __future__ import annotations

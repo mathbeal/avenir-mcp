@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """How long the computing functions take on a heavy plan (`just bench`).
 
 Each benchmark times one call a tool makes, on about 9,000 transactions: what a

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
 """list_scheduled_transactions through the MCP protocol: what falls due, and when."""
 
 from __future__ import annotations
