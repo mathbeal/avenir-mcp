@@ -112,7 +112,9 @@ def test_every_link_to_the_site_from_the_repository_reaches_a_page() -> None:
     assert not broken, f"links to no page of the site: {broken}"
 
 
-_REPOSITORY_FILE = re.compile(r"https://github\.com/mathbeal/avenir-mcp/(?:blob|tree)/main/([^\s)>\"`#]+)")
+_REPOSITORY_FILE = re.compile(
+    r"https://github\.com/mathbeal/avenir-mcp/(?:blob|tree)/main/([^\s)>\"`#]+)"
+)
 
 
 def test_every_link_to_a_file_of_the_repository_names_one_that_exists() -> None:
