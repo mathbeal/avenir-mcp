@@ -26,8 +26,8 @@ disagree, the change waits until they agree.
 
 | Role | Who | Responsibilities |
 |---|---|---|
-| Maintainer | Mathieu Beal ([@mathbeal](https://github.com/mathbeal)) | decides what is merged and released; reviews pull requests (owner of every file in `CODEOWNERS`); approves CI runs of first-time contributors; answers issues; handles vulnerability reports as [SECURITY.md](SECURITY.md) describes; cuts releases (changelog, tag, PyPI through Trusted Publishing, MCP registry); keeps the dependencies current with Renovate; enforces the [code of conduct](CODE_OF_CONDUCT.md) |
-| Reviewer | anyone who comments on a pull request | reads the change against [AGENTS.md](AGENTS.md); says what is wrong and why; checks that the tests come with the change. A review informs the maintainer's decision; it does not merge |
+| Maintainer | Mathieu Beal ([@mathbeal](https://github.com/mathbeal)) | decides what is merged and released; reviews pull requests (owner of every file in `CODEOWNERS`) as [CONTRIBUTING.md](CONTRIBUTING.md#code-review) describes; approves CI runs of first-time contributors; answers issues; handles vulnerability reports as [SECURITY.md](SECURITY.md) describes; cuts releases (changelog, tag, PyPI through Trusted Publishing, MCP registry); keeps the dependencies current with Renovate; enforces the [code of conduct](CODE_OF_CONDUCT.md) |
+| Reviewer | anyone who comments on a pull request | reads the change against [AGENTS.md](AGENTS.md) and the checklist of [code review](CONTRIBUTING.md#code-review); says what is wrong and why; checks that the tests come with the change. A review informs the maintainer's decision; it does not merge |
 | Contributor | anyone who opens an issue or a pull request | follows [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md); writes the tests first; signs off every commit ([DCO](https://developercertificate.org)); never shares real financial data or a token; follows the [code of conduct](CODE_OF_CONDUCT.md) |
 
 ## Becoming a maintainer
