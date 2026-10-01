@@ -103,6 +103,65 @@ The site is published on GitHub Pages and on Cloudflare Pages, which builds it w
 hash of every inline script and style for the policy, so a new one needs no change, and
 fails when a required header is missing or weakened.
 
+## Code review
+
+A pull request is reviewed on GitHub, in public: comments go on the lines they are
+about, and the author answers with new commits on the same branch. A review says what
+is wrong and why, and points to the rule it relies on (this file, [AGENTS.md](AGENTS.md),
+[SECURITY.md](SECURITY.md)); a question is fine, a demand without a reason is not.
+
+### What the reviewer checks
+
+The checks of CI cover what a machine can see: formatting, lint, types, coverage,
+vocabulary, spelling, the workflows, known vulnerabilities, secrets. The reviewer reads
+for what they cannot:
+
+- **Behaviour.** The change does what the title and the description say, and nothing
+  else. Errors say what to fix. A tool's description, which the agent reads, matches
+  what the tool does.
+- **Tests.** New behaviour has tests of what it does and of what it refuses; a fix has
+  a regression test that fails without it. The tests check the behaviour, not the
+  implementation, and use invented data only.
+- **Security.** The change keeps every claim of the
+  [assurance case](SECURITY.md#assurance-case) true, or updates it in the same pull
+  request. In particular: a tool that changes a plan carries the `write` tag and the
+  matching annotations, and goes through `confirm.py` with a preview and, where YNAB
+  allows it, an undo (the exceptions are named in [SECURITY.md](SECURITY.md#scope)); payee
+  names and memos pass through `text.untrusted` before they reach a question or an
+  answer; a secret stays a `SecretStr`; the journal and the logs hold no payee, memo
+  or transaction amount; no new network destination, file or environment variable
+  appears without being documented; a new dependency comes with its reason; a
+  workflow keeps its actions pinned by commit and its permissions minimal.
+- **YNAB's API terms.** Requests stay within the hourly limit and go through
+  `client.py`; an operation newly used is removed from `api/coverage.toml`, and each
+  rule YNAB states on what it sends has its test in `api/constraints.toml`; YNAB's
+  name, attribution and image are used as the terms allow.
+- **Documentation.** If a tool, its arguments or its answers changed, the generated
+  pages were regenerated (`uv run python -m docsgen`). A page written by hand was
+  changed in all five languages of the site: English, French, Spanish, German and
+  Dutch. A new environment variable is documented.
+- **Title.** The pull request is squashed and its title becomes the commit message the
+  changelog is generated from: it starts with the kind of change (`feat:`, `fix:`,
+  …), says what changes for a user, and a change that breaks a configuration or a
+  tool's interface is marked with `!` (`feat!: …`).
+
+### What is required to merge
+
+- **CI passed** and **MCP Inspector** are green, every commit is signed off, and the
+  title passes its check.
+- Every comment is answered: resolved by a commit, or settled in the discussion.
+- **An approving review by someone other than the author.** A pull request from a
+  contributor is approved by the maintainer. With two maintainers or more, a pull
+  request written by a maintainer is approved by another maintainer, or by a
+  [reviewer](GOVERNANCE.md#roles) whose review that maintainer accepts, before it is
+  merged.
+
+Today the project has a single maintainer (see [GOVERNANCE.md](GOVERNANCE.md)), so
+nobody else reviews the maintainer's own changes. Until a second maintainer exists,
+the maintainer goes through the checklist above for each of them before merging it,
+the same checks run again on `main` once it is merged, and anyone can comment on a
+pull request or a commit after the fact.
+
 ## Proposing a feature
 
 Open a [feature request](https://github.com/mathbeal/avenir-mcp/issues/new?template=feature_request.yml):
