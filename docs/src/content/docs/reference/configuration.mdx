@@ -21,7 +21,7 @@ block or in the shell that starts it. Nothing else is read: no configuration fil
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP address. |
 | `AVENIR_MCP_PORT` | `8103` | HTTP port. |
-| `AVENIR_MCP_HTTP_TOKEN` | unset | Token HTTP clients must present; required with writes over HTTP. |
+| `AVENIR_MCP_HTTP_TOKEN` | unset | Token HTTP clients must present; unset, a random one is made at each start. |
 | `AVENIR_MCP_JOURNAL` | see below | Journal file, used by undo. |
 | `XDG_STATE_HOME` | `~/.local/state` | Where the journal lives by default. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confidence needed to suggest a category. |
@@ -95,8 +95,8 @@ without the prefix are ignored on purpose: shells often set `HOST` to the machin
 ### `AVENIR_MCP_HTTP_TOKEN`
 
 Over HTTP, a secret every request must carry as `Authorization: Bearer <token>`; others
-get `401`. **Required when `AVENIR_MCP_WRITE=1`**: the server refuses to start without
-it. Create one with `openssl rand -hex 32`. Ignored over stdio. Whatever the token, the
+get `401`. **Always required over HTTP**: when it is unset, the server makes a random
+token at each start and prints it once on stderr. Create one with `openssl rand -hex 32`. Ignored over stdio. Whatever the token, the
 `Host` and `Origin` headers must name this machine. See
 [Run over HTTP](/avenir-mcp/guides/run-options/#run-over-http).
 

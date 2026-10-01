@@ -37,7 +37,7 @@ user ── conversation ──> agent (LLM) in an MCP client
 | Transport | When | Guards |
 |---|---|---|
 | stdio | default | no network port; stdout belongs to the protocol, diagnostics go to stderr |
-| streamable HTTP | `AVENIR_MCP_TRANSPORT=http` | listens on `127.0.0.1:8103` by default; `Host` and `Origin` must name this machine; with `AVENIR_MCP_HTTP_TOKEN`, every request carries `Authorization: Bearer`; writes over HTTP refuse to start without that token |
+| streamable HTTP | `AVENIR_MCP_TRANSPORT=http` | listens on `127.0.0.1:8103` by default; `Host` and `Origin` must name this machine; every request carries `Authorization: Bearer` with `AVENIR_MCP_HTTP_TOKEN`, or with a random token the server makes at start-up and prints on stderr when that variable is unset |
 
 `server.main` chooses the transport from the environment. The server takes no
 command-line option besides `--version`.

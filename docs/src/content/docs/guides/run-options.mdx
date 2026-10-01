@@ -58,10 +58,11 @@ Over HTTP, every request is checked before it reaches a tool:
 |---|---|---|
 | the `Host` header names this machine (`127.0.0.1`, `localhost`, `::1`) | `421` | a web page reaching the server through DNS rebinding |
 | an `Origin` header, when present, is this server's | `403` | a page from another site, running in your browser |
-| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, when a token is set | `401` | any other program on your machine or network |
+| `Authorization: Bearer <token>`, with `AVENIR_MCP_HTTP_TOKEN` or the token printed at start-up | `401` | any other program on your machine or network |
 
-With `AVENIR_MCP_WRITE=1`, the token is **required**: without it the server refuses to
-start. Read-only over HTTP works without a token, with the first two checks only.
+The token is **always required**, read-only or not. If `AVENIR_MCP_HTTP_TOKEN` is unset,
+the server makes a random token when it starts and prints it once on stderr; it changes
+at each start, so set the variable to give your clients a token that lasts.
 
 <Aside type="danger" title="Keep it on your machine">
 Keep `AVENIR_MCP_HOST=127.0.0.1`: the traffic is plain HTTP, not encrypted. Never bind

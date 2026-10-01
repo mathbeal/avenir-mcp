@@ -266,8 +266,11 @@ def test_main_runs_http_on_localhost_by_default(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setenv("HOST", "my-laptop.local")  # zsh sets HOST; it must be ignored
     with patch.object(server.mcp, "run") as run:
         server.main()
-    run.assert_called_once_with(
-        transport="streamable-http", host="127.0.0.1", port=8103, **server.http_options(None)
+    kwargs = run.call_args.kwargs
+    assert (kwargs["transport"], kwargs["host"], kwargs["port"]) == (
+        "streamable-http",
+        "127.0.0.1",
+        8103,
     )
 
 
@@ -278,8 +281,11 @@ def test_main_runs_http_on_configured_host_and_port(monkeypatch: pytest.MonkeyPa
     monkeypatch.setenv("AVENIR_MCP_PORT", "9000")
     with patch.object(server.mcp, "run") as run:
         server.main()
-    run.assert_called_once_with(
-        transport="streamable-http", host="127.0.0.2", port=9000, **server.http_options(None)
+    kwargs = run.call_args.kwargs
+    assert (kwargs["transport"], kwargs["host"], kwargs["port"]) == (
+        "streamable-http",
+        "127.0.0.2",
+        9000,
     )
 
 

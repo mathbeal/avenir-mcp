@@ -59,10 +59,12 @@ Via HTTP wordt elk verzoek gecontroleerd voordat het een tool bereikt:
 |---|---|---|
 | de header `Host` noemt deze computer (`127.0.0.1`, `localhost`, `::1`) | `421` | een webpagina die de server via DNS-rebinding bereikt |
 | een header `Origin`, als die er is, is die van deze server | `403` | een pagina van een andere site die in je browser draait |
-| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, als er een token is ingesteld | `401` | elk ander programma op je computer of netwerk |
+| `Authorization: Bearer <token>`, met `AVENIR_MCP_HTTP_TOKEN` of het token dat bij de start is getoond | `401` | elk ander programma op je computer of netwerk |
 
-Met `AVENIR_MCP_WRITE=1` is het token **verplicht**: zonder token weigert de server te
-starten. Alleen lezen via HTTP werkt zonder token, alleen met de eerste twee controles.
+Het token is **altijd verplicht**, alleen lezen of niet. Is `AVENIR_MCP_HTTP_TOKEN` niet
+ingesteld, dan maakt de server bij de start een willekeurig token en toont het één keer op
+stderr; het verandert bij elke start. Stel de variabele in om je clients een blijvend
+token te geven.
 
 <Aside type="danger" title="Houd hem op je computer">
 Houd `AVENIR_MCP_HOST=127.0.0.1`: het verkeer is gewoon HTTP, niet versleuteld. Bind nooit

@@ -22,7 +22,7 @@ configuración.
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` o `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | Dirección HTTP. |
 | `AVENIR_MCP_PORT` | `8103` | Puerto HTTP. |
-| `AVENIR_MCP_HTTP_TOKEN` | sin definir | Token que deben presentar los clientes HTTP; obligatorio con escrituras por HTTP. |
+| `AVENIR_MCP_HTTP_TOKEN` | sin definir | Token que deben presentar los clientes HTTP; sin definir, se crea uno aleatorio en cada arranque. |
 | `AVENIR_MCP_JOURNAL` | ver abajo | Archivo del diario, usado para anular operaciones. |
 | `XDG_STATE_HOME` | `~/.local/state` | Dónde se guarda el diario por defecto. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confianza necesaria para sugerir una categoría. |
@@ -101,8 +101,8 @@ máquina.
 ### `AVENIR_MCP_HTTP_TOKEN`
 
 Por HTTP, un secreto que cada petición debe llevar como `Authorization: Bearer <token>`;
-las demás reciben `401`. **Obligatorio con `AVENIR_MCP_WRITE=1`**: sin él, el servidor
-se niega a arrancar. Cree uno con `openssl rand -hex 32`. Se ignora por stdio. Sea cual
+las demás reciben `401`. **Siempre obligatorio por HTTP**: si no está definido, el
+servidor crea un token aleatorio en cada arranque y lo muestra una vez en stderr. Cree uno con `openssl rand -hex 32`. Se ignora por stdio. Sea cual
 sea el token, las cabeceras `Host` y `Origin` deben designar esta máquina. Vea
 [Ejecutar por HTTP](/avenir-mcp/es/guides/run-options/#ejecutar-por-http).
 

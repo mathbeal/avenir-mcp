@@ -22,7 +22,7 @@ fichier de configuration.
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` ou `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | Adresse HTTP. |
 | `AVENIR_MCP_PORT` | `8103` | Port HTTP. |
-| `AVENIR_MCP_HTTP_TOKEN` | absente | Jeton que les clients HTTP doivent présenter ; obligatoire avec l'écriture en HTTP. |
+| `AVENIR_MCP_HTTP_TOKEN` | absente | Jeton que les clients HTTP doivent présenter ; absente, un jeton aléatoire est créé à chaque démarrage. |
 | `AVENIR_MCP_JOURNAL` | voir plus bas | Fichier du journal, utilisé par l'annulation. |
 | `XDG_STATE_HOME` | `~/.local/state` | Où vit le journal par défaut. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Confiance nécessaire pour proposer une catégorie. |
@@ -100,8 +100,9 @@ de la machine.
 ### `AVENIR_MCP_HTTP_TOKEN`
 
 En HTTP, un secret que chaque requête doit porter en `Authorization: Bearer <jeton>` ;
-les autres reçoivent `401`. **Obligatoire avec `AVENIR_MCP_WRITE=1`** : sans lui, le
-serveur refuse de démarrer. Créez-en un avec `openssl rand -hex 32`. Ignorée en stdio.
+les autres reçoivent `401`. **Toujours obligatoire en HTTP** : si la variable est
+absente, le serveur crée un jeton aléatoire à chaque démarrage et l'affiche une fois sur
+stderr. Créez-en un avec `openssl rand -hex 32`. Ignorée en stdio.
 Quel que soit le jeton, les en-têtes `Host` et `Origin` doivent désigner cette machine.
 Voir [Lancer en HTTP](/avenir-mcp/fr/guides/run-options/#lancer-en-http).
 

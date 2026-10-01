@@ -22,7 +22,7 @@ keine Konfigurationsdatei.
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` oder `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-Adresse. |
 | `AVENIR_MCP_PORT` | `8103` | HTTP-Port. |
-| `AVENIR_MCP_HTTP_TOKEN` | nicht gesetzt | Token, das HTTP-Clients vorweisen müssen; Pflicht beim Schreiben über HTTP. |
+| `AVENIR_MCP_HTTP_TOKEN` | nicht gesetzt | Token, das HTTP-Clients vorweisen müssen; nicht gesetzt, wird bei jedem Start ein zufälliges erzeugt. |
 | `AVENIR_MCP_JOURNAL` | siehe unten | Journaldatei, vom Rückgängigmachen genutzt. |
 | `XDG_STATE_HOME` | `~/.local/state` | Wo das Journal standardmäßig liegt. |
 | `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Nötige Sicherheit, um eine Kategorie vorzuschlagen. |
@@ -101,8 +101,8 @@ Rechners.
 ### `AVENIR_MCP_HTTP_TOKEN`
 
 Über HTTP ein Geheimnis, das jede Anfrage als `Authorization: Bearer <token>` tragen muss;
-andere erhalten `401`. **Pflicht bei `AVENIR_MCP_WRITE=1`**: Ohne es weigert sich der
-Server zu starten. Erzeugen Sie eines mit `openssl rand -hex 32`. Über stdio ignoriert.
+andere erhalten `401`. **Über HTTP immer Pflicht**: Ist sie nicht gesetzt, erzeugt der
+Server bei jedem Start ein zufälliges Token und gibt es einmal auf stderr aus. Erzeugen Sie eines mit `openssl rand -hex 32`. Über stdio ignoriert.
 Unabhängig vom Token müssen die Header `Host` und `Origin` diesen Rechner nennen. Siehe
 [Über HTTP betreiben](/avenir-mcp/de/guides/run-options/#über-http-betreiben).
 

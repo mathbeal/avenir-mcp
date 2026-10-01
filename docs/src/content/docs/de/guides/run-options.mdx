@@ -61,10 +61,12 @@ claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
 |---|---|---|
 | der Header `Host` nennt diesen Rechner (`127.0.0.1`, `localhost`, `::1`) | `421` | dass eine Webseite den Server über DNS-Rebinding erreicht |
 | ein Header `Origin`, falls vorhanden, ist der dieses Servers | `403` | eine Seite einer anderen Website, die in Ihrem Browser läuft |
-| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, wenn ein Token gesetzt ist | `401` | jedes andere Programm auf Ihrem Rechner oder in Ihrem Netzwerk |
+| `Authorization: Bearer <token>`, mit `AVENIR_MCP_HTTP_TOKEN` oder dem beim Start ausgegebenen Token | `401` | jedes andere Programm auf Ihrem Rechner oder in Ihrem Netzwerk |
 
-Mit `AVENIR_MCP_WRITE=1` ist das Token **Pflicht**: Ohne es weigert sich der Server zu
-starten. Nur lesend funktioniert HTTP ohne Token, nur mit den ersten beiden Prüfungen.
+Das Token ist **immer Pflicht**, ob nur lesend oder nicht. Ist `AVENIR_MCP_HTTP_TOKEN` nicht
+gesetzt, erzeugt der Server beim Start ein zufälliges Token und gibt es einmal auf stderr
+aus; es ändert sich bei jedem Start. Setzen Sie die Variable, damit Ihre Clients ein
+dauerhaftes Token haben.
 
 <Aside type="danger" title="Behalten Sie ihn auf Ihrem Rechner">
 Behalten Sie `AVENIR_MCP_HOST=127.0.0.1`: Der Verkehr ist einfaches HTTP, nicht

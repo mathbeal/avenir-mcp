@@ -60,11 +60,12 @@ Por HTTP, cada petición se comprueba antes de llegar a una herramienta:
 |---|---|---|
 | la cabecera `Host` designa esta máquina (`127.0.0.1`, `localhost`, `::1`) | `421` | una página web que llegara al servidor por DNS rebinding |
 | una cabecera `Origin`, si existe, es la de este servidor | `403` | una página de otro sitio, abierta en su navegador |
-| `Authorization: Bearer <AVENIR_MCP_HTTP_TOKEN>`, si hay un token definido | `401` | cualquier otro programa de su máquina o de su red |
+| `Authorization: Bearer <token>`, con `AVENIR_MCP_HTTP_TOKEN` o el token mostrado al arrancar | `401` | cualquier otro programa de su máquina o de su red |
 
-Con `AVENIR_MCP_WRITE=1`, el token es **obligatorio**: sin él, el servidor se niega a
-arrancar. El modo de solo lectura por HTTP funciona sin token, solo con las dos primeras
-comprobaciones.
+El token es **siempre obligatorio**, en solo lectura o no. Si `AVENIR_MCP_HTTP_TOKEN` no
+está definido, el servidor crea un token aleatorio al arrancar y lo muestra una vez en
+stderr; cambia en cada arranque: defina la variable para dar a sus clientes un token que
+dure.
 
 <Aside type="danger" title="Manténgalo en su máquina">
 Mantenga `AVENIR_MCP_HOST=127.0.0.1`: el tráfico es HTTP simple, sin cifrar. Nunca use

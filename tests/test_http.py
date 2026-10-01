@@ -25,9 +25,9 @@ _TOKEN = "correct-horse-battery-staple"
 _GOOD = {"Authorization": f"Bearer {_TOKEN}"}
 
 
-def _post(headers: dict[str, str], token: str | None = _TOKEN) -> int:
+def _post(headers: dict[str, str], token: str = _TOKEN) -> int:
     """POST an initialize request to the app main() would serve; return the status."""
-    app = server.mcp.http_app(**server.http_options(SecretStr(token) if token else None))
+    app = server.mcp.http_app(**server.http_options(SecretStr(token)))
 
     async def run() -> int:
         async with app.lifespan(app):
@@ -71,23 +71,50 @@ def test_without_the_token_nothing_is_served(headers: dict[str, str]) -> None:
     assert _post(headers) == 401
 
 
-def test_without_a_token_configured_host_and_origin_are_still_checked() -> None:
-    """Read-only over HTTP without a token still refuses other sites."""
-    assert _post({}, token=None) == 200
-    assert _post({"Origin": "https://evil.example"}, token=None) == 403
-
-
-def test_writes_over_http_need_a_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    """With writes on and no token, the server refuses to start, saying why."""
+def _start_without_a_token(monkeypatch: pytest.MonkeyPatch, writes: bool) -> str:
+    """Start main() over HTTP with no AVENIR_MCP_HTTP_TOKEN; return the token it requires."""
     monkeypatch.setenv("AVENIR_MCP_TRANSPORT", "http")
-    monkeypatch.setenv("AVENIR_MCP_WRITE", "1")
+    monkeypatch.setenv("AVENIR_MCP_WRITE", "1" if writes else "0")
     monkeypatch.delenv("AVENIR_MCP_HTTP_TOKEN", raising=False)
-    with (
-        patch.object(server.mcp, "run") as run,
-        pytest.raises(SystemExit, match="AVENIR_MCP_HTTP_TOKEN"),
-    ):
+    with patch.object(server.mcp, "run") as run:
         server.main([])
-    run.assert_not_called()
+    [guard] = run.call_args.kwargs["middleware"]
+    assert guard.cls is http_auth.BearerToken
+    token: str = guard.kwargs["token"].get_secret_value()
+    return token
+
+
+@pytest.mark.parametrize("writes", [False, True])
+def test_without_a_token_configured_the_server_makes_one(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], writes: bool
+) -> None:
+    """Read-only or not, HTTP always needs a token: a random one, said once on stderr."""
+    token = _start_without_a_token(monkeypatch, writes)
+    captured = capsys.readouterr()
+    assert len(token) >= 40
+    assert captured.err.count(token) == 1
+    assert "AVENIR_MCP_HTTP_TOKEN" in captured.err
+    assert token not in captured.out
+    assert _post({}, token=token) == 401
+    assert _post({"Authorization": f"Bearer {token}"}, token=token) == 200
+
+
+def test_each_start_makes_a_new_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A token made at start-up is random, not a default someone could guess."""
+    first = _start_without_a_token(monkeypatch, writes=False)
+    assert first != _start_without_a_token(monkeypatch, writes=False)
+
+
+def test_a_configured_token_is_never_printed(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The user's own token stays where they put it."""
+    monkeypatch.setenv("AVENIR_MCP_TRANSPORT", "http")
+    monkeypatch.setenv("AVENIR_MCP_HTTP_TOKEN", _TOKEN)
+    with patch.object(server.mcp, "run"):
+        server.main([])
+    captured = capsys.readouterr()
+    assert _TOKEN not in captured.err + captured.out
 
 
 def test_main_serves_http_with_the_checks(monkeypatch: pytest.MonkeyPatch) -> None:
