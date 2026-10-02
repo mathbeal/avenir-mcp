@@ -54,7 +54,7 @@ bestand `.pth` van een bewerkbare installatie verbergen, dat Python dan negeert.
 De CI controleert ook met lychee elke link in de README en de documentatie (`just links`,
 en elke maandag, want een pagina elders kan verdwijnen), en draait `typos`, `zizmor` op de workflows, `reuse lint` (elk bestand vermeldt zijn copyright en licentie), twee builds van de wheel en de sdist die bit voor bit gelijk moeten zijn (`just reproducible`), `pip-audit` op de vastgelegde
 afhankelijkheden, `gitleaks` op elke commit van de geschiedenis (`just secrets`, met
-Docker), de build van de documentatie met de tests van haar eigen code, CodeQL en de
+Docker), de build van de documentatie met de tests van haar eigen code en `npm audit` op haar afhankelijkheden, CodeQL en de
 OpenSSF Scorecard (zodra de repository openbaar is), een wekelijkse vergelijking van de API
 van YNAB met zijn momentopname (`just api-drift`), en de officiële MCP Inspector
 (`just inspect`), die de server controleert zoals een client hem op het demoplan ziet:

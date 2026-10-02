@@ -55,7 +55,7 @@ La CI ejecuta además lychee sobre cada enlace del README y de la documentación
 y cada lunes, porque una página externa puede desaparecer), `gitleaks` sobre cada commit del historial (`just secrets`, con
 Docker), `typos`, `zizmor` sobre los workflows, `reuse lint` (cada archivo indica su copyright y su licencia), dos construcciones del wheel y del sdist que deben ser idénticas bit a bit (`just reproducible`), `pip-audit` sobre las
 dependencias bloqueadas, la construcción de la documentación con las pruebas de su propio
-código, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), una comparación semanal de
+código y `npm audit` sobre sus dependencias, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), una comparación semanal de
 la API de YNAB con su instantánea (`just api-drift`), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
 cliente, sobre el plan de demostración: sus listas, la portabilidad de los esquemas
 de sus herramientas y una llamada de cada tipo. La batería de pruebas se

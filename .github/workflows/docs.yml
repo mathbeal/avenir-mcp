@@ -35,6 +35,9 @@ jobs:
           cache-dependency-path: docs/package-lock.json
       - run: npm ci
         working-directory: docs
+      # Known vulnerabilities in the site's dependencies, which build every page it serves.
+      - run: npm audit
+        working-directory: docs
       # The build's own code: the plugin that sets the name avenir-mcp apart.
       - run: npm test
         working-directory: docs
