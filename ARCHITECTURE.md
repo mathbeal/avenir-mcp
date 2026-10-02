@@ -59,9 +59,9 @@ The package `avenir_mcp/` has four layers. Only the I/O layer has side effects.
 | Layer | Modules | Role |
 |---|---|---|
 | Entry | `server.py`, `app.py`, `http_auth.py`, `logs.py`, `updates.py` | start the server, choose the transport, open or close the write gate, guard HTTP, configure logs on stderr, check PyPI for a newer release |
-| Tools | `tools_budget.py`, `tools_accounts.py`, `tools_categories.py`, `tools_classify.py`, `tools_flags.py`, `tools_targets.py`, `tools_charges.py`, `tools_networth.py`, `tools_payoff.py`, `tools_runway.py`, `tools_savings.py`, `tools_underfunded.py`, `tools_undo.py`, `context.py` | declare what the agent sees: tools, resources and prompts; orchestrate; never compute |
+| Tools | `tools_budget.py`, `tools_accounts.py`, `tools_age.py`, `tools_categories.py`, `tools_classify.py`, `tools_flags.py`, `tools_targets.py`, `tools_charges.py`, `tools_networth.py`, `tools_payoff.py`, `tools_runway.py`, `tools_savings.py`, `tools_underfunded.py`, `tools_undo.py`, `context.py` | declare what the agent sees: tools, resources and prompts; orchestrate; never compute |
 | Confirmation | `confirm.py`, `writes.py` | the single path of every confirmed write: preview, confirmation, apply, journal |
-| Logic | `analytics.py`, `classifier.py`, `triage.py`, `reconcile.py`, `forecast.py`, `charges.py`, `networth.py`, `payoff.py`, `runway.py`, `savings.py`, `schedule.py`, `search.py`, `split.py`, `flags.py`, `targets.py`, `underfunded.py` | pure functions on data already fetched: no network, no disk |
+| Logic | `age.py`, `analytics.py`, `classifier.py`, `triage.py`, `reconcile.py`, `forecast.py`, `charges.py`, `networth.py`, `payoff.py`, `runway.py`, `savings.py`, `schedule.py`, `search.py`, `split.py`, `flags.py`, `targets.py`, `underfunded.py` | pure functions on data already fetched: no network, no disk |
 | Shared types | `model.py`, `amounts.py`, `text.py` | the base model (unknown fields refused), the amount type (finite, bounded), untrusted text made safe to show |
 | I/O | `client.py` (HTTP to YNAB), `journal.py` (disk) | the only code that talks to YNAB, and the only code that writes the journal |
 

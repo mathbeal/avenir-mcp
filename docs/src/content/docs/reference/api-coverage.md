@@ -28,7 +28,7 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 | `PATCH /plans/{plan_id}/category_groups/{category_group_id}` | planned | Rename or hide a group. |
 | `GET /plans/{plan_id}/money_movement_groups` | planned | Moves of money grouped as the user made them, for the monthly review. |
 | `GET /plans/{plan_id}/money_movements` | planned | Money moved between categories, for the monthly review. |
-| `GET /plans/{plan_id}/months` | covered | `get_spending_trends` |
+| `GET /plans/{plan_id}/months` | covered | `get_age_of_money`, `get_spending_trends` |
 | `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_monthly_summary`, `get_spending_trends`, `get_underfunded_targets`, `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/categories/{category_id}` | excluded | A month's categories come in one request with the month. |
 | `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` | covered | `move_money`, `set_category_budget`, `undo_operation` |
@@ -67,6 +67,7 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `find_recurring_charges` | `GET /categories`, `GET /scheduled_transactions`, `GET /transactions` | — |
 | `find_transactions` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
 | `forecast_balance` | `GET /accounts`, `GET /categories`, `GET /scheduled_transactions`, `GET /transactions` | — |
+| `get_age_of_money` | `GET /months` | — |
 | `get_budget_vs_actual` | `GET /months/{month}` | — |
 | `get_category_balances` | `GET /months/{month}` | — |
 | `get_debt_payoff_plan` | `GET /accounts`, `GET /transactions` | — |

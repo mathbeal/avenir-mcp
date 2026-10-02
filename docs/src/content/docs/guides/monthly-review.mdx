@@ -13,6 +13,7 @@ import trends from '@snippets/spending_trends.json?raw';
 import move from '@snippets/move_preview.json?raw';
 import badMonth from '@snippets/bad_month.json?raw';
 import savings from '@snippets/savings_rate.json?raw';
+import age from '@snippets/age_of_money.json?raw';
 
 **Goal:** understand a month — income, spending, what is left to assign — and correct
 what went off track.
@@ -21,7 +22,8 @@ what went off track.
 [`get_category_balances`](/avenir-mcp/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/),
-[`get_savings_rate`](/avenir-mcp/reference/tools/get-savings-rate/), and
+[`get_savings_rate`](/avenir-mcp/reference/tools/get-savings-rate/),
+[`get_age_of_money`](/avenir-mcp/reference/tools/get-age-of-money/), and
 [`move_money`](/avenir-mcp/reference/tools/move-money/) to fix.
 **Prompt:** `monthly_review`.
 
@@ -87,6 +89,20 @@ Here the household kept 56.4 % of its salary from June to August, July its best 
 The notes say how each figure was counted: the agent relays them with the rate.
 
 <Code code={savings} lang="json" title="get_savings_rate" />
+
+## How old is your money?
+
+Ask *"how old is my money?"*: `get_age_of_money` gives YNAB's Age of Money for each month
+up to the current one, in days: how long, on average, money stayed in the budget accounts
+before being spent, the oldest money spent first. Over 30 days, the household lives on
+last month's income. The figure is YNAB's own, read with the list of months in a single
+request: it is the one YNAB shows.
+
+Here June has no figure: its payments came before the first salary, and YNAB needs some
+history first. From 17 days in July, the money is 47 days old in September: what was
+received in June and July still pays September's bills.
+
+<Code code={age} lang="json" title="get_age_of_money" />
 
 ## Good to know
 

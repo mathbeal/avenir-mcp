@@ -13,6 +13,7 @@ import trends from '@snippets/de/spending_trends.json?raw';
 import move from '@snippets/de/move_preview.json?raw';
 import badMonth from '@snippets/de/bad_month.json?raw';
 import savings from '@snippets/de/savings_rate.json?raw';
+import age from '@snippets/de/age_of_money.json?raw';
 
 **Ziel:** einen Monat verstehen – Einnahmen, Ausgaben, was noch zuzuweisen ist – und
 korrigieren, was aus dem Ruder gelaufen ist.
@@ -21,7 +22,8 @@ korrigieren, was aus dem Ruder gelaufen ist.
 [`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/de/reference/tools/get-spending-trends/),
-[`get_savings_rate`](/avenir-mcp/de/reference/tools/get-savings-rate/) und
+[`get_savings_rate`](/avenir-mcp/de/reference/tools/get-savings-rate/),
+[`get_age_of_money`](/avenir-mcp/de/reference/tools/get-age-of-money/) und
 [`move_money`](/avenir-mcp/de/reference/tools/move-money/) zum Korrigieren.
 **Prompt:** `monthly_review`.
 
@@ -91,6 +93,20 @@ meisten. Die Hinweise sagen, wie jede Zahl gezählt wurde: Der Agent gibt sie mi
 weiter.
 
 <Code code={savings} lang="json" title="get_savings_rate" />
+
+## Wie alt ist Ihr Geld?
+
+Fragen Sie *„Wie alt ist mein Geld?“*: `get_age_of_money` gibt YNABs Alter des Geldes (Age
+of Money) für jeden Monat bis zum laufenden, in Tagen: wie lange das Geld im Durchschnitt
+auf den Budgetkonten lag, bevor es ausgegeben wurde, das älteste zuerst. Über 30 Tagen lebt
+der Haushalt vom Einkommen des Vormonats. Die Zahl ist die von YNAB, mit der Liste der
+Monate in einer einzigen Anfrage gelesen: Es ist die, die YNAB anzeigt.
+
+Hier hat der Juni keine Zahl: Seine Zahlungen kamen vor dem ersten Gehalt, und YNAB braucht
+zuerst etwas Verlauf. Von 17 Tagen im Juli ist das Geld im September 47 Tage alt: Was im
+Juni und Juli einging, bezahlt noch die Rechnungen des Septembers.
+
+<Code code={age} lang="json" title="get_age_of_money" />
 
 ## Gut zu wissen
 

@@ -13,6 +13,7 @@ import trends from '@snippets/nl/spending_trends.json?raw';
 import move from '@snippets/nl/move_preview.json?raw';
 import badMonth from '@snippets/nl/bad_month.json?raw';
 import savings from '@snippets/nl/savings_rate.json?raw';
+import age from '@snippets/nl/age_of_money.json?raw';
 
 **Doel:** een maand begrijpen – inkomsten, uitgaven, wat er nog toe te wijzen is – en
 corrigeren wat uit de koers is geraakt.
@@ -21,7 +22,8 @@ corrigeren wat uit de koers is geraakt.
 [`get_category_balances`](/avenir-mcp/nl/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/),
-[`get_savings_rate`](/avenir-mcp/nl/reference/tools/get-savings-rate/), en
+[`get_savings_rate`](/avenir-mcp/nl/reference/tools/get-savings-rate/),
+[`get_age_of_money`](/avenir-mcp/nl/reference/tools/get-age-of-money/), en
 [`move_money`](/avenir-mcp/nl/reference/tools/move-money/) om te corrigeren.
 **Prompt:** `monthly_review`.
 
@@ -90,6 +92,20 @@ beste maand. De notities zeggen hoe elk cijfer geteld is: de agent geeft ze door
 quote.
 
 <Code code={savings} lang="json" title="get_savings_rate" />
+
+## Hoe oud is je geld?
+
+Vraag *„hoe oud is mijn geld?“*: `get_age_of_money` geeft de leeftijd van het geld (Age of
+Money) van YNAB voor elke maand tot en met de huidige, in dagen: hoe lang het geld
+gemiddeld op de budgetrekeningen stond voordat het werd uitgegeven, het oudste eerst. Boven
+30 dagen leeft het huishouden van het inkomen van de vorige maand. Het cijfer is dat van
+YNAB, gelezen met de lijst van maanden in één verzoek: het is wat YNAB toont.
+
+Hier heeft juni geen cijfer: de betalingen kwamen vóór het eerste salaris, en YNAB heeft
+eerst wat geschiedenis nodig. Van 17 dagen in juli is het geld in september 47 dagen oud:
+wat in juni en juli binnenkwam, betaalt nog de rekeningen van september.
+
+<Code code={age} lang="json" title="get_age_of_money" />
 
 ## Goed om te weten
 

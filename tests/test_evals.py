@@ -53,6 +53,15 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     assert tasks.underfunded("2026-08-01") == (80.0, None)
     # The 19,040.81 left on the car loan, at 4.5 % and 400 a month.
     assert tasks.car_loan_payoff() == (53, 1972.8)
+    # June's payments came before the first salary: no age. July spends June's salary, August
+    # and September what was left of it, then July's.
+    assert tasks.ages_of_money() == {
+        "2026-06": None,
+        "2026-07": 17,
+        "2026-08": 48,
+        "2026-09": 47,
+    }
+    assert tasks.AGE_OF_MONEY == 47
 
 
 def test_underfunded_targets_needs_the_total_and_the_target_due_first() -> None:
@@ -69,6 +78,25 @@ def test_a_removed_target_hides_the_demo_plans_own() -> None:
     state.set_goal("cat-rent", {"goal_target": None})
     rent = next(c for c in state.month("2026-09-01")["categories"] if c["id"] == "cat-rent")
     assert (rent["goal_type"], rent.get("goal_under_funded")) == (None, None)
+
+
+def test_the_demo_server_serves_the_age_of_money_computed_from_the_demo_data() -> None:
+    """Each month, alone or in the list of months, carries the figure the eval expects."""
+    state = fake_ynab.DemoBudget()
+    expected = tasks.ages_of_money()
+    assert {m[:7]: state.month(m)["age_of_money"] for m in demo_budget.MONTHS} == expected
+    assert {m["month"][:7]: m["age_of_money"] for m in state.months()} == expected
+    assert all("categories" not in m for m in state.months())
+
+
+def test_the_demo_age_of_money_follows_what_the_run_changes() -> None:
+    """A new payment spends July's salary, 54 days old: September's figure grows."""
+    state = fake_ynab.DemoBudget()
+    state.create_transactions(
+        [{"account_id": demo_budget.CHECKING, "date": "2026-09-20", "amount": -10_000}]
+    )
+    assert state.month("2026-09-01")["age_of_money"] == 49
+    assert state.month("2026-08-01")["age_of_money"] == 48
 
 
 def test_demo_server_answers_like_ynab() -> None:

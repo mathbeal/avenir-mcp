@@ -13,6 +13,7 @@ import trends from '@snippets/fr/spending_trends.json?raw';
 import move from '@snippets/fr/move_preview.json?raw';
 import badMonth from '@snippets/fr/bad_month.json?raw';
 import savings from '@snippets/fr/savings_rate.json?raw';
+import age from '@snippets/fr/age_of_money.json?raw';
 
 **Objectif :** comprendre un mois — revenus, dépenses, ce qui reste à assigner — et
 corriger ce qui a dérapé.
@@ -21,7 +22,8 @@ corriger ce qui a dérapé.
 [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/),
-[`get_savings_rate`](/avenir-mcp/fr/reference/tools/get-savings-rate/), et
+[`get_savings_rate`](/avenir-mcp/fr/reference/tools/get-savings-rate/),
+[`get_age_of_money`](/avenir-mcp/fr/reference/tools/get-age-of-money/), et
 [`move_money`](/avenir-mcp/fr/reference/tools/move-money/) pour corriger. **Prompt :** `monthly_review`.
 
 ## La conversation
@@ -88,6 +90,21 @@ Ici le foyer a gardé 56,4 % de son salaire de juin à août, juillet étant son
 Les notes disent comment chaque chiffre a été compté : l'agent les relaie avec le taux.
 
 <Code code={savings} lang="json" title="get_savings_rate" />
+
+## Quel âge a votre argent ?
+
+Demandez *« quel âge a mon argent ? »* : `get_age_of_money` donne l'âge de l'argent (Age of
+Money) de YNAB pour chaque mois jusqu'au mois en cours, en jours : combien de temps, en
+moyenne, l'argent est resté sur les comptes du budget avant d'être dépensé, le plus ancien
+dépensé en premier. Au-delà de 30 jours, le foyer vit sur les revenus du mois précédent. Le
+chiffre est celui de YNAB, lu avec la liste des mois en une seule requête : c'est celui que
+YNAB affiche.
+
+Ici juin n'a pas de chiffre : ses paiements sont antérieurs au premier salaire, et YNAB a
+d'abord besoin d'un historique. De 17 jours en juillet, l'argent passe à 47 jours en
+septembre : ce qui a été reçu en juin et juillet paie encore les factures de septembre.
+
+<Code code={age} lang="json" title="get_age_of_money" />
 
 ## Bon à savoir
 

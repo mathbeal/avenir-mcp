@@ -14,6 +14,7 @@ avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schre
 | [`find_recurring_charges`](/avenir-mcp/de/reference/tools/find-recurring-charges/) | List the subscriptions and other charges paid every month, with their yearly cost. |
 | [`find_transactions`](/avenir-mcp/de/reference/tools/find-transactions/) | Find transactions by date, amount, account, category or payee, categorised or not. |
 | [`forecast_balance`](/avenir-mcp/de/reference/tools/forecast-balance/) | Project the balance month by month and say when money would run out. |
+| [`get_age_of_money`](/avenir-mcp/de/reference/tools/get-age-of-money/) | YNAB's Age of Money: how old the money spent is today, and its trend month by month. |
 | [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/) | Share of each category's budget spent in a month, to see what is over or close. |
 | [`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/) | Budgeted, spent (activity) and available (balance) per category for a month. |
 | [`get_debt_payoff_plan`](/avenir-mcp/de/reference/tools/get-debt-payoff-plan/) | When the debts would be paid off, highest rate first (avalanche) or smallest first. |

@@ -13,6 +13,7 @@ import trends from '@snippets/es/spending_trends.json?raw';
 import move from '@snippets/es/move_preview.json?raw';
 import badMonth from '@snippets/es/bad_month.json?raw';
 import savings from '@snippets/es/savings_rate.json?raw';
+import age from '@snippets/es/age_of_money.json?raw';
 
 **Objetivo:** entender un mes — ingresos, gastos, lo que queda por asignar — y corregir
 lo que se desvió.
@@ -21,7 +22,8 @@ lo que se desvió.
 [`get_category_balances`](/avenir-mcp/es/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/),
 [`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/),
-[`get_savings_rate`](/avenir-mcp/es/reference/tools/get-savings-rate/), y
+[`get_savings_rate`](/avenir-mcp/es/reference/tools/get-savings-rate/),
+[`get_age_of_money`](/avenir-mcp/es/reference/tools/get-age-of-money/), y
 [`move_money`](/avenir-mcp/es/reference/tools/move-money/) para corregir. **Prompt:** `monthly_review`.
 
 ## La conversación
@@ -86,6 +88,20 @@ Aquí el hogar guardó el 56,4 % de su sueldo de junio a agosto, y julio fue su 
 notas dicen cómo se contó cada cifra: el agente las transmite con la tasa.
 
 <Code code={savings} lang="json" title="get_savings_rate" />
+
+## ¿Qué edad tiene su dinero?
+
+Pregunte *«¿qué edad tiene mi dinero?»*: `get_age_of_money` da la edad del dinero (Age of
+Money) de YNAB para cada mes hasta el actual, en días: cuánto tiempo, de media, pasó el
+dinero en las cuentas del presupuesto antes de gastarse, el más antiguo primero. Por encima
+de 30 días, el hogar vive de los ingresos del mes anterior. La cifra es la de YNAB, leída
+con la lista de meses en una sola petición: es la que muestra YNAB.
+
+Aquí junio no tiene cifra: sus pagos son anteriores al primer sueldo, y YNAB necesita antes
+algo de historial. De 17 días en julio, el dinero pasa a tener 47 días en septiembre: lo
+recibido en junio y julio aún paga las facturas de septiembre.
+
+<Code code={age} lang="json" title="get_age_of_money" />
 
 ## Conviene saber
 

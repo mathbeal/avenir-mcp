@@ -186,6 +186,49 @@ def _payoff_answer(text: str) -> bool:
     return _number(months)(text) and _number(interest)(text)
 
 
+def ages_of_money() -> dict[str, int | None]:
+    """YNAB's Age of Money at the end of each demo month, in days.
+
+    Money in lines up on one axis, oldest first; each payment out of the budget accounts
+    takes the next stretch of it still there when it is paid, and its age is the average,
+    over that stretch, of the days since each part came in. The figure is the average age
+    of the last 10 payments, rounded; None before 10 payments have one. Transfers between
+    the budget accounts move no money. A payment made before any money came in has no age.
+    """
+    budget = {acc_id for acc_id, _, _, on_budget, _ in demo.ACCOUNTS if on_budget}
+    moves = [
+        tx
+        for tx in demo.transactions()
+        if tx["account_id"] in budget and tx["transfer_account_id"] not in budget
+    ]
+    # Money in, as (date, where it starts on the axis, where it ends).
+    stretches: list[tuple[date, int, int]] = []
+    paid: list[tuple[str, float]] = []
+    spent = 0
+    for tx in sorted(moves, key=lambda tx: (str(tx["date"]), int(tx["amount"]) < 0)):
+        day, amount = date.fromisoformat(str(tx["date"])), int(tx["amount"])
+        end = stretches[-1][2] if stretches else 0
+        if amount > 0:
+            stretches.append((day, end, end + amount))
+            continue
+        start, stop = spent, min(spent - amount, end)
+        if stop <= start:
+            continue
+        spent = stop
+        overlap = [
+            (min(stop, high) - max(start, low), (day - when).days)
+            for when, low, high in stretches
+            if low < stop and high > start
+        ]
+        paid.append((str(tx["date"]), sum(n * d for n, d in overlap) / (stop - start)))
+    result: dict[str, int | None] = {}
+    for month in demo.MONTHS:
+        ages = [a for day, a in paid if day[:7] <= month[:7]][-10:]
+        result[month[:7]] = round(sum(ages) / 10) if len(ages) == 10 else None
+    return result
+
+
+AGE_OF_MONEY = ages_of_money()[demo.MONTHS[-1][:7]]
 DUPLICATE = 71.86
 RESTAURANTS_AUGUST = -_sum("cat-restaurants", "2026-08")
 RESTAURANTS_SEPTEMBER_OVER = round(
@@ -440,6 +483,19 @@ TASKS = [
         notes=(
             "The car loan is the only debt left; YNAB's loan details give its 4.5 % rate "
             "and 400 payment. The student loan, paid off, is closed."
+        ),
+        tags=["read"],
+    ),
+    Task(
+        "age-of-money",
+        "How old is my money today, according to YNAB, in days? Has it gone up since July "
+        "2026?" + FORMAT,
+        answer=_number(float(AGE_OF_MONEY or 0)),
+        state=_unchanged,
+        notes=(
+            "YNAB's Age of Money of the latest month the demo budget holds, September; July's "
+            "salary is still being spent. June has no figure: its payments came before the "
+            "first salary."
         ),
         tags=["read"],
     ),

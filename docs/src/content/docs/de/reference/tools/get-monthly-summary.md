@@ -69,7 +69,7 @@ Antwort auf dem Demo-Budget:
   "budgeted": 1967.67,
   "activity": -1206.68,
   "ready_to_assign": 1729.32,
-  "age_of_money": 18,
+  "age_of_money": 47,
   "overspent": [
     {
       "category_id": "cat-restaurants",
