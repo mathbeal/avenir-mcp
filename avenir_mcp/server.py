@@ -18,6 +18,7 @@ from typing import Any
 from pydantic import SecretStr
 
 from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
+    YNAB_API_VERSION,
     __version__,
     context,
     http_auth,
@@ -139,7 +140,7 @@ def main(argv: list[str] | None = None) -> None:
         argv: The command-line arguments; None for sys.argv.
     """
     if (sys.argv[1:] if argv is None else argv) == ["--version"]:
-        print(f"avenir-mcp {__version__}")
+        print(f"avenir-mcp {__version__} (YNAB API v{YNAB_API_VERSION})")
         return
     logs.configure(
         os.getenv("AVENIR_MCP_LOG_LEVEL", "WARNING").upper(),
