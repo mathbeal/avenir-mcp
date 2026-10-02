@@ -91,6 +91,7 @@
   ],
   "lockFileMaintenance": {
     "enabled": true,
+    "minimumReleaseAge": null,
     "schedule": [
       "before 6am on monday"
     ],
