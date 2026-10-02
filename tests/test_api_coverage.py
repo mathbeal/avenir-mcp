@@ -11,6 +11,7 @@ from typing import Any
 
 import pytest
 
+from avenir_mcp import YNAB_API_VERSION
 from docsgen import api, errors
 
 
@@ -127,3 +128,14 @@ def test_a_tool_reads_with_get_and_writes_with_the_other_methods() -> None:
     assert "`GET /transactions`" in reads
     assert writes == "`PATCH /transactions`"
     assert rows["list_plans"] == ("`GET /plans`", "—")
+
+
+def test_the_advertised_api_version_matches_the_snapshot_and_readme() -> None:
+    """The advertised YNAB API version is the single source of truth.
+
+    It must equal the spec snapshot, and the README must advertise that same version,
+    so the constant, the snapshot and the README never drift apart.
+    """
+    assert YNAB_API_VERSION == api.snapshot()["version"]
+    readme = (Path(__file__).resolve().parent.parent / "README.md").read_text(encoding="utf-8")
+    assert f"v{YNAB_API_VERSION}" in readme

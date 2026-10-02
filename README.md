@@ -9,6 +9,8 @@ Self-checked on every change against YNAB's API terms of 2025-05-28 (naming, att
 YNAB's own image, a personal token for its owner only, the hourly limit); a weekly job
 turns the badge red when YNAB changes its terms. Not reviewed or endorsed by YNAB.
 
+Built and tested against YNAB's API v1.87.0. A weekly [`YNAB API drift`](https://github.com/mathbeal/avenir-mcp/actions/workflows/api-drift.yml) check compares it with the live specification and fails when YNAB publishes a new version.
+
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![MCP Inspector](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml)
 [![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://avenir-mcp.pages.dev/avenir-mcp/)

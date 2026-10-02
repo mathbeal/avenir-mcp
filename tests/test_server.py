@@ -314,7 +314,9 @@ def test_main_prints_the_version_and_stops(capsys: pytest.CaptureFixture[str]) -
     """`avenir-mcp --version` answers for bug reports and starts no server."""
     with patch.object(server.mcp, "run") as run:
         server.main(["--version"])
-    assert capsys.readouterr().out == f"avenir-mcp {avenir_mcp.__version__}\n"
+    assert capsys.readouterr().out == (
+        f"avenir-mcp {avenir_mcp.__version__} (YNAB API v{avenir_mcp.YNAB_API_VERSION})\n"
+    )
     run.assert_not_called()
 
 
