@@ -5,6 +5,8 @@
 // every category. One series, one hue (validated light and dark), bars from zero; an
 // overspent category turns to the status colour and says so in words.
 // Hover shows budgeted, spent and left; a table gives the same numbers without the picture.
+// The month is named relative to the demo plan's today ("last month"), never by name or
+// year, so the picture does not look dated months later.
 interface Row {
   name: string;
   group: string;
@@ -14,7 +16,7 @@ interface Row {
 }
 interface Props {
   rows: Row[];
-  month: string;
+  when: 'lastMonth' | 'thisMonth';
 }
 
 const texts = {
@@ -27,6 +29,8 @@ const texts = {
     budgeted: 'Budgeted',
     spent: 'Spent',
     remaining: 'Left',
+    lastMonth: 'Last month',
+    thisMonth: 'This month',
   },
   fr: {
     title: 'Ce qui reste dans chaque catégorie',
@@ -37,6 +41,8 @@ const texts = {
     budgeted: 'Budgété',
     spent: 'Dépensé',
     remaining: 'Restant',
+    lastMonth: 'Le mois dernier',
+    thisMonth: 'Ce mois-ci',
   },
   es: {
     title: 'Lo que queda en cada categoría',
@@ -47,6 +53,8 @@ const texts = {
     budgeted: 'Presupuestado',
     spent: 'Gastado',
     remaining: 'Disponible',
+    lastMonth: 'El mes pasado',
+    thisMonth: 'Este mes',
   },
   de: {
     title: 'Was in jeder Kategorie übrig bleibt',
@@ -57,6 +65,8 @@ const texts = {
     budgeted: 'Budgetiert',
     spent: 'Ausgegeben',
     remaining: 'Übrig',
+    lastMonth: 'Letzter Monat',
+    thisMonth: 'Dieser Monat',
   },
   nl: {
     title: 'Wat er in elke categorie overblijft',
@@ -67,6 +77,8 @@ const texts = {
     budgeted: 'Gebudgetteerd',
     spent: 'Uitgegeven',
     remaining: 'Over',
+    lastMonth: 'Vorige maand',
+    thisMonth: 'Deze maand',
   },
 };
 
@@ -74,9 +86,7 @@ const lang = Astro.locals.starlightRoute.lang as keyof typeof texts;
 const t = texts[lang] ?? texts.en;
 const locale = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', de: 'de-DE', nl: 'nl-NL' }[lang] ?? 'en-US';
 const money = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
-  new Date(`${Astro.props.month}T00:00:00Z`),
-);
+const monthName = t[Astro.props.when];
 
 // Groups in YNAB's order; within a group, the most left first.
 const groups = [...new Set(Astro.props.rows.map((r) => r.group))].map((group) => ({
@@ -250,7 +260,6 @@ function bar(x0: number, x1: number, y: number): string {
   figcaption span {
     color: var(--sl-color-gray-3);
     font-size: var(--sl-text-sm);
-    text-transform: capitalize;
   }
 
   .plot {

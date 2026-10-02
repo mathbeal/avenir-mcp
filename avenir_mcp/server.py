@@ -27,6 +27,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     tools_charges,
     tools_classify,
     tools_flags,
+    tools_networth,
     tools_targets,
     tools_undo,
     updates,

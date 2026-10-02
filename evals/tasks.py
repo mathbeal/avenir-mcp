@@ -41,9 +41,26 @@ def _checking() -> float:
 
 
 def _pending() -> list[dict[str, object]]:
+    # Tracking accounts take no category: their transactions never wait for one.
+    tracking = {acc_id for acc_id, _, _, on_budget, _ in demo.ACCOUNTS if not on_budget}
     return [
-        tx for tx in demo.transactions() if not tx["category_id"] and not tx["transfer_account_id"]
+        tx
+        for tx in demo.transactions()
+        if not tx["category_id"]
+        and not tx["transfer_account_id"]
+        and tx["account_id"] not in tracking
     ]
+
+
+def _owed() -> float:
+    """What the debt accounts add up to today, as a positive amount."""
+    debts = {acc_id for acc_id, _, kind, _, _ in demo.ACCOUNTS if kind.endswith("Loan")}
+    return -_milli(sum(tx["amount"] for tx in demo.transactions() if tx["account_id"] in debts))
+
+
+def _grown_since(day: str) -> float:
+    """How much the net worth grew after a day: every transaction dated later, all accounts."""
+    return _milli(sum(tx["amount"] for tx in demo.transactions() if tx["date"] > day))
 
 
 DUPLICATE = 71.86
@@ -52,6 +69,8 @@ RESTAURANTS_SEPTEMBER_OVER = round(
     demo.BUDGETED["cat-restaurants"] / 1000 + _sum("cat-restaurants", "2026-09"), 2
 )
 CHECKING = _checking()
+OWED = _owed()
+NET_WORTH_GROWTH = _grown_since("2025-04-30")
 SCHEDULED_EARLY_OCTOBER = _milli(
     -sum(
         amount
@@ -239,6 +258,15 @@ TASKS = [
         "What is the balance of my checking account?" + FORMAT,
         answer=_number(CHECKING),
         state=_unchanged,
+        tags=["read"],
+    ),
+    Task(
+        "debts-down",
+        "Am I paying off my debts? How much do I owe in total today, and by how much has my "
+        "net worth grown since the end of April 2025?" + FORMAT,
+        answer=lambda t: _number(OWED)(t) and _number(NET_WORTH_GROWTH)(t),
+        state=_unchanged,
+        notes="The loans are tracking accounts; the student loan, paid off, is closed.",
         tags=["read"],
     ),
     Task(

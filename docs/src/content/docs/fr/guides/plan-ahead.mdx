@@ -8,6 +8,7 @@ sidebar:
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/fr/forecast.json?raw';
 import recurring from '@snippets/fr/recurring_charges.json?raw';
+import networth from '@snippets/fr/net_worth.json?raw';
 
 **Objectif :** savoir si l'argent tiendra, et quand il manquerait, avant que ça arrive.
 
@@ -81,6 +82,21 @@ comptent aussi (ici, les courses) ; une dépense annuelle n'y figure pas, sauf s
 échéance.
 
 <Code code={recurring} lang="json" title="find_recurring_charges" />
+
+## Les dettes baissent-elles ?
+
+Demandez *« est-ce que je rembourse mes dettes ? »* ou *« comment a évolué mon patrimoine
+cette année ? »* : `get_net_worth_trend` donne, à chaque fin de mois, ce que détiennent les
+comptes (`assets`), ce qui est dû (`debts`, négatif, comme YNAB l'affiche) et les deux
+ensemble (`net_worth`). Les comptes de suivi comptent aussi : ici le livret du foyer, le crédit
+auto, un prêt étudiant remboursé en mars 2026 et l'ancienne banque close en mai 2026,
+chacun compté pour les mois où il avait encore un solde. Les fins de mois passées sont reconstituées à partir des soldes du jour,
+moins les transactions datées après elles ; le mois en cours montre ceux du jour.
+
+Le prêteur prélève chaque mois les intérêts du crédit auto sur le compte du prêt : la dette
+baisse de moins que l'échéance. Une réparation de voiture et Noël aplatissent chacun un mois.
+
+<Code code={networth} lang="json" title="get_net_worth_trend" />
 
 ## Puis préparer le mois suivant
 

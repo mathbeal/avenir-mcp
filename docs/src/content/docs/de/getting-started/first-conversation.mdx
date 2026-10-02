@@ -31,7 +31,9 @@ Der Agent ruft `list_accounts` mit `{"plan_id": "last-used"}` auf:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Zwei Konten: Girokonto mit 3.328,50, alles gebucht, und Sparkonto mit 600,00.
+> **Claude:** Im Budget: Girokonto mit 3.328,50, alles gebucht, und Sparkonto mit 600,00.
+> Außerhalb verfolgt: das gemeinsame Sparkonto mit 16.342,36 und der Autokredit, von dem
+> noch 19.040,81 offen sind. Der abbezahlte Studienkredit und die alte Bank sind geschlossen.
 
 Die Salden sind in der Währung Ihres Plans. `cleared_balance` ist, was die Bank bereits
 gezeigt hat; `uncleared_balance` ist, was sie noch nicht gezeigt hat.

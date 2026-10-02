@@ -8,6 +8,7 @@ sidebar:
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/nl/forecast.json?raw';
 import recurring from '@snippets/nl/recurring_charges.json?raw';
+import networth from '@snippets/nl/net_worth.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -80,6 +81,22 @@ het al dekt. Vaste uitgaven bij dezelfde winkel tellen ook mee (hier de boodscha
 jaarlijkse betaling staat er niet in, tenzij er een planning voor is.
 
 <Code code={recurring} lang="json" title="find_recurring_charges" />
+
+## Gaan de schulden omlaag?
+
+Vraag *„los ik mijn schulden af?“* of *„hoe is mijn vermogen dit jaar veranderd?“*:
+`get_net_worth_trend` geeft aan elk maandeinde wat de rekeningen bevatten (`assets`), wat
+er verschuldigd is (`debts`, negatief, zoals YNAB het toont) en beide samen (`net_worth`).
+Volgrekeningen tellen ook mee: hier de gezamenlijke spaarrekening, de autolening, een
+studielening die in maart 2026 is afbetaald en de vorige bank, gesloten in mei 2026, elk
+meegeteld in de maanden waarin er nog een saldo op stond.
+Eerdere maandeinden worden herleid uit de saldi van vandaag, min de transacties die later
+gedateerd zijn; de lopende maand toont die van vandaag.
+
+De kredietverstrekker boekt de rente van de autolening elke maand op de leningrekening: de
+schuld daalt minder dan de aflossing. Een autoreparatie en de kerst drukken elk een maand.
+
+<Code code={networth} lang="json" title="get_net_worth_trend" />
 
 ## Dan volgende maand budgetteren
 

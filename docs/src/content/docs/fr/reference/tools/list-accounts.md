@@ -87,7 +87,32 @@ Réponse sur le budget de démonstration :
     "uncleared_balance": 0.0,
     "bank_link": "none",
     "last_reconciled": null
-  }
+  },
+  {
+    "id": "acc-joint-savings",
+    "name": "Livret du foyer",
+    "type": "savings",
+    "on_budget": false,
+    "closed": false,
+    "balance": 16342.36,
+    "cleared_balance": 16342.36,
+    "uncleared_balance": 0.0,
+    "bank_link": "none",
+    "last_reconciled": null
+  },
+  {
+    "id": "acc-car-loan",
+    "name": "Crédit auto",
+    "type": "autoLoan",
+    "on_budget": false,
+    "closed": false,
+    "balance": -19040.81,
+    "cleared_balance": -19040.81,
+    "uncleared_balance": 0.0,
+    "bank_link": "none",
+    "last_reconciled": null
+  },
+  "… 2 more"
 ]
 ```
 

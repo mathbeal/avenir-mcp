@@ -30,7 +30,10 @@ De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Twee rekeningen: Betaalrekening met 3.328,50, alles verwerkt, en Spaarrekening met 600,00.
+> **Claude:** In het budget: Betaalrekening met 3.328,50, alles verwerkt, en Spaarrekening
+> met 600,00. Daarbuiten gevolgd: de gezamenlijke spaarrekening met 16.342,36 en de
+> autolening, waarvan nog 19.040,81 open staat. De afbetaalde studielening en de vorige
+> bank zijn gesloten.
 
 Saldi zijn in de valuta van je plan. `cleared_balance` is wat de bank al heeft
 getoond; `uncleared_balance` is wat ze nog niet heeft getoond.

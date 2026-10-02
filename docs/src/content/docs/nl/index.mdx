@@ -58,14 +58,14 @@ maken. Hoe het werkt: [Bevestiging](/avenir-mcp/nl/concepts/confirmation/) en
 Tools geven gestructureerde gegevens terug waar de agent op kan vertrouwen – en die hij
 voor jou in gewone woorden uitlegt.
 
-> **Jij:** Hoe ging augustus?
+> **Jij:** Hoe ging vorige maand?
 
 De agent roept [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/)
 aan met `{"month": "2026-08-01"}` en krijgt voor elke categorie wat er gebudgetteerd, wat er uitgegeven en wat er over is. Hier dat antwoord op het demoplan, als grafiek:
 
-<BudgetChart rows={august} month="2026-08-01" />
+<BudgetChart rows={august} when="lastMonth" />
 
-> **Claude:** Augustus bleef overal binnen budget: geen enkele categorie zit over budget.
+> **Claude:** Vorige maand bleef overal binnen budget: geen enkele categorie zit over budget.
 > De rekeningen zijn betaald, er is 207,49 over voor boodschappen en 58,00 voor tennis, en de
 > 200,00 voor vakantie is onaangeroerd.
 

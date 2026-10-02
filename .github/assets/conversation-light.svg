@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="352" viewBox="0 0 720 352" role="img" aria-label="Asked how the September budget is doing, the agent reads the month with two read-only tools and answers: one category over budget, Restaurants by 22.50, everything else on track.">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="352" viewBox="0 0 720 352" role="img" aria-label="Asked how the budget is doing this month, the agent reads the month with two read-only tools and answers: one category over budget, Restaurants by 22.50, everything else on track.">
 <rect x="0.5" y="0.5" width="719" height="351" rx="12" fill="#fcfcfb" stroke="#e6e5e0"/>
 <text x="28" y="36" font-size="12" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#52514e">avenir-mcp in Claude Code</text>
-<rect x="379" y="54" width="313" height="34" rx="17" fill="#2a78d6"/>
-<text x="395" y="76" font-size="14" font-weight="500" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#ffffff">How is my budget doing this September?</text>
+<rect x="409" y="54" width="283" height="34" rx="17" fill="#2a78d6"/>
+<text x="425" y="76" font-size="14" font-weight="500" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#ffffff">How is my budget doing this month?</text>
 <rect x="28" y="104" width="541" height="26" rx="6" fill="#f0efec"/>
 <text x="42" y="121" font-size="12" font-weight="400" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#52514e">get_monthly_summary · get_budget_vs_actual · read-only, nothing changed</text>
-<text x="44" y="148" font-size="13" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0b0b0b">Here&#x27;s where September stands:</text>
+<text x="44" y="148" font-size="13" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0b0b0b">Here&#x27;s where this month stands:</text>
 <text x="48" y="175" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#52514e">•</text>
 <text x="62" y="175" font-size="13" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0b0b0b"><tspan font-weight="600">Budgeted:</tspan> €1,945 |<tspan font-weight="600"> Spent</tspan><tspan font-weight="600"> so</tspan><tspan font-weight="600"> far:</tspan> €1,112.49 |<tspan font-weight="600"> Ready</tspan><tspan font-weight="600"> to</tspan><tspan font-weight="600"> Assign:</tspan> €1,820</text>
 <rect x="36" y="180" width="3" height="19" rx="1.5" fill="#eb6834"/>
@@ -18,4 +18,4 @@
 <text x="62" y="251" font-size="13" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0b0b0b">Subscriptions (€15), Holidays savings (€200)</text>
 <text x="44" y="278" font-size="13" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0b0b0b">Only overspend flag is Restaurants. Everything else still has full headroom, so overall</text>
 <text x="44" y="297" font-size="13" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0b0b0b">you&#x27;re in good shape for the month — just keep an eye on dining out.</text>
-<text x="28" y="332" font-size="11" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#52514e">Claude Sonnet on the invented demo plan, 28 Sep 2026 · the whole reply, word for word, recorded in evals/results/</text></svg>
+<text x="28" y="332" font-size="11" font-weight="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#52514e">Claude Sonnet on the invented demo plan · the whole reply recorded in evals/results/, with “this month” for the month’s name</text></svg>

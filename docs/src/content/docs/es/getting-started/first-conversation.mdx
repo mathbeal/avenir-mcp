@@ -31,7 +31,10 @@ El agente llama a `list_accounts` con `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Dos cuentas: Cuenta corriente con 3.328,50, todo punteado, y Ahorro con 600,00.
+> **Claude:** En el presupuesto, Cuenta corriente con 3.328,50, todo punteado, y Ahorro con
+> 600,00. Fuera de él, a seguimiento: el ahorro común con 16.342,36 y el préstamo del
+> coche, con 19.040,81 aún por pagar. El préstamo de estudios, pagado, y el banco anterior
+> están cerrados.
 
 Los saldos están en la moneda de su plan. `cleared_balance` es lo que el banco ya
 ha mostrado; `uncleared_balance`, lo que todavía no.

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="380" viewBox="0 0 720 380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+<title id="title">Net worth: from −24,038 to +1,230 in 18 months, on the demo plan</title>
+<desc id="desc">17 months ago: assets 3,160, debts −27,198, net worth −24,038; 16 months ago: assets 4,234, debts −26,644, net worth −22,410; 15 months ago: assets 5,254, debts −26,089, net worth −20,835; 14 months ago: assets 6,129, debts −25,532, net worth −19,402; 13 months ago: assets 5,571, debts −24,973, net worth −19,403; 12 months ago: assets 6,681, debts −24,413, net worth −17,733; 11 months ago: assets 7,815, debts −23,852, net worth −16,037; 10 months ago: assets 8,882, debts −23,289, net worth −14,406; 9 months ago: assets 8,382, debts −22,724, net worth −14,341; 8 months ago: assets 9,602, debts −22,157, net worth −12,555; 7 months ago: assets 10,784, debts −21,589, net worth −10,805; 6 months ago: assets 13,674, debts −20,987, net worth −7,313; 5 months ago: assets 15,015, debts −20,665, net worth −5,651; 4 months ago: assets 16,342, debts −20,343, net worth −4,001; 3 months ago: assets 17,760, debts −20,019, net worth −2,260; 2 months ago: assets 19,181, debts −19,694, net worth −514; last month: assets 20,554, debts −19,368, net worth 1,186; this month: assets 20,271, debts −19,041, net worth 1,230</desc>
+<rect x="0.5" y="0.5" width="719" height="379" rx="12" fill="#1a1a19" stroke="#383835"/>
+<text x="24" y="40" font-size="18" font-weight="600" fill="#ffffff">Net worth: from −24,038 to +1,230 in 18 months</text>
+<text x="24" y="64" font-size="13" fill="#c3c2b7">get_net_worth_trend on the invented demo plan · assets above zero, debts below, at each month end</text>
+<line x1="64" x2="594" y1="318.0" y2="318.0" stroke="#383835" stroke-width="1"/>
+<text x="54" y="322.0" font-size="12" text-anchor="end" fill="#c3c2b7">−30k</text>
+<line x1="64" x2="594" y1="282.3" y2="282.3" stroke="#383835" stroke-width="1"/>
+<text x="54" y="286.3" font-size="12" text-anchor="end" fill="#c3c2b7">−20k</text>
+<line x1="64" x2="594" y1="246.7" y2="246.7" stroke="#383835" stroke-width="1"/>
+<text x="54" y="250.7" font-size="12" text-anchor="end" fill="#c3c2b7">−10k</text>
+<line x1="64" x2="594" y1="211.0" y2="211.0" stroke="#c3c2b7" stroke-width="1"/>
+<text x="54" y="215.0" font-size="12" text-anchor="end" fill="#c3c2b7">0</text>
+<line x1="64" x2="594" y1="175.3" y2="175.3" stroke="#383835" stroke-width="1"/>
+<text x="54" y="179.3" font-size="12" text-anchor="end" fill="#c3c2b7">10k</text>
+<line x1="64" x2="594" y1="139.7" y2="139.7" stroke="#383835" stroke-width="1"/>
+<text x="54" y="143.7" font-size="12" text-anchor="end" fill="#c3c2b7">20k</text>
+<line x1="64" x2="594" y1="104.0" y2="104.0" stroke="#383835" stroke-width="1"/>
+<text x="54" y="108.0" font-size="12" text-anchor="end" fill="#c3c2b7">30k</text>
+<text x="80.0" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">17 months ago</text>
+<text x="221.8" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">12 months ago</text>
+<text x="391.9" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">6 months ago</text>
+<text x="562.0" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">this month</text>
+<path d="M72.0,211.0 V203.7 A4.0,4.0 0 0 1 76.0,199.7 H84.0 A4.0,4.0 0 0 1 88.0,203.7 V211.0 Z" fill="#3987e5"/>
+<path d="M72.0,211.0 V304.0 A4.0,4.0 0 0 0 76.0,308.0 H84.0 A4.0,4.0 0 0 0 88.0,304.0 V211.0 Z" fill="#d95926"/>
+<path d="M100.4,211.0 V199.9 A4.0,4.0 0 0 1 104.4,195.9 H112.4 A4.0,4.0 0 0 1 116.4,199.9 V211.0 Z" fill="#3987e5"/>
+<path d="M100.4,211.0 V302.0 A4.0,4.0 0 0 0 104.4,306.0 H112.4 A4.0,4.0 0 0 0 116.4,302.0 V211.0 Z" fill="#d95926"/>
+<path d="M128.7,211.0 V196.3 A4.0,4.0 0 0 1 132.7,192.3 H140.7 A4.0,4.0 0 0 1 144.7,196.3 V211.0 Z" fill="#3987e5"/>
+<path d="M128.7,211.0 V300.0 A4.0,4.0 0 0 0 132.7,304.0 H140.7 A4.0,4.0 0 0 0 144.7,300.0 V211.0 Z" fill="#d95926"/>
+<path d="M157.1,211.0 V193.1 A4.0,4.0 0 0 1 161.1,189.1 H169.1 A4.0,4.0 0 0 1 173.1,193.1 V211.0 Z" fill="#3987e5"/>
+<path d="M157.1,211.0 V298.1 A4.0,4.0 0 0 0 161.1,302.1 H169.1 A4.0,4.0 0 0 0 173.1,298.1 V211.0 Z" fill="#d95926"/>
+<path d="M185.4,211.0 V195.1 A4.0,4.0 0 0 1 189.4,191.1 H197.4 A4.0,4.0 0 0 1 201.4,195.1 V211.0 Z" fill="#3987e5"/>
+<path d="M185.4,211.0 V296.1 A4.0,4.0 0 0 0 189.4,300.1 H197.4 A4.0,4.0 0 0 0 201.4,296.1 V211.0 Z" fill="#d95926"/>
+<path d="M213.8,211.0 V191.2 A4.0,4.0 0 0 1 217.8,187.2 H225.8 A4.0,4.0 0 0 1 229.8,191.2 V211.0 Z" fill="#3987e5"/>
+<path d="M213.8,211.0 V294.1 A4.0,4.0 0 0 0 217.8,298.1 H225.8 A4.0,4.0 0 0 0 229.8,294.1 V211.0 Z" fill="#d95926"/>
+<path d="M242.1,211.0 V187.1 A4.0,4.0 0 0 1 246.1,183.1 H254.1 A4.0,4.0 0 0 1 258.1,187.1 V211.0 Z" fill="#3987e5"/>
+<path d="M242.1,211.0 V292.1 A4.0,4.0 0 0 0 246.1,296.1 H254.1 A4.0,4.0 0 0 0 258.1,292.1 V211.0 Z" fill="#d95926"/>
+<path d="M270.5,211.0 V183.3 A4.0,4.0 0 0 1 274.5,179.3 H282.5 A4.0,4.0 0 0 1 286.5,183.3 V211.0 Z" fill="#3987e5"/>
+<path d="M270.5,211.0 V290.1 A4.0,4.0 0 0 0 274.5,294.1 H282.5 A4.0,4.0 0 0 0 286.5,290.1 V211.0 Z" fill="#d95926"/>
+<path d="M298.8,211.0 V185.1 A4.0,4.0 0 0 1 302.8,181.1 H310.8 A4.0,4.0 0 0 1 314.8,185.1 V211.0 Z" fill="#3987e5"/>
+<path d="M298.8,211.0 V288.0 A4.0,4.0 0 0 0 302.8,292.0 H310.8 A4.0,4.0 0 0 0 314.8,288.0 V211.0 Z" fill="#d95926"/>
+<path d="M327.2,211.0 V180.8 A4.0,4.0 0 0 1 331.2,176.8 H339.2 A4.0,4.0 0 0 1 343.2,180.8 V211.0 Z" fill="#3987e5"/>
+<path d="M327.2,211.0 V286.0 A4.0,4.0 0 0 0 331.2,290.0 H339.2 A4.0,4.0 0 0 0 343.2,286.0 V211.0 Z" fill="#d95926"/>
+<path d="M355.5,211.0 V176.5 A4.0,4.0 0 0 1 359.5,172.5 H367.5 A4.0,4.0 0 0 1 371.5,176.5 V211.0 Z" fill="#3987e5"/>
+<path d="M355.5,211.0 V284.0 A4.0,4.0 0 0 0 359.5,288.0 H367.5 A4.0,4.0 0 0 0 371.5,284.0 V211.0 Z" fill="#d95926"/>
+<path d="M383.9,211.0 V166.2 A4.0,4.0 0 0 1 387.9,162.2 H395.9 A4.0,4.0 0 0 1 399.9,166.2 V211.0 Z" fill="#3987e5"/>
+<path d="M383.9,211.0 V281.9 A4.0,4.0 0 0 0 387.9,285.9 H395.9 A4.0,4.0 0 0 0 399.9,281.9 V211.0 Z" fill="#d95926"/>
+<path d="M412.2,211.0 V161.4 A4.0,4.0 0 0 1 416.2,157.4 H424.2 A4.0,4.0 0 0 1 428.2,161.4 V211.0 Z" fill="#3987e5"/>
+<path d="M412.2,211.0 V280.7 A4.0,4.0 0 0 0 416.2,284.7 H424.2 A4.0,4.0 0 0 0 428.2,280.7 V211.0 Z" fill="#d95926"/>
+<path d="M440.6,211.0 V156.7 A4.0,4.0 0 0 1 444.6,152.7 H452.6 A4.0,4.0 0 0 1 456.6,156.7 V211.0 Z" fill="#3987e5"/>
+<path d="M440.6,211.0 V279.6 A4.0,4.0 0 0 0 444.6,283.6 H452.6 A4.0,4.0 0 0 0 456.6,279.6 V211.0 Z" fill="#d95926"/>
+<path d="M468.9,211.0 V151.7 A4.0,4.0 0 0 1 472.9,147.7 H480.9 A4.0,4.0 0 0 1 484.9,151.7 V211.0 Z" fill="#3987e5"/>
+<path d="M468.9,211.0 V278.4 A4.0,4.0 0 0 0 472.9,282.4 H480.9 A4.0,4.0 0 0 0 484.9,278.4 V211.0 Z" fill="#d95926"/>
+<path d="M497.3,211.0 V146.6 A4.0,4.0 0 0 1 501.3,142.6 H509.3 A4.0,4.0 0 0 1 513.3,146.6 V211.0 Z" fill="#3987e5"/>
+<path d="M497.3,211.0 V277.2 A4.0,4.0 0 0 0 501.3,281.2 H509.3 A4.0,4.0 0 0 0 513.3,277.2 V211.0 Z" fill="#d95926"/>
+<path d="M525.6,211.0 V141.7 A4.0,4.0 0 0 1 529.6,137.7 H537.6 A4.0,4.0 0 0 1 541.6,141.7 V211.0 Z" fill="#3987e5"/>
+<path d="M525.6,211.0 V276.1 A4.0,4.0 0 0 0 529.6,280.1 H537.6 A4.0,4.0 0 0 0 541.6,276.1 V211.0 Z" fill="#d95926"/>
+<path d="M554.0,211.0 V142.7 A4.0,4.0 0 0 1 558.0,138.7 H566.0 A4.0,4.0 0 0 1 570.0,142.7 V211.0 Z" fill="#3987e5"/>
+<path d="M554.0,211.0 V274.9 A4.0,4.0 0 0 0 558.0,278.9 H566.0 A4.0,4.0 0 0 0 570.0,274.9 V211.0 Z" fill="#d95926"/>
+<polyline points="80.0,296.7 108.4,290.9 136.7,285.3 165.1,280.2 193.4,280.2 221.8,274.2 250.1,268.2 278.5,262.4 306.8,262.2 335.2,255.8 363.5,249.5 391.9,237.1 420.2,231.2 448.6,225.3 476.9,219.1 505.3,212.8 533.6,206.8 562.0,206.6" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="80.0" cy="296.7" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="108.4" cy="290.9" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="136.7" cy="285.3" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="165.1" cy="280.2" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="193.4" cy="280.2" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="221.8" cy="274.2" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="250.1" cy="268.2" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="278.5" cy="262.4" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="306.8" cy="262.2" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="335.2" cy="255.8" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="363.5" cy="249.5" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="391.9" cy="237.1" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="420.2" cy="231.2" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="448.6" cy="225.3" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="476.9" cy="219.1" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="505.3" cy="212.8" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="533.6" cy="206.8" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="562.0" cy="206.6" r="4" fill="#ffffff" stroke="#1a1a19" stroke-width="2"/>
+<rect x="578.0" y="133.7" width="10" height="10" rx="2" fill="#3987e5"/>
+<text x="594.0" y="142.7" font-size="13" fill="#ffffff">Assets 20,271</text>
+<rect x="578.0" y="201.6" width="10" height="10" rx="2" fill="#ffffff"/>
+<text x="594.0" y="210.6" font-size="13" fill="#ffffff">Net worth 1,230</text>
+<rect x="578.0" y="273.9" width="10" height="10" rx="2" fill="#d95926"/>
+<text x="594.0" y="282.9" font-size="13" fill="#ffffff">Debts −19,041</text>
+<text x="24" y="362" font-size="12" fill="#c3c2b7">Debts down from 27,198 to 19,041; net worth +25,268 since 17 months ago.</text>
+</svg>

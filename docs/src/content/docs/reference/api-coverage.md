@@ -15,7 +15,7 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 |---|---|---|
 | `GET /plans` | covered | `list_plans`, `ynab://plans` |
 | `GET /plans/{plan_id}` | excluded | The whole plan at once: far more than an agent can read; tools fetch the parts they need. |
-| `GET /plans/{plan_id}/accounts` | covered | `apply_categories`, `create_transactions`, `find_transactions`, `forecast_balance`, `list_accounts`, `list_scheduled_transactions`, `reconcile_account`, `split_transaction`, `suggest_categories`, `ynab://plans/{plan_id}/accounts` |
+| `GET /plans/{plan_id}/accounts` | covered | `apply_categories`, `create_transactions`, `find_transactions`, `forecast_balance`, `get_net_worth_trend`, `list_accounts`, `list_scheduled_transactions`, `reconcile_account`, `split_transaction`, `suggest_categories`, `ynab://plans/{plan_id}/accounts` |
 | `POST /plans/{plan_id}/accounts` | excluded | Accounts are opened in YNAB, where the bank connection is set up. |
 | `GET /plans/{plan_id}/accounts/{account_id}` | excluded | list_accounts gives every account in the same single request. |
 | `GET /plans/{plan_id}/accounts/{account_id}/transactions` | excluded | find_transactions filters the plan's transactions by account, in one request. |
@@ -49,7 +49,7 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 | `PUT /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | planned | Change a coming payment, after reading them is in place. |
 | `DELETE /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` | planned | Cancel a coming payment, after reading them is in place. |
 | `GET /plans/{plan_id}/settings` | planned | The plan's currency and formats, to show amounts with their currency. |
-| `GET /plans/{plan_id}/transactions` | covered | `apply_categories`, `find_recurring_charges`, `find_transactions`, `flag_transactions`, `forecast_balance`, `reconcile_account`, `split_transaction`, `suggest_categories`, `undo_operation` |
+| `GET /plans/{plan_id}/transactions` | covered | `apply_categories`, `find_recurring_charges`, `find_transactions`, `flag_transactions`, `forecast_balance`, `get_net_worth_trend`, `reconcile_account`, `split_transaction`, `suggest_categories`, `undo_operation` |
 | `POST /plans/{plan_id}/transactions` | covered | `create_transactions`, `reconcile_account` |
 | `PATCH /plans/{plan_id}/transactions` | covered | `apply_categories`, `approve_transactions`, `flag_transactions`, `reconcile_account`, `split_transaction`, `undo_operation` |
 | `POST /plans/{plan_id}/transactions/import` | covered | `import_transactions` |
@@ -70,6 +70,7 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `get_budget_vs_actual` | `GET /months/{month}` | — |
 | `get_category_balances` | `GET /months/{month}` | — |
 | `get_monthly_summary` | `GET /months/{month}` | — |
+| `get_net_worth_trend` | `GET /accounts`, `GET /transactions` | — |
 | `get_spending_trends` | `GET /months`, `GET /months/{month}` | — |
 | `list_accounts` | `GET /accounts` | — |
 | `list_category_groups` | `GET /categories` | — |

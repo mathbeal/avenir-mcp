@@ -58,14 +58,14 @@ marche : [Confirmation](/avenir-mcp/fr/concepts/confirmation/) et
 Les outils renvoient des données structurées sur lesquelles l'agent peut compter — et
 qu'il vous traduit en langage courant.
 
-> **Vous :** Comment s'est passé août ?
+> **Vous :** Comment s'est passé le mois dernier ?
 
 L'agent appelle [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/)
 avec `{"month": "2026-08-01"}` et reçoit, pour chaque catégorie, le montant budgété, le montant dépensé et ce qui reste. Voici cette réponse sur le plan de démonstration, sous forme de graphique :
 
-<BudgetChart rows={august} month="2026-08-01" />
+<BudgetChart rows={august} when="lastMonth" />
 
-> **Claude :** Août est resté dans le budget partout : aucune catégorie n'est en
+> **Claude :** Le mois dernier est resté dans le budget partout : aucune catégorie n'est en
 > dépassement. Les factures sont payées, il reste 207,49 pour les courses et 58,00 pour le
 > tennis, et les 200,00 mis de côté pour les vacances sont intacts.
 

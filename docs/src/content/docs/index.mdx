@@ -56,15 +56,15 @@ works: [Confirmation](/avenir-mcp/concepts/confirmation/) and
 
 Tools return structured data the agent can rely on — and put into plain words for you.
 
-> **You:** How did August go?
+> **You:** How did last month go?
 
 The agent calls [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/)
 with `{"month": "2026-08-01"}` and gets, for every category, what was budgeted, what was spent and what is left. Here is
 that answer on the demo plan, drawn:
 
-<BudgetChart rows={august} month="2026-08-01" />
+<BudgetChart rows={august} when="lastMonth" />
 
-> **Claude:** August stayed within budget everywhere: no category is overspent.
+> **Claude:** Last month stayed within budget everywhere: no category is overspent.
 > The bills are paid, 207.49 is left for groceries and 58.00 for tennis, and the 200.00 set
 > aside for holidays is untouched.
 
