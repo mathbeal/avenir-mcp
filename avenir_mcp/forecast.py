@@ -82,7 +82,7 @@ class Projection(Model):
     """First month whose lowest balance is below zero; null if none."""
 
 
-def _months_before(today: date, count: int) -> list[str]:
+def months_before(today: date, count: int) -> list[str]:
     """List the full months before today's month.
 
     Args:
@@ -111,7 +111,7 @@ def lookback(today: date) -> list[str]:
     Returns:
         The last LOOKBACK_MONTHS full months, as YYYY-MM, oldest first.
     """
-    return _months_before(today, LOOKBACK_MONTHS)
+    return months_before(today, LOOKBACK_MONTHS)
 
 
 def usable(tx: dict[str, Any]) -> bool:
@@ -207,7 +207,7 @@ def _other_average(
     Returns:
         The monthly average in currency units, negative for money out.
     """
-    months = set(_months_before(today, VARIABLE_MONTHS))
+    months = set(months_before(today, VARIABLE_MONTHS))
     recurring_payees = {r.payee for r in known if (r.amount < 0) == outflow}
     total = sum(
         tx["amount"]

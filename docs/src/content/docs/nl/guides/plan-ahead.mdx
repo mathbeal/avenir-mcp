@@ -9,6 +9,7 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/nl/forecast.json?raw';
 import recurring from '@snippets/nl/recurring_charges.json?raw';
 import networth from '@snippets/nl/net_worth.json?raw';
+import runway from '@snippets/nl/runway.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -97,6 +98,22 @@ De kredietverstrekker boekt de rente van de autolening elke maand op de leningre
 schuld daalt minder dan de aflossing. Een autoreparatie en de kerst drukken elk een maand.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## Hoe lang zou het geld meegaan?
+
+Vraag *„als mijn inkomen wegvalt, hoe lang kan ik dan rondkomen?“*: `get_runway` deelt het
+geld dat vandaag beschikbaar is door de gemiddelde maandelijkse uitgaven van de laatste
+volledige maanden. Beschikbaar is het saldo van de betaal-, spaar- en contantrekeningen
+van het budget, min wat de creditcards ervan schuldig zijn; volgrekeningen, hier de
+gezamenlijke spaarrekening en de autolening, tellen niet mee en staan in `left_out`. Er
+wordt geen inkomen aangenomen.
+
+Noem in `essential_groups` de categoriegroepen die je niet zou kunnen stoppen met betalen,
+voor een tweede looptijd op die alleen: hier vaste lasten en dagelijkse uitgaven. Het
+demobudget heeft pas sinds juni transacties: het gemiddelde loopt over drie maanden, en
+een opmerking zegt dat.
+
+<Code code={runway} lang="json" title="get_runway" />
 
 ## Dan volgende maand budgetteren
 

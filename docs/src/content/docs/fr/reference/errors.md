@@ -37,6 +37,10 @@ Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool
 
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
 
+## [`get_runway`](/avenir-mcp/fr/reference/tools/get-runway/)
+
+- `Unknown category group(s) {given}: give names or ids of this plan's groups, as list_category_groups shows them: {names}.`
+
 ## [`list_scheduled_transactions`](/avenir-mcp/fr/reference/tools/list-scheduled-transactions/)
 
 - `Account {0} is not in this plan: use an id from list_accounts.`

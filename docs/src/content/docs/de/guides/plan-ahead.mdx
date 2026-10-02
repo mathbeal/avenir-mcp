@@ -9,6 +9,7 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/de/forecast.json?raw';
 import recurring from '@snippets/de/recurring_charges.json?raw';
 import networth from '@snippets/de/net_worth.json?raw';
+import runway from '@snippets/de/runway.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -97,6 +98,22 @@ Schuld sinkt um weniger als die Rate. Eine Autoreparatur und Weihnachten flachen
 Monat ab.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## Wie lange würde das Geld reichen?
+
+Fragen Sie *„wenn mein Einkommen wegfiele, wie lange käme ich aus?“*: `get_runway` teilt
+das heute verfügbare Geld durch die durchschnittlichen monatlichen Ausgaben der letzten
+vollständigen Monate. Verfügbar ist der Saldo der Giro-, Spar- und Bargeldkonten des
+Budgets, abzüglich dessen, was seine Kreditkarten schulden; Tracking-Konten, hier das
+gemeinsame Sparkonto und der Autokredit, zählen nicht und stehen in `left_out`. Es wird
+kein Einkommen angenommen.
+
+Nennen Sie in `essential_groups` die Kategoriegruppen, die Sie nicht aufhören könnten zu
+bezahlen, für eine zweite Reichweite nur mit ihnen: hier Fixkosten und Alltag. Das
+Demo-Budget hat erst seit Juni Buchungen: Der Durchschnitt geht über drei Monate, und
+ein Hinweis sagt es.
+
+<Code code={runway} lang="json" title="get_runway" />
 
 ## Dann den nächsten Monat budgetieren
 

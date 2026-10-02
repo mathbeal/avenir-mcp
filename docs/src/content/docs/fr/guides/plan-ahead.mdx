@@ -9,6 +9,7 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/fr/forecast.json?raw';
 import recurring from '@snippets/fr/recurring_charges.json?raw';
 import networth from '@snippets/fr/net_worth.json?raw';
+import runway from '@snippets/fr/runway.json?raw';
 
 **Objectif :** savoir si l'argent tiendra, et quand il manquerait, avant que ça arrive.
 
@@ -97,6 +98,22 @@ Le prêteur prélève chaque mois les intérêts du crédit auto sur le compte d
 baisse de moins que l'échéance. Une réparation de voiture et Noël aplatissent chacun un mois.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## Combien de temps l'argent durerait-il ?
+
+Demandez *« si je perdais mes revenus, combien de temps tiendrais-je ? »* : `get_runway`
+divise l'argent disponible aujourd'hui par la dépense mensuelle moyenne des derniers mois
+complets. L'argent disponible est le solde des comptes courants, d'épargne et d'espèces du
+budget, moins ce que doivent ses cartes de crédit ; les comptes de suivi, ici le livret du
+foyer et le crédit auto, ne sont pas comptés et figurent dans `left_out`. Aucun revenu n'est
+supposé.
+
+Nommez dans `essential_groups` les groupes de catégories que vous ne pourriez pas cesser de
+payer, pour une seconde durée sur ceux-là seuls : ici les charges fixes et le quotidien. Le
+budget de démonstration n'a de transactions que depuis juin : la moyenne porte sur trois
+mois, et une note le dit.
+
+<Code code={runway} lang="json" title="get_runway" />
 
 ## Puis préparer le mois suivant
 

@@ -57,6 +57,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "flag_transactions",
             "find_recurring_charges",
             "get_net_worth_trend",
+            "get_runway",
             "set_category_target",
         ]
     )

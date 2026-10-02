@@ -12,6 +12,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import date
 
 from evals import demo_budget as demo
 from evals.fake_ynab import DemoBudget
@@ -61,6 +62,40 @@ def _owed() -> float:
 def _grown_since(day: str) -> float:
     """How much the net worth grew after a day: every transaction dated later, all accounts."""
     return _milli(sum(tx["amount"] for tx in demo.transactions() if tx["date"] > day))
+
+
+def runway(today: date, months_count: int = 6) -> tuple[float, float]:
+    """Money in the budget accounts today, and how many months it lasts at the usual pace.
+
+    The pace is the average money out of the budget accounts over the last complete
+    months before today's, from the first month they hold a transaction; transfers
+    between them are left out. It moves with the date of the run, as the tool's does.
+    """
+    budget = {
+        acc_id for acc_id, _, _, on_budget, closed in demo.ACCOUNTS if on_budget and not closed
+    }
+    held = [tx for tx in demo.transactions() if tx["account_id"] in budget]
+    first = min(str(tx["date"])[:7] for tx in held)
+    now = today.year * 12 + today.month - 1
+    months = [
+        month
+        for index in range(now - months_count, now)
+        if (month := f"{index // 12:04d}-{index % 12 + 1:02d}") >= first
+    ]
+    spent = sum(
+        tx["amount"]
+        for tx in held
+        if str(tx["date"])[:7] in months
+        and tx["amount"] < 0
+        and tx["transfer_account_id"] not in budget
+    )
+    liquid = sum(tx["amount"] for tx in held)
+    return _milli(liquid), round(liquid / (-spent / len(months)), 1)
+
+
+def _runway_answer(text: str) -> bool:
+    """The months the money lasts, as of the day the evaluation runs."""
+    return _number(runway(date.today())[1])(text)
 
 
 DUPLICATE = 71.86
@@ -267,6 +302,19 @@ TASKS = [
         answer=lambda t: _number(OWED)(t) and _number(NET_WORTH_GROWTH)(t),
         state=_unchanged,
         notes="The loans are tracking accounts; the student loan, paid off, is closed.",
+        tags=["read"],
+    ),
+    Task(
+        "runway",
+        "If I lost my income, how many months could I live on what I have in my budget, at "
+        "my usual spending?" + FORMAT,
+        answer=_runway_answer,
+        state=_unchanged,
+        notes=(
+            "Checking and savings at the average of the last complete months; the joint "
+            "savings are a tracking account, outside the budget. The figure follows the "
+            "date of the run."
+        ),
         tags=["read"],
     ),
     Task(
