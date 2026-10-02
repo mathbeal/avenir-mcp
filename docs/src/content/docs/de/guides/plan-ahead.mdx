@@ -10,6 +10,7 @@ import projection from '@snippets/de/forecast.json?raw';
 import recurring from '@snippets/de/recurring_charges.json?raw';
 import networth from '@snippets/de/net_worth.json?raw';
 import runway from '@snippets/de/runway.json?raw';
+import debtPayoff from '@snippets/de/debt_payoff.json?raw';
 
 **Ziel:** wissen, ob das Geld reicht und wann es ausgehen würde, bevor es so weit ist.
 
@@ -98,6 +99,24 @@ Schuld sinkt um weniger als die Rate. Eine Autoreparatur und Weihnachten flachen
 Monat ab.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## Wann sind die Schulden abbezahlt?
+
+Fragen Sie *„wann ist mein Autokredit abbezahlt, wenn ich 500 im Monat zahle?“* oder
+*„Lawine oder Schneeball?“*: `get_debt_payoff_plan` zahlt die Schulden Monat für Monat mit
+der genannten Summe ab. Jeden Monat wird auf jede Schuld ein Zwölftel ihres Jahreszinses
+berechnet, dann erhält sie ihre Mindestzahlung; der Rest geht zuerst an die teuerste Schuld
+(Lawine, *avalanche*) oder an die kleinste (Schneeball, *snowball*), und eine getilgte
+Schuld gibt ihre Mindestzahlung für die nächste frei. Standardmäßig kommen beide
+Reihenfolgen, mit den Zinsen, die die Lawine spart.
+
+Zinssätze und Mindestzahlungen stammen aus den Kreditdetails in YNAB. Eine Kreditkarte hat
+dort keine: Sie wird mit 0 % gerechnet, und eine Notiz sagt es; geben Sie ihren Zinssatz in
+`overrides` an. Ohne `monthly_budget` gelten die Mindestzahlungen. Hier ist der Autokredit
+die einzige verbleibende Schuld, beide Reihenfolgen sind also gleich: 100 im Monat über
+seiner Rate von 400.
+
+<Code code={debtPayoff} lang="json" title="get_debt_payoff_plan" />
 
 ## Wie lange würde das Geld reichen?
 

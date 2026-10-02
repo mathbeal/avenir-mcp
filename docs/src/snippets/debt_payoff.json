@@ -1,0 +1,59 @@
+{
+  "message": "At 500.00 a month, the 19040.81 owed on 1 debt is paid off in 42 months, by 2030-03, with 1543.29 of interest (avalanche). Avalanche and snowball cost the same here.",
+  "monthly_budget": 500.0,
+  "budget_from": "given",
+  "first_month": "2026-10",
+  "debts": [
+    {
+      "account_id": "acc-car-loan",
+      "name": "Car loan",
+      "type": "autoLoan",
+      "owed": 19040.81,
+      "interest_rate": 4.5,
+      "rate_from": "YNAB",
+      "minimum_payment": 400.0,
+      "minimum_from": "YNAB",
+      "escrow": 0.0
+    }
+  ],
+  "plans": [
+    {
+      "strategy": "avalanche",
+      "debts": [
+        {
+          "name": "Car loan",
+          "payoff_month": "2030-03",
+          "months": 42,
+          "interest": 1543.29,
+          "paid": 20584.1
+        }
+      ],
+      "months_to_debt_free": 42,
+      "debt_free_month": "2030-03",
+      "total_interest": 1543.29,
+      "total_paid": 20584.1
+    },
+    {
+      "strategy": "snowball",
+      "debts": [
+        {
+          "name": "Car loan",
+          "payoff_month": "2030-03",
+          "months": 42,
+          "interest": 1543.29,
+          "paid": 20584.1
+        }
+      ],
+      "months_to_debt_free": 42,
+      "debt_free_month": "2030-03",
+      "total_interest": 1543.29,
+      "total_paid": 20584.1
+    }
+  ],
+  "interest_saved_by_avalanche": 0.0,
+  "months_saved_by_avalanche": 0,
+  "notes": [
+    "Rates and minimum payments are those in force today and are assumed fixed; no new charges are made on the debts.",
+    "Each month, from 2026-10, every debt is charged a twelfth of its yearly rate on its balance, then gets its minimum payment; the rest of the monthly budget goes to the first debt of the strategy (avalanche: highest rate first; snowball: smallest balance first), and a debt paid off frees its minimum for the next."
+  ]
+}

@@ -10,6 +10,7 @@ import projection from '@snippets/es/forecast.json?raw';
 import recurring from '@snippets/es/recurring_charges.json?raw';
 import networth from '@snippets/es/net_worth.json?raw';
 import runway from '@snippets/es/runway.json?raw';
+import debtPayoff from '@snippets/es/debt_payoff.json?raw';
 
 **Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
 
@@ -98,6 +99,23 @@ préstamo: la deuda baja menos que la cuota. Una reparación del coche y la Navi
 cada una un mes.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## ¿Cuándo estarán pagadas las deudas?
+
+Pregunte *«¿cuándo habré pagado el préstamo del coche si le dedico 500 al mes?»* o
+*«¿avalancha o bola de nieve?»*: `get_debt_payoff_plan` paga las deudas mes a mes con la
+suma indicada. Cada mes, cada deuda genera una doceava parte de su tipo anual y luego recibe
+su pago mínimo; el resto va primero a la deuda más cara (avalancha, *avalanche*) o a la más
+pequeña (bola de nieve, *snowball*), y una deuda saldada libera su mínimo para la
+siguiente. Por defecto se dan los dos órdenes, con los intereses que ahorra la avalancha.
+
+Los tipos y pagos mínimos vienen de los detalles del préstamo guardados en YNAB. Una tarjeta
+de crédito no los tiene: se cuenta al 0 % y una nota lo dice; indique su tipo en
+`overrides`. Sin `monthly_budget`, se usan los pagos mínimos. Aquí el préstamo del coche es
+la única deuda que queda, así que los dos órdenes coinciden: 100 al mes por encima de su
+cuota de 400.
+
+<Code code={debtPayoff} lang="json" title="get_debt_payoff_plan" />
 
 ## ¿Cuánto duraría el dinero?
 

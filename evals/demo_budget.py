@@ -268,6 +268,12 @@ CAR_RATE = 0.045
 STUDENT_PAYMENT = 250_000
 STUDENT_RATE = 0.02
 TAX_REFUND = 1_600_000
+# The loans' details as YNAB keeps them, from the day each loan was entered: the rate in
+# thousandths of a percent, the minimum payment in milliunits. Other accounts have none.
+LOAN_TERMS: dict[str, tuple[str, int, int]] = {
+    CAR_LOAN: ("2025-03-31", round(CAR_RATE * 100_000), CAR_PAYMENT),
+    STUDENT_LOAN: ("2025-03-31", round(STUDENT_RATE * 100_000), STUDENT_PAYMENT),
+}
 
 
 def _interest(balance: int, yearly_rate: float) -> int:

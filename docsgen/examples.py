@@ -144,6 +144,13 @@ CALLS: list[Call] = [
         {"plan_id": BUDGET, "essential_groups": ["Bills", "Everyday"]},
         keep=10,
     ),
+    # The car loan, 100 a month above its payment.
+    Call(
+        "debt_payoff",
+        "get_debt_payoff_plan",
+        {"plan_id": BUDGET, "monthly_budget": 500},
+        keep=10,
+    ),
     Call(
         "forecast",
         "forecast_balance",

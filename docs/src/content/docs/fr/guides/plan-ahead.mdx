@@ -10,6 +10,7 @@ import projection from '@snippets/fr/forecast.json?raw';
 import recurring from '@snippets/fr/recurring_charges.json?raw';
 import networth from '@snippets/fr/net_worth.json?raw';
 import runway from '@snippets/fr/runway.json?raw';
+import debtPayoff from '@snippets/fr/debt_payoff.json?raw';
 
 **Objectif :** savoir si l'argent tiendra, et quand il manquerait, avant que ça arrive.
 
@@ -98,6 +99,24 @@ Le prêteur prélève chaque mois les intérêts du crédit auto sur le compte d
 baisse de moins que l'échéance. Une réparation de voiture et Noël aplatissent chacun un mois.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## Quand les dettes seront-elles remboursées ?
+
+Demandez *« quand mon crédit auto sera-t-il remboursé si j'y mets 500 par mois ? »* ou
+*« avalanche ou boule de neige ? »* : `get_debt_payoff_plan` rembourse les dettes mois par
+mois avec la somme donnée. Chaque mois, chaque dette porte un douzième de son taux annuel,
+puis reçoit son paiement minimum ; le reste va d'abord à la dette la plus chère
+(avalanche) ou à la plus petite (boule de neige, *snowball*), et une dette soldée libère son
+minimum pour la suivante. Les deux ordres sont donnés par défaut, avec les intérêts que
+l'avalanche économise.
+
+Les taux et paiements minimums viennent des détails du prêt saisis dans YNAB. Une carte de
+crédit n'en a pas : elle est comptée à 0 % et une note le dit ; donnez son taux dans
+`overrides`. Sans `monthly_budget`, les paiements minimums sont pris. Ici, le crédit auto
+est la seule dette restante, les deux ordres sont donc identiques : 100 par mois de plus que
+son échéance de 400.
+
+<Code code={debtPayoff} lang="json" title="get_debt_payoff_plan" />
 
 ## Combien de temps l'argent durerait-il ?
 

@@ -60,6 +60,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "get_runway",
             "get_savings_rate",
             "get_underfunded_targets",
+            "get_debt_payoff_plan",
             "set_category_target",
         ]
     )

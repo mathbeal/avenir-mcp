@@ -163,6 +163,29 @@ def _underfunded_answer(text: str) -> bool:
     return _number(total)(text) and _words(str(first).removeprefix("cat-"))(text)
 
 
+def car_loan_payoff() -> tuple[int, float]:
+    """Payments until the car loan is paid off at its monthly payment, and the interest.
+
+    Each month the lender charges a twelfth of the yearly rate, rounded to the cent, then
+    the payment comes off, as the demo's own history does. The demo budget holds no
+    payment after September, so neither figure moves with the date of the run.
+    """
+    owed = -sum(tx["amount"] for tx in demo.transactions() if tx["account_id"] == demo.CAR_LOAN)
+    months = interest = 0
+    while owed > 0:
+        months += 1
+        charge = int(round(owed * demo.CAR_RATE / 12, -1))
+        interest += charge
+        owed += charge - min(owed + charge, demo.CAR_PAYMENT)
+    return months, _milli(interest)
+
+
+def _payoff_answer(text: str) -> bool:
+    """The payments left on the car loan and the interest they carry, both."""
+    months, interest = car_loan_payoff()
+    return _number(months)(text) and _number(interest)(text)
+
+
 DUPLICATE = 71.86
 RESTAURANTS_AUGUST = -_sum("cat-restaurants", "2026-08")
 RESTAURANTS_SEPTEMBER_OVER = round(
@@ -405,6 +428,18 @@ TASKS = [
             "Groceries and Restaurants ask for more each month than is budgeted; Transport "
             "(the rail card, due 1 October) and Tennis (the club, due 1 December) save for "
             "a yearly fee. Rent and Subscriptions are funded."
+        ),
+        tags=["read"],
+    ),
+    Task(
+        "debt-payoff",
+        "At my current monthly payment, how many more payments until my car loan is paid "
+        "off, and how much interest will I still pay? Give both figures." + FORMAT,
+        answer=_payoff_answer,
+        state=_unchanged,
+        notes=(
+            "The car loan is the only debt left; YNAB's loan details give its 4.5 % rate "
+            "and 400 payment. The student loan, paid off, is closed."
         ),
         tags=["read"],
     ),

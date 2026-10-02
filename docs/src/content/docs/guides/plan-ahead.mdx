@@ -10,6 +10,7 @@ import projection from '@snippets/forecast.json?raw';
 import recurring from '@snippets/recurring_charges.json?raw';
 import networth from '@snippets/net_worth.json?raw';
 import runway from '@snippets/runway.json?raw';
+import debtPayoff from '@snippets/debt_payoff.json?raw';
 
 **Goal:** know whether the money lasts, and when it would run out, before it does.
 
@@ -98,6 +99,22 @@ The lender charges the car loan's interest on the loan account each month, so th
 falls by less than the payment; a car repair and Christmas each flatten a month.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## When will the debts be paid off?
+
+Ask *"when will my car loan be paid off if I put 500 a month on it?"* or *"avalanche or
+snowball?"*: `get_debt_payoff_plan` pays the debts month by month with the sum you give.
+Each month every debt is charged a twelfth of its yearly rate, then gets its minimum
+payment; the rest goes to the dearest debt first (avalanche) or to the smallest
+(snowball), and a debt paid off frees its minimum for the next. Both orders are given by
+default, with the interest the avalanche saves.
+
+The rates and minimum payments come from the loan details kept in YNAB. A credit card has
+none there: it is counted at 0 % and a note says so; give its rate in `overrides`. Without
+`monthly_budget`, the minimum payments are used. Here the car loan is the only debt left,
+so both orders are the same: 100 a month above its 400 payment.
+
+<Code code={debtPayoff} lang="json" title="get_debt_payoff_plan" />
 
 ## How long would the money last?
 
