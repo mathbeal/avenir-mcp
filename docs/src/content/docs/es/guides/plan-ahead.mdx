@@ -9,6 +9,7 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import projection from '@snippets/es/forecast.json?raw';
 import recurring from '@snippets/es/recurring_charges.json?raw';
 import networth from '@snippets/es/net_worth.json?raw';
+import runway from '@snippets/es/runway.json?raw';
 
 **Objetivo:** saber si el dinero alcanza, y cuándo se acabaría, antes de que ocurra.
 
@@ -97,6 +98,21 @@ préstamo: la deuda baja menos que la cuota. Una reparación del coche y la Navi
 cada una un mes.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## ¿Cuánto duraría el dinero?
+
+Pregunte *«si perdiera mis ingresos, ¿cuánto tiempo aguantaría?»*: `get_runway` divide el
+dinero disponible hoy entre el gasto mensual medio de los últimos meses completos. El dinero
+disponible es el saldo de las cuentas corrientes, de ahorro y de efectivo del presupuesto,
+menos lo que deben sus tarjetas de crédito; las cuentas de seguimiento, aquí el ahorro común
+y el préstamo del coche, no se cuentan y aparecen en `left_out`. No se supone ningún ingreso.
+
+Indique en `essential_groups` los grupos de categorías que no podría dejar de pagar, para
+una segunda duración con ellos solos: aquí las facturas y el día a día. El presupuesto de
+demostración solo tiene transacciones desde junio: la media es de tres meses, y una nota lo
+dice.
+
+<Code code={runway} lang="json" title="get_runway" />
 
 ## Después, presupuestar el mes siguiente
 

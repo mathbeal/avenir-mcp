@@ -63,21 +63,29 @@ _APPLY = {
 # What the documented writes type in, in each documentation language.
 _TYPED: dict[str, dict[str, str]] = {
     "fr": {
+        "Bills": "Charges fixes",
+        "Everyday": "Quotidien",
         "not imported by the bank": "non importé par la banque",
         "Pets": "Animaux",
         "Sport": "Sport",
     },
     "es": {
+        "Bills": "Facturas",
+        "Everyday": "Día a día",
         "not imported by the bank": "no importado por el banco",
         "Pets": "Mascotas",
         "Sport": "Deporte",
     },
     "de": {
+        "Bills": "Fixkosten",
+        "Everyday": "Alltag",
         "not imported by the bank": "nicht von der Bank importiert",
         "Pets": "Haustiere",
         "Sport": "Sport",
     },
     "nl": {
+        "Bills": "Vaste lasten",
+        "Everyday": "Dagelijks",
         "not imported by the bank": "niet door de bank geïmporteerd",
         "Pets": "Huisdieren",
         "Sport": "Sport",
@@ -121,6 +129,13 @@ CALLS: list[Call] = [
     Call("recurring_charges", "find_recurring_charges", {"plan_id": BUDGET}, keep=10),
     # Eighteen months of paying off debts, for the chart in the README.
     Call("net_worth", "get_net_worth_trend", {"plan_id": BUDGET, "months_count": 18}, keep=18),
+    # Rent, bills, groceries and transport are what a household cannot stop paying.
+    Call(
+        "runway",
+        "get_runway",
+        {"plan_id": BUDGET, "essential_groups": ["Bills", "Everyday"]},
+        keep=10,
+    ),
     Call(
         "forecast",
         "forecast_balance",

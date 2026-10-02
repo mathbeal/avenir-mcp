@@ -16,8 +16,8 @@ newest first.
 Read-only tools, each one a question a user asks about their money, computed from the
 plan as the existing reports are:
 
-- `get_net_worth_trend`: net worth month by month, assets and debts apart.
-- `get_runway`: how many months the money available would cover usual spending.
+- `get_net_worth_trend`: net worth month by month, assets and debts apart. *Done.*
+- `get_runway`: how many months the money available would cover usual spending. *Done.*
 - `get_savings_rate`: the share of income kept each month, and its trend.
 - `get_underfunded_targets`: the categories whose target is not met this month, and
   what each still needs.

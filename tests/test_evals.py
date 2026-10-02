@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -39,6 +40,10 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     assert tasks.CHECKING == pytest.approx(3328.50)
     assert tasks.OWED == pytest.approx(19040.81)
     assert tasks.NET_WORTH_GROWTH == pytest.approx(25268.26)
+    # Checking and savings, over June to August when docsgen's date sets "now" in September,
+    # over June to September from October on.
+    assert tasks.runway(date(2026, 9, 25)) == (3928.5, 2.8)
+    assert tasks.runway(date(2026, 10, 2)) == (3928.5, 2.8)
 
 
 def test_demo_server_answers_like_ynab() -> None:

@@ -498,6 +498,33 @@ async def get_category_groups(plan_id: str) -> list[dict[str, Any]]:
     ]
 
 
+async def get_category_tree(plan_id: str) -> list[dict[str, Any]]:
+    """Return a plan's category groups, each with the ids of its categories.
+
+    Hidden groups and categories are kept: past spending may sit in one. Deleted and
+    system groups, and deleted categories, are skipped.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+
+    Returns:
+        List of {"id", "name", "category_ids"} dicts.
+    """
+    logger.info("Fetching category groups and their categories for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/categories")
+    return [
+        {
+            "id": group["id"],
+            "name": group["name"],
+            "category_ids": [
+                cat["id"] for cat in group.get("categories", []) if not cat.get("deleted", False)
+            ],
+        }
+        for group in data["data"]["category_groups"]
+        if not group.get("deleted", False) and group["name"] not in _SYSTEM_GROUPS
+    ]
+
+
 async def create_category(plan_id: str, category_group_id: str, name: str) -> dict[str, Any]:
     """Create a new category in a plan.
 
