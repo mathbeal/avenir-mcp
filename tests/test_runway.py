@@ -120,6 +120,20 @@ def test_only_money_out_of_the_budget_accounts_counts() -> None:
     assert answer.spending.monthly_spending == -1_015.0
 
 
+def test_a_transfer_to_an_asset_tracking_account_is_saved_not_spent() -> None:
+    """500 a month to the brokerage stays the household's: not spending, as in get_savings_rate."""
+    history = [
+        *_months_of(-1_000_000),
+        *(
+            _tx("checking", f"2026-{m}-05", -500_000, transfer="brokerage")
+            for m in ("06", "07", "08")
+        ),
+    ]
+    answer = runway.summary(ACCOUNTS, history, TODAY, 3)
+    assert answer.spending.monthly_spending == -1_000.0
+    assert any("holds an asset" in note for note in answer.notes)
+
+
 def test_a_split_counts_each_line_on_its_own() -> None:
     """A split of 500: 400 to the mortgage (counted) and 100 to savings (a transfer, not)."""
     lines: list[dict[str, Any]] = [

@@ -17,6 +17,7 @@ from typing import Any
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 from avenir_mcp.forecast import months_before
 from avenir_mcp.model import Model
+from avenir_mcp.networth import tracking_assets
 from avenir_mcp.text import untrusted
 
 MAX_MONTHS = 24
@@ -113,7 +114,7 @@ def chosen_groups(groups: list[dict[str, Any]], wanted: list[str]) -> list[dict[
     return found
 
 
-def _lines(tx: dict[str, Any]) -> list[dict[str, Any]]:
+def lines_of(tx: dict[str, Any]) -> list[dict[str, Any]]:
     """Give the lines of a transaction: its split lines, or itself when not split.
 
     Args:
@@ -187,7 +188,9 @@ def _notes(  # pylint: disable=too-many-arguments
         "No income is assumed: the runway is how long the money would last if nothing came in.",
         "Spending is the past average of money out of the budget accounts; refunds and "
         "other money in are not deducted, transfers between budget accounts are left out, "
-        "and transfers to a tracking account (a loan payment, say) count as spending.",
+        "and transfers to a tracking loan or debt (a loan payment, say) count as spending.",
+        "A transfer to a tracking account that holds an asset (savings, investments) is not "
+        "spending: that money is still yours, as get_savings_rate counts it.",
         "Tracking accounts are not counted as money available: investments and loans "
         "outside the budget are listed in left_out.",
         "The past is no promise: yearly bills, holidays or a job search change the pace.",
@@ -240,6 +243,8 @@ def summary(  # pylint: disable=too-many-arguments,too-many-locals
     owed = sum(amount_to_milliunit(a["balance"]) for a in counted if a["type"] in CARD_TYPES)
 
     history = [tx for tx in transactions if tx["account_id"] in budget and not tx.get("deleted")]
+    # Money moved to another budget account, or to an asset outside it, is not spent.
+    kept = budget | tracking_assets(accounts)
     first = min((tx["date"][:7] for tx in history), default="9999-12")
     months = [month for month in months_before(today, months_count) if month >= first]
     vital_ids = {cat_id for group in essential or [] for cat_id in group["category_ids"]}
@@ -247,8 +252,8 @@ def summary(  # pylint: disable=too-many-arguments,too-many-locals
     for tx in history:
         if tx["date"][:7] not in months:
             continue
-        for line in _lines(tx):
-            if line["amount"] >= 0 or line.get("transfer_account_id") in budget:
+        for line in lines_of(tx):
+            if line["amount"] >= 0 or line.get("transfer_account_id") in kept:
                 continue
             spent += line["amount"]
             if line.get("category_id") in vital_ids:

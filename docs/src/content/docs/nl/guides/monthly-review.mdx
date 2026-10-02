@@ -12,6 +12,7 @@ import usage from '@snippets/nl/budget_vs_actual.json?raw';
 import trends from '@snippets/nl/spending_trends.json?raw';
 import move from '@snippets/nl/move_preview.json?raw';
 import badMonth from '@snippets/nl/bad_month.json?raw';
+import savings from '@snippets/nl/savings_rate.json?raw';
 
 **Doel:** een maand begrijpen – inkomsten, uitgaven, wat er nog toe te wijzen is – en
 corrigeren wat uit de koers is geraakt.
@@ -19,7 +20,8 @@ corrigeren wat uit de koers is geraakt.
 **Tools:** [`get_monthly_summary`](/avenir-mcp/nl/reference/tools/get-monthly-summary/),
 [`get_category_balances`](/avenir-mcp/nl/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/nl/reference/tools/get-budget-vs-actual/),
-[`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/), en
+[`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/),
+[`get_savings_rate`](/avenir-mcp/nl/reference/tools/get-savings-rate/), en
 [`move_money`](/avenir-mcp/nl/reference/tools/move-money/) om te corrigeren.
 **Prompt:** `monthly_review`.
 
@@ -72,6 +74,22 @@ corrigeren wat uit de koers is geraakt.
    <Code code={move} lang="json" title="move_money — voorbeeld" />
 
 </Steps>
+
+## Hoeveel hield je over?
+
+Vraag *„hoeveel van mijn inkomen houd ik over?“*: `get_savings_rate` geeft voor elk van de
+laatste volledige maanden het inkomen (geld dat in Ready to Assign kwam), de uitgaven (geld
+dat de budgetrekeningen verliet, terugbetalingen afgetrokken), wat er gespaard is, en de
+spaarquote: gespaard gedeeld door inkomen. Geld dat tussen budgetrekeningen verschuift, hier
+de 200 die elke maand naar de spaarrekening gaan, blijft gespaard; een overboeking naar een
+trackingrekening met een bezitting (sparen, beleggingen) telt ook als gespaard, een
+aflossing van een lening als uitgave. Beginsaldi zijn geen inkomen.
+
+Hier hield het huishouden van juni tot augustus 56,4 % van zijn salaris over, met juli als
+beste maand. De notities zeggen hoe elk cijfer geteld is: de agent geeft ze door met de
+quote.
+
+<Code code={savings} lang="json" title="get_savings_rate" />
 
 ## Goed om te weten
 

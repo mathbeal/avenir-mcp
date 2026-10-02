@@ -12,6 +12,7 @@ import usage from '@snippets/es/budget_vs_actual.json?raw';
 import trends from '@snippets/es/spending_trends.json?raw';
 import move from '@snippets/es/move_preview.json?raw';
 import badMonth from '@snippets/es/bad_month.json?raw';
+import savings from '@snippets/es/savings_rate.json?raw';
 
 **Objetivo:** entender un mes — ingresos, gastos, lo que queda por asignar — y corregir
 lo que se desvió.
@@ -19,7 +20,8 @@ lo que se desvió.
 **Herramientas:** [`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/),
 [`get_category_balances`](/avenir-mcp/es/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/es/reference/tools/get-budget-vs-actual/),
-[`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/), y
+[`get_spending_trends`](/avenir-mcp/es/reference/tools/get-spending-trends/),
+[`get_savings_rate`](/avenir-mcp/es/reference/tools/get-savings-rate/), y
 [`move_money`](/avenir-mcp/es/reference/tools/move-money/) para corregir. **Prompt:** `monthly_review`.
 
 ## La conversación
@@ -69,6 +71,21 @@ lo que se desvió.
    <Code code={move} lang="json" title="move_money — vista previa" />
 
 </Steps>
+
+## ¿Cuánto ha guardado?
+
+Pregunte *«¿qué parte de mis ingresos ahorro?»*: `get_savings_rate` da, para cada uno de
+los últimos meses completos, los ingresos (el dinero puesto en Ready to Assign), el gasto
+(el dinero que salió de las cuentas del presupuesto, descontados los reembolsos), lo
+ahorrado y la tasa de ahorro: lo ahorrado sobre los ingresos. El dinero movido entre cuentas
+del presupuesto, aquí los 200 que pasan cada mes al ahorro, sigue ahorrado; una
+transferencia a una cuenta de seguimiento que guarda un activo (ahorro, inversiones) también
+cuenta como ahorro, el pago de un préstamo como gasto. Los saldos iniciales no son ingresos.
+
+Aquí el hogar guardó el 56,4 % de su sueldo de junio a agosto, y julio fue su mejor mes. Las
+notas dicen cómo se contó cada cifra: el agente las transmite con la tasa.
+
+<Code code={savings} lang="json" title="get_savings_rate" />
 
 ## Conviene saber
 
