@@ -105,7 +105,9 @@ Ask *"if I lost my income, how long could I last?"*: `get_runway` divides the mo
 available today by the average monthly spending of the last complete months. The money
 available is the balance of the budget's checking, savings and cash accounts, less what
 its credit cards owe; tracking accounts, here the joint savings and the car loan, are not
-counted and are listed in `left_out`. No income is assumed.
+counted and are listed in `left_out`. No income is assumed. Money moved to a tracking
+account that holds an asset (savings, investments) is not spending, as in
+`get_savings_rate`; a loan payment is.
 
 Name the category groups you could not stop paying in `essential_groups` for a second
 runway on those alone: here the bills and everyday spending. The demo budget holds

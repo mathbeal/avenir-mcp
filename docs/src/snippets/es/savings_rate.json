@@ -1,0 +1,41 @@
+{
+  "message": "Over the last 3 complete months, 9600.00 came in and 4188.09 went out: 5411.91 saved, 56.4 % of the income. Best month: 2026-07 (56.9 %), worst: 2026-08 (55.4 %).",
+  "months": [
+    {
+      "month": "2026-06",
+      "income": 3200.0,
+      "spending": -1382.75,
+      "saved": 1817.25,
+      "rate": 56.8
+    },
+    {
+      "month": "2026-07",
+      "income": 3200.0,
+      "spending": -1379.06,
+      "saved": 1820.94,
+      "rate": 56.9
+    },
+    {
+      "month": "2026-08",
+      "income": 3200.0,
+      "spending": -1426.28,
+      "saved": 1773.72,
+      "rate": 55.4
+    }
+  ],
+  "income": 9600.0,
+  "spending": -4188.09,
+  "saved": 5411.91,
+  "rate": 56.4,
+  "average_saved": 1803.97,
+  "best_month": "2026-07",
+  "worst_month": "2026-08",
+  "moved_to_tracking": 0.0,
+  "notes": [
+    "Income is money in categorised to Ready to Assign on the budget accounts; starting balances and transfers, from a tracking account too, are not income.",
+    "Spending is money out of the budget accounts less refunds (money in categorised to a spending category); transfers between budget accounts are left out.",
+    "A transfer to a tracking account that holds an asset (savings, investments) is saved, not spent; a transfer to a tracking loan or debt is spending, as YNAB's budget counts it.",
+    "Saved is income less spending: what stayed in the budget accounts or went to an asset outside them. The rate is saved over income.",
+    "Only the last 3 of the 6 months hold budget transactions: the figures are over those."
+  ]
+}

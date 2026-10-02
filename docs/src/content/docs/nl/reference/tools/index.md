@@ -19,6 +19,7 @@ avenir-mcp biedt deze tools aan. Leestools zijn altijd beschikbaar; schrijftools
 | [`get_monthly_summary`](/avenir-mcp/nl/reference/tools/get-monthly-summary/) | A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories. |
 | [`get_net_worth_trend`](/avenir-mcp/nl/reference/tools/get-net-worth-trend/) | Assets, debts and net worth at the end of each month, to see debts go down. |
 | [`get_runway`](/avenir-mcp/nl/reference/tools/get-runway/) | How many months the money available would last without income, at the usual spending. |
+| [`get_savings_rate`](/avenir-mcp/nl/reference/tools/get-savings-rate/) | How much of the income was kept, month by month: income, spending, saved, rate. |
 | [`get_spending_trends`](/avenir-mcp/nl/reference/tools/get-spending-trends/) | Spending per category, month by month, over the last N months. |
 | [`list_accounts`](/avenir-mcp/nl/reference/tools/list-accounts/) | List the plan's accounts with their balances, bank link and last reconciliation. |
 | [`list_category_groups`](/avenir-mcp/nl/reference/tools/list-category-groups/) | List the category groups a new category can be created in. |

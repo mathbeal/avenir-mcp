@@ -78,7 +78,7 @@ worth and the forecast the documentation shows.
 - **Answers an agent can read.** Currency units, short typed answers, pagination,
   errors that say what to fix, bank text treated as untrusted.
 - **Verified.** 100 % line and branch coverage, and an evaluation where a real agent
-  works on an invented plan: 20/20 tasks.
+  works on an invented plan: 22/22 tasks.
 
 ## Install
 
@@ -127,6 +127,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Will I go below zero before December?" | `forecast_balance` — month by month, with its assumptions |
 | "Am I paying off my debts?" | `get_net_worth_trend` — assets, debts and net worth at each month end |
 | "If I lost my income, how long could I last?" | `get_runway` — months the money in the budget covers the usual spending |
+| "How much of my income do I keep?" | `get_savings_rate` — income, spending, saved and rate, month by month |
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 

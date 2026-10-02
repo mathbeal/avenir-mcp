@@ -12,6 +12,7 @@ import usage from '@snippets/de/budget_vs_actual.json?raw';
 import trends from '@snippets/de/spending_trends.json?raw';
 import move from '@snippets/de/move_preview.json?raw';
 import badMonth from '@snippets/de/bad_month.json?raw';
+import savings from '@snippets/de/savings_rate.json?raw';
 
 **Ziel:** einen Monat verstehen – Einnahmen, Ausgaben, was noch zuzuweisen ist – und
 korrigieren, was aus dem Ruder gelaufen ist.
@@ -19,7 +20,8 @@ korrigieren, was aus dem Ruder gelaufen ist.
 **Tools:** [`get_monthly_summary`](/avenir-mcp/de/reference/tools/get-monthly-summary/),
 [`get_category_balances`](/avenir-mcp/de/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/),
-[`get_spending_trends`](/avenir-mcp/de/reference/tools/get-spending-trends/) und
+[`get_spending_trends`](/avenir-mcp/de/reference/tools/get-spending-trends/),
+[`get_savings_rate`](/avenir-mcp/de/reference/tools/get-savings-rate/) und
 [`move_money`](/avenir-mcp/de/reference/tools/move-money/) zum Korrigieren.
 **Prompt:** `monthly_review`.
 
@@ -72,6 +74,23 @@ korrigieren, was aus dem Ruder gelaufen ist.
    <Code code={move} lang="json" title="move_money — Vorschau" />
 
 </Steps>
+
+## Wie viel haben Sie behalten?
+
+Fragen Sie *„Wie viel von meinem Einkommen lege ich zurück?“*: `get_savings_rate` gibt für
+jeden der letzten vollständigen Monate das Einkommen (Geld, das in Ready to Assign
+geflossen ist), die Ausgaben (Geld, das die Budgetkonten verlassen hat, abzüglich
+Erstattungen), das Ersparte und die Sparquote: Erspartes geteilt durch Einkommen. Geld, das
+zwischen Budgetkonten verschoben wird, hier die 200, die jeden Monat aufs Sparkonto gehen,
+bleibt erspart; eine Überweisung auf ein Trackingkonto mit einem Vermögenswert (Ersparnisse,
+Geldanlagen) gilt ebenfalls als erspart, eine Kreditrate als Ausgabe. Anfangssalden sind
+kein Einkommen.
+
+Hier hat der Haushalt von Juni bis August 56,4 % seines Gehalts behalten, im Juli am
+meisten. Die Hinweise sagen, wie jede Zahl gezählt wurde: Der Agent gibt sie mit der Quote
+weiter.
+
+<Code code={savings} lang="json" title="get_savings_rate" />
 
 ## Gut zu wissen
 

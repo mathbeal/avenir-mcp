@@ -18,7 +18,7 @@ plan as the existing reports are:
 
 - `get_net_worth_trend`: net worth month by month, assets and debts apart. *Done.*
 - `get_runway`: how many months the money available would cover usual spending. *Done.*
-- `get_savings_rate`: the share of income kept each month, and its trend.
+- `get_savings_rate`: the share of income kept each month, and its trend. *Done.*
 - `get_underfunded_targets`: the categories whose target is not met this month, and
   what each still needs.
 - `get_debt_payoff_plan`: when each debt is paid off at the current payments, and with

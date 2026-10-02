@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 27 tools, 4 resources and 4 prompts over your YNAB plans. This
+avenir-mcp gives an agent 28 tools, 4 resources and 4 prompts over your YNAB plans. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -48,6 +48,7 @@ conversation without a tool call.
 | *“Show me every category.”* | [`get_category_balances`](/avenir-mcp/reference/tools/get-category-balances/) — budgeted, spent, available per category | R |
 | *“Which budgets are almost spent?”* | [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/) — share of each budget consumed | R |
 | *“Is Restaurants high every month?”* | [`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/) — spending per category over N months | R |
+| *“How much of my income do I keep?”* | [`get_savings_rate`](/avenir-mcp/reference/tools/get-savings-rate/) — income, spending, saved and savings rate month by month, best and worst month | R |
 
 Guide: [Review a month](/avenir-mcp/guides/monthly-review/).
 

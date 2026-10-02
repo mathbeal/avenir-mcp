@@ -64,6 +64,25 @@ def _grown_since(day: str) -> float:
     return _milli(sum(tx["amount"] for tx in demo.transactions() if tx["date"] > day))
 
 
+def _budget_months(today: date, months_count: int) -> tuple[set[str], list[str]]:
+    """The open budget accounts, and the complete months before today's they hold.
+
+    Months before the budget accounts' first transaction are left out, as the tools
+    leave them out. They move with the date of the run.
+    """
+    budget = {
+        acc_id for acc_id, _, _, on_budget, closed in demo.ACCOUNTS if on_budget and not closed
+    }
+    first = min(str(tx["date"])[:7] for tx in demo.transactions() if tx["account_id"] in budget)
+    now = today.year * 12 + today.month - 1
+    months = [
+        month
+        for index in range(now - months_count, now)
+        if (month := f"{index // 12:04d}-{index % 12 + 1:02d}") >= first
+    ]
+    return budget, months
+
+
 def runway(today: date, months_count: int = 6) -> tuple[float, float]:
     """Money in the budget accounts today, and how many months it lasts at the usual pace.
 
@@ -71,17 +90,8 @@ def runway(today: date, months_count: int = 6) -> tuple[float, float]:
     months before today's, from the first month they hold a transaction; transfers
     between them are left out. It moves with the date of the run, as the tool's does.
     """
-    budget = {
-        acc_id for acc_id, _, _, on_budget, closed in demo.ACCOUNTS if on_budget and not closed
-    }
+    budget, months = _budget_months(today, months_count)
     held = [tx for tx in demo.transactions() if tx["account_id"] in budget]
-    first = min(str(tx["date"])[:7] for tx in held)
-    now = today.year * 12 + today.month - 1
-    months = [
-        month
-        for index in range(now - months_count, now)
-        if (month := f"{index // 12:04d}-{index % 12 + 1:02d}") >= first
-    ]
     spent = sum(
         tx["amount"]
         for tx in held
@@ -96,6 +106,31 @@ def runway(today: date, months_count: int = 6) -> tuple[float, float]:
 def _runway_answer(text: str) -> bool:
     """The months the money lasts, as of the day the evaluation runs."""
     return _number(runway(date.today())[1])(text)
+
+
+def savings_rate(today: date, months_count: int = 6) -> float:
+    """The share of income kept over the last complete months, in percent to one decimal.
+
+    Income is the salary put in Ready to Assign; spending is money out of the budget
+    accounts, transfers between them left out. The demo budget holds no refund and moves
+    no money to a tracking account. It moves with the date of the run, as the tool's does.
+    """
+    budget, months = _budget_months(today, months_count)
+    held = [
+        tx
+        for tx in demo.transactions()
+        if tx["account_id"] in budget and str(tx["date"])[:7] in months
+    ]
+    income: int = sum(tx["amount"] for tx in held if tx["category_id"] == "cat-inflow")
+    spent: int = sum(
+        tx["amount"] for tx in held if tx["amount"] < 0 and tx["transfer_account_id"] not in budget
+    )
+    return round((income + spent) / income * 100, 1)
+
+
+def _savings_answer(text: str) -> bool:
+    """The savings rate, as of the day the evaluation runs."""
+    return _number(savings_rate(date.today()))(text)
 
 
 DUPLICATE = 71.86
@@ -314,6 +349,19 @@ TASKS = [
             "Checking and savings at the average of the last complete months; the joint "
             "savings are a tracking account, outside the budget. The figure follows the "
             "date of the run."
+        ),
+        tags=["read"],
+    ),
+    Task(
+        "savings-rate",
+        "What share of my income did I save over the last six complete months, in percent?"
+        + FORMAT,
+        answer=_savings_answer,
+        state=_unchanged,
+        notes=(
+            "The salary is the only income; the monthly transfer to the Savings account "
+            "stays in the budget. September has no salary yet in the demo budget, so from "
+            "October on its spending lowers the rate. The figure follows the date of the run."
         ),
         tags=["read"],
     ),

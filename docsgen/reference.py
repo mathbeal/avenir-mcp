@@ -51,6 +51,7 @@ GUIDES = {
     "get_category_balances": "guides/monthly-review",
     "get_budget_vs_actual": "guides/monthly-review",
     "get_spending_trends": "guides/monthly-review",
+    "get_savings_rate": "guides/monthly-review",
     "forecast_balance": "guides/plan-ahead",
     "find_recurring_charges": "guides/plan-ahead",
     "get_net_worth_trend": "guides/plan-ahead",

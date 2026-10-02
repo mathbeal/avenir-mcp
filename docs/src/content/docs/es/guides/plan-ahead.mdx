@@ -106,6 +106,8 @@ dinero disponible hoy entre el gasto mensual medio de los últimos meses complet
 disponible es el saldo de las cuentas corrientes, de ahorro y de efectivo del presupuesto,
 menos lo que deben sus tarjetas de crédito; las cuentas de seguimiento, aquí el ahorro común
 y el préstamo del coche, no se cuentan y aparecen en `left_out`. No se supone ningún ingreso.
+El dinero enviado a una cuenta de seguimiento que guarda un activo (ahorro, inversiones) no
+es gasto, como en `get_savings_rate`; el pago de un préstamo sí lo es.
 
 Indique en `essential_groups` los grupos de categorías que no podría dejar de pagar, para
 una segunda duración con ellos solos: aquí las facturas y el día a día. El presupuesto de

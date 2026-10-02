@@ -106,7 +106,8 @@ geld dat vandaag beschikbaar is door de gemiddelde maandelijkse uitgaven van de 
 volledige maanden. Beschikbaar is het saldo van de betaal-, spaar- en contantrekeningen
 van het budget, min wat de creditcards ervan schuldig zijn; volgrekeningen, hier de
 gezamenlijke spaarrekening en de autolening, tellen niet mee en staan in `left_out`. Er
-wordt geen inkomen aangenomen.
+wordt geen inkomen aangenomen. Geld dat naar een trackingrekening met een bezitting (sparen,
+beleggingen) gaat, is geen uitgave, zoals in `get_savings_rate`; een aflossing wel.
 
 Noem in `essential_groups` de categoriegroepen die je niet zou kunnen stoppen met betalen,
 voor een tweede looptijd op die alleen: hier vaste lasten en dagelijkse uitgaven. Het

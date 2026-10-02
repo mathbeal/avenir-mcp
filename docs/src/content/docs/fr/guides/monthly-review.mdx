@@ -12,6 +12,7 @@ import usage from '@snippets/fr/budget_vs_actual.json?raw';
 import trends from '@snippets/fr/spending_trends.json?raw';
 import move from '@snippets/fr/move_preview.json?raw';
 import badMonth from '@snippets/fr/bad_month.json?raw';
+import savings from '@snippets/fr/savings_rate.json?raw';
 
 **Objectif :** comprendre un mois — revenus, dépenses, ce qui reste à assigner — et
 corriger ce qui a dérapé.
@@ -19,7 +20,8 @@ corriger ce qui a dérapé.
 **Outils :** [`get_monthly_summary`](/avenir-mcp/fr/reference/tools/get-monthly-summary/),
 [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/),
-[`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/), et
+[`get_spending_trends`](/avenir-mcp/fr/reference/tools/get-spending-trends/),
+[`get_savings_rate`](/avenir-mcp/fr/reference/tools/get-savings-rate/), et
 [`move_money`](/avenir-mcp/fr/reference/tools/move-money/) pour corriger. **Prompt :** `monthly_review`.
 
 ## La conversation
@@ -71,6 +73,21 @@ corriger ce qui a dérapé.
    <Code code={move} lang="json" title="move_money — aperçu" />
 
 </Steps>
+
+## Combien avez-vous gardé ?
+
+Demandez *« quelle part de mes revenus est-ce que je garde ? »* : `get_savings_rate` donne,
+pour chacun des derniers mois complets, les revenus (l'argent mis dans Ready to Assign), les
+dépenses (l'argent sorti des comptes du budget, remboursements déduits), ce qui a été
+épargné, et le taux d'épargne : l'épargne rapportée aux revenus. L'argent déplacé entre
+comptes du budget, ici les 200 versés chaque mois sur l'épargne, reste épargné ; un virement
+vers un compte de suivi qui détient un actif (épargne, placements) est épargné lui aussi, un
+remboursement de prêt est une dépense. Les soldes d'ouverture ne sont pas des revenus.
+
+Ici le foyer a gardé 56,4 % de son salaire de juin à août, juillet étant son meilleur mois.
+Les notes disent comment chaque chiffre a été compté : l'agent les relaie avec le taux.
+
+<Code code={savings} lang="json" title="get_savings_rate" />
 
 ## Bon à savoir
 

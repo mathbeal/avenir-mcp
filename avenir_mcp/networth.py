@@ -35,6 +35,20 @@ DEBT_TYPES = frozenset(
 """YNAB account types that hold money owed; every other type holds an asset."""
 
 
+def tracking_assets(accounts: list[dict[str, Any]]) -> set[str]:
+    """Find the tracking accounts that hold an asset: savings, investments, a house.
+
+    Money moved there from the budget is still the household's: it is saved, not spent.
+
+    Args:
+        accounts: The plan's accounts not deleted.
+
+    Returns:
+        The ids of the accounts off the budget whose type is not a debt.
+    """
+    return {a["id"] for a in accounts if not a["on_budget"] and a["type"] not in DEBT_TYPES}
+
+
 class NetWorthMonth(Model):
     """What the plan's accounts held at the end of one month, in currency units."""
 

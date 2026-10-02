@@ -106,7 +106,9 @@ das heute verfügbare Geld durch die durchschnittlichen monatlichen Ausgaben der
 vollständigen Monate. Verfügbar ist der Saldo der Giro-, Spar- und Bargeldkonten des
 Budgets, abzüglich dessen, was seine Kreditkarten schulden; Tracking-Konten, hier das
 gemeinsame Sparkonto und der Autokredit, zählen nicht und stehen in `left_out`. Es wird
-kein Einkommen angenommen.
+kein Einkommen angenommen. Geld, das auf ein Trackingkonto mit einem Vermögenswert
+(Ersparnisse, Geldanlagen) fließt, ist keine Ausgabe, wie in `get_savings_rate`; eine
+Kreditrate schon.
 
 Nennen Sie in `essential_groups` die Kategoriegruppen, die Sie nicht aufhören könnten zu
 bezahlen, für eine zweite Reichweite nur mit ihnen: hier Fixkosten und Alltag. Das

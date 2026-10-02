@@ -44,6 +44,10 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     # over June to September from October on.
     assert tasks.runway(date(2026, 9, 25)) == (3928.5, 2.8)
     assert tasks.runway(date(2026, 10, 2)) == (3928.5, 2.8)
+    # 5,411.91 kept of 9,600 from June to August; September's spending, with no salary
+    # in it yet, brings it down from October on.
+    assert tasks.savings_rate(date(2026, 9, 25)) == 56.4
+    assert tasks.savings_rate(date(2026, 10, 2)) == 40.9
 
 
 def test_demo_server_answers_like_ynab() -> None:

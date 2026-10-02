@@ -106,7 +106,8 @@ divise l'argent disponible aujourd'hui par la dépense mensuelle moyenne des der
 complets. L'argent disponible est le solde des comptes courants, d'épargne et d'espèces du
 budget, moins ce que doivent ses cartes de crédit ; les comptes de suivi, ici le livret du
 foyer et le crédit auto, ne sont pas comptés et figurent dans `left_out`. Aucun revenu n'est
-supposé.
+supposé. L'argent versé sur un compte de suivi qui détient un actif (épargne, placements)
+n'est pas une dépense, comme dans `get_savings_rate` ; un remboursement de prêt en est une.
 
 Nommez dans `essential_groups` les groupes de catégories que vous ne pourriez pas cesser de
 payer, pour une seconde durée sur ceux-là seuls : ici les charges fixes et le quotidien. Le

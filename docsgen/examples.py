@@ -119,6 +119,8 @@ CALLS: list[Call] = [
         keep=100,
     ),
     Call("spending_trends", "get_spending_trends", {"plan_id": BUDGET, "months_count": 3}, 3),
+    # The share of the salary kept, over the months the demo budget holds.
+    Call("savings_rate", "get_savings_rate", {"plan_id": BUDGET}, keep=6),
     Call("suggest_categories", "suggest_categories", {"plan_id": BUDGET, "limit": 3}, 3),
     Call("apply_preview", "apply_categories", _APPLY),
     Call(

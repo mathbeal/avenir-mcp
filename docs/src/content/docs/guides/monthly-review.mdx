@@ -12,6 +12,7 @@ import usage from '@snippets/budget_vs_actual.json?raw';
 import trends from '@snippets/spending_trends.json?raw';
 import move from '@snippets/move_preview.json?raw';
 import badMonth from '@snippets/bad_month.json?raw';
+import savings from '@snippets/savings_rate.json?raw';
 
 **Goal:** understand a month — income, spending, what is left to assign — and correct
 what went off track.
@@ -19,7 +20,8 @@ what went off track.
 **Tools:** [`get_monthly_summary`](/avenir-mcp/reference/tools/get-monthly-summary/),
 [`get_category_balances`](/avenir-mcp/reference/tools/get-category-balances/),
 [`get_budget_vs_actual`](/avenir-mcp/reference/tools/get-budget-vs-actual/),
-[`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/), and
+[`get_spending_trends`](/avenir-mcp/reference/tools/get-spending-trends/),
+[`get_savings_rate`](/avenir-mcp/reference/tools/get-savings-rate/), and
 [`move_money`](/avenir-mcp/reference/tools/move-money/) to fix.
 **Prompt:** `monthly_review`.
 
@@ -71,6 +73,20 @@ what went off track.
    <Code code={move} lang="json" title="move_money — preview" />
 
 </Steps>
+
+## How much did you keep?
+
+Ask *"how much of my income do I keep?"*: `get_savings_rate` gives, for each of the last
+complete months, the income (money put in Ready to Assign), the spending (money out of the
+budget accounts, refunds deducted), what was saved, and the savings rate: saved over
+income. Money moved between budget accounts, here the 200 put into Savings each month,
+stays saved; a transfer to a tracking account that holds an asset (savings, investments)
+is saved too, a loan payment is spending. Starting balances are not income.
+
+Here the household kept 56.4 % of its salary from June to August, July its best month.
+The notes say how each figure was counted: the agent relays them with the rate.
+
+<Code code={savings} lang="json" title="get_savings_rate" />
 
 ## Good to know
 
