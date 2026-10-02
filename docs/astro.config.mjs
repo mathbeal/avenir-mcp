@@ -9,9 +9,11 @@ import starlightLinksValidator from 'starlight-links-validator';
 import { satteri } from '@astrojs/markdown-satteri';
 import { brand } from './src/plugins/brand.mjs';
 
+// The address in canonical links and the sitemap: the site lives on Cloudflare Pages.
+const site = process.env.DOCS_SITE || 'https://avenir-mcp.pages.dev';
+
 export default defineConfig({
-  // The address in canonical links and the sitemap: the site lives on Cloudflare Pages.
-  site: process.env.DOCS_SITE || 'https://avenir-mcp.pages.dev',
+  site,
   base: '/avenir-mcp',
   // The name avenir-mcp is set apart in the text of every page (see the plugin).
   markdown: { processor: satteri({ hastPlugins: [brand] }) },
@@ -27,6 +29,19 @@ export default defineConfig({
       description: 'An unofficial MCP server for YNAB, built for agents.',
       logo: { src: './src/assets/logo.svg' },
       favicon: '/favicon.svg',
+      // The card shown when a page is shared; its source is .github/assets/social-preview.svg.
+      head: [
+        { tag: 'meta', attrs: { property: 'og:image', content: new URL('/avenir-mcp/social-preview.png', site).href } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1280' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '640' } },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:image:alt',
+            content: 'avenir-mcp: asked whether they will run short before payday, the agent forecasts the balance and answers no.',
+          },
+        },
+      ],
       // Fonts are served with the site: no request to a third-party font service.
       customCss: [
         '@fontsource-variable/source-sans-3',
