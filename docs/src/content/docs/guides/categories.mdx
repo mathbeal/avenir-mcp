@@ -11,6 +11,7 @@ import create from '@snippets/create_category_preview.json?raw';
 import rename from '@snippets/update_category_preview.json?raw';
 import target from '@snippets/target_preview.json?raw';
 import budget from '@snippets/budget_preview.json?raw';
+import underfunded from '@snippets/underfunded_targets.json?raw';
 
 **Goal:** keep the category structure in line with your life, and give each category its
 amount.
@@ -18,7 +19,8 @@ amount.
 **Tools:** [`list_category_groups`](/avenir-mcp/reference/tools/list-category-groups/),
 [`create_category`](/avenir-mcp/reference/tools/create-category/),
 [`update_category`](/avenir-mcp/reference/tools/update-category/),
-[`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/).
+[`set_category_budget`](/avenir-mcp/reference/tools/set-category-budget/),
+[`get_underfunded_targets`](/avenir-mcp/reference/tools/get-underfunded-targets/).
 
 ## Create a category
 
@@ -64,6 +66,23 @@ target, except one set in YNAB's app as monthly funding, a target balance or a d
 when it is replaced or removed; the question says so before you confirm.
 
 <Code code={target} lang="json" title="set_category_target" />
+
+## See which targets are behind
+
+Ask *"which targets are behind this month?"* or *"can I cover my targets?"*:
+`get_underfunded_targets` lists the categories whose target still needs money this month,
+with what YNAB says each still needs this month (`needed`, its Underfunded amount) and what
+the target needs over its whole period (`left`). The most urgent come first: targets due
+by a date, the soonest first; then monthly and weekly ones; then the rest, the largest need
+first. The totals set what is needed against the month's Ready to Assign, so the agent can
+say whether it covers everything, or how much of it.
+
+Here, in September, Transport saves for the rail card renewed on 1 October and Tennis for
+the club's membership due on 1 December; Groceries and Restaurants ask for more than is
+budgeted. Together they need 155.00, which Ready to Assign covers. The tool changes
+nothing: to fund a target, move money to it or set its amount, as above.
+
+<Code code={underfunded} lang="json" title="get_underfunded_targets" />
 
 ## Undo
 

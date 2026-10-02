@@ -1,0 +1,65 @@
+{
+  "message": "4 targets need 155.00 in 2026-09; Ready to Assign holds 1729.32: enough for all of them, with 1574.32 left.",
+  "month": "2026-09-01",
+  "targets": [
+    {
+      "category_id": "cat-transport",
+      "name": "Mobilität",
+      "group": "Alltag",
+      "target": "250.00 by 2026-10-01",
+      "due": "2026-10-01",
+      "needed": 35.0,
+      "left": 160.0,
+      "percent_complete": 36,
+      "months_left": 2,
+      "urgency": "due_date"
+    },
+    {
+      "category_id": "cat-tennis",
+      "name": "Tennis",
+      "group": "Freizeit",
+      "target": "480.00 by 2026-12-01",
+      "due": "2026-12-01",
+      "needed": 40.0,
+      "left": 400.0,
+      "percent_complete": 16,
+      "months_left": 4,
+      "urgency": "due_date"
+    },
+    {
+      "category_id": "cat-groceries",
+      "name": "Lebensmittel",
+      "group": "Alltag",
+      "target": "450.00 each month",
+      "due": null,
+      "needed": 50.0,
+      "left": 50.0,
+      "percent_complete": 88,
+      "months_left": 1,
+      "urgency": "repeating"
+    },
+    {
+      "category_id": "cat-restaurants",
+      "name": "Restaurants",
+      "group": "Alltag",
+      "target": "150.00 each month",
+      "due": null,
+      "needed": 30.0,
+      "left": 30.0,
+      "percent_complete": 80,
+      "months_left": 1,
+      "urgency": "repeating"
+    }
+  ],
+  "more": 0,
+  "needed": 155.0,
+  "ready_to_assign": 1729.32,
+  "enough": true,
+  "covered": 155.0,
+  "short_by": 0.0,
+  "on_track": 2,
+  "notes": [
+    "needed is what YNAB says each category still needs this month to stay on track (Underfunded in its app); left is what the target needs over its whole period.",
+    "Most urgent first: targets due by a date, the soonest first; then monthly and weekly funding and debt payments; then the rest; the largest need first in each."
+  ]
+}

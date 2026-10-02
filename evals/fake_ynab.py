@@ -34,7 +34,7 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         self.knowledge = 1
         self.changed_at = {tx_id: 1 for tx_id in self.transactions}
         self.budgeted: dict[tuple[str, str], int] = {}
-        # Targets set during the run, by category: the demo plan starts with none.
+        # Targets set during the run, by category; they replace the demo plan's own.
         self.goals: dict[str, dict[str, Any]] = {}
         self.groups = {name: [list(c) for c in cats] for name, cats in demo.GROUPS.items()}
         self.lock = threading.Lock()
@@ -54,11 +54,40 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                 "category_group_name": demo.named(group, self.language),
                 "hidden": False,
                 "deleted": False,
-                **self.goals.get(cat_id, {}),
+                **self.goals.get(cat_id, demo.TARGETS.get(cat_id, {})),
             }
             for group, cats in self.groups.items()
             for cat_id, name in cats
         ]
+
+    @staticmethod
+    def goal_figures(cat: dict[str, Any], month: str, budgeted: int, activity: int) -> Any:
+        """What YNAB computes for a target in a month, for the two kinds the demo holds.
+
+        A monthly target set aside asks for its amount each month, whatever was spent. A
+        target by a date spreads what is left evenly over the months up to the date's,
+        this one included; what the category holds counts as funded. The demo's months
+        carry nothing over, as everywhere in this stand-in. Before the target was created,
+        or after its date, there is no target.
+        """
+        due, created = cat.get("goal_target_date"), cat.get("goal_creation_month") or month
+        if not cat.get("goal_type") or month < created or (due and month[:7] > due[:7]):
+            return {key: None for key in cat if key.startswith("goal_")}
+        target = cat["goal_target"]
+        if due:
+            months = (int(due[:4]) - int(month[:4])) * 12 + int(due[5:7]) - int(month[5:7]) + 1
+            funded = budgeted + activity
+            needed = max(-(-target // months) - budgeted, 0)
+        else:
+            months, funded = 1, budgeted
+            needed = max(target - budgeted, 0)
+        return {
+            "goal_under_funded": needed,
+            "goal_overall_funded": funded,
+            "goal_overall_left": max(target - funded, 0),
+            "goal_percentage_complete": min(max(funded, 0) * 100 // target, 100),
+            "goal_months_to_budget": months,
+        }
 
     def month(self, month: str) -> dict[str, Any]:
         """A month with its categories, computed from the transactions."""
@@ -75,6 +104,7 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                 budgeted, activity = 0, 0
             cats.append(
                 {**cat, "budgeted": budgeted, "activity": activity, "balance": budgeted + activity}
+                | self.goal_figures(cat, month, budgeted, activity)
             )
         income = sum(tx["amount"] for tx in live if tx["category_id"] == "cat-inflow")
         budgeted_total = sum(c["budgeted"] for c in cats)
@@ -163,7 +193,8 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
     def set_goal(self, cat_id: str, fields: dict[str, Any]) -> None:
         """Set a category's target as YNAB does: a date or a frequency, or none at all."""
         if fields.get("goal_target") is None:
-            self.goals.pop(cat_id, None)
+            # Nothing left: the demo plan's own target is gone too.
+            self.goals[cat_id] = {"goal_type": None, "goal_target": None}
             return
         goal = {"goal_type": "NEED", "goal_target": fields["goal_target"]}
         cadences = {"monthly": 1, "weekly": 2, "yearly": 13}

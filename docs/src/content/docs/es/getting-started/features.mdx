@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp da a un agente 28 herramientas, 4 recursos y 4 prompts sobre sus planes de
+avenir-mcp da a un agente 29 herramientas, 4 recursos y 4 prompts sobre sus planes de
 YNAB. Esta página los lista según lo que quiera hacer. Cada fila da una frase que puede
 decir al agente; el agente elige la herramienta.
 
@@ -105,6 +105,7 @@ importes puntuales. Guía:
 | *«Crea una categoría Mascotas en el grupo Día a día.»* | [`create_category`](/avenir-mcp/es/reference/tools/create-category/) | E |
 | *«Cambia el nombre de Tenis a Deporte.»* | [`update_category`](/avenir-mcp/es/reference/tools/update-category/) — también mueve una categoría a otro grupo | E |
 | *«Ahorra 1.200 para las vacaciones antes de junio de 2027.»* | [`set_category_target`](/avenir-mcp/es/reference/tools/set-category-target/) — un importe para una fecha, o cada mes, semana o año | E ↺ |
+| *«¿Qué objetivos van atrasados este mes?»* | [`get_underfunded_targets`](/avenir-mcp/es/reference/tools/get-underfunded-targets/) — lo que le falta a cada objetivo, el más urgente primero, frente a Ready to Assign | L |
 
 Guía: [Organizar categorías](/avenir-mcp/es/guides/categories/).
 

@@ -11,6 +11,7 @@ import create from '@snippets/nl/create_category_preview.json?raw';
 import rename from '@snippets/nl/update_category_preview.json?raw';
 import target from '@snippets/nl/target_preview.json?raw';
 import budget from '@snippets/nl/budget_preview.json?raw';
+import underfunded from '@snippets/nl/underfunded_targets.json?raw';
 
 **Doel:** de indeling van je categorieën bij je leven laten passen, en elke categorie haar
 bedrag geven.
@@ -18,7 +19,8 @@ bedrag geven.
 **Tools:** [`list_category_groups`](/avenir-mcp/nl/reference/tools/list-category-groups/),
 [`create_category`](/avenir-mcp/nl/reference/tools/create-category/),
 [`update_category`](/avenir-mcp/nl/reference/tools/update-category/),
-[`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/).
+[`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/),
+[`get_underfunded_targets`](/avenir-mcp/nl/reference/tools/get-underfunded-targets/).
 
 ## Een categorie aanmaken
 
@@ -65,6 +67,24 @@ maandelijkse financiering, doelsaldo of schuldaflossing en wordt vervangen of we
 vraag zegt dat voordat je bevestigt.
 
 <Code code={target} lang="json" title="set_category_target" />
+
+## Zien welke doelen achterlopen
+
+Vraag *„welke doelen lopen deze maand achter?“* of *„kan ik mijn doelen dekken?“*:
+`get_underfunded_targets` toont de categorieën waarvan het doel deze maand nog geld nodig
+heeft, met wat er volgens YNAB deze maand nog nodig is (`needed`, het bedrag Underfunded)
+en wat het doel over de hele periode nog nodig heeft (`left`). De dringendste komen eerst:
+doelen met een datum, de eerstvolgende eerst; dan maandelijkse en wekelijkse; dan de rest,
+de grootste behoefte eerst. De totalen zetten wat nodig is tegenover het Ready to Assign van
+de maand: de agent kan zeggen of het alles dekt, of hoeveel.
+
+Hier, in september, spaart Vervoer voor het treinabonnement dat op 1 oktober wordt verlengd
+en Tennis voor de clubcontributie, te betalen op 1 december; Boodschappen en Restaurants
+vragen meer dan er is gebudgetteerd. Samen hebben ze 155,00 nodig, wat Ready to Assign
+dekt. De tool verandert niets: om een doel te financieren, verplaats je er geld naartoe of
+stel je het bedrag in, zoals hierboven.
+
+<Code code={underfunded} lang="json" title="get_underfunded_targets" />
 
 ## Ongedaan maken
 

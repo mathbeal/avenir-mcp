@@ -48,6 +48,25 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     # in it yet, brings it down from October on.
     assert tasks.savings_rate(date(2026, 9, 25)) == 56.4
     assert tasks.savings_rate(date(2026, 10, 2)) == 40.9
+    # Rail card 35 and tennis club 40, both due by a date, groceries 50 and restaurants 30.
+    assert tasks.underfunded("2026-09-01") == (155.0, "cat-transport")
+    assert tasks.underfunded("2026-08-01") == (80.0, None)
+
+
+def test_underfunded_targets_needs_the_total_and_the_target_due_first() -> None:
+    """155 in all, and Transport, the rail card due on 1 October."""
+    task = next(task for task in tasks.TASKS if task.task_id == "underfunded-targets")
+    assert task.answer("ANSWER: 155.00 in all; Transport is due first")
+    assert not task.answer("ANSWER: 155.00 in all")
+    assert not task.answer("ANSWER: Transport, 80.00")
+
+
+def test_a_removed_target_hides_the_demo_plans_own() -> None:
+    """Removing a target the demo plan starts with leaves the category without one."""
+    state = fake_ynab.DemoBudget()
+    state.set_goal("cat-rent", {"goal_target": None})
+    rent = next(c for c in state.month("2026-09-01")["categories"] if c["id"] == "cat-rent")
+    assert (rent["goal_type"], rent.get("goal_under_funded")) == (None, None)
 
 
 def test_demo_server_answers_like_ynab() -> None:

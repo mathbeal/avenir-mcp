@@ -41,6 +41,10 @@ Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool
 
 - `Unknown category group(s) {given}: give names or ids of this plan's groups, as list_category_groups shows them: {names}.`
 
+## [`get_underfunded_targets`](/avenir-mcp/fr/reference/tools/get-underfunded-targets/)
+
+- `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
+
 ## [`list_scheduled_transactions`](/avenir-mcp/fr/reference/tools/list-scheduled-transactions/)
 
 - `Account {0} is not in this plan: use an id from list_accounts.`

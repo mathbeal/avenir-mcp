@@ -62,6 +62,7 @@ GUIDES = {
     "create_category": "guides/categories",
     "update_category": "guides/categories",
     "set_category_target": "guides/categories",
+    "get_underfunded_targets": "guides/categories",
     "undo_operation": "concepts/journal",
 }
 
