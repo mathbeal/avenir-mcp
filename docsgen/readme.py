@@ -9,6 +9,10 @@ so each chart shows what its tool answers today, and the test of generated files
 when it no longer does. One SVG per colour scheme: GitHub picks it with `<picture>`.
 Colours are the reference palette's first two categorical slots, checked for
 colour-blind separation and contrast on both surfaces; the net worth line is in ink.
+
+Months are named relative to the example's current month ("this month", "6 months
+ago", "next month"), never by name or year: the images do not look dated months later,
+while the examples behind them keep their fixed dates, so the generated files stay stable.
 """
 
 from __future__ import annotations
@@ -45,7 +49,23 @@ SCHEMES = {
     },
 }
 
-MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+def _relative(offset: int) -> str:
+    """Name a month by its distance from the current one, so the label never ages.
+
+    Args:
+        offset: Months after the current one; negative before it.
+
+    Returns:
+        E.g. "this month", "last month", "6 months ago", "next month" or "in 3 months".
+    """
+    if offset == 0:
+        return "this month"
+    if offset == -1:
+        return "last month"
+    if offset == 1:
+        return "next month"
+    return f"{-offset} months ago" if offset < 0 else f"in {offset} months"
 
 
 def _money(value: float) -> str:
@@ -124,8 +144,8 @@ def _frame(months: list[dict[str, Any]], colour: dict[str, str]) -> list[str]:
         The opening elements.
     """
     summary = "; ".join(
-        f"{m['month']}: month end {_money(m['end'])}, lowest day {_money(m['lowest'])}"
-        for m in months
+        f"{_relative(index)}: month end {_money(m['end'])}, lowest day {_money(m['lowest'])}"
+        for index, m in enumerate(months)
     )
     return [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" '
@@ -144,7 +164,7 @@ def _frame(months: list[dict[str, Any]], colour: dict[str, str]) -> list[str]:
 
 
 def _axes(months: list[dict[str, Any]], scale: _Scale, colour: dict[str, str]) -> list[str]:
-    """Draw the grid, its amounts, the month names and each month's span.
+    """Draw the grid, its amounts, each month's distance from now and its span.
 
     Args:
         months: The forecast's months.
@@ -169,7 +189,7 @@ def _axes(months: list[dict[str, Any]], scale: _Scale, colour: dict[str, str]) -
         parts.append(
             f'<text x="{scale.x(index):.1f}" y="{BOTTOM + 24}" font-size="12" '
             f'text-anchor="middle" fill="{colour["secondary"]}">'
-            f"{MONTHS[int(month['month'][5:7]) - 1]}</text>"
+            f"{_relative(index)}</text>"
         )
         # The span of the month, from its lowest day up to its end.
         parts.append(
@@ -219,6 +239,8 @@ def _marks(months: list[dict[str, Any]], scale: _Scale, colour: dict[str, str]) 
 def _yearly(forecast: dict[str, Any], scale: _Scale, colour: dict[str, str]) -> list[str]:
     """Name each yearly scheduled payment beside the lowest day of its month.
 
+    The label under its month already says when.
+
     Args:
         forecast: forecast_balance's answer.
         scale: Where months and amounts go.
@@ -236,14 +258,28 @@ def _yearly(forecast: dict[str, Any], scale: _Scale, colour: dict[str, str]) -> 
         if index is None:
             continue
         left, low = scale.x(index) + 12, scale.y(months[index]["lowest"])
-        day = f"{int(payment['date'][8:])} {MONTHS[int(payment['date'][5:7]) - 1]}"
         parts.append(
             f'<text x="{left:.1f}" y="{low + 4:.1f}" font-size="12" '
             f'fill="{colour["secondary"]}">'
-            f"<tspan>{payment['payee'].title()} {_money(payment['amount'])}, {day}</tspan>"
+            f"<tspan>{payment['payee'].title()} {_money(payment['amount'])}</tspan>"
             f'<tspan x="{left:.1f}" dy="15">yearly, scheduled in YNAB</tspan></text>'
         )
     return parts
+
+
+def _outlook(months: list[dict[str, Any]]) -> str:
+    """Say whether money runs out, as the tool's message does, without naming a month.
+
+    Args:
+        months: The forecast's months, the current one first.
+
+    Returns:
+        E.g. "The balance stays above zero for the 4 months shown."
+    """
+    short = next((i for i, m in enumerate(months) if m["lowest"] < 0), None)
+    if short is None:
+        return f"The balance stays above zero for the {len(months)} months shown."
+    return f"The balance goes below zero {_relative(short)}."
 
 
 def chart(forecast: dict[str, Any], scheme: str) -> str:
@@ -265,7 +301,7 @@ def chart(forecast: dict[str, Any], scheme: str) -> str:
         *_marks(months, scale, colour),
         *_yearly(forecast, scale, colour),
         f'<text x="{LEFT - 40}" y="{HEIGHT - 18}" font-size="12" '
-        f'fill="{colour["secondary"]}">{forecast["message"].split(".")[0]}.</text>',
+        f'fill="{colour["secondary"]}">{_outlook(months)}</text>',
         "</svg>",
     ]
     return "\n".join(parts) + "\n"
@@ -369,20 +405,6 @@ def _bar(x: float, width: float, base: float, end: float, fill: str) -> str:
     )
 
 
-def _month_name(month: str, first: bool) -> str:
-    """Name a month on the axis: its year too in January and on the first label.
-
-    Args:
-        month: The month, YYYY-MM-01.
-        first: True for the first label of the axis.
-
-    Returns:
-        E.g. "Apr 2025", "Jul" or "Jan 2026".
-    """
-    name = MONTHS[int(month[5:7]) - 1]
-    return f"{name} {month[:4]}" if first or month[5:7] == "01" else name
-
-
 def _net_frame(trend: dict[str, Any], colour: dict[str, str]) -> list[str]:
     """Open the net worth SVG: accessible title and description, card, heading.
 
@@ -394,10 +416,11 @@ def _net_frame(trend: dict[str, Any], colour: dict[str, str]) -> list[str]:
         The opening elements.
     """
     months = trend["months"]
+    last = len(months) - 1
     summary = "; ".join(
-        f"{m['month'][:7]}: assets {_money(m['assets'])}, debts {_money(m['debts'])}, "
-        f"net worth {_money(m['net_worth'])}"
-        for m in months
+        f"{_relative(index - last)}: assets {_money(m['assets'])}, "
+        f"debts {_money(m['debts'])}, net worth {_money(m['net_worth'])}"
+        for index, m in enumerate(months)
     )
     heading = (
         f"Net worth: from {_signed(trend['first_net_worth'])} to "
@@ -420,7 +443,10 @@ def _net_frame(trend: dict[str, Any], colour: dict[str, str]) -> list[str]:
 
 
 def _net_axes(months: list[dict[str, Any]], scale: _NetScale, colour: dict[str, str]) -> list[str]:
-    """Draw the grid, its amounts, zero in ink, and every third month's name.
+    """Draw the grid, its amounts, zero in ink, and a few months' distance from now.
+
+    A label every six months back from the current one, and on the first month when it
+    stands far enough from the next label.
 
     Args:
         months: get_net_worth_trend's months.
@@ -442,11 +468,15 @@ def _net_axes(months: list[dict[str, Any]], scale: _NetScale, colour: dict[str, 
             f'<text x="{LEFT - 10}" y="{scale.y(value) + 4:.1f}" font-size="12" '
             f'text-anchor="end" fill="{colour["secondary"]}">{label}</text>'
         )
-    for index in range(0, len(months), 3):
+    last = len(months) - 1
+    ticks = list(range(last, -1, -6))
+    if ticks[-1] >= 3:
+        ticks.append(0)
+    for index in reversed(ticks):
         parts.append(
             f'<text x="{scale.x(index):.1f}" y="{NW_BOTTOM + 24}" font-size="12" '
             f'text-anchor="middle" fill="{colour["secondary"]}">'
-            f"{_month_name(months[index]['month'], index == 0)}</text>"
+            f"{_relative(index - last)}</text>"
         )
     return parts
 
@@ -511,8 +541,7 @@ def net_worth_chart(trend: dict[str, Any], scheme: str) -> str:
     first, last = months[0], months[-1]
     footer = (
         f"Debts down from {_money(-first['debts'])} to {_money(-last['debts'])}; "
-        f"net worth {_signed(trend['change'])} since the end of "
-        f"{MONTHS[int(first['month'][5:7]) - 1]} {first['month'][:4]}."
+        f"net worth {_signed(trend['change'])} since {_relative(1 - len(months))}."
     )
     parts = [
         *_net_frame(trend, colour),

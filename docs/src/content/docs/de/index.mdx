@@ -59,14 +59,14 @@ machen. Wie das funktioniert: [Bestätigung](/avenir-mcp/de/concepts/confirmatio
 Die Tools liefern strukturierte Daten, auf die sich der Agent verlassen kann – und
 die er Ihnen in klare Worte fasst.
 
-> **Sie:** Wie lief der August?
+> **Sie:** Wie lief der letzte Monat?
 
 Der Agent ruft [`get_budget_vs_actual`](/avenir-mcp/de/reference/tools/get-budget-vs-actual/)
 mit `{"month": "2026-08-01"}` auf und erhält für jede Kategorie, was budgetiert, was ausgegeben wurde und was übrig ist. Hier diese Antwort auf dem Demo-Plan, als Grafik:
 
-<BudgetChart rows={august} month="2026-08-01" />
+<BudgetChart rows={august} when="lastMonth" />
 
-> **Claude:** Der August blieb überall im Budget: Keine Kategorie ist überzogen. Die
+> **Claude:** Der letzte Monat blieb überall im Budget: Keine Kategorie ist überzogen. Die
 > Rechnungen sind bezahlt, für Lebensmittel sind 207,49 übrig und für Tennis 58,00, und die
 > 200,00 für den Urlaub sind unberührt.
 

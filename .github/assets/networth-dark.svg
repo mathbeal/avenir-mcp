@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="380" viewBox="0 0 720 380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
 <title id="title">Net worth: from −24,038 to +1,230 in 18 months, on the demo plan</title>
-<desc id="desc">2025-04: assets 3,160, debts −27,198, net worth −24,038; 2025-05: assets 4,234, debts −26,644, net worth −22,410; 2025-06: assets 5,254, debts −26,089, net worth −20,835; 2025-07: assets 6,129, debts −25,532, net worth −19,402; 2025-08: assets 5,571, debts −24,973, net worth −19,403; 2025-09: assets 6,681, debts −24,413, net worth −17,733; 2025-10: assets 7,815, debts −23,852, net worth −16,037; 2025-11: assets 8,882, debts −23,289, net worth −14,406; 2025-12: assets 8,382, debts −22,724, net worth −14,341; 2026-01: assets 9,602, debts −22,157, net worth −12,555; 2026-02: assets 10,784, debts −21,589, net worth −10,805; 2026-03: assets 13,674, debts −20,987, net worth −7,313; 2026-04: assets 15,015, debts −20,665, net worth −5,651; 2026-05: assets 16,342, debts −20,343, net worth −4,001; 2026-06: assets 17,760, debts −20,019, net worth −2,260; 2026-07: assets 19,181, debts −19,694, net worth −514; 2026-08: assets 20,554, debts −19,368, net worth 1,186; 2026-09: assets 20,271, debts −19,041, net worth 1,230</desc>
+<desc id="desc">17 months ago: assets 3,160, debts −27,198, net worth −24,038; 16 months ago: assets 4,234, debts −26,644, net worth −22,410; 15 months ago: assets 5,254, debts −26,089, net worth −20,835; 14 months ago: assets 6,129, debts −25,532, net worth −19,402; 13 months ago: assets 5,571, debts −24,973, net worth −19,403; 12 months ago: assets 6,681, debts −24,413, net worth −17,733; 11 months ago: assets 7,815, debts −23,852, net worth −16,037; 10 months ago: assets 8,882, debts −23,289, net worth −14,406; 9 months ago: assets 8,382, debts −22,724, net worth −14,341; 8 months ago: assets 9,602, debts −22,157, net worth −12,555; 7 months ago: assets 10,784, debts −21,589, net worth −10,805; 6 months ago: assets 13,674, debts −20,987, net worth −7,313; 5 months ago: assets 15,015, debts −20,665, net worth −5,651; 4 months ago: assets 16,342, debts −20,343, net worth −4,001; 3 months ago: assets 17,760, debts −20,019, net worth −2,260; 2 months ago: assets 19,181, debts −19,694, net worth −514; last month: assets 20,554, debts −19,368, net worth 1,186; this month: assets 20,271, debts −19,041, net worth 1,230</desc>
 <rect x="0.5" y="0.5" width="719" height="379" rx="12" fill="#1a1a19" stroke="#383835"/>
 <text x="24" y="40" font-size="18" font-weight="600" fill="#ffffff">Net worth: from −24,038 to +1,230 in 18 months</text>
 <text x="24" y="64" font-size="13" fill="#c3c2b7">get_net_worth_trend on the invented demo plan · assets above zero, debts below, at each month end</text>
@@ -18,12 +18,10 @@
 <text x="54" y="143.7" font-size="12" text-anchor="end" fill="#c3c2b7">20k</text>
 <line x1="64" x2="594" y1="104.0" y2="104.0" stroke="#383835" stroke-width="1"/>
 <text x="54" y="108.0" font-size="12" text-anchor="end" fill="#c3c2b7">30k</text>
-<text x="80.0" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">Apr 2025</text>
-<text x="165.1" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">Jul</text>
-<text x="250.1" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">Oct</text>
-<text x="335.2" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">Jan 2026</text>
-<text x="420.2" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">Apr</text>
-<text x="505.3" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">Jul</text>
+<text x="80.0" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">17 months ago</text>
+<text x="221.8" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">12 months ago</text>
+<text x="391.9" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">6 months ago</text>
+<text x="562.0" y="342" font-size="12" text-anchor="middle" fill="#c3c2b7">this month</text>
 <path d="M72.0,211.0 V203.7 A4.0,4.0 0 0 1 76.0,199.7 H84.0 A4.0,4.0 0 0 1 88.0,203.7 V211.0 Z" fill="#3987e5"/>
 <path d="M72.0,211.0 V304.0 A4.0,4.0 0 0 0 76.0,308.0 H84.0 A4.0,4.0 0 0 0 88.0,304.0 V211.0 Z" fill="#d95926"/>
 <path d="M100.4,211.0 V199.9 A4.0,4.0 0 0 1 104.4,195.9 H112.4 A4.0,4.0 0 0 1 116.4,199.9 V211.0 Z" fill="#3987e5"/>
@@ -85,5 +83,5 @@
 <text x="594.0" y="210.6" font-size="13" fill="#ffffff">Net worth 1,230</text>
 <rect x="578.0" y="273.9" width="10" height="10" rx="2" fill="#d95926"/>
 <text x="594.0" y="282.9" font-size="13" fill="#ffffff">Debts −19,041</text>
-<text x="24" y="362" font-size="12" fill="#c3c2b7">Debts down from 27,198 to 19,041; net worth +25,268 since the end of Apr 2025.</text>
+<text x="24" y="362" font-size="12" fill="#c3c2b7">Debts down from 27,198 to 19,041; net worth +25,268 since 17 months ago.</text>
 </svg>

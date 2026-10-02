@@ -40,17 +40,17 @@ you, and can be undone.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
-  <img alt="Asked how the September budget is doing, the agent reads the month with two read-only tools and answers: one category over budget, Restaurants by 22.50, everything else on track." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-light.svg" width="720">
+  <img alt="Asked how the budget is doing this month, the agent reads the month with two read-only tools and answers: one category over budget, Restaurants by 22.50, everything else on track." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-light.svg" width="720">
 </picture>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-dark.svg">
-  <img alt="get_net_worth_trend on the demo plan: over 18 months the debts shrink from 27,198 to 19,041 despite the car loan's interest, the assets grow, and the net worth rises from −24,038 to +1,230, with a dip for a car repair and another at Christmas." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-light.svg" width="720">
+  <img alt="get_net_worth_trend on the demo plan: over the last 18 months the debts shrink from 27,198 to 19,041 despite the car loan's interest, the assets grow, and the net worth rises from −24,038 to +1,230, with a dip for a car repair and another at Christmas." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-light.svg" width="720">
 </picture>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-dark.svg">
-  <img alt="forecast_balance on the demo plan: the month-end balance rises from September to December, with each month's lowest day and a yearly insurance payment scheduled on 20 October." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-light.svg" width="720">
+  <img alt="forecast_balance on the demo plan: the month-end balance rises from this month to three months ahead, with each month's lowest day and a yearly insurance payment scheduled next month." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-light.svg" width="720">
 </picture>
 
 All three come from the invented demo plan: a real reply of Claude Sonnet, and the net
