@@ -53,21 +53,26 @@ export function redirectPage(url) {
 }
 
 /**
+ * The script of the 404 page: the same path on the site, or its home page when the path is
+ * not under the base.
+ */
+export const NOT_FOUND_SCRIPT =
+  `var p=location.pathname,b=${JSON.stringify(BASE)};` +
+  `location.replace(p.indexOf(b)===0?${JSON.stringify(TARGET)}+p.slice(b.length)+location.search+location.hash:${JSON.stringify(TARGET)});`;
+
+/**
  * The page GitHub Pages answers for a path it does not have: the same path on the site,
  * or its home page when the path is not under the base.
  */
 export function notFoundPage() {
   const home = escape(TARGET);
-  const script =
-    `var p=location.pathname,b=${JSON.stringify(BASE)};` +
-    `location.replace(p.indexOf(b)===0?${JSON.stringify(TARGET)}+p.slice(b.length)+location.search+location.hash:${JSON.stringify(TARGET)});`;
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>avenir-mcp: moved</title>
 <meta name="robots" content="noindex">
-<script>${script}</script>
+<script>${NOT_FOUND_SCRIPT}</script>
 <noscript><meta http-equiv="refresh" content="0; url=${home}"></noscript>
 </head>
 <body>

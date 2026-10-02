@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { runInNewContext } from 'node:vm';
 import { test } from 'node:test';
-import { TARGET, notFoundPage, pagePath, redirects } from '../scripts/redirects.mjs';
+import { NOT_FOUND_SCRIPT, TARGET, notFoundPage, pagePath, redirects } from '../scripts/redirects.mjs';
 
 const built = ['index.html', 'fr/index.html', 'guides/classify/index.html', '404.html'];
 
@@ -44,11 +44,11 @@ test('a page name is escaped in the markup', () => {
 
 test('the 404 page sends any path under the base to the same path, and the rest home', () => {
   const html = notFoundPage();
-  const script = /<script>([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
+  assert.ok(html.includes(`<script>${NOT_FOUND_SCRIPT}</script>`));
   const visit = (/** @type {string} */ pathname, search = '', hash = '') => {
     let target = '';
     const location = { pathname, search, hash, replace: (/** @type {string} */ url) => (target = url) };
-    runInNewContext(script, { location });
+    runInNewContext(NOT_FOUND_SCRIPT, { location });
     return target;
   };
   assert.equal(visit('/avenir-mcp/old/page/', '?q=1', '#x'), `${TARGET}old/page/?q=1#x`);
