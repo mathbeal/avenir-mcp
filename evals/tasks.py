@@ -429,7 +429,7 @@ TASKS = [
     Task(
         "debts-down",
         "Am I paying off my debts? How much do I owe in total today, and by how much has my "
-        "net worth grown since the end of April 2025?" + FORMAT,
+        "net worth grown since the end of April 2025? Give both amounts to the cent." + FORMAT,
         answer=lambda t: _number(OWED)(t) and _number(NET_WORTH_GROWTH)(t),
         state=_unchanged,
         notes="The loans are tracking accounts; the student loan, paid off, is closed.",
