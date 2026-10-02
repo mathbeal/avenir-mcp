@@ -16,6 +16,7 @@ path = [
     "**/*.mdx",
     "**/*.json",
     "**/*.svg",
+    "**/*.png",
     "**/*.astro",
     "uv.lock",
     "lexdrift.lock",
