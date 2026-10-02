@@ -128,6 +128,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "Am I paying off my debts?" | `get_net_worth_trend` — assets, debts and net worth at each month end |
 | "If I lost my income, how long could I last?" | `get_runway` — months the money in the budget covers the usual spending |
 | "How much of my income do I keep?" | `get_savings_rate` — income, spending, saved and rate, month by month |
+| "Which targets are behind this month?" | `get_underfunded_targets` — what each still needs, most urgent first, against Ready to Assign |
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 

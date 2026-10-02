@@ -11,6 +11,7 @@ import create from '@snippets/es/create_category_preview.json?raw';
 import rename from '@snippets/es/update_category_preview.json?raw';
 import target from '@snippets/es/target_preview.json?raw';
 import budget from '@snippets/es/budget_preview.json?raw';
+import underfunded from '@snippets/es/underfunded_targets.json?raw';
 
 **Objetivo:** mantener la estructura de categorías acorde con su vida, y dar a cada
 categoría su importe.
@@ -18,7 +19,8 @@ categoría su importe.
 **Herramientas:** [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/),
 [`create_category`](/avenir-mcp/es/reference/tools/create-category/),
 [`update_category`](/avenir-mcp/es/reference/tools/update-category/),
-[`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/).
+[`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/),
+[`get_underfunded_targets`](/avenir-mcp/es/reference/tools/get-underfunded-targets/).
 
 ## Crear una categoría
 
@@ -65,6 +67,24 @@ saldo objetivo o pago de deuda y se sustituye o se quita; la pregunta lo dice an
 confirme.
 
 <Code code={target} lang="json" title="set_category_target" />
+
+## Ver qué objetivos van atrasados
+
+Pregunte *«¿qué objetivos van atrasados este mes?»* o *«¿puedo cubrir mis objetivos?»*:
+`get_underfunded_targets` lista las categorías cuyo objetivo aún necesita dinero este mes,
+con lo que según YNAB aún le falta este mes (`needed`, su importe Underfunded) y lo que le
+falta al objetivo en todo su periodo (`left`). Los más urgentes van primero: los objetivos
+con fecha, el más cercano primero; luego los mensuales y semanales; luego el resto, la
+mayor necesidad primero. Los totales comparan lo necesario con el Ready to Assign del mes:
+el agente puede decir si lo cubre todo, o cuánto.
+
+Aquí, en septiembre, Transporte ahorra para el abono de tren que se renueva el 1 de octubre
+y Tenis para la cuota del club, que vence el 1 de diciembre; Supermercado y Restaurantes
+piden más de lo presupuestado. En total necesitan 155,00, que Ready to Assign cubre. La
+herramienta no cambia nada: para financiar un objetivo, mueva dinero a él o fije su
+importe, como arriba.
+
+<Code code={underfunded} lang="json" title="get_underfunded_targets" />
 
 ## Deshacer
 

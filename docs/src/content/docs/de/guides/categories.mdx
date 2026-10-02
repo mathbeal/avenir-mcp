@@ -11,6 +11,7 @@ import create from '@snippets/de/create_category_preview.json?raw';
 import rename from '@snippets/de/update_category_preview.json?raw';
 import target from '@snippets/de/target_preview.json?raw';
 import budget from '@snippets/de/budget_preview.json?raw';
+import underfunded from '@snippets/de/underfunded_targets.json?raw';
 
 **Ziel:** die Struktur der Kategorien an Ihr Leben anpassen und jeder Kategorie ihren
 Betrag geben.
@@ -18,7 +19,8 @@ Betrag geben.
 **Tools:** [`list_category_groups`](/avenir-mcp/de/reference/tools/list-category-groups/),
 [`create_category`](/avenir-mcp/de/reference/tools/create-category/),
 [`update_category`](/avenir-mcp/de/reference/tools/update-category/),
-[`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/).
+[`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/),
+[`get_underfunded_targets`](/avenir-mcp/de/reference/tools/get-underfunded-targets/).
 
 ## Eine Kategorie anlegen
 
@@ -67,6 +69,25 @@ YNAB-App als monatliche Finanzierung, Zielsaldo oder Schuldentilgung angelegt un
 oder entfernt; die Frage sagt das, bevor Sie bestätigen.
 
 <Code code={target} lang="json" title="set_category_target" />
+
+## Sehen, welche Ziele zurückliegen
+
+Fragen Sie *„Welche Ziele liegen diesen Monat zurück?“* oder *„Reicht mein Geld für meine
+Ziele?“*: `get_underfunded_targets` listet die Kategorien, deren Ziel diesen Monat noch Geld
+braucht, mit dem, was laut YNAB diesen Monat noch fehlt (`needed`, sein Betrag
+Underfunded), und dem, was dem Ziel über seinen ganzen Zeitraum fehlt (`left`). Die
+dringendsten kommen zuerst: Ziele mit Datum, das nächste zuerst; dann monatliche und
+wöchentliche; dann die übrigen, der größte Bedarf zuerst. Die Summen stellen den Bedarf dem
+Ready to Assign des Monats gegenüber: Der Agent kann sagen, ob es alles deckt oder wie viel
+davon.
+
+Hier, im September, spart Mobilität für die Jahreskarte der Bahn, die am 1. Oktober
+verlängert wird, und Tennis für den Vereinsbeitrag, fällig am 1. Dezember; Lebensmittel und
+Restaurants verlangen mehr, als budgetiert ist. Zusammen brauchen sie 155,00, die Ready to
+Assign deckt. Das Tool ändert nichts: Um ein Ziel zu finanzieren, verschieben Sie Geld
+dorthin oder legen seinen Betrag fest, wie oben.
+
+<Code code={underfunded} lang="json" title="get_underfunded_targets" />
 
 ## Rückgängig machen
 

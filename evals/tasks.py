@@ -133,6 +133,36 @@ def _savings_answer(text: str) -> bool:
     return _number(savings_rate(date.today()))(text)
 
 
+def underfunded(month: str) -> tuple[float, str | None]:
+    """What the targets still need in a month, and the category whose dated target is due first.
+
+    A monthly target asks for its amount less what is budgeted; a target by a date asks
+    for an even share of its amount over the months left to its date, this one included,
+    less what is budgeted. The demo budget carries nothing over between months, and its
+    dated targets, created in September, have nothing spent in them yet. The month is
+    named in the task: the figure does not move with the date of the run.
+    """
+    needed, dated = 0, []
+    for cat_id, goal in demo.TARGETS.items():
+        due, budgeted = goal["goal_target_date"], demo.BUDGETED[cat_id]
+        if month < goal["goal_creation_month"]:
+            continue
+        if due is None:
+            share = goal["goal_target"]
+        else:
+            left = (int(due[:4]) - int(month[:4])) * 12 + int(due[5:7]) - int(month[5:7]) + 1
+            share = -(-goal["goal_target"] // left)
+            dated.append((due, cat_id))
+        needed += max(share - budgeted, 0)
+    return _milli(needed), min(dated)[1] if dated else None
+
+
+def _underfunded_answer(text: str) -> bool:
+    """The total the September targets need, and the rail card due first."""
+    total, first = underfunded("2026-09-01")
+    return _number(total)(text) and _words(str(first).removeprefix("cat-"))(text)
+
+
 DUPLICATE = 71.86
 RESTAURANTS_AUGUST = -_sum("cat-restaurants", "2026-08")
 RESTAURANTS_SEPTEMBER_OVER = round(
@@ -362,6 +392,19 @@ TASKS = [
             "The salary is the only income; the monthly transfer to the Savings account "
             "stays in the budget. September has no salary yet in the demo budget, so from "
             "October on its spending lowers the rate. The figure follows the date of the run."
+        ),
+        tags=["read"],
+    ),
+    Task(
+        "underfunded-targets",
+        "Which of my category targets still need money in September 2026, and how much do "
+        "they need in total? Which one is due soonest?" + FORMAT,
+        answer=_underfunded_answer,
+        state=_unchanged,
+        notes=(
+            "Groceries and Restaurants ask for more each month than is budgeted; Transport "
+            "(the rail card, due 1 October) and Tennis (the club, due 1 December) save for "
+            "a yearly fee. Rent and Subscriptions are funded."
         ),
         tags=["read"],
     ),

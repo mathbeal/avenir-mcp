@@ -59,6 +59,7 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "get_net_worth_trend",
             "get_runway",
             "get_savings_rate",
+            "get_underfunded_targets",
             "set_category_target",
         ]
     )

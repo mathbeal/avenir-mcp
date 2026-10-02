@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gives an agent 28 tools, 4 resources and 4 prompts over your YNAB plans. This
+avenir-mcp gives an agent 29 tools, 4 resources and 4 prompts over your YNAB plans. This
 page lists them by what you want to do. Each row gives a sentence you can say to the
 agent; the agent chooses the tool.
 
@@ -103,6 +103,7 @@ How it works: [Forecasting](/avenir-mcp/concepts/forecasting/).
 | *“Create a Pets category in Everyday.”* | [`create_category`](/avenir-mcp/reference/tools/create-category/) | W |
 | *“Rename Tennis to Sport.”* | [`update_category`](/avenir-mcp/reference/tools/update-category/) — also moves a category to another group | W |
 | *“Save 1,200 for the holidays by June 2027.”* | [`set_category_target`](/avenir-mcp/reference/tools/set-category-target/) — an amount by a date, or each month, week or year | W ↺ |
+| *“Which targets are behind this month?”* | [`get_underfunded_targets`](/avenir-mcp/reference/tools/get-underfunded-targets/) — what each target still needs, the most urgent first, against Ready to Assign | R |
 
 Guide: [Organise categories](/avenir-mcp/guides/categories/).
 

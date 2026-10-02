@@ -29,7 +29,7 @@ YNAB's API 1.87.0 has 44 operations: 14 used by avenir-mcp, 13 planned, 17 left 
 | `GET /plans/{plan_id}/money_movement_groups` | planned | Moves of money grouped as the user made them, for the monthly review. |
 | `GET /plans/{plan_id}/money_movements` | planned | Money moved between categories, for the monthly review. |
 | `GET /plans/{plan_id}/months` | covered | `get_spending_trends` |
-| `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_monthly_summary`, `get_spending_trends`, `move_money`, `set_category_budget`, `undo_operation` |
+| `GET /plans/{plan_id}/months/{month}` | covered | `get_budget_vs_actual`, `get_category_balances`, `get_monthly_summary`, `get_spending_trends`, `get_underfunded_targets`, `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/categories/{category_id}` | excluded | A month's categories come in one request with the month. |
 | `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` | covered | `move_money`, `set_category_budget`, `undo_operation` |
 | `GET /plans/{plan_id}/months/{month}/money_movement_groups` | planned | Moves of money grouped as the user made them in a month, for the monthly review. |
@@ -74,6 +74,7 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `get_runway` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
 | `get_savings_rate` | `GET /accounts`, `GET /categories`, `GET /transactions` | — |
 | `get_spending_trends` | `GET /months`, `GET /months/{month}` | — |
+| `get_underfunded_targets` | `GET /months/{month}` | — |
 | `list_accounts` | `GET /accounts` | — |
 | `list_category_groups` | `GET /categories` | — |
 | `list_plans` | `GET /plans` | — |

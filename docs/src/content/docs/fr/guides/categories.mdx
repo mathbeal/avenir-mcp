@@ -11,6 +11,7 @@ import create from '@snippets/fr/create_category_preview.json?raw';
 import rename from '@snippets/fr/update_category_preview.json?raw';
 import target from '@snippets/fr/target_preview.json?raw';
 import budget from '@snippets/fr/budget_preview.json?raw';
+import underfunded from '@snippets/fr/underfunded_targets.json?raw';
 
 **Objectif :** garder une structure de catégories fidèle à votre vie, et donner à chaque
 catégorie son montant.
@@ -18,7 +19,8 @@ catégorie son montant.
 **Outils :** [`list_category_groups`](/avenir-mcp/fr/reference/tools/list-category-groups/),
 [`create_category`](/avenir-mcp/fr/reference/tools/create-category/),
 [`update_category`](/avenir-mcp/fr/reference/tools/update-category/),
-[`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/).
+[`set_category_budget`](/avenir-mcp/fr/reference/tools/set-category-budget/),
+[`get_underfunded_targets`](/avenir-mcp/fr/reference/tools/get-underfunded-targets/).
 
 ## Créer une catégorie
 
@@ -65,6 +67,25 @@ comme financement mensuel, solde cible ou remboursement de dette et qu'il est re
 retiré ; la question le dit avant que vous confirmiez.
 
 <Code code={target} lang="json" title="set_category_target" />
+
+## Voir les objectifs en retard
+
+Demandez *« quels objectifs sont en retard ce mois-ci ? »* ou *« ai-je de quoi financer mes
+objectifs ? »* : `get_underfunded_targets` liste les catégories dont l'objectif manque
+encore d'argent ce mois-ci, avec ce qu'il leur faut encore ce mois selon YNAB (`needed`,
+son montant Underfunded) et ce qu'il manque à l'objectif sur toute sa période (`left`). Les
+plus urgents viennent d'abord : les objectifs à une date, le plus proche d'abord ; puis les
+mensuels et hebdomadaires ; puis les autres, le plus gros besoin d'abord. Les totaux
+comparent ce qu'il faut au Ready to Assign du mois : l'agent peut dire s'il couvre tout, ou
+combien.
+
+Ici, en septembre, Transports met de côté pour la carte de train renouvelée le 1er octobre
+et Tennis pour la cotisation du club due le 1er décembre ; Courses et Restaurants demandent
+plus que ce qui est budgété. Il leur faut 155,00 en tout, que le Ready to Assign couvre.
+L'outil ne change rien : pour financer un objectif, déplacez-y de l'argent ou fixez son
+montant, comme plus haut.
+
+<Code code={underfunded} lang="json" title="get_underfunded_targets" />
 
 ## Annuler
 

@@ -175,6 +175,32 @@ BUDGETED: dict[str, int] = {
 
 MONTHS = ["2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01"]
 
+# The targets the household set in YNAB, as YNAB returns them, amounts in milliunits.
+# Rent and subscriptions are fully funded each month; groceries and restaurants ask for
+# more than is budgeted. In September the household started saving for two yearly
+# fees: the rail card renewed on 1 October and the tennis club's membership, due on
+# 1 December. Holidays has no target: an evaluation task sets one.
+TARGETS: dict[str, dict[str, Any]] = {
+    cat_id: {
+        "goal_type": "NEED",
+        "goal_target": target,
+        "goal_target_date": due,
+        "goal_cadence": 0 if due else 1,
+        "goal_cadence_frequency": 1,
+        "goal_needs_whole_amount": None if due else True,
+        "goal_creation_month": created,
+        "goal_snoozed_at": None,
+    }
+    for cat_id, target, due, created in [
+        ("cat-rent", 950_000, None, "2026-06-01"),
+        ("cat-subscriptions", 13_490, None, "2026-06-01"),
+        ("cat-groceries", 450_000, None, "2026-06-01"),
+        ("cat-restaurants", 150_000, None, "2026-06-01"),
+        ("cat-transport", 250_000, "2026-10-01", "2026-09-01"),
+        ("cat-tennis", 480_000, "2026-12-01", "2026-09-01"),
+    ]
+}
+
 
 def _card(merchant: str, day: str) -> str:
     """A card payment label as a French bank writes it."""
