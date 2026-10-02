@@ -77,6 +77,7 @@ alone.
 | development tools, CI actions, the documentation site (minor and patch) | grouped, merged by itself once CI passes |
 | `fastmcp`, `httpx`, `pydantic` — they run in front of users' plans | one pull request each, reviewed by hand; the evaluation runs before a `fastmcp` update |
 | any major version | one pull request each, reviewed by hand |
+| the weekly refresh of the lock file | one pull request, reviewed by hand |
 | a known vulnerability | at once, whatever the day |
 
 A new release waits seven days before Renovate proposes it, so a broken or malicious
