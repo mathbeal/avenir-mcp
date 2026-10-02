@@ -78,7 +78,7 @@ worth and the forecast the documentation shows.
 - **Answers an agent can read.** Currency units, short typed answers, pagination,
   errors that say what to fix, bank text treated as untrusted.
 - **Verified.** 100 % line and branch coverage, and an evaluation where a real agent
-  works on an invented plan: 20/20 tasks.
+  works on an invented plan: 22/22 tasks.
 
 ## Install
 
