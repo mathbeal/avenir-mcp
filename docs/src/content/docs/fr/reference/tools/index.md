@@ -16,6 +16,7 @@ avenir-mcp déclare ces outils. Les outils de lecture sont toujours disponibles 
 | [`forecast_balance`](/avenir-mcp/fr/reference/tools/forecast-balance/) | Project the balance month by month and say when money would run out. |
 | [`get_budget_vs_actual`](/avenir-mcp/fr/reference/tools/get-budget-vs-actual/) | Share of each category's budget spent in a month, to see what is over or close. |
 | [`get_category_balances`](/avenir-mcp/fr/reference/tools/get-category-balances/) | Budgeted, spent (activity) and available (balance) per category for a month. |
+| [`get_debt_payoff_plan`](/avenir-mcp/fr/reference/tools/get-debt-payoff-plan/) | When the debts would be paid off, highest rate first (avalanche) or smallest first. |
 | [`get_monthly_summary`](/avenir-mcp/fr/reference/tools/get-monthly-summary/) | A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories. |
 | [`get_net_worth_trend`](/avenir-mcp/fr/reference/tools/get-net-worth-trend/) | Assets, debts and net worth at the end of each month, to see debts go down. |
 | [`get_runway`](/avenir-mcp/fr/reference/tools/get-runway/) | How many months the money available would last without income, at the usual spending. |

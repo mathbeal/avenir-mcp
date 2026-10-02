@@ -20,6 +20,20 @@ from urllib.parse import parse_qs, urlparse
 from evals import demo_budget as demo
 
 
+def _loan_terms(acc_id: str) -> dict[str, Any]:
+    """A loan's rates, minimum payments and escrow as YNAB gives them; null elsewhere."""
+    if acc_id not in demo.LOAN_TERMS:
+        return dict.fromkeys(
+            ("debt_interest_rates", "debt_minimum_payments", "debt_escrow_amounts")
+        )
+    since, rate, payment = demo.LOAN_TERMS[acc_id]
+    return {
+        "debt_interest_rates": {since: rate},
+        "debt_minimum_payments": {since: payment},
+        "debt_escrow_amounts": {since: 0},
+    }
+
+
 class DemoBudget:  # pylint: disable=too-many-instance-attributes
     """The demo budget's mutable state."""
 
@@ -163,6 +177,7 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                         "2026-08-31T18:02:11.000Z" if acc_id == demo.CHECKING else None
                     ),
                 }
+                | _loan_terms(acc_id)
             )
         return result
 

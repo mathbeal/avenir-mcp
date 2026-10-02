@@ -51,6 +51,8 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     # Rail card 35 and tennis club 40, both due by a date, groceries 50 and restaurants 30.
     assert tasks.underfunded("2026-09-01") == (155.0, "cat-transport")
     assert tasks.underfunded("2026-08-01") == (80.0, None)
+    # The 19,040.81 left on the car loan, at 4.5 % and 400 a month.
+    assert tasks.car_loan_payoff() == (53, 1972.8)
 
 
 def test_underfunded_targets_needs_the_total_and_the_target_due_first() -> None:

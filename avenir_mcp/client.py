@@ -627,6 +627,48 @@ async def get_accounts(plan_id: str) -> list[dict[str, Any]]:
     ]
 
 
+async def get_debt_terms(plan_id: str) -> list[dict[str, Any]]:
+    """Return the non-deleted accounts of a plan with their loan terms, dated.
+
+    YNAB gives a loan account's interest rates in thousandths of a percent (4500 is
+    4.5 %) and its minimum payments and escrow in milliunits, each keyed by the date
+    from which it holds; other accounts have none.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+
+    Returns:
+        List of dicts: id, name, type, on_budget, closed, balance in currency units,
+        and interest_rates (percent), minimum_payments and escrow_amounts (currency
+        units), each a dict from YYYY-MM-DD to its value, empty when YNAB has none.
+    """
+    logger.info("Fetching accounts and their loan terms for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/accounts")
+    return [
+        {
+            "id": acc["id"],
+            "name": acc["name"],
+            "type": acc["type"],
+            "on_budget": acc["on_budget"],
+            "closed": acc["closed"],
+            "balance": milliunit_to_amount(acc["balance"]),
+            "interest_rates": {
+                day: rate / 1000 for day, rate in (acc.get("debt_interest_rates") or {}).items()
+            },
+            "minimum_payments": {
+                day: milliunit_to_amount(amount)
+                for day, amount in (acc.get("debt_minimum_payments") or {}).items()
+            },
+            "escrow_amounts": {
+                day: milliunit_to_amount(amount)
+                for day, amount in (acc.get("debt_escrow_amounts") or {}).items()
+            },
+        }
+        for acc in data["data"]["accounts"]
+        if not acc.get("deleted", False)
+    ]
+
+
 _OPTIONAL_TX_FIELDS = ("memo", "category_id", "import_id")
 
 

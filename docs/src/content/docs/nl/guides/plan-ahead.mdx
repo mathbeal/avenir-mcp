@@ -10,6 +10,7 @@ import projection from '@snippets/nl/forecast.json?raw';
 import recurring from '@snippets/nl/recurring_charges.json?raw';
 import networth from '@snippets/nl/net_worth.json?raw';
 import runway from '@snippets/nl/runway.json?raw';
+import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
 
 **Doel:** weten of het geld volstaat, en wanneer het op zou raken, voordat het zover is.
 
@@ -98,6 +99,23 @@ De kredietverstrekker boekt de rente van de autolening elke maand op de leningre
 schuld daalt minder dan de aflossing. Een autoreparatie en de kerst drukken elk een maand.
 
 <Code code={networth} lang="json" title="get_net_worth_trend" />
+
+## Wanneer zijn de schulden afbetaald?
+
+Vraag *„wanneer is mijn autolening afbetaald als ik er 500 per maand in stop?“* of
+*„lawine of sneeuwbal?“*: `get_debt_payoff_plan` lost de schulden maand na maand af met het
+opgegeven bedrag. Elke maand krijgt elke schuld een twaalfde van haar jaarrente, daarna
+haar minimale betaling; de rest gaat eerst naar de duurste schuld (lawine, *avalanche*) of
+naar de kleinste (sneeuwbal, *snowball*), en een afbetaalde schuld maakt haar minimum vrij
+voor de volgende. Standaard komen beide volgordes, met de rente die de lawine bespaart.
+
+De rentes en minimale betalingen komen uit de leninggegevens in YNAB. Een creditcard heeft
+die daar niet: die telt tegen 0 % en een notitie zegt dat; geef de rente op in `overrides`.
+Zonder `monthly_budget` gelden de minimale betalingen. Hier is de autolening de enige
+schuld die overblijft, dus beide volgordes zijn gelijk: 100 per maand boven de termijn van
+400.
+
+<Code code={debtPayoff} lang="json" title="get_debt_payoff_plan" />
 
 ## Hoe lang zou het geld meegaan?
 

@@ -33,6 +33,12 @@ Cualquier herramienta que llame a YNAB puede devolver el error de YNAB: `Error c
 
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
 
+## [`get_debt_payoff_plan`](/avenir-mcp/es/reference/tools/get-debt-payoff-plan/)
+
+- `Unknown debt account(s) {given}: give names or ids of the open accounts that owe money: {names}.`
+- `No minimum payment is known and nothing was paid into the debt accounts over the last 3 complete months: give monthly_budget, or minimum_payment in overrides.`
+- `monthly_budget {given} is less than the minimum payments, {minimums}: give at least that much.`
+
 ## [`get_monthly_summary`](/avenir-mcp/es/reference/tools/get-monthly-summary/)
 
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
