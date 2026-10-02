@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 import threading
+from collections import deque
 from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -142,11 +143,61 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             "budgeted": budgeted_total,
             "activity": sum(c["activity"] for c in cats),
             "to_be_budgeted": earned - assigned,
-            "age_of_money": 18,
+            "age_of_money": self.age_of_money(month),
             "note": None,
             "deleted": False,
             "categories": cats,
         }
+
+    def months(self) -> list[dict[str, Any]]:
+        """Every month as YNAB lists them: the month's figures, without its categories."""
+        return [
+            {key: value for key, value in self.month(month).items() if key != "categories"}
+            for month in demo.MONTHS
+        ]
+
+    def age_of_money(self, month: str) -> int | None:
+        """The Age of Money at the end of a month, computed the way YNAB describes it.
+
+        Money coming into the budget accounts is queued, oldest first; each payment out of
+        them spends the oldest money still there, and its age is the days since that money
+        came in, weighted by amount. The figure is the average age of the last 10 payments,
+        rounded to the day; None before 10 payments have an age. Transfers between budget
+        accounts move no money in or out. A payment made before any money came in, as in
+        early June, has no age, and the part of a payment with no money left to spend is
+        not aged.
+        """
+        budget = {acc_id for acc_id, _, _, on_budget, _ in demo.ACCOUNTS if on_budget}
+        moves = sorted(
+            (
+                (tx["date"], tx["amount"] < 0, tx["amount"])
+                for tx in self.transactions.values()
+                if not tx["deleted"]
+                and tx["account_id"] in budget
+                and tx["transfer_account_id"] not in budget
+                and tx["amount"]
+                and tx["date"][:7] <= month[:7]
+            ),
+            key=lambda move: (move[0], move[1]),
+        )
+        queue: deque[list[Any]] = deque()
+        ages: list[float] = []
+        for day, spent, amount in moves:
+            when = date.fromisoformat(day)
+            if not spent:
+                queue.append([when, amount])
+                continue
+            left, aged, weighted = -amount, 0, 0
+            while left and queue:
+                taken = min(left, queue[0][1])
+                weighted += taken * (when - queue[0][0]).days
+                aged, left = aged + taken, left - taken
+                queue[0][1] -= taken
+                if not queue[0][1]:
+                    queue.popleft()
+            if aged:
+                ages.append(weighted / aged)
+        return round(sum(ages[-10:]) / 10) if len(ages) >= 10 else None
 
     def accounts(self) -> list[dict[str, Any]]:
         """The demo accounts with balances from their transactions."""
@@ -304,7 +355,7 @@ class Handler(BaseHTTPRequestHandler):
                 ]
                 return self._send(200, {"data": {"category_groups": groups}})
             if method == "GET" and rest == "/months":
-                months = [{"month": m} for m in demo.MONTHS]
+                months = STATE.months()
                 return self._send(200, {"data": {"months": months}})
             month_match = re.match(r"^/months/([^/]+)$", rest)
             if method == "GET" and month_match:

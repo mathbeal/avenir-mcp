@@ -70,6 +70,7 @@ answers. Amounts are read as people write them: `3,328.50`, `3 328,50`, `-22.5`.
 | 2026-09-29 | Sonnet | 19/19 | 2.4 | `set_category_target`, and a task asking to put 1,200 aside for the holidays by 1 June 2027: the agent sets the target with one preview and one confirmation |
 | 2026-10-02 | Sonnet | 20/20 | 2.6 | `get_net_worth_trend`, and a task asking whether the debts are going down, how much is owed today and how much the net worth has grown: the agent answers with the new tool |
 | 2026-10-02 | Sonnet | 22/22 | 2.4 | `get_runway` and `get_savings_rate`, with a task each: how many months the money would last without income, and how much of the income was kept; the agent answers each with its tool |
+| 2026-10-02 | Sonnet | 25/25 | 2.3 | `get_underfunded_targets`, `get_debt_payoff_plan` and `get_age_of_money`, with a task each; the agent answers each with its tool. A first run gave 24/25: in `debts-down` the agent rounded the net worth growth to the unit, so the question now asks for amounts to the cent |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A

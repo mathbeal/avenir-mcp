@@ -78,7 +78,7 @@ worth and the forecast the documentation shows.
 - **Answers an agent can read.** Currency units, short typed answers, pagination,
   errors that say what to fix, bank text treated as untrusted.
 - **Verified.** 100 % line and branch coverage, and an evaluation where a real agent
-  works on an invented plan: 22/22 tasks.
+  works on an invented plan: 25/25 tasks.
 
 ## Install
 
@@ -130,6 +130,7 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 | "How much of my income do I keep?" | `get_savings_rate` — income, spending, saved and rate, month by month |
 | "Which targets are behind this month?" | `get_underfunded_targets` — what each still needs, most urgent first, against Ready to Assign |
 | "When will my debts be paid off if I put 500 a month on them?" | `get_debt_payoff_plan` — avalanche or snowball, the month each debt is paid off and the interest |
+| "How old is my money?" | `get_age_of_money` — YNAB's Age of Money month by month, and its trend |
 | "Move 30 from Tennis to Restaurants." | `set_category_budget`, previewed and undoable |
 | "Undo that." | `undo_operation` |
 

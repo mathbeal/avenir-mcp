@@ -1,0 +1,35 @@
+{
+  "message": "Your money is 47 days old (2026-09, YNAB's Age of Money): what you spend came in 47 days before, on average. Over 30 days: you are living on last month's income, the buffer YNAB aims for. It went up by 30 days since 2026-07.",
+  "days": 47,
+  "as_of": "2026-09",
+  "months": [
+    {
+      "month": "2026-06",
+      "days": null,
+      "change": null
+    },
+    {
+      "month": "2026-07",
+      "days": 17,
+      "change": null
+    },
+    {
+      "month": "2026-08",
+      "days": 48,
+      "change": 31
+    },
+    {
+      "month": "2026-09",
+      "days": 47,
+      "change": -1
+    }
+  ],
+  "change": 30,
+  "trend": "up",
+  "notes": [
+    "Age of Money is YNAB's own figure: for the latest payments out of the budget accounts, how many days passed since that money came in, the oldest money spent first, averaged.",
+    "The current month's figure moves with each payment; a past month's is the one YNAB keeps for it.",
+    "No figure for 2026-06: YNAB did not have enough history of money in and out yet.",
+    "YNAB holds only 4 months up to 2026-09: all are shown."
+  ]
+}

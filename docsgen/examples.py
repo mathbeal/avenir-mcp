@@ -127,6 +127,8 @@ CALLS: list[Call] = [
         "get_underfunded_targets",
         {"plan_id": BUDGET, "month": "2026-09-01"},
     ),
+    # YNAB's own figure for every month the demo budget holds, June's still unknown.
+    Call("age_of_money", "get_age_of_money", {"plan_id": BUDGET}),
     Call("suggest_categories", "suggest_categories", {"plan_id": BUDGET, "limit": 3}, 3),
     Call("apply_preview", "apply_categories", _APPLY),
     Call(
