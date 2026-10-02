@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Keep avenir-mcp's dependencies current. Tooling merges itself once CI passes; what runs in front of users' budgets is reviewed by hand.",
+  "description": "Keep avenir-mcp's dependencies current. Minor and patch updates of tooling and the docs site merge themselves once CI passes; everything else, the weekly lock file refresh included, is reviewed by hand.",
   "extends": [
     "config:recommended",
     ":semanticCommits",
@@ -95,7 +95,7 @@
     "schedule": [
       "before 6am on monday"
     ],
-    "automerge": true
+    "automerge": false
   },
   "pre-commit": {
     "enabled": true
