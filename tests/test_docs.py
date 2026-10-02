@@ -113,7 +113,8 @@ def test_every_link_to_the_site_from_the_repository_reaches_a_page() -> None:
 
 
 _REPOSITORY_FILE = re.compile(
-    r"https://github\.com/mathbeal/avenir-mcp/(?:blob|tree)/main/([^\s)>\"`#]+)"
+    r"https://(?:github\.com/mathbeal/avenir-mcp/(?:blob|tree)"
+    r"|raw\.githubusercontent\.com/mathbeal/avenir-mcp)/main/([^\s)>\"`#?]+)"
 )
 
 

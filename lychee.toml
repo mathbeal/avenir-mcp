@@ -34,6 +34,7 @@ exclude = [
   # Files of the repository on main: tests/test_docs.py checks them in the checkout,
   # so a pull request can link to a file it adds.
   '^https://github\.com/mathbeal/avenir-mcp/(blob|tree)/main/',
+  '^https://raw\.githubusercontent\.com/mathbeal/avenir-mcp/main/',
   # GitHub pages that need a signed-in user or do not exist until used.
   '^https://github\.com/mathbeal/avenir-mcp/(issues/new|edit|compare|pull/new)',
   # YNAB's app answers only to a signed-in user.
