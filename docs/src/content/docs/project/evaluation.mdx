@@ -103,6 +103,25 @@ never tried it. That first wording also kept Sonnet from using codes the user ha
 in advance; the instruction now lets the user's own word in the conversation count. A client that can ask the user closes the gap: see
 [Allow changes](/avenir-mcp/getting-started/install/#allow-changes).
 
+## Local models
+
+On 2026-10-02, the full suite (now twenty-five tasks) ran against two models served locally
+by [Ollama](https://ollama.com), with `AVENIR_EVAL_BASE_URL` pointing at it and no key:
+
+| Model | Passed | Note |
+|---|---:|---|
+| mistral-nemo (7B) | 1/25 | picks a sensible tool in twenty tasks, but reads the result wrong |
+| qwen3:14b | — | about five minutes a task, too slow to finish the suite |
+
+mistral-nemo drives the server — it calls a tool in twenty of the twenty-five tasks — but
+turns the result into the right answer only once, and that once it refused to guess. On the
+four write tasks it changed the plan wrongly. A small local model is therefore usable to
+read, not to write: one more reason writes stay behind `AVENIR_MCP_WRITE=1`.
+
+The gap is size, not family: the hosted Mistral Large 3 and Qwen 3.7 Max above pass almost
+every task. The two runs use different suites, nine tasks there and twenty-five here, so
+this is a direction, not a head-to-head.
+
 ## Running it
 
 ```bash
@@ -121,3 +140,10 @@ uv run python -m evals.run_openai --model gpt-5.4-mini
 
 `AVENIR_EVAL_BASE_URL` points to another OpenAI-compatible API. Only the demo plan's
 invented data is sent.
+
+For a model served locally by [Ollama](https://ollama.com), no key is needed:
+
+```bash
+AVENIR_EVAL_BASE_URL=http://localhost:11434/v1 AVENIR_EVAL_API_KEY=ollama \
+  uv run python -m evals.run_openai --model mistral-nemo
+```

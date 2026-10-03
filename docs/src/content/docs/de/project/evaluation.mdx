@@ -108,6 +108,28 @@ das eigene Wort des Nutzers im Gespräch gelten. Ein Client, der den Nutzer frag
 schließt die Lücke: siehe
 [Änderungen erlauben](/avenir-mcp/de/getting-started/install/#änderungen-erlauben).
 
+## Lokale Modelle
+
+Am 2026-10-02 lief die vollständige Suite (jetzt fünfundzwanzig Aufgaben) gegen zwei lokal
+von [Ollama](https://ollama.com) bereitgestellte Modelle, wobei `AVENIR_EVAL_BASE_URL`
+darauf verweist und kein Schlüssel nötig ist:
+
+| Modell | Bestanden | Hinweis |
+|---|---:|---|
+| mistral-nemo (7B) | 1/25 | wählt in zwanzig Aufgaben ein sinnvolles Werkzeug, liest das Ergebnis aber falsch |
+| qwen3:14b | — | etwa fünf Minuten pro Aufgabe, zu langsam, um die Suite zu beenden |
+
+mistral-nemo steuert den Server — es ruft in zwanzig der fünfundzwanzig Aufgaben ein
+Werkzeug auf —, macht aus dem Ergebnis aber nur einmal die richtige Antwort, und dabei
+weigerte es sich zu raten. Bei den vier Schreibaufgaben änderte es den Plan falsch. Ein
+kleines lokales Modell ist daher zum Lesen brauchbar, nicht zum Schreiben: ein weiterer
+Grund, warum Schreibzugriffe hinter `AVENIR_MCP_WRITE=1` bleiben.
+
+Der Unterschied liegt an der Größe, nicht an der Familie: die oben genannten gehosteten
+Mistral Large 3 und Qwen 3.7 Max bestehen fast jede Aufgabe. Die beiden Läufe verwenden
+unterschiedliche Suites, neun Aufgaben dort und fünfundzwanzig hier, das ist also eine
+Tendenz, kein direkter Vergleich.
+
 ## Ausführen
 
 ```bash
@@ -126,3 +148,10 @@ uv run python -m evals.run_openai --model gpt-5.4-mini
 
 `AVENIR_EVAL_BASE_URL` verweist auf eine andere OpenAI-kompatible API. Nur die erfundenen
 Daten des Demo-Plans werden gesendet.
+
+Für ein lokal von [Ollama](https://ollama.com) bereitgestelltes Modell ist kein Schlüssel nötig:
+
+```bash
+AVENIR_EVAL_BASE_URL=http://localhost:11434/v1 AVENIR_EVAL_API_KEY=ollama \
+  uv run python -m evals.run_openai --model mistral-nemo
+```

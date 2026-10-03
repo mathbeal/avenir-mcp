@@ -107,6 +107,27 @@ eigen woord van de gebruiker in het gesprek meetellen. Een client die de gebruik
 vragen, dicht het gat: zie
 [Wijzigingen toestaan](/avenir-mcp/nl/getting-started/install/#wijzigingen-toestaan).
 
+## Lokale modellen
+
+Op 2026-10-02 liep de volledige suite (nu vijfentwintig taken) tegen twee modellen die
+lokaal door [Ollama](https://ollama.com) werden aangeboden, met `AVENIR_EVAL_BASE_URL` die
+ernaar verwijst en zonder sleutel:
+
+| Model | Geslaagd | Opmerking |
+|---|---:|---|
+| mistral-nemo (7B) | 1/25 | kiest in twintig taken een zinnig hulpmiddel, maar leest het resultaat verkeerd |
+| qwen3:14b | — | ongeveer vijf minuten per taak, te traag om de suite af te maken |
+
+mistral-nemo bestuurt de server — het roept in twintig van de vijfentwintig taken een
+hulpmiddel aan — maar maakt van het resultaat slechts één keer het juiste antwoord, en die
+keer weigerde het te gokken. Bij de vier schrijftaken wijzigde het het plan verkeerd. Een
+klein lokaal model is daarom bruikbaar om te lezen, niet om te schrijven: nog een reden
+waarom schrijfacties achter `AVENIR_MCP_WRITE=1` blijven.
+
+Het verschil is grootte, niet familie: de hierboven gehoste Mistral Large 3 en Qwen 3.7 Max
+slagen voor bijna elke taak. De twee runs gebruiken verschillende suites, negen taken daar
+en vijfentwintig hier, dus dit is een richting, geen directe vergelijking.
+
 ## Uitvoeren
 
 ```bash
@@ -125,3 +146,10 @@ uv run python -m evals.run_openai --model gpt-5.4-mini
 
 `AVENIR_EVAL_BASE_URL` wijst naar een andere OpenAI-compatibele API. Alleen de verzonnen
 gegevens van het demoplan worden verstuurd.
+
+Voor een model dat lokaal door [Ollama](https://ollama.com) wordt aangeboden, is geen sleutel nodig:
+
+```bash
+AVENIR_EVAL_BASE_URL=http://localhost:11434/v1 AVENIR_EVAL_API_KEY=ollama \
+  uv run python -m evals.run_openai --model mistral-nemo
+```
