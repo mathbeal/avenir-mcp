@@ -22,7 +22,7 @@ import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
 
 <Steps>
 
-1. **Vraag het, met wat je weet.**
+1. **Stel vragen op basis van wat u weet.**
 
    > **Jij:** Als ik 3.200 per maand verdien, komen mijn rekeningen dan vóór het eind van
    > het jaar onder nul?
@@ -32,13 +32,13 @@ import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
 
    <Code code={projection} lang="json" title="forecast_balance (fragment)" />
 
-3. **De agent leest je de aannames voor**, vóór de conclusie:
+3. **De makelaar leest de aannames aan u voor** voordat de overeenkomst wordt gesloten:
 
-   > **Claude:** Uitgaande van 3.928,50 op Betaalrekening en Spaarrekening, met 3.200 per maand erin,
-   > je terugkerende kosten (huur 950, boodschappen ongeveer 182,58, elektriciteit 64,20,
-   > de trein 45, tennis 22, internet 29,99, telefoon 19,99, Streamflix 13,49) en ongeveer 69 aan overige
-   > uitgaven, blijft het saldo groeien: het laagste punt, 3.928,50, is vandaag. Komt er
-   > iets aan dat ik moet toevoegen?
+   > **Claude:** U begint met 3.928,50 op uw betaal- en spaarrekening, waarbij er maandelijks 3.200
+   > wordt bijgeschreven. Uw vaste lasten (huur 950, boodschappen ongeveer 182,58, elektriciteit 64,20, de
+   > trein 45, tennis 22, internet 29,99, telefoon 19,99, Streamflix 13,49) en ongeveer 69 aan overige
+   > uitgaven, blijft het saldo groeien: het laagste punt, 3.928,50, is vandaag. Zijn er nog
+   > uitgaven die ik zou moeten toevoegen?
 
 4. **Je corrigeert.** Voeg toe wat de geschiedenis niet kan weten:
 
@@ -51,27 +51,27 @@ import debtPayoff from '@snippets/nl/debt_payoff.json?raw';
 
 ## Wat de prognose aanneemt
 
-| Aanname | Waar ze vandaan komt | Wijzigen met |
+| Aanname | Herkomst | Wijzigen in |
 |---|---|---|
-| Beginsaldo | het huidige saldo van de open budgetrekeningen | `account_ids` |
-| Terugkerende kosten en inkomsten | dezelfde begunstigde in 3 van de laatste 4 volle maanden, elke maand binnen 20 % van zijn mediaan | — (teruggegeven in `assumptions.recurring`) |
-| Overige uitgaven | gemiddelde van de laatste 3 volle maanden, zonder terugkerende kosten | `variable_monthly` |
-| Inkomsten | wat je opgeeft; anders het gemiddelde van de laatste 3 maanden | `monthly_income` |
-| Eenmalige bedragen | alleen wat je opgeeft | `one_offs` |
+| Beginsaldo | het huidige saldo van de openstaande rekeningen binnen het budget |  `account_ids`|
+| Terugkerende uitgaven en inkomsten | dezelfde begunstigde in 3 van de laatste 4 volledige maanden, elke maand binnen 20 % van de mediaan | — (teruggegeven in `assumptions.recurring`) |
+| Overige uitgaven | gemiddelde van de laatste 3 volledige maanden, exclusief terugkerende kosten |  `variable_monthly`|
+| Inkomsten | wat u opgeeft; anders het gemiddelde van de laatste 3 maanden |  `monthly_income`|
+| Eenmalige bedragen | uitsluitend wat u opgeeft |  `one_offs`|
 
 Details: [Prognose](/avenir-mcp/nl/concepts/forecasting/).
 
 ## Het antwoord lezen
 
 - `months[].start`, `inflows`, `outflows`, `end`: het saldo en de stromen van de maand.
-- `months[].lowest`: het laagste punt binnen de maand, dag voor dag – het punt dat je
-  vertelt of een betaling zou mislukken.
+- `months[].lowest`: het laagste punt binnen de maand, dag voor dag — het punt dat aangeeft
+  of een betaling zou worden geweigerd.
 - `first_shortfall`: de eerste maand waarvan het laagste punt onder nul ligt, of `null`.
 
-<Aside type="caution" title="Een projectie, geen voorspelling">
-Ze trekt je recente maanden door. Een vakantie, een jaarlijkse belasting of een eenmalige
-aankoop daarin verschuift de gemiddelden; een nieuwe uitgave blijft onzichtbaar tot je haar
-toevoegt. Lees de aannames vóór de conclusie.
+<Aside type="caution" title="Een prognose, geen voorspelling">
+Het is een voortzetting van de afgelopen maanden. Een vakantie, een jaarlijkse belastingafdracht of een eenmalige aankoop in die periode
+beïnvloedt de gemiddelden; een nieuwe uitgave is pas zichtbaar wanneer u deze toevoegt. Lees de aannames
+voordat u conclusies trekt.
 </Aside>
 
 ## De uitgaven die elke maand terugkomen
@@ -127,10 +127,9 @@ gezamenlijke spaarrekening en de autolening, tellen niet mee en staan in `left_o
 wordt geen inkomen aangenomen. Geld dat naar een trackingrekening met een bezitting (sparen,
 beleggingen) gaat, is geen uitgave, zoals in `get_savings_rate`; een aflossing wel.
 
-Noem in `essential_groups` de categoriegroepen die je niet zou kunnen stoppen met betalen,
-voor een tweede looptijd op die alleen: hier vaste lasten en dagelijkse uitgaven. Het
-demobudget heeft pas sinds juni transacties: het gemiddelde loopt over drie maanden, en
-een opmerking zegt dat.
+Noem de categorieën waarvoor u de betalingen geen moment zou kunnen staken
+`essential_groups`om alleen daarmee een tweede startbaan te financieren: hier gaat het om de rekeningen en de dagelijkse uitgaven. Het voorbeeldbudget bevat
+alleen transacties vanaf juni, dus het gemiddelde is over drie maanden berekend, en dat wordt ook vermeld in een opmerking.
 
 <Code code={runway} lang="json" title="get_runway" />
 
@@ -138,6 +137,6 @@ een opmerking zegt dat.
 
 > **Jij:** Bereid hiermee het budget van oktober voor.
 
-De agent stelt de bedragen van volgende maand voor, categorie per categorie – eerst de
-terugkerende kosten, dan de rest op basis van recente uitgaven – en past de bedragen die je
-accepteert toe met `set_category_budget`, elk als eigen wijziging met voorbeeld.
+De agent stelt de bedragen voor de komende maand per categorie voor — eerst de terugkerende kosten,
+daarna de overige bedragen op basis van recente uitgaven — en past de bedragen toe waarmee u akkoord gaat
+`set_category_budget`, waarbij u telkens één wijziging in het voorbeeld kunt bekijken.

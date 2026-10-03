@@ -7,20 +7,20 @@ sidebar:
 
 ## Bekende beperkingen
 
-| Gebied | Beperking | Omweg |
+| Gebied | Beperking | Oplossing |
 |---|---|---|
-| Bevestigingscodes | in het geheugen bewaard: een herstart van de server vergeet ze | vraag opnieuw om een nieuw voorbeeld |
-| Ongedaan maken | beperkt tot de computer waarvan het journaal de operatie heeft vastgelegd; een ongedaanmaking kan niet ongedaan worden gemaakt | de wijziging opnieuw doen |
-| `approve_transactions` | wordt meteen toegepast, zonder voorbeeld | het haalt alleen de controlemarkering van YNAB weg |
-| `import_transactions` | wordt meteen toegepast, zonder voorbeeld; hier niet ongedaan te maken | het haalt alleen op wat de bank al heeft; verwijder een transactie in YNAB om haar terug te draaien |
-| `update_category`, `create_category` | niet ongedaan te maken; de API van YNAB kan geen categorie verwijderen | terug hernoemen; de categorie in YNAB verbergen |
-| HTTP-transport | gewoon HTTP, één gedeeld token, geen gebruikersaccounts | houd het op `127.0.0.1`, of gebruik stdio |
-| Openbare of gedeelde server | niet ondersteund: geen gebruikersaccounts, en de voorwaarden van YNAB eisen OAuth voor de plans van anderen | ieder draait een eigen avenir-mcp – zie de [juridische informatie](/avenir-mcp/nl/project/legal/) |
-| Gesplitste transacties | nooit voorgesteld of opnieuw gecategoriseerd: hun regels dragen de categorieën; `split_transaction` splitst er een, maar de API van YNAB kan een splitsing niet wijzigen of ongedaan maken | wijzig of herstel ze in YNAB |
-| Suggesties | hebben een geschiedenis nodig: een winkelier die nooit is gecategoriseerd, krijgt er geen | de agent stelt voor, jij beslist |
-| Prognose | trekt de laatste maanden door, plus de geplande transacties van YNAB; een kwartaal- of jaarlijkse kostenpost zonder planning keert volgens haar definitie niet terug | plan haar in YNAB, of geef haar door als `one_offs` |
-| Valuta | bedragen worden als getallen getoond, zonder valutasymbool | — |
-| Python | 3.12 tot 3.14; 3.15 wacht op een afhankelijkheid (beartype) | — |
+| Bevestigingscodes | worden in het geheugen bewaard: bij een herstart van de server gaan ze verloren | vraag opnieuw om een voorbeeld |
+| Ongedaan maken | geldt alleen voor de computer waarop de bewerking in het journaal is vastgelegd; het ongedaan maken zelf kan niet ongedaan worden gemaakt | voer de wijziging opnieuw uit |
+|  `approve_transactions`| wordt onmiddellijk toegepast, zonder voorbeeld | hiermee wordt alleen de controlevlag van YNAB gewist |
+|  `import_transactions`| wordt onmiddellijk toegepast, zonder voorbeeldweergave; kan hier niet ongedaan worden gemaakt | het haalt alleen de gegevens op die de bank al heeft; verwijder een transactie in YNAB om deze terug te draaien |
+| `update_category`,  `create_category`| kan niet ongedaan worden gemaakt; de API van YNAB kan geen categorie verwijderen | hernoem de categorie terug; verberg de categorie in YNAB |
+| HTTP-transport | gewone HTTP, één gedeeld token, geen gebruikersaccounts | laat het ingeschakeld`127.0.0.1`, of gebruik stdio |
+| Openbare of gedeelde server | niet ondersteund: geen gebruikersaccounts, en de voorwaarden van YNAB vereisen OAuth voor abonnementen van anderen | elke persoon draait zijn eigen avenir-mcp — zie de [juridische kennisgeving](/avenir-mcp/project/legal/) |
+| Gesplitste transacties | nooit voorgesteld of gehercategoriseerd: de regels bevatten de categorieën;  één transactie kan worden `split_transaction`gesplitst, maar de API van YNAB kan een splitsing niet wijzigen of ongedaan maken | wijzig of maak ze ongedaan in YNAB |
+| Suggesties | vereist een geschiedenis: een nooit geclassificeerde handelaar krijgt geen suggesties | de agent doet een voorstel, u beslist |
+| Prognose | bouwt voort op de afgelopen maanden, plus de geplande transacties van YNAB; een driemaandelijkse of jaarlijkse afschrijving zonder planning is per definitie geen terugkerende transactie | plan deze in YNAB in, of geef deze door als  `one_offs`|
+| Valuta | bedragen worden weergegeven als getallen, zonder valutasymbool | — |
+| Python | 3.12 tot en met 3.14; 3.15 wacht op een afhankelijkheid (beartype) | — |
 
 ## Roadmap
 
@@ -32,4 +32,4 @@ sidebar:
 - De minimale Python-versie verlagen zodra de afhankelijkheden het toelaten.
 - De evaluatie draaien via andere clients dan Claude Code, en met lokale modellen.
 
-Mis je iets? [Stel een functie voor](/avenir-mcp/nl/project/propose-a-feature/).
+Ontbreekt er iets? [Stel een functie voor](/avenir-mcp/project/propose-a-feature/).

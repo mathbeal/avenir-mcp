@@ -10,22 +10,20 @@ sidebar:
 <details>
 <summary>Mijn client toont de tools van avenir-mcp niet</summary>
 
-1. Controleer dat de server verbonden is: `claude mcp list`, of het MCP-paneel van je
-   client.
-2. Draai `uvx avenir-mcp` in een terminal. Het hoort stil op een client te wachten; een fout
-   die daar verschijnt, is de fout die je client verbergt.
-3. Herstart de client na het bewerken van zijn configuratie.
-4. Controleer dat `uv` in het `PATH` staat dat je client ziet. Grafische applicaties zien
-   het `PATH` van je shell misschien niet: geef het volledige pad naar `uvx` op in de
-   configuratie.
+1. Controleer of de server verbonden is: `claude mcp list`, of via het MCP-paneel van uw client.
+2. Voer  uit in`uvx avenir-mcp` een terminal. Het programma zou stil moeten wachten op een client; een foutmelding
+   die daar wordt weergegeven, is dezelfde die door uw client wordt verborgen.
+3. Start de client opnieuw op nadat u de configuratie ervan hebt aangepast.
+4. Controleer of  `uv`zich bevindt op de  die uw`PATH` client ziet. Grafische toepassingen zien mogelijk de
+    van`PATH` uw shell niet: geef het volledige pad naar  op in`uvx` de configuratie.
 
 </details>
 
 <details>
 <summary>De tools die mijn plan wijzigen ontbreken</summary>
 
-avenir-mcp is alleen lezend tenzij zijn omgeving `AVENIR_MCP_WRITE=1` bevat – precies `1`.
-Herstart de server nadat je het hebt gewijzigd.
+avenir-mcp is alleen-lezen, tenzij de omgeving precies  `AVENIR_MCP_WRITE=1`— bevat`1`.
+Start de server opnieuw op nadat u dit hebt gewijzigd.
 
 </details>
 
@@ -71,19 +69,17 @@ dankzij delta-synchronisatie. Zie
 <details>
 <summary>De agent blijft <code>confirmation_required</code> antwoorden</summary>
 
-Je client kan geen bevestigingsvenster tonen, dus gaf avenir-mcp een voorbeeld en een code
-terug. Zeg de agent dat je akkoord gaat: hij roept opnieuw aan met de code. Een code is 10
-minuten geldig en werkt één keer; vraag na een herstart van de server om een nieuw
-voorbeeld.
+Uw klant kan geen bevestigingsvenster weergeven, dus heeft avenir-mcp een voorbeeld en een code teruggestuurd.
+Laat de medewerker weten dat u akkoord gaat: hij belt opnieuw met de code. Een code is 10 minuten geldig en werkt
+één keer; vraag na een herstart van de server om een nieuw voorbeeld.
 
 </details>
 
 <details>
 <summary><code>The plan changed between the preview and the answer</code></summary>
 
-Er is iets aan een transactie veranderd tussen het voorbeeld en je antwoord – jij in YNAB,
-een import, een andere agent. Vraag het opnieuw: het nieuwe voorbeeld laat de huidige
-toestand zien.
+Er is iets veranderd aan een transactie tussen het voorbeeld en uw antwoord — door u in YNAB, een
+import of een andere gebruiker. Vraag het nogmaals: het nieuwe voorbeeld geeft de huidige stand van zaken weer.
 
 </details>
 
@@ -101,9 +97,9 @@ is al ongedaan gemaakt, elders gedaan, of het journaalbestand is veranderd. Zie
 <details>
 <summary>Waar zie ik wat de server doet?</summary>
 
-Stel `AVENIR_MCP_LOG_LEVEL=INFO` in (elke aanroep en elk verzoek) of `DEBUG` (alles).
-Diagnoses gaan naar stderr, dat je client in zijn MCP-logs bewaart – in Claude Code toont
-`claude --debug` ze. stdout is van het protocol.
+Stel in  `AVENIR_MCP_LOG_LEVEL=INFO`(elke oproep en elk verzoek) of  `DEBUG`(alles).
+Diagnostische gegevens worden naar stderr gestuurd, die uw client in zijn MCP-logbestanden bewaart — in Claude Code
+`claude --debug`worden deze weergegeven. stdout behoort tot het protocol.
 
 </details>
 

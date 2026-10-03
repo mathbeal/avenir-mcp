@@ -1,15 +1,15 @@
 ---
 title: Functies
-description: Alles wat avenir-mcp kan, met wat je vraagt en welke tool antwoordt.
+description: Alles wat avenir-mcp kan doen, met de vraag die u moet stellen en de tool die daarop antwoordt.
 sidebar:
   order: 3
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp geeft een agent 31 tools, 4 resources en 4 prompts voor je YNAB-plans. Deze
-pagina ordent ze naar wat je wilt doen. Elke regel geeft een zin die je tegen de agent kunt
-zeggen; de agent kiest de tool.
+avenir-mcp biedt een agent 31 hulpmiddelen, 4 bronnen en 4 aanwijzingen met betrekking tot uw YNAB-plannen. Op deze
+pagina zijn deze gerangschikt op basis van wat u wilt doen. Elke rij bevat een zin die u tegen de
+agent kunt zeggen; de agent kiest vervolgens het hulpmiddel.
 
 <Aside type="note">
 **L** = alleen lezen, altijd beschikbaar. **S** = schrijven, beschikbaar met
@@ -18,10 +18,9 @@ zeggen; de agent kiest de tool.
 </Aside>
 
 <Aside type="tip" title="Plan of budget?">
-YNAB [noemt een budget nu een **plan**](https://web.archive.org/web/20260112213044/https://www.ynab.com/blog/budget-tab-breakdown), en de tools van avenir-mcp ook (`list_plans`,
-`plan_id`). Zeg wat je wilt: de agent begrijpt beide en antwoordt met jouw woord. „Mijn
-budget voor Restaurants“ betekent nog steeds het bedrag dat aan die categorie is
-toegewezen.
+YNAB [noemt een budget nu een **plan**](https://web.archive.org/web/20260112213044/https://www.ynab.com/blog/budget-tab-breakdown), en dat geldt ook voor de tools van avenir-mcp (`list_plans`,
+`plan_id`). Gebruik de term die u het liefst gebruikt: de agent begrijpt beide en reageert met uw
+woord. "Mijn budget voor restaurants" betekent nog steeds het bedrag dat aan die categorie is toegewezen.
 </Aside>
 
 ## Rondkijken
@@ -37,9 +36,9 @@ toegewezen.
 | *„Welke facturen moeten vóór de 10e betaald worden?“* | [`list_scheduled_transactions`](/avenir-mcp/nl/reference/tools/list-scheduled-transactions/) – geplande transacties herhaald volgens hun frequentie, inkomend en uitgaand | L |
 | *„Waar ben ik op geabonneerd, en wat kost het per jaar?“* | [`find_recurring_charges`](/avenir-mcp/nl/reference/tools/find-recurring-charges/) – uitgaven die bijna elke maand terugkomen, de duurste per jaar eerst | L |
 
-De plans, rekeningen en categorieën worden ook aangeboden als
-[resources](/avenir-mcp/nl/reference/resources-and-prompts/) die je client zonder toolaanroep
-aan een gesprek kan koppelen.
+De plannen, rekeningen en categorieën fungeren tevens als
+[bronnen](/avenir-mcp/reference/resources-and-prompts/) die uw klant aan een
+gesprek kan toevoegen zonder dat daarvoor een tool hoeft te worden opgeroepen.
 
 ## Een maand begrijpen
 
@@ -56,14 +55,14 @@ Handleiding: [Een maand doornemen](/avenir-mcp/nl/guides/monthly-review/).
 
 ## Transacties categoriseren
 
-| Je zegt | Tool | |
+| U zegt | Functie | |
 |---|---|---|
-| *„Haal de nieuwste transacties van mijn bank op.“* | [`import_transactions`](/avenir-mcp/nl/reference/tools/import-transactions/) – wat Import in YNAB doet, meteen toegepast | S |
-| *„Wat heeft nog een categorie nodig?“* | [`suggest_categories`](/avenir-mcp/nl/reference/tools/suggest-categories/) – openstaande transacties, met een suggestie als je geschiedenis duidelijk is | L |
-| *„Ja, pas dat toe.“* | [`apply_categories`](/avenir-mcp/nl/reference/tools/apply-categories/) – één bevestigde batch | S ↺ |
-| *„Zet een vlag op de transacties die ik in YNAB moet nakijken.“* | [`flag_transactions`](/avenir-mcp/nl/reference/tools/flag-transactions/) – een gekleurde vlag, om in YNAB te bekijken | S ↺ |
-| *„Splits deze bon: 81,15 boodschappen, 5,25 huishouden.“* | [`split_transaction`](/avenir-mcp/nl/reference/tools/split-transaction/) – één transactie over meerdere categorieën; ongedaan te maken in YNAB, niet hier | S |
-| *„Markeer ze als gecontroleerd.“* | [`approve_transactions`](/avenir-mcp/nl/reference/tools/approve-transactions/) – haalt de markering *unapproved* van YNAB weg | S |
+| *“Haal de meest recente transacties van mijn bank op.”* | [`import_transactions`](/avenir-mcp/reference/tools/import-transactions/) — wat de functie ‘Importeren’ in YNAB doet, direct toegepast | W |
+| *“Wat heeft nog een categorie nodig?”* | [`suggest_categories`](/avenir-mcp/reference/tools/suggest-categories/) — transacties in afwachting, met een suggestie zodra uw transactiegeschiedenis volledig is | R |
+| *“Ja, pas dat toe.”* | [`apply_categories`](/avenir-mcp/reference/tools/apply-categories/) — één bevestigde batch | W ↺ |
+| *“Markeer de transacties die ik in YNAB moet controleren.”* | [`flag_transactions`](/avenir-mcp/reference/tools/flag-transactions/) — een gekleurde markering, om in YNAB te bekijken | W ↺ |
+| *“Splits deze bon: 81,15 boodschappen, 5,25 huishoudelijke artikelen.”* | [`split_transaction`](/avenir-mcp/reference/tools/split-transaction/) — één transactie die onder meerdere categorieën valt; ongedaan gemaakt in YNAB, niet hier | W |
+| *“Markeer ze als gecontroleerd.”* | [`approve_transactions`](/avenir-mcp/reference/tools/approve-transactions/) — verwijdert de *niet-goedgekeurde* markering in YNAB | W |
 
 Suggesties herkennen een winkelier over zijn bankomschrijvingen heen
 (`CB MARKET FRESH FACT 050926 525130******1` en `… 190926 …` zijn dezelfde winkel), leren
@@ -95,10 +94,10 @@ winkelier, hooguit 3 dagen uit elkaar). Handleidingen:
 | *„Zet Restaurants voor september op 150.“* | [`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/) | S ↺ |
 | *„Verschuif 30 van Tennis naar Restaurants.“* | [`move_money`](/avenir-mcp/nl/reference/tools/move-money/) – beide categorieën in één bevestiging | S ↺ |
 
-De prognose zet de geplande transacties van YNAB op hun data, vindt terugkerende kosten in
-je geschiedenis, middelt de rest en laat je je inkomen en eenmalige bedragen opgeven.
-Handleiding: [Vooruit plannen](/avenir-mcp/nl/guides/plan-ahead/).
-Hoe het werkt: [Prognose](/avenir-mcp/nl/concepts/forecasting/).
+De prognose plaatst de geplande transacties van YNAB op de juiste data, spoort terugkerende
+kosten in uw transactiegeschiedenis op, berekent het gemiddelde van de overige bedragen en biedt u de mogelijkheid om uw inkomsten en eenmalige
+bedragen in te voeren. Handleiding: [Plan vooruit](/avenir-mcp/guides/plan-ahead/).
+Hoe het werkt: [Prognoses](/avenir-mcp/concepts/forecasting/).
 
 ## Categorieën ordenen
 
@@ -125,22 +124,20 @@ Handleiding: [Een wijziging ongedaan maken](/avenir-mcp/nl/guides/undo/). Hoe he
 Vier [prompts](/avenir-mcp/nl/reference/resources-and-prompts/#prompts) leiden de agent door
 een hele taak. In Claude Code zijn het slash-commando's van de server `avenir-mcp`.
 
-| Prompt | Argumenten | Wat hij doet |
+| Opdracht | Argumenten | Wat het doet |
 |---|---|---|
-| `classify_pending` | plan | suggesties, jouw keuzes, één bevestigde batch, het id om ongedaan te maken |
-| `monthly_review` | plan, maand | totalen, wat opvalt, voorgestelde correcties |
-| `reconcile` | plan, rekening, banksaldo | het verschil uitgelegd, dan een bevestigde afstemming |
-| `plan_next_month` | plan | prognose en aannames, dan de bedragen van volgende maand |
+|  `classify_pending`| plan | suggesties, uw keuzes, één bevestigde batch, het ID voor ongedaan maken |
+|  `monthly_review`| plan, maand | totalen, wat opvalt, voorgestelde oplossingen |
+|  `reconcile`| plan, rekening, banksaldo | uitleg over het verschil, gevolgd door een bevestigde afstemming |
+|  `plan_next_month`| plan | prognose en aannames, gevolgd door de bedragen voor de volgende maand |
 
 ## Ingebouwd
 
-- **Veiligheid:** standaard alleen lezen, bevestiging gekoppeld aan het exacte voorbeeld,
-  een lokaal journaal om ongedaan te maken, banktekst als onbetrouwbaar behandeld. Zie
-  [Veilig door ontwerp](/avenir-mcp/nl/concepts/safety/).
-- **Zuinigheid:** een lokale kopie van je transacties, bijgewerkt met
-  delta-synchronisatie; de meeste tools kosten één of twee YNAB-verzoeken. Zie
-  [Gegevens en synchronisatie](/avenir-mcp/nl/concepts/data-and-sync/).
-- **Duidelijkheid voor agents:** valuta-eenheden, getypeerde uitvoerschema's met een
-  beschrijving per veld, paginering, [fouten](/avenir-mcp/nl/reference/errors/) die zeggen wat
-  je moet doen.
-- **Protocol:** MCP 2026-07-28 en eerdere versies; stdio of streamable HTTP.
+- **Veiligheid:** standaard alleen-lezen, bevestiging gekoppeld aan het exacte voorbeeld, een lokaal
+  logboek voor ongedaan maken, banktekst wordt als onbetrouwbaar beschouwd. Zie
+  [Veiligheid door ontwerp](/avenir-mcp/concepts/safety/).
+- **Kosten:** een lokale kopie van uw transacties die wordt bijgewerkt via delta-synchronisatie; de meeste tools
+  kosten één of twee YNAB-verzoeken. Zie [Gegevens en synchronisatie](/avenir-mcp/concepts/data-and-sync/).
+- **Duidelijkheid voor gebruikers:** valuta-eenheden, getypeerde uitvoerschema’s met een beschrijving per
+  veld, paginering, actieerbare [fouten](/avenir-mcp/reference/errors/).
+- **Protocol:** MCP 28 juli 2026 en eerdere versies; stdio of streamable HTTP.

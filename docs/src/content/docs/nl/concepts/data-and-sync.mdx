@@ -32,8 +32,7 @@ zijn in de eigen valuta van het plan; uitgaven zijn negatief, inkomend geld posi
 | Gebruikte methoden | `GET` om te lezen; `PATCH`, `POST` en `DELETE` op transacties, categorieën en maandbudgetten |
 | Fouten | elke 4xx of 5xx komt terug als `Error calling tool '<tool>': YNAB <status>: <detail>`, met de eigen uitleg van YNAB |
 
-`plan_id` accepteert `last-used`, dat YNAB omzet naar het plan dat je het laatst hebt
-geopend.
+`plan_id` accepteert`last-used`, wat door YNAB wordt omgezet naar het plan dat u als laatste hebt geopend.
 
 ### Plans, vroeger budgets
 
@@ -68,11 +67,10 @@ houdt per plan een kopie in het geheugen en werkt die bij met de
 3. avenir-mcp voegt ze samen in zijn kopie: een gewijzigde transactie vervangt de oude,
    een verwijderde wordt weggehaald.
 
-Met het id van een plan wordt de kopie bijgewerkt met delta-synchronisatie. Met
-`last-used`, dat het plan aanduidt dat je het laatst in YNAB hebt geopend en tussen twee
-aanroepen kan veranderen, worden transacties elke keer volledig geladen – nog steeds één
-verzoek – zodat twee plans nooit door elkaar raken. Met meerdere plans geef je het
-id uit `list_plans` door.
+Met de id van een plan wordt de kopie vernieuwd via delta-synchronisatie. Met `last-used`, wat
+verwijst naar het plan dat u het laatst in YNAB hebt geopend en dat tussen twee aanroepen kan veranderen,
+worden transacties elke keer volledig geladen — nog steeds via één verzoek — zodat twee plannen
+nooit door elkaar worden gehaald. Bij meerdere plannen dient u de id uit door te geven`list_plans`.
 
 De kopie leeft zo lang als het serverproces. Gefilterde leesacties – op datum of op
 categorie – gaan eromheen.
@@ -102,12 +100,11 @@ Het toepassen van een bevestigde schrijfactie voegt een eigen verzoek toe (één
 `PATCH` voor elk aantal transacties). Met een warme cache kost opnieuw lezen van de
 transacties één klein deltaverzoek.
 
-Als het quotum op is, antwoordt YNAB met `429` zonder te zeggen wanneer je terug kunt
-komen, dus **probeert avenir-mcp niets opnieuw**: het geeft `… YNAB 429: …` terug en stuurt
-10 minuten lang helemaal geen verzoek. Het stopt ook uit zichzelf bij **180 verzoeken** in
-het laatste uur, laat de rest over aan andere apps met hetzelfde token, en zegt over hoeveel
-minuten het volgende verzoek weg kan. Hoe dan ook krijgt de agent de opdracht het je te
-zeggen en het niet eerder opnieuw te proberen.
+Wanneer het quotum is opgebruikt, geeft YNAB een antwoord `429`zonder aan te geven wanneer men terug kan komen, dus
+avenir-mcp **doet geen nieuwe pogingen**: het keert terug `… YNAB 429: …`en verstuurt gedurende
+10 minuten helemaal geen verzoeken. Het stopt ook vanzelf bij **180 verzoeken** in het afgelopen uur, waarbij de rest
+wordt overgelaten aan andere apps die hetzelfde token gebruiken, en geeft aan over hoeveel minuten het volgende verzoek kan
+worden verzonden. In beide gevallen krijgt de agent de opdracht om u hiervan op de hoogte te stellen en niet eerder opnieuw te proberen.
 
 ## Wat nooit wordt opgeslagen
 

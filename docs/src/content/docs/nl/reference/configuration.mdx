@@ -7,29 +7,28 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp leest zijn configuratie uit omgevingsvariabelen, gezet in het blok `env` van je
-MCP-client of in de shell die het start. Verder wordt er niets gelezen: geen
-configuratiebestand.
+avenir-mcp haalt zijn configuratie uit omgevingsvariabelen die zijn ingesteld in het `env`
+blok van uw MCP-client of in de shell waarmee het programma wordt gestart. Er wordt verder niets gelezen: er is geen configuratiebestand.
 
 ## Overzicht
 
-| Variabele | Standaard | Betekenis |
+| Variabele | Standaardwaarde | Betekenis |
 |---|---|---|
-| `YNAB_API_KEY` | — (**verplicht**, of `YNAB_API_KEY_FILE`) | Je YNAB personal access token. |
-| `YNAB_API_KEY_FILE` | niet ingesteld | Een bestand met het token, gebruikt als `YNAB_API_KEY` niet is ingesteld. |
-| `AVENIR_MCP_WRITE` | niet ingesteld: alleen lezen | `1` registreert de tools die je plan wijzigen. |
-| `AVENIR_MCP_REQUIRE_ELICITATION` | niet ingesteld | `1` accepteert alleen een ja in de client: geen bevestigingscodes. |
-| `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` of `http`. |
-| `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-adres. |
-| `AVENIR_MCP_PORT` | `8103` | HTTP-poort. |
-| `AVENIR_MCP_HTTP_TOKEN` | niet ingesteld | Token dat HTTP-clients moeten tonen; niet ingesteld, dan wordt bij elke start een willekeurig token gemaakt. |
-| `AVENIR_MCP_JOURNAL` | zie hieronder | Journaalbestand, gebruikt door ongedaan maken. |
-| `XDG_STATE_HOME` | `~/.local/state` | Waar het journaal standaard staat. |
-| `AVENIR_MCP_CONFIDENCE_THRESHOLD` | `0.90` | Benodigde zekerheid om een categorie voor te stellen. |
-| `AVENIR_MCP_LOG_LEVEL` | `WARNING` | Diagnoseniveau. |
-| `AVENIR_MCP_LOG_FORMAT` | `text` | `json` schrijft één JSON-object per regel. |
-| `AVENIR_MCP_NO_UPDATE_CHECK` | niet gezet | `1` stopt de dagelijkse controle op een nieuwere versie op PyPI. |
-| `AVENIR_MCP_YNAB_URL` | `https://api.ynab.com/v1` | Adres van de API. |
+|  `YNAB_API_KEY`| — (**verplicht**, of `YNAB_API_KEY_FILE`) | Uw persoonlijke YNAB-toegangstoken. |
+|  `YNAB_API_KEY_FILE`| niet ingesteld | Een bestand waarin het token is opgeslagen, dat wordt gebruikt wanneer  niet is`YNAB_API_KEY` ingesteld. |
+|  `AVENIR_MCP_WRITE`| niet ingesteld: alleen-lezen |  `1`registreert de tools die uw plan wijzigen. |
+|  `AVENIR_MCP_REQUIRE_ELICITATION`| niet ingesteld |  `1`accepteert alleen een ‘ja’ dat in de client wordt opgegeven: geen bevestigingscodes. |
+|  `AVENIR_MCP_TRANSPORT`|  `stdio`|  `stdio`of `http`. |
+|  `AVENIR_MCP_HOST`|  `127.0.0.1`| HTTP-adres. |
+|  `AVENIR_MCP_PORT`|  `8103`| HTTP-poort. |
+|  `AVENIR_MCP_HTTP_TOKEN`| niet ingesteld | Token dat HTTP-clients moeten overleggen; indien niet ingesteld, wordt bij elke start een willekeurig token gegenereerd. |
+|  `AVENIR_MCP_JOURNAL`| zie hieronder | Journaalbestand, gebruikt voor het ongedaan maken van acties. |
+|  `XDG_STATE_HOME`|  `~/.local/state`| De standaardlocatie van het journaal. |
+|  `AVENIR_MCP_CONFIDENCE_THRESHOLD`|  `0.90`| Vereiste betrouwbaarheid om een categorie voor te stellen. |
+|  `AVENIR_MCP_LOG_LEVEL`|  `WARNING`| Diagnostisch niveau. |
+|  `AVENIR_MCP_LOG_FORMAT`|  `text`|  schrijft`json` één JSON-object per regel. |
+|  `AVENIR_MCP_NO_UPDATE_CHECK`| niet ingesteld |  `1`stopt de dagelijkse controle op een nieuwere release op PyPI. |
+|  `AVENIR_MCP_YNAB_URL`|  `https://api.ynab.com/v1`| API-adres. |
 
 ## Details
 
@@ -41,14 +40,13 @@ geeft volledige lees- en schrijftoegang tot elk plan van het account.
 
 ### `YNAB_API_KEY_FILE`
 
-Het pad van een bestand dat alleen het token bevat, gebruikt als `YNAB_API_KEY` niet is
-ingesteld: het token staat dan in geen enkele configuratie van een MCP-client. Het bestand
-moet alleen voor jou leesbaar zijn (`chmod 600`); anders weigert avenir-mcp het en zegt het
-dat. Op macOS, nadat je het token hebt gekopieerd:
+Het pad naar een bestand dat uitsluitend het token bevat, dat wordt gebruikt wanneer  niet `YNAB_API_KEY`is ingesteld: het
+token verschijnt dan in geen enkele MCP-clientconfiguratie. Het bestand mag alleen door u zelf kunnen worden gelezen
+(`chmod 600`); anders weigert avenir-mcp het en geeft het een foutmelding. Op macOS, na het kopiëren van het token:
 
 ```bash
 mkdir -p ~/.config/avenir-mcp
-(umask 077; pbpaste > ~/.config/avenir-mcp/ynab-token)   # het token dat je net kopieerde
+(umask 077; pbpaste > ~/.config/avenir-mcp/ynab-token)   # het token dat u net kopieerde
 ```
 
 Geef `YNAB_API_KEY_FILE` dan het volledige pad van het bestand in het blok `env` van de
@@ -76,12 +74,11 @@ gelezen, bij het opstarten.
 
 ### `AVENIR_MCP_REQUIRE_ELICITATION`
 
-Precies `1`: een schrijfactie wordt pas toegepast nadat de gebruiker ja zegt in het eigen
-bevestigingsvenster van de client. Bevestigingscodes worden niet uitgegeven of
-geaccepteerd, een weggeklikte vraag telt als nee, en een client die het niet kan vragen,
-krijgt een fout. Gebruik het als het model een code zou kunnen doorgeven zonder het je te
-vragen – zie
-[Bevestiging](/avenir-mcp/nl/concepts/confirmation/#het-eigen-antwoord-van-de-gebruiker-eisen).
+Precies`1`: een schrijfbewerking wordt pas uitgevoerd nadat de gebruiker in het eigen
+bevestigingsvenster van de client ‘ja’ heeft gezegd. Er worden geen bevestigingscodes verstrekt of geaccepteerd; een gesloten
+vraag geldt als ‘nee’, en een client die geen vraag kan stellen, krijgt een foutmelding. Gebruik dit wanneer het model
+mogelijk een code doorgeeft zonder u hierom te vragen — zie
+[Bevestiging](/avenir-mcp/concepts/confirmation/#requiring-the-users-own-answer).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
 
@@ -134,24 +131,28 @@ voor een logcollector – zie
 
 ### `AVENIR_MCP_NO_UPDATE_CHECK`
 
-Niet gezet (standaard): bij het starten vraagt de server hoogstens één keer per dag aan
-PyPI (`https://pypi.org/pypi/avenir-mcp/json`) wat de nieuwste versie is, wacht daarbij
-hoogstens 1,5 seconde en onthoudt het antwoord in `latest-version.json` onder
-`XDG_CACHE_HOME` (standaard `~/.cache`). Is er een nieuwere versie, dan zegt een regel in
-zijn instructies dat tegen de agent, die het jou kan vertellen, en dezelfde regel wordt als
-waarschuwing gelogd. Er wordt niets over jou of
-je plans verstuurd: het is één anoniem verzoek, dat PyPI van jouw adres ziet komen. De
-server werkt zichzelf nooit bij. `1`: geen verzoek; `DO_NOT_TRACK=1`, of een CI-run
-(`CI=true`), heeft hetzelfde effect.
+Niet ingesteld (standaard): bij het opstarten, maximaal één keer per dag, vraagt de server PyPI
+(`https://pypi.org/pypi/avenir-mcp/json`
+) om de nieuwste release, waarbij hij maximaal 1,5 seconde wacht,
+en onthoudt het antwoord in  `latest-version.json`
+onder `XDG_CACHE_HOME`
+(`~/.cache`
+standaard). Wanneer er een nieuwere release beschikbaar is, wordt via een regel in de instructies van de server
+een melding naar de agent gestuurd, die u hiervan op de hoogte kan stellen, en wordt dezelfde regel als waarschuwing geregistreerd. Er wordt niets over u of uw plannen verzonden: het betreft één
+anoniem verzoek, dat door PyPI wordt gezien als afkomstig van uw adres. De server voert nooit zelf een upgrade uit
+. `1`
+: helemaal geen verzoek; `DO_NOT_TRACK=1`
+, of een CI-run (`CI=true`
+), heeft hetzelfde effect.
 
 ### `AVENIR_MCP_YNAB_URL`
 
-Het basisadres van de API. Alleen nuttig om avenir-mcp naar een vervanger te laten wijzen,
-zoals de evaluatie en de documentatiegenerator doen met hun server voor het demoplan. Het
-moet beginnen met `https://` – gewoon `http://` wordt alleen voor `127.0.0.1` of `localhost`
-geaccepteerd – omdat elk verzoek je token draagt.
+Het basisadres van de API. Dit is alleen nuttig om avenir-mcp naar een stand-in te verwijzen, zoals de evaluatie en
+de documentatiegenerator dat doen met hun demo-planserver. Het moet beginnen met
+`https://` — ‘plain’ `http://`wordt alleen geaccepteerd voor  `127.0.0.1`of  `localhost`— omdat
+elk verzoek uw token bevat.
 
-## Toolargumenten die je vaak ziet
+## Argumenten van hulpprogramma’s die u vaak zult tegenkomen
 
 | Argument | Geaccepteerde waarden |
 |---|---|

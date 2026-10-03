@@ -12,14 +12,14 @@ import balances from '@snippets/nl/category_balances.json?raw';
 import pending from '@snippets/nl/suggest_categories.json?raw';
 import preview from '@snippets/nl/apply_preview.json?raw';
 
-Deze rondleiding volgt een echt gesprek op het demoplan, een verzonnen huishouden met een
-betaalrekening en een spaarrekening. Bij elke stap zie je wat je zegt, welke tool de agent
-met welke argumenten aanroept, wat avenir-mcp antwoordt en wat de agent je vertelt. Je
-eigen antwoorden hebben dezelfde vorm, met je eigen cijfers.
+Deze rondleiding volgt een echt gesprek aan de hand van het demoplan, een fictief huishouden met een
+betaalrekening en een spaarrekening. Bij elke stap ziet u wat u zegt, welke tool de medewerker
+aanroept met welke argumenten, wat avenir-mcp antwoordt en wat de medewerker u vertelt. Uw eigen
+antwoorden zullen dezelfde opbouw hebben, maar dan met uw eigen cijfers.
 
 <Aside type="tip">
-Je noemt zelf nooit tools: zeg wat je wilt, de agent kiest de tool. Een tool noemen
-(*„gebruik get_monthly_summary“*) werkt ook, en helpt als een antwoord je verrast.
+U geeft zelf nooit een naam aan tools: wat u ook zegt, de agent kiest de tool. Het benoemen van een
+tool (*“gebruik get_monthly_summary”*) werkt eveneens, en is handig wanneer een antwoord u verrast.
 </Aside>
 
 ## 1. Rondkijken
@@ -35,8 +35,8 @@ De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
 > autolening, waarvan nog 19.040,81 open staat. De afbetaalde studielening en de vorige
 > bank zijn gesloten.
 
-Saldi zijn in de valuta van je plan. `cleared_balance` is wat de bank al heeft
-getoond; `uncleared_balance` is wat ze nog niet heeft getoond.
+De saldi zijn uitgedrukt in de valuta van uw rekening.  `cleared_balance`is het bedrag dat de bank al
+heeft weergegeven;  `uncleared_balance`is het bedrag dat nog niet is weergegeven.
 
 ## 2. Zien hoe de maand gaat
 
@@ -68,13 +68,12 @@ De agent roept `suggest_categories` aan met `{"plan_id": "last-used"}`:
 
 <Code code={pending} lang="json" title="suggest_categories (eerste pagina, 3 items)" />
 
-> **Claude:** Er wachten zes transacties. Vijf hebben een duidelijke suggestie uit je
-> geschiedenis: twee keer Market Fresh, Streamflix, Rail Co… De bakker is nieuw voor
-> mij: boodschappen?
+> **Claude:** Er staan zes transacties in de wachtrij. Voor vijf daarvan is er een duidelijke aanwijzing in uw
+> transactiegeschiedenis: twee keer Market Fresh, Streamflix, Rail Co… De bakkerij is mij onbekend: boodschappen?
 
-Waar je geschiedenis duidelijk is, staat er een `suggestion` klaar met zijn `confidence`.
-Voor een winkelier die nog nooit is gezien, stelt de agent een categorie voor uit de lijst
-`categories` en vraagt het je.
+Als uw geschiedenis duidelijk is, `suggestion`staat een  klaar met zijn `confidence`. Voor een
+verkoper die u nog nooit eerder hebt gezien, stelt de agent een categorie voor uit de  `categories`lijst en
+vraagt hij u om bevestiging.
 
 ## 4. Iets wijzigen – veilig
 
@@ -87,33 +86,31 @@ niets:**
 
 <Steps>
 
-1. avenir-mcp heeft precies berekend wat er zou veranderen: twee transacties, van geen
-   categorie naar Boodschappen en Vervoer.
-2. Je client laat je de vraag zien – een bevestigingsvenster als hij MCP-elicitation
-   ondersteunt, of de agent geeft het voorbeeld door en wacht.
-3. Je zegt ja. De agent roept opnieuw aan met je antwoord (of de code `confirmation`).
-4. avenir-mcp past beide wijzigingen toe in één YNAB-verzoek, legt ze vast in zijn
-   journaal en geeft een `operation_id` terug.
+1. avenir-mcp heeft precies berekend wat er zou veranderen: twee transacties, van ‘geen categorie’ naar
+   ‘Boodschappen’ en ‘Vervoer’.
+2. Uw client toont u de vraag — een bevestigingsvenster indien deze MCP-
+   afleiding ondersteunt, of de agent geeft het voorbeeld weer en wacht af.
+3. U zegt ja. De agent belt opnieuw met uw antwoord (of de  code`confirmation`).
+4. avenir-mcp past beide wijzigingen toe in één YNAB-verzoek, registreert ze in zijn journaal en
+   retourneert een `operation_id`.
 
 </Steps>
 
 > **Jij:** Toch maar niet, maak dat ongedaan.
 
-De agent roept `undo_operation` aan, dat als voorbeeld toont hoe beide transacties worden
-teruggezet, en het toepast zodra je akkoord gaat. Zie
-[Een wijziging ongedaan maken](/avenir-mcp/nl/guides/undo/).
+De agent belt u op`undo_operation`, waarbij een voorbeeld wordt getoond waarin beide transacties worden teruggezet naar de toestand waarin
+ze zich eerder bevonden, en deze wijziging wordt doorgevoerd zodra u hiermee instemt. Zie [Een wijziging ongedaan maken]](/avenir-mcp/guides/undo/).
 
 ## 5. De kant-en-klare werkstromen gebruiken
 
-In plaats van elke stap te sturen, start je een prompt: die geeft de agent de hele
-werkwijze.
+In plaats van elke stap afzonderlijk aan te sturen, kunt u een instructie geven: hierin wordt de agent de volledige werkwijze uitgelegd.
 
-| Prompt | Wat hij met je doorloopt |
+| Prompt | Wat er stap voor stap wordt uitgelegd |
 |---|---|
-| `classify_pending` | suggesties, jouw keuzes, één bevestigde batch, het id om ongedaan te maken |
-| `monthly_review` | totalen, wat opvalt, voorgestelde correcties |
-| `reconcile` | het verschil met je bank uitgelegd, dan een bevestigde afstemming |
-| `plan_next_month` | een prognose en haar aannames, dan de bedragen van volgende maand |
+|  `classify_pending`| suggesties, uw keuzes, één bevestigde batch, de ongedaan-maak-ID |
+|  `monthly_review`| totalen, wat opvalt, voorgestelde correcties |
+|  `reconcile`| uitleg over het verschil met uw bank, gevolgd door een bevestigde afstemming |
+|  `plan_next_month`| een prognose en de bijbehorende aannames, gevolgd door de bedragen voor de volgende maand |
 
 In Claude Code verschijnen ze tussen de slash-commando's van de server `avenir-mcp`.
 
