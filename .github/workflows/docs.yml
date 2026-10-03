@@ -36,7 +36,8 @@ jobs:
       - run: npm ci
         working-directory: docs
       # Known vulnerabilities in the site's dependencies, which build every page it serves.
-      - run: npm audit
+      # Fails on any advisory except those reviewed and named in scripts/audit.mjs.
+      - run: npm run audit
         working-directory: docs
       # The build's own code: the plugin that sets the name avenir-mcp apart.
       - run: npm test
