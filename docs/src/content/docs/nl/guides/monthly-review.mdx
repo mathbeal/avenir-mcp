@@ -42,11 +42,11 @@ corrigeren wat uit de koers is geraakt.
 
    | Veld | Betekent |
    |---|---|
-   | `income` | deze maand ontvangen geld in Ready to Assign |
-   | `budgeted` | deze maand in totaal aan categorieën toegewezen |
-   | `activity` | uitgegeven (negatief) en ontvangen in categorieën |
-   | `ready_to_assign` | geld zonder taak – negatief als je meer hebt toegewezen dan je hebt |
-   | `overspent` | categorieën waarvan het beschikbare saldo negatief is |
+   |  |`income` geld dat deze maand is ontvangen in „Klaar om toe te wijzen“ |
+   |  `budgeted`| totaalbedrag dat deze maand aan categorieën is toegewezen |
+   |  `activity`| uitgegeven (negatief) en ontvangen in categorieën |
+   |  `ready_to_assign`| geld waarvoor nog geen bestemming is toegewezen — negatief indien u meer hebt toegewezen dan u beschikt |
+   |  `overspent`| categorieën waarvan het beschikbare saldo negatief is |
 
 3. **De details.** `get_category_balances` somt elke categorie op waar iets in zit:
 
@@ -77,7 +77,7 @@ corrigeren wat uit de koers is geraakt.
 
 </Steps>
 
-## Hoeveel hield je over?
+## Hoeveel heeft u overgehouden?
 
 Vraag *„hoeveel van mijn inkomen houd ik over?“*: `get_savings_rate` geeft voor elk van de
 laatste volledige maanden het inkomen (geld dat in Ready to Assign kwam), de uitgaven (geld
@@ -93,7 +93,7 @@ quote.
 
 <Code code={savings} lang="json" title="get_savings_rate" />
 
-## Hoe oud is je geld?
+## Hoe oud is uw geld?
 
 Vraag *„hoe oud is mijn geld?“*: `get_age_of_money` geeft de leeftijd van het geld (Age of
 Money) van YNAB voor elke maand tot en met de huidige, in dagen: hoe lang het geld
@@ -113,10 +113,10 @@ wat in juni en juli binnenkwam, betaalt nog de rekeningen van september.
   wordt geweigerd voordat YNAB wordt aangeroepen, zonder kosten:
 
   <Code code={badMonth} lang="text" title="get_monthly_summary — maand 2026-13-01" />
-- Verborgen categorieën en de interne van YNAB (*Inflow: Ready to Assign*) worden bij elke
-  doorname weggelaten.
-- `move_money` verschuift een **bedrag**: Tennis gaat van 80 naar 50 en Restaurants van 120
-  naar 150, allebei tegelijk, en `undo_operation` zet beide terug. Om het bedrag van één
-  categorie in te stellen, neemt `set_category_budget` een **absoluut** bedrag.
-- De resource `avenir-mcp://guide` herinnert agents aan de methode van YNAB: een
-  overschrijding los je op door geld te verschuiven, niet door haar te negeren.
+- Verborgen categorieën en de interne categorieën van YNAB (*Inflow: Ready to Assign*) worden bij
+  elke evaluatie buiten beschouwing gelaten.
+-  `move_money`verplaatst een **bedrag**: Tennis gaat van 80 naar 50 en Restaurants van 120 naar 150
+  samen, en  `undo_operation`zet beide weer terug. Om in plaats daarvan het totaal van één categorie in te stellen,
+  `set_category_budget` wordt een **absoluut** bedrag gebruikt.
+- De  `avenir-mcp://guide`hulpbron herinnert gebruikers aan de YNAB-methode: te hoge uitgaven worden gecorrigeerd
+  door geld te verplaatsen, niet door ze te negeren.

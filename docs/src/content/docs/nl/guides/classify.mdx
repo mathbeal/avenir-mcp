@@ -1,6 +1,6 @@
 ---
 title: Openstaande transacties categoriseren
-description: Geef elke geïmporteerde transactie een categorie in één bevestigde batch, en leer avenir-mcp je winkeliers kennen.
+description: Wijs aan elke geïmporteerde transactie in één bevestigde batch een categorie toe en voer uw handelaren in het systeem van avenir-mcp in.
 sidebar:
   order: 1
 ---
@@ -12,11 +12,11 @@ import approved from '@snippets/nl/approve.json?raw';
 import imported from '@snippets/nl/import.json?raw';
 import flagged from '@snippets/nl/flag_preview.json?raw';
 
-**Doel:** elke transactie die van je bank is geïmporteerd krijgt de juiste categorie, zonder
-dat je ze in YNAB één voor één doorloopt.
+**Doel:** elke transactie die vanuit uw bank wordt geïmporteerd, krijgt de juiste categorie toegewezen, zonder dat u
+ze één voor één in YNAB hoeft door te nemen.
 
-**Voordat je begint:** schrijven ingeschakeld (`AVENIR_MCP_WRITE=1`). Met een server die
-alleen leest krijg je nog steeds de suggesties; je past ze dan in YNAB toe.
+**Voordat u begint:** schrijftoegang ingeschakeld (`AVENIR_MCP_WRITE=1`). Bij een server die alleen-lezen is,
+krijgt u nog steeds de suggesties te zien; u past deze vervolgens toe in YNAB.
 
 **Tools:** [`suggest_categories`](/avenir-mcp/nl/reference/tools/suggest-categories/),
 [`apply_categories`](/avenir-mcp/nl/reference/tools/apply-categories/), eventueel
@@ -59,9 +59,9 @@ alleen leest krijg je nog steeds de suggesties; je past ze dan in YNAB toe.
 
    <Code code={preview} lang="json" title="apply_categories — voorbeeld (fragment)" />
 
-5. **Je bevestigt.** In een client die MCP-elicitation ondersteunt vink je een vakje aan;
-   anders laat de agent je het voorbeeld zien en roept hij, zodra je akkoord gaat, opnieuw
-   aan met dezelfde toewijzingen en de code `confirmation`.
+5. **U bevestigt dit.** In een client die MCP-verzameling ondersteunt, vinkt u een vakje aan; anders
+   toont de agent u het voorbeeld en, zodra u akkoord gaat, belt hij opnieuw met dezelfde
+   opdrachten en de code`confirmation`.
 
 6. **avenir-mcp past toe.** Alle wijzigingen gaan in één verzoek naar YNAB en worden in het
    journaal vastgelegd. De `operation_id` van het antwoord is wat
@@ -71,8 +71,8 @@ alleen leest krijg je nog steeds de suggesties; je past ze dan in YNAB toe.
 
 ## Als gecontroleerd markeren
 
-YNAB markeert geïmporteerde transacties als *unapproved* totdat je ze controleert. Zodra
-ze gecategoriseerd zijn:
+YNAB markeert geïmporteerde transacties als *niet-goedgekeurd* totdat u ze hebt gecontroleerd. Zodra ze
+zijn geclassificeerd:
 
 > **Jij:** Markeer ze als gecontroleerd.
 
@@ -87,12 +87,11 @@ De geschiedenis van een begunstigde zijn de categorieën die zijn eerdere transa
 kregen. Een suggestie verschijnt als minstens 90 % daarvan overeenkomt
 (`AVENIR_MCP_CONFIDENCE_THRESHOLD`), en `confidence` geeft dat aandeel.
 
-- Bankomschrijvingen worden vóór het vergelijken **genormaliseerd**: `CB MARKET FRESH FACT
-  050926 525130******1` en `CB MARKET FRESH FACT 190926 525130******1` zijn allebei
-  `MARKET FRESH`.
-- Geld **erin** en geld **eruit** worden apart geleerd: een geldschieter die je ooit heeft
-  betaald, maakt je aflossingen niet tot inkomsten.
-- Alleen categorieën die je nog kunt toewijzen worden voorgesteld, nooit een verborgen.
+- Banklabels worden vóór de vergelijking **genormaliseerd**:  `CB MARKET FRESH FACT 050926
+  525130******1`en  `CB MARKET FRESH FACT 190926 525130******1`zijn beide `MARKET FRESH`.
+- Inkomende en **uitgaande** betalingen worden afzonderlijk geleerd: een kredietverstrekker die u ooit heeft betaald, wordt niet
+  meegeteld als inkomsten uit aflossingen.
+- Er worden alleen categorieën voorgesteld die u nog kunt toewijzen; nooit een verborgen categorie.
 
 Details en voorbeelden: [Suggesties](/avenir-mcp/nl/concepts/suggestions/).
 
@@ -107,13 +106,13 @@ Details en voorbeelden: [Suggesties](/avenir-mcp/nl/concepts/suggestions/).
   Vraag *„zet een vlag op de tweede, ik kijk het na in YNAB“*: `flag_transactions` zet na
   bevestiging een gekleurde vlag, en `undo_operation` haalt die weg:
 
-  <Code code={flagged} lang="json" title="flag_transactions – voorbeeld" />
-- **Eén rekening of één periode:** vraag *„alleen de betaalrekening“*; de agent filtert de
-  lijst voordat hij toepast.
-- **Veel transacties:** de agent bladert met `next_cursor` en past dan toe in één of een
-  paar batches. Elke batch is één operatie om ongedaan te maken.
-- **Een winkelier aanleren:** zodra je *Boulangerie du Port* een paar keer als Boodschappen
-  hebt gecategoriseerd, wordt het vanzelf voorgesteld.
+  <Code code={flagged} lang="json" title="flag_transactions — preview" />
+- **Eén rekening of één periode:** vraag *“alleen de betaalrekening”*; de medewerker filtert
+  de lijst alvorens de aanvraag in te dienen.
+- **Veel transacties:** de agent bladert door de lijst met `next_cursor`, en voert vervolgens de verwerking uit in één of
+  enkele batches. Elke batch is één bewerking die ongedaan kan worden gemaakt.
+- **Leer het een handelaar kennen:** zodra u *Boulangerie du Port* een
+  paar keer als „Levensmiddelen” hebt geclassificeerd, wordt deze automatisch voorgesteld.
 
 ## Wat er mis kan gaan
 

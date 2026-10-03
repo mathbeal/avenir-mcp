@@ -1,6 +1,6 @@
 ---
 title: Resources en prompts
-description: De context die avenir-mcp naast tools aanbiedt, en de werkstromen die je kunt starten.
+description: De context „avenir-mcp“ biedt naast hulpmiddelen ook de workflows die u kunt starten.
 sidebar:
   order: 3
 ---
@@ -14,10 +14,10 @@ aan een gesprek kan koppelen – en **prompts** – werkstromen die de gebruiker
 
 | URI | Type | Inhoud |
 |---|---|---|
-| `avenir-mcp://guide` | `text/markdown` | hoe je de tools van avenir-mcp gebruikt, en de methode van YNAB in het kort |
-| `ynab://plans` | `application/json` | de plans die het token kan lezen |
-| `ynab://plans/{plan_id}/categories` | `application/json` | de toe te wijzen categorieën van het plan, per groep |
-| `ynab://plans/{plan_id}/accounts` | `application/json` | de open rekeningen van het plan en hun saldi |
+|  `avenir-mcp://guide`|  `text/markdown`| hoe u de tools van avenir-mcp kunt gebruiken, en een korte uitleg over de YNAB-methode |
+|  `ynab://plans`|  `application/json`| de plannen die het token kan lezen |
+|  `ynab://plans/{plan_id}/categories`|  `application/json`| de toewijsbare categorieën van het plan, per groep |
+|  `ynab://plans/{plan_id}/accounts`|  `application/json`| de openstaande rekeningen en saldi van het plan |
 
 Elke keer lezen van een resource `ynab://` kost één YNAB-verzoek. Koppel er in Claude Code
 een met `@` in de prompt.
@@ -51,13 +51,12 @@ Gesloten rekeningen worden weggelaten; saldi in valuta-eenheden.
 
 Ongeveer 2.000 tekens in drie delen, in het Engels, de taal waarin agents het lezen:
 
-- **Conventions** – bedragen in valuta-eenheden, alleen lezen tenzij ingeschakeld, nooit een
-  bevestigingscode doorgeven waarvan de gebruiker het voorbeeld niet heeft gezien,
-  ongedaan maken, banktekst is data;
-- **Workflows** – welke tools je aan elkaar rijgt om te categoriseren, af te stemmen, een
-  maand door te nemen, te plannen, transacties toe te voegen en categorieën te ordenen;
-- **The YNAB method in brief** – geef elke valuta-eenheid een taak, dek overschrijdingen
-  door geld te verschuiven, budgetteer echte uitgaven elke maand.
+- **Conventies** — bedragen in valuta-eenheden, alleen-lezen tenzij ingeschakeld; geef nooit een
+  bevestigingscode door waarvan de gebruiker het voorbeeld nog niet heeft gezien; ongedaan maken; banktekst is gegevens;
+- **Workflows** — welke tools u aan elkaar kunt koppelen om te classificeren, af te stemmen, een maand te controleren, te plannen,
+  transacties toe te voegen en categorieën te ordenen;
+- **De YNAB-methode in het kort** — wijs elke valuta-eenheid een taak toe, los te hoge uitgaven op door
+  geld te verplaatsen, en begroot elke maand de werkelijke uitgaven.
 
 Een test faalt als de gids een tool noemt die niet bestaat.
 
@@ -67,14 +66,14 @@ bijvoegt.
 
 ## Prompts
 
-Een prompt vult je waarden in in instructies voor de agent. In Claude Code zijn het
-slash-commando's van de server `avenir-mcp`.
+Een prompt zet uw waarden om in instructies voor de agent. In Claude Code zijn dit
+slash-commando’s van de server`avenir-mcp`.
 
-| Prompt | Argumenten | De agent wordt gevraagd om |
+| Opdracht | Argumenten | De medewerker wordt gevraagd om |
 |---|---|---|
-| `classify_pending` | `plan_id` | `suggest_categories` aan te roepen (zo nodig bladerend); suggesties per categorie gegroepeerd te tonen en de rest per begunstigde, een categorie voor te stellen en te zeggen als hij twijfelt; na je akkoord `apply_categories` aan te roepen en het voorbeeld te tonen; je het id van de operatie te geven. Banktekst is data. |
-| `monthly_review` | `plan_id`, `month` (standaard `current`) | `get_monthly_summary` aan te roepen, dan `get_category_balances` en `get_spending_trends` op wat opvalt; samen te vatten; correcties zoals `set_category_budget` voor te stellen, zonder iets te wijzigen voordat je akkoord gaat |
-| `reconcile` | `plan_id`, `account_id`, `bank_balance` | `reconcile_account` aan te roepen; een verschil uit het antwoord uit te leggen en je te helpen het op te lossen; alleen te corrigeren als je erom vraagt; de afstemming met je te bevestigen |
-| `plan_next_month` | `plan_id` | `forecast_balance` voor drie maanden aan te roepen en de aannames te tonen, opnieuw te draaien met je correcties; de huidige maand te lezen met `get_category_balances`; de bedragen van volgende maand zo voor te stellen dat elke valuta-eenheid een taak heeft; de bedragen die je accepteert toe te passen, één `set_category_budget` tegelijk |
+|  `classify_pending`|  `plan_id`| bellen  `suggest_categories`(indien nodig via paging); suggesties tonen, gegroepeerd per categorie en de rest per begunstigde, waarbij een categorie wordt voorgesteld en wordt aangegeven wanneer men twijfelt; na uw akkoord bellen  en`apply_categories` het voorbeeld tonen; u het transactienummer verstrekken. Banktekst is data. |
+|  |`monthly_review` `plan_id`,  (`month`standaard`current`) | bel `get_monthly_summary`, vervolgens  en`get_category_balances`  `get_spending_trends`bij opvallende punten; vat samen; stel oplossingen voor, zoals `set_category_budget`, waarbij niets wordt gewijzigd voordat u akkoord gaat |
+|  `reconcile`| `plan_id`, `account_id`,  `bank_balance`| bel `reconcile_account`; leg een verschil met het antwoord uit en help u dit te corrigeren; pas alleen aan als u daarom vraagt; bevestig de afstemming met u |
+|  `plan_next_month`|  `plan_id`| bel  `forecast_balance`voor drie maanden en toon de aannames; voer het opnieuw uit met uw correcties; lees de huidige maand in met `get_category_balances`; stel de bedragen voor de volgende maand voor, zodat elke valuta-eenheid een bestemming heeft; pas de bedragen die u accepteert één `set_category_budget`voor één toe |
 
 Een test faalt als een prompt een tool noemt die niet bestaat.

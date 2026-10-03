@@ -101,15 +101,15 @@ geven een sterkere garantie: de gebruiker antwoordt de client rechtstreeks.
 
 ## Het eigen antwoord van de gebruiker eisen
 
-Een bevestigingscode bewijst dat er een voorbeeld bestond, niet dat jij het hebt gelezen.
-Met `AVENIR_MCP_REQUIRE_ELICITATION=1`:
+Een bevestigingscode bewijst dat er een voorbeeldversie bestond, niet dat u deze hebt gelezen. Met
+`AVENIR_MCP_REQUIRE_ELICITATION=1`:
 
 | Situatie | Zonder de variabele | Met de variabele |
 |---|---|---|
-| de client kan het vragen, je zegt ja | `applied` | `applied` |
-| vraag weggeklikt | een bevestigingscode | `declined` |
-| de client kan het niet vragen | een bevestigingscode | fout: er is niets gewijzigd |
-| er wordt een code `confirmation` doorgegeven | gecontroleerd, dan toegepast | fout: codes zijn uitgeschakeld |
+| de klant kan vragen, u zegt ja |  `applied`|  `applied`|
+| vraag afgewezen | een bevestigingscode |  `declined`|
+| de klant kan niet vragen | een bevestigingscode | fout: er is niets gewijzigd |
+| er wordt een  code`confirmation` doorgegeven | gecontroleerd en vervolgens toegepast | fout: codes zijn uitgeschakeld |
 
 Alleen clients die MCP-elicitation ondersteunen, kunnen dan schrijven.
 

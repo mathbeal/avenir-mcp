@@ -12,20 +12,19 @@ volgen; [Ontwikkeling](/avenir-mcp/nl/project/development/) beschrijft de reposi
 controles in detail. Je hebt een GitHub-account nodig, [git](https://git-scm.com),
 [uv](https://docs.astral.sh/uv/) en [just](https://just.systems).
 
-<Aside type="tip" title="Eerst praten, dan programmeren">
-Voor alles wat groter is dan een typfout of een zin documentatie, open je eerst een issue of
-reageer je op een issue – een [functieverzoek](/avenir-mcp/nl/project/propose-a-feature/) of een
-[bugmelding](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) – en
-zeg je dat je het graag wilt doen. Het eens worden over de aanpak voordat je code schrijft,
-bespaart je het herschrijven.
+<Aside type="tip" title="Eerst overleggen, dan coderen">
+Voor alles wat meer is dan een typefout of een zin in de documentatie, dient u eerst een
+issue te openen of daarop te reageren — een [functieverzoek](/avenir-mcp/project/propose-a-feature/) of een
+[bugrapport](https://github.com/mathbeal/avenir-mcp/issues/new?template=bug_report.yml) — en aan te geven dat u dit graag wilt uitvoeren.
+Door vooraf overeenstemming te bereiken over de aanpak, voorkomt u dat u de code later opnieuw moet schrijven.
 </Aside>
 
 ## Stap voor stap
 
 <Steps>
 
-1. **Forken en klonen.** Klik op GitHub op **Fork** en kloon dan je kopie. Met de
-   [GitHub CLI](https://cli.github.com), in één commando:
+1. **Forken en klonen.** Klik op GitHub op **Fork** en kloon vervolgens uw kopie. Met de
+   [GitHub CLI](https://cli.github.com), in één opdracht:
 
    ```bash
    gh repo fork mathbeal/avenir-mcp --clone
@@ -36,7 +35,7 @@ bespaart je het herschrijven.
 
    ```bash
    uv sync       # Python 3.14 en de vastgelegde ontwikkeltools
-   just check    # alles moet slagen voordat je iets verandert
+   just check    # alles moet slagen voordat u iets verandert
    ```
 
 3. **Maak een branch** met de naam van de wijziging:
@@ -45,9 +44,9 @@ bespaart je het herschrijven.
    git switch -c feat/subscription-increases
    ```
 
-4. **Schrijf eerst de test**, zie hem falen, en schrijf dan de code die hem laat slagen.
-   Tests gebruiken alleen verzonnen gegevens – nooit YNAB, nooit je plan. Vul het
-   demoplan in `evals/demo_budget.py` aan als een voorbeeld nieuwe cijfers nodig heeft.
+4. **Schrijf eerst de test**, kijk hoe deze mislukt en schrijf vervolgens de code waarmee de test slaagt.
+   Tests maken uitsluitend gebruik van verzonnen gegevens — nooit YNAB, nooit uw plan. Voeg gegevens toe aan het demoplan
+   indien`evals/demo_budget.py` een voorbeeld nieuwe cijfers vereist.
 
 5. **Draai de controles** tot ze allemaal slagen:
 
@@ -58,10 +57,10 @@ bespaart je het herschrijven.
    just secrets   # gitleaks op elke commit (vraagt Docker)
    ```
 
-6. **Werk de documentatie bij.** Als een tool, zijn argumenten of zijn antwoorden zijn
-   veranderd, draai je `uv run python -m docsgen` en commit je wat het schrijft. Een met de
-   hand geschreven pagina wordt in alle talen van de site tegelijk gewijzigd; `just docs`
-   bouwt de site en faalt bij een kapotte link.
+6. **Werk de documentatie bij.** Als een tool, de argumenten ervan of de resultaten zijn gewijzigd, voer
+   `uv run python -m docsgen` de tool dan uit en leg de gegenereerde tekst vast. Een handmatig geschreven pagina wordt
+   in alle talen van de website tegelijk gewijzigd;  de website wordt opnieuw `just docs`opgebouwd en
+   er treedt een fout op bij een gebroken link.
 
 7. **Commit** met een voorvoegsel dat het soort wijziging noemt – de changelog wordt eruit
    gegenereerd:
@@ -70,9 +69,9 @@ bespaart je het herschrijven.
    git commit -s -m "feat: list subscriptions whose price went up"
    ```
 
-   `-s` tekent de commit af: je verklaart het
-   [Developer Certificate of Origin](https://developercertificate.org) – je hebt de wijziging
-   geschreven, of hebt het recht haar onder de MIT-licentie in te dienen.
+   `-s` ondertekent de commit: u verklaart dat u in het bezit bent van het
+   [Ontwikkelaarscertificaat van herkomst](https://developercertificate.org) — u hebt de
+   wijziging geschreven of beschikt over het recht om deze in te dienen onder de MIT-licentie.
 
 8. **Pushen en het pull request openen.**
 
@@ -88,12 +87,12 @@ bespaart je het herschrijven.
 
 ## Wat er daarna gebeurt
 
-| Fase | Wat je kunt verwachten |
+| Fase | Wat u kunt verwachten |
 |---|---|
-| CI | dezelfde controles als `just check` en `just hygiene`, op Linux, macOS en Windows, de build van de documentatie, de MCP Inspector, afgetekende commits en een titel die met het soort wijziging begint; **CI passed** en **MCP Inspector** moeten groen zijn. Bij een eerste bijdrage keurt een maintainer de run eerst goed. |
-| Review | reacties op de code; push nieuwe commits naar dezelfde branch om erop te antwoorden |
-| Merge | samengevoegd tot één commit op `main`, met de titel van je pull request als bericht |
-| Release | je wijziging verschijnt in de [changelog](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) van de volgende versie |
+| CI | dezelfde controles als  `just check`en `just hygiene`, op Linux, macOS en Windows, de documentatiebouw, de MCP Inspector, goedgekeurde commits en een titel die begint met het soort wijziging; **CI geslaagd** en **MCP Inspector** moeten groen zijn. Bij een eerste bijdrage keurt een beheerder de run eerst goed. |
+| Beoordeling | opmerkingen over de code; push nieuwe commits naar dezelfde branch om hierop te reageren |
+| Samenvoegen | samengevoegd tot één commit op `main`, met de titel van uw pull-verzoek als bericht |
+| Uitgave | uw wijziging verschijnt in het [wijzigingslogboek](https://github.com/mathbeal/avenir-mcp/blob/main/CHANGELOG.md) | van de volgende versie |
 
 ## Wat een pull request mergeklaar maakt
 

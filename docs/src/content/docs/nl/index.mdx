@@ -1,10 +1,10 @@
 ---
 title: avenir-mcp
-description: Een onofficiële opensource-MCP-server voor YNAB, gebouwd voor agents. Standaard alleen lezen; elke wijziging krijg je eerst te zien, bevestig je en kun je ongedaan maken.
+description: Een onofficiële, open-source MCP-server voor YNAB, speciaal ontwikkeld voor agenten. Standaard alleen-lezen; elke wijziging wordt eerst in een voorbeeld weergegeven, moet worden bevestigd en kan ongedaan worden gemaakt.
 template: splash
 hero:
   title: Je YNAB-plan, in gewone woorden.
-  tagline: Met avenir-mcp kunnen Claude en andere AI-agents je plan lezen, categoriseren, afstemmen en vooruitberekenen. Standaard alleen lezen; elke wijziging krijg je eerst te zien, bevestig je zelf en kun je ongedaan maken.
+  tagline: Met avenir-mcp kunnen Claude en andere AI-agenten uw plan lezen, classificeren, afstemmen en voorspellen. Standaard is het systeem alleen-lezen; elke wijziging wordt eerst in een voorbeeld weergegeven, door u bevestigd en kan ongedaan worden gemaakt.
   actions:
     - text: Aan de slag
       link: /avenir-mcp/nl/getting-started/install/
@@ -26,42 +26,40 @@ import augustRaw from '@snippets/nl/august_categories.json?raw';
 ## Waarom avenir-mcp
 
 <CardGrid>
-  <Card title="Tools voor taken, niet voor endpoints" icon="rocket">
-    Een maand aan transacties categoriseren, een rekening afstemmen met de bank, het saldo
-    vooruitberekenen, een maand doornemen: elke taak is één tool, geen tien API-aanroepen
-    die de agent aan elkaar moet rijgen.
+  <Card title="Hulpmiddelen voor taken, geen eindpunten" icon="rocket">
+    Een maand aan transacties classificeren, een rekening afstemmen met de bank, het
+    saldo voorspellen, een maand evalueren: elk daarvan is één hulpmiddel, niet tien API-aanroepen die de agent achter elkaar moet uitvoeren.
   </Card>
-  <Card title="Standaard alleen lezen" icon="seti:lock">
-    De dertien schrijftools worden niet getoond en zijn niet aan te roepen totdat je
-    `AVENIR_MCP_WRITE=1` instelt. Een agent kan niet wijzigen wat hij niet ziet.
+  <Card title="Standaard alleen-lezen" icon="seti:lock">
+    De dertien schrijfhulpmiddelen worden pas weergegeven en kunnen pas worden aangeroepen nadat u de instellingen hebt geconfigureerd
+    `AVENIR_MCP_WRITE=1`. Een agent kan niet wijzigen wat hij niet kan zien.
   </Card>
   <Card title="Antwoorden die een agent kan lezen" icon="document">
-    Valuta-eenheden, nooit milliunits. Getypeerde uitvoerschema's met een beschrijving
-    voor elk veld, paginering en fouten die zeggen wat er moet worden verbeterd.
+    Valuta-eenheden, nooit milli-eenheden. Getypeerde uitvoerschema’s met een beschrijving voor elk
+    veld, paginering en foutmeldingen die aangeven wat er moet worden gecorrigeerd.
   </Card>
-  <Card title="Zuinig met het quotum van YNAB" icon="seti:clock">
-    Een lokale kopie van je transacties, bijgewerkt met delta-synchronisatie: de meeste
-    tools kosten één of twee van de 200 verzoeken die YNAB per uur toestaat.
+  <Card title="Geringe belasting van het YNAB-quotum" icon="seti:clock">
+    Een lokale kopie van uw transacties, vernieuwd via delta-synchronisatie: de meeste tools kosten één of
+    twee van de 200 verzoeken die YNAB per uur toestaat.
   </Card>
-  <Card title="Volgt de YNAB-API" icon="approve-check-circle">
-    Gebouwd en getest tegen de in de repository vastgelegde versie van de YNAB-API. Een
-    wekelijkse controle vergelijkt die met de live-specificatie, zodat een wijziging bij
-    YNAB niet onopgemerkt blijft.
+  <Card title="Volgt de API van YNAB" icon="approve-check-circle">
+    Gebouwd en getest op basis van de YNAB-API-versie die in de repository is vastgelegd. Een wekelijkse
+    controle vergelijkt deze met de actuele specificatie, zodat een wijziging bij YNAB niet
+    onopgemerkt kan blijven.
   </Card>
 </CardGrid>
 
-## Elke wijziging op jouw voorwaarden
+## Elke verandering, op uw voorwaarden
 
 <WriteFlow />
 
-Categorieën, bedragen, afstemmingen en aangemaakte transacties kun je allemaal ongedaan
-maken. Hoe het werkt: [Bevestiging](/avenir-mcp/nl/concepts/confirmation/) en
-[Journaal en ongedaan maken](/avenir-mcp/nl/concepts/journal/).
+Categorieën, bedragen, afstemmingen en aangemaakte transacties kunnen allemaal ongedaan worden gemaakt. Hoe dit
+werkt: [Bevestiging](/avenir-mcp/concepts/confirmation/) en
+[Journaal en ongedaan maken](/avenir-mcp/concepts/journal/).
 
 ## Echte antwoorden, geen proza
 
-Tools geven gestructureerde gegevens terug waar de agent op kan vertrouwen – en die hij
-voor jou in gewone woorden uitlegt.
+Deze tools leveren gestructureerde gegevens op waarop de medewerker kan vertrouwen — en die voor u in begrijpelijke taal worden uitgelegd.
 
 > **Jij:** Hoe ging vorige maand?
 

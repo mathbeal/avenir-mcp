@@ -146,7 +146,7 @@ ook in CI, als een vereiste header ontbreekt of verzwakt is. De omgevingsvariabe
 ## Evaluatie
 
 ```bash
-just evaluate    # alle taken, Sonnet, ongeveer 1 USD van je Claude-abonnement
+just evaluate    # alle taken, Sonnet, ongeveer 1 USD van uw Claude-abonnement
 uv run python -m evals.run --task classify --model haiku
 ```
 
@@ -154,13 +154,12 @@ Zie [Evaluatie](/avenir-mcp/nl/project/evaluation/).
 
 ## Commits en releases
 
-- Commitberichten beginnen met een type – `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
-  `build:`, `ci:`, `chore:` – omdat git-cliff er `CHANGELOG.md` uit genereert.
-- Om te releasen: `just changelog`, committen, tag `vX.Y.Z` passend bij
-  `avenir_mcp.__version__`, en een GitHub-release publiceren. De workflow `publish` bouwt
-  twee keer met de datum van de getagde commit, stopt als de twee builds verschillen,
-  draait `twine check --strict` en uploadt naar PyPI via Trusted Publishing: er wordt geen
-  token opgeslagen.
-- Daarna de MCP-registry: `server.json` draagt dezelfde versie (een test controleert dat);
-  voer `mcp-publisher login github` en daarna `mcp-publisher publish` uit. De regel
-  `mcp-name:` in de README bewijst dat het PyPI-pakket van jou is.
+- Commitberichten beginnen met een type — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
+  `build:`, `ci:`,  `chore:`— omdat  daaruit `CHANGELOG.md`wordt gegenereerd door
+  git-cliff.
+- Om een release uit te brengen: `just changelog`, commit, tag  die overeenkomt`vX.Y.Z` met `avenir_mcp.__version__`,
+  en publiceer een GitHub-release. De  `publish`workflow voert twee keer een build uit met de datum van de getagde commit, stopt tenzij beide builds overeenkomen, voert  uit en`twine check
+  --strict` uploadt naar PyPI via Trusted Publishing: er wordt geen token opgeslagen.
+- Vervolgens het MCP-register:  `server.json`heeft dezelfde versie (dit wordt door een test gecontroleerd); voer
+  uit,`mcp-publisher login github` en daarna `mcp-publisher publish`. Het eigendom van PyPI wordt aangetoond door de
+  `mcp-name:` regel in het README-bestand.

@@ -1,30 +1,29 @@
 ---
 title: Suggesties
-description: Hoe avenir-mcp een winkelier herkent over bankomschrijvingen heen, leert van je geschiedenis, en beslist wanneer het een categorie voorstelt.
+description: Hoe avenir-mcp een handelaar herkent op basis van verschillende banklabels, leert van uw geschiedenis en bepaalt wanneer een categorie wordt voorgesteld.
 sidebar:
   order: 6
 ---
 
-`suggest_categories` beantwoordt voor elke openstaande transactie twee vragen: *wie is deze
-winkelier?* en *waar heb je hem eerder ingedeeld?*
+`suggest_categories` beantwoordt twee vragen voor elke lopende transactie: *wie is deze
+handelaar?* en *waar heeft u het eerder opgeslagen?*
 
 ## Wat openstaat
 
-Een transactie staat open als ze niet verwijderd is, geen categorie heeft (of de interne
-categorie *Uncategorized* van YNAB), geen overboeking tussen je rekeningen is
-(overboekingen krijgen in YNAB geen categorie), niet gesplitst is (de regels van een
-splitsing dragen haar categorieën) en bij een rekening **in het budget** hoort: de
-transacties van tracking-rekeningen – een hypotheek, een lening, een belegging – krijgen nooit
-een categorie, hun beginsaldo inbegrepen. Openstaande transacties worden de nieuwste eerst
-getoond.
+Een transactie is in behandeling wanneer deze niet is verwijderd, geen categorie heeft (of de interne
+*Niet gecategoriseerd* van YNAB), geen overboeking tussen uw rekeningen is (overboekingen krijgen geen categorie in
+YNAB), geen splitsing is (de regels van een splitsing hebben hun eigen categorieën) en tot een rekening behoort
+**met een budget**: de transacties van volgrekeningen — een hypotheek, een lening, een belegging —
+krijgen nooit een categorie toegewezen, inclusief hun beginsaldo. Transacties in afwachting worden weergegeven
+met de nieuwste bovenaan.
 
 ## Twee keer geïmporteerde overboekingen
 
-Een verplaatsing tussen twee van je rekeningen komt soms binnen als twee gewone transacties
-– één eruit, één erin – in plaats van één overboeking. Als twee openstaande transacties
-**tegengestelde bedragen** hebben, op **verschillende rekeningen**, hooguit **3 dagen** uit
-elkaar, noemt elk item het andere in `possible_transfer_with`. De agent stelt dan voor ze in
-YNAB als overboeking te koppelen, in plaats van elk een categorie te geven.
+Een overboeking tussen twee van uw rekeningen wordt soms weergegeven als twee gewone transacties — één
+uitgaande, één inkomende — in plaats van één overboeking. Wanneer twee in behandeling zijnde transacties **tegengestelde
+bedragen** hebben, op **verschillende rekeningen**, met een tussenpoos van maximaal **3 dagen**, wordt in elk van beide transacties de andere
+vermeld`possible_transfer_with`. De medewerker stelt vervolgens voor om deze in YNAB aan elkaar te koppelen als een overschrijving,
+in plaats van aan elke transactie een categorie toe te wijzen.
 
 ## Een winkelier herkennen
 
@@ -47,24 +46,23 @@ IBAN van een schuldeiser uit elk antwoord.
 
 ## Leren van de geschiedenis
 
-De geschiedenis wordt opgebouwd uit de transacties van het plan die een categorie hebben,
-niet verwijderd zijn en geen overboekingen zijn. Ze telt voor elke genormaliseerde
-begunstigde hoe vaak elke categorie is gebruikt – **apart voor geld eruit en geld erin**.
-Een geldschieter die je ooit heeft betaald (geld erin, *Ready to Assign*), laat je
-aflossingen (geld eruit) niet op inkomsten lijken.
+De geschiedenis wordt samengesteld op basis van de transacties in het plan die een categorie hebben, niet
+zijn verwijderd en geen overboekingen zijn. Voor elke genormaliseerde begunstigde wordt bijgehouden hoe vaak elke
+categorie is gebruikt — **afzonderlijk voor uitgaande en inkomende betalingen**. Een kredietverstrekker die u ooit
+heeft betaald (inkomsten, *Klaar om toe te wijzen*) zorgt er niet voor dat uw aflossingen (uitgaven) worden weergegeven als
+inkomsten.
 
 ## Beslissen
 
-Voor een openstaande transactie kijkt avenir-mcp naar de geschiedenis van haar begunstigde,
-in haar richting, en houdt alleen de categorieën die je nog kunt toewijzen: een verborgen
-of verwijderde categorie wordt nooit voorgesteld.
+Bij een lopende transactie bekijkt avenir-mcp de geschiedenis van de begunstigde in kwestie,
+en houdt daarbij alleen de categorieën over die u nog kunt toewijzen: een verborgen of verwijderde categorie wordt
+nooit voorgesteld.
 
-- **confidence** = gebruik van de meest gebruikte categorie ÷ alle gebruik van die
-  categorieën.
-- Er wordt een suggestie gedaan als confidence ≥ de drempel, standaard **0,90**
+- **betrouwbaarheid** = het aantal keren dat de meest voorkomende categorie wordt gebruikt ÷ het totale aantal keren dat al die categorieën worden gebruikt.
+- Er wordt een suggestie gegeven wanneer de betrouwbaarheid ≥ de drempelwaarde is, standaard **0,90**
   (`AVENIR_MCP_CONFIDENCE_THRESHOLD`).
-- Geen geschiedenis, of geen categorie boven de drempel: geen suggestie. De agent stelt er
-  een voor uit de categorielijst en vraagt het je.
+- Geen geschiedenis of geen categorie boven de drempelwaarde: geen suggestie. De agent stelt er een voor
+  uit de categorielijst en vraagt het u.
 
 Gemeten op een echt huishoudbudget van ongeveer 800 gecategoriseerde transacties, waarbij
 elke transactie om de beurt werd weggelaten, klopten de suggesties bij 0,90 in 95 % van de

@@ -7,8 +7,8 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp wordt ingesteld met omgevingsvariabelen, gezet in het blok `env` van je
-MCP-client. De volledige lijst staat in [Configuratie](/avenir-mcp/nl/reference/configuration/).
+avenir-mcp wordt geconfigureerd met omgevingsvariabelen, die worden ingesteld in het  -blok`env` van uw MCP-client.
+De volledige lijst vindt u in [Configuratie](/avenir-mcp/reference/configuration/)].
 
 ## Alleen lezen of schrijven
 
@@ -28,8 +28,8 @@ Je client start avenir-mcp als subproces en praat ermee via zijn standaardinvoer
 
 ## Via HTTP draaien
 
-Voor een client die met een URL verbindt, of om één server op je computer te delen tussen
-meerdere clients. Maak eerst een lang willekeurig token aan, dat clients moeten tonen:
+Voor een client die verbinding maakt met een URL, of om één server te delen tussen meerdere clients op
+uw computer. Maak eerst een lang willekeurig token aan, dat de clients moeten tonen:
 
 ```bash
 export AVENIR_MCP_HTTP_TOKEN=$(openssl rand -hex 32)
@@ -41,12 +41,12 @@ Start dan de server:
 AVENIR_MCP_TRANSPORT=http \
 AVENIR_MCP_HOST=127.0.0.1 \
 AVENIR_MCP_PORT=8103 \
-YNAB_API_KEY=jouw-token \
+YNAB_API_KEY=uw-token \
 uvx avenir-mcp
 ```
 
-Hij luistert op `http://127.0.0.1:8103/mcp` (streamable HTTP). Wijs je client daarheen,
-met het token in een header `Authorization` – met Claude Code:
+Het luistert op  `http://127.0.0.1:8103/mcp`(streamable HTTP). Richt uw client daarop
+met het token in een  header`Authorization` — met Claude-code:
 
 ```bash
 claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
@@ -55,21 +55,20 @@ claude mcp add --transport http avenir-mcp http://127.0.0.1:8103/mcp \
 
 Via HTTP wordt elk verzoek gecontroleerd voordat het een tool bereikt:
 
-| Controle | Geweigerd met | Houdt tegen |
+| Controle | Geweigerd met | Stops |
 |---|---|---|
-| de header `Host` noemt deze computer (`127.0.0.1`, `localhost`, `::1`) | `421` | een webpagina die de server via DNS-rebinding bereikt |
-| een header `Origin`, als die er is, is die van deze server | `403` | een pagina van een andere site die in je browser draait |
-| `Authorization: Bearer <token>`, met `AVENIR_MCP_HTTP_TOKEN` of het token dat bij de start is getoond | `401` | elk ander programma op je computer of netwerk |
+| de  header`Host` verwijst naar deze machine (`127.0.0.1`, `localhost`, `::1`) |  `421`| een webpagina die de server bereikt via DNS-rebinding |
+| een  header`Origin`, indien aanwezig, is die van deze server |  `403`| een pagina van een andere site, die in uw browser wordt weergegeven |
+| `Authorization: Bearer <token>`, met  of`AVENIR_MCP_HTTP_TOKEN` het token dat bij het opstarten wordt weergegeven |  `401`| elk ander programma op uw computer of netwerk |
 
-Het token is **altijd verplicht**, alleen lezen of niet. Is `AVENIR_MCP_HTTP_TOKEN` niet
-ingesteld, dan maakt de server bij de start een willekeurig token en toont het één keer op
-stderr; het verandert bij elke start. Stel de variabele in om je clients een blijvend
-token te geven.
+Het token is **altijd vereist**, ongeacht of het alleen-lezen is of niet. Indien  niet `AVENIR_MCP_HTTP_TOKEN`is ingesteld,
+genereert de server bij het opstarten een willekeurig token en geeft dit eenmalig weer op stderr; dit verandert
+bij elke opstart, dus stel de variabele in om uw clients een token te geven dat geldig blijft.
 
-<Aside type="danger" title="Houd hem op je computer">
-Houd `AVENIR_MCP_HOST=127.0.0.1`: het verkeer is gewoon HTTP, niet versleuteld. Bind nooit
-`0.0.0.0`, publiceer de poort nooit op alle interfaces met Docker of een router, en zet de
-server nooit op het internet.
+<Aside type="danger" title="Bewaar het op uw computer">
+Let op`AVENIR_MCP_HOST=127.0.0.1`: het verkeer verloopt via onversleuteld HTTP. Bind
+`0.0.0.0` of publiceer de poort nooit op alle interfaces met Docker of een router, en plaats
+de server nooit op het internet.
 </Aside>
 
 ## Waar het journaal staat
@@ -96,14 +95,13 @@ regel gelogd; een echte storing houdt haar traceback. Het token wordt nooit gelo
 
 ## Logs naar een logsysteem sturen
 
-Voor een collector zoals Vector, Fluent Bit, Promtail of een Datadog-agent vraag je om
-JSON en schrijf je stderr naar een bestand dat de collector leest. In de configuratie van
-de client:
+Voor een collector zoals Vector, Fluent Bit, Promtail of een Datadog-agent dient u JSON aan te vragen en
+stderr naar een bestand te schrijven dat door de collector wordt gelezen. In de configuratie van de client:
 
 ```json
 "command": "/bin/sh",
 "args": ["-c", "exec uvx avenir-mcp 2>>\"$HOME/.local/state/avenir-mcp/avenir.log\""],
-"env": { "YNAB_API_KEY": "jouw-token", "AVENIR_MCP_LOG_FORMAT": "json", "AVENIR_MCP_LOG_LEVEL": "INFO" }
+"env": { "YNAB_API_KEY": "uw-token", "AVENIR_MCP_LOG_FORMAT": "json", "AVENIR_MCP_LOG_LEVEL": "INFO" }
 ```
 
 Elke regel ziet er dan zo uit:
@@ -115,9 +113,9 @@ Elke regel ziet er dan zo uit:
 Draait de server via HTTP als dienst, dan bewaart de dienstbeheerder stderr: systemd stuurt
 het naar het journal, launchd naar het bestand dat `StandardErrorPath` noemt.
 
-Vanaf `INFO` bevatten meldingen alleen id's en aantallen – nooit begunstigden, bedragen of
-categorienamen – zodat logs je computer kunnen verlaten zonder je financiële gegevens.
-Bewaar `DEBUG` voor lokale probleemoplossing.
+`INFO`Vanaf  bevatten berichten uitsluitend identificatiecodes en aantallen — nooit begunstigden, bedragen of
+categorieën — zodat logbestanden uw computer kunnen verlaten zonder dat uw financiële gegevens worden meegenomen. Bewaar
+`DEBUG`deze voor lokale probleemoplossing.
 
 ## Drempel voor suggesties
 

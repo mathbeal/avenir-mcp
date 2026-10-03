@@ -5,9 +5,9 @@ sidebar:
   order: 7
 ---
 
-`reconcile_account` vergelijkt een rekening met het saldo dat je bank toont. De
-vergelijking is een pure berekening op de transacties van de rekening
-(`reconcile.analyse`); ze schrijft niets.
+`reconcile_account` vergelijkt een rekening met het saldo dat uw bank weergeeft. De
+vergelijking is een zuivere berekening op basis van de transacties op de rekening (`reconcile.analyse`); er
+wordt niets weggeschreven.
 
 ## De vergelijking
 
@@ -27,11 +27,11 @@ telt dan de bank – meestal een dubbele boeking of een terugbetaling die nooit 
 
 ## Een verschil verklaren
 
-| Aanwijzing | Regel |
+| Rij | Regel |
 |---|---|
-| `explained_by` | niet-verwerkte transacties waarvan het bedrag precies gelijk is aan het verschil: er één verwerken dicht het gat |
-| `possible_duplicates` | paren met hetzelfde bedrag en dezelfde [genormaliseerde](/avenir-mcp/nl/concepts/suggestions/#een-winkelier-herkennen) winkelier, hooguit **3 dagen** uit elkaar, onder de transacties van de laatste **60 dagen** |
-| `uncleared` | wat de bank nog niet heeft getoond, zodat de agent het met je kan nalopen |
+|  `explained_by`| niet-verrekende transacties waarvan het bedrag precies gelijk is aan het verschil: door de ene te verrekenen wordt het verschil weggewerkt |
+|  `possible_duplicates`| paren met hetzelfde bedrag en dezelfde [genormaliseerde](/avenir-mcp/concepts/suggestions/#recognising-a-merchant) handelaar, met een tijdsverschil van maximaal **3 dagen**, binnen de laatste **60 dagen** aan transacties |
+|  `uncleared`| wat de bank nog niet heeft getoond, zodat de medewerker dit met u kan controleren |
 
 Het venster van 60 dagen houdt oude, legitieme dubbelgangers – twee nachten in hetzelfde
 hotel vorige winter – buiten het antwoord.

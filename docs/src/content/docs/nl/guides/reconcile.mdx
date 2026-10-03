@@ -1,6 +1,6 @@
 ---
 title: Een rekening afstemmen
-description: Een rekening vergelijken met het saldo dat je bank toont, elk verschil uitleggen, en haar dan als afgestemd markeren.
+description: Vergelijk een rekening met het saldo dat uw bank weergeeft, leg eventuele verschillen uit en markeer de rekening vervolgens als afgestemd.
 sidebar:
   order: 2
 ---
@@ -8,11 +8,11 @@ sidebar:
 import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import gap from '@snippets/nl/reconcile_gap.json?raw';
 
-**Doel:** zeker weten dat YNAB overeenkomt met je bank, de oorzaak vinden als dat niet zo
-is, en de rekening als afgestemd markeren zodra het klopt.
+**Doel:** ervoor zorgen dat YNAB overeenkomt met uw bankgegevens, de oorzaak achterhalen wanneer dit niet het geval is, en
+de rekening afstemmen zodra dit wel het geval is.
 
-**Voordat je begint:** het saldo dat je bank vandaag toont, en schrijven ingeschakeld om de
-rekening als afgestemd te markeren (de diagnose werkt ook alleen lezend).
+**Voordat u begint:** het saldo dat uw bank vandaag weergeeft, en de schrijfrechten die nodig zijn om de
+rekening af te stemmen (de diagnose werkt in de modus ‘alleen-lezen’).
 
 **Tool:** [`reconcile_account`](/avenir-mcp/nl/reference/tools/reconcile-account/).
 **Prompt:** `reconcile`.
@@ -42,7 +42,7 @@ rekening als afgestemd te markeren (de diagnose werkt ook alleen lezend).
    getoond) en `possible_duplicates` (zelfde bedrag en winkelier, hooguit 3 dagen uit
    elkaar, in de laatste 60 dagen).
 
-4. **Je lost de oorzaak op** – hier verwijder je de dubbele boeking in YNAB.
+4. **U verhelpt de oorzaak** — verwijder in dit geval het dubbele item in YNAB.
 
 5. **Vraag het opnieuw.** Als de saldi overeenkomen, toont avenir-mcp de afstemming als
    voorbeeld: elke *cleared* transactie van de rekening wordt *reconciled*. Je bevestigt;
@@ -52,8 +52,8 @@ rekening als afgestemd te markeren (de diagnose werkt ook alleen lezend).
 
 ## Als het verschil niet te verklaren is
 
-Soms blijft er een klein verschil: kosten die nooit zijn geïmporteerd, een oude fout. Alleen
-als je erom vraagt, roept de agent opnieuw aan met `adjust=true`:
+Soms blijft er een klein verschil bestaan: een vergoeding die nooit is bijgeschreven, een oude fout. Alleen als u
+daarom vraagt, belt de medewerker u opnieuw op met`adjust=true`:
 
 - er wordt een transactie **Balance adjustment** ter grootte van het verschil op de
   rekening aangemaakt, met de datum van vandaag, in *Ready to Assign*, met de omschrijving
@@ -73,12 +73,12 @@ correctie, als die er is. Zie [Een wijziging ongedaan maken](/avenir-mcp/nl/guid
 
 ## Statussen
 
-| `status` | Betekenis |
+|  `status`| Betekenis |
 |---|---|
-| `difference_found` | de saldi verschillen; niets geschreven; lees `analysis` |
-| `nothing_to_do` | de saldi komen overeen en er valt niets meer af te stemmen |
-| `confirmation_required` | de saldi komen overeen (of `adjust` is gevraagd); wacht op je ja |
-| `applied` | afgestemd; `operation_id` om ongedaan te maken |
-| `declined` | je zei nee; niets geschreven |
+|  `difference_found`| saldi wijken af; niets genoteerd; lees  `analysis`|
+|  `nothing_to_do`| saldi komen overeen en er hoeft niets meer te worden afgestemd |
+|  `confirmation_required`| saldi komen overeen (of  `adjust`werd gevraagd); in afwachting van uw bevestiging |
+|  `applied`| afgestemd;  ongedaan `operation_id`maken |
+|  `declined`| u hebt nee gezegd; niets genoteerd |
 
 Hoe de vergelijking werkt: [Afstemming](/avenir-mcp/nl/concepts/reconciliation/).

@@ -1,22 +1,22 @@
 ---
 title: Veilig door ontwerp
-description: Het dreigingsmodel en de zes beschermingen tussen een agent en je plan.
+description: Het dreigingsmodel en de zes beschermingsmaatregelen tussen een agent en uw plan.
 sidebar:
   order: 2
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Een agent die je plan kan wijzigen, mag je nooit verrassen. Deze pagina zegt waartegen
-avenir-mcp beschermt en hoe.
+Een tussenpersoon die uw polis kan wijzigen, mag u nooit voor een verrassing stellen. Op deze pagina wordt uitgelegd waartegen
+avenir-mcp u beschermt en op welke wijze.
 
 ## Wat er op het spel staat
 
-| Bezit | Risico |
+| Activa | Risico |
 |---|---|
-| Je YNAB-token | het leest en wijzigt **elk** plan van het account; YNAB heeft geen token dat alleen kan lezen |
-| Je plan | een verkeerde of ongewenste wijziging: een categorie, een bedrag, een verwijderde transactie |
-| Je gegevens | bedragen, begunstigden en omschrijvingen die je computer verlaten of in bestanden belanden |
+| Uw YNAB-token | het leest en wijzigt **elk** plan van de rekening; YNAB kent geen alleen-lezen-token |
+| Uw plan | een onjuiste of ongewenste wijziging: een categorie, een bedrag, een verwijderde transactie |
+| Uw gegevens | bedragen, begunstigden en notities die uw apparaat verlaten of in bestanden terechtkomen |
 
 | Dreiging | Voorbeeld |
 |---|---|
@@ -27,18 +27,17 @@ avenir-mcp beschermt en hoe.
 
 ## Standaard alleen lezen
 
-Schrijftools dragen de tag `write` en zijn **uitgeschakeld** tenzij `AVENIR_MCP_WRITE=1`:
-niet getoond, niet aan te roepen. Elke tool meldt ook MCP-annotaties – `readOnlyHint`,
-`destructiveHint`, `idempotentHint`, `openWorldHint` – zodat de client kan beslissen hoeveel
-hij je vraagt. Een test faalt als een tool ze mist.
+Schrijftools zijn voorzien van de tag  `write`en zijn **uitgeschakeld**, tenzij `AVENIR_MCP_WRITE=1`: niet
+vermeld, niet aanroepbaar. Elke tool bevat bovendien MCP-annotaties — `readOnlyHint`,
+`destructiveHint`, `idempotentHint`,  `openWorldHint`— zodat de client kan bepalen hoeveel
+informatie hij van u vraagt. Een test mislukt als een tool deze annotaties niet bevat.
 
 ## Voorbeeld en bevestiging
 
-Elke schrijfactie behalve `approve_transactions` en `import_transactions` berekent eerst haar exacte wijzigingen en
-past niets toe totdat je akkoord gaat, via het eigen venster van je client of een eenmalige
-code die aan dat voorbeeld gekoppeld is. Verandert het plan tussen het voorbeeld en je
-antwoord, dan wordt het antwoord geweigerd. Details:
-[Bevestiging](/avenir-mcp/nl/concepts/confirmation/).
+Bij elke schrijfbewerking, met uitzondering van  en`approve_transactions` , worden eerst`import_transactions` de exacte wijzigingen berekend en wordt er
+niets doorgevoerd totdat u hiermee instemt, via het dialoogvenster van uw client of via een eenmalige code die is gekoppeld aan
+dat voorbeeld. Indien het plan tussen het voorbeeld en uw antwoord verandert, wordt het antwoord
+geweigerd. Details: [Bevestiging](/avenir-mcp/concepts/confirmation/).
 
 ## Ongedaan maken
 
@@ -48,14 +47,14 @@ met `undo_operation`, dat nooit een latere wijziging overschrijft. Details:
 
 ## Banktekst is data
 
-Namen van begunstigden en omschrijvingen worden geschreven door banken, winkeliers en
-iedereen die je geld kan sturen. avenir-mcp geeft ze terug in eigen velden, op één regel,
-zonder stuurtekens, tekens met nulbreedte of tekens die de schrijfrichting omkeren, ingekort
-tot 80 tekens – zodat ze geen vervalste regel aan een bevestigingsvraag kunnen toevoegen –
-en zet ze nooit in een toolbeschrijving, een prompt of een instructie. De resource
-`avenir-mcp://guide` en de prompt `classify_pending` vertellen agents ze als gegevens te
-behandelen. De [evaluatie](/avenir-mcp/nl/project/evaluation/) verstopt een instructie in een
-omschrijving en controleert dat de agent haar negeert.
+De namen van de begunstigden en de mededelingen worden ingevuld door banken, handelaren en iedereen die u geld kan overmaken.
+avenir-mcp geeft deze weer in speciale velden, op één regel, zonder controle-, nulbreedte- of
+richtingoverschrijvingstekens, ingekort tot 80 tekens — zodat er geen vervalste regel
+aan een bevestigingsvraag kan worden toegevoegd — en plaatst ze nooit in een toolbeschrijving, een prompt of
+een instructie. De  `avenir-mcp://guide`bron en de
+`classify_pending` prompt geven agenten de opdracht om deze als gegevens te behandelen. De
+[evaluatie](/avenir-mcp/project/evaluation/) verbergt een instructie in een opmerking en controleert
+of de agent deze negeert.
 
 ## Transport
 
@@ -64,7 +63,7 @@ omschrijving en controleert dat de agent haar negeert.
 | stdio (standaard) | geen: de client start avenir-mcp als subproces |
 | HTTP | luistert standaard op `127.0.0.1:8103`; verzoeken moeten deze computer noemen (`Host`, `Origin`) en een token dragen: `AVENIR_MCP_HTTP_TOKEN`, of een willekeurig token dat bij de start wordt getoond. Gewoon HTTP: houd het op localhost |
 
-## Wat op je computer blijft
+## Wat er op uw computer blijft staan
 
 - Het token blijft in de omgeving; het wordt nooit gelogd, teruggegeven of weggeschreven.
 - Transacties leven in het geheugen zolang de server draait; er wordt niets op schijf
@@ -81,9 +80,9 @@ omschrijving en controleert dat de agent haar negeert.
 - Afhankelijkheden zijn vastgepind en worden in de CI gecontroleerd op bekende
   kwetsbaarheden; GitHub Actions zijn per commit vastgepind en gecontroleerd met zizmor.
 
-<Aside type="caution" title="Waartegen avenir-mcp niet kan beschermen">
-Een bevestigingscode bewijst dat er een voorbeeld bestond, niet dat jij het hebt gelezen:
-een agent die hem doorgeeft zonder het je te vragen, omzeilt hem. Kies liever een client
-die MCP-elicitation ondersteunt, en lees wat je bevestigt. Meld kwetsbaarheden
-vertrouwelijk: zie [Beveiliging](/avenir-mcp/nl/project/security/).
+<Aside type="caution" title="Wat avenir-mcp niet kan beschermen">
+Een bevestigingscode bewijst dat er een voorbeeld bestond, niet dat u het hebt gelezen: een agent die
+deze doorgeeft zonder u hierom te vragen, maakt de code zinloos. Geef de voorkeur aan een client die MCP-verificatie ondersteunt, en lees
+wat u bevestigt. Meld kwetsbaarheden vertrouwelijk: zie
+[Beveiliging](/avenir-mcp/project/security/).
 </Aside>

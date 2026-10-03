@@ -7,9 +7,9 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-`forecast_balance` berekent het saldo van je rekeningen maand voor maand vooruit, tot 24
-maanden vooruit. Het scheidt **wat terugkeert**, op zijn dag geplaatst, van **wat
-varieert**, over de dagen verdeeld, en geeft elke aanname terug.
+`forecast_balance` geeft een prognose van het saldo van uw rekeningen per maand, tot 24 maanden
+vooruit. Het maakt een onderscheid tussen **wat periodiek terugkomt**, op de betreffende dag, en **wat varieert**, verspreid over
+de dagen, en geeft alle aannames weer.
 
 ## Rekeningen en beginpunt
 
@@ -50,9 +50,8 @@ rekening telt als uitgaand geld. Ze worden teruggegeven in `assumptions.schedule
 | Inkomsten | het gemiddelde van de inkomsten van de laatste 3 volle maanden, zonder terugkerende inkomsten | `monthly_income` |
 | Eenmalige bedragen | geen | `one_offs`: `{date, amount, label}` |
 
-Als je `monthly_income` opgeeft, **vervangt** het de inkomsten uit de geschiedenis en de
-geplande inkomende bedragen, salaris inbegrepen, zodat een salaris nooit twee keer wordt
-geteld.
+Wanneer u een bedrag invoert`monthly_income`, **vervangt** dit het inkomen dat in de geschiedenis en de
+geplande inkomsten, inclusief salaris, is opgenomen, zodat een salaris nooit dubbel wordt geteld.
 
 ## De projectie
 
@@ -73,16 +72,14 @@ laagste saldo van welke dag ook in de maand. `first_shortfall` is de eerste maan
 ## Grenzen
 
 <Aside type="caution">
-Een prognose trekt je recente verleden door. Houd er rekening mee dat:
+Een prognose is een voortzetting van uw recente verleden. Houd er rekening mee dat:
 
-- gemiddelden alles bevatten wat ongewoon was in de laatste 3 maanden – vakanties, een
-  jaarlijkse belasting, een grote aankoop;
-- een kwartaal- of jaarlijkse kostenpost zonder planning in YNAB volgens deze definitie
-  niet terugkeert: plan haar in YNAB, of voeg haar toe als eenmalig bedrag;
-- onregelmatig betaald inkomen wordt gemiddeld: geef `monthly_income` op als je het beter
-  weet;
-- alleen de gekozen rekeningen worden vooruitberekend; geld dat naar andere rekeningen
-  gaat, lijkt uitgegeven.
+- in de gemiddelden wordt rekening gehouden met alle ongebruikelijke uitgaven van de afgelopen 3 maanden — vakanties, een jaarlijkse belasting, een
+  grote aankoop;
+- een driemaandelijkse of jaarlijkse uitgave waarvoor geen planning in YNAB is opgezet, wordt volgens deze
+  definitie niet als terugkerend beschouwd: plan deze in YNAB in, of voeg deze toe als een eenmalige uitgave;
+- onregelmatig uitbetaalde inkomsten worden gemiddeld berekend: geef het door  `monthly_income`als u beter weet;
+- alleen de geselecteerde rekeningen worden geprojecteerd; geld dat naar andere rekeningen is overgemaakt, wordt als uitgegeven beschouwd.
 </Aside>
 
 De horizon `until` is een maand, `YYYY-MM`, van de huidige maand tot 24 maanden vooruit.
