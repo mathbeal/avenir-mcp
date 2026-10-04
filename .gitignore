@@ -42,3 +42,7 @@ docs/.astro/
 
 # lychee's cache of checked links
 .lycheecache
+
+# what running the Claude Desktop extension from mcpb/ resolves: a lock naming the
+# release it installs, which only exists once that release is published
+mcpb/uv.lock
