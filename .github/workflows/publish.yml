@@ -68,6 +68,42 @@ jobs:
           path: dist/
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
 
+  bundle:
+    name: attach the Claude Desktop extension to the release
+    # The .mcpb a reader opens for a one-click install. It installs avenir-mcp from PyPI,
+    # so it is attached once the release is there: `needs: publish`.
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # No cache: a release job writing a cache could poison a later run (zizmor).
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: docs/.nvmrc
+          package-manager-cache: false
+
+      - name: the tag must match the version the extension installs
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          expected="${TAG#v}"
+          found="$(node -p 'require("./mcpb/manifest.json").version')"
+          echo "tag=$expected  manifest=$found"
+          test "$expected" = "$found"
+          echo "VERSION=$expected" >> "$GITHUB_ENV"
+
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "avenir-mcp-$VERSION.mcpb"
+      - run: gh release upload "$TAG" "avenir-mcp-$VERSION.mcpb" --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+
   sbom:
     name: attach the SBOM to the release
     # What avenir-mcp runs with, exactly as locked: a CycloneDX bill of materials, for

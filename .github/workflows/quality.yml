@@ -49,9 +49,9 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
-      - run: uv run ruff format --check avenir_mcp tests evals docsgen benchmarks
-      - run: uv run pylint avenir_mcp tests evals docsgen benchmarks
-      - run: uv run ruff check avenir_mcp tests evals docsgen benchmarks
+      - run: uv run ruff format --check avenir_mcp tests evals docsgen benchmarks mcpb/src
+      - run: uv run pylint avenir_mcp tests evals docsgen benchmarks mcpb/src
+      - run: uv run ruff check avenir_mcp tests evals docsgen benchmarks mcpb/src
       - run: uvx pydoclint==0.10.1 avenir_mcp
       # Dead code. Its paths and its whitelist are in pyproject.toml.
       - run: uv run vulture
@@ -192,6 +192,25 @@ jobs:
           zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
           git /repo --redact --log-opts=--all
 
+  bundle:
+    name: the Claude Desktop extension packs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: docs/.nvmrc
+      # The manifest against the MCPB schema, then the zip Claude Desktop installs. The
+      # same pinned packer as `just bundle` and the release: one verdict on one manifest.
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "$RUNNER_TEMP/avenir-mcp.mcpb"
+
   reproducible:
     name: the build is reproducible
     runs-on: ubuntu-latest
@@ -219,7 +238,7 @@ jobs:
     name: CI passed
     # The one check branch protection requires: it stands for every job above.
     if: always()
-    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, secrets, reproducible]
+    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, secrets, bundle, reproducible]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
