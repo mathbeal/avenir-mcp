@@ -18,10 +18,8 @@ import { execFileSync } from "node:child_process";
  * @type {Record<string, string>}
  */
 export const ALLOWED = {
-  "GHSA-ch52-4w7c-c8xp":
-    "http-cache-semantics <=4.2.0, pulled by astro and the link validator. " +
-    "An HTTP cache flaw with no runtime here (the site is static) and no " +
-    "patched version published. Accepted 2026-10-03; revisit when one ships.",
+  // No advisories are accepted right now. Add one here as "GHSA-id": "dated reason"
+  // only when it has no fix and cannot be reached by the static site.
 };
 
 /**
