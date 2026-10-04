@@ -47,16 +47,24 @@ Running the project needs these accesses:
 | owner of the PyPI project `avenir-mcp` | manage the Trusted Publisher that lets the `publish` workflow upload a release, yank a broken release |
 | publishing to the MCP registry | update the `io.github.mathbeal/avenir-mcp` entry with each release |
 
-Today the maintainer alone holds them. If he could no longer act, nobody could merge a
-pull request or publish a release until those accesses were restored.
-
-The project is looking for a second maintainer. Once found, they will receive admin
-rights on the repository and the owner role on the PyPI project, and this file will
-name them. From then on, either maintainer can accept changes, handle a vulnerability
-report and publish a release to PyPI alone. The MCP registry entry lives under the
-maintainer's GitHub namespace (`io.github.mathbeal`) and is published with his GitHub
-login: it stays tied to that account until the publishing step no longer depends on it.
+So that the project can continue if the maintainer becomes unavailable, the credentials
+and recovery codes for each of these accesses — the GitHub account, the PyPI account and
+the GitHub login used for the MCP registry (`io.github.mathbeal`) — are held in the
+maintainer's password manager with its **emergency-access** feature enabled for one
+designated, trusted person, and are also kept in a sealed physical lockbox. That person
+holds written authorization, legally sufficient where required (including for any domain
+names), to use the accounts, merge changes, handle a vulnerability report and publish a
+release, or to transfer ownership. The emergency-access waiting period and the lockbox are
+set so that this person can create and close issues, accept proposed changes and publish a
+release within a week of confirmation that the maintainer can no longer continue.
 
 Whatever happens, the code stays usable: it is under the MIT licence, each release's
 source is on PyPI, and everything needed to build, test, document and release it is in
 the repository.
+
+A second maintainer is still sought (see the [roadmap](ROADMAP.md)). Once found, they will
+get the least privilege that lets them review, merge and cut a release — write, or maintain,
+access on the repository — not standing admin; the admin role and the PyPI owner role reach
+them through the continuity arrangement above, and only if the maintainer can no longer act.
+This file will name them; from then on either maintainer can accept changes and publish a
+release, which also raises the project's bus factor.
