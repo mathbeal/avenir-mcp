@@ -148,11 +148,11 @@ carries a CycloneDX SBOM (`avenir-mcp.cdx.json`) of the locked dependencies.
 
 ### The Claude Desktop extension
 
-Each release also carries `avenir-mcp-<version>.mcpb`, the extension Claude Desktop
-installs. The `publish` workflow packs it from `mcpb/`: a manifest, an icon, a
-`pyproject.toml` whose single dependency is `avenir-mcp` pinned to that version, and a
-launcher of about forty lines. It holds no copy of avenir-mcp and no Python, so the code
-that runs is the release on PyPI, with the provenance above. The file carries no
+Releases from the next one on also carry `avenir-mcp-<version>.mcpb`, the extension
+Claude Desktop installs. The `publish` workflow packs it from `mcpb/`: a manifest, an
+icon, a `pyproject.toml` whose single dependency is `avenir-mcp` pinned to that version,
+and a launcher of about forty lines. It holds no copy of avenir-mcp and no Python, so
+the code that runs is the release on PyPI, with the provenance above. The file carries no
 code-signing certificate; what you can check is its content, with `unzip -l` or
 `npx @anthropic-ai/mcpb info avenir-mcp-<version>.mcpb`, and that the pin names the
 version you expect.
