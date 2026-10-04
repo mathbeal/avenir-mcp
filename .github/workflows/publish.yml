@@ -69,13 +69,16 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
 
   bundle:
-    name: attach the Claude Desktop extension to the release
+    name: pack the Claude Desktop extension
     # The .mcpb a reader opens for a one-click install. It installs avenir-mcp from PyPI,
     # so it is attached once the release is there: `needs: publish`.
     needs: publish
     runs-on: ubuntu-latest
+    # The packer's version is pinned, its own dependencies are not. It therefore runs with
+    # nothing it could write to: the packed file crosses to `bundle-upload`, which is the
+    # only job holding a token that can change the release.
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -98,7 +101,26 @@ jobs:
 
       - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
       - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "avenir-mcp-$VERSION.mcpb"
-      - run: gh release upload "$TAG" "avenir-mcp-$VERSION.mcpb" --clobber
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: extension
+          path: "*.mcpb"
+          if-no-files-found: error
+
+  bundle-upload:
+    name: attach the Claude Desktop extension to the release
+    # The only job that can write to the release, and it runs no third-party code: no Node,
+    # no npx, nothing but the file `bundle` packed and the tag it was packed for.
+    needs: bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: extension
+      - run: gh release upload "$TAG" "avenir-mcp-${TAG#v}.mcpb" --clobber
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
