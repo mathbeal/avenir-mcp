@@ -24,5 +24,8 @@
     "satteri": "0.10.5",
     "sharp": "0.35.5",
     "starlight-links-validator": "0.26.0"
+  },
+  "overrides": {
+    "http-cache-semantics": "^4.3.0"
   }
 }
