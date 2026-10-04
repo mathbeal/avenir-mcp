@@ -184,3 +184,6 @@ Siehe [Evaluierung](/avenir-mcp/de/project/evaluation/).
 - Danach die MCP-Registry: `server.json` trägt dieselbe Version (ein Test prüft das); führen
   Sie `mcp-publisher login github` und dann `mcp-publisher publish` aus. Die Zeile `mcp-name:`
   in der README belegt, dass das PyPI-Paket Ihnen gehört.
+- Die Claude-Desktop-Erweiterung trägt sie ebenfalls: `mcpb/manifest.json` und die
+  Festlegung `avenir-mcp==` in `mcpb/pyproject.toml` folgen `avenir_mcp.__version__` (ein
+  Test prüft beides), sonst installiert die Erweiterung die vorherige Version.
