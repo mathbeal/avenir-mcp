@@ -157,6 +157,17 @@ code-signing certificate; what you can check is its content, with `unzip -l` or
 `npx @anthropic-ai/mcpb info avenir-mcp-<version>.mcpb`, and that the pin names the
 version you expect.
 
+That pin reaches avenir-mcp and stops there. Of avenir-mcp's own dependencies only
+`fastmcp` is pinned; `httpx`, `pydantic`, `mcp`, `mcp-types` and `starlette` are ranges,
+which the uv Claude Desktop runs resolves at install time. Two installs of the same file
+on different days can therefore run different versions of them, and the SBOM says what
+the release was locked against, not what your install resolved.
+
+The packing itself holds no write access. The `bundle` job of the `publish` workflow runs
+the packer with a read-only token and hands the file to a second job, which uploads it to
+the release and runs nothing else: a compromised dependency of the packer cannot reach the
+release's files.
+
 Installing it changes nothing on a plan. The manifest leaves `AVENIR_MCP_WRITE` off
 until you tick "Allow changes to your plans" yourself, and it marks the token a
 sensitive setting, which keeps it out of the configuration files a reader can open.

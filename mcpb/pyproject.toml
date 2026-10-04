@@ -3,8 +3,11 @@
 
 # What Claude Desktop resolves when the extension is installed. It declares no build
 # system on purpose: uv then installs the dependency and never builds this directory.
-# The single dependency is the released avenir-mcp, pinned to the version of the
-# manifest; avenir-mcp pins its own (tests/test_bundle.py keeps the three in step).
+# The single dependency is the released avenir-mcp, pinned to the version of the manifest
+# (tests/test_bundle.py keeps the three in step). What avenir-mcp itself brings is not
+# pinned that way: only `fastmcp` is, and `httpx`, `pydantic`, `mcp`, `mcp-types` and
+# `starlette` are ranges, which uv resolves when the reader installs the extension. Two
+# installs of the same .mcpb a month apart can therefore run different versions of them.
 [project]
 name = "avenir-mcp-extension"
 version = "0.5.0"
