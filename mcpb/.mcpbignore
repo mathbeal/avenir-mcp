@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
+# What a local `uv run src/server.py` leaves in this directory, and must stay out of the
+# zip: the `uv` runtime resolves the dependencies on the reader's machine instead.
+.venv/
+uv.lock
+__pycache__/
+*.pyc
