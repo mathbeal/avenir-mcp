@@ -1,0 +1,27 @@
+---
+// One write from preview to undo, in thirty seconds. The two pictures are written by
+// `python -m docsgen` into public/, from a conversation replayed on the demo plan; the
+// size here is theirs, and a test of the documentation fails when it stops being.
+// Starlight's own classes pick the one of the page's theme, which an <img> cannot do.
+import { home } from './home-i18n';
+
+const t = home(Astro.locals.starlightRoute.lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<figure class="demo not-content">
+  <img class="dark:sl-hidden" src={`${base}/demo-light.svg`} alt={t.writeDemo} width="720" height="498" />
+  <img class="light:sl-hidden" src={`${base}/demo-dark.svg`} alt={t.writeDemo} width="720" height="498" />
+</figure>
+
+<style>
+  .demo {
+    margin: 1.5rem 0 0;
+  }
+
+  .demo img {
+    width: 100%;
+    height: auto;
+    border-radius: 1rem;
+  }
+</style>
