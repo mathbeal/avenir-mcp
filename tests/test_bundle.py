@@ -14,6 +14,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING
 
 import pytest
+import yaml
 
 from avenir_mcp import __version__
 
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 ROOT = Path(__file__).resolve().parent.parent
+WORKFLOWS = ROOT / ".github" / "workflows"
 BUNDLE = ROOT / "mcpb"
 MANIFEST: dict[str, object] = json.loads((BUNDLE / "manifest.json").read_text(encoding="utf-8"))
 PROJECT = tomllib.loads((BUNDLE / "pyproject.toml").read_text(encoding="utf-8"))
@@ -53,6 +55,16 @@ def _setting(name: str) -> Mapping[str, object]:
     setting = settings[name]
     assert isinstance(setting, dict)
     return setting
+
+
+def _artifact(job: Mapping[str, object], action: str) -> str:
+    """The name of the artifact a job's step uploads or downloads with `action`."""
+    steps = job["steps"]
+    assert isinstance(steps, list)
+    names = [step["with"]["name"] for step in steps if action in step.get("uses", "")]
+    assert len(names) == 1, f"{action}: {names}"
+    assert isinstance(names[0], str)
+    return names[0]
 
 
 def _launcher() -> ModuleType:
@@ -216,7 +228,31 @@ def test_one_pinned_packer_checks_and_packs_the_bundle_everywhere() -> None:
     recipe = (ROOT / "justfile").read_text(encoding="utf-8")
     assert f"{PACKER} validate mcpb" in recipe
     assert f"{PACKER} pack mcpb" in recipe
-    for workflow in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+    for workflow in sorted(WORKFLOWS.glob("*.yml")):
         for line in workflow.read_text(encoding="utf-8").splitlines():
             if re.search(r"mcpb (validate|pack) mcpb", line):
                 assert PACKER in line, f"{workflow.name}: {line.strip()}"
+
+
+def test_the_job_that_packs_the_extension_cannot_change_the_release() -> None:
+    """Packing and attaching are two jobs: only the second holds a token that can write.
+
+    The packer's version is pinned, what it depends on is not. One of those turning
+    hostile must find nothing it could rewrite, so the job that runs it is read-only and
+    hands the file over; the job that can write to the release runs no third-party code.
+    """
+    jobs = yaml.safe_load((WORKFLOWS / "publish.yml").read_text(encoding="utf-8"))["jobs"]
+    packing, attaching = jobs["bundle"], jobs["bundle-upload"]
+
+    assert packing["permissions"] == {"contents": "read"}
+    assert attaching["needs"] == "bundle"
+    assert attaching["permissions"] == {"contents": "write"}
+
+    # The packed file is all that crosses from one job to the other.
+    assert _artifact(packing, "actions/upload-artifact") == _artifact(
+        attaching, "actions/download-artifact"
+    )
+    for step in attaching["steps"]:
+        assert "setup-node" not in step.get("uses", "")
+        for command in step.get("run", "").splitlines():
+            assert command.startswith("gh release upload "), command
