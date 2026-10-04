@@ -13,9 +13,9 @@ setup:
 check: lint types test vocabulary lock
 
 lint:
-    uv run ruff format --check avenir_mcp tests evals docsgen benchmarks
-    uv run pylint avenir_mcp tests evals docsgen benchmarks
-    uv run ruff check avenir_mcp tests evals docsgen benchmarks
+    uv run ruff format --check avenir_mcp tests evals docsgen benchmarks mcpb/src
+    uv run pylint avenir_mcp tests evals docsgen benchmarks mcpb/src
+    uv run ruff check avenir_mcp tests evals docsgen benchmarks mcpb/src
     uvx pydoclint==0.10.1 avenir_mcp
     uv run vulture
     uv run deptry .
@@ -56,8 +56,8 @@ fuzz examples="50000":
 
 # Reformat.
 fix:
-    uv run ruff check --select I --fix avenir_mcp tests evals docsgen benchmarks
-    uv run ruff format avenir_mcp tests evals docsgen benchmarks
+    uv run ruff check --select I --fix avenir_mcp tests evals docsgen benchmarks mcpb/src
+    uv run ruff format avenir_mcp tests evals docsgen benchmarks mcpb/src
 
 # Look for secrets in every commit of every branch, as CI does (needs Docker).
 # It mounts the repository that holds the history, so a worktree works too.
@@ -101,6 +101,17 @@ reproducible:
     uv build --quiet -o "$out/second"
     (cd "$out/first" && sha256sum -- *) | tee "$out/first.sha256"
     (cd "$out/second" && sha256sum --check --strict -- ../first.sha256)
+
+# Check and pack the Claude Desktop extension of mcpb/, as the release does (needs
+# Node.js). The manifest names the released version it installs, so the file this writes
+# only works once that version is on PyPI.
+bundle:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    version="$(uv run --no-project python -c 'import json; print(json.load(open("mcpb/manifest.json"))["version"])')"
+    npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
+    mkdir -p dist
+    npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "dist/avenir-mcp-$version.mcpb"
 
 # Regenerate CHANGELOG.md from the commit history.
 changelog:

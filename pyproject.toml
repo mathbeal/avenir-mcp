@@ -97,7 +97,7 @@ include = ["/avenir_mcp", "/tests"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-files = ["avenir_mcp", "tests", "evals", "docsgen", "benchmarks"]
+files = ["avenir_mcp", "tests", "evals", "docsgen", "benchmarks", "mcpb/src"]
 
 # Docstrings in Google style, complete: every argument, return value and exception.
 [tool.ruff]

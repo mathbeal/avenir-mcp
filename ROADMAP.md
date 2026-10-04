@@ -45,7 +45,6 @@ review; category groups; editing one transaction.
 
 ### Around the server
 
-- A `.mcpb` bundle for one-click install in Claude Desktop.
 - Undo for `update_category`.
 - The evaluation run through other clients than Claude Code, and with local models.
 - A second maintainer (see [GOVERNANCE.md](GOVERNANCE.md)).
@@ -99,6 +98,8 @@ review; category groups; editing one transaction.
 ## Done since 0.5
 
 - `forecast_balance`: month-by-month projection with visible assumptions.
+- A `.mcpb` extension for Claude Desktop, attached to each release: one file installs
+  avenir-mcp, keeps the token out of sight, and leaves it read-only until a box is ticked.
 
 ## 0.5: tasks, not endpoints
 

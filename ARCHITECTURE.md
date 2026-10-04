@@ -116,6 +116,26 @@ from PyPI's answer can reach the agent.
 | `api/` | a snapshot of YNAB's OpenAPI operations, why each unused one is planned or left out, and the rules each sent field follows |
 | `docs/` | the documentation site (Astro Starlight) in English, French, Spanish, German and Dutch |
 | `benchmarks/` | timings of the logic on a generated five-year plan |
+| `mcpb/` | the Claude Desktop extension: a manifest, the dependency on a released avenir-mcp, and the launcher Claude Desktop runs |
+
+### The Claude Desktop extension
+
+`mcpb/` is packed into the `.mcpb` file attached to each release (`just bundle`, the
+`publish` workflow). It is an [MCP bundle](https://github.com/anthropics/mcpb) of the
+`uv` kind: it carries no dependency and no Python of its own. Claude Desktop reads
+`mcpb/manifest.json`, resolves `mcpb/pyproject.toml` — whose single dependency is
+`avenir-mcp` pinned to the manifest's version — with its own uv, then runs
+`mcpb/src/server.py`.
+
+That launcher has no behaviour of its own. It turns the "Allow changes to your plans"
+checkbox, which Claude Desktop passes as `true` or `false`, into the exact `1`
+`AVENIR_MCP_WRITE` reads, and hands over to `avenir_mcp.server.main`. The token reaches
+the server the same way every other client sends it, through `YNAB_API_KEY`; Claude
+Desktop keeps it out of sight, since the manifest marks that setting sensitive.
+
+`tests/test_bundle.py` keeps the manifest, the pin and the package's version in step,
+checks that an extension installed without a tick is read-only, and that the packing
+command is the same one in the justfile and in both workflows.
 
 ## Dependencies
 

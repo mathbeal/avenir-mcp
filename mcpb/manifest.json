@@ -1,0 +1,66 @@
+{
+  "manifest_version": "0.4",
+  "name": "avenir-mcp",
+  "display_name": "avenir-mcp for YNAB",
+  "version": "0.5.0",
+  "description": "Unofficial MCP server for YNAB: budgets, spending and transaction classification, built for agents.",
+  "long_description": "Ask Claude about the plan you keep in YNAB: what is left in a category, where the money went last month, whether you will run short before payday. avenir-mcp answers from your own YNAB data, and nothing else.\n\nIt is **read-only when you install it**. Tick *Allow changes to your plans* and the agent can also classify transactions, move money between categories, reconcile an account and create one: every change is shown to you before it happens, you confirm it, and it can be undone.\n\nYou need a YNAB account and a personal access token, which YNAB gives you under *Account settings > Developer settings*. avenir-mcp is not made by YNAB, and it never touches a bank account: it changes a plan in YNAB, never real money.",
+  "author": {
+    "name": "The avenir-mcp contributors",
+    "url": "https://github.com/mathbeal/avenir-mcp"
+  },
+  "homepage": "https://avenir-mcp.pages.dev/avenir-mcp/",
+  "documentation": "https://avenir-mcp.pages.dev/avenir-mcp/getting-started/install/",
+  "support": "https://github.com/mathbeal/avenir-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mathbeal/avenir-mcp"
+  },
+  "icon": "icon.png",
+  "license": "MIT",
+  "keywords": [
+    "ynab",
+    "budget",
+    "budgeting",
+    "personal-finance",
+    "money"
+  ],
+  "privacy_policies": [
+    "https://avenir-mcp.pages.dev/avenir-mcp/project/privacy/"
+  ],
+  "server": {
+    "type": "uv",
+    "entry_point": "src/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "src/server.py"],
+      "env": {
+        "YNAB_API_KEY": "${user_config.ynab_api_key}",
+        "AVENIR_MCP_WRITE": "${user_config.allow_changes}"
+      }
+    }
+  },
+  "tools_generated": true,
+  "user_config": {
+    "ynab_api_key": {
+      "type": "string",
+      "title": "YNAB personal access token",
+      "description": "In YNAB, open Account settings > Developer settings > New Token. The token can read and change every plan of your account: YNAB offers no read-only one. Claude Desktop keeps it out of sight here, and avenir-mcp never logs it and never returns it in an answer.",
+      "required": true,
+      "sensitive": true
+    },
+    "allow_changes": {
+      "type": "boolean",
+      "title": "Allow changes to your plans",
+      "description": "Leave this off and avenir-mcp answers questions and changes nothing. Turn it on and the agent can also classify transactions, budget, reconcile and create: it shows you each change, waits for your yes, and can undo it afterwards.",
+      "required": false,
+      "default": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.12"
+    }
+  }
+}

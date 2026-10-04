@@ -23,6 +23,14 @@ la suivante.
 
 </Steps>
 
+<Aside type="tip" title="Sur Claude Desktop : un fichier, sans terminal">
+Claude Desktop installe avenir-mcp depuis une extension. Elle apporte son propre Python,
+garde votre jeton là où votre système garde les mots de passe, et n'a besoin ni d'uv ni
+d'un fichier de configuration : les étapes 1 et 3 ne sont pas pour vous. Obtenez
+[un jeton YNAB](#obtenir-un-jeton-ynab), puis
+[installez l'extension](#ajouter-avenir-mcp-à-votre-client).
+</Aside>
+
 ## Ce qu'il vous faut
 
 | | Pourquoi | Où l'obtenir |
@@ -151,6 +159,23 @@ vient après.
     Claude Code garde cela, jeton compris, dans `~/.claude.json`, lisible par vous seul.
   </TabItem>
   <TabItem label="Claude Desktop">
+    **L'extension.** Un seul fichier installe avenir-mcp, le Python qui l'exécute et les
+    réglages dont il a besoin :
+
+    1. Téléchargez `avenir-mcp-<version>.mcpb` depuis la
+       [dernière version publiée](https://github.com/mathbeal/avenir-mcp/releases/latest).
+    2. Ouvrez le fichier. Claude Desktop présente l'extension, puis vous demande de
+       l'installer.
+    3. Collez votre jeton dans **YNAB personal access token** et laissez **Allow changes
+       to your plans** décoché. Installez.
+
+    Le premier démarrage prend quelques secondes, le temps que Claude Desktop récupère
+    Python et avenir-mcp. Les deux réglages restent modifiables dans **Settings →
+    Extensions → avenir-mcp** ; le jeton y est masqué et n'apparaît dans aucun fichier
+    que vous pouvez lire.
+
+    **Ou à la main**, si vous préférez écrire la configuration vous-même :
+
     1. Ouvrez Claude Desktop, puis **Settings → Developer → Edit Config**. Cela ouvre
        `claude_desktop_config.json` :
        - macOS : `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -304,6 +329,11 @@ Pour que l'agent puisse classer des transactions, déplacer de l'argent entre ca
 ou rapprocher des comptes, ajoutez `AVENIR_MCP_WRITE=1` à l'environnement d'avenir-mcp.
 
 <Tabs syncKey="client">
+  <TabItem label="Claude Desktop">
+    Installé depuis l'extension : ouvrez **Settings → Extensions → avenir-mcp**, cochez
+    **Allow changes to your plans**, puis redémarrez Claude Desktop. L'extension pose la
+    variable pour vous.
+  </TabItem>
   <TabItem label="Claude Code">
     Retirez avenir-mcp et ajoutez-le à nouveau avec la variable en plus :
     ```bash
@@ -354,8 +384,8 @@ Chaque changement vous est montré avant d'être appliqué : voir
 
 | Pour | Faire |
 |---|---|
-| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp` |
-| **Retirer** | `claude mcp remove avenir-mcp --scope user`, ou supprimez l'entrée `avenir-mcp` de la configuration du client |
+| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp`. L'extension Claude Desktop se met à jour en installant par-dessus le `.mcpb` de la version plus récente |
+| **Retirer** | `claude mcp remove avenir-mcp --scope user`, ou supprimez l'entrée `avenir-mcp` de la configuration du client. L'extension se retire depuis **Settings → Extensions**, jeton compris |
 | **Nettoyer** | le seul fichier d'avenir-mcp sur votre machine est son [journal](/avenir-mcp/fr/concepts/journal/), dans `~/.local/state/avenir-mcp/` |
 | **Révoquer le jeton** | YNAB → Account Settings → Developer Settings → **Revoke** à côté du jeton |
 

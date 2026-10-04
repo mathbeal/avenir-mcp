@@ -22,6 +22,14 @@ termina con una comprobación: sabrá que ha funcionado antes de seguir.
 
 </Steps>
 
+<Aside type="tip" title="En Claude Desktop: un archivo, sin terminal">
+Claude Desktop instala avenir-mcp desde una extensión. Trae su propio Python, guarda su
+token donde su sistema guarda las contraseñas, y no necesita ni uv ni un archivo de
+configuración: los pasos 1 y 3 no son para usted. Obtenga
+[un token de YNAB](#obtener-un-token-de-ynab), y luego
+[instale la extensión](#añadir-avenir-mcp-a-su-cliente).
+</Aside>
+
 ## Lo que necesita
 
 | | Por qué | Dónde conseguirlo |
@@ -146,6 +154,22 @@ preguntas pero no cambia nada. [Permitir cambios](#permitir-cambios) viene despu
     Claude Code guarda esto, token incluido, en `~/.claude.json`, legible solo por usted.
   </TabItem>
   <TabItem label="Claude Desktop">
+    **La extensión.** Un solo archivo instala avenir-mcp, el Python con el que se ejecuta
+    y los ajustes que necesita:
+
+    1. Descargue `avenir-mcp-<version>.mcpb` de la
+       [última versión publicada](https://github.com/mathbeal/avenir-mcp/releases/latest).
+    2. Abra el archivo. Claude Desktop presenta la extensión y luego le pide instalarla.
+    3. Pegue su token en **YNAB personal access token** y deje **Allow changes to your
+       plans** sin marcar. Instale.
+
+    El primer arranque tarda unos segundos, mientras Claude Desktop obtiene Python y
+    avenir-mcp. Los dos ajustes siguen siendo editables en **Settings → Extensions →
+    avenir-mcp**; allí el token queda oculto y no aparece en ningún archivo que usted
+    pueda leer.
+
+    **O a mano**, si prefiere escribir la configuración usted mismo:
+
     1. Abra Claude Desktop y luego **Settings → Developer → Edit Config**. Se abre
        `claude_desktop_config.json`:
        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -297,6 +321,11 @@ Para que el agente pueda clasificar transacciones, mover dinero entre categoría
 conciliar cuentas, añada `AVENIR_MCP_WRITE=1` al entorno de avenir-mcp.
 
 <Tabs syncKey="client">
+  <TabItem label="Claude Desktop">
+    Instalado desde la extensión: abra **Settings → Extensions → avenir-mcp**, marque
+    **Allow changes to your plans** y reinicie Claude Desktop. La extensión pone la
+    variable por usted.
+  </TabItem>
   <TabItem label="Claude Code">
     Quite avenir-mcp y vuelva a añadirlo con la variable adicional:
     ```bash
@@ -347,8 +376,8 @@ Cada cambio se le muestra antes de aplicarse: vea
 
 | Para | Haga |
 |---|---|
-| **Actualizar** | `uvx` descarga las nuevas versiones por sí mismo de vez en cuando; fuércelo con `uvx --refresh avenir-mcp` |
-| **Quitar** | `claude mcp remove avenir-mcp --scope user`, o borre la entrada `avenir-mcp` de la configuración del cliente |
+| **Actualizar** | `uvx` descarga las nuevas versiones por sí mismo de vez en cuando; fuércelo con `uvx --refresh avenir-mcp`. La extensión de Claude Desktop se actualiza instalando encima el `.mcpb` de la versión más reciente |
+| **Quitar** | `claude mcp remove avenir-mcp --scope user`, o borre la entrada `avenir-mcp` de la configuración del cliente. La extensión se quita desde **Settings → Extensions**, token incluido |
 | **Limpiar** | el único archivo de avenir-mcp en su máquina es su [diario](/avenir-mcp/es/concepts/journal/), en `~/.local/state/avenir-mcp/` |
 | **Revocar el token** | YNAB → Account Settings → Developer Settings → **Revoke** junto al token |
 
