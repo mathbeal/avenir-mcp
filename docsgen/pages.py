@@ -7,11 +7,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from docsgen import api, examples, readme, reference
+from docsgen import api, demo, examples, readme, reference
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "docs" / "src" / "content" / "docs"
 SNIPPETS = ROOT / "docs" / "src" / "snippets"
+ASSETS = ROOT / ".github" / "assets"
+# The site serves its own copy of the demo: a page cannot reach a file outside docs/.
+PUBLIC = ROOT / "docs" / "public"
 
 
 def security() -> str:
@@ -42,9 +45,12 @@ def generated() -> dict[Path, str]:
         for name, capture in by_name.items():
             files[SNIPPETS / language / f"{name}.json"] = capture.text
     for scheme, svg in readme.charts(captures[""]["forecast"].text).items():
-        files[ROOT / ".github" / "assets" / f"forecast-{scheme}.svg"] = svg
+        files[ASSETS / f"forecast-{scheme}.svg"] = svg
     for scheme, svg in readme.net_worth_charts(captures[""]["net_worth"].text).items():
-        files[ROOT / ".github" / "assets" / f"networth-{scheme}.svg"] = svg
+        files[ASSETS / f"networth-{scheme}.svg"] = svg
+    for scheme, svg in demo.pictures().items():
+        files[ASSETS / f"demo-{scheme}.svg"] = svg
+        files[PUBLIC / f"demo-{scheme}.svg"] = svg
     return files
 
 

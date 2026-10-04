@@ -41,6 +41,11 @@ you, and can be undone.
 [English](https://avenir-mcp.pages.dev/avenir-mcp/) · [Français](https://avenir-mcp.pages.dev/avenir-mcp/fr/) · [Español](https://avenir-mcp.pages.dev/avenir-mcp/es/) · [Deutsch](https://avenir-mcp.pages.dev/avenir-mcp/de/) · [Nederlands](https://avenir-mcp.pages.dev/avenir-mcp/nl/)
 
 <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/demo-dark.svg">
+  <img alt="Thirty seconds, one write: move_money previews moving 30 from Tennis to Restaurants — Tennis 80.00 → 50.00, Restaurants 120.00 → 150.00 — and changes nothing; once agreed, the move is applied and journaled; undo_operation then puts both amounts back." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/demo-light.svg" width="720">
+</picture>
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-dark.svg">
   <img alt="Asked how the budget is doing this month, the agent reads the month with two read-only tools and answers: one category over budget, Restaurants by 22.50, everything else on track." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/conversation-light.svg" width="720">
 </picture>
@@ -55,8 +60,11 @@ you, and can be undone.
   <img alt="forecast_balance on the demo plan: the month-end balance rises from this month to three months ahead, with each month's lowest day and a yearly insurance payment scheduled next month." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/forecast-light.svg" width="720">
 </picture>
 
-All three come from the invented demo plan: a real reply of Claude Sonnet, and the net
-worth and the forecast the documentation shows.
+All four come from the invented demo plan: the write above is replayed by `python -m docsgen`,
+so every line of it is what avenir-mcp answers today; then a real reply of Claude Sonnet, and
+the net worth and the forecast the documentation shows. The demo plays for thirty seconds and
+holds its last frame, which tells the whole story on its own: a reader whose system asks for
+less motion, or a viewer that does not animate, sees that frame instead.
 
 > **Unofficial project.** We are not affiliated, associated, or in any way officially
 > connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website

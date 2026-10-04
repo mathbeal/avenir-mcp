@@ -10,14 +10,17 @@ import json
 import re
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
+from xml.etree import ElementTree  # noqa: S405  # nosec B405 - reads what docsgen drew
 
 import pytest
 
-from docsgen import pages
+from docsgen import demo, pages
 
 CONTENT = pages.CONTENT
+COMPONENTS = CONTENT.parents[1] / "components"
 TRANSLATED = ("fr", "es", "de", "nl")
 REGENERATE = "run `uv run python -m docsgen` and commit the result"
+SVG = "{http://www.w3.org/2000/svg}"
 
 
 def _english_pages() -> set[Path]:
@@ -32,6 +35,104 @@ def test_generated_files_are_current() -> None:
     """Tool reference, security page and every JSON example match the code today."""
     for path, text in pages.generated().items():
         assert path.read_text(encoding="utf-8") == text, f"{path.name}: {REGENERATE}"
+
+
+@pytest.fixture(scope="module", name="demo_steps")
+def fixture_demo_steps() -> list[demo.Step]:
+    """The three exchanges of the animated demo, played once for the tests that read them."""
+    return demo.steps(demo.capture())
+
+
+def test_the_demo_previews_a_write_then_applies_it_then_undoes_it(
+    demo_steps: list[demo.Step],
+) -> None:
+    """The card shows a move that changed nothing yet, the confirmed move, and its undo."""
+    preview, applied, undone = demo_steps
+    assert (preview.status, applied.status, undone.status) == (
+        "confirmation_required",
+        "applied",
+        "applied",
+    )
+    assert preview.lines == (
+        "Move 30.00 from Tennis to Restaurants for this month?",
+        "- Tennis: 80.00 → 50.00",
+        "- Restaurants: 120.00 → 150.00",
+    )
+    assert "undo_operation" in applied.lines[0]
+    assert undone.lines == (
+        "Undo: move 30.00 back from Restaurants to Tennis for this month?",
+        "Both amounts restored.",
+    )
+
+
+def test_the_demo_names_neither_a_date_nor_the_journal_id_it_was_given(
+    demo_steps: list[demo.Step],
+) -> None:
+    """A date would make the picture look old, and a random id would change it every run."""
+    drawn = demo.picture(demo_steps, "light")
+    assert "2026-" not in drawn
+    assert "this month" in drawn
+    assert "&lt;operation id&gt;" in drawn
+
+
+def test_the_demo_plays_for_thirty_seconds_and_holds_still_when_asked_to(
+    demo_steps: list[demo.Step],
+) -> None:
+    """Each part appears in its own second of a thirty-second loop, unless motion is refused."""
+    drawn = demo.picture(demo_steps, "light")
+    assert drawn.count("30s linear infinite") == 3 * len(demo_steps)
+    assert "@media (prefers-reduced-motion: reduce)" in drawn
+    assert "animation: none" in drawn
+
+
+def _overflowing(drawn: str) -> list[str]:
+    """Every string of a card that would be drawn past one of its edges.
+
+    Args:
+        drawn: An SVG document.
+
+    Returns:
+        The strings that do not fit, in the order they are drawn.
+    """
+    over = []
+    root = ElementTree.fromstring(drawn)  # noqa: S314  # nosec B314 - drawn here, not read in
+    for node in root.iter(f"{SVG}text"):
+        text, size = node.text or "", float(node.get("font-size", "0"))
+        share = demo.FIXED if node.get("font-family") == demo.MONO else demo.SANS
+        width = demo.text_width(text, size, share)
+        anchor, x = node.get("text-anchor", "start"), float(node.get("x", "0"))
+        left = {"start": x, "middle": x - width / 2, "end": x - width}[anchor]
+        if left < demo.MARGIN - 1 or left + width > demo.WIDTH - demo.MARGIN + 1:
+            over.append(text)
+    return over
+
+
+@pytest.mark.parametrize("scheme", ("light", "dark"))
+def test_every_line_of_the_demo_fits_inside_the_card(
+    demo_steps: list[demo.Step], scheme: str
+) -> None:
+    """SVG text neither wraps nor shrinks: a longer message would run off the card."""
+    over = _overflowing(demo.picture(demo_steps, scheme))
+    assert not over, f"drawn past the edge of the card: {over}"
+
+
+def test_the_site_shows_the_demo_at_the_size_it_was_drawn(demo_steps: list[demo.Step]) -> None:
+    """Sizes left behind would stretch the picture: the home pages declare the SVG's own."""
+    picture = demo.picture(demo_steps, "light")
+    drawn = ElementTree.fromstring(picture)  # noqa: S314  # nosec B314 - drawn here, not read in
+    component = (COMPONENTS / "WriteDemo.astro").read_text(encoding="utf-8")
+    assert (
+        re.findall(r'width="(\d+)" height="(\d+)"', component)
+        == [(drawn.get("width"), drawn.get("height"))] * 2
+    )
+
+
+@pytest.mark.parametrize("language", ("", *TRANSLATED))
+def test_every_home_page_shows_the_demo_with_its_own_alternative_text(language: str) -> None:
+    """The demo is on every home page, and each language names what it shows."""
+    assert "<WriteDemo />" in (CONTENT / language / "index.mdx").read_text(encoding="utf-8")
+    labels = (COMPONENTS / "home-i18n.ts").read_text(encoding="utf-8")
+    assert labels.count("writeDemo:") == 1 + len(TRANSLATED)
 
 
 @pytest.mark.parametrize("language", TRANSLATED)

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="498" viewBox="0 0 720 498" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+<title id="title">One write in avenir-mcp: previewed, confirmed, then undone</title>
+<desc id="desc">Restaurants is over budget. Move 30 from Tennis to cover it. Move 30.00 from Tennis to Restaurants for this month? - Tennis: 80.00 → 50.00 - Restaurants: 120.00 → 150.00 Yes, go ahead. Moved. undo_operation with operation_id &lt;operation id&gt; moves it back. Actually, put it back. Undo: move 30.00 back from Restaurants to Tennis for this month? Both amounts restored.</desc>
+<style>
+.p0 { animation: a0 30s linear infinite }
+@keyframes a0 { 0%, 1.0% { opacity: 0 } 3.7%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p1 { animation: a1 30s linear infinite }
+@keyframes a1 { 0%, 4.3% { opacity: 0 } 7.0%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p2 { animation: a2 30s linear infinite }
+@keyframes a2 { 0%, 7.7% { opacity: 0 } 10.3%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p3 { animation: a3 30s linear infinite }
+@keyframes a3 { 0%, 32.7% { opacity: 0 } 35.3%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p4 { animation: a4 30s linear infinite }
+@keyframes a4 { 0%, 36.0% { opacity: 0 } 38.7%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p5 { animation: a5 30s linear infinite }
+@keyframes a5 { 0%, 39.3% { opacity: 0 } 42.0%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p6 { animation: a6 30s linear infinite }
+@keyframes a6 { 0%, 64.3% { opacity: 0 } 67.0%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p7 { animation: a7 30s linear infinite }
+@keyframes a7 { 0%, 67.7% { opacity: 0 } 70.3%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+.p8 { animation: a8 30s linear infinite }
+@keyframes a8 { 0%, 71.0% { opacity: 0 } 73.7%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .p0, .p1, .p2, .p3, .p4, .p5, .p6, .p7, .p8 { animation: none } }
+</style>
+<rect x="0.5" y="0.5" width="719" height="497" rx="12" fill="#fcfcfb" stroke="#e6e5e0"/>
+<text x="28" y="36" font-size="12" font-weight="600" fill="#52514e">avenir-mcp in Claude Code</text>
+<text x="692" y="36" font-size="12" text-anchor="end" fill="#52514e">One write: previewed, confirmed, undone</text>
+<g class="p0">
+<rect x="257.2" y="54.0" width="434.8" height="34" rx="17.0" fill="#2a78d6"/>
+<text x="474.6" y="76.0" font-size="14" font-weight="500" text-anchor="middle" fill="#ffffff">Restaurants is over budget. Move 30 from Tennis to cover it.</text>
+</g>
+<g class="p1">
+<rect x="28" y="100.0" width="172.0" height="26" rx="6" fill="#e6e5e0"/>
+<text x="42" y="117.0" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#52514e">move_money · preview</text>
+<circle cx="543.4" cy="113.0" r="4" fill="#eb6834"/>
+<text x="692" y="117.0" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="end" fill="#0b0b0b">confirmation_required</text>
+</g>
+<g class="p2">
+<rect x="28" y="136.0" width="3" height="57" rx="1.5" fill="#eb6834"/>
+<text x="44" y="150.0" font-size="13" fill="#0b0b0b">Move 30.00 from Tennis to Restaurants for this month?</text>
+<text x="44" y="169.0" font-size="13" fill="#0b0b0b">- Tennis: 80.00 → 50.00</text>
+<text x="44" y="188.0" font-size="13" fill="#0b0b0b">- Restaurants: 120.00 → 150.00</text>
+</g>
+<g class="p3">
+<rect x="559.9" y="211.0" width="132.1" height="34" rx="17.0" fill="#2a78d6"/>
+<text x="625.9" y="233.0" font-size="14" font-weight="500" text-anchor="middle" fill="#ffffff">Yes, go ahead.</text>
+</g>
+<g class="p4">
+<rect x="28" y="257.0" width="308.8" height="26" rx="6" fill="#e6e5e0"/>
+<text x="42" y="274.0" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#52514e">move_money · with the confirmation code</text>
+<circle cx="635.8" cy="270.0" r="4" fill="#2a78d6"/>
+<text x="692" y="274.0" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="end" fill="#0b0b0b">applied</text>
+</g>
+<g class="p5">
+<rect x="28" y="293.0" width="3" height="19" rx="1.5" fill="#2a78d6"/>
+<text x="44" y="307.0" font-size="13" fill="#0b0b0b">Moved. undo_operation with operation_id &lt;operation id&gt; moves it back.</text>
+</g>
+<g class="p6">
+<rect x="507.2" y="330.0" width="184.8" height="34" rx="17.0" fill="#2a78d6"/>
+<text x="599.6" y="352.0" font-size="14" font-weight="500" text-anchor="middle" fill="#ffffff">Actually, put it back.</text>
+</g>
+<g class="p7">
+<rect x="28" y="376.0" width="308.8" height="26" rx="6" fill="#e6e5e0"/>
+<text x="42" y="393.0" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#52514e">undo_operation · preview, then the code</text>
+<circle cx="635.8" cy="389.0" r="4" fill="#2a78d6"/>
+<text x="692" y="393.0" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="end" fill="#0b0b0b">applied</text>
+</g>
+<g class="p8">
+<rect x="28" y="412.0" width="3" height="38" rx="1.5" fill="#2a78d6"/>
+<text x="44" y="426.0" font-size="13" fill="#0b0b0b">Undo: move 30.00 back from Restaurants to Tennis for this month?</text>
+<text x="44" y="445.0" font-size="13" fill="#0b0b0b">Both amounts restored.</text>
+</g>
+<text x="28" y="468.0" font-size="11" fill="#52514e">Every answer above is what avenir-mcp returns on the invented demo plan today, replayed by python -m docsgen.</text>
+<text x="28" y="484.0" font-size="11" fill="#52514e">“this month” stands for the month’s name, &lt;operation id&gt; for the journal id.</text>
+</svg>

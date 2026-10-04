@@ -15,10 +15,11 @@ import asyncio
 import json
 import os
 import tempfile
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 from unittest.mock import patch
 
 from fastmcp import Client
@@ -27,6 +28,8 @@ from evals import fake_ynab
 
 TODAY = date(2026, 9, 25)
 BUDGET = "demo-budget"
+
+T = TypeVar("T")
 
 
 @dataclass(frozen=True)
@@ -299,8 +302,19 @@ async def _capture(language: str) -> dict[str, Capture]:
     return captures
 
 
-def capture_all(language: str = "") -> dict[str, Capture]:
-    """Run every documented call against a fresh demo budget, named in one language."""
+def on_demo_plan(session: Callable[[], Coroutine[Any, Any, T]], language: str = "") -> T:
+    """Run a session of tool calls against a fresh demo budget, named in one language.
+
+    The date is fixed, a fake YNAB serves the invented plan, and the journal lives in a
+    temporary folder: nothing of the machine's own configuration is read or written.
+
+    Args:
+        session: Makes the coroutine that calls the tools.
+        language: The language the demo budget is named in.
+
+    Returns:
+        What the session returned.
+    """
     fake_ynab.STATE = fake_ynab.DemoBudget(language)
     demo = fake_ynab.serve()
     try:
@@ -311,10 +325,15 @@ def capture_all(language: str = "") -> dict[str, Capture]:
                 "AVENIR_MCP_JOURNAL": str(Path(work) / "journal.jsonl"),
             }
             with patch.dict(os.environ, env), patch("avenir_mcp.app.today", lambda: TODAY):
-                return asyncio.run(_capture(language))
+                return asyncio.run(session())
     finally:
         demo.shutdown()
         demo.server_close()
+
+
+def capture_all(language: str = "") -> dict[str, Capture]:
+    """Run every documented call against a fresh demo budget, named in one language."""
+    return on_demo_plan(lambda: _capture(language), language)
 
 
 def generate() -> dict[str, str]:

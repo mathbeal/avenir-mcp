@@ -8,6 +8,8 @@ const texts = {
     install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=your-token \\\n  -- uvx avenir-mcp',
     worksWith: 'Works with',
     demoLabel: 'A conversation with Claude using avenir-mcp',
+    writeDemo:
+      'Thirty seconds, one write: move_money previews moving 30 from Tennis to Restaurants — Tennis 80.00 → 50.00, Restaurants 120.00 → 150.00 — and changes nothing; once agreed, the move is applied and journaled; undo_operation then puts both amounts back.',
     you: 'You',
     q1: 'Which category is overspent this month?',
     a1: 'Restaurants is <strong>22.50 over</strong>. Tennis still has 80.00 available — move 30 to cover it?',
@@ -38,6 +40,8 @@ const texts = {
     install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=votre-jeton \\\n  -- uvx avenir-mcp',
     worksWith: 'Fonctionne avec',
     demoLabel: 'Une conversation avec Claude qui utilise avenir-mcp',
+    writeDemo:
+      'Trente secondes, une écriture : move_money affiche l’aperçu d’un déplacement de 30 de Tennis vers Restaurants — Tennis 80,00 → 50,00, Restaurants 120,00 → 150,00 — et ne modifie rien ; une fois l’accord donné, le déplacement est appliqué et inscrit au journal ; undo_operation remet ensuite les deux montants comme avant.',
     you: 'Vous',
     q1: 'Quelle catégorie est en dépassement ce mois-ci ?',
     a1: 'Restaurants dépasse de <strong>22,50</strong>. Il reste 80,00 dans Escalade — j’en déplace 30 pour couvrir ?',
@@ -68,6 +72,8 @@ const texts = {
     install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=su-token \\\n  -- uvx avenir-mcp',
     worksWith: 'Funciona con',
     demoLabel: 'Una conversación con Claude usando avenir-mcp',
+    writeDemo:
+      'Treinta segundos, una escritura: move_money muestra una vista previa del traslado de 30 de Tennis a Restaurants — Tennis 80,00 → 50,00, Restaurants 120,00 → 150,00 — y no cambia nada; tras la aceptación, el traslado se aplica y queda anotado en el diario; después undo_operation devuelve ambos importes a como estaban.',
     you: 'Usted',
     q1: '¿Qué categoría se ha pasado este mes?',
     a1: 'Restaurantes se ha pasado <strong>22,50</strong>. A Pádel le quedan 80,00 — ¿muevo 30 para cubrirlo?',
@@ -98,6 +104,8 @@ const texts = {
     install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=ihr-token \\\n  -- uvx avenir-mcp',
     worksWith: 'Funktioniert mit',
     demoLabel: 'Ein Gespräch mit Claude über avenir-mcp',
+    writeDemo:
+      'Dreißig Sekunden, eine Änderung: move_money zeigt eine Vorschau, wie 30 von Tennis zu Restaurants umgebucht werden — Tennis 80,00 → 50,00, Restaurants 120,00 → 150,00 — und ändert nichts; nach der Zustimmung wird die Umbuchung angewendet und im Journal erfasst; danach setzt undo_operation beide Beträge zurück.',
     you: 'Sie',
     q1: 'Welche Kategorie ist diesen Monat überzogen?',
     a1: 'Restaurants liegt <strong>22,50 darüber</strong>. Tennis hat noch 80,00 verfügbar – 30 davon umbuchen, um es auszugleichen?',
@@ -128,6 +136,8 @@ const texts = {
     install: 'claude mcp add avenir-mcp \\\n  --env YNAB_API_KEY=jouw-token \\\n  -- uvx avenir-mcp',
     worksWith: 'Werkt met',
     demoLabel: 'Een gesprek met Claude via avenir-mcp',
+    writeDemo:
+      'Dertig seconden, één schrijfactie: move_money toont een voorbeeld van het overhevelen van 30 van Tennis naar Restaurants — Tennis 80,00 → 50,00, Restaurants 120,00 → 150,00 — en verandert niets; na akkoord wordt de overheveling toegepast en in het journaal gezet; daarna zet undo_operation beide bedragen terug.',
     you: 'Jij',
     q1: 'Welke categorie zit deze maand over budget?',
     a1: 'Restaurants zit <strong>22,50 over budget</strong>. Tennis heeft nog 80,00 beschikbaar – 30 overhevelen om het te dekken?',
