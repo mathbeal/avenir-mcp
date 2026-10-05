@@ -7,9 +7,9 @@
 version = 1
 
 # Markdown, whose first line is a title or front matter; JSON, which has no comments;
-# images; lock files; one-line version files; Astro components, whose first line is
-# their script fence; generated documentation pages and examples, and the evaluation's
-# reports, which docsgen and evals/run.py write.
+# images; lock files; one-line version files; the PEP 561 marker, which is empty; Astro
+# components, whose first line is their script fence; generated documentation pages and
+# examples, and the evaluation's reports, which docsgen and evals/run.py write.
 [[annotations]]
 path = [
     "**/*.md",
@@ -21,6 +21,7 @@ path = [
     "uv.lock",
     "lexdrift.lock",
     ".python-version",
+    "avenir_mcp/py.typed",
     "docs/.nvmrc",
     "docs/cloudflare/_headers",
     "docs/cloudflare/_redirects",

@@ -42,6 +42,14 @@ def test_the_registry_asks_for_the_token_as_a_required_secret() -> None:
     assert variables["YNAB_API_KEY"]["isSecret"] is True
 
 
+def test_the_typed_classifier_is_backed_by_the_marker_the_package_ships() -> None:
+    """`Typing :: Typed` promises the PEP 561 marker, without which mypy ignores the hints."""
+    marker = ROOT / "avenir_mcp" / "py.typed"
+    assert "Typing :: Typed" in PROJECT["classifiers"]
+    assert marker.is_file(), "the classifier promises avenir_mcp/py.typed"
+    assert marker.read_bytes() == b"", "the marker is empty: the whole package is typed"
+
+
 def test_the_descriptions_fit_on_one_line_and_name_ynab() -> None:
     """Short enough for registries' cards, and findable by the word people search for."""
     for description in (SERVER["description"], PROJECT["description"]):
