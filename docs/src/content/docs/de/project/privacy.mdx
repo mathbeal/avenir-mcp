@@ -18,6 +18,10 @@ Programm auf Ihrem Rechner mit den Daten macht, die es über die API von YNAB er
 | Ihr Modellanbieter | die Tool-Ergebnisse, die Ihr MCP-Client an sein Modell sendet: Konten, Kategorien, Empfänger, Beträge, Verwendungszwecke | die Ihres Anbieters; keine mit einem [lokalen Modell](/avenir-mcp/de/guides/choose-a-model/#lokale-modelle) |
 | Der Herausgeber von avenir-mcp | nichts | — |
 
+avenir-mcp gibt keine der Daten, die es über die API von YNAB erhält, ohne Ihr Wissen an
+Dritte weiter und verkauft keine davon: Die Daten gehen nirgendwohin außer dorthin, wo diese
+Tabelle es angibt.
+
 ## Was avenir-mcp verarbeitet
 
 - **Ihr YNAB-Token.** Beim Start aus `YNAB_API_KEY` gelesen, oder aus der Datei, die
@@ -79,7 +83,10 @@ Ihre Daten bei YNAB bleiben in Ihrem YNAB-Konto, nach der Richtlinie von YNAB.
 
 avenir-mcp hat keine Telemetrie, kein Konto und keinen Server. Diese
 Dokumentationsseite setzt keine Cookies und nutzt keine Analyse; ihre Schriften liefert
-die Seite selbst aus. GitHub, das sie hostet, speichert die IP-Adressen der Besucher aus
+die Seite selbst aus. Cloudflare Pages, das sie hostet, erhält die IP-Adressen der Besucher, um die Seiten
+auszuliefern und zu schützen, gemäß der
+[Datenschutzrichtlinie von Cloudflare](https://www.cloudflare.com/privacypolicy/). Die früheren Adressen der Seite
+auf GitHub Pages leiten nur dorthin weiter; GitHub speichert die IP-Adressen der Besucher aus
 Sicherheitsgründen, gemäß der
 [Datenschutzerklärung von GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 

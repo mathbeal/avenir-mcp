@@ -18,6 +18,10 @@ programa hace, en su equipo, con los datos que obtiene a través de la API de YN
 | Su proveedor de modelo | los resultados de herramientas que su cliente MCP envía a su modelo: cuentas, categorías, beneficiarios, importes, memos | la de su proveedor; ninguna con un [modelo local](/avenir-mcp/es/guides/choose-a-model/#modelos-locales) |
 | El editor de avenir-mcp | nada | — |
 
+avenir-mcp no transmite a ningún tercero sin que usted lo sepa los datos que obtiene a través
+de la API de YNAB, y no vende ninguno: los datos no van a ningún sitio salvo donde indica esta
+tabla.
+
 ## Qué maneja avenir-mcp
 
 - **Su token de YNAB.** Se lee al arrancar en `YNAB_API_KEY`, o en el archivo indicado por
@@ -78,8 +82,11 @@ Sus datos en YNAB permanecen en su cuenta de YNAB, bajo la política de YNAB.
 ## No se recopila nada más
 
 avenir-mcp no tiene telemetría, ni cuenta, ni servidor. Este sitio de documentación no
-instala cookies ni usa analítica; sus fuentes las sirve el propio sitio. GitHub, que lo
-aloja, registra la dirección IP de los visitantes por motivos de seguridad, según la
+instala cookies ni usa analítica; sus fuentes las sirve el propio sitio. Cloudflare Pages,
+que lo aloja, recibe la dirección IP de los visitantes para servir las páginas y protegerlas,
+según la [política de privacidad de Cloudflare](https://www.cloudflare.com/privacypolicy/). Las antiguas
+direcciones del sitio en GitHub Pages solo redirigen a él; GitHub registra la dirección IP de los
+visitantes por motivos de seguridad, según la
 [declaración de privacidad de GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 ## Cambios en esta página
