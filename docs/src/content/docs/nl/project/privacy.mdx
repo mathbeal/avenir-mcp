@@ -18,6 +18,10 @@ met de gegevens die het via de API van YNAB verkrijgt.
 | Uw modelaanbieder | de toolresultaten die uw MCP-client naar het model verzendt: rekeningen, categorieën, begunstigden, bedragen, notities | die van uw aanbieder; niemand met een [lokaal model](/avenir-mcp/guides/choose-a-model/#local-models) |
 | De uitgever van avenir-mcp | niets | — |
 
+avenir-mcp geeft geen van de gegevens die het via de API van YNAB ophaalt zonder uw
+medeweten door aan derden, en verkoopt er geen: de gegevens gaan nergens anders heen dan
+waar deze tabel aangeeft.
+
 ## Wat avenir-mcp verwerkt
 
 - **Uw YNAB-token.** Wordt bij het opstarten gelezen uit `YNAB_API_KEY`
@@ -77,8 +81,11 @@ Uw gegevens bij YNAB blijven in uw YNAB-account opgeslagen, conform het beleid v
 
 avenir-mcp heeft geen telemetrie, geen account en geen server. Deze documentatiesite
 plaatst geen cookies en gebruikt geen analytics; de lettertypen komen van de site zelf.
-GitHub, dat de site host, legt de IP-adressen van bezoekers vast voor beveiliging, volgens
-de [privacyverklaring van GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+Cloudflare Pages, dat de site host, ontvangt de IP-adressen van bezoekers om de pagina's te
+leveren en te beschermen, volgens het [privacybeleid van Cloudflare](https://www.cloudflare.com/privacypolicy/).
+De oude adressen op GitHub Pages verwijzen alleen door naar de site; GitHub legt de
+IP-adressen van bezoekers vast voor beveiliging, volgens de
+[privacyverklaring van GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 ## Wijzigingen van deze pagina
 

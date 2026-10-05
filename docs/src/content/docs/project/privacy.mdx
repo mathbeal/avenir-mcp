@@ -18,6 +18,9 @@ with the data it obtains through YNAB's API.
 | Your model provider | the tool results your MCP client sends to its model: accounts, categories, payees, amounts, memos | your provider's; nobody's with a [local model](/avenir-mcp/guides/choose-a-model/#local-models) |
 | The publisher of avenir-mcp | nothing | — |
 
+avenir-mcp passes none of the data it obtains through YNAB's API to a third party without
+your knowledge, and sells none of it: the data goes nowhere but where this table says.
+
 ## What avenir-mcp handles
 
 - **Your YNAB token.** Read at start from `YNAB_API_KEY`, or from the file named by
@@ -73,9 +76,11 @@ Your data at YNAB stays in your YNAB account, under YNAB's policy.
 ## Nothing else is collected
 
 avenir-mcp has no telemetry, no account and no server. This documentation site sets no
-cookies and runs no analytics; its fonts are served by the site itself. GitHub, which
-hosts it, records visitors' IP addresses for security, under the
-[GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+cookies and runs no analytics; its fonts are served by the site itself. Cloudflare Pages,
+which hosts it, receives visitors' IP addresses to serve the pages and protect them, under
+the [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/). The site's former addresses on
+GitHub Pages only redirect to it; GitHub records visitors' IP addresses for security, under
+the [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 ## Changes to this page
 
