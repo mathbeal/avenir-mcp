@@ -72,6 +72,23 @@ def _is_split(tx: dict[str, Any]) -> bool:
     return any(not sub.get("deleted") for sub in tx.get("subtransactions") or [])
 
 
+def _is_unsplittable_transfer(tx: dict[str, Any], off_budget: set[str] | frozenset[str]) -> bool:
+    """Tell whether YNAB refuses to split this transfer.
+
+    Args:
+        tx: A YNAB transaction.
+        off_budget: Ids of the tracking accounts.
+
+    Returns:
+        False when it is no transfer, and for the one transfer YNAB splits: from an
+        on-budget account to a tracking one. True for any other transfer.
+    """
+    other = tx.get("transfer_account_id")
+    if not other:
+        return False
+    return other not in off_budget or tx.get("account_id") in off_budget
+
+
 def _check_transaction(tx: dict[str, Any], off_budget: set[str] | frozenset[str]) -> None:
     """Refuse a transaction YNAB cannot split.
 
@@ -80,8 +97,8 @@ def _check_transaction(tx: dict[str, Any], off_budget: set[str] | frozenset[str]
         off_budget: Ids of the tracking accounts.
 
     Raises:
-        ValueError: If it was deleted, is already split, a transfer, or on an off-budget
-            account.
+        ValueError: If it was deleted, is already split, a transfer other than one from an
+            on-budget account to a tracking one, or on an off-budget account.
     """
     tx_id = tx["id"]
     if tx.get("deleted"):
@@ -91,7 +108,7 @@ def _check_transaction(tx: dict[str, Any], off_budget: set[str] | frozenset[str]
             f"Transaction {tx_id} is already split: YNAB's API cannot change its lines, "
             "change them in YNAB."
         )
-    if tx.get("transfer_account_id"):
+    if _is_unsplittable_transfer(tx, off_budget):
         raise ValueError(f"Transaction {tx_id} is a transfer between accounts: it cannot be split.")
     if tx.get("account_id") in off_budget:
         raise ValueError(
@@ -171,8 +188,9 @@ def plan_split(
 
     Raises:
         ValueError: With a message saying what to fix, if the transaction is unknown,
-            deleted, already split, a transfer or off-budget, or if the lines are fewer than
-            two, zero, in an unknown or internal category, or do not add up.
+            deleted, already split, off-budget, or a transfer other than one from an on-budget
+            account to a tracking one, or if the lines are fewer than two, zero, in an unknown
+            or internal category, or do not add up.
     """
     tx = next((t for t in transactions if t["id"] == transaction_id), None)
     if tx is None:

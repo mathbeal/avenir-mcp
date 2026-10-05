@@ -112,6 +112,29 @@ def test_what_cannot_be_split_is_refused_with_what_to_do(
         _plan(tx, lines, off_budget={"tracking"})
 
 
+def test_a_transfer_to_a_tracking_account_can_be_split() -> None:
+    """YNAB splits that one transfer: money leaving the budget for a tracked account."""
+    tx = _tx(transfer_account_id="tracking", payee_name="Transfer : Brokerage")
+    plan = _plan(tx, off_budget={"tracking"})
+    assert plan.transaction_id == "t1"
+    assert [line.category for line in plan.lines] == ["Groceries", "Household"]
+
+
+@pytest.mark.parametrize(
+    "tx",
+    [
+        _tx(transfer_account_id="acc2"),
+        _tx(account_id="tracking", transfer_account_id="acc2"),
+        _tx(account_id="tracking", transfer_account_id="other"),
+    ],
+    ids=["on-budget-to-on-budget", "tracking-to-on-budget", "tracking-to-tracking"],
+)
+def test_every_other_transfer_keeps_the_same_refusal(tx: dict[str, Any]) -> None:
+    """Only a transfer leaving the budget is new: the others get the message they had."""
+    with pytest.raises(ValueError, match="is a transfer between accounts: it cannot be split"):
+        _plan(tx, off_budget={"tracking", "other"})
+
+
 def test_a_line_to_a_credit_card_payment_category_is_refused() -> None:
     """YNAB ignores it on a split line, which would be left without a category."""
     with pytest.raises(ValueError, match="c-visa pays a credit card"):

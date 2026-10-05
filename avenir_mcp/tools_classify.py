@@ -198,9 +198,11 @@ async def split_transaction(
     transaction's amount to the cent (amounts in currency units, negative for
     spending; a refunded deposit is a positive line). Group a receipt by
     category: one line per category, not per item. Transactions already split,
-    transfers and off-budget ones are refused. YNAB's API cannot change a split
-    afterwards: undo_operation cannot revert it, the user edits it in YNAB; the
-    user is told before confirming. Confirmation works as for apply_categories.
+    off-budget ones and transfers are refused, except a transfer from an
+    on-budget account to a tracking one, which YNAB does split. YNAB's API
+    cannot change a split afterwards: undo_operation cannot revert it, the user
+    edits it in YNAB; the user is told before confirming. Confirmation works as
+    for apply_categories.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
