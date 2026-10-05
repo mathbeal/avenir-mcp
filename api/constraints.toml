@@ -151,8 +151,11 @@ tests = [
 [[rule]]
 rule = "SaveTransactionWithOptionalFields.subtransactions: Splits are not allowed on tracking accounts or on transfers between on-budget accounts; a transfer to a tracking account can be a split."
 status = "tested"
-tests = ["tests/test_split.py::test_what_cannot_be_split_is_refused_with_what_to_do"]
-# Stricter than YNAB: split_transaction also refuses a transfer to a tracking account.
+tests = [
+  "tests/test_split.py::test_what_cannot_be_split_is_refused_with_what_to_do",
+  "tests/test_split.py::test_a_transfer_to_a_tracking_account_can_be_split",
+  "tests/test_split.py::test_every_other_transfer_keeps_the_same_refusal",
+]
 
 [[rule]]
 rule = "SaveTransactionWithOptionalFields.subtransactions: Updating `subtransactions` on an existing split transaction is not supported and will return an error."

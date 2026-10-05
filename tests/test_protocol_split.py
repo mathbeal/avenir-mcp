@@ -64,6 +64,23 @@ def test_split_is_previewed_then_applied_with_the_code(ynab: AsyncMock) -> None:
     )
 
 
+def test_a_transfer_to_a_tracking_account_goes_through_the_same_steps(ynab: AsyncMock) -> None:
+    """The one splittable transfer gets the usual preview, code, call and undo wording."""
+    accounts = [*_ACCOUNTS, {"id": "brokerage", "name": "Brokerage", "on_budget": False}]
+    tx = _TX | {"transfer_account_id": "brokerage", "payee_name": "Transfer : Brokerage"}
+    with (
+        patch("avenir_mcp.client.get_accounts", AsyncMock(return_value=accounts)),
+        patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=[tx])),
+    ):
+        preview = call("split_transaction", _args()).structured_content
+        assert preview["status"] == "confirmation_required"
+        ynab.assert_not_called()
+        done = call("split_transaction", _args(confirmation=preview["confirmation"]))
+    assert done.structured_content["status"] == "applied"
+    assert "in YNAB" in done.structured_content["message"]
+    ynab.assert_called_once()
+
+
 def test_the_question_warns_that_undo_happens_in_ynab(ynab: AsyncMock) -> None:
     """The user is told, before saying yes, that undo_operation cannot revert a split."""
     asked: list[str] = []
