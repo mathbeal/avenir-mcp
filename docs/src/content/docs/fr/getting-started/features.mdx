@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp donne à un agent 31 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
+avenir-mcp donne à un agent 33 outils, 4 ressources et 4 prompts sur vos plans YNAB. Cette
 page les classe selon ce que vous voulez faire. Chaque ligne donne une phrase à dire à
 l'agent ; c'est lui qui choisit l'outil.
 
@@ -62,6 +62,8 @@ Guide : [Faire le point sur un mois](/avenir-mcp/fr/guides/monthly-review/).
 | *« Qu'est-ce qui attend une catégorie ? »* | [`suggest_categories`](/avenir-mcp/fr/reference/tools/suggest-categories/) — transactions en attente, avec une proposition quand votre historique est clair | L |
 | *« Oui, applique. »* | [`apply_categories`](/avenir-mcp/fr/reference/tools/apply-categories/) — un lot confirmé | É ↺ |
 | *« Mets un drapeau sur celles que je dois vérifier dans YNAB. »* | [`flag_transactions`](/avenir-mcp/fr/reference/tools/flag-transactions/) — un drapeau de couleur, à regarder dans YNAB | É ↺ |
+| *« Quels bénéficiaires ne sont que des libellés bancaires ? »* | [`list_payees`](/avenir-mcp/fr/reference/tools/list-payees/) — chaque bénéficiaire avec le commerçant auquel son libellé se normalise, et sa fréquence d'usage | L |
+| *« Appelle celui-là Market Fresh. »* | [`rename_payee`](/avenir-mcp/fr/reference/tools/rename-payee/) — un libellé devient le nom du commerçant, pour tout son historique | É ↺ |
 | *« Ventile ce ticket : 81,15 en courses, 5,25 en entretien. »* | [`split_transaction`](/avenir-mcp/fr/reference/tools/split-transaction/) — une transaction sur plusieurs catégories ; s'annule dans YNAB, pas ici | É |
 | *« Marque-les comme revues. »* | [`approve_transactions`](/avenir-mcp/fr/reference/tools/approve-transactions/) — lève le marqueur *unapproved* de YNAB | É |
 

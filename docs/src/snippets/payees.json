@@ -1,0 +1,35 @@
+{
+  "payees": [
+    {
+      "payee_id": "pay-013",
+      "name": "CB MARKET FRESH FACT 190926 525130******1",
+      "merchant": "MARKET FRESH",
+      "transactions": 2,
+      "last_date": "2026-09-19"
+    },
+    {
+      "payee_id": "pay-006",
+      "name": "CB MARKET FRESH FACT 050626 525130******1",
+      "merchant": "MARKET FRESH",
+      "transactions": 1,
+      "last_date": "2026-06-05"
+    },
+    {
+      "payee_id": "pay-007",
+      "name": "CB MARKET FRESH FACT 050726 525130******1",
+      "merchant": "MARKET FRESH",
+      "transactions": 1,
+      "last_date": "2026-07-05"
+    },
+    {
+      "payee_id": "pay-008",
+      "name": "CB MARKET FRESH FACT 050826 525130******1",
+      "merchant": "MARKET FRESH",
+      "transactions": 1,
+      "last_date": "2026-08-05"
+    },
+    "… 7 more"
+  ],
+  "total": 11,
+  "shown": 11
+}

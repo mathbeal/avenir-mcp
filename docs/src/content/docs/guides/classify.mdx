@@ -11,6 +11,8 @@ import preview from '@snippets/apply_preview.json?raw';
 import approved from '@snippets/approve.json?raw';
 import imported from '@snippets/import.json?raw';
 import flagged from '@snippets/flag_preview.json?raw';
+import payeeList from '@snippets/payees.json?raw';
+import renamed from '@snippets/rename_payee_preview.json?raw';
 
 **Goal:** every transaction imported from your bank gets the right category, without going
 through them one by one in YNAB.
@@ -105,6 +107,20 @@ Details and examples: [Suggestions](/avenir-mcp/concepts/suggestions/).
   after confirmation, and `undo_operation` removes it:
 
   <Code code={flagged} lang="json" title="flag_transactions — preview" />
+- **A bank label where a shop's name belongs:** the groceries of June to September left
+  eleven payees for one shop, each label carrying its own date and card number. Ask
+  *“which payees look like Market Fresh?”*: `list_payees` gives them with the merchant
+  each one normalises to, and how many transactions name it:
+
+  <Code code={payeeList} lang="json" title="list_payees" />
+
+  Then *“call the one of 5 September Market Fresh”*: `rename_payee` shows the change
+  first; once you agree, every transaction naming that payee shows the new name, and
+  `undo_operation` puts the label back. YNAB's API renames one payee at a time and
+  cannot merge two, so the other labels keep theirs until you rename them too, or merge
+  them in YNAB:
+
+  <Code code={renamed} lang="json" title="rename_payee — preview" />
 - **One account or one period:** ask *“only the checking account”*; the agent filters
   the list before applying.
 - **Many transactions:** the agent pages with `next_cursor`, then applies in one or a

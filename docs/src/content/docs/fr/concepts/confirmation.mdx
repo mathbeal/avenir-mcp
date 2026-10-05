@@ -23,6 +23,7 @@ Chaque outil construit un **sujet** : le changement exact, sous forme de donnée
 | `flag_transactions` | les drapeaux (transaction, couleur après) |
 | `set_category_target` | catégorie, les champs d'objectif envoyés (montant en milliunités, date ou fréquence) |
 | `update_category` | catégorie, nom après, groupe après |
+| `rename_payee` | bénéficiaire, nom après |
 | `create_category` | groupe, nom |
 | `create_transactions` | compte, les transactions, `approved` |
 | `split_transaction` | transaction, les lignes (montant, catégorie, mémo) |
@@ -123,6 +124,7 @@ Seuls les clients qui gèrent l'élicitation MCP peuvent alors écrire.
 | `flag_transactions` | *Change the flag of 2 transaction(s)?* puis une ligne par transaction : date, bénéficiaire, montant, couleur avant → après |
 | `set_category_target` | *Set the target of Vacances: no target → 1200.00 by 2027-06-01?*, et un avertissement quand l'annulation ne peut pas rétablir l'objectif précédent |
 | `update_category` | *Change category 'Tennis' (Loisirs) to 'Sport' (Loisirs)?* |
+| `rename_payee` | *Rename payee 'CB MARKET FRESH …' to 'Market Fresh'? 1 transaction(s) name it.* |
 | `create_category` | *Create category 'Animaux' in Quotidien?* |
 | `create_transactions` | *Create 1 transaction(s) on Compte courant?* puis une ligne par transaction |
 | `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* puis une ligne par catégorie, et l'avertissement que seul YNAB peut l'annuler |

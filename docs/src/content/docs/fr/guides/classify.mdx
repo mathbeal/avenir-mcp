@@ -11,6 +11,8 @@ import preview from '@snippets/fr/apply_preview.json?raw';
 import approved from '@snippets/fr/approve.json?raw';
 import imported from '@snippets/fr/import.json?raw';
 import flagged from '@snippets/fr/flag_preview.json?raw';
+import payeeList from '@snippets/fr/payees.json?raw';
+import renamed from '@snippets/fr/rename_payee_preview.json?raw';
 
 **Objectif :** chaque transaction importée de votre banque reçoit la bonne catégorie, sans
 les passer une à une dans YNAB.
@@ -109,6 +111,21 @@ Détails et exemples : [Suggestions](/avenir-mcp/fr/concepts/suggestions/).
   retire :
 
   <Code code={flagged} lang="json" title="flag_transactions — aperçu" />
+- **Un libellé bancaire à la place du nom d'une boutique :** les courses de juin à
+  septembre ont laissé onze bénéficiaires pour une seule boutique, chaque libellé
+  portant sa date et son numéro de carte. Demandez *« quels bénéficiaires ressemblent à
+  Market Fresh ? »* : `list_payees` les donne avec le commerçant auquel chacun se
+  normalise, et le nombre de transactions qui le nomment :
+
+  <Code code={payeeList} lang="json" title="list_payees" />
+
+  Puis *« appelle celui du 5 septembre Market Fresh »* : `rename_payee` montre d'abord
+  le changement ; dès que vous acceptez, chaque transaction qui nomme ce bénéficiaire
+  affiche le nouveau nom, et `undo_operation` remet le libellé. L'API de YNAB renomme un
+  bénéficiaire à la fois et ne peut pas en fusionner deux : les autres libellés gardent
+  le leur jusqu'à ce que vous les renommiez aussi, ou que vous les fusionniez dans YNAB :
+
+  <Code code={renamed} lang="json" title="rename_payee — aperçu" />
 - **Un seul compte ou une période :** demandez *« seulement le compte courant »* ;
   l'agent filtre la liste avant d'appliquer.
 - **Beaucoup de transactions :** l'agent pagine avec `next_cursor`, puis applique en un

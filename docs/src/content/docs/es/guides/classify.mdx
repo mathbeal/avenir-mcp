@@ -11,6 +11,8 @@ import preview from '@snippets/es/apply_preview.json?raw';
 import approved from '@snippets/es/approve.json?raw';
 import imported from '@snippets/es/import.json?raw';
 import flagged from '@snippets/es/flag_preview.json?raw';
+import payeeList from '@snippets/es/payees.json?raw';
+import renamed from '@snippets/es/rename_payee_preview.json?raw';
 
 **Objetivo:** que cada transacción importada de su banco reciba la categoría correcta,
 sin recorrerlas una a una en YNAB.
@@ -108,6 +110,21 @@ Detalles y ejemplos: [Sugerencias](/avenir-mcp/es/concepts/suggestions/).
   una bandera de color, tras la confirmación, y `undo_operation` la quita:
 
   <Code code={flagged} lang="json" title="flag_transactions — vista previa" />
+- **Una etiqueta del banco donde debería ir el nombre de una tienda:** la compra de
+  junio a septiembre dejó once beneficiarios para una sola tienda, cada etiqueta con su
+  fecha y su número de tarjeta. Pida *«¿qué beneficiarios se parecen a Market Fresh?»*:
+  `list_payees` los da con el comercio al que se normaliza cada uno y cuántas
+  transacciones lo nombran:
+
+  <Code code={payeeList} lang="json" title="list_payees" />
+
+  Luego *«llama Market Fresh al del 5 de septiembre»*: `rename_payee` muestra primero el
+  cambio; cuando usted acepta, cada transacción que nombra a ese beneficiario muestra el
+  nuevo nombre, y `undo_operation` devuelve la etiqueta. La API de YNAB renombra un
+  beneficiario a la vez y no puede fusionar dos, así que las demás etiquetas conservan la
+  suya hasta que las renombre también o las fusione en YNAB:
+
+  <Code code={renamed} lang="json" title="rename_payee — vista previa" />
 - **Una cuenta o un periodo:** pida *«solo la cuenta corriente»*; el agente filtra la
   lista antes de aplicar.
 - **Muchas transacciones:** el agente pagina con `next_cursor` y aplica en uno o varios

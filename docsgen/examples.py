@@ -214,6 +214,18 @@ CALLS: list[Call] = [
         "update_category",
         {"plan_id": BUDGET, "category_id": "cat-tennis", "name": "Sport"},
     ),
+    # Every label the bank left for one shop: twelve payees for the same groceries.
+    Call(
+        "payees",
+        "list_payees",
+        {"plan_id": BUDGET, "search": "market fresh"},
+        keep=4,
+    ),
+    Call(
+        "rename_payee_preview",
+        "rename_payee",
+        {"plan_id": BUDGET, "payee_id": "pay-009", "name": "Market Fresh"},
+    ),
     Call("import", "import_transactions", {"plan_id": BUDGET}),
     # The duplicate import of 19 September, flagged for the user to check in YNAB.
     Call(

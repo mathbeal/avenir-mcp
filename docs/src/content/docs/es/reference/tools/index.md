@@ -26,6 +26,7 @@ avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles
 | [`get_underfunded_targets`](/avenir-mcp/es/reference/tools/get-underfunded-targets/) | The categories whose target still needs money this month, the most urgent first. |
 | [`list_accounts`](/avenir-mcp/es/reference/tools/list-accounts/) | List the plan's accounts with their balances, bank link and last reconciliation. |
 | [`list_category_groups`](/avenir-mcp/es/reference/tools/list-category-groups/) | List the category groups a new category can be created in. |
+| [`list_payees`](/avenir-mcp/es/reference/tools/list-payees/) | List the payees of a plan, those most transactions name first. |
 | [`list_plans`](/avenir-mcp/es/reference/tools/list-plans/) | List all YNAB plans accessible with the current API key. |
 | [`list_scheduled_transactions`](/avenir-mcp/es/reference/tools/list-scheduled-transactions/) | List the scheduled transactions due between two dates: bills, salary, transfers. |
 | [`suggest_categories`](/avenir-mcp/es/reference/tools/suggest-categories/) | List the transactions waiting for a category, with a suggestion when history allows. |
@@ -42,6 +43,7 @@ avenir-mcp declara estas herramientas. Las de lectura están siempre disponibles
 | [`import_transactions`](/avenir-mcp/es/reference/tools/import-transactions/) | Import the latest transactions from the plan's linked bank accounts into YNAB. |
 | [`move_money`](/avenir-mcp/es/reference/tools/move-money/) | Move money budgeted in one category to another for a month, after the user confirms. |
 | [`reconcile_account`](/avenir-mcp/es/reference/tools/reconcile-account/) | Compare an account with the balance your bank shows, then reconcile it. |
+| [`rename_payee`](/avenir-mcp/es/reference/tools/rename-payee/) | Rename a payee, e.g. a bank label into the merchant's name, after the user confirms. |
 | [`set_category_budget`](/avenir-mcp/es/reference/tools/set-category-budget/) | Set the amount budgeted ("Assigned") in a category for a month, after the user confirms. |
 | [`set_category_target`](/avenir-mcp/es/reference/tools/set-category-target/) | Set, change or remove a category's target, after the user confirms. |
 | [`split_transaction`](/avenir-mcp/es/reference/tools/split-transaction/) | Split one transaction across categories, e.g. from a receipt, after the user confirms. |

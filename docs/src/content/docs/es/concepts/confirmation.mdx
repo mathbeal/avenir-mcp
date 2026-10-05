@@ -22,6 +22,7 @@ Cada herramienta construye un **objeto**: el cambio exacto, en forma de datos.
 | `flag_transactions` | las banderas (transacción, color después) |
 | `set_category_target` | categoría, los campos del objetivo enviados (importe en miliunidades, fecha o frecuencia) |
 | `update_category` | categoría, nombre nuevo, grupo nuevo |
+| `rename_payee` | beneficiario, nombre nuevo |
 | `create_category` | grupo, nombre |
 | `create_transactions` | cuenta, las transacciones, `approved` |
 | `split_transaction` | transacción, las líneas (importe, categoría, memo) |
@@ -122,6 +123,7 @@ Solo los clientes que admiten la elicitación MCP pueden entonces escribir.
 | `flag_transactions` | *Change the flag of 2 transaction(s)?* y una línea por transacción: fecha, beneficiario, importe, color antes → después |
 | `set_category_target` | *Set the target of Vacaciones: no target → 1200.00 by 2027-06-01?*, y un aviso cuando deshacer no puede restaurar el objetivo anterior |
 | `update_category` | *Change category 'Tenis' (Ocio) to 'Deporte' (Ocio)?* |
+| `rename_payee` | *Rename payee 'CB MARKET FRESH …' to 'Market Fresh'? 1 transaction(s) name it.* |
 | `create_category` | *Create category 'Mascotas' in Día a día?* |
 | `create_transactions` | *Create 1 transaction(s) on Cuenta corriente?* y una línea por transacción |
 | `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* y una línea por categoría, con el aviso de que solo YNAB puede deshacerla |

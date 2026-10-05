@@ -8,6 +8,9 @@ moved from which category to which. A budget change or a move also keeps the
 amounts assigned before and after, a flag change the colours, and a target the
 one to restore, which undo restores. Undoing an operation appends a line that
 marks it undone. A transaction's amount, payee and memo are never stored.
+
+A payee rename is the one operation whose undo needs a name: its line keeps the
+payee's name before and after, and nothing else of the transactions naming it.
 """
 
 from __future__ import annotations
@@ -52,7 +55,7 @@ class Entry(Model):
     plan_id: str = Field(validation_alias=AliasChoices("plan_id", "budget_id"))
     """Plan the operation changed."""
     kind: str
-    """categorize, reconcile, budget, move, create, flag or target."""
+    """categorize, reconcile, budget, move, create, flag, target or payee."""
     applied_at: str
     """When it was applied, ISO 8601 in UTC."""
     moves: list[Move]
@@ -138,10 +141,10 @@ class Journal:
 
         Args:
             plan_id: The plan it changed.
-            kind: categorize, reconcile, budget, move, create, flag or target.
+            kind: categorize, reconcile, budget, move, create, flag, target or payee.
             moves: Category changes, for a recategorisation.
-            details: What undoing another kind needs: identifiers, and a budget
-                change's amounts before and after.
+            details: What undoing another kind needs: identifiers, a budget
+                change's amounts before and after, and a payee rename's names.
 
         Returns:
             The new operation's id.

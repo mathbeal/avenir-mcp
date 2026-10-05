@@ -14,6 +14,7 @@ sidebar:
 | `approve_transactions` | wird sofort angewendet, ohne Vorschau | es entfernt nur das Prüfkennzeichen von YNAB |
 | `import_transactions` | wird sofort angewendet, ohne Vorschau; hier nicht rückgängig zu machen | es holt nur, was die Bank bereits hat; eine Transaktion in YNAB löschen, um sie zurückzunehmen |
 | `update_category`, `create_category` | nicht rückgängig zu machen; die API von YNAB kann keine Kategorie löschen | zurückbenennen; die Kategorie in YNAB ausblenden |
+| `rename_payee` | benennt einen Zahlungsempfänger auf einmal um; die API von YNAB kann zwei nicht zusammenführen, daher wird ein Name abgelehnt, den ein anderer Zahlungsempfänger schon trägt | die anderen Texte des Ladens ebenfalls umbenennen oder die Zahlungsempfänger in YNAB zusammenführen |
 | HTTP-Transport | einfaches HTTP, ein gemeinsames Token, keine Benutzerkonten | auf `127.0.0.1` belassen oder stdio nutzen |
 | Öffentlicher oder geteilter Server | nicht unterstützt: keine Benutzerkonten, und die Bedingungen von YNAB verlangen OAuth für die Plans anderer | jede Person betreibt ihr eigenes avenir-mcp – siehe die [rechtlichen Hinweise](/avenir-mcp/de/project/legal/) |
 | Aufgeteilte Transaktionen | nie vorgeschlagen oder neu kategorisiert: Ihre Zeilen tragen die Kategorien; `split_transaction` teilt eine auf, aber die API von YNAB kann eine Aufteilung weder ändern noch rückgängig machen | in YNAB ändern oder rückgängig machen |

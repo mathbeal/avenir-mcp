@@ -92,7 +92,7 @@ y se indica en su [página de referencia](/avenir-mcp/es/reference/tools/):
 |---|---|
 | 0 | toda llamada rechazada por la validación (un mes mal formado, un nombre vacío…) |
 | 1 | `list_plans`, `list_accounts`, `list_category_groups`, `get_monthly_summary`, `get_age_of_money`, `get_category_balances`, `get_budget_vs_actual`, `get_underfunded_targets`, `get_debt_payoff_plan`, `approve_transactions`, la vista previa de `set_category_budget`, la vista previa de `move_money`, la vista previa de `flag_transactions`, la vista previa de `set_category_target` |
-| 2 | `get_net_worth_trend`, `get_runway`, `get_debt_payoff_plan` sin `monthly_budget` cuando falta un pago mínimo, `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `undo_operation` |
+| 2 | `get_net_worth_trend`, `get_runway`, `get_debt_payoff_plan` sin `monthly_budget` cuando falta un pago mínimo, `reconcile_account`, `create_transactions`, `create_category`, `update_category`, `list_payees`, la vista previa de `rename_payee`, `undo_operation` |
 | 3 | `get_runway` con `essential_groups`, `get_savings_rate`, `find_transactions`, `find_recurring_charges`, `list_scheduled_transactions`, `suggest_categories` (una página entera), `apply_categories`, la vista previa de `split_transaction` |
 | 4 | `forecast_balance` |
 | 1 + N | `get_spending_trends` sobre N meses |
@@ -111,4 +111,4 @@ reintentar antes.
 ## Lo que nunca se guarda
 
 avenir-mcp no guarda ninguna copia en disco. Las transacciones viven en memoria mientras el
-servidor se ejecuta; el [diario](/avenir-mcp/es/concepts/journal/) solo contiene identificadores y los importes asignados por un cambio de presupuesto o un movimiento entre categorías, y el objetivo que restaurar; el token se queda en el entorno y nunca se registra.
+servidor se ejecuta; el [diario](/avenir-mcp/es/concepts/journal/) solo contiene identificadores, los importes asignados por un cambio de presupuesto o un movimiento entre categorías, el objetivo que restaurar y los dos nombres de un beneficiario renombrado; el token se queda en el entorno y nunca se registra.

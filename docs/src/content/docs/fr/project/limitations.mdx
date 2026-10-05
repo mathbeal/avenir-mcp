@@ -14,6 +14,7 @@ sidebar:
 | `approve_transactions` | s'applique aussitôt, sans aperçu | il ne lève que le marqueur de revue de YNAB |
 | `import_transactions` | s'applique aussitôt, sans aperçu ; non annulable ici | il n'apporte que ce que la banque a déjà ; supprimer une transaction dans YNAB pour revenir en arrière |
 | `update_category`, `create_category` | non annulables ; l'API YNAB ne peut pas supprimer une catégorie | renommer à nouveau ; masquer la catégorie dans YNAB |
+| `rename_payee` | renomme un bénéficiaire à la fois ; l'API YNAB ne peut pas en fusionner deux, donc un nom qu'un autre bénéficiaire porte déjà est refusé | renommer aussi les autres libellés de la boutique, ou fusionner les bénéficiaires dans YNAB |
 | Transport HTTP | HTTP simple, un seul jeton partagé, pas de comptes | le garder sur `127.0.0.1`, ou utiliser stdio |
 | Serveur public ou partagé | non pris en charge : pas de comptes, et les conditions de YNAB imposent OAuth pour les plans d'autrui | chacun fait tourner son propre avenir-mcp — voir les [mentions légales](/avenir-mcp/fr/project/legal/) |
 | Transactions ventilées | jamais proposées ni recatégorisées : leurs lignes portent les catégories ; `split_transaction` en ventile une, mais l'API YNAB ne peut ni modifier ni annuler une ventilation | les modifier ou les annuler dans YNAB |

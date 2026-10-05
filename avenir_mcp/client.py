@@ -834,6 +834,36 @@ async def set_category_target(
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
+async def get_payees(plan_id: str) -> list[dict[str, Any]]:
+    """Return a plan's payees, as YNAB holds them.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+
+    Returns:
+        List of payee dicts (id, name, transfer_account_id, deleted).
+    """
+    logger.info("Fetching payees for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/payees")
+    return data["data"]["payees"]  # type: ignore[no-any-return]
+
+
+async def rename_payee(plan_id: str, payee_id: str, name: str) -> dict[str, Any]:
+    """Give a payee another name; every transaction naming it shows the new one.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+        payee_id: Payee to rename.
+        name: Its new name.
+
+    Returns:
+        The updated payee dict.
+    """
+    logger.info("Renaming payee %s", payee_id)
+    data = await _patch(f"/plans/{plan_id}/payees/{payee_id}", {"payee": {"name": name}})
+    return data["data"]["payee"]  # type: ignore[no-any-return]
+
+
 async def set_transactions_cleared(plan_id: str, tx_ids: list[str], cleared: str) -> list[str]:
     """Set the cleared status of transactions in one bulk request.
 

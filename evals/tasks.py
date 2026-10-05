@@ -335,6 +335,18 @@ def _split(state: DemoBudget) -> bool:
     )
 
 
+# The label the bank left on the groceries of 5 September, and the merchant behind it.
+RENAMED_PAYEE = "pay-009"
+MERCHANT = "Market Fresh"
+
+
+def _renamed(state: DemoBudget) -> bool:
+    """That one label now names the merchant, and no other payee was touched."""
+    before = {payee["id"]: payee["name"] for payee in demo.payees()}
+    changed = {pid: name for pid, name in state.payee_names.items() if name != before[pid]}
+    return changed == {RENAMED_PAYEE: MERCHANT}
+
+
 def _holiday_target(state: DemoBudget) -> bool:
     return state.goals == {
         "cat-holidays": {
@@ -558,6 +570,16 @@ TASKS = [
         "again." + FORMAT,
         answer=lambda t: bool(ANSWER.findall(t)),
         state=_holiday_target,
+        tags=["write"],
+    ),
+    Task(
+        "rename-payee",
+        "My groceries of 5 September 2026 show up under the bank's label instead of the "
+        f"shop's name. Rename that payee to {MERCHANT!r}, and leave the other labels "
+        "alone. I accept the preview in advance: apply it without asking me again." + FORMAT,
+        answer=lambda t: bool(ANSWER.findall(t)),
+        state=_renamed,
+        notes="One payee of eleven for the same shop: the other labels must stay as they are.",
         tags=["write"],
     ),
     Task(

@@ -24,7 +24,7 @@ What the server does:
   and never writes it anywhere
 - `apply_categories`, `reconcile_account`, `set_category_budget`, `move_money`,
   `update_category`, `create_transactions`, `create_category`, `split_transaction`,
-  `flag_transactions`, `set_category_target` and `undo_operation` change nothing until
+  `flag_transactions`, `set_category_target`, `rename_payee` and `undo_operation` change nothing until
   the user confirms the previewed changes. A confirmation code is single-use, expires after 10 minutes and
   only confirms the exact changes it was issued for
 - with `AVENIR_MCP_REQUIRE_ELICITATION=1`, only the user's yes given in the client
@@ -35,8 +35,9 @@ What the server does:
   used a code on its own after reading a planted memo, then undid the change. Use a
   client that supports elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
-  identifiers, the amounts a budget change or a move assigned before and after, and the
-  colours of a flag change, and a target to restore, readable by
+  identifiers, the amounts a budget change or a move assigned before and after, the
+  colours of a flag change, a target to restore and, for a renamed payee, its name
+  before and after, which its undo needs, readable by
   its owner only (mode `0600` on Linux and macOS; on Windows, the permissions of its
   folder apply)
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.

@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp biedt een agent 31 hulpmiddelen, 4 bronnen en 4 aanwijzingen met betrekking tot uw YNAB-plannen. Op deze
+avenir-mcp biedt een agent 33 hulpmiddelen, 4 bronnen en 4 aanwijzingen met betrekking tot uw YNAB-plannen. Op deze
 pagina zijn deze gerangschikt op basis van wat u wilt doen. Elke rij bevat een zin die u tegen de
 agent kunt zeggen; de agent kiest vervolgens het hulpmiddel.
 
@@ -61,6 +61,8 @@ Handleiding: [Een maand doornemen](/avenir-mcp/nl/guides/monthly-review/).
 | *“Wat heeft nog een categorie nodig?”* | [`suggest_categories`](/avenir-mcp/reference/tools/suggest-categories/) — transacties in afwachting, met een suggestie zodra uw transactiegeschiedenis volledig is | R |
 | *“Ja, pas dat toe.”* | [`apply_categories`](/avenir-mcp/reference/tools/apply-categories/) — één bevestigde batch | W ↺ |
 | *“Markeer de transacties die ik in YNAB moet controleren.”* | [`flag_transactions`](/avenir-mcp/reference/tools/flag-transactions/) — een gekleurde markering, om in YNAB te bekijken | W ↺ |
+| *“Welke begunstigden zijn alleen banklabels?”* | [`list_payees`](/avenir-mcp/nl/reference/tools/list-payees/) — elke begunstigde met de handelaar waartoe het label wordt genormaliseerd, en hoe vaak die wordt gebruikt | L |
+| *“Noem die Market Fresh.”* | [`rename_payee`](/avenir-mcp/nl/reference/tools/rename-payee/) — een label wordt de naam van de handelaar, voor de hele geschiedenis | W ↺ |
 | *“Splits deze bon: 81,15 boodschappen, 5,25 huishoudelijke artikelen.”* | [`split_transaction`](/avenir-mcp/reference/tools/split-transaction/) — één transactie die onder meerdere categorieën valt; ongedaan gemaakt in YNAB, niet hier | W |
 | *“Markeer ze als gecontroleerd.”* | [`approve_transactions`](/avenir-mcp/reference/tools/approve-transactions/) — verwijdert de *niet-goedgekeurde* markering in YNAB | W |
 

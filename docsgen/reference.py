@@ -37,6 +37,7 @@ UNDOABLE = {
     "create_transactions",
     "flag_transactions",
     "set_category_target",
+    "rename_payee",
 }
 UNCONFIRMED_WRITES = {"approve_transactions", "import_transactions"}
 
@@ -46,6 +47,8 @@ GUIDES = {
     "import_transactions": "guides/classify",
     "apply_categories": "guides/classify",
     "flag_transactions": "guides/classify",
+    "list_payees": "guides/classify",
+    "rename_payee": "guides/classify",
     "reconcile_account": "guides/reconcile",
     "get_monthly_summary": "guides/monthly-review",
     "get_category_balances": "guides/monthly-review",
