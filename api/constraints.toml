@@ -74,6 +74,15 @@ status = "tested"
 tests = ["tests/test_targets.py::test_what_card_and_loan_categories_do_not_take_is_refused_first"]
 
 [[rule]]
+rule = "SavePayee.name: maxLength 500"
+status = "tested"
+tests = [
+  "tests/test_payees.py::test_what_ynab_or_the_user_could_not_make_sense_of_is_refused",
+  "tests/test_protocol_payees.py::test_the_schema_tells_agents_the_length_ynab_accepts",
+  "tests/test_protocol_payees.py::test_what_ynab_or_the_user_could_not_use_is_refused_before_asking",
+]
+
+[[rule]]
 rule = "SaveSubTransaction.category_id: Credit Card Payment categories are not permitted and will be ignored if supplied."
 status = "tested"
 tests = ["tests/test_split.py::test_a_line_to_a_credit_card_payment_category_is_refused"]

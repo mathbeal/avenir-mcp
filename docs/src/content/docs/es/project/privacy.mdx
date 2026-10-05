@@ -34,7 +34,7 @@ tabla.
   para que la siguiente petición pida solo lo que cambió, y se devuelven a su agente como
   resultados de herramientas. Nunca se escriben en disco.
 - **El [diario](/avenir-mcp/es/concepts/journal/).** Tras cada cambio que usted confirma,
-  una línea de identificadores: qué transacción pasó de qué categoría a cuál, y lo que necesita una operación de deshacer; para un cambio de presupuesto o un movimiento entre categorías, el importe asignado antes y después; para un objetivo, el que restaurar. Nunca el importe de una transacción, un beneficiario ni un memo. El
+  una línea de identificadores: qué transacción pasó de qué categoría a cuál, y lo que necesita una operación de deshacer; para un cambio de presupuesto o un movimiento entre categorías, el importe asignado antes y después; para un objetivo, el que restaurar; para un beneficiario renombrado, su nombre antes y después, que su deshacer necesita. Nunca el importe de una transacción ni un memo, ni ningún nombre de beneficiario distinto del de un beneficiario renombrado. El
   archivo solo lo puede leer su cuenta de usuario.
 - **Los códigos de confirmación.** En memoria, de un solo uso, válidos 10 minutos.
 - **Los registros de diagnóstico.** En stderr, solo identificadores y recuentos, avisos y

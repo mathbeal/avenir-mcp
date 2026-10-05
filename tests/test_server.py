@@ -63,6 +63,8 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "get_debt_payoff_plan",
             "get_age_of_money",
             "set_category_target",
+            "list_payees",
+            "rename_payee",
         ]
     )
 

@@ -11,6 +11,8 @@ import preview from '@snippets/nl/apply_preview.json?raw';
 import approved from '@snippets/nl/approve.json?raw';
 import imported from '@snippets/nl/import.json?raw';
 import flagged from '@snippets/nl/flag_preview.json?raw';
+import payeeList from '@snippets/nl/payees.json?raw';
+import renamed from '@snippets/nl/rename_payee_preview.json?raw';
 
 **Doel:** elke transactie die vanuit uw bank wordt geïmporteerd, krijgt de juiste categorie toegewezen, zonder dat u
 ze één voor één in YNAB hoeft door te nemen.
@@ -107,6 +109,21 @@ Details en voorbeelden: [Suggesties](/avenir-mcp/nl/concepts/suggestions/).
   bevestiging een gekleurde vlag, en `undo_operation` haalt die weg:
 
   <Code code={flagged} lang="json" title="flag_transactions — preview" />
+- **Een banklabel waar de naam van een winkel hoort:** de boodschappen van juni tot
+  september hebben elf begunstigden voor één winkel achtergelaten, elk label met zijn
+  eigen datum en kaartnummer. Vraag *„welke begunstigden lijken op Market Fresh?”*:
+  `list_payees` geeft ze met de handelaar waartoe elk label wordt genormaliseerd, en met
+  het aantal transacties dat het noemt:
+
+  <Code code={payeeList} lang="json" title="list_payees" />
+
+  Vraag daarna *„noem die van 5 september Market Fresh”*: `rename_payee` toont de
+  wijziging eerst; zodra u akkoord gaat, toont elke transactie die deze begunstigde
+  noemt de nieuwe naam, en `undo_operation` zet het label terug. De API van YNAB
+  benoemt één begunstigde per keer en kan er geen twee samenvoegen; de andere labels
+  houden hun naam totdat u ze ook hernoemt of ze in YNAB samenvoegt:
+
+  <Code code={renamed} lang="json" title="rename_payee — preview" />
 - **Eén rekening of één periode:** vraag *“alleen de betaalrekening”*; de medewerker filtert
   de lijst alvorens de aanvraag in te dienen.
 - **Veel transacties:** de agent bladert door de lijst met `next_cursor`, en voert vervolgens de verwerking uit in één of

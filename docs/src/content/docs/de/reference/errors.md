@@ -130,6 +130,19 @@ Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error call
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
 - `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
 
+## [`rename_payee`](/avenir-mcp/de/reference/tools/rename-payee/)
+
+- `Payee {payee_id} is a transfer's: YNAB names it after the account the money moves to. Rename the account in YNAB itself.`
+- `Payee {payee_id} is not in this plan: use a payee_id from list_payees.`
+- `The new name is empty: give the merchant's name.`
+- `The new name is {new_name} characters: YNAB refuses a payee name longer than 500.`
+- `'{new_name}' is already the name of another payee: YNAB's API cannot merge two payees. Merge them in YNAB, or choose another name.`
+- `'{name}' contains a line break, control or format character (such as a zero-width or direction mark): give the name on one line, with visible characters only.`
+- `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
+- `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
+- `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`
+
 ## [`set_category_budget`](/avenir-mcp/de/reference/tools/set-category-budget/)
 
 - `Category {category_id} is not in this plan: use a category_id from get_category_balances.`

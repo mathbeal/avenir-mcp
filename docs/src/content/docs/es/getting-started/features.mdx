@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp da a un agente 31 herramientas, 4 recursos y 4 prompts sobre sus planes de
+avenir-mcp da a un agente 33 herramientas, 4 recursos y 4 prompts sobre sus planes de
 YNAB. Esta página los lista según lo que quiera hacer. Cada fila da una frase que puede
 decir al agente; el agente elige la herramienta.
 
@@ -62,6 +62,8 @@ Guía: [Revisar un mes](/avenir-mcp/es/guides/monthly-review/).
 | *«¿Qué queda sin categoría?»* | [`suggest_categories`](/avenir-mcp/es/reference/tools/suggest-categories/) — transacciones pendientes, con una sugerencia cuando su historial es claro | L |
 | *«Sí, aplícalo.»* | [`apply_categories`](/avenir-mcp/es/reference/tools/apply-categories/) — un lote confirmado | E ↺ |
 | *«Marca con una bandera las que debo revisar en YNAB.»* | [`flag_transactions`](/avenir-mcp/es/reference/tools/flag-transactions/) — una bandera de color, para mirar en YNAB | E ↺ |
+| *«¿Qué beneficiarios son solo etiquetas del banco?»* | [`list_payees`](/avenir-mcp/es/reference/tools/list-payees/) — cada beneficiario con el comercio al que se normaliza su etiqueta y con qué frecuencia se usa | L |
+| *«Llama a ese Market Fresh.»* | [`rename_payee`](/avenir-mcp/es/reference/tools/rename-payee/) — una etiqueta pasa a ser el nombre del comercio, para todo su historial | E ↺ |
 | *«Divide este ticket: 81,15 en comida, 5,25 en hogar.»* | [`split_transaction`](/avenir-mcp/es/reference/tools/split-transaction/) — una transacción en varias categorías; se deshace en YNAB, no aquí | E |
 | *«Márcalas como revisadas.»* | [`approve_transactions`](/avenir-mcp/es/reference/tools/approve-transactions/) — quita la marca *unapproved* de YNAB | E |
 

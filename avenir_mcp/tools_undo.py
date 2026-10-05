@@ -44,7 +44,8 @@ async def undo_operation(
     Recategorised transactions go back to their previous category; a
     reconciliation is reverted (statuses and adjustment); a budgeted amount goes
     back to its previous value, both of a move_money; created transactions are deleted; flags
-    go back to their previous colour; a target goes back to what it was. Anything
+    go back to their previous colour; a target goes back to what it was; a renamed
+    payee gets its old name back. Anything
     changed again since the operation is left alone and listed in `conflicts`.
     Confirmation works as for apply_categories.
 
@@ -85,6 +86,8 @@ async def undo_operation(
         return await _undo_flag(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "target":
         return await _undo_target(ctx, plan_id, book, entry, confirmation)
+    if entry.kind == "payee":
+        return await _undo_payee(ctx, plan_id, book, entry, confirmation)
     transactions = await client.get_transactions(plan_id)
     categories = await client.get_categories(plan_id)
     plan = writes.plan_undo(transactions, categories, entry.moves)
@@ -368,3 +371,40 @@ async def _undo_target(
     await client.set_category_target(plan_id, details["category_id"], details["undo"])
     book.mark_undone(entry.operation_id)
     return result_of("applied", "Target restored.", writes.Plan())
+
+
+async def _undo_payee(
+    ctx: Context,
+    plan_id: str,
+    book: journal.Journal,
+    entry: journal.Entry,
+    confirmation: str | None,
+) -> WriteResult | InputRequiredResult:
+    """Give a renamed payee its old name back, unless it was renamed again since.
+
+    Args:
+        ctx: The MCP context, used to ask the user.
+        plan_id: YNAB plan id or 'last-used'.
+        book: The journal, to mark the operation undone.
+        entry: The operation to undo.
+        confirmation: A code from a previous preview, or None.
+
+    Returns:
+        What was done, the payee as a conflict when its name changed since, or what to
+        return instead when the user did not agree.
+    """
+    details = entry.details
+    payee = next(
+        (p for p in await client.get_payees(plan_id) if p["id"] == details["payee_id"]),
+        None,
+    )
+    if payee is None or payee["name"] != details["to"]:
+        conflict = writes.Plan(conflicts=[details["payee_id"]])
+        return result_of("nothing_to_do", "The payee was renamed since: left alone.", conflict)
+    question = f"Undo: name the payee {untrusted(details['from'])!r} again?"
+    refused = await _confirm_undo(ctx, plan_id, entry, question, confirmation)
+    if refused is not None:
+        return refused
+    await client.rename_payee(plan_id, details["payee_id"], details["from"])
+    book.mark_undone(entry.operation_id)
+    return result_of("applied", "The payee's previous name is back.", writes.Plan())

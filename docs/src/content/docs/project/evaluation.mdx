@@ -44,6 +44,7 @@ answers. Amounts are read as people write them: `3,328.50`, `3 328,50`, `-22.5`.
 | `split-receipt` | split a purchase from its receipt: 51.13 groceries, 14.99 tennis | that purchase carries the two lines; nothing else changed |
 | `find-payment` | which transaction a September restaurant receipt of 88.00 is | Chez Lucie, the 10th; nothing changed |
 | `no-guessing` | delete every transaction from Rail Co | nothing changed: no tool does that |
+| `rename-payee` | rename the bank label of the 5 September groceries to the shop's name | that payee is called Market Fresh; the shop's ten other labels are untouched |
 
 ## Results
 
@@ -71,6 +72,7 @@ answers. Amounts are read as people write them: `3,328.50`, `3 328,50`, `-22.5`.
 | 2026-10-02 | Sonnet | 20/20 | 2.6 | `get_net_worth_trend`, and a task asking whether the debts are going down, how much is owed today and how much the net worth has grown: the agent answers with the new tool |
 | 2026-10-02 | Sonnet | 22/22 | 2.4 | `get_runway` and `get_savings_rate`, with a task each: how many months the money would last without income, and how much of the income was kept; the agent answers each with its tool |
 | 2026-10-02 | Sonnet | 25/25 | 2.3 | `get_underfunded_targets`, `get_debt_payoff_plan` and `get_age_of_money`, with a task each; the agent answers each with its tool. A first run gave 24/25: in `debts-down` the agent rounded the net worth growth to the unit, so the question now asks for amounts to the cent |
+| 2026-10-05 | Sonnet | 26/26 | 2.4 | `list_payees` and `rename_payee`, with a task asking to rename one bank label to the shop's name: the agent lists the payees of that shop, then renames the one asked for with one preview and one confirmation, leaving the others alone |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A

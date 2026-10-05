@@ -25,6 +25,13 @@ plan as the existing reports are:
   an extra amount. *Done.*
 - `get_age_of_money`: how YNAB's Age of Money changed month by month. *Done.*
 
+### Payees named as the user names them
+
+- `list_payees`: every payee of the plan with the merchant its bank label normalises
+  to, and how often it is used. *Done.*
+- `rename_payee`: one bank label becomes the merchant's name, for the whole history it
+  carries, previewed, confirmed and undoable. *Done.*
+
 ### From a document to the year's schedules
 
 See the section below: write tools for scheduled transactions, one confirmed batch per
@@ -33,9 +40,8 @@ document.
 ### What YNAB's API offers and avenir-mcp does not use yet
 
 The operations marked "planned" in `api/coverage.toml`, each in a task: the plan's
-currency, to show amounts with it; payees, to clean the names bank imports give them;
-money moved between categories, for the monthly review; category groups; editing one
-transaction.
+currency, to show amounts with it; money moved between categories, for the monthly
+review; category groups; editing one transaction.
 
 ### Around the server
 
@@ -84,7 +90,7 @@ transaction.
 ## 1.0: verified and published
 
 - Contract tests through the MCP protocol, and an MCP Inspector session in CI.
-- An evaluation suite run by a real agent on a demo budget. *Done: 10 tasks, 10/10.*
+- An evaluation suite run by a real agent on a demo budget. *Done: 26 tasks, 26/26.*
 - Tooling: ruff, 100 % branch coverage, mutation testing, hardened GitHub Actions,
   pip-audit, Python 3.11–3.14.
 - PyPI release through Trusted Publishing, a generated changelog, a `.mcpb` bundle for

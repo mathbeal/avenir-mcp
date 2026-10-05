@@ -46,21 +46,13 @@ reason = "The category list gives every category in one request."
 status = "excluded"
 reason = "A month's categories come in one request with the month."
 
-[operations.getPayees]
-status = "planned"
-reason = "List payees, to clean the names bank imports give them."
-
 [operations.createPayee]
 status = "excluded"
 reason = "YNAB creates a payee with the first transaction that names it."
 
 [operations.getPayeeById]
 status = "excluded"
-reason = "The payee list, once planned, gives every payee in one request."
-
-[operations.updatePayee]
-status = "planned"
-reason = "Rename a payee, e.g. a bank label into the merchant's name."
+reason = "list_payees gives every payee of the plan in the same single request."
 
 [operations.getPayeeLocations]
 status = "excluded"

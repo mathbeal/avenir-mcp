@@ -171,6 +171,17 @@ def test_split_receipt_passes_only_for_the_receipt_lines() -> None:
     assert not split.state(state)
 
 
+def test_rename_payee_passes_only_for_the_label_of_the_fifth_of_september() -> None:
+    """The task passes when that one payee names the merchant, and no other label moved."""
+    rename = next(task for task in tasks.TASKS if task.task_id == "rename-payee")
+    state = fake_ynab.DemoBudget()
+    assert not rename.state(state)
+    state.rename_payee(tasks.RENAMED_PAYEE, tasks.MERCHANT)
+    assert rename.state(state)
+    state.rename_payee("pay-013", tasks.MERCHANT)
+    assert not rename.state(state)
+
+
 # ---------------------------------------------------------------------------
 # The runner for models behind an OpenAI-compatible API
 # ---------------------------------------------------------------------------

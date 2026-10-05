@@ -22,6 +22,7 @@ Elke tool bouwt een **object**: de exacte wijziging, als gegevens.
 | `flag_transactions` | de vlaggen (transactie, kleur erna) |
 | `set_category_target` | categorie, de verzonden doelvelden (bedrag in milliunits, datum of frequentie) |
 | `update_category` | categorie, naam erna, groep erna |
+| `rename_payee` | begunstigde, naam erna |
 | `create_category` | groep, naam |
 | `create_transactions` | rekening, de transacties, `approved` |
 | `reconcile_account` | rekening, banksaldo, te corrigeren verschil |
@@ -125,6 +126,7 @@ De vragen komen van de server en zijn in het Engels:
 | `flag_transactions` | *Change the flag of 2 transaction(s)?*, dan één regel per transactie: datum, begunstigde, bedrag, kleur ervoor → erna |
 | `set_category_target` | *Set the target of Vakantie: no target → 1200.00 by 2027-06-01?*, en een waarschuwing als ongedaan maken het vorige doel niet kan terugzetten |
 | `update_category` | *Change category 'Tennis' (Vrije tijd) to 'Sport' (Vrije tijd)?* |
+| `rename_payee` | *Rename payee 'CB MARKET FRESH …' to 'Market Fresh'? 1 transaction(s) name it.* |
 | `create_category` | *Create category 'Huisdieren' in Dagelijks?* |
 | `create_transactions` | *Create 1 transaction(s) on Betaalrekening?*, dan één regel per transactie |
 | `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?*, dan één regel per categorie, en een waarschuwing dat alleen YNAB het ongedaan kan maken |

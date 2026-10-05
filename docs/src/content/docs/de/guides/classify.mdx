@@ -11,6 +11,8 @@ import preview from '@snippets/de/apply_preview.json?raw';
 import approved from '@snippets/de/approve.json?raw';
 import imported from '@snippets/de/import.json?raw';
 import flagged from '@snippets/de/flag_preview.json?raw';
+import payeeList from '@snippets/de/payees.json?raw';
+import renamed from '@snippets/de/rename_payee_preview.json?raw';
 
 **Ziel:** Jede von Ihrer Bank importierte Transaktion erhält die richtige Kategorie, ohne
 dass Sie sie in YNAB einzeln durchgehen.
@@ -108,6 +110,23 @@ Einzelheiten und Beispiele: [Vorschläge](/avenir-mcp/de/concepts/suggestions/).
   Bestätigung eine farbige Markierung, und `undo_operation` entfernt sie:
 
   <Code code={flagged} lang="json" title="flag_transactions – Vorschau" />
+- **Ein Bankbeleg-Text, wo der Name eines Laden hingehört:** die Lebensmittel von Juni
+  bis September haben elf Zahlungsempfänger für einen einzigen Laden hinterlassen, jeder
+  Text mit eigenem Datum und eigener Kartennummer. Sagen Sie *„welche
+  Zahlungsempfänger sehen wie Market Fresh aus?“*: `list_payees` gibt sie mit dem
+  Händler, auf den jeder normalisiert wird, und mit der Zahl der Transaktionen, die ihn
+  nennen:
+
+  <Code code={payeeList} lang="json" title="list_payees" />
+
+  Dann *„nenne den vom 5. September Market Fresh“*: `rename_payee` zeigt die Änderung
+  zuerst; sobald Sie zustimmen, zeigt jede Transaktion, die diesen Zahlungsempfänger
+  nennt, den neuen Namen, und `undo_operation` stellt den alten Text wieder her. YNABs
+  API benennt einen Zahlungsempfänger auf einmal um und kann zwei nicht
+  zusammenführen; die anderen Texte behalten ihren, bis Sie sie ebenfalls umbenennen
+  oder sie in YNAB zusammenführen:
+
+  <Code code={renamed} lang="json" title="rename_payee – Vorschau" />
 - **Ein Konto oder ein Zeitraum:** Sagen Sie *„nur das Girokonto“*; der Agent filtert die
   Liste, bevor er anwendet.
 - **Viele Transaktionen:** Der Agent blättert mit `next_cursor` und wendet dann in einem

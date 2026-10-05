@@ -52,6 +52,7 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         # Targets set during the run, by category; they replace the demo plan's own.
         self.goals: dict[str, dict[str, Any]] = {}
         self.groups = {name: [list(c) for c in cats] for name, cats in demo.GROUPS.items()}
+        self.payee_names = {p["id"]: p["name"] for p in demo.payees(language)}
         self.lock = threading.Lock()
         self.next_id = len(self.transactions)
         # Requests served, so the documentation can state what each tool costs.
@@ -199,6 +200,12 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                 ages.append(weighted / aged)
         return round(sum(ages[-10:]) / 10) if len(ages) >= 10 else None
 
+    def payees(self) -> list[dict[str, Any]]:
+        """The payees, with the names renames left them."""
+        return [
+            payee | {"name": self.payee_names[payee["id"]]} for payee in demo.payees(self.language)
+        ]
+
     def accounts(self) -> list[dict[str, Any]]:
         """The demo accounts with balances from their transactions."""
         result = []
@@ -255,6 +262,15 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             tx["category_name"] = names.get(tx["category_id"] or "")
             self.touch(tx["id"])
         return [u["id"] for u in updates]
+
+    def rename_payee(self, payee_id: str, name: str) -> dict[str, Any]:
+        """Rename a payee, as YNAB does: every transaction naming it shows the new name."""
+        self.payee_names[payee_id] = name
+        for tx in self.transactions.values():
+            if tx.get("payee_id") == payee_id:
+                tx["payee_name"] = name
+                self.touch(tx["id"])
+        return {"id": payee_id, "name": name, "transfer_account_id": None, "deleted": False}
 
     def set_goal(self, cat_id: str, fields: dict[str, Any]) -> None:
         """Set a category's target as YNAB does: a date or a frequency, or none at all."""
@@ -354,6 +370,12 @@ class Handler(BaseHTTPRequestHandler):
                     for name in STATE.groups
                 ]
                 return self._send(200, {"data": {"category_groups": groups}})
+            if method == "GET" and rest == "/payees":
+                return self._send(200, {"data": {"payees": STATE.payees()}})
+            payee_match = re.match(r"^/payees/([^/]+)$", rest)
+            if method == "PATCH" and payee_match:
+                payee = STATE.rename_payee(payee_match.group(1), self._body()["payee"]["name"])
+                return self._send(200, {"data": {"payee": payee}})
             if method == "GET" and rest == "/months":
                 months = STATE.months()
                 return self._send(200, {"data": {"months": months}})

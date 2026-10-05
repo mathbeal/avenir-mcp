@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-avenir-mcp gibt einem Agenten 31 Tools, 4 Ressourcen und 4 Prompts für Ihre
+avenir-mcp gibt einem Agenten 33 Tools, 4 Ressourcen und 4 Prompts für Ihre
 YNAB-Plans. Diese Seite ordnet sie nach dem, was Sie tun möchten. Jede Zeile nennt einen
 Satz, den Sie dem Agenten sagen können; der Agent wählt das Tool.
 
@@ -62,6 +62,8 @@ Anleitung: [Einen Monat auswerten](/avenir-mcp/de/guides/monthly-review/).
 | *„Was braucht noch eine Kategorie?“* | [`suggest_categories`](/avenir-mcp/de/reference/tools/suggest-categories/) – ausstehende Transaktionen, mit Vorschlag, wenn Ihre Historie eindeutig ist | L |
 | *„Ja, wende das an.“* | [`apply_categories`](/avenir-mcp/de/reference/tools/apply-categories/) – ein bestätigter Stapel | S ↺ |
 | *„Markiere die Buchungen, die ich in YNAB prüfen sollte.“* | [`flag_transactions`](/avenir-mcp/de/reference/tools/flag-transactions/) – eine farbige Markierung, in YNAB anzusehen | S ↺ |
+| *„Welche Zahlungsempfänger sind nur Bankbeleg-Texte?“* | [`list_payees`](/avenir-mcp/de/reference/tools/list-payees/) – jeder Zahlungsempfänger mit dem Händler, auf den sein Text normalisiert wird, und wie oft er genutzt wird | L |
+| *„Nenne den Market Fresh.“* | [`rename_payee`](/avenir-mcp/de/reference/tools/rename-payee/) – ein Text wird zum Namen des Händlers, für seine ganze Geschichte | S ↺ |
 | *„Teile diesen Beleg auf: 81,15 Lebensmittel, 5,25 Haushalt.“* | [`split_transaction`](/avenir-mcp/de/reference/tools/split-transaction/) – eine Transaktion auf mehrere Kategorien; in YNAB rückgängig zu machen, nicht hier | S |
 | *„Markiere sie als geprüft.“* | [`approve_transactions`](/avenir-mcp/de/reference/tools/approve-transactions/) – entfernt YNABs Kennzeichen *unapproved* | S |
 

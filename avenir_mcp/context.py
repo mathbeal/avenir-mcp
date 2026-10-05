@@ -53,6 +53,8 @@ GUIDE = """# avenir-mcp: how to work with this YNAB server
 - Missing transactions: first check `list_accounts` for a broken bank link, which the
   user fixes in YNAB; then `create_transactions`. New categories: `create_category`;
   renaming or moving one: `update_category`.
+- A bank label where a shop's name belongs: `list_payees` shows the labels with the
+  merchant each normalises to, and `rename_payee` cleans one up, for its whole history.
 
 ## The YNAB method in brief
 - Give every unit of currency a job: assign only money you have, until Ready to

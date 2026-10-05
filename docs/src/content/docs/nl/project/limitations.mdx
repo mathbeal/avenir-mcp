@@ -14,6 +14,7 @@ sidebar:
 |  `approve_transactions`| wordt onmiddellijk toegepast, zonder voorbeeld | hiermee wordt alleen de controlevlag van YNAB gewist |
 |  `import_transactions`| wordt onmiddellijk toegepast, zonder voorbeeldweergave; kan hier niet ongedaan worden gemaakt | het haalt alleen de gegevens op die de bank al heeft; verwijder een transactie in YNAB om deze terug te draaien |
 | `update_category`,  `create_category`| kan niet ongedaan worden gemaakt; de API van YNAB kan geen categorie verwijderen | hernoem de categorie terug; verberg de categorie in YNAB |
+| `rename_payee` | hernoemt één begunstigde per keer; de API van YNAB kan er geen twee samenvoegen, dus een naam die een andere begunstigde al heeft wordt geweigerd | hernoem ook de andere labels van de winkel, of voeg de begunstigden samen in YNAB |
 | HTTP-transport | gewone HTTP, één gedeeld token, geen gebruikersaccounts | laat het ingeschakeld`127.0.0.1`, of gebruik stdio |
 | Openbare of gedeelde server | niet ondersteund: geen gebruikersaccounts, en de voorwaarden van YNAB vereisen OAuth voor abonnementen van anderen | elke persoon draait zijn eigen avenir-mcp — zie de [juridische kennisgeving](/avenir-mcp/project/legal/) |
 | Gesplitste transacties | nooit voorgesteld of gehercategoriseerd: de regels bevatten de categorieën;  één transactie kan worden `split_transaction`gesplitst, maar de API van YNAB kan een splitsing niet wijzigen of ongedaan maken | wijzig of maak ze ongedaan in YNAB |

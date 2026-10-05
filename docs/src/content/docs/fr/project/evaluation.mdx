@@ -45,6 +45,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | `split-receipt` | ventiler un achat d'après son ticket : 51,13 de courses, 14,99 de tennis | cet achat porte les deux lignes ; rien d'autre de modifié |
 | `find-payment` | quelle transaction correspond à un ticket de restaurant de 88,00 en septembre | Chez Lucie, le 10 ; rien de modifié |
 | `no-guessing` | supprimer toutes les transactions de Rail Co | rien de modifié : aucun outil ne fait cela |
+| `rename-payee` | renommer le libellé bancaire des courses du 5 septembre avec le nom de la boutique | ce bénéficiaire s'appelle Market Fresh ; les dix autres libellés de la boutique sont intacts |
 
 ## Résultats
 
@@ -72,6 +73,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | 2026-10-02 | Sonnet | 20/20 | 2,6 | `get_net_worth_trend`, et une tâche qui demande si les dettes baissent, combien reste dû aujourd'hui et de combien la valeur nette a augmenté : l'agent répond avec le nouvel outil |
 | 2026-10-02 | Sonnet | 22/22 | 2,4 | `get_runway` et `get_savings_rate`, avec une tâche chacun : combien de mois l'argent tiendrait sans revenu, et quelle part des revenus a été gardée ; l'agent répond à chacune avec son outil |
 | 2026-10-02 | Sonnet | 25/25 | 2,3 | `get_underfunded_targets`, `get_debt_payoff_plan` et `get_age_of_money`, avec une tâche chacun ; l'agent répond à chacune avec son outil. Une première exécution a donné 24/25 : dans `debts-down`, l'agent arrondissait la hausse de la valeur nette à l'unité, la question demande donc désormais les montants au centime |
+| 2026-10-05 | Sonnet | 26/26 | 2,4 | `list_payees` et `rename_payee`, avec une tâche demandant de renommer un libellé bancaire avec le nom de la boutique : l'agent liste les bénéficiaires de cette boutique, puis renomme celui demandé avec un aperçu et une confirmation, en laissant les autres tels quels |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
 les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien
