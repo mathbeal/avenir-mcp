@@ -2,12 +2,14 @@
 
 <!-- mcp-name: io.github.mathbeal/avenir-mcp -->
 
-[![Works with YNAB](https://api.ynab.com/papi/works_with_ynab.svg)](https://api.ynab.com/)
+[![Works with YNAB](https://api.ynab.com/papi/works_with_ynab.svg)](https://api.ynab.com/#works-with-ynab-third-party)
 [![YNAB API terms: self-checked](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml)
 
 Self-checked on every change against YNAB's API terms of 2025-05-28 (naming, attribution,
 YNAB's own image, a personal token for its owner only, the hourly limit); a weekly job
-turns the badge red when YNAB changes its terms. Not reviewed or endorsed by YNAB.
+turns the badge red when YNAB changes its terms. Listed by YNAB in its
+[Works with YNAB](https://api.ynab.com/#works-with-ynab-third-party) directory, among
+third-party apps. Not endorsed by YNAB.
 
 Built and tested against YNAB's API v1.87.0. A weekly [`YNAB API drift`](https://github.com/mathbeal/avenir-mcp/actions/workflows/api-drift.yml) check compares it with the live specification and fails when YNAB publishes a new version.
 
