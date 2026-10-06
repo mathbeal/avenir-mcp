@@ -5,7 +5,8 @@
 
 Each test marked `ynab_terms` enforces one rule of YNAB's API Terms of Service, as
 dated in api/ynab-terms.json; `python -m docsgen.terms` fails when YNAB changes them.
-Self-checked means exactly that: YNAB has not reviewed avenir-mcp.
+Self-checked means exactly that: the checks are the project's own. YNAB lists avenir-mcp
+among the third-party apps of its "Works with YNAB" directory, and endorses nothing.
 """
 
 from __future__ import annotations
@@ -28,6 +29,13 @@ pytestmark = pytest.mark.ynab_terms
 ROOT = Path(__file__).resolve().parent.parent
 TERMS = json.loads((ROOT / "api" / "ynab-terms.json").read_text(encoding="utf-8"))
 OFFICIAL_IMAGE = "https://api.ynab.com/papi/works_with_ynab.svg"
+DIRECTORY = "https://api.ynab.com/#works-with-ynab-third-party"
+LISTED_IMAGE = f"[![Works with YNAB]({OFFICIAL_IMAGE})]({DIRECTORY})"
+# What the project may say about the listing: a fact and its limit, nothing in between.
+LISTING = (
+    "Listed by YNAB in its Works with YNAB directory, among third-party apps. Not endorsed by YNAB."
+)
+LANGUAGES = ["", "fr", "es", "de", "nl"]
 
 
 def _words(markdown: str) -> str:
@@ -50,7 +58,7 @@ def test_the_site_footer_displays_ynabs_attribution_word_for_word() -> None:
     assert TERMS["attribution"] in terms.text_of(english.replace("\\'", "'"))
 
 
-@pytest.mark.parametrize("language", ["", "fr", "es", "de", "nl"])
+@pytest.mark.parametrize("language", LANGUAGES)
 def test_every_legal_page_quotes_ynabs_attribution_word_for_word(language: str) -> None:
     """The legal notice, in each language, quotes YNAB's text as written before translating it."""
     page = ROOT / "docs" / "src" / "content" / "docs" / language / "project" / "legal.mdx"
@@ -97,8 +105,23 @@ def test_requests_stay_under_ynabs_hourly_limit() -> None:
 
 
 def test_the_readme_dates_the_badge_with_the_terms_checked() -> None:
-    """The badge's promise names the terms it holds against, and says who checked."""
+    """The badge's promise names the terms it holds against, and the workflow that checks."""
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "actions/workflows/ynab-terms.yml/badge.svg" in readme
     assert f"YNAB's API terms of {TERMS['last_updated']}" in readme
-    assert "Not reviewed or endorsed by YNAB." in readme
+
+
+def test_the_readme_says_avenir_mcp_is_listed_by_ynab_and_claims_nothing_more() -> None:
+    """The README states the listing as a fact, links it, and says YNAB endorses nothing."""
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert LISTED_IMAGE in readme
+    assert LISTING in _words(readme)
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_every_home_page_links_ynabs_image_to_the_entry_that_lists_avenir_mcp(
+    language: str,
+) -> None:
+    """Each home page shows YNAB's own image, linked to the third-party part of its directory."""
+    page = ROOT / "docs" / "src" / "content" / "docs" / language / "index.mdx"
+    assert LISTED_IMAGE in page.read_text(encoding="utf-8")

@@ -7,7 +7,8 @@ name: YNAB API terms
 # check the rules of YNAB's API Terms of Service (dated in api/ynab-terms.json); every
 # Monday, the terms YNAB publishes are compared with that snapshot, so the badge turns
 # red when YNAB changes its terms, until they are read and the checks adapted.
-# Self-checked: YNAB has not reviewed avenir-mcp.
+# Self-checked: these checks are the project's own. YNAB lists avenir-mcp among the
+# third-party apps of its "Works with YNAB" directory, and endorses nothing.
 on:
   push:
     branches: [main]
