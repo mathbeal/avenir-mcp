@@ -119,9 +119,14 @@ Codec-Fehlermeldung statt als zu korrigierende Zeile erschien.
 
 `just complexity` listet die Funktionen auf, die radon mit C oder schlechter bewertet,
 zyklomatische Komplexität 11 und darüber, die schlechteste jeder Datei zuerst, dann den
-Durchschnitt über alle Blöcke, die nicht gezeigten mitgezählt. Ein Bericht zum Lesen, keine
-Schranke: er schlägt nie fehl, und die CI führt ihn nicht aus. Seine Version ist
-festgeschrieben und `uvx` holt es, wie bei pydoclint.
+Durchschnitt über alle Blöcke, die nicht gezeigten mitgezählt. Zudem wird der
+Wartbarkeitsindex jedes Moduls des Pakets angezeigt, beginnend mit dem niedrigsten Wert:
+eine Zahl, die das Halstead-Volumen, die zyklomatische Komplexität und die Zeilenzahl
+zusammenfasst. Diese Zahl ordnet die Dateien gegeneinander ein und zeigt auf, in welche
+Richtung sich die einzelnen Dateien entwickeln, anstatt ein endgültiges Urteil zu fällen, da
+der A-Rang bei radon bereits bei 20 beginnt und jede Datei des Pakets weit darüber liegt.
+Ein Bericht zum Lesen, keine Schranke: er schlägt nie fehl, und die CI führt ihn nicht aus.
+Seine Version ist festgeschrieben und `uvx` holt es, wie bei pydoclint.
 
 ## Dokumentation
 

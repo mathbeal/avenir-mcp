@@ -117,7 +117,12 @@ als kale codecfout verscheen in plaats van de regel te noemen die moet worden he
 
 `just complexity` somt de functies op die radon als C of slechter beoordeelt, cyclomatische
 complexiteit 11 en hoger, de slechtste van elk bestand eerst, daarna het gemiddelde over
-alle blokken, de niet weergegeven blokken meegerekend. Een rapport om te lezen, geen
+alle blokken, de niet weergegeven blokken meegerekend. Het geeft tevens de
+onderhoudbaarheidsindex van elke module van het pakket weer, beginnend met de laagste: één
+getal dat het Halstead-volume, de cyclomatische complexiteit en het aantal regels samenvat.
+Dit getal rangschikt de bestanden ten opzichte van elkaar en geeft aan welke richting elk
+bestand opgaat, in plaats van een oordeel te vellen, aangezien de A-rang van radon begint
+bij 20 en elk bestand van het pakket ver daarboven ligt. Een rapport om te lezen, geen
 drempel: het faalt nooit en de CI draait het niet. De versie staat vast en `uvx` haalt het
 op, zoals bij pydoclint.
 

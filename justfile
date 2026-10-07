@@ -34,10 +34,15 @@ lock:
     uv lock --check
 
 # The functions radon ranks C or worse (cyclomatic complexity 11 and above), the worst of
-# each file first, then the average over every block, counting the ones not shown. A report
-# to read, not a gate: nothing here fails.
+# each file first, then the average over every block, counting the ones not shown, then the
+# maintainability index of every module of the package, lowest first. A report to read, not
+# a gate: nothing here fails, and no index is anywhere near radon's A rank, which starts at
+# 20. `radon mi` has no ordering option, hence the `sort`; `LC_ALL=C` because a locale that
+# writes decimals with a comma makes `sort -n` read `39.45` as `39`, which ties every file
+# of the same unit and falls back to sorting them by name.
 complexity:
     uvx radon==6.0.1 cc avenir_mcp tests evals docsgen benchmarks --min C --show-complexity --order SCORE --total-average
+    uvx radon==6.0.1 mi -s avenir_mcp | LC_ALL=C sort -t'(' -k2,2n
 
 # Time the computing functions on a five-year plan of about 9,000 transactions.
 bench:

@@ -115,8 +115,12 @@ was not text (0x80) surfacing as a bare codec error instead of the line to fix.
 
 `just complexity` lists the functions radon ranks C or worse, cyclomatic complexity 11 and
 above, the worst of each file first, then the average over every block, counting the ones
-not shown. A report to read, not a gate: it never fails, and CI does not run it. Its
-version is pinned and `uvx` fetches it, as for pydoclint.
+not shown. It also prints the maintainability index of every module of the package, lowest
+first: one number aggregating Halstead volume, cyclomatic complexity and line count, which
+ranks the files against each other and shows where each is heading rather than returning a
+verdict, since radon's A rank starts at 20 and every file of the package is far above it.
+A report to read, not a gate: it never fails, and CI does not run it. Its version is pinned
+and `uvx` fetches it, as for pydoclint.
 
 ## Documentation
 

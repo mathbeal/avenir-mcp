@@ -118,7 +118,12 @@ nuit avec 200 000. Le premier passage a trouvé un octet du journal qui n'était
 
 `just complexity` liste les fonctions que radon classe C ou pire, complexité cyclomatique
 11 et au-delà, la pire de chaque fichier d'abord, puis la moyenne sur tous les blocs, en
-comptant ceux qui ne sont pas affichés. Un rapport à lire, pas une barrière : il n'échoue
+comptant ceux qui ne sont pas affichés. Il affiche également l'indice de maintenabilité de
+chaque module du paquet, du plus bas au plus élevé : un chiffre synthétisant le volume de
+Halstead, la complexité cyclomatique et le nombre de lignes, qui classe les fichiers les uns
+par rapport aux autres et indique la tendance de chacun plutôt que de rendre un verdict,
+étant donné que le rang A de radon commence à 20 et que tous les fichiers du paquet se
+situent bien au-dessus de cette valeur. Un rapport à lire, pas une barrière : il n'échoue
 jamais, et la CI ne le lance pas. Sa version est épinglée et `uvx` le récupère, comme pour
 pydoclint.
 
