@@ -41,7 +41,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | Check | Command | Fails when |
 |---|---|---|
 | format | `ruff format --check` | a file is not formatted |
-| lint | `pylint` | the score is below 10.00 |
+| lint | `pylint` | the score is below 10.00, which four or more computing lines repeated between two of the files it reads is enough to do (`duplicate-code`) |
 | ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…) |
 | docstrings | `pydoclint` | a docstring of the package lists the arguments in another order than the signature, gives a type the annotation already gives, or is a bare summary for a function that takes arguments or returns a value |
 | YNAB API terms | `pytest -m ynab_terms`, `python -m docsgen.terms` | a rule of YNAB's API terms is broken (naming, attribution word for word, YNAB's own image, a token for its owner only, the hourly limit), or YNAB changed its terms since the date checked; the README badge shows it |
@@ -112,6 +112,11 @@ minutes; `just fuzz 200000` for longer), on what comes from outside: bank labels
 journals, HTTP headers, amounts, cursors. A failure is saved and replayed, minimised, by
 the next run. CI does it every night with 200,000. The first run found a journal byte that
 was not text (0x80) surfacing as a bare codec error instead of the line to fix.
+
+`just complexity` lists the functions radon ranks C or worse, cyclomatic complexity 11 and
+above, the worst of each file first, then the average over every block, counting the ones
+not shown. A report to read, not a gate: it never fails, and CI does not run it. Its
+version is pinned and `uvx` fetches it, as for pydoclint.
 
 ## Documentation
 

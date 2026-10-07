@@ -42,7 +42,7 @@ alors.
 | Contrôle | Commande | Échoue quand |
 |---|---|---|
 | format | `ruff format --check` | un fichier n'est pas formaté |
-| lint | `pylint` | la note est sous 10,00 |
+| lint | `pylint` | la note est sous 10,00, ce que suffisent à faire quatre lignes de calcul ou plus répétées entre deux des fichiers qu'il lit (`duplicate-code`) |
 | ruff | `ruff check` | une docstring du paquet n'est pas au format Google ou omet un argument, la valeur de retour ou une exception levée ; les imports ne sont pas triés ; les contrôles de sécurité de bandit trouvent un motif risqué (TLS non vérifié, commande shell, mot de passe dans le code…) |
 | docstrings | `pydoclint` | une docstring du paquet liste les arguments dans un autre ordre que la signature, donne un type que l'annotation donne déjà, ou se réduit à un résumé pour une fonction qui prend des arguments ou renvoie une valeur |
 | Conditions de l'API YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | une règle des conditions de l'API YNAB n'est pas respectée (nommage, mention mot pour mot, image officielle de YNAB, jeton réservé à son titulaire, limite de requêtes par heure), ou YNAB a changé ses conditions depuis la date vérifiée ; le badge du README l'affiche |
@@ -115,6 +115,12 @@ libellés bancaires, journaux abîmés, en-têtes HTTP, montants, curseurs de pa
 enregistré et rejoué, réduit au plus petit cas, au lancement suivant. La CI le fait chaque
 nuit avec 200 000. Le premier passage a trouvé un octet du journal qui n'était pas du texte
 (0x80) et remontait en erreur de codec brute au lieu de nommer la ligne à corriger.
+
+`just complexity` liste les fonctions que radon classe C ou pire, complexité cyclomatique
+11 et au-delà, la pire de chaque fichier d'abord, puis la moyenne sur tous les blocs, en
+comptant ceux qui ne sont pas affichés. Un rapport à lire, pas une barrière : il n'échoue
+jamais, et la CI ne le lance pas. Sa version est épinglée et `uvx` le récupère, comme pour
+pydoclint.
 
 ## Documentation
 

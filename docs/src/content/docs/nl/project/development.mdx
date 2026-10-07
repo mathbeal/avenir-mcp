@@ -41,7 +41,7 @@ bestand `.pth` van een bewerkbare installatie verbergen, dat Python dan negeert.
 | Controle | Commando | Faalt als |
 |---|---|---|
 | opmaak | `ruff format --check` | een bestand niet is opgemaakt |
-| lint | `pylint` | de score onder 10,00 ligt |
+| lint | `pylint` | de score onder 10,00 ligt, waarvoor vier of meer rekenende regels die zich tussen twee van de gelezen bestanden herhalen al genoeg zijn (`duplicate-code`) |
 | ruff | `ruff check` | een docstring van het pakket niet in Google-stijl is of een argument, de returnwaarde of een opgeworpen exceptie weglaat; imports niet gesorteerd zijn; de beveiligingscontroles van bandit een riskant patroon vinden (TLS niet gecontroleerd, een shellcommando, een wachtwoord in de code…) |
 | docstrings | `pydoclint` | een docstring van het pakket de argumenten in een andere volgorde noemt dan de signatuur, een type geeft dat de annotatie al geeft, of alleen een samenvatting is voor een functie die argumenten neemt of een waarde teruggeeft |
 | YNAB-API-voorwaarden | `pytest -m ynab_terms`, `python -m docsgen.terms` | een regel uit de YNAB-API-voorwaarden niet wordt nageleefd (naam, vermelding woord voor woord, YNAB's eigen afbeelding, token alleen voor de eigenaar, limiet van verzoeken per uur), of YNAB de voorwaarden heeft gewijzigd sinds de gecontroleerde datum; de badge in de README toont het |
@@ -114,6 +114,12 @@ beschadigde journalen, HTTP-headers, bedragen, paginacursors. Een fout wordt bew
 volgende run, teruggebracht tot het kleinste geval, opnieuw gedraaid. De CI doet het elke
 nacht met 200.000. De eerste run vond een byte in het journaal die geen tekst was (0x80) en
 als kale codecfout verscheen in plaats van de regel te noemen die moet worden hersteld.
+
+`just complexity` somt de functies op die radon als C of slechter beoordeelt, cyclomatische
+complexiteit 11 en hoger, de slechtste van elk bestand eerst, daarna het gemiddelde over
+alle blokken, de niet weergegeven blokken meegerekend. Een rapport om te lezen, geen
+drempel: het faalt nooit en de CI draait het niet. De versie staat vast en `uvx` haalt het
+op, zoals bij pydoclint.
 
 ## Documentatie
 

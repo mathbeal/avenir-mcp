@@ -42,7 +42,7 @@ dann ignoriert.
 | Prüfung | Befehl | Schlägt fehl, wenn |
 |---|---|---|
 | Format | `ruff format --check` | eine Datei nicht formatiert ist |
-| Lint | `pylint` | die Bewertung unter 10,00 liegt |
+| Lint | `pylint` | die Bewertung unter 10,00 liegt, wozu vier oder mehr rechnende Zeilen genügen, die sich zwischen zwei der von ihm gelesenen Dateien wiederholen (`duplicate-code`) |
 | ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…) |
 | Docstrings | `pydoclint` | ein Docstring des Pakets die Argumente in anderer Reihenfolge als die Signatur nennt, einen Typ angibt, den die Annotation schon angibt, oder nur eine Zusammenfassung ist, obwohl die Funktion Argumente nimmt oder einen Wert zurückgibt |
 | YNAB-API-Bedingungen | `pytest -m ynab_terms`, `python -m docsgen.terms` | eine Regel der YNAB-API-Bedingungen verletzt ist (Name, Hinweis auf die fehlende Zugehörigkeit im Wortlaut, YNABs eigenes Bild, Token nur für seinen Inhaber, Limit an Anfragen pro Stunde) oder YNAB seine Bedingungen seit dem geprüften Datum geändert hat; das Badge in der README zeigt es an |
@@ -116,6 +116,12 @@ beschädigte Journale, HTTP-Header, Beträge, Seiten-Cursor. Ein Fehlschlag wird
 nächsten Lauf, auf den kleinsten Fall verkleinert, wiederholt. Die CI tut das jede Nacht mit
 200.000. Der erste Lauf fand ein Byte im Journal, das kein Text war (0x80) und als rohe
 Codec-Fehlermeldung statt als zu korrigierende Zeile erschien.
+
+`just complexity` listet die Funktionen auf, die radon mit C oder schlechter bewertet,
+zyklomatische Komplexität 11 und darüber, die schlechteste jeder Datei zuerst, dann den
+Durchschnitt über alle Blöcke, die nicht gezeigten mitgezählt. Ein Bericht zum Lesen, keine
+Schranke: er schlägt nie fehl, und die CI führt ihn nicht aus. Seine Version ist
+festgeschrieben und `uvx` holt es, wie bei pydoclint.
 
 ## Dokumentation
 

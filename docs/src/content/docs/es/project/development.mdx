@@ -41,7 +41,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | Control | Comando | Falla cuando |
 |---|---|---|
 | formato | `ruff format --check` | un archivo no está formateado |
-| lint | `pylint` | la nota es inferior a 10,00 |
+| lint | `pylint` | la nota es inferior a 10,00, lo que basta con cuatro líneas de cálculo o más repetidas entre dos de los archivos que lee (`duplicate-code`) |
 | ruff | `ruff check` | un docstring del paquete no sigue el estilo Google u omite un argumento, el valor devuelto o una excepción lanzada; los imports no están ordenados; los controles de seguridad de bandit encuentran un patrón de riesgo (TLS sin verificar, un comando shell, una contraseña en el código…) |
 | docstrings | `pydoclint` | un docstring del paquete enumera los argumentos en otro orden que la firma, da un tipo que la anotación ya da, o se reduce a un resumen en una función que recibe argumentos o devuelve un valor |
 | Condiciones de la API de YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | no se cumple una regla de las condiciones de la API de YNAB (nombre, mención palabra por palabra, imagen oficial de YNAB, token solo para su titular, límite de solicitudes por hora), o YNAB cambió sus condiciones desde la fecha comprobada; el distintivo del README lo muestra |
@@ -114,6 +114,11 @@ bancarias, diarios dañados, cabeceras HTTP, importes, cursores de paginación. 
 vuelve a ejecutar, reducido al caso más pequeño, en la ejecución siguiente. La CI lo hace
 cada noche con 200.000. La primera pasada encontró un byte del diario que no era texto
 (0x80) y aparecía como un error de códec en bruto en lugar de nombrar la línea que corregir.
+
+`just complexity` enumera las funciones que radon clasifica como C o peor, complejidad
+ciclomática 11 y más, la peor de cada archivo primero, y después la media sobre todos los
+bloques, contando los que no se muestran. Un informe para leer, no una barrera: nunca falla,
+y la CI no lo ejecuta. Su versión está fijada y `uvx` lo descarga, como con pydoclint.
 
 ## Documentación
 
