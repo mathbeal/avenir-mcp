@@ -25,6 +25,7 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     logs,
     tools_accounts,
     tools_age,
+    tools_budget,
     tools_categories,
     tools_charges,
     tools_classify,
@@ -40,40 +41,16 @@ from avenir_mcp import (  # noqa: F401  pylint: disable=unused-import
     updates,
 )
 from avenir_mcp.app import WRITE_TAG, configure, mcp, today
-from avenir_mcp.tools_accounts import create_transactions
-from avenir_mcp.tools_budget import (
-    approve_transactions,
-    find_transactions,
-    get_budget_vs_actual,
-    get_category_balances,
-    get_monthly_summary,
-    get_spending_trends,
-    list_accounts,
-    list_category_groups,
-    list_plans,
-    list_scheduled_transactions,
-)
-from avenir_mcp.tools_categories import create_category, set_category_budget
 
+# The ways into the server, and nothing else: a tool is reached by registering on mcp,
+# not through this module. Naming some tools here said twice what the registry says
+# once, and the two drifted apart.
 __all__ = [
     "WRITE_TAG",
-    "approve_transactions",
     "configure",
-    "create_category",
-    "create_transactions",
-    "find_transactions",
-    "get_budget_vs_actual",
-    "get_category_balances",
-    "get_monthly_summary",
-    "get_spending_trends",
-    "list_accounts",
-    "list_plans",
-    "list_scheduled_transactions",
-    "list_category_groups",
     "http_options",
     "main",
     "mcp",
-    "set_category_budget",
     "today",
 ]
 
