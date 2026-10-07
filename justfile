@@ -33,6 +33,12 @@ vocabulary:
 lock:
     uv lock --check
 
+# The functions radon ranks C or worse (cyclomatic complexity 11 and above), the worst of
+# each file first, then the average over every block, counting the ones not shown. A report
+# to read, not a gate: nothing here fails.
+complexity:
+    uvx radon==6.0.1 cc avenir_mcp tests evals docsgen benchmarks --min C --show-complexity --order SCORE --total-average
+
 # Time the computing functions on a five-year plan of about 9,000 transactions.
 bench:
     uv run pytest benchmarks -o addopts="" -p no:cacheprovider --benchmark-only --benchmark-sort=name --benchmark-columns=min,median,mean,rounds

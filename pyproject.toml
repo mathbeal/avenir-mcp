@@ -151,6 +151,14 @@ enable = ["useless-suppression"]
 [tool.pylint.main]
 fail-on = ["useless-suppression"]
 
+# Duplication (`just lint`, CI): pylint's `duplicate-code` compares every file of one run
+# with the others, so the directories `just lint` passes it are the ones it covers. Four
+# lines is pylint's own default, written down here because a check that depends on a
+# default can loosen without a commit saying so. Comments, docstrings, imports and
+# signatures are left out of the comparison, so four means four lines that compute.
+[tool.pylint.similarities]
+min-similarity-lines = 4
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = ["error"]
