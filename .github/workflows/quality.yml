@@ -36,7 +36,7 @@ jobs:
       - run: uv lock --check
 
   lint:
-    name: ruff, pylint, pydoclint, deptry
+    name: ruff, pylint, pydoclint, vulture, deptry
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
@@ -53,6 +53,8 @@ jobs:
       - run: uv run pylint avenir_mcp tests evals docsgen benchmarks
       - run: uv run ruff check avenir_mcp tests evals docsgen benchmarks
       - run: uvx pydoclint==0.10.1 avenir_mcp
+      # Dead code. Its paths and its whitelist are in pyproject.toml.
+      - run: uv run vulture
       - run: uv run deptry .
 
   types:

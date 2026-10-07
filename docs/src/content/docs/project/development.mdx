@@ -45,6 +45,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…) |
 | docstrings | `pydoclint` | a docstring of the package lists the arguments in another order than the signature, gives a type the annotation already gives, or is a bare summary for a function that takes arguments or returns a value |
 | YNAB API terms | `pytest -m ynab_terms`, `python -m docsgen.terms` | a rule of YNAB's API terms is broken (naming, attribution word for word, YNAB's own image, a token for its owner only, the hourly limit), or YNAB changed its terms since the date checked; the README badge shows it |
+| dead code | `vulture` | a name nothing else in the repository reads is neither registered by a decorator (`@mcp.tool`, `@pytest.fixture`…) nor listed, with the reason it is alive, in `vulture_whitelist.py` |
 | dependencies | `deptry .` | the code imports a package `pyproject.toml` does not declare, or declares one it does not use |
 | types | `mypy` (strict) | any type error |
 | tests | `pytest` | a test fails, **any warning** is raised, or coverage of lines **or branches** is below 100 % |

@@ -73,6 +73,7 @@ dev = [
     "pyyaml==6.0.3",
     "types-pyyaml==6.0.12.20260906",
     "pytest-benchmark==5.3.0",
+    "vulture==2.16",
 ]
 
 # hatchling builds the same wheel and sdist twice from the same commit: files in a fixed
@@ -164,6 +165,19 @@ addopts = "--strict-markers --strict-config --cov=avenir_mcp --cov-branch --cov-
 # use pytest-benchmark.
 [tool.deptry.per_rule_ignores]
 DEP004 = ["yaml", "pytest_benchmark"]
+
+# Dead code (`just lint`, CI): the same directories ruff reads, plus the whitelist, which
+# vulture reads as code so that a name in it counts as read. No min-confidence: vulture
+# reports everything it finds, and `vulture_whitelist.py` says why each name it cannot see
+# is alive. A lower threshold would hide a finding; a higher one would hide them all and
+# leave the whitelist empty.
+# A function registered by one of these decorators is called by FastMCP or pytest, never
+# by a line of the repository. The decorator is the proof it is alive, so ignoring them
+# hides nothing a per-name entry would show, and adding a tool or a fixture needs no edit
+# to the whitelist.
+[tool.vulture]
+paths = ["avenir_mcp", "tests", "evals", "docsgen", "benchmarks", "vulture_whitelist.py"]
+ignore_decorators = ["@mcp.tool", "@mcp.resource", "@mcp.prompt", "@pytest.fixture"]
 
 # Mutation testing (`just mutate`): the modules that compute, against their own tests.
 [tool.mutmut]
