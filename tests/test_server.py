@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import asyncio
 from datetime import date
+from pathlib import Path
+from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -15,7 +17,7 @@ from fastmcp import Client
 from fastmcp.exceptions import ToolError
 
 import avenir_mcp
-from avenir_mcp import server, updates
+from avenir_mcp import server, tools_budget, updates
 
 # ---------------------------------------------------------------------------
 # FastMCP instance
@@ -69,6 +71,27 @@ def test_catalog_is_exactly_the_published_tools() -> None:
     )
 
 
+def test_all_names_the_entry_points_and_no_tool() -> None:
+    """__all__ names the ways into the server; a tool is never re-exported there.
+
+    A tool reaches an agent by registering on mcp, not by being an attribute of
+    server: listing some tools in __all__ said twice what the registry says once,
+    and the two drifted apart.
+    """
+    assert server.__all__ == ["WRITE_TAG", "configure", "http_options", "main", "mcp", "today"]
+    server.configure(enable_writes=True)  # count the write tools too
+    registered = {tool.name for tool in asyncio.run(server.mcp.list_tools())}
+    assert registered.isdisjoint(server.__all__)
+
+
+def test_every_tool_module_is_imported_so_its_tools_register() -> None:
+    """A new tools_*.py module registers nothing until server.py imports it."""
+    modules = sorted(path.stem for path in Path(server.__file__).parent.glob("tools_*.py"))
+    assert modules
+    missing = [name for name in modules if not isinstance(getattr(server, name, None), ModuleType)]
+    assert not missing, missing
+
+
 # ---------------------------------------------------------------------------
 # list_plans
 # ---------------------------------------------------------------------------
@@ -87,7 +110,7 @@ def test_list_budgets_keeps_what_an_agent_needs() -> None:
         {"id": "b2", "name": "Empty"},
     ]
     with patch("avenir_mcp.client.get_plans", new=AsyncMock(return_value=budgets)):
-        result = asyncio.run(server.list_plans())
+        result = asyncio.run(tools_budget.list_plans())
     assert [b.model_dump() for b in result] == [
         {"id": "b1", "name": "Business", "first_month": "2026-01-01", "last_month": "2026-09-01"},
         {"id": "b2", "name": "Empty", "first_month": None, "last_month": None},
@@ -105,7 +128,7 @@ def test_get_category_balances_default_month() -> None:
     with patch(
         "avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)
     ) as mock_fn:
-        asyncio.run(server.get_category_balances("b1"))
+        asyncio.run(tools_budget.get_category_balances("b1"))
     mock_fn.assert_called_once_with("b1", "current")
 
 
@@ -115,7 +138,7 @@ def test_get_category_balances_explicit_month() -> None:
     with patch(
         "avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)
     ) as mock_fn:
-        asyncio.run(server.get_category_balances("b1", "2026-03-01"))
+        asyncio.run(tools_budget.get_category_balances("b1", "2026-03-01"))
     mock_fn.assert_called_once_with("b1", "2026-03-01")
 
 
@@ -135,7 +158,7 @@ def test_get_monthly_summary_is_compact_and_in_currency() -> None:
         "categories": [{"id": "c1", "name": "Rent", "balance": 1_000, "note": "x" * 5000}],
     }
     with patch("avenir_mcp.client.get_month", new=AsyncMock(return_value=month)):
-        result = asyncio.run(server.get_monthly_summary("b1", "2026-04-01"))
+        result = asyncio.run(tools_budget.get_monthly_summary("b1", "2026-04-01"))
     assert result.activity == -3200.0
     assert "categories" not in result.model_dump()
     assert result.overspent == []
@@ -145,7 +168,7 @@ def test_get_category_balances_are_in_currency() -> None:
     """Category lines carry currency amounts, not milliunits."""
     cats = [{"id": "c1", "name": "Rent", "budgeted": 500_000, "activity": 0, "balance": 500_000}]
     with patch("avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)):
-        result = asyncio.run(server.get_category_balances("b1"))
+        result = asyncio.run(tools_budget.get_category_balances("b1"))
     assert result[0].budgeted == 500.0
 
 
@@ -153,9 +176,9 @@ def test_get_category_balances_are_in_currency() -> None:
 def test_month_tools_reject_a_malformed_month_with_a_way_forward(month: str) -> None:
     """A bad month is refused before calling YNAB, saying the expected format."""
     for tool in (
-        server.get_monthly_summary,
-        server.get_category_balances,
-        server.get_budget_vs_actual,
+        tools_budget.get_monthly_summary,
+        tools_budget.get_category_balances,
+        tools_budget.get_budget_vs_actual,
     ):
         with patch("avenir_mcp.client.get_month", new=AsyncMock()) as fetch:
             with pytest.raises(ToolError, match="YYYY-MM-01"):
@@ -174,7 +197,7 @@ def test_get_budget_vs_actual_returns_analytics_output() -> None:
         {"id": "c1", "name": "Rent", "budgeted": 500_000, "activity": -400_000, "balance": 100_000}
     ]
     with patch("avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)):
-        result = asyncio.run(server.get_budget_vs_actual("b1"))
+        result = asyncio.run(tools_budget.get_budget_vs_actual("b1"))
     assert result[0].utilization_pct == 80.0
 
 
@@ -195,7 +218,7 @@ def test_get_spending_trends_fetches_last_n_months() -> None:
         patch("avenir_mcp.client.get_months", mock_get_months),
         patch("avenir_mcp.client.get_month_categories", mock_month_cats),
     ):
-        result = asyncio.run(server.get_spending_trends("b1", months_count=2))
+        result = asyncio.run(tools_budget.get_spending_trends("b1", months_count=2))
 
     # Should have fetched categories for exactly 2 months (last 2)
     assert mock_month_cats.call_count == 2
@@ -213,7 +236,7 @@ def test_list_category_groups_delegates_to_client() -> None:
     with patch(
         "avenir_mcp.client.get_category_groups", new=AsyncMock(return_value=groups)
     ) as mock_fn:
-        result = asyncio.run(server.list_category_groups("b1"))
+        result = asyncio.run(tools_budget.list_category_groups("b1"))
     mock_fn.assert_called_once_with("b1")
     assert [g.model_dump() for g in result] == groups
 
@@ -240,7 +263,7 @@ def test_list_accounts_delegates_to_client() -> None:
         }
     ]
     with patch("avenir_mcp.client.get_accounts", new=AsyncMock(return_value=accounts)) as mock_fn:
-        result = asyncio.run(server.list_accounts("b1"))
+        result = asyncio.run(tools_budget.list_accounts("b1"))
     mock_fn.assert_called_once_with("b1")
     assert [a.model_dump() for a in result] == accounts
     assert result[0].on_budget is False
@@ -251,7 +274,7 @@ def test_approve_transactions_delegates_to_client() -> None:
     with patch(
         "avenir_mcp.client.approve_transactions", new=AsyncMock(return_value={"approved": 1})
     ) as mock_fn:
-        result = asyncio.run(server.approve_transactions("b1", ["t1"]))
+        result = asyncio.run(tools_budget.approve_transactions("b1", ["t1"]))
     mock_fn.assert_called_once_with("b1", ["t1"])
     assert result.approved == 1
     assert "approve_transactions" in [t.name for t in asyncio.run(server.mcp.list_tools())]
