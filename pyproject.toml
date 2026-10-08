@@ -203,25 +203,23 @@ also_copy = ["evals/"]
 pytest_add_cli_args = ["--no-cov", "-p", "no:cacheprovider"]
 # Only these tests run against a mutant, so every module above has to be covered by one
 # of them: a module no file here reaches comes back "no tests", which measures nothing.
-# Most are the module's own tests; the five `test_protocol_*` files are there because the
-# only caller of what they reach is a tool (flags, plan_undo), or because they are the
-# only tests of a branch (a budget with no credit card, a month outside the history, a
-# payee name holding a NUL).
+# Most are the module's own tests; the three `test_protocol_*` files are there because
+# they are the only tests of a branch: a budget with no credit card, a month outside the
+# history asked for, and a payee name holding a NUL.
 pytest_add_cli_args_test_selection = [
     "tests/test_age.py",
     "tests/test_analytics.py",
     "tests/test_charges.py",
     "tests/test_classifier.py",
+    "tests/test_flags.py",
     "tests/test_forecast.py",
     "tests/test_networth.py",
     "tests/test_payees.py",
     "tests/test_payoff.py",
     "tests/test_properties.py",
     "tests/test_protocol_create.py",
-    "tests/test_protocol_flags.py",
     "tests/test_protocol_runway.py",
     "tests/test_protocol_savings.py",
-    "tests/test_protocol_writes.py",
     "tests/test_reconcile.py",
     "tests/test_runway.py",
     "tests/test_savings.py",

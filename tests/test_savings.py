@@ -97,7 +97,10 @@ def test_the_rate_is_what_was_kept_of_the_income_to_one_decimal() -> None:
         66.7,
     )
     assert answer.average_saved == 2_000.0
-    assert "66.7 %" in answer.message
+    assert answer.message == (
+        "Over the last 3 complete months, 9000.00 came in and 3000.00 went out: "
+        "6000.00 saved, 66.7 % of the income."
+    )
 
 
 def test_best_and_worst_months_are_named() -> None:
@@ -110,7 +113,11 @@ def test_best_and_worst_months_are_named() -> None:
     answer = _summary(history)
     assert [m.rate for m in answer.months] == [66.7, 20.0, 70.6]
     assert (answer.best_month, answer.worst_month) == ("2026-08", "2026-07")
-    assert "Best month: 2026-08 (70.6 %), worst: 2026-07 (20.0 %)" in answer.message
+    assert answer.message == (
+        "Over the last 3 complete months, 9400.00 came in and 4400.00 went out: "
+        "5000.00 saved, 53.2 % of the income. Best month: 2026-08 (70.6 %), "
+        "worst: 2026-07 (20.0 %)."
+    )
 
 
 def test_a_refund_reduces_spending_and_is_not_income() -> None:
@@ -231,14 +238,19 @@ def test_without_any_income_no_rate_is_given() -> None:
     answer = _summary([_tx("checking", "2026-08-03", -100_000, "cat-rent")])
     assert answer.rate is None
     assert (answer.best_month, answer.worst_month) == (None, None)
-    assert "No income" in answer.message
+    assert answer.message == (
+        "No income was categorised to Ready to Assign over the last 1 complete months: "
+        "no savings rate can be given; 100.00 was spent."
+    )
 
 
 def test_months_before_the_first_transaction_are_not_counted() -> None:
     """Six months asked, history since July: July and August only, and a note says so."""
     answer = _summary(_salary_and_rent(months=("07", "08")), months=6)
     assert [m.month for m in answer.months] == ["2026-07", "2026-08"]
-    assert any("Only the last 2 of the 6 months" in note for note in answer.notes)
+    assert answer.notes[-1] == (
+        "Only the last 2 of the 6 months hold budget transactions: the figures are over those."
+    )
 
 
 def test_without_any_history_nothing_is_measured() -> None:
@@ -247,13 +259,122 @@ def test_without_any_history_nothing_is_measured() -> None:
     assert answer.months == []
     assert answer.rate is None
     assert answer.average_saved == 0.0
-    assert "No complete month" in answer.message
+    assert answer.message == (
+        "No complete month holds budget transactions yet: no savings rate to give."
+    )
+
+
+_WHAT_INCOME_IS = (
+    "Income is money in categorised to Ready to Assign on the budget accounts; starting "
+    "balances and transfers, from a tracking account too, are not income."
+)
+_WHAT_SPENDING_IS = (
+    "Spending is money out of the budget accounts less refunds (money in categorised "
+    "to a spending category); transfers between budget accounts are left out."
+)
+_WHAT_A_TRANSFER_OUT_IS = (
+    "A transfer to a tracking account that holds an asset (savings, investments) is "
+    "saved, not spent; a transfer to a tracking loan or debt is spending, as YNAB's "
+    "budget counts it."
+)
+_WHAT_SAVED_IS = (
+    "Saved is income less spending: what stayed in the budget accounts or went to an "
+    "asset outside them. The rate is saved over income."
+)
 
 
 def test_every_answer_states_its_rules() -> None:
-    """Refunds, transfers and what counts as saving are said in plain words."""
-    notes = " ".join(_summary(_salary_and_rent()).notes)
-    assert "Ready to Assign" in notes
-    assert "refund" in notes
-    assert "transfers between budget accounts" in notes
-    assert "loan" in notes
+    """Refunds, transfers and what counts as saving are said in plain words.
+
+    The notes are what the user is told the figures mean, so they are checked whole:
+    four rules, and nothing else when every month asked for holds transactions.
+    """
+    assert _summary(_salary_and_rent()).notes == [
+        _WHAT_INCOME_IS,
+        _WHAT_SPENDING_IS,
+        _WHAT_A_TRANSFER_OUT_IS,
+        _WHAT_SAVED_IS,
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_a_single_month_is_neither_the_best_nor_the_worst() -> None:
+    """With one month measured, the message gives its rate and names no best or worst."""
+    answer = _summary(_salary_and_rent(months=("08",)), months=1)
+    assert (answer.best_month, answer.worst_month) == ("2026-08", "2026-08")
+    assert answer.message == (
+        "Over the last 1 complete months, 3000.00 came in and 1000.00 went out: "
+        "2000.00 saved, 66.7 % of the income."
+    )
+
+
+def test_a_month_that_kept_nothing_is_the_worst_one() -> None:
+    """A rate of exactly 0.0 % is the lowest there is, not the absence of a rate."""
+    history = [
+        *_salary_and_rent(1_000_000, -1_000_000, ("07",)),
+        *_salary_and_rent(1_000_000, -995_000, ("08",)),
+    ]
+    answer = _summary(history)
+    assert [m.rate for m in answer.months] == [0.0, 0.5]
+    assert (answer.best_month, answer.worst_month) == ("2026-08", "2026-07")
+
+
+def test_a_transaction_of_the_running_month_does_not_stop_the_count() -> None:
+    """A month that is not measured is passed over, and the months after it still count."""
+    history = [
+        _tx("checking", "2026-09-02", -700_000, "cat-rent"),
+        *_salary_and_rent(months=("08",)),
+    ]
+    month = _summary(history, months=1).months[0]
+    assert (month.month, month.income, month.spending) == ("2026-08", 3_000.0, -1_000.0)
+
+
+def test_a_line_that_is_passed_over_does_not_stop_the_other_lines_of_a_split() -> None:
+    """An internal transfer in a split leaves the lines after it to be counted."""
+    lines: list[dict[str, Any]] = [
+        {"amount": -200_000, "transfer_account_id": "savings", "category_id": None},
+        {"amount": -300_000, "transfer_account_id": None, "category_id": "cat-food"},
+    ]
+    history = [
+        *_salary_and_rent(months=("08",)),
+        _tx("checking", "2026-08-15", -500_000, lines=lines),
+    ]
+    month = _summary(history, months=1).months[0]
+    assert (month.income, month.spending) == (3_000.0, -1_300.0)
+
+
+def test_money_of_a_single_milliunit_coming_back_from_a_tracking_account_is_not_counted() -> None:
+    """Whatever its size, an inflow on a transfer is money coming back, not income."""
+    history = [
+        *_salary_and_rent(months=("08",)),
+        _tx("checking", "2026-08-16", 1, transfer="brokerage"),
+    ]
+    answer = _summary(history, months=1)
+    assert (answer.income, answer.moved_to_tracking) == (3_000.0, 0.0)
+
+
+def test_the_months_without_income_are_named_together() -> None:
+    """Every month that had no income is named in the note, separated by a comma."""
+    answer = _summary(_salary_and_rent(months=("06",)), months=3)
+    assert answer.notes[-1] == (
+        "No rate for 2026-07, 2026-08: no income was categorised that month."
+    )
+
+
+def test_inflows_without_a_category_are_counted_apart_and_said() -> None:
+    """An inflow YNAB has no category for is neither income nor a refund, and the note says so."""
+    history = [
+        *_salary_and_rent(months=("08",)),
+        _tx("checking", "2026-08-11", 120_000, "cat-none"),
+        _tx("checking", "2026-08-12", 80_000),
+    ]
+    answer = _summary(history, months=1)
+    assert answer.income == 3_000.0
+    assert answer.notes[-1] == (
+        "2 inflows without a category (200.00) are counted neither as income nor as "
+        "refunds: categorise them in YNAB for a true figure."
+    )

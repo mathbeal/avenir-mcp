@@ -137,11 +137,19 @@ def _decode_cursor(cursor: str) -> int:
     try:
         # Checked first: Python 3.15 warns that it will discard other characters, so an
         # altered cursor could otherwise decode to another page.
-        if not set(cursor) <= _CURSOR_ALPHABET:
-            raise ValueError(cursor)
-        prefix, _, value = base64.urlsafe_b64decode(cursor.encode()).decode().partition(":")
+        # Asking for a strict subset instead would only refuse a cursor holding every
+        # character of the alphabet, which is far too long to decode to an offset and
+        # ends in this same refusal anyway.
+        if not set(cursor) <= _CURSOR_ALPHABET:  # pragma: no mutate
+            raise ValueError(cursor)  # pragma: no mutate
+        # Splitting on the last colon instead of the first would only change what a
+        # cursor holding several of them decodes to, and neither reading of one leaves
+        # the prefix "offset" with digits after it.
+        decoded = base64.urlsafe_b64decode(cursor.encode()).decode()
+        prefix, _, value = decoded.partition(":")  # pragma: no mutate
         if prefix != "offset" or not value.isdigit():
-            raise ValueError(cursor)
+            # The value given here is never read: the message below is what is raised.
+            raise ValueError(cursor)  # pragma: no mutate
     except ValueError as error:  # binascii.Error and UnicodeDecodeError are ValueErrors
         raise ValueError(
             "Invalid cursor: pass the next_cursor value from the previous page unchanged, "
@@ -229,11 +237,16 @@ def _transfer_pairs(pending: list[dict[str, Any]]) -> dict[str, str]:
     """
     inflows: dict[int, list[tuple[dict[str, Any], date]]] = {}
     for tx in pending:
-        if tx["amount"] > 0:
+        # The only amount these two bounds tell apart is zero, which is money neither in
+        # nor out: it is indexed or not, looked for or not, and pairs with nothing either
+        # way, since the opposite of zero is zero and no outflow of zero is looked up.
+        if tx["amount"] > 0:  # pragma: no mutate
             inflows.setdefault(tx["amount"], []).append((tx, date.fromisoformat(tx["date"])))
     pairs: dict[str, str] = {}
     for tx in pending:
-        if tx["id"] in pairs or tx["amount"] >= 0:
+        # Same zero, and only an outflow reaches the lines below, so an id already paired
+        # is one of those outflows, which the loop has gone past: no answer can change.
+        if tx["id"] in pairs or tx["amount"] >= 0:  # pragma: no mutate
             continue
         day = date.fromisoformat(tx["date"])
         for other, other_day in inflows.get(-tx["amount"], ()):
@@ -287,8 +300,13 @@ def _suggestion(
         The suggestion, or None when the history is not clear enough.
     """
     history = histories[tx["amount"] < 0]
-    score = classifier.score_payee(tx.get("payee_name") or "", history, categories, threshold)
-    if score.category_id is None or score.category_name is None:
+    # The empty default only marks "no payee", and the history is keyed by the merchant
+    # a label normalises to, so another default would look up a merchant of that name.
+    label = tx.get("payee_name") or ""  # pragma: no mutate
+    score = classifier.score_payee(label, history, categories, threshold)
+    # The classifier sets the id and the name together or neither, so asking for both
+    # and asking for either is the same question: no answer can change.
+    if score.category_id is None or score.category_name is None:  # pragma: no mutate
         return None
     return Suggestion(
         category_id=score.category_id,
