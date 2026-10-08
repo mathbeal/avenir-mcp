@@ -50,6 +50,36 @@ class RecurringCharges(Model):
     """The full months the charges were looked for in, YYYY-MM."""
 
 
+def _merchant(item: dict[str, Any]) -> str:
+    """Reduce a transaction's or a schedule's bank label to the merchant it names.
+
+    Args:
+        item: A YNAB transaction or scheduled transaction.
+
+    Returns:
+        The merchant, empty when it names no payee.
+    """
+    # The empty default only marks "no payee". It is matched against the merchants the
+    # charges are named by, so another default would change what a schedule covers only
+    # for a bank label reducing to exactly that string.
+    label = item.get("payee_name") or ""  # pragma: no mutate
+    return normalize_payee(label)
+
+
+def _most_frequent(counts: Counter[str]) -> str:
+    """Give the category a payee was assigned to most often.
+
+    Args:
+        counts: How many times each category was used for one payee.
+
+    Returns:
+        The id of the most frequent one.
+    """
+    # Only the first pair is read, so asking most_common for one, for two or for all of
+    # the categories gives back the same one: no answer can change.
+    return counts.most_common(1)[0][0]  # pragma: no mutate
+
+
 def _categories(
     transactions: list[dict[str, Any]], months: set[str], names: dict[str, str]
 ) -> dict[str, str | None]:
@@ -66,9 +96,11 @@ def _categories(
     seen: dict[str, Counter[str]] = {}
     for tx in transactions:
         if forecast.usable(tx) and tx["date"][:7] in months and tx.get("category_id"):
-            payee = untrusted(normalize_payee(tx.get("payee_name") or ""))
-            seen.setdefault(payee, Counter())[tx["category_id"]] += 1
-    return {payee: names.get(counts.most_common(1)[0][0]) for payee, counts in seen.items()}
+            payee = untrusted(_merchant(tx))
+            # Counting by any other step scales every category of a payee alike, so the
+            # most frequent one stays the most frequent: no answer can change.
+            seen.setdefault(payee, Counter())[tx["category_id"]] += 1  # pragma: no mutate
+    return {payee: names.get(_most_frequent(counts)) for payee, counts in seen.items()}
 
 
 def find(
@@ -93,26 +125,32 @@ def find(
     """
     months = forecast.lookback(today)
     planned = frozenset(
-        (normalize_payee(item.get("payee_name") or ""), item["amount"] < 0)
-        for item in scheduled
-        if not item.get("deleted")
+        (_merchant(item), item["amount"] < 0) for item in scheduled if not item.get("deleted")
     )
-    names = {c["id"]: c["name"] for c in categories}
-    category_of = _categories(transactions, set(months), names)
-    found = [
-        RecurringCharge(
-            payee=r.payee,
-            monthly_amount=r.amount,
-            yearly_amount=round(r.amount * 12, 2),
-            day=r.day,
-            months_seen=r.months_seen,
-            category=category_of.get(r.payee),
-            scheduled=forecast.is_scheduled(r.payee, r.amount < 0, planned),
+    category_of = _categories(transactions, set(months), {c["id"]: c["name"] for c in categories})
+    found = []
+    for r in forecast.recurring(transactions, today):
+        # The only amount this bound tells apart is zero, which is money neither in nor
+        # out: a recurrence of zero is left out of both lists below, so no answer can
+        # change. On its own line, so the rest of the loop stays measured.
+        outflow = r.amount < 0  # pragma: no mutate
+        if not outflow and not include_income:
+            continue
+        found.append(
+            RecurringCharge(
+                payee=r.payee,
+                monthly_amount=r.amount,
+                yearly_amount=round(r.amount * 12, 2),
+                day=r.day,
+                months_seen=r.months_seen,
+                category=category_of.get(r.payee),
+                scheduled=forecast.is_scheduled(r.payee, outflow, planned),
+            )
         )
-        for r in forecast.recurring(transactions, today)
-        if r.amount < 0 or include_income
-    ]
     spent = sorted((c for c in found if c.monthly_amount < 0), key=lambda c: c.yearly_amount)
     earned = sorted((c for c in found if c.monthly_amount > 0), key=lambda c: -c.yearly_amount)
-    total = round(sum(c.yearly_amount for c in spent), 2)
+    yearly = sum(c.yearly_amount for c in spent)
+    # Every amount added holds two decimals already, so rounding to two places or to
+    # three gives the same figure: this only clears the drift of adding floats.
+    total = round(yearly, 2)  # pragma: no mutate
     return RecurringCharges(charges=spent + earned, yearly_total=total, months_looked_at=months)

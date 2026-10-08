@@ -333,3 +333,69 @@ def test_a_category_with_any_one_amount_is_listed(key: str) -> None:
     cat = _month_cat("c1", "Books", 0, budgeted=0, activity=0)
     cat[key] = 5000
     assert [c.name for c in analytics.category_balances([cat])] == ["Books"]
+
+
+def test_a_category_without_its_figures_counts_as_nothing_everywhere() -> None:
+    """YNAB may leave a figure out: every amount then reads as nothing, and no name is made up."""
+    assert analytics.budget_vs_actual([{}])[0].model_dump() == {
+        "id": "",
+        "name": "",
+        "group": "",
+        "budgeted": 0.0,
+        "actual": 0.0,
+        "balance": 0.0,
+        "utilization_pct": 0.0,
+    }
+
+
+def test_a_category_without_a_name_is_no_trend() -> None:
+    """A category YNAB named nothing is left out of the trends, not given a name."""
+    assert not analytics.spending_trends([("2026-04-01", [{}])])
+
+
+def test_a_named_category_without_spending_is_a_month_at_zero() -> None:
+    """A category YNAB gives no activity for spent nothing that month."""
+    assert analytics.spending_trends([("2026-04-01", [{"name": "Books"}])]) == {
+        "Books": [analytics.MonthSpending(month="2026-04-01", amount=0.0)]
+    }
+
+
+def test_a_transaction_without_an_amount_adds_nothing_to_its_payee() -> None:
+    """An amount YNAB left out counts as nothing, and the transaction is still counted."""
+    assert analytics.top_payees([{"payee_name": "Books"}])[0].model_dump() == {
+        "payee_name": "Books",
+        "total": 0.0,
+        "count": 1,
+    }
+
+
+def test_a_month_without_its_totals_reads_as_a_month_at_zero() -> None:
+    """A month YNAB returns with nothing but its date: every total is nothing, no category."""
+    assert analytics.month_overview({"month": "2026-09-01"}).model_dump() == {
+        "month": "2026-09-01",
+        "income": 0.0,
+        "budgeted": 0.0,
+        "activity": 0.0,
+        "ready_to_assign": 0.0,
+        "age_of_money": None,
+        "overspent": [],
+    }
+
+
+def test_an_overspent_category_in_no_group_is_still_named() -> None:
+    """A category YNAB gives no group shows an empty group, not a made-up one."""
+    cat = {"id": "c1", "name": "Books", "balance": -1_500}
+    assert analytics.month_overview({"month": "2026-09-01", "categories": [cat]}).overspent == [
+        analytics.Overspent(category_id="c1", name="Books", group="", balance=-1.5)
+    ]
+
+
+def test_a_category_balance_without_its_figures_is_a_line_of_zeros() -> None:
+    """Asked for the empty ones too, a category with no figure at all reads as zeros."""
+    cat = {"id": "c1", "name": "Books"}
+    assert analytics.category_balances([cat]) == []
+    assert analytics.category_balances([cat], include_empty=True) == [
+        analytics.CategoryBalance(
+            category_id="c1", name="Books", group="", budgeted=0.0, activity=0.0, balance=0.0
+        )
+    ]

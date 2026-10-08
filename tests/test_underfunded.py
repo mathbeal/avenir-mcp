@@ -151,7 +151,7 @@ def test_a_limit_lists_the_most_urgent_and_counts_the_rest() -> None:
     answer = underfunded.summary(_month(MIXED), 2)
     assert [t.category_id for t in answer.targets] == ["rail", "insurance"]
     assert (answer.more, answer.needed) == (6, 1_005.0)
-    assert any("6 more" in note for note in answer.notes)
+    assert answer.notes[-1] == "6 more underfunded targets are not listed; the totals count them."
 
 
 def test_every_target_funded() -> None:
@@ -195,3 +195,93 @@ def test_names_are_shown_on_one_line() -> None:
     forged = _cat("rent", "MF", needed=10_000, name=FORGED, category_group_name=FORGED)
     target = underfunded.summary(_month([forged]), None).targets[0]
     assert (target.name, target.group) == (FLAT, FLAT)
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_every_answer_opens_with_the_two_notes_on_the_figures_and_the_order() -> None:
+    """How needed and left are counted, and what sorts the targets, is said every time."""
+    answer = underfunded.summary(_month(MIXED), None)
+    assert answer.notes == [
+        "needed is what YNAB says each category still needs this month to stay on track "
+        "(Underfunded in its app); left is what the target needs over its whole period.",
+        "Most urgent first: targets due by a date, the soonest first; then monthly and "
+        "weekly funding and debt payments; then the rest; the largest need first in each.",
+    ]
+
+
+def test_a_single_target_is_spoken_of_in_the_singular() -> None:
+    """One target short: the message says "1 target needs"."""
+    answer = underfunded.summary(_month([_cat("phone", "MF", needed=20_000)], ready=50_000), None)
+    assert answer.message == (
+        "1 target needs 20.00 in 2026-09; Ready to Assign holds 50.00: enough for all of "
+        "them, with 30.00 left."
+    )
+
+
+def test_several_funded_targets_are_spoken_of_in_the_plural() -> None:
+    """Nothing short, more than one target: the message says "targets are funded"."""
+    funded = [_cat("rent", "NEED", cadence=1), _cat("phone", "MF")]
+    answer = underfunded.summary(_month(funded), None)
+    assert answer.message == (
+        "The 2 targets of 2026-09 are funded: nothing more is needed this month."
+    )
+
+
+def test_ready_to_assign_exactly_covering_the_need_is_enough() -> None:
+    """Ready to Assign equal to what is needed covers it, with nothing left over."""
+    answer = underfunded.summary(_month([_cat("phone", "MF", needed=20_000)], ready=20_000), None)
+    assert (answer.enough, answer.covered, answer.short_by) == (True, 20.0, 0.0)
+    assert answer.message == (
+        "1 target needs 20.00 in 2026-09; Ready to Assign holds 20.00: enough for all of "
+        "them, with 0.00 left."
+    )
+
+
+def test_a_target_short_of_a_single_milliunit_is_underfunded() -> None:
+    """Any amount still missing, however small, puts a target behind."""
+    answer = underfunded.summary(_month([_cat("phone", "MF", needed=1)]), None)
+    assert [(t.category_id, t.needed) for t in answer.targets] == [("phone", 0.001)]
+    assert answer.on_track == 0
+
+
+def test_a_target_without_its_overall_figure_needs_nothing_more_overall() -> None:
+    """YNAB may leave goal_overall_left out: it reads as nothing, not as a failure."""
+    bare = _cat("phone", "MF", needed=20_000, goal_overall_left=None)
+    answer = underfunded.summary(_month([bare]), None)
+    assert (answer.targets[0].needed, answer.targets[0].left) == (20.0, 0.0)
+
+
+def test_a_month_without_categories_has_no_target() -> None:
+    """A month YNAB returns without its categories holds nothing to fund."""
+    answer = underfunded.summary({"month": "2026-09-01"}, None)
+    assert (answer.targets, answer.on_track) == ([], 0)
+    assert answer.message == "No visible category has a target in 2026-09."
+
+
+def test_a_monthly_target_with_a_date_sorts_on_its_need_not_its_date() -> None:
+    """Monthly funding is sorted by the largest need, whatever date YNAB also gives it."""
+    monthly = [
+        _cat("water", "MF", needed=20_000),
+        _cat("phone", "MF", needed=90_000, due="2026-10-01"),
+    ]
+    answer = underfunded.summary(_month(monthly), None)
+    assert [(t.category_id, t.urgency) for t in answer.targets] == [
+        ("phone", "repeating"),
+        ("water", "repeating"),
+    ]
+
+
+def test_two_snoozed_targets_are_named_one_after_the_other() -> None:
+    """Every snoozed target is named in the note, separated by a comma."""
+    snoozed = [
+        _cat(key, "NEED", needed=60_000, cadence=1, goal_snoozed_at="2026-09-02T10:00Z")
+        for key in ("gifts", "holidays")
+    ]
+    answer = underfunded.summary(_month(snoozed), None)
+    assert answer.notes[-1] == (
+        "Targets snoozed in YNAB ask for nothing this month and are left out: Gifts, Holidays."
+    )

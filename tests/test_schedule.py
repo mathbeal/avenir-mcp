@@ -105,10 +105,15 @@ def test_a_date_already_past_moves_on_to_the_window() -> None:
 
 
 def test_deleted_and_out_of_window_schedules_are_left_out() -> None:
-    """A deleted schedule, or one that starts after the end date, gives nothing."""
+    """A deleted schedule, or one that starts after the end date, gives nothing.
+
+    The deleted one comes first, before a schedule that does fall in the window: passing
+    over it cannot mean stopping at it.
+    """
     deleted = _sched("2026-01-03", "2026-10-03", "monthly", deleted=True)
+    kept = _sched("2026-01-07", "2026-10-07", "never", id="s3")
     later = _sched("2027-01-03", "2027-01-03", "monthly", id="s2")
-    assert _dates(deleted, later) == []
+    assert _dates(deleted, kept, later) == ["2026-10-07"]
 
 
 def test_an_occurrence_says_what_it_is_and_shows_bank_text_safely() -> None:
@@ -155,3 +160,55 @@ def test_occurrences_come_in_date_order() -> None:
     late = _sched("2026-01-20", "2026-10-20", "never", id="late")
     early = _sched("2026-01-02", "2026-10-02", "never", id="early")
     assert _dates(late, early) == ["2026-10-02", "2026-10-20"]
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_dates_before_the_window_are_passed_over_not_stopped_at() -> None:
+    """A schedule whose next dates are still in the past keeps the ones inside the window."""
+    weekly = _sched("2026-01-01", "2026-09-17", "weekly")
+    assert _dates(weekly, until="2026-10-15") == ["2026-10-01", "2026-10-08", "2026-10-15"]
+
+
+def test_a_split_whose_every_part_is_deleted_is_not_a_split() -> None:
+    """Deleted subtransactions are gone: the schedule's own category is the one shown."""
+    item = _sched(
+        "2026-01-05",
+        "2026-10-05",
+        "never",
+        subtransactions=[
+            {"id": "x", "category_id": "c-rent", "deleted": True},
+            {"id": "y", "category_id": "c-rent", "deleted": True},
+        ],
+    )
+    found = schedule.occurrences(
+        [item], _ACCOUNTS, _CATEGORIES, date(2026, 10, 1), date(2026, 10, 31)
+    )
+    assert [o.category for o in found] == ["Rent"]
+
+
+def test_a_schedule_with_no_note_has_none() -> None:
+    """No memo reads as null, not as an empty note."""
+    found = schedule.occurrences(
+        [_sched("2026-01-03", "2026-10-03", "never")],
+        _ACCOUNTS,
+        _CATEGORIES,
+        date(2026, 10, 1),
+        date(2026, 10, 31),
+    )
+    assert [o.memo for o in found] == [None]
+
+
+def test_an_account_the_plan_no_longer_names_shows_as_an_empty_name() -> None:
+    """A schedule on an account the plan does not list still comes back, without a name."""
+    found = schedule.occurrences(
+        [_sched("2026-01-03", "2026-10-03", "never", account_id="gone")],
+        _ACCOUNTS,
+        _CATEGORIES,
+        date(2026, 10, 1),
+        date(2026, 10, 31),
+    )
+    assert [o.account for o in found] == [""]

@@ -190,9 +190,12 @@ def plan_rename(
             f"{untrusted(new_name)!r} is already the name of another payee: YNAB's API cannot "
             "merge two payees. Merge them in YNAB, or choose another name."
         )
+    # Only the count is wanted here, so the latest date of the default pair was never
+    # read: asking for the count alone leaves no value behind that no test can reach.
+    used = _usage(transactions)
     return RenamePlan(
         payee_id=payee_id,
         from_name=payee["name"],
         to_name=new_name,
-        transactions=_usage(transactions).get(payee_id, (0, ""))[0],
+        transactions=used[payee_id][0] if payee_id in used else 0,
     )
