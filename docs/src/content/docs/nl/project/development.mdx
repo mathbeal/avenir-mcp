@@ -41,8 +41,8 @@ bestand `.pth` van een bewerkbare installatie verbergen, dat Python dan negeert.
 | Controle | Commando | Faalt als |
 |---|---|---|
 | opmaak | `ruff format --check` | een bestand niet is opgemaakt |
-| lint | `pylint` | de score onder 10,00 ligt |
-| ruff | `ruff check` | een docstring van het pakket niet in Google-stijl is of een argument, de returnwaarde of een opgeworpen exceptie weglaat; imports niet gesorteerd zijn; de beveiligingscontroles van bandit een riskant patroon vinden (TLS niet gecontroleerd, een shellcommando, een wachtwoord in de code…) |
+| lint | `pylint` | de score onder 10,00 ligt, waarbij het volstaat dat vier of meer rekenregels in twee van de gelezen bestanden herhaald voorkomen (`duplicate-code`) |
+| ruff | `ruff check` | een docstring van het pakket niet in Google-stijl is of een argument, de returnwaarde of een opgeworpen exceptie weglaat; imports niet gesorteerd zijn; de beveiligingscontroles van bandit een riskant patroon vinden (TLS niet gecontroleerd, een shellcommando, een wachtwoord in de code…); de cyclomatische complexiteit van een functie hoger is dan 19, de hoogste waarde die de repository momenteel bereikt, een maximum dat alleen maar daalt (`C901`) |
 | docstrings | `pydoclint` | een docstring van het pakket de argumenten in een andere volgorde noemt dan de signatuur, een type geeft dat de annotatie al geeft, of alleen een samenvatting is voor een functie die argumenten neemt of een waarde teruggeeft |
 | YNAB-API-voorwaarden | `pytest -m ynab_terms`, `python -m docsgen.terms` | een regel uit de YNAB-API-voorwaarden niet wordt nageleefd (naam, vermelding woord voor woord, YNAB's eigen afbeelding, token alleen voor de eigenaar, limiet van verzoeken per uur), of YNAB de voorwaarden heeft gewijzigd sinds de gecontroleerde datum; de badge in de README toont het |
 | dode code | `vulture` | een naam die door niets anders in de repository wordt gelezen en die noch door een decorator (`@mcp.tool`, `@pytest.fixture`…) is geregistreerd, noch met de reden waarom hij leeft in `vulture_whitelist.py` staat |
@@ -114,6 +114,22 @@ beschadigde journalen, HTTP-headers, bedragen, paginacursors. Een fout wordt bew
 volgende run, teruggebracht tot het kleinste geval, opnieuw gedraaid. De CI doet het elke
 nacht met 200.000. De eerste run vond een byte in het journaal die geen tekst was (0x80) en
 als kale codecfout verscheen in plaats van de regel te noemen die moet worden hersteld.
+
+`just complexity` geeft een overzicht van de functies die volgens radon een C-beoordeling
+of slechter hebben, met een cyclomatische complexiteit van 11 of hoger, waarbij eerst de
+slechtste waarden van elk bestand worden weergegeven, gevolgd door het gemiddelde over elk
+blok, waarbij ook de niet-weergegeven waarden worden meegeteld. Het geeft tevens de
+onderhoudbaarheidsindex van elke module van het pakket weer, beginnend met de laagste: één
+getal dat het Halstead-volume, de cyclomatische complexiteit en het aantal regels
+samenvat, waarmee de bestanden ten opzichte van elkaar worden gerangschikt en wordt
+aangegeven welke richting elk bestand opgaat, in plaats van een oordeel te vellen,
+aangezien de A-rang van radon begint bij 20 en elk bestand van het pakket ver daarboven
+ligt. Een rapport om te lezen, geen filter: het faalt nooit, en de CI voert het niet uit.
+De versie ervan is vastgelegd en wordt opgehaald via `uvx`, net als bij pydoclint. De
+complexiteit die het weergeeft, is niet de complexiteit die `C901` als limiet hanteert:
+radon telt booleaanse operatoren, voorwaardelijke uitdrukkingen en comprehensions, die
+door de mccabe van ruff buiten beschouwing worden gelaten, waardoor dezelfde functie hier
+hoger scoort dan bij de limiet.
 
 ## Documentatie
 
