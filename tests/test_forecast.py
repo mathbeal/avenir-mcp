@@ -334,6 +334,7 @@ def test_a_one_off_dated_today_has_already_happened() -> None:
         one_offs=[forecast.OneOff(date=TODAY, amount=-50.0, label="paid today")],
     )
     assert result.months[0].end == 100.0
+    assert result.months[0].outflows == 0.0
 
 
 def test_next_months_are_whole_whatever_was_spent_this_month() -> None:
@@ -402,4 +403,45 @@ def test_a_schedule_matches_whole_words_only_and_its_own_direction() -> None:
     assert not forecast.is_scheduled("ACMEVILLE STORE", False, scheduled)
     assert not forecast.is_scheduled("ACME", True, scheduled)
     assert forecast.is_scheduled("ACME SAS - ACME", False, scheduled)
+
+
+def test_a_schedule_naming_the_same_words_in_another_order_matches() -> None:
+    """The label's words are all the schedule names, so it covers it: no word to spare."""
+    scheduled = frozenset({("PAYROLL ACME", False)})
+    assert forecast.is_scheduled("ACME PAYROLL", False, scheduled)
+
+
+def test_an_amount_of_exactly_zero_is_money_in() -> None:
+    """A payment of zero never joins the recurring charge of the same payee."""
+    txs = [
+        _tx("GYM", amount, f"{month}-05")
+        for month in ("2026-06", "2026-07", "2026-08")
+        for amount in (-30000, 0)
+    ]
+    assert forecast.recurring(txs, TODAY) == [
+        forecast.Recurring(payee="GYM", amount=0.0, day=5, months_seen=3),
+        forecast.Recurring(payee="GYM", amount=-30.0, day=5, months_seen=3),
+    ]
+
+
+def test_a_charge_varying_by_exactly_a_fifth_still_recurs() -> None:
+    """The 20 % tolerance includes its bound: 80, 100 and 120 are one monthly charge."""
+    txs = [
+        _tx("ENERGY", -80000, "2026-06-15"),
+        _tx("ENERGY", -100000, "2026-07-15"),
+        _tx("ENERGY", -120000, "2026-08-15"),
+    ]
+    assert forecast.recurring(txs, TODAY) == [
+        forecast.Recurring(payee="ENERGY", amount=-100.0, day=15, months_seen=3)
+    ]
+
+
+def test_a_month_is_walked_from_its_first_projected_day_to_its_last() -> None:
+    """A day before the first projected one, or past the month's length, moves no balance."""
+    month, closing = forecast._walk(  # pylint: disable=protected-access
+        "2026-09", 1000, 25, 30, [{1: -500, 26: -100, 31: -200}, {27: 300}]
+    )
+    assert closing == 1200
+    assert (month.start, month.end, month.lowest) == (1.0, 1.2, 0.9)
+    assert (month.inflows, month.outflows) == (0.3, -0.8)
     assert not forecast.is_scheduled("", False, frozenset({("", False)}))
