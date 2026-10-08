@@ -68,6 +68,20 @@ def test_likely_duplicates_are_flagged() -> None:
     assert result.possible_duplicates == [["t1", "t2"]]
 
 
+def test_transactions_without_a_payee_pair_on_their_amount_alone() -> None:
+    """Two payments YNAB names no payee for, of one amount and days apart, are pointed out.
+
+    Having no payee is a merchant in common, as the answer reads today: both reduce to
+    the same empty merchant, so the pair is offered for the user to judge.
+    """
+    txs = [
+        _tx("t1", -4500, payee_name=None, date="2026-09-10"),
+        _tx("t2", -4500, payee_name=None, date="2026-09-12"),
+    ]
+    result = reconcile.analyse("acc", txs, 0.0, today=date(2026, 9, 24))
+    assert result.possible_duplicates == [["t1", "t2"]]
+
+
 def test_uncleared_list_is_bounded() -> None:
     """A neglected account cannot flood the answer."""
     txs = [_tx(f"t{i}", -1000, "uncleared") for i in range(80)]

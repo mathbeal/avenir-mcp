@@ -55,6 +55,13 @@ def test_a_monthly_charge_is_found_with_its_cost_over_a_year() -> None:
     assert stream.scheduled is False
 
 
+def test_a_transaction_without_a_payee_names_no_charge() -> None:
+    """A payment YNAB names no payee for cannot be a recurring charge, nor decide a category."""
+    blank = [_tx(None, -20_000, f"{m}-07", "c-subs") for m in MONTHS]  # type: ignore[arg-type]
+    found = charges.find(PLAN + blank, [], CATEGORIES, TODAY)
+    assert [c.payee for c in found.charges] == ["LANDLORD SARL", "STREAMFLIX"]
+
+
 def test_the_costliest_over_a_year_comes_first_and_the_total_adds_them_up() -> None:
     """Rent before streaming; a one-off purchase is not a recurring charge."""
     found = charges.find(PLAN, [], CATEGORIES, TODAY)

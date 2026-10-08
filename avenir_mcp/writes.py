@@ -201,8 +201,9 @@ def plan_undo(
         before = move.from_category_id
         # The empty default only marks "no category". It is looked up among the plan's
         # ids, which YNAB writes as UUIDs, so another default would be found only if a
-        # category carried that very id. It is alone on its line.
-        no_category = ""
+        # category carried that very id, and a lookup of None answers the same. It is
+        # alone on its line, so the pragma covers no more than it.
+        no_category = ""  # pragma: no mutate
         gave = move.to_category_id or no_category
         changes.append(
             Change(

@@ -69,6 +69,13 @@ def test_known_merchant_gets_a_suggestion() -> None:
     assert triage.prepare(_history() + [pending], _CATEGORIES).suggested_count == 1
 
 
+def test_a_transaction_without_a_payee_gets_no_suggestion() -> None:
+    """A transaction YNAB names no payee for has no history to suggest a category from."""
+    blank: str = None  # type: ignore[assignment]  # YNAB may send no payee at all
+    item = triage.prepare(_history() + [_tx("p1", blank)], _CATEGORIES).items[0]
+    assert item.suggestion is None
+
+
 def test_ambiguous_merchant_gets_no_suggestion() -> None:
     """Below the confidence threshold the agent decides, not the history."""
     history = [_tx("h1", "SHOP", "c-food"), _tx("h2", "SHOP", "c-fun")]

@@ -172,6 +172,13 @@ def test_a_category_finds_its_transactions_and_split_lines() -> None:
     assert [m.transaction_id for m in found.transactions] == ["split", "food"]
 
 
+def test_a_transaction_without_a_payee_matches_no_merchant() -> None:
+    """A transaction YNAB names no payee for is not what a search for a merchant finds."""
+    txs = [_tx("named", "2026-09-10", -1000), _tx("blank", "2026-09-11", -2000, payee_name=None)]
+    found = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1), payee="corner")
+    assert [m.transaction_id for m in found.transactions] == ["named"]
+
+
 def test_a_payee_matches_the_merchant_whatever_the_bank_label() -> None:
     """Case, card numbers and dates in the bank label do not hide the merchant."""
     txs = [
