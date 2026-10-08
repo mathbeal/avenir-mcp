@@ -100,3 +100,75 @@ def test_the_most_frequent_category_wins() -> None:
     plan[0]["category_id"] = "c-rent"
     [stream] = charges.find(plan, [], CATEGORIES, TODAY).charges
     assert stream.category == "Subscriptions"
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_a_category_outside_the_months_looked_at_does_not_decide() -> None:
+    """Only the four full months count: this month's categories have no say yet."""
+    plan = _monthly("STREAMFLIX", -13_490, 15, "c-subs")
+    plan += [_tx("STREAMFLIX", -13_490, f"2026-09-{day:02d}", "c-rent") for day in (1, 2, 3, 4, 5)]
+    [stream] = charges.find(plan, [], CATEGORIES, TODAY).charges
+    assert stream.category == "Subscriptions"
+
+
+def test_a_transfer_does_not_decide_the_category() -> None:
+    """A transfer is not money leaving the plan: its category says nothing about a charge."""
+    plan = _monthly("STREAMFLIX", -13_490, 15, "c-subs")
+    moved = [
+        dict(_tx("STREAMFLIX", -13_490, f"{month}-16", "c-rent"), transfer_account_id="acc-savings")
+        for month in MONTHS
+        for _ in range(2)
+    ]
+    [stream] = charges.find(plan + moved, [], CATEGORIES, TODAY).charges
+    assert stream.category == "Subscriptions"
+
+
+def test_the_yearly_amount_and_the_total_are_rounded_to_the_cent() -> None:
+    """Twelve times 1.234 is 14.808: the answer says 14.81, as money is written."""
+    plan = _monthly("WATER BOARD", -1_234, 8, None)
+    found = charges.find(plan, [], CATEGORIES, TODAY)
+    assert [c.yearly_amount for c in found.charges] == [-14.81]
+    assert found.yearly_total == -14.81
+
+
+def test_income_comes_from_the_largest_down() -> None:
+    """The biggest income over a year first, the other way round from the charges."""
+    plan = _monthly("SMALL RENT INCOME", 120_000, 4, None) + _monthly(
+        "BIG SALARY", 3_200_000, 28, None
+    )
+    found = charges.find(plan, [], CATEGORIES, TODAY, include_income=True)
+    assert [c.payee for c in found.charges] == ["BIG SALARY", "SMALL RENT INCOME"]
+
+
+def test_income_of_less_than_a_unit_is_still_income() -> None:
+    """Interest of 50 cents a month is listed with the income, not with the charges.
+
+    A schedule for it covers money coming in, so it is marked scheduled: a charge of
+    the same name would not be.
+    """
+    plan = _monthly("SAVINGS INTEREST", 500, 30, None)
+    schedule = {"payee_name": "Savings Interest", "amount": 500, "deleted": False}
+    assert charges.find(plan, [schedule], CATEGORIES, TODAY).charges == []
+    [interest] = charges.find(plan, [schedule], CATEGORIES, TODAY, include_income=True).charges
+    assert (interest.payee, interest.monthly_amount) == ("SAVINGS INTEREST", 0.5)
+    assert interest.scheduled is True
+
+
+def test_a_recurring_amount_of_nothing_is_neither_a_charge_nor_income() -> None:
+    """A payee seen every month for 0.00 costs nothing and brings nothing: not listed."""
+    plan = _monthly("ZERO CO", 0, 9, "c-subs")
+    found = charges.find(plan, [], CATEGORIES, TODAY, include_income=True)
+    assert found.charges == []
+    assert found.yearly_total == 0.0
+
+
+def test_a_schedule_of_nothing_covers_no_charge() -> None:
+    """A schedule left at 0.00 is money neither in nor out: it covers no charge."""
+    empty = {"payee_name": "STREAMFLIX", "amount": 0, "deleted": False}
+    plan = _monthly("STREAMFLIX", -13_490, 15, "c-subs")
+    [stream] = charges.find(plan, [empty], CATEGORIES, TODAY).charges
+    assert stream.scheduled is False
