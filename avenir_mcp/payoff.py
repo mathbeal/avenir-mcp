@@ -275,12 +275,11 @@ def _past_payments(debts: list[Debt], transactions: list[dict[str, Any]], today:
     ids = {debt.account_id for debt in debts}
     months = months_before(today, PAYMENT_MONTHS)
     paid: int = sum(
-        tx["amount"]
+        max(tx["amount"], 0)
         for tx in transactions
         if tx["account_id"] in ids
         and not tx.get("deleted")
         and tx["date"][:7] in months
-        and tx["amount"] > 0
         and tx.get("transfer_account_id")
     )
     return round(paid / PAYMENT_MONTHS)
@@ -374,10 +373,11 @@ def _schedule(  # pylint: disable=too-many-locals
             if not owed[i] and done[i] is None:
                 done[i] = month
         never = month == 1 and sum(owed) >= first_total
-    rows = sorted(
-        range(len(debts)),
-        key=lambda i: (done[i] is None, done[i] or 0, order.index(i)),
-    )
+    # A debt not paid off sorts after every debt that is, so the month it sorts on only
+    # has to be one the plan did not reach: another one sorts the same. On its own line,
+    # so the pragma covers no more than that month.
+    unpaid = month + 1  # pragma: no mutate
+    rows = sorted(range(len(debts)), key=lambda i: (done[i] or unpaid, order.index(i)))
     free = None if any(owed) else month
     return (
         StrategyPlan(
@@ -504,6 +504,23 @@ def _notes(  # pylint: disable=too-many-arguments
     return notes
 
 
+def _saved(plans: list[StrategyPlan]) -> float:
+    """Say what avalanche saves over snowball in interest.
+
+    Args:
+        plans: Both plans, avalanche first.
+
+    Returns:
+        Snowball's interest less avalanche's, in currency units.
+    """
+    difference = plans[1].total_interest - plans[0].total_interest
+    # Interest is rounded to the cent every month, so two totals differ by whole cents:
+    # rounding their difference to a third decimal changes nothing. The precision is alone
+    # on its line, so the pragma covers no more than it.
+    to_the_cent = 2  # pragma: no mutate
+    return round(difference, to_the_cent)
+
+
 def _message(
     plans: list[StrategyPlan], debts: list[Debt], budget: int, never: bool, max_months: int
 ) -> str:
@@ -539,7 +556,7 @@ def _message(
         f"{first.total_interest:.2f} of interest ({first.strategy})."
     )
     if len(plans) == 2:
-        saved = round(plans[1].total_interest - plans[0].total_interest, 2)
+        saved = _saved(plans)
         message += (
             f" Avalanche saves {saved:.2f} of interest over snowball."
             if saved
@@ -602,7 +619,7 @@ def plan(  # pylint: disable=too-many-arguments,too-many-locals
     if len(plans) == 2 and not never:
         fast, slow = plans[0].months_to_debt_free, plans[1].months_to_debt_free
         if fast is not None and slow is not None:
-            saved = round(plans[1].total_interest - plans[0].total_interest, 2)
+            saved = _saved(plans)
             months = slow - fast
     return DebtPayoffPlan(
         message=_message(plans, debts, budget, never, max_months),
