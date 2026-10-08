@@ -390,6 +390,12 @@ def test_an_overspent_category_in_no_group_is_still_named() -> None:
     ]
 
 
+def test_a_category_whose_balance_ynab_left_out_is_not_overspent() -> None:
+    """A category with no balance at all has nothing negative to report, and does not fail."""
+    cat = {"id": "c1", "name": "Books", "category_group_name": "Everyday"}
+    assert analytics.month_overview({"month": "2026-09-01", "categories": [cat]}).overspent == []
+
+
 def test_a_category_balance_without_its_figures_is_a_line_of_zeros() -> None:
     """Asked for the empty ones too, a category with no figure at all reads as zeros."""
     cat = {"id": "c1", "name": "Books"}

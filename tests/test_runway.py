@@ -237,6 +237,19 @@ def test_no_money_available_means_no_runway() -> None:
     assert any("nothing to live on" in note for note in answer.notes)
 
 
+def test_owing_a_thousandth_of_a_unit_is_still_no_runway() -> None:
+    """Zero months is written 0.0, never -0.0: a debt too small to show is still a debt.
+
+    repr is read rather than the value, since -0.0 equals 0.0 but is written "-0.0" in
+    the answer the agent relays.
+    """
+    answer = runway.summary(
+        [_account("checking", "checking", -0.001)], _months_of(-100_000, ("08",)), TODAY, 1
+    )
+    assert answer.liquid == -0.001
+    assert repr(answer.spending.runway_months) == "0.0"
+
+
 _NO_INCOME_IS_ASSUMED = (
     "No income is assumed: the runway is how long the money would last if nothing came in."
 )

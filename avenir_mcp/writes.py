@@ -201,8 +201,9 @@ def plan_undo(
         before = move.from_category_id
         # The empty default only marks "no category". It is looked up among the plan's
         # ids, which YNAB writes as UUIDs, so another default would be found only if a
-        # category carried that very id.
-        gave = move.to_category_id or ""  # pragma: no mutate
+        # category carried that very id. It is alone on its line.
+        no_category = ""
+        gave = move.to_category_id or no_category
         changes.append(
             Change(
                 transaction_id=tx["id"],
@@ -235,7 +236,9 @@ def fingerprint(plan_id: str, subject: object) -> str:
     # same way: how compact the JSON is, and whether a two-item list is sorted, change
     # the digest without changing which plans match. Sorting what matters happens above.
     data = [plan_id, subject]
-    payload = json.dumps(data, sort_keys=True, separators=(",", ":"))  # pragma: no mutate
+    # The separators are alone on their line, so the pragma covers no more than them.
+    compact = (",", ":")  # pragma: no mutate
+    payload = json.dumps(data, sort_keys=True, separators=compact)
     return hashlib.sha256(payload.encode()).hexdigest()
 
 

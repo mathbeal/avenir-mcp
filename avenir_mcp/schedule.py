@@ -128,9 +128,9 @@ def occurrences(
         split = any(not sub.get("deleted") for sub in item.get("subtransactions") or [])
         # The empty default only marks "no category". It is looked up among the plan's
         # ids, which YNAB writes as UUIDs, so another default would be found only if a
-        # category carried that very id. On its own line, so the pragma covers no more
-        # than this one lookup.
-        of_item = item.get("category_id") or ""  # pragma: no mutate
+        # category carried that very id. It is alone on its line.
+        no_category = ""
+        of_item = item.get("category_id") or no_category
         category = "Split" if split else categories.get(of_item)
         for day in _dates(
             date.fromisoformat(item["date_first"]),

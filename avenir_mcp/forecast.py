@@ -147,12 +147,7 @@ def _merchant(tx: dict[str, Any]) -> str:
     Returns:
         The merchant, empty when the transaction names no payee.
     """
-    # The empty default only marks "no payee". It is compared with what normalize_payee
-    # leaves of a bank label, so another default would change a projection only for a
-    # label reducing to exactly that string: nothing a test could state about a
-    # forecast. On its own line, so the pragma covers no more than this one lookup.
-    label = tx.get("payee_name") or ""  # pragma: no mutate
-    return normalize_payee(label)
+    return normalize_payee(tx.get("payee_name") or "")
 
 
 def _day_of(tx: dict[str, Any]) -> int:
@@ -164,10 +159,11 @@ def _day_of(tx: dict[str, Any]) -> int:
     Returns:
         The day, 1 to 31.
     """
-    # YNAB dates a transaction with an ISO date, which is 10 characters long, so a
-    # slice reaching further reads those same two digits. On its own line, so the
-    # pragma covers no more than this one slice.
-    return int(tx["date"][8:10])  # pragma: no mutate
+    # YNAB dates a transaction with an ISO date, which is 10 characters long, so a slice
+    # reaching further reads those same two digits. The end of the slice is alone on its
+    # line, so the pragma covers no more than it.
+    end_of_date = 10  # pragma: no mutate
+    return int(tx["date"][8:end_of_date])
 
 
 def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring]:
@@ -188,14 +184,14 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
             if payee:
                 groups[(payee, _is_outflow(tx["amount"]))].append(tx)
     found: list[Recurring] = []
+    # The slice is only a grouping key, and YNAB dates a transaction with an ISO date, so
+    # a slice reaching further groups the very same transactions. The end of the slice is
+    # alone on its line, so the pragma covers no more than it.
+    month_key_end = 7
     for (payee, _), txs in sorted(groups.items()):
         per_month: dict[str, int] = defaultdict(int)
         for tx in txs:
-            # The slice is only a grouping key, and YNAB dates a transaction with an ISO
-            # date, so a slice reaching further groups the very same transactions. On its
-            # own line, so the pragma covers no more than this one slice.
-            month = tx["date"][:7]  # pragma: no mutate
-            per_month[month] += tx["amount"]
+            per_month[tx["date"][:month_key_end]] += tx["amount"]
         if len(per_month) < MIN_MONTHS_SEEN:
             continue
         median = statistics.median(per_month.values())
@@ -493,10 +489,11 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         left_to_spend = variable - amount_to_milliunit(spent_this_month)
         left_to_receive = income - amount_to_milliunit(received_this_month)
         # Clamping at 1 milliunit instead of 0 cannot move a projection: _spread turns
-        # 1 milliunit into 0 cent on every day it covers. Each clamp is alone on its
-        # line, so the pragma covers no more than the clamp.
-        rest_of_month_spend = min(0, left_to_spend)  # pragma: no mutate
-        rest_of_month_income = max(0, left_to_receive)  # pragma: no mutate
+        # 1 milliunit into 0 cent on every day it covers. The bound is alone on its line,
+        # so the pragma covers no more than it.
+        nothing_more = 0
+        rest_of_month_spend = min(nothing_more, left_to_spend)
+        rest_of_month_income = max(nothing_more, left_to_receive)
         to_spend = rest_of_month_spend if current else variable
         to_receive = rest_of_month_income if current else income
         daily = [

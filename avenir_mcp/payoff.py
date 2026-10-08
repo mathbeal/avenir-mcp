@@ -374,9 +374,10 @@ def _schedule(  # pylint: disable=too-many-locals
                 done[i] = month
         never = month == 1 and sum(owed) >= first_total
     # A debt not paid off sorts after every debt that is, so the month it sorts on only
-    # has to be one the plan did not reach: another one sorts the same. On its own line,
-    # so the pragma covers no more than that month.
-    unpaid = month + 1  # pragma: no mutate
+    # has to be past the last the plan reached: any number of months further sorts the
+    # same. That number is alone on its line, so the pragma covers no more than it.
+    one_month_past = 1
+    unpaid = month + one_month_past
     rows = sorted(range(len(debts)), key=lambda i: (done[i] or unpaid, order.index(i)))
     free = None if any(owed) else month
     return (
@@ -517,7 +518,7 @@ def _saved(plans: list[StrategyPlan]) -> float:
     # Interest is rounded to the cent every month, so two totals differ by whole cents:
     # rounding their difference to a third decimal changes nothing. The precision is alone
     # on its line, so the pragma covers no more than it.
-    to_the_cent = 2  # pragma: no mutate
+    to_the_cent = 2
     return round(difference, to_the_cent)
 
 

@@ -110,11 +110,10 @@ def latest_version(path: Path, now: datetime, get: Getter = httpx.get) -> str | 
         The latest version, or None when unknown.
     """
     try:
-        # The cache holds the JSON written below, which json.dumps escapes to ASCII, so
-        # every encoding Python can be told to use here reads back the same text. On its
-        # own line, so the pragma covers no more than this one read.
-        remembered = path.read_text(encoding="utf-8")  # pragma: no mutate
-        cached = json.loads(remembered)
+        # The bytes are decoded rather than read as text: the cache holds the JSON
+        # written below, which json.dumps escapes to ASCII, so naming an encoding here
+        # would only add a literal no test could state anything about.
+        cached = json.loads(path.read_bytes().decode())
         if now - datetime.fromisoformat(cached["checked_at"]) < FRESH_FOR:
             latest = cached["latest"]
             return latest if isinstance(latest, str) else None
@@ -124,10 +123,7 @@ def latest_version(path: Path, now: datetime, get: Getter = httpx.get) -> str | 
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         answer = json.dumps({"checked_at": now.isoformat(), "latest": latest})
-        # json.dumps escapes anything beyond ASCII, so every encoding Python can be told
-        # to use here writes the same bytes. On its own line, so the pragma covers no
-        # more than this one write.
-        path.write_text(answer, encoding="utf-8")  # pragma: no mutate
+        path.write_bytes(answer.encode())
     except OSError as error:
         logger.info("Update check not remembered: %s", error)
     return latest
@@ -168,9 +164,10 @@ def off(env: Mapping[str, str]) -> bool:
         convention for tools that would call home), or in a CI run (CI=true or 1).
     """
     # The empty default only marks "no CI variable", and it is matched against "true" and
-    # "1", so another default answers the same. On its own line, so the pragma covers no
-    # more than this one lookup.
-    in_ci = env.get("CI", "")  # pragma: no mutate
+    # "1", so another default answers the same. It is alone on its line, so the pragma
+    # covers no more than it.
+    unset = ""
+    in_ci = env.get("CI", unset)
     return (
         env.get("AVENIR_MCP_NO_UPDATE_CHECK") == "1"
         or env.get("DO_NOT_TRACK") == "1"

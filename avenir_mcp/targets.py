@@ -185,7 +185,7 @@ def plan(
         fields: dict[str, Any] = {"goal_target": None}
         # Only describe() reads this one, and it reads both fields as missing whatever
         # they are called here: a target removed has nothing left to describe.
-        after: dict[str, Any] = {"goal_type": None, "goal_target": None}  # pragma: no mutate
+        after: dict[str, Any] = {"goal_type": None, "goal_target": None}
     else:
         milli = amount_to_milliunit(amount)
         fields = {"goal_target": milli}

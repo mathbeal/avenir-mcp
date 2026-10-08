@@ -444,6 +444,13 @@ def test_a_debt_paid_off_first_is_listed_first() -> None:
     assert [(d.name, d.months) for d in answer.plans[0].debts] == [("Small", 2), ("Dear", 4)]
 
 
+def test_a_debt_paid_off_on_the_last_month_of_the_plan_is_still_listed_first() -> None:
+    """A debt not paid off comes after every debt that is, even one paid on the last month."""
+    accounts = [_loan("dear", 1_000.0, 24.0, 20.0), _loan("small", 400.0, 0.0, 30.0)]
+    answer = _plan(accounts, strategy="snowball", monthly_budget=100.0, max_months=5)
+    assert [(d.name, d.months) for d in answer.plans[0].debts] == [("Small", 5), ("Dear", None)]
+
+
 def test_one_order_ending_and_the_other_not_is_no_comparison() -> None:
     """Avalanche ends within the cap, snowball does not: nothing can be compared."""
     accounts = [_loan("dear", 1_000.0, 24.0, 20.0), _loan("small", 400.0, 0.0, 30.0)]

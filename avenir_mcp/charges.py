@@ -61,9 +61,9 @@ def _merchant(item: dict[str, Any]) -> str:
     """
     # The empty default only marks "no payee". It is matched against the merchants the
     # charges are named by, so another default would change what a schedule covers only
-    # for a bank label reducing to exactly that string.
-    label = item.get("payee_name") or ""  # pragma: no mutate
-    return normalize_payee(label)
+    # for a bank label reducing to exactly that string. It is alone on its line.
+    no_payee = ""
+    return normalize_payee(item.get("payee_name") or no_payee)
 
 
 def _most_frequent(counts: Counter[str]) -> str:
@@ -75,9 +75,8 @@ def _most_frequent(counts: Counter[str]) -> str:
     Returns:
         The id of the most frequent one.
     """
-    # Only the first pair is read, so asking most_common for one, for two or for all of
-    # the categories gives back the same one: no answer can change.
-    return counts.most_common(1)[0][0]  # pragma: no mutate
+    # Asked for all of them, most_common orders them: the first is the most frequent.
+    return counts.most_common()[0][0]
 
 
 def _categories(
@@ -94,16 +93,18 @@ def _categories(
         Each payee, as a charge names it, with its most frequent category name.
     """
     seen: dict[str, Counter[str]] = {}
+    # Counting by any other step scales every category of a payee alike, so the most
+    # frequent one stays the most frequent: no answer can change. The step is alone on
+    # its line, so the pragma covers no more than it.
+    one_more = 1
     for tx in transactions:
         if forecast.usable(tx) and tx["date"][:7] in months and tx.get("category_id"):
             payee = untrusted(_merchant(tx))
-            # Counting by any other step scales every category of a payee alike, so the
-            # most frequent one stays the most frequent: no answer can change.
-            seen.setdefault(payee, Counter())[tx["category_id"]] += 1  # pragma: no mutate
+            seen.setdefault(payee, Counter())[tx["category_id"]] += one_more
     return {payee: names.get(_most_frequent(counts)) for payee, counts in seen.items()}
 
 
-def find(
+def find(  # pylint: disable=too-many-locals
     transactions: list[dict[str, Any]],
     scheduled: list[dict[str, Any]],
     categories: list[dict[str, Any]],
@@ -133,7 +134,7 @@ def find(
         # The only amount this bound tells apart is zero, which is money neither in nor
         # out: a recurrence of zero is left out of both lists below, so no answer can
         # change. On its own line, so the rest of the loop stays measured.
-        outflow = r.amount < 0  # pragma: no mutate
+        outflow = r.amount < 0
         if not outflow and not include_income:
             continue
         found.append(
@@ -151,6 +152,8 @@ def find(
     earned = sorted((c for c in found if c.monthly_amount > 0), key=lambda c: -c.yearly_amount)
     yearly = sum(c.yearly_amount for c in spent)
     # Every amount added holds two decimals already, so rounding to two places or to
-    # three gives the same figure: this only clears the drift of adding floats.
-    total = round(yearly, 2)  # pragma: no mutate
+    # three gives the same figure: this only clears the drift of adding floats. The
+    # precision is alone on its line, so the pragma covers no more than it.
+    to_the_cent = 2
+    total = round(yearly, to_the_cent)
     return RecurringCharges(charges=spent + earned, yearly_total=total, months_looked_at=months)

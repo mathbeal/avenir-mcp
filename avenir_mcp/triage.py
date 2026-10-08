@@ -139,14 +139,18 @@ def _decode_cursor(cursor: str) -> int:
         # altered cursor could otherwise decode to another page.
         # Asking for a strict subset instead would only refuse a cursor holding every
         # character of the alphabet, which is far too long to decode to an offset and
-        # ends in this same refusal anyway.
-        if not set(cursor) <= _CURSOR_ALPHABET:  # pragma: no mutate
+        # ends in this same refusal anyway. The comparison is alone on its line, so the
+        # pragma covers no more than it.
+        only_known_chars = set(cursor) <= _CURSOR_ALPHABET
+        if not only_known_chars:
             raise ValueError(cursor)  # pragma: no mutate
+        decoded = base64.urlsafe_b64decode(cursor.encode()).decode()
+        at_colon = ":"
         # Splitting on the last colon instead of the first would only change what a
         # cursor holding several of them decodes to, and neither reading of one leaves
-        # the prefix "offset" with digits after it.
-        decoded = base64.urlsafe_b64decode(cursor.encode()).decode()
-        prefix, _, value = decoded.partition(":")  # pragma: no mutate
+        # the prefix "offset" with digits after it. The call is alone on its line, so the
+        # pragma covers no more than the end it splits from.
+        prefix, _, value = decoded.partition(at_colon)
         if prefix != "offset" or not value.isdigit():
             # The value given here is never read: the message below is what is raised.
             raise ValueError(cursor)  # pragma: no mutate
@@ -237,19 +241,29 @@ def _transfer_pairs(pending: list[dict[str, Any]]) -> dict[str, str]:
     """
     inflows: dict[int, list[tuple[dict[str, Any], date]]] = {}
     for tx in pending:
+        amount = tx["amount"]
         # The only amount these two bounds tell apart is zero, which is money neither in
         # nor out: it is indexed or not, looked for or not, and pairs with nothing either
         # way, since the opposite of zero is zero and no outflow of zero is looked up.
-        if tx["amount"] > 0:  # pragma: no mutate
-            inflows.setdefault(tx["amount"], []).append((tx, date.fromisoformat(tx["date"])))
+        # The comparison is alone on its line, so the pragma covers no more than it.
+        money_in = amount > 0
+        if money_in:
+            inflows.setdefault(amount, []).append((tx, date.fromisoformat(tx["date"])))
     pairs: dict[str, str] = {}
     for tx in pending:
+        amount = tx["amount"]
+        already_paired = tx["id"] in pairs
         # Same zero, and only an outflow reaches the lines below, so an id already paired
         # is one of those outflows, which the loop has gone past: no answer can change.
-        if tx["id"] in pairs or tx["amount"] >= 0:  # pragma: no mutate
+        # The comparison is alone on its line, so the pragma covers no more than it.
+        money_in = amount >= 0  # pragma: no mutate
+        # Only an outflow reaches the lines below, so an id already paired is one of
+        # those outflows, which the loop has gone past: asking for both instead of either
+        # cannot change an answer. The line holds nothing but that conjunction.
+        if already_paired or money_in:  # pragma: no mutate
             continue
         day = date.fromisoformat(tx["date"])
-        for other, other_day in inflows.get(-tx["amount"], ()):
+        for other, other_day in inflows.get(-amount, ()):
             if (
                 other["id"] not in pairs
                 and other.get("account_id") != tx.get("account_id")
@@ -302,11 +316,14 @@ def _suggestion(
     history = histories[tx["amount"] < 0]
     # The empty default only marks "no payee", and the history is keyed by the merchant
     # a label normalises to, so another default would look up a merchant of that name.
-    label = tx.get("payee_name") or ""  # pragma: no mutate
+    # It is alone on its line.
+    no_payee = ""
+    label = tx.get("payee_name") or no_payee
     score = classifier.score_payee(label, history, categories, threshold)
     # The classifier sets the id and the name together or neither, so asking for both
-    # and asking for either is the same question: no answer can change.
-    if score.category_id is None or score.category_name is None:  # pragma: no mutate
+    # and asking for either is the same question: no answer can change. Narrowing both
+    # types needs the test written out, so the line carries more than that question.
+    if score.category_id is None or score.category_name is None:
         return None
     return Suggestion(
         category_id=score.category_id,

@@ -153,7 +153,7 @@ def summary(  # pylint: disable=too-many-locals
     # The sentinel only has to keep every month out when the plan holds no budget
     # transaction at all: any text sorting after a YYYY-MM month does that. On its own
     # line, so the pragma covers no more than the sentinel.
-    none_yet = "9999-12"  # pragma: no mutate
+    none_yet = "9999-12"
     first = min((tx["date"][:7] for tx in history), default=none_yet)
     months = [month for month in months_before(today, months_count) if month >= first]
     income = dict.fromkeys(months, 0)
@@ -171,7 +171,7 @@ def summary(  # pylint: disable=too-many-locals
             # something, since the first test below leaves on a line of zero, so a bound
             # that includes zero, or one at 1, answers the same. On its own line, so the
             # pragma covers no more than this comparison.
-            outflow = amount < 0  # pragma: no mutate
+            outflow = amount < 0
             # Nothing moved, money between budget accounts, or back from outside: skipped.
             if not amount or transfer in budget or (transfer and not outflow):
                 continue

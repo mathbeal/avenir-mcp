@@ -139,8 +139,10 @@ def _coverage(liquid: int, spent: int, months: int) -> Coverage:
         The monthly average and the runway in months.
     """
     average = round(spent / months) if months else 0
-    # Owing more than the money available is no runway at all, not a negative one.
-    runway = None if not average else max(round(liquid / -average, 1), 0.0)
+    # Owing more than the money available is no runway at all, not a negative one. The
+    # bound comes before the rounding: rounding first turns a small debt into -0.0, which
+    # is what the answer would then carry.
+    runway = None if not average else round(max(liquid / -average, 0.0), 1)
     return Coverage(monthly_spending=milliunit_to_amount(average), runway_months=runway)
 
 
@@ -244,7 +246,7 @@ def summary(  # pylint: disable=too-many-arguments,too-many-locals
     # The sentinel only has to keep every month out when the plan holds no budget
     # transaction at all: any text sorting after a YYYY-MM month does that. On its own
     # line, so the pragma covers no more than the sentinel.
-    none_yet = "9999-12"  # pragma: no mutate
+    none_yet = "9999-12"
     first = min((tx["date"][:7] for tx in history), default=none_yet)
     months = [month for month in months_before(today, months_count) if month >= first]
     vital_ids = {cat_id for group in essential or [] for cat_id in group["category_ids"]}
@@ -253,15 +255,16 @@ def summary(  # pylint: disable=too-many-arguments,too-many-locals
         if tx["date"][:7] not in months:
             continue
         for line in lines_of(tx):
+            amount = line["amount"]
             # Which way the line goes. A line of zero adds nothing to either total, so a
-            # bound that takes it for spending, or one at 1, answers the same. On its own
-            # line, so the pragma covers no more than this comparison.
-            outflow = line["amount"] < 0  # pragma: no mutate
+            # bound that takes it for spending, or one at 1, answers the same. The
+            # comparison is alone on its line, so the pragma covers no more than it.
+            outflow = amount < 0
             if not outflow or line.get("transfer_account_id") in kept:
                 continue
-            spent += line["amount"]
+            spent += amount
             if line.get("category_id") in vital_ids:
-                vital += line["amount"]
+                vital += amount
 
     spending = _coverage(liquid, spent, len(months))
     vital_coverage = None if essential is None else _coverage(liquid, vital, len(months))

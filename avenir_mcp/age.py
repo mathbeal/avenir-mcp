@@ -155,7 +155,7 @@ def _message(rows: list[AgeMonth], known: list[tuple[str, int]], current: str) -
         return message + f" It is unchanged since {since}."
     # Equal figures returned above, so asking for greater and for greater or equal is
     # the same question here. On its own line, so the words below stay measured.
-    rose = latest > first  # pragma: no mutate
+    rose = latest > first
     direction = "up" if rose else "down"
     return message + f" It went {direction} by {abs(latest - first)} days since {since}."
 

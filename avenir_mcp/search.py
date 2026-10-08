@@ -132,11 +132,9 @@ def _names_payee(tx: dict[str, Any], payee: str) -> bool:
         True when the merchant searched is part of the transaction's payee.
     """
     # The empty default only marks "no payee". Another default would change the answer
-    # only for a search term that is part of that very string, which says nothing about
-    # what find_transactions should find. On its own line, so the pragma covers no more
-    # than this one lookup.
-    label = tx.get("payee_name") or ""  # pragma: no mutate
-    return normalize_payee(payee) in normalize_payee(label)
+    # only for a search term that is part of that very string. It is alone on its line.
+    no_payee = ""
+    return normalize_payee(payee) in normalize_payee(tx.get("payee_name") or no_payee)
 
 
 def find(  # pylint: disable=too-many-arguments

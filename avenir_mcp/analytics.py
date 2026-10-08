@@ -255,11 +255,12 @@ def month_overview(month: dict[str, Any]) -> MonthOverview:
     """
     amount = client.milliunit_to_amount
     overspent: list[Overspent] = []
+    # YNAB gives every category of a month its balance. The default only marks an absence,
+    # and a category with nothing left is not overspent either way. It is alone on its
+    # line, so the pragma covers no more than it.
+    absent = 0
     for cat in month.get("categories", []):
-        # YNAB gives every category of a month its balance. The default only marks an
-        # absence, and a category with nothing left is not overspent either way. On its
-        # own line, so the pragma covers no more than this one lookup.
-        balance = cat.get("balance", 0)  # pragma: no mutate
+        balance = cat.get("balance", absent)
         if _usable(cat) and balance < 0:
             overspent.append(
                 Overspent(
