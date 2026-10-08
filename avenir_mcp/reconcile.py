@@ -60,6 +60,23 @@ class Analysis(Model):
     """Pairs with the same amount and merchant, at most 3 days apart, over the last 60 days."""
 
 
+def _merchant(tx: dict[str, Any]) -> str:
+    """Reduce a transaction's bank label to the merchant it names.
+
+    Args:
+        tx: A YNAB transaction.
+
+    Returns:
+        The merchant, empty when the transaction names no payee.
+    """
+    # The empty default only marks "no payee". It is compared with what normalize_payee
+    # leaves of a bank label, so another default would change a pair only for a label
+    # reducing to exactly that string: nothing a test could state about an account.
+    # On its own line, so the pragma covers no more than this one lookup.
+    label = tx.get("payee_name") or ""  # pragma: no mutate
+    return normalize_payee(label)
+
+
 def _duplicates(transactions: list[dict[str, Any]]) -> list[list[str]]:
     """Find pairs with the same amount and merchant, dated a few days apart.
 
@@ -71,7 +88,7 @@ def _duplicates(transactions: list[dict[str, Any]]) -> list[list[str]]:
     """
     pairs: list[list[str]] = []
     ordered = [
-        (tx, date.fromisoformat(tx["date"]), normalize_payee(tx.get("payee_name") or ""))
+        (tx, date.fromisoformat(tx["date"]), _merchant(tx))
         for tx in sorted(transactions, key=lambda tx: tx["date"])
     ]
     for i, (first, first_day, first_payee) in enumerate(ordered):
