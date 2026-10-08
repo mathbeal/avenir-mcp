@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import string
 from typing import Any
 
 import pytest
@@ -275,6 +276,13 @@ def test_codes_are_distinct_strings_and_a_fresh_one_survives_the_next_issue() ->
     second = confirmations.issue("b1", {"x": 2})
     assert isinstance(first, str) and first and first != second
     assert confirmations.consume(first, "b1", {"x": 1}) is True
+
+
+def test_a_code_carries_eight_bytes_of_randomness() -> None:
+    """A code the agent cannot guess: 8 random bytes, written URL-safe on 11 characters."""
+    code = writes.Confirmations().issue("b1", {"x": 1})
+    assert len(code) == 11
+    assert set(code) <= set(string.ascii_letters + string.digits + "-_")
 
 
 def test_a_code_is_still_valid_at_the_exact_end_of_its_lifetime() -> None:
