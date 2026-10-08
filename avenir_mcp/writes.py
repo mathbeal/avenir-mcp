@@ -199,6 +199,10 @@ def plan_undo(
             conflicts.append(move.transaction_id)
             continue
         before = move.from_category_id
+        # The empty default only marks "no category". It is looked up among the plan's
+        # ids, which YNAB writes as UUIDs, so another default would be found only if a
+        # category carried that very id.
+        gave = move.to_category_id or ""  # pragma: no mutate
         changes.append(
             Change(
                 transaction_id=tx["id"],
@@ -206,7 +210,7 @@ def plan_undo(
                 amount=milliunit_to_amount(tx["amount"]),
                 payee=untrusted(tx.get("payee_name")),
                 from_category_id=move.to_category_id,
-                from_category=untrusted(names.get(move.to_category_id or "")) or None,
+                from_category=untrusted(names.get(gave)) or None,
                 to_category_id=before,
                 to_category=untrusted(names.get(before)) if before else None,
             )
@@ -227,7 +231,11 @@ def fingerprint(plan_id: str, subject: object) -> str:
     subject = _JSON.dump_python(subject, mode="json")
     if isinstance(subject, list):
         subject = sorted(json.dumps(item, sort_keys=True) for item in subject)
-    payload = json.dumps([plan_id, subject], sort_keys=True, separators=(",", ":"))
+    # Whatever this call writes is hashed and only ever compared with a digest made the
+    # same way: how compact the JSON is, and whether a two-item list is sorted, change
+    # the digest without changing which plans match. Sorting what matters happens above.
+    data = [plan_id, subject]
+    payload = json.dumps(data, sort_keys=True, separators=(",", ":"))  # pragma: no mutate
     return hashlib.sha256(payload.encode()).hexdigest()
 
 

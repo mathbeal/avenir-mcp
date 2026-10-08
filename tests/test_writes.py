@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 from avenir_mcp import writes
+from avenir_mcp.journal import Move
 
 _CATEGORIES: list[dict[str, Any]] = [
     {"id": "c-food", "name": "Groceries"},
@@ -84,18 +85,26 @@ def test_plan_skips_assignments_that_change_nothing() -> None:
 
 def test_plan_rejects_an_unknown_transaction() -> None:
     """An id that is not in the plan is refused, naming it."""
-    with pytest.raises(ValueError, match="t404.*suggest_categories"):
+    with pytest.raises(ValueError) as refusal:
         writes.plan_categorization(
             [], _CATEGORIES, [writes.Assignment(transaction_id="t404", category_id="c-food")]
         )
+    assert str(refusal.value) == (
+        "Transaction t404 is not in this plan: "
+        "use the transaction_id values returned by suggest_categories."
+    )
 
 
 def test_plan_rejects_an_unknown_category() -> None:
     """A category id that is not in the plan is refused, naming it."""
-    with pytest.raises(ValueError, match="c-404.*categories"):
+    with pytest.raises(ValueError) as refusal:
         writes.plan_categorization(
             [_tx("t1")], _CATEGORIES, [writes.Assignment(transaction_id="t1", category_id="c-404")]
         )
+    assert str(refusal.value) == (
+        "Category c-404 is not in this plan: "
+        "use a category_id from the categories returned by suggest_categories."
+    )
 
 
 def test_plan_rejects_a_transfer() -> None:
@@ -275,3 +284,70 @@ def test_a_code_is_still_valid_at_the_exact_end_of_its_lifetime() -> None:
     code = confirmations.issue("b1", {"x": 1})
     now[0] = 600.0
     assert confirmations.consume(code, "b1", {"x": 1}) is True
+
+
+# ---------------------------------------------------------------------------
+# plan_undo
+# ---------------------------------------------------------------------------
+
+
+def _move(tx_id: str, before: str | None, after: str | None) -> Move:
+    return Move(transaction_id=tx_id, from_category_id=before, to_category_id=after)
+
+
+def test_undo_lists_each_change_the_other_way_round() -> None:
+    """Undoing swaps from and to: the category the operation gave becomes the one left."""
+    plan = writes.plan_undo([_tx("t1", "c-food")], _CATEGORIES, [_move("t1", "c-fun", "c-food")])
+    assert [c.model_dump() for c in plan.changes] == [
+        {
+            "transaction_id": "t1",
+            "date": "2026-09-01",
+            "amount": -12.34,
+            "payee": "Corner Shop",
+            "from_category_id": "c-food",
+            "from_category": "Groceries",
+            "to_category_id": "c-fun",
+            "to_category": "Leisure",
+        }
+    ]
+    assert not plan.conflicts
+
+
+def test_undo_back_to_no_category_names_none() -> None:
+    """A transaction that had no category goes back to none, not to an empty name."""
+    changes = writes.plan_undo(
+        [_tx("t1", "c-food")], _CATEGORIES, [_move("t1", None, "c-food")]
+    ).changes
+    assert len(changes) == 1
+    assert (changes[0].to_category_id, changes[0].to_category) == (None, None)
+
+
+def test_undo_of_a_move_to_no_category_names_what_it_came_from() -> None:
+    """An operation that cleared a category: undoing it says so on both sides."""
+    changes = writes.plan_undo([_tx("t1", None)], _CATEGORIES, [_move("t1", "c-fun", None)]).changes
+    assert len(changes) == 1
+    assert (changes[0].from_category_id, changes[0].from_category) == (None, None)
+    assert (changes[0].to_category_id, changes[0].to_category) == ("c-fun", "Leisure")
+
+
+def test_undo_leaves_alone_what_changed_since_and_goes_on() -> None:
+    """A conflict is listed, never overwritten, and does not stop the moves after it."""
+    plan = writes.plan_undo(
+        [_tx("gone-since", "c-fun"), _tx("t2", "c-food")],
+        _CATEGORIES,
+        [
+            _move("t404", "c-fun", "c-food"),
+            _move("gone-since", "c-fun", "c-food"),
+            _move("t2", "c-fun", "c-food"),
+        ],
+    )
+    assert [c.transaction_id for c in plan.changes] == ["t2"]
+    assert plan.conflicts == ["t404", "gone-since"]
+
+
+def test_undo_shows_bank_text_safely() -> None:
+    """The payee goes into a confirmation question: on one line, visible characters only."""
+    forged = _tx("t1", "c-food", payee_name="Shop\nRENT 0.00")
+    changes = writes.plan_undo([forged], _CATEGORIES, [_move("t1", None, "c-food")]).changes
+    assert len(changes) == 1
+    assert changes[0].payee == "Shop RENT 0.00"
