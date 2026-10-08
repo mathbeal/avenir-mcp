@@ -105,8 +105,9 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-# D, DOC: Google docstrings. I: sorted imports. S: bandit's security checks.
-select = ["D", "DOC", "I", "S"]
+# C901: cyclomatic complexity. D, DOC: Google docstrings. I: sorted imports. S: bandit's
+# security checks.
+select = ["C901", "D", "DOC", "I", "S"]
 # A Raises section may name what a called function raises: the caller needs it too.
 ignore = ["DOC502"]
 # The DOC rules (pydoclint) are still in preview.
@@ -124,6 +125,18 @@ preview = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+# Complexity (`just lint`, CI): a ratchet, not a target. 19 is the highest any function
+# reaches today, `Handler._route` in `evals/fake_ynab.py`, so nothing may go above the worst
+# that already exists. The number only ever moves down: splitting `_route` brings it to 12,
+# which is `savings.summary`, the worst of the package. No `noqa` and no per-file ignore to
+# go over it: ruff has no per-file ceiling, so an exception would switch the rule off for a
+# whole file instead of raising its limit.
+# This is not radon's count, which reads 44 for the same `_route` and 40 for the same
+# `savings.summary`: ruff's mccabe leaves out boolean operators, conditional expressions and
+# comprehensions. `just complexity` reports radon's; this setting gates ruff's.
+[tool.ruff.lint.mccabe]
+max-complexity = 19
 
 # Run with `uvx` (just lint, CI), not installed: pydoclint needs a fork of docstring_parser
 # that takes the place of the one fastmcp needs.

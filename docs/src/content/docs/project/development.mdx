@@ -42,7 +42,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 |---|---|---|
 | format | `ruff format --check` | a file is not formatted |
 | lint | `pylint` | the score is below 10.00, which four or more computing lines repeated between two of the files it reads is enough to do (`duplicate-code`) |
-| ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…) |
+| ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…); the cyclomatic complexity of a function goes over 19, the worst the repository reaches today, a ceiling that only ever comes down (`C901`) |
 | docstrings | `pydoclint` | a docstring of the package lists the arguments in another order than the signature, gives a type the annotation already gives, or is a bare summary for a function that takes arguments or returns a value |
 | YNAB API terms | `pytest -m ynab_terms`, `python -m docsgen.terms` | a rule of YNAB's API terms is broken (naming, attribution word for word, YNAB's own image, a token for its owner only, the hourly limit), or YNAB changed its terms since the date checked; the README badge shows it |
 | dead code | `vulture` | a name nothing else in the repository reads is neither registered by a decorator (`@mcp.tool`, `@pytest.fixture`…) nor listed, with the reason it is alive, in `vulture_whitelist.py` |
@@ -120,7 +120,10 @@ first: one number aggregating Halstead volume, cyclomatic complexity and line co
 ranks the files against each other and shows where each is heading rather than returning a
 verdict, since radon's A rank starts at 20 and every file of the package is far above it.
 A report to read, not a gate: it never fails, and CI does not run it. Its version is pinned
-and `uvx` fetches it, as for pydoclint.
+and `uvx` fetches it, as for pydoclint. The complexity it prints is not the complexity
+`C901` limits: radon counts boolean operators, conditional expressions and comprehensions,
+which ruff's mccabe leaves out, so the same function scores higher here than it does against
+the limit.
 
 ## Documentation
 

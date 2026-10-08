@@ -42,7 +42,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 |---|---|---|
 | formato | `ruff format --check` | un archivo no está formateado |
 | lint | `pylint` | la nota es inferior a 10,00, lo que basta con cuatro líneas de cálculo o más repetidas entre dos de los archivos que lee (`duplicate-code`) |
-| ruff | `ruff check` | un docstring del paquete no sigue el estilo Google u omite un argumento, el valor devuelto o una excepción lanzada; los imports no están ordenados; los controles de seguridad de bandit encuentran un patrón de riesgo (TLS sin verificar, un comando shell, una contraseña en el código…) |
+| ruff | `ruff check` | un docstring del paquete no sigue el estilo Google u omite un argumento, el valor devuelto o una excepción lanzada; los imports no están ordenados; los controles de seguridad de bandit encuentran un patrón de riesgo (TLS sin verificar, un comando shell, una contraseña en el código…); la complejidad ciclomática de una función supera 19, el valor más alto que alcanza hoy el repositorio, un límite que solo puede bajar (`C901`) |
 | docstrings | `pydoclint` | un docstring del paquete enumera los argumentos en otro orden que la firma, da un tipo que la anotación ya da, o se reduce a un resumen en una función que recibe argumentos o devuelve un valor |
 | Condiciones de la API de YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | no se cumple una regla de las condiciones de la API de YNAB (nombre, mención palabra por palabra, imagen oficial de YNAB, token solo para su titular, límite de solicitudes por hora), o YNAB cambió sus condiciones desde la fecha comprobada; el distintivo del README lo muestra |
 | código muerto | `vulture` | un nombre que ninguna otra parte del repositorio lee, y que no está registrado por un decorador (`@mcp.tool`, `@pytest.fixture`…) ni inscrito, con la razón por la que sigue vivo, en `vulture_whitelist.py` |
@@ -123,7 +123,11 @@ volumen de Halstead, la complejidad ciclomática y el número de líneas de cód
 clasifica los archivos entre sí y muestra la tendencia de cada uno, en lugar de emitir un
 veredicto, ya que el rango A de radon comienza en 20 y todos los archivos del paquete se
 sitúan muy por encima de ese valor. Un informe para leer, no una barrera: nunca falla,
-y la CI no lo ejecuta. Su versión está fijada y `uvx` lo descarga, como con pydoclint.
+y la CI no lo ejecuta. Su versión está fijada y `uvx` lo descarga, como con pydoclint. La
+complejidad que muestra no es la que se compara con el límite `C901`: radon contabiliza los operadores
+booleanos, las expresiones condicionales y las comprensiones, elementos que el mccabe de
+ruff omite, por lo que la misma función obtiene aquí una puntuación más alta que frente a
+dicho límite.
 
 ## Documentación
 
