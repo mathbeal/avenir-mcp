@@ -183,7 +183,9 @@ def plan(
     had = category.get("goal_type") is not None and category.get("goal_target") is not None
     if amount is None:
         fields: dict[str, Any] = {"goal_target": None}
-        after: dict[str, Any] = {"goal_type": None, "goal_target": None}
+        # Only describe() reads this one, and it reads both fields as missing whatever
+        # they are called here: a target removed has nothing left to describe.
+        after: dict[str, Any] = {"goal_type": None, "goal_target": None}  # pragma: no mutate
     else:
         milli = amount_to_milliunit(amount)
         fields = {"goal_target": milli}

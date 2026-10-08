@@ -80,6 +80,8 @@ def test_future_and_deleted_months_are_left_out_and_the_last_ones_kept() -> None
     answer = _summary(list(reversed(months)), count=3)
     assert [m.month for m in answer.months] == ["2026-07", "2026-08", "2026-09"]
     assert (answer.days, answer.change) == (18, 4)
+    wider = _summary(list(reversed(months)), count=4)
+    assert [m.month for m in wider.months] == ["2026-05", "2026-07", "2026-08", "2026-09"]
 
 
 def test_months_without_a_figure_are_named() -> None:
@@ -134,3 +136,81 @@ def test_every_answer_states_how_ynab_counts() -> None:
     notes = " ".join(_summary([_month("09", 47)]).notes)
     assert "oldest money" in notes
     assert "current month" in notes
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+_HOW_YNAB_COUNTS = (
+    "Age of Money is YNAB's own figure: for the latest payments out of the budget "
+    "accounts, how many days passed since that money came in, the oldest money spent "
+    "first, averaged."
+)
+_THE_CURRENT_MONTH_MOVES = (
+    "The current month's figure moves with each payment; a past month's is the one YNAB "
+    "keeps for it."
+)
+
+
+def test_every_answer_opens_with_the_same_two_notes_and_nothing_else() -> None:
+    """A full set of months up to this one has nothing missing to report."""
+    answer = _summary([_month("08", 48), _month("09", 47)], count=2)
+    assert answer.notes == [_HOW_YNAB_COUNTS, _THE_CURRENT_MONTH_MOVES]
+
+
+def test_the_months_without_a_figure_are_listed_together() -> None:
+    """Two months with no figure are named in one note, in order."""
+    answer = _summary([_month("06", None), _month("07", None), _month("08", 17)], count=3)
+    assert answer.notes[2:] == [
+        "No figure for 2026-06, 2026-07: YNAB did not have enough history of money in and out yet.",
+        "YNAB has no month 2026-09 yet: the latest is 2026-08.",
+    ]
+
+
+def test_the_note_about_a_missing_current_month_names_the_latest_one() -> None:
+    """The latest month YNAB holds, not the one before it."""
+    answer = _summary([_month("07", 40), _month("08", 48)], count=2)
+    assert answer.notes[2] == "YNAB has no month 2026-09 yet: the latest is 2026-08."
+
+
+def test_exactly_thirty_days_is_already_the_buffer() -> None:
+    """Thirty days is the goal reached, not the last day short of it."""
+    answer = _summary([_month("09", age.A_MONTH)])
+    assert answer.message == (
+        "Your money is 30 days old (2026-09, YNAB's Age of Money): what you spend came "
+        "in 30 days before, on average. Over 30 days: you are living on last month's "
+        "income, the buffer YNAB aims for."
+    )
+
+
+def test_under_the_buffer_the_message_says_what_a_bigger_one_buys() -> None:
+    """The whole sentence an agent relays, not a fragment of it."""
+    answer = _summary([_month("08", 25), _month("09", 21)], count=2)
+    assert answer.message == (
+        "Your money is 21 days old (2026-09, YNAB's Age of Money): what you spend came "
+        "in 21 days before, on average. Under 30 days: money is spent within a month of "
+        "coming in; the older it gets, the bigger the buffer between pay and bills. "
+        "It went down by 4 days since 2026-08."
+    )
+
+
+def test_a_gain_of_one_day_is_a_trend_upwards() -> None:
+    """One day more is already up, not steady."""
+    answer = _summary([_month("08", 20), _month("09", 21)], count=2)
+    assert (answer.change, answer.trend) == (1, "up")
+
+
+def test_with_no_month_at_all_the_message_names_the_month_asked_about() -> None:
+    """The user is told which month YNAB was asked up to."""
+    assert _summary([]).message == (
+        "YNAB returned no month up to 2026-09: no Age of Money to give."
+    )
+
+
+def test_with_no_figure_at_all_the_message_says_what_ynab_waits_for() -> None:
+    """Null everywhere: the whole sentence, so the agent can relay the reason."""
+    assert _summary([_month("08", None), _month("09", None)], count=2).message == (
+        "YNAB gives no Age of Money for the last 2 months: it shows one once the plan "
+        "has enough history of money in and out."
+    )

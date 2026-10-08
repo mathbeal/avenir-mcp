@@ -127,22 +127,30 @@ def find(
     planned = frozenset(
         (_merchant(item), item["amount"] < 0) for item in scheduled if not item.get("deleted")
     )
-    names = {c["id"]: c["name"] for c in categories}
-    category_of = _categories(transactions, set(months), names)
-    found = [
-        RecurringCharge(
-            payee=r.payee,
-            monthly_amount=r.amount,
-            yearly_amount=round(r.amount * 12, 2),
-            day=r.day,
-            months_seen=r.months_seen,
-            category=category_of.get(r.payee),
-            scheduled=forecast.is_scheduled(r.payee, r.amount < 0, planned),
+    category_of = _categories(transactions, set(months), {c["id"]: c["name"] for c in categories})
+    found = []
+    for r in forecast.recurring(transactions, today):
+        # The only amount this bound tells apart is zero, which is money neither in nor
+        # out: a recurrence of zero is left out of both lists below, so no answer can
+        # change. On its own line, so the rest of the loop stays measured.
+        outflow = r.amount < 0  # pragma: no mutate
+        if not outflow and not include_income:
+            continue
+        found.append(
+            RecurringCharge(
+                payee=r.payee,
+                monthly_amount=r.amount,
+                yearly_amount=round(r.amount * 12, 2),
+                day=r.day,
+                months_seen=r.months_seen,
+                category=category_of.get(r.payee),
+                scheduled=forecast.is_scheduled(r.payee, outflow, planned),
+            )
         )
-        for r in forecast.recurring(transactions, today)
-        if r.amount < 0 or include_income
-    ]
     spent = sorted((c for c in found if c.monthly_amount < 0), key=lambda c: c.yearly_amount)
     earned = sorted((c for c in found if c.monthly_amount > 0), key=lambda c: -c.yearly_amount)
-    total = round(sum(c.yearly_amount for c in spent), 2)
+    yearly = sum(c.yearly_amount for c in spent)
+    # Every amount added holds two decimals already, so rounding to two places or to
+    # three gives the same figure: this only clears the drift of adding floats.
+    total = round(yearly, 2)  # pragma: no mutate
     return RecurringCharges(charges=spent + earned, yearly_total=total, months_looked_at=months)
