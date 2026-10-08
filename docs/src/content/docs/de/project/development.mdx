@@ -46,6 +46,7 @@ dann ignoriert.
 | ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…) |
 | Docstrings | `pydoclint` | ein Docstring des Pakets die Argumente in anderer Reihenfolge als die Signatur nennt, einen Typ angibt, den die Annotation schon angibt, oder nur eine Zusammenfassung ist, obwohl die Funktion Argumente nimmt oder einen Wert zurückgibt |
 | YNAB-API-Bedingungen | `pytest -m ynab_terms`, `python -m docsgen.terms` | eine Regel der YNAB-API-Bedingungen verletzt ist (Name, Hinweis auf die fehlende Zugehörigkeit im Wortlaut, YNABs eigenes Bild, Token nur für seinen Inhaber, Limit an Anfragen pro Stunde) oder YNAB seine Bedingungen seit dem geprüften Datum geändert hat; das Badge in der README zeigt es an |
+| Toter Code | `vulture` | ein Name, den sonst nichts im Repository liest, weder von einem Dekorator (`@mcp.tool`, `@pytest.fixture`…) registriert noch mit dem Grund, warum er lebt, in `vulture_whitelist.py` eingetragen ist |
 | Abhängigkeiten | `deptry .` | der Code ein Paket importiert, das `pyproject.toml` nicht deklariert, oder eines deklariert, das er nicht nutzt |
 | Typen | `mypy` (strikt) | irgendein Typfehler |
 | Tests | `pytest` | ein Test fehlschlägt, **irgendeine Warnung** ausgelöst wird oder die Abdeckung der Zeilen **oder Zweige** unter 100 % liegt |
