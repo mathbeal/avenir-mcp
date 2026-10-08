@@ -111,7 +111,7 @@ changelog-check:
     uvx git-cliff -o /tmp/avenir-cliff.md
     diff -u CHANGELOG.md /tmp/avenir-cliff.md
 
-# Mutation testing: change the code on purpose and check a test notices (about 30 s).
+# Mutation testing: change the code on purpose and check a test notices (a few minutes).
 mutate:
     uv run mutmut run --max-children 8
     uv run mutmut results

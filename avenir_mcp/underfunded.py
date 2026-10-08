@@ -101,7 +101,8 @@ def _line(category: dict[str, Any]) -> UnderfundedTarget:
     """Turn a category with an underfunded target into a line of the answer.
 
     Args:
-        category: The category as YNAB returns it for the month, amounts in milliunits.
+        category: The category as YNAB returns it for the month, amounts in milliunits;
+            its goal_under_funded is what still falls short, so it is there and above zero.
 
     Returns:
         The line, names made safe to show.
@@ -112,7 +113,7 @@ def _line(category: dict[str, Any]) -> UnderfundedTarget:
         group=untrusted(category.get("category_group_name")),
         target=describe(category),
         due=category.get("goal_target_date"),
-        needed=milliunit_to_amount(category.get("goal_under_funded") or 0),
+        needed=milliunit_to_amount(category["goal_under_funded"]),
         left=milliunit_to_amount(category.get("goal_overall_left") or 0),
         percent_complete=category.get("goal_percentage_complete"),
         months_left=category.get("goal_months_to_budget"),
@@ -130,11 +131,17 @@ def _key(line: UnderfundedTarget) -> tuple[int, str, float, str]:
         Its group, then its date (dated targets only), then the largest need first,
         then its name.
     """
-    due = line.due if line.urgency == "due_date" and line.due else ""
+    # A target with no date to sort on is padded, and that pad is only ever compared with
+    # the same pad: a target sorts on its date in the due_date group alone, where YNAB
+    # gives every target one. On its own line, so the pragma covers no more than the pad.
+    no_date = ""  # pragma: no mutate
+    due = line.due if line.urgency == "due_date" and line.due else no_date
     return _ORDER[line.urgency], due, -line.needed, line.name
 
 
-def _message(month: str, count: int, needed: int, ready: int, on_track: int) -> str:
+def _message(  # pylint: disable=too-many-arguments
+    month: str, *, count: int, needed: int, ready: int, covered: int, on_track: int
+) -> str:
     """Say what the targets need and whether Ready to Assign covers it.
 
     Args:
@@ -142,6 +149,7 @@ def _message(month: str, count: int, needed: int, ready: int, on_track: int) -> 
         count: How many targets are underfunded.
         needed: What they need together, in milliunits.
         ready: The month's Ready to Assign, in milliunits.
+        covered: What Ready to Assign covers of what is needed, in milliunits.
         on_track: How many targets need nothing more.
 
     Returns:
@@ -160,7 +168,6 @@ def _message(month: str, count: int, needed: int, ready: int, on_track: int) -> 
     )
     if ready >= needed:
         return head + f"enough for all of them, with {amount(ready - needed):.2f} left."
-    covered = max(ready, 0)
     return (
         head + f"it covers {amount(covered):.2f} of the {amount(needed):.2f}, "
         f"{amount(needed - covered):.2f} short."
@@ -189,7 +196,8 @@ def summary(month: dict[str, Any], limit: int | None) -> UnderfundedTargets:
     needed = sum(c["goal_under_funded"] for c in behind)
     ready = month.get("to_be_budgeted") or 0
     covered = min(max(ready, 0), needed)
-    shown = short if limit is None else short[:limit]
+    on_track = len(active) - len(short)
+    shown = short[:limit]
     notes = [
         "needed is what YNAB says each category still needs this month to stay on track "
         "(Underfunded in its app); left is what the target needs over its whole period.",
@@ -207,7 +215,14 @@ def summary(month: dict[str, Any], limit: int | None) -> UnderfundedTargets:
             f"Targets snoozed in YNAB ask for nothing this month and are left out: {names}."
         )
     return UnderfundedTargets(
-        message=_message(month["month"][:7], len(short), needed, ready, len(active) - len(short)),
+        message=_message(
+            month["month"][:7],
+            count=len(short),
+            needed=needed,
+            ready=ready,
+            covered=covered,
+            on_track=on_track,
+        ),
         month=month["month"],
         targets=shown,
         more=len(short) - len(shown),
@@ -216,6 +231,6 @@ def summary(month: dict[str, Any], limit: int | None) -> UnderfundedTargets:
         enough=ready >= needed,
         covered=milliunit_to_amount(covered),
         short_by=milliunit_to_amount(needed - covered),
-        on_track=len(active) - len(short),
+        on_track=on_track,
         notes=notes,
     )

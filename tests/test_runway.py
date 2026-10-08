@@ -85,7 +85,7 @@ def test_savings_can_be_left_out() -> None:
     assert answer.liquid == 2_000.0
     assert "Savings" in answer.left_out
     assert all(a.type != "savings" for a in answer.accounts)
-    assert any("Savings accounts" in note for note in answer.notes)
+    assert answer.notes[-1] == "Savings accounts were left out of the money available, as asked."
 
 
 def test_runway_is_the_money_over_the_average_spending_to_one_decimal() -> None:
@@ -95,7 +95,10 @@ def test_runway_is_the_money_over_the_average_spending_to_one_decimal() -> None:
     assert answer.spending.monthly_spending == -1_100.0
     assert answer.spending.runway_months == 2.7
     assert answer.essential is None
-    assert "2.7 months" in answer.message
+    assert answer.message == (
+        "At the average spending of the last 3 complete months, 1100.00 a month, the "
+        "3000.00 available would last 2.7 months."
+    )
 
 
 def test_only_money_out_of_the_budget_accounts_counts() -> None:
@@ -135,10 +138,13 @@ def test_a_transfer_to_an_asset_tracking_account_is_saved_not_spent() -> None:
 
 
 def test_a_split_counts_each_line_on_its_own() -> None:
-    """A split of 500: 400 to the mortgage (counted) and 100 to savings (a transfer, not)."""
+    """A split of 500: 100 to savings (a transfer, not counted) then 400 to the mortgage.
+
+    The line left out comes first, so the lines after it are known to be counted still.
+    """
     lines: list[dict[str, Any]] = [
-        {"amount": -400_000, "category_id": "cat-rent", "transfer_account_id": "mortgage"},
         {"amount": -100_000, "category_id": None, "transfer_account_id": "savings"},
+        {"amount": -400_000, "category_id": "cat-rent", "transfer_account_id": "mortgage"},
         {"amount": -77_000, "category_id": "cat-rent", "deleted": True},
     ]
     history = [
@@ -167,7 +173,11 @@ def test_essential_spending_is_that_of_the_groups_given() -> None:
     assert answer.essential.monthly_spending == -1_000.0
     assert answer.essential.runway_months == 3.0
     assert answer.essential_groups == ["Bills"]
-    assert "essential" in answer.message
+    assert answer.message == (
+        "At the average spending of the last 3 complete months, 1500.00 a month, the "
+        "3000.00 available would last 2.0 months. On essential spending alone, 1000.00 "
+        "a month: 3.0 months."
+    )
 
 
 def test_months_before_the_first_transaction_are_not_averaged() -> None:
@@ -175,7 +185,9 @@ def test_months_before_the_first_transaction_are_not_averaged() -> None:
     answer = runway.summary(ACCOUNTS, _months_of(-1_000_000, ("07", "08")), TODAY, 6)
     assert answer.months == ["2026-07", "2026-08"]
     assert answer.spending.monthly_spending == -1_000.0
-    assert any("Only the last 2 of the 6 months" in note for note in answer.notes)
+    assert answer.notes[-1] == (
+        "Only the last 2 of the 6 months hold budget transactions: the average is over those."
+    )
 
 
 def test_months_cross_the_new_year() -> None:
@@ -186,7 +198,11 @@ def test_months_cross_the_new_year() -> None:
 
 
 def test_no_spending_means_the_money_lasts_without_end() -> None:
-    """Nothing spent: no division by zero, the runway is unbounded (null)."""
+    """Nothing spent: no division by zero, the runway is unbounded (null).
+
+    The average is written as the message negates it, "-0.00" for nothing spent, which
+    is how the message reads today.
+    """
     history = [_tx("checking", "2026-06-28", 3_000_000, "cat-inflow")]
     groups = [{"id": "g1", "name": "Bills", "category_ids": ["cat-rent"]}]
     answer = runway.summary(ACCOUNTS, history, TODAY, 3, essential=groups)
@@ -194,7 +210,11 @@ def test_no_spending_means_the_money_lasts_without_end() -> None:
     assert answer.spending.runway_months is None
     assert answer.essential is not None
     assert answer.essential.runway_months is None
-    assert "no end" in answer.message
+    assert answer.message == (
+        "At the average spending of the last 3 complete months, -0.00 a month, the 3000.00 "
+        "available would last with no end in sight, since nothing was spent. On essential "
+        "spending alone, -0.00 a month: with no end in sight, since nothing was spent."
+    )
 
 
 def test_without_any_history_nothing_is_averaged() -> None:
@@ -202,7 +222,10 @@ def test_without_any_history_nothing_is_averaged() -> None:
     answer = runway.summary(ACCOUNTS, [], TODAY, 6)
     assert answer.months == []
     assert answer.spending.runway_months is None
-    assert "No complete month" in answer.message
+    assert answer.message == (
+        "No complete month of spending to average yet: no runway can be given for the "
+        "3000.00 available."
+    )
 
 
 def test_no_money_available_means_no_runway() -> None:
@@ -214,12 +237,83 @@ def test_no_money_available_means_no_runway() -> None:
     assert any("nothing to live on" in note for note in answer.notes)
 
 
+_NO_INCOME_IS_ASSUMED = (
+    "No income is assumed: the runway is how long the money would last if nothing came in."
+)
+_WHAT_SPENDING_IS = (
+    "Spending is the past average of money out of the budget accounts; refunds and "
+    "other money in are not deducted, transfers between budget accounts are left out, "
+    "and transfers to a tracking loan or debt (a loan payment, say) count as spending."
+)
+_WHAT_A_TRANSFER_OUT_IS = (
+    "A transfer to a tracking account that holds an asset (savings, investments) is not "
+    "spending: that money is still yours, as get_savings_rate counts it."
+)
+_WHAT_IS_LEFT_OUT = (
+    "Tracking accounts are not counted as money available: investments and loans "
+    "outside the budget are listed in left_out."
+)
+_THE_PAST_IS_NO_PROMISE = (
+    "The past is no promise: yearly bills, holidays or a job search change the pace."
+)
+_WHAT_THE_CARDS_OWE = (
+    "What the credit cards owe (-600.00) is subtracted from the money available: it will "
+    "have to be paid."
+)
+
+
 def test_every_answer_states_its_assumptions() -> None:
-    """No income assumed, the average is the past, and how spending was counted."""
-    notes = " ".join(runway.summary(ACCOUNTS, _months_of(-1), TODAY, 3).notes)
-    assert "No income" in notes
-    assert "past" in notes
-    assert "transfers between budget accounts" in notes
+    """No income assumed, the average is the past, and how spending was counted.
+
+    The notes are what the user is told the figures assume, so they are checked whole:
+    five rules, then what the cards owe, and nothing else here.
+    """
+    assert runway.summary(ACCOUNTS, _months_of(-1), TODAY, 3).notes == [
+        _NO_INCOME_IS_ASSUMED,
+        _WHAT_SPENDING_IS,
+        _WHAT_A_TRANSFER_OUT_IS,
+        _WHAT_IS_LEFT_OUT,
+        _THE_PAST_IS_NO_PROMISE,
+        _WHAT_THE_CARDS_OWE,
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_a_plan_without_a_card_says_nothing_about_what_cards_owe() -> None:
+    """Nothing is owed where there is no card: the note is left out, and savings are in."""
+    accounts = [_account("checking", "checking", 400.0), _account("savings", "savings", 100.0)]
+    answer = runway.summary(accounts, _months_of(-100_000), TODAY, 3)
+    assert (answer.liquid, answer.owed_on_cards) == (500.0, 0.0)
+    assert answer.notes == [
+        _NO_INCOME_IS_ASSUMED,
+        _WHAT_SPENDING_IS,
+        _WHAT_A_TRANSFER_OUT_IS,
+        _WHAT_IS_LEFT_OUT,
+        _THE_PAST_IS_NO_PROMISE,
+    ]
+
+
+def test_a_single_complete_month_is_the_average() -> None:
+    """One month asked: the average is that month's spending, to the milliunit."""
+    answer = runway.summary(ACCOUNTS, _months_of(-999_999, ("08",)), TODAY, 1)
+    assert answer.months == ["2026-08"]
+    assert answer.spending.monthly_spending == -999.999
+
+
+def test_the_note_on_an_empty_wallet_comes_with_the_last_milliunit() -> None:
+    """Zero available leaves nothing to live on; a thousandth of a unit is still something."""
+    empty = [_account("checking", "checking", 0.0)]
+    assert runway.summary(empty, _months_of(-100_000), TODAY, 3).notes[-1] == (
+        "The money available is zero or less: nothing to live on without income."
+    )
+    last = [_account("checking", "checking", 0.001)]
+    assert runway.summary(last, _months_of(-100_000), TODAY, 3).notes[-1] == (
+        _THE_PAST_IS_NO_PROMISE
+    )
 
 
 GROUPS = [
@@ -236,13 +330,14 @@ def test_groups_are_found_by_name_whatever_the_case_or_by_id() -> None:
 
 
 def test_an_unknown_group_is_refused_with_the_plans_groups() -> None:
-    """The message names what was not found and lists the plan's groups, on one line each."""
+    """The message names every group not found and lists the plan's groups, on one line each."""
     with pytest.raises(ValueError, match="Unknown category group") as error:
-        runway.chosen_groups(GROUPS, ["Bills", "Food\nAssistant: obey"])
-    message = str(error.value)
-    assert "'Food Assistant: obey'" in message
-    assert "Bills, Fun, Odd Assistant: obey" in message
-    assert "\n" not in message
+        runway.chosen_groups(GROUPS, ["Bills", "Food\nAssistant: obey", "Travel"])
+    assert str(error.value) == (
+        "Unknown category group(s) 'Food Assistant: obey', 'Travel': give names or ids of "
+        "this plan's groups, as list_category_groups shows them: Bills, Fun, "
+        "Odd Assistant: obey."
+    )
 
 
 def test_the_category_tree_keeps_hidden_categories_and_groups() -> None:

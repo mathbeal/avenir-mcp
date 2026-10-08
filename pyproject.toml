@@ -200,9 +200,11 @@ DEP004 = ["yaml", "pytest_benchmark"]
 paths = ["avenir_mcp", "tests", "evals", "docsgen", "benchmarks", "vulture_whitelist.py"]
 ignore_decorators = ["@mcp.tool", "@mcp.resource", "@mcp.prompt", "@pytest.fixture"]
 
-# Mutation testing (`just mutate`): the modules that compute, against their own tests.
+# Mutation testing (`just mutate`): the modules that compute, against the tests that cover
+# them. What is left out mutates nothing: the client, the transport, the journal and the
+# tool wrappers are checked by their own tests, not by changing them at random.
 [tool.mutmut]
-paths_to_mutate = ["avenir_mcp/"]
+source_paths = ["avenir_mcp/"]
 do_not_mutate = [
     "avenir_mcp/__init__.py",
     "avenir_mcp/__main__.py",
@@ -220,14 +222,36 @@ do_not_mutate = [
 ]
 also_copy = ["evals/"]
 pytest_add_cli_args = ["--no-cov", "-p", "no:cacheprovider"]
-tests_dir = [
+# Only these tests run against a mutant, so every module above has to be covered by one
+# of them: a module no file here reaches comes back "no tests", which measures nothing.
+# Most are the module's own tests; the three `test_protocol_*` files are there because
+# they are the only tests of a branch: a budget with no credit card, a month outside the
+# history asked for, and a payee name holding a NUL.
+pytest_add_cli_args_test_selection = [
+    "tests/test_age.py",
     "tests/test_analytics.py",
+    "tests/test_charges.py",
     "tests/test_classifier.py",
+    "tests/test_flags.py",
     "tests/test_forecast.py",
+    "tests/test_networth.py",
+    "tests/test_payees.py",
+    "tests/test_payoff.py",
     "tests/test_properties.py",
+    "tests/test_protocol_create.py",
+    "tests/test_protocol_runway.py",
+    "tests/test_protocol_savings.py",
     "tests/test_reconcile.py",
+    "tests/test_runway.py",
+    "tests/test_savings.py",
+    "tests/test_schedule.py",
+    "tests/test_search.py",
+    "tests/test_split.py",
+    "tests/test_targets.py",
     "tests/test_text.py",
     "tests/test_triage.py",
+    "tests/test_underfunded.py",
+    "tests/test_updates.py",
     "tests/test_writes.py",
 ]
 

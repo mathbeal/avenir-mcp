@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 import pytest
@@ -108,17 +108,28 @@ def test_bank_text_is_made_safe_to_show() -> None:
 @pytest.mark.parametrize(
     ("kw", "message"),
     [
-        ({"since": date(2026, 9, 15), "until": date(2026, 9, 9)}, "before"),
-        ({"since": date(2025, 1, 1), "until": date(2026, 9, 15)}, "366 days"),
-        ({"account_ids": ["a-gone"]}, "list_accounts"),
+        (
+            {"since": date(2026, 9, 15), "until": date(2026, 9, 9)},
+            "until_date 2026-09-09 is before since_date 2026-09-15: swap them.",
+        ),
+        (
+            {"since": date(2025, 1, 1), "until": date(2026, 9, 15)},
+            "The dates span more than 366 days: search a shorter period.",
+        ),
+        (
+            {"account_ids": ["a-gone"]},
+            "Account a-gone is not in this plan: use an id from list_accounts.",
+        ),
     ],
+    ids=["reversed dates", "too long a span", "unknown account"],
 )
 def test_what_cannot_be_searched_is_refused_with_what_to_do(
     kw: dict[str, Any], message: str
 ) -> None:
-    """Each refusal says what to fix."""
-    with pytest.raises(ValueError, match=message):
+    """Each refusal names what is wrong and what to do, word for word."""
+    with pytest.raises(ValueError) as refusal:
         _find(**kw)
+    assert str(refusal.value) == message
 
 
 def test_a_deleted_transaction_is_never_found() -> None:
@@ -174,5 +185,77 @@ def test_a_payee_matches_the_merchant_whatever_the_bank_label() -> None:
 
 def test_an_unknown_category_is_refused_with_what_to_do() -> None:
     """A category id that is not in the plan is named, with where to find one."""
-    with pytest.raises(ValueError, match="c-gone.*get_category_balances"):
+    with pytest.raises(ValueError) as refusal:
         search.find(_TXS, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1), category_ids=["c-gone"])
+    assert str(refusal.value) == (
+        "Category c-gone is not in this plan: use a category_id from get_category_balances."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_the_two_dates_may_be_the_same_day() -> None:
+    """One day is a period: the same date twice is not reversed dates."""
+    found = _find(since=date(2026, 9, 12), until=date(2026, 9, 12))
+    assert [m.transaction_id for m in found.transactions] == ["t2", "t3"]
+
+
+def test_a_transaction_dated_the_last_day_is_found() -> None:
+    """until_date is included, as the tool says."""
+    found = _find(since=date(2026, 9, 1), until=date(2026, 9, 20), amount=-43.21)
+    assert "t4" in [m.transaction_id for m in found.transactions]
+
+
+def test_a_span_of_exactly_a_year_is_allowed() -> None:
+    """366 days is the longest period, not the first one refused."""
+    since = date(2025, 9, 15)
+    found = _find(since=since, until=since + timedelta(days=search.MAX_DAYS))
+    assert [m.transaction_id for m in found.transactions] == ["t2", "t3", "t5", "t1"]
+
+
+def test_exactly_as_many_matches_as_the_limit_is_not_truncated() -> None:
+    """A page that holds every match says so: nothing is left to narrow down."""
+    found = _find(amount=-43.21, limit=3)
+    assert len(found.transactions) == 3
+    assert found.truncated is False
+
+
+def test_a_split_whose_every_line_is_deleted_names_its_own_category() -> None:
+    """Deleted lines are gone: the transaction is no longer split."""
+    txs = [
+        _tx(
+            "was-split",
+            "2026-09-10",
+            -1_000,
+            category_id="c-food",
+            subtransactions=[{"id": "s1", "category_id": "c-food", "deleted": True}],
+        )
+    ]
+    [match] = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1)).transactions
+    assert (match.split, match.category) == (False, "Groceries")
+
+
+def test_a_split_never_names_a_category_even_when_ynab_left_one_on_it() -> None:
+    """The lines carry the categories: naming the parent's would say the wrong thing."""
+    txs = [
+        _tx(
+            "split",
+            "2026-09-10",
+            -1_000,
+            category_id="c-food",
+            subtransactions=[{"id": "s1", "category_id": "c-food", "deleted": False}],
+        )
+    ]
+    [match] = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1)).transactions
+    assert (match.split, match.category) == (True, None)
+
+
+def test_a_transaction_ynab_sent_without_a_cleared_state_counts_as_uncleared() -> None:
+    """The field is required in the answer: the safest reading is that the bank has not shown it."""
+    txs = [_tx("t9", "2026-09-10", -1_000)]
+    del txs[0]["cleared"]
+    [match] = search.find(txs, _ACCOUNTS, _CATEGORIES, since=date(2026, 9, 1)).transactions
+    assert match.cleared == "uncleared"

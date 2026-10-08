@@ -94,22 +94,68 @@ def test_a_line_may_go_the_other_way() -> None:
 @pytest.mark.parametrize(
     ("tx", "lines", "message"),
     [
-        (None, _lines((-86.40, "c-food")), "at least two lines"),
-        (None, _lines((-86.40, "c-food"), (0, "c-home")), "zero"),
-        (None, _lines((-81.15, "c-food"), (-5.25, "c-gone")), "not in this plan"),
-        (None, _lines((-81.15, "c-food"), (-5.25, "c-none")), "Uncategorized"),
-        (_tx(subtransactions=[{"id": "s1"}]), _GOOD, "already split"),
-        (_tx(transfer_account_id="acc2"), _GOOD, "transfer"),
-        (_tx(account_id="tracking"), _GOOD, "off-budget"),
-        (_tx(deleted=True), _GOOD, "deleted"),
+        (
+            None,
+            _lines((-86.40, "c-food")),
+            "Give at least two lines: to give the whole transaction one category, "
+            "use apply_categories.",
+        ),
+        (None, _lines((-86.40, "c-food"), (0, "c-home")), "A line is zero: leave it out."),
+        (
+            None,
+            _lines((-81.15, "c-food"), (-5.25, "c-gone")),
+            "Category c-gone is not in this plan: use a category_id from suggest_categories "
+            "or get_category_balances.",
+        ),
+        (
+            None,
+            _lines((-81.15, "c-food"), (-5.25, "c-none")),
+            "Category c-none is YNAB's internal Uncategorized: choose a real category.",
+        ),
+        (
+            _tx(subtransactions=[{"id": "s1"}]),
+            _GOOD,
+            "Transaction t1 is already split: YNAB's API cannot change its lines, "
+            "change them in YNAB.",
+        ),
+        (
+            _tx(transfer_account_id="acc2"),
+            _GOOD,
+            "Transaction t1 is a transfer between accounts: it cannot be split.",
+        ),
+        (
+            _tx(account_id="tracking"),
+            _GOOD,
+            "Transaction t1 is on an off-budget account: YNAB does not split those.",
+        ),
+        (
+            _tx(deleted=True),
+            _GOOD,
+            "Transaction t1 was deleted in YNAB: there is nothing to split.",
+        ),
+    ],
+    ids=[
+        "one line",
+        "a zero line",
+        "unknown category",
+        "internal Uncategorized",
+        "already split",
+        "transfer",
+        "off-budget account",
+        "deleted",
     ],
 )
 def test_what_cannot_be_split_is_refused_with_what_to_do(
     tx: dict[str, Any] | None, lines: list[SplitLine], message: str
 ) -> None:
-    """Each refusal says what is wrong, so the agent can fix its call."""
-    with pytest.raises(ValueError, match=message):
+    """Each refusal names the transaction or category and what to do, word for word.
+
+    The message is what the agent reads to fix its call: it is checked whole, not by
+    a fragment that a rewording could still pass.
+    """
+    with pytest.raises(ValueError) as refusal:
         _plan(tx, lines, off_budget={"tracking"})
+    assert str(refusal.value) == message
 
 
 def test_a_transfer_to_a_tracking_account_can_be_split() -> None:
@@ -142,9 +188,13 @@ def test_a_line_to_a_credit_card_payment_category_is_refused() -> None:
 
 
 def test_an_unknown_transaction_is_refused() -> None:
-    """The id must come from the budget."""
-    with pytest.raises(ValueError, match="suggest_categories"):
+    """The id must come from the budget, and the refusal says which tool gives one."""
+    with pytest.raises(ValueError) as refusal:
         split.plan_split([_tx()], _CATEGORIES, "t-gone", _GOOD)
+    assert str(refusal.value) == (
+        "Transaction t-gone is not in this plan: "
+        "use a transaction_id returned by suggest_categories."
+    )
 
 
 def test_a_deleted_subtransaction_list_does_not_count_as_a_split() -> None:

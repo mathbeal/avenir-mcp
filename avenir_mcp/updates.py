@@ -110,7 +110,11 @@ def latest_version(path: Path, now: datetime, get: Getter = httpx.get) -> str | 
         The latest version, or None when unknown.
     """
     try:
-        cached = json.loads(path.read_text(encoding="utf-8"))
+        # The cache holds the JSON written below, which json.dumps escapes to ASCII, so
+        # every encoding Python can be told to use here reads back the same text. On its
+        # own line, so the pragma covers no more than this one read.
+        remembered = path.read_text(encoding="utf-8")  # pragma: no mutate
+        cached = json.loads(remembered)
         if now - datetime.fromisoformat(cached["checked_at"]) < FRESH_FOR:
             latest = cached["latest"]
             return latest if isinstance(latest, str) else None
@@ -119,9 +123,11 @@ def latest_version(path: Path, now: datetime, get: Getter = httpx.get) -> str | 
     latest = get_latest(get)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps({"checked_at": now.isoformat(), "latest": latest}), encoding="utf-8"
-        )
+        answer = json.dumps({"checked_at": now.isoformat(), "latest": latest})
+        # json.dumps escapes anything beyond ASCII, so every encoding Python can be told
+        # to use here writes the same bytes. On its own line, so the pragma covers no
+        # more than this one write.
+        path.write_text(answer, encoding="utf-8")  # pragma: no mutate
     except OSError as error:
         logger.info("Update check not remembered: %s", error)
     return latest
@@ -161,10 +167,14 @@ def off(env: Mapping[str, str]) -> bool:
         True with AVENIR_MCP_NO_UPDATE_CHECK=1, with DO_NOT_TRACK=1 (the common
         convention for tools that would call home), or in a CI run (CI=true or 1).
     """
+    # The empty default only marks "no CI variable", and it is matched against "true" and
+    # "1", so another default answers the same. On its own line, so the pragma covers no
+    # more than this one lookup.
+    in_ci = env.get("CI", "")  # pragma: no mutate
     return (
         env.get("AVENIR_MCP_NO_UPDATE_CHECK") == "1"
         or env.get("DO_NOT_TRACK") == "1"
-        or env.get("CI", "").lower() in {"true", "1"}
+        or in_ci.lower() in {"true", "1"}
     )
 
 

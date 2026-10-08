@@ -130,19 +130,49 @@ def test_an_amount_alone_on_a_category_without_target_is_monthly() -> None:
 @pytest.mark.parametrize(
     ("amount", "date", "frequency", "expected"),
     [
-        (100.0, "2027-01-01", "monthly", "either a date or a frequency"),
-        (0.0, None, None, "greater than 0"),
-        (-5.0, None, "monthly", "greater than 0"),
-        (None, "2027-01-01", None, "no date"),
-        (None, None, "monthly", "no date"),
+        (
+            100.0,
+            "2027-01-01",
+            "monthly",
+            "Give either a date or a frequency, not both: YNAB refuses the two.",
+        ),
+        (
+            0.0,
+            None,
+            None,
+            "The amount must be greater than 0; to remove the target, give none.",
+        ),
+        (
+            -5.0,
+            None,
+            "monthly",
+            "The amount must be greater than 0; to remove the target, give none.",
+        ),
+        (
+            None,
+            "2027-01-01",
+            None,
+            "To remove the target, give no amount, no date and no frequency.",
+        ),
+        (
+            None,
+            None,
+            "monthly",
+            "To remove the target, give no amount, no date and no frequency.",
+        ),
     ],
+    ids=["both", "zero", "negative", "removal with a date", "removal with a frequency"],
 )
 def test_contradictory_targets_are_refused(
     amount: float | None, date: str | None, frequency: str | None, expected: str
 ) -> None:
-    """YNAB refuses a date with a frequency; a removal takes neither; amounts are positive."""
-    with pytest.raises(ValueError, match=expected):
+    """YNAB refuses a date with a frequency; a removal takes neither; amounts are positive.
+
+    Each message is checked whole: it is what the agent reads to fix the call.
+    """
+    with pytest.raises(ValueError) as refusal:
         targets.plan(_cat(), amount=amount, date=date, frequency=frequency)
+    assert str(refusal.value) == expected
 
 
 def test_an_amount_alone_on_a_card_category_is_monthly_funding() -> None:
@@ -186,3 +216,69 @@ def test_nothing_to_change_is_said() -> None:
     """The same target again is no change."""
     change = targets.plan(NEED_MONTHLY, amount=50.0, date=None, frequency="monthly")
     assert change.unchanged
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_a_target_of_one_unit_is_allowed() -> None:
+    """Greater than zero means one is enough, not that one is refused too."""
+    change = targets.plan(_cat(), amount=1.0, date=None, frequency=None)
+    assert change.fields == {"goal_target": 1_000}
+
+
+@pytest.mark.parametrize(
+    ("category", "expected"),
+    [
+        (_cat(goal_type="NEED", goal_target=50_000), "50.00 (spending target)"),
+        (_cat(goal_type="NEED", goal_target=50_000, goal_cadence=0), "50.00 (spending target)"),
+        (
+            _cat(goal_type="NEED", goal_target=50_000, goal_cadence=3, goal_cadence_frequency=1),
+            "50.00 (spending target)",
+        ),
+        (_cat(goal_type="WHAT", goal_target=50_000), "50.00 (WHAT)"),
+        (_cat(goal_type="NEED"), "no target"),
+        (_cat(goal_target=50_000), "no target"),
+    ],
+    ids=[
+        "no cadence",
+        "cadence 0",
+        "cadence YNAB alone sets",
+        "unknown kind",
+        "no amount",
+        "no kind",
+    ],
+)
+def test_a_target_the_api_cannot_set_again_is_described_by_its_kind(
+    category: dict[str, Any], expected: str
+) -> None:
+    """No rhythm the API can set: the YNAB kind is shown, by its own id when unknown.
+
+    Half a target, which YNAB should not return, reads as no target rather than failing.
+    """
+    assert targets.describe(category) == expected
+
+
+@pytest.mark.parametrize(
+    "category",
+    [_cat(goal_type="NEED"), _cat(goal_target=50_000)],
+    ids=["no amount", "no kind"],
+)
+def test_half_a_target_is_recreated_as_no_target(category: dict[str, Any]) -> None:
+    """A category YNAB returns with only one of the two fields is treated as having none."""
+    assert targets.recreate(category) == {"goal_target": None}
+
+
+def test_an_amount_alone_over_half_a_target_sets_a_monthly_one() -> None:
+    """Both fields make a target: with only one, there is no kind to keep."""
+    change = targets.plan(_cat(goal_type="NEED"), amount=40.0, date=None, frequency=None)
+    assert change.after == "40.00 each month"
+    assert change.undo == {"goal_target": None}
+
+
+def test_the_preview_of_a_target_by_a_date_says_the_date() -> None:
+    """What the user confirms is the date asked for, not the rhythm of a monthly target."""
+    change = targets.plan(_cat(), amount=1200.0, date="2027-06-01", frequency=None)
+    assert change.after == "1200.00 by 2027-06-01"

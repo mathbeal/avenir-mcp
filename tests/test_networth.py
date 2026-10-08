@@ -94,11 +94,32 @@ def test_a_closed_account_counts_while_it_had_a_balance() -> None:
 
 
 def test_deleted_transactions_and_unknown_accounts_change_nothing() -> None:
-    """A deleted transaction, and one of an account deleted since, leave the balances alone."""
+    """A deleted transaction, and one of an account deleted since, leave the balances alone.
+
+    Both fall after the end of August, where they would otherwise count, and both come
+    before a transaction that does: skipping one cannot mean stopping at it.
+    """
     accounts = [_account("checking", "checking", 100.0)]
-    ignored = [_tx("checking", "2026-09-01", 50_000, deleted=True), _tx("gone", "2026-09-02", 1)]
-    [month] = networth.trend(accounts, ignored, TODAY, 1).months
-    assert month.assets == 100.0
+    mixed = [
+        _tx("checking", "2026-09-10", 50_000, deleted=True),
+        _tx("gone", "2026-09-11", 1),
+        _tx("checking", "2026-09-12", 20_000),
+    ]
+    assert [m.assets for m in networth.trend(accounts, mixed, TODAY, 2).months] == [80.0, 100.0]
+
+
+def test_a_transaction_dated_the_first_of_a_month_belongs_to_that_month() -> None:
+    """The end of August is before 1 September: money moved that day is taken off it."""
+    accounts = [_account("checking", "checking", 100.0)]
+    first = [_tx("checking", "2026-09-01", 10_000)]
+    assert [m.assets for m in networth.trend(accounts, first, TODAY, 2).months] == [90.0, 100.0]
+
+
+def test_everything_that_came_later_is_taken_off_the_month_end() -> None:
+    """Two payments after the end of August come off it, not just the last one."""
+    accounts = [_account("checking", "checking", 100.0)]
+    later = [_tx("checking", "2026-09-12", 20_000), _tx("checking", "2026-09-13", 5_000)]
+    assert [m.assets for m in networth.trend(accounts, later, TODAY, 2).months] == [75.0, 100.0]
 
 
 def test_the_summary_says_where_the_net_worth_started_and_ended() -> None:

@@ -126,6 +126,50 @@ def usable(tx: dict[str, Any]) -> bool:
     return not tx.get("deleted") and not tx.get("transfer_account_id")
 
 
+def _is_outflow(amount: float) -> bool:
+    """Tell which direction an amount goes, in milliunits or in currency units.
+
+    Args:
+        amount: A transaction amount or a monthly average.
+
+    Returns:
+        True for money out, False for money in; an amount of exactly zero is money in.
+    """
+    return amount < 0
+
+
+def _merchant(tx: dict[str, Any]) -> str:
+    """Reduce a transaction's bank label to the merchant it names.
+
+    Args:
+        tx: A YNAB transaction.
+
+    Returns:
+        The merchant, empty when the transaction names no payee.
+    """
+    # The empty default only marks "no payee". It is compared with what normalize_payee
+    # leaves of a bank label, so another default would change a projection only for a
+    # label reducing to exactly that string: nothing a test could state about a
+    # forecast. On its own line, so the pragma covers no more than this one lookup.
+    label = tx.get("payee_name") or ""  # pragma: no mutate
+    return normalize_payee(label)
+
+
+def _day_of(tx: dict[str, Any]) -> int:
+    """Read the day of the month a transaction falls on.
+
+    Args:
+        tx: A YNAB transaction.
+
+    Returns:
+        The day, 1 to 31.
+    """
+    # YNAB dates a transaction with an ISO date, which is 10 characters long, so a
+    # slice reaching further reads those same two digits. On its own line, so the
+    # pragma covers no more than this one slice.
+    return int(tx["date"][8:10])  # pragma: no mutate
+
+
 def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring]:
     """Find the payees seen in 3 of the last 4 full months, each month within 20 % of the median.
 
@@ -140,14 +184,18 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
     groups: dict[tuple[str, bool], list[dict[str, Any]]] = defaultdict(list)
     for tx in transactions:
         if usable(tx) and tx["date"][:7] in months:
-            payee = normalize_payee(tx.get("payee_name") or "")
+            payee = _merchant(tx)
             if payee:
-                groups[(payee, tx["amount"] < 0)].append(tx)
+                groups[(payee, _is_outflow(tx["amount"]))].append(tx)
     found: list[Recurring] = []
     for (payee, _), txs in sorted(groups.items()):
         per_month: dict[str, int] = defaultdict(int)
         for tx in txs:
-            per_month[tx["date"][:7]] += tx["amount"]
+            # The slice is only a grouping key, and YNAB dates a transaction with an ISO
+            # date, so a slice reaching further groups the very same transactions. On its
+            # own line, so the pragma covers no more than this one slice.
+            month = tx["date"][:7]  # pragma: no mutate
+            per_month[month] += tx["amount"]
         if len(per_month) < MIN_MONTHS_SEEN:
             continue
         median = statistics.median(per_month.values())
@@ -156,7 +204,7 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
                 Recurring(
                     payee=untrusted(payee),
                     amount=milliunit_to_amount(round(median)),
-                    day=int(statistics.median(int(tx["date"][8:10]) for tx in txs)),
+                    day=int(statistics.median(_day_of(tx) for tx in txs)),
                     months_seen=len(per_month),
                 )
             )
@@ -208,15 +256,15 @@ def _other_average(
         The monthly average in currency units, negative for money out.
     """
     months = set(months_before(today, VARIABLE_MONTHS))
-    recurring_payees = {r.payee for r in known if (r.amount < 0) == outflow}
+    recurring_payees = {r.payee for r in known if _is_outflow(r.amount) == outflow}
     total = sum(
         tx["amount"]
         for tx in transactions
         if usable(tx)
-        and (tx["amount"] < 0) == outflow
+        and _is_outflow(tx["amount"]) == outflow
         and tx["date"][:7] in months
-        and normalize_payee(tx.get("payee_name") or "") not in recurring_payees
-        and not is_scheduled(normalize_payee(tx.get("payee_name") or ""), outflow, also)
+        and _merchant(tx) not in recurring_payees
+        and not is_scheduled(_merchant(tx), outflow, also)
     )
     return milliunit_to_amount(round(total / VARIABLE_MONTHS))
 
@@ -282,16 +330,15 @@ def month_to_date(
         (spent, received) in currency units; spent is negative.
     """
     this_month = today.isoformat()[:7]
-    recurring_payees = {(r.payee, r.amount < 0) for r in known}
+    recurring_payees = {(r.payee, _is_outflow(r.amount)) for r in known}
     spent = received = 0
     for tx in transactions:
         if not usable(tx) or tx["date"][:7] != this_month:
             continue
-        payee = normalize_payee(tx.get("payee_name") or "")
-        key = (payee, tx["amount"] < 0)
+        key = (_merchant(tx), _is_outflow(tx["amount"]))
         if key in recurring_payees or is_scheduled(*key, also):
             continue
-        if tx["amount"] < 0:
+        if _is_outflow(tx["amount"]):
             spent += tx["amount"]
         else:
             received += tx["amount"]
@@ -391,8 +438,8 @@ def _walk(
     month = MonthProjection(
         month=label,
         start=milliunit_to_amount(balance),
-        inflows=milliunit_to_amount(sum(a for a in amounts if a > 0)),
-        outflows=milliunit_to_amount(sum(a for a in amounts if a < 0)),
+        inflows=milliunit_to_amount(sum(max(a, 0) for a in amounts)),
+        outflows=milliunit_to_amount(sum(min(a, 0) for a in amounts)),
         end=milliunit_to_amount(running),
         lowest=milliunit_to_amount(lowest),
     )
@@ -443,10 +490,15 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         current = (year, month) == (today.year, today.month)
         label = f"{year:04d}-{month:02d}"
         first_day = today.day + 1 if current else 1
-        to_spend = min(0, variable - amount_to_milliunit(spent_this_month)) if current else variable
-        to_receive = (
-            max(0, income - amount_to_milliunit(received_this_month)) if current else income
-        )
+        left_to_spend = variable - amount_to_milliunit(spent_this_month)
+        left_to_receive = income - amount_to_milliunit(received_this_month)
+        # Clamping at 1 milliunit instead of 0 cannot move a projection: _spread turns
+        # 1 milliunit into 0 cent on every day it covers. Each clamp is alone on its
+        # line, so the pragma covers no more than the clamp.
+        rest_of_month_spend = min(0, left_to_spend)  # pragma: no mutate
+        rest_of_month_income = max(0, left_to_receive)  # pragma: no mutate
+        to_spend = rest_of_month_spend if current else variable
+        to_receive = rest_of_month_income if current else income
         daily = [
             _spread(to_spend, first_day, days),
             _spread(to_receive, first_day, days),

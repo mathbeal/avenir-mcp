@@ -112,7 +112,7 @@ def spending_trends(
     trends: dict[str, list[MonthSpending]] = {}
     for month_label, categories in months_data:
         for cat in filter(_usable, categories):
-            name = cat.get("name", "")
+            name = cat.get("name")
             if not name:
                 continue
             amount = client.milliunit_to_amount(abs(cat.get("activity", 0)))
@@ -254,6 +254,21 @@ def month_overview(month: dict[str, Any]) -> MonthOverview:
         The month's totals and the usable categories whose balance is negative.
     """
     amount = client.milliunit_to_amount
+    overspent: list[Overspent] = []
+    for cat in month.get("categories", []):
+        # YNAB gives every category of a month its balance. The default only marks an
+        # absence, and a category with nothing left is not overspent either way. On its
+        # own line, so the pragma covers no more than this one lookup.
+        balance = cat.get("balance", 0)  # pragma: no mutate
+        if _usable(cat) and balance < 0:
+            overspent.append(
+                Overspent(
+                    category_id=cat["id"],
+                    name=cat["name"],
+                    group=cat.get("category_group_name", ""),
+                    balance=amount(balance),
+                )
+            )
     return MonthOverview(
         month=month["month"],
         income=amount(month.get("income", 0)),
@@ -261,16 +276,7 @@ def month_overview(month: dict[str, Any]) -> MonthOverview:
         activity=amount(month.get("activity", 0)),
         ready_to_assign=amount(month.get("to_be_budgeted", 0)),
         age_of_money=month.get("age_of_money"),
-        overspent=[
-            Overspent(
-                category_id=cat["id"],
-                name=cat["name"],
-                group=cat.get("category_group_name", ""),
-                balance=amount(cat["balance"]),
-            )
-            for cat in month.get("categories", [])
-            if _usable(cat) and cat.get("balance", 0) < 0
-        ],
+        overspent=overspent,
     )
 
 
@@ -298,5 +304,5 @@ def category_balances(
         )
         for cat in categories
         if _usable(cat)
-        and (include_empty or any(cat.get(key, 0) for key in ("budgeted", "activity", "balance")))
+        and (include_empty or any(cat.get(key) for key in ("budgeted", "activity", "balance")))
     ]

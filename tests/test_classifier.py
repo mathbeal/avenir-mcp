@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import importlib
+import logging
 from typing import Any
 from unittest.mock import patch
 
@@ -237,3 +238,37 @@ def test_history_goes_on_after_a_transaction_without_category() -> None:
         {"payee_name": "Rent", "category_id": "c2"},
     ]
     assert classifier.build_payee_history(txs) == {"AWS": {"c1": 1}, "RENT": {"c2": 1}}
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("payee", "history", "expected"),
+    [
+        ("NEVER SEEN", {}, "No usable history for this payee: no suggestion"),
+        ("AWS", {"AWS": {"c2": 4}}, "Suggestion found (confidence=1.00 ≥ 0.80)"),
+        (
+            "AWS",
+            {"AWS": {"c2": 3, "c1": 2}},
+            "Ambiguous payee (confidence=0.60 < 0.80): top-3 candidates",
+        ),
+    ],
+    ids=["no history", "confident", "ambiguous"],
+)
+def test_each_outcome_is_logged_with_the_confidence_it_was_decided_on(
+    caplog: pytest.LogCaptureFixture,
+    payee: str,
+    history: dict[str, dict[str, int]],
+    expected: str,
+) -> None:
+    """Why a payee was or was not classified is in the log, with both figures compared.
+
+    The message is read by whoever has to explain a suggestion afterwards, so it is
+    checked whole: a line saying only that something happened would not explain it.
+    """
+    caplog.set_level(logging.INFO, logger="avenir_mcp.classifier")
+    classifier.score_payee(payee, history, _CATEGORIES, threshold=0.80)
+    assert caplog.messages == [expected]

@@ -8,6 +8,8 @@ from __future__ import annotations
 import base64
 from typing import Any
 
+import pytest
+
 from avenir_mcp import text, triage
 
 _CATEGORIES: list[dict[str, Any]] = [
@@ -111,16 +113,6 @@ def test_long_bank_text_is_truncated() -> None:
     assert len(item.payee) == text.MAX_TEXT
     assert item.payee.endswith("…")
     assert len(item.memo or "") == text.MAX_TEXT
-
-
-def test_invalid_cursor_is_rejected_with_an_actionable_message() -> None:
-    """A cursor the server did not issue is refused, saying what to do."""
-    try:
-        triage.prepare([], _CATEGORIES, cursor="banana")
-    except ValueError as error:
-        assert "next_cursor" in str(error)
-    else:  # pragma: no cover
-        raise AssertionError("an invalid cursor must raise")
 
 
 def test_well_encoded_foreign_cursor_is_rejected() -> None:
@@ -271,3 +263,38 @@ def test_a_full_last_page_has_no_next_cursor() -> None:
     """When the items fill the page exactly, there is nothing more to fetch."""
     txs = [_tx(f"p{i}", "SHOP", date=f"2026-09-0{i + 1}") for i in range(2)]
     assert triage.prepare(txs, _CATEGORIES, limit=2).next_cursor is None
+
+
+def test_an_invalid_cursor_says_exactly_what_to_pass() -> None:
+    """The message is what the agent reads to recover a page: checked word for word."""
+    with pytest.raises(ValueError) as refusal:
+        triage.prepare([], _CATEGORIES, cursor="banana")
+    assert str(refusal.value) == (
+        "Invalid cursor: pass the next_cursor value from the previous page unchanged, "
+        "or omit it to start from the first page."
+    )
+
+
+def test_a_transaction_of_an_account_ynab_does_not_name_shows_an_empty_name() -> None:
+    """A pending transaction is still listed when its account carries no name."""
+    bare = _tx("p1", "SHOP")
+    del bare["account_name"]
+    [item] = triage.prepare([bare], _CATEGORIES).items
+    assert item.account == ""
+
+
+def test_a_category_in_no_group_is_offered_with_an_empty_group() -> None:
+    """YNAB always groups a category, but a missing group must not hide it from the agent."""
+    loose: list[dict[str, Any]] = [{"id": "c-loose", "name": "Loose", "deleted": False}]
+    page = triage.prepare([_tx("p1", "SHOP")], loose)
+    assert [(c.category_id, c.group) for c in page.categories] == [("c-loose", "")]
+
+
+def test_a_transaction_of_nothing_is_not_money_out() -> None:
+    """0.00 goes with the money coming in, when it is learnt and when it is read."""
+    learnt = [_tx(f"h{i}", "ADJUSTMENT", "c-fun", amount=0) for i in range(3)]
+    other_way = [_tx(f"o{i}", "ADJUSTMENT", "c-food", amount=-1_000) for i in range(3)]
+    page = triage.prepare(learnt + other_way + [_tx("p1", "ADJUSTMENT", amount=0)], _CATEGORIES)
+    [item] = page.items
+    assert item.suggestion is not None
+    assert item.suggestion.category_id == "c-fun"

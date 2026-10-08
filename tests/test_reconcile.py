@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 from avenir_mcp import reconcile
@@ -107,6 +107,17 @@ def test_reconciled_transactions_are_neither_pending_nor_to_reconcile() -> None:
     assert result.cleared_balance == 80.0
     assert result.uncleared_count == 0
     assert result.to_reconcile_count == 1
+
+
+def test_the_lookback_takes_in_its_own_first_day() -> None:
+    """Sixty days back counts as recent: a pair starting exactly there is still looked at."""
+    today = date(2026, 9, 24)
+    sixty_days_back = (today - timedelta(days=reconcile.DUPLICATE_LOOKBACK_DAYS)).isoformat()
+    txs = [
+        _tx("d1", -3000, payee_name="FERRY", date=sixty_days_back),
+        _tx("d2", -3000, payee_name="FERRY", date="2026-07-27"),
+    ]
+    assert reconcile.analyse("acc", txs, 0.0, today=today).possible_duplicates == [["d1", "d2"]]
 
 
 def test_duplicates_may_be_up_to_three_days_apart() -> None:
