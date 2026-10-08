@@ -263,12 +263,16 @@ def test_a_check_pypi_could_not_answer_says_why_in_the_log(
 def test_a_check_that_could_not_be_remembered_says_why_in_the_log(
     caplog: pytest.LogCaptureFixture, tmp_path: Path
 ) -> None:
-    """A cache that cannot be written is said once, with the error, and changes nothing."""
-    blocker = tmp_path / "file"
+    """A cache that cannot be written is said once, with the error, and changes nothing.
+
+    The error names the path it could not write, which the message has to carry; only its
+    last part is read here, since a path in an OSError is written differently per system.
+    """
+    blocker = tmp_path / "not-a-directory"
     blocker.write_text("")
     caplog.set_level(logging.INFO, logger="avenir_mcp.updates")
     get = getter({"info": {"version": "0.2.3"}})
     assert updates.latest_version(blocker / "latest.json", NOW, get) == "0.2.3"
     assert len(caplog.messages) == 1
     assert caplog.messages[0].startswith("Update check not remembered: ")
-    assert str(blocker.resolve()) in caplog.messages[0]
+    assert blocker.name in caplog.messages[0]
