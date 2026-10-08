@@ -150,7 +150,11 @@ def summary(  # pylint: disable=too-many-locals
     income_ids = {c["id"] for c in categories if c["id"] in internal and c["name"] != UNCATEGORIZED}
 
     history = [tx for tx in transactions if tx["account_id"] in budget and not tx.get("deleted")]
-    first = min((tx["date"][:7] for tx in history), default="9999-12")
+    # The sentinel only has to keep every month out when the plan holds no budget
+    # transaction at all: any text sorting after a YYYY-MM month does that. On its own
+    # line, so the pragma covers no more than the sentinel.
+    none_yet = "9999-12"  # pragma: no mutate
+    first = min((tx["date"][:7] for tx in history), default=none_yet)
     months = [month for month in months_before(today, months_count) if month >= first]
     income = dict.fromkeys(months, 0)
     spent = dict.fromkeys(months, 0)
@@ -163,12 +167,17 @@ def summary(  # pylint: disable=too-many-locals
         for line in lines_of(tx):
             amount, transfer = line["amount"], line.get("transfer_account_id")
             category = line.get("category_id")
+            # Which way the line goes. It is read only once the line is known to move
+            # something, since the first test below leaves on a line of zero, so a bound
+            # that includes zero, or one at 1, answers the same. On its own line, so the
+            # pragma covers no more than this comparison.
+            outflow = amount < 0  # pragma: no mutate
             # Nothing moved, money between budget accounts, or back from outside: skipped.
-            if not amount or transfer in budget or (transfer and amount > 0):
+            if not amount or transfer in budget or (transfer and not outflow):
                 continue
             if transfer in assets:
                 moved -= amount
-            elif amount < 0 or (category and category not in internal):
+            elif outflow or (category and category not in internal):
                 spent[month] += amount
             elif category not in income_ids:
                 uncategorized.append(amount)
