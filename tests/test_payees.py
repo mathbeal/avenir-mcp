@@ -113,24 +113,90 @@ def test_renaming_to_the_name_it_already_has_changes_nothing() -> None:
 @pytest.mark.parametrize(
     ("payee_id", "name", "expected"),
     [
-        ("p-404", "Shop", "p-404"),
-        ("p-gone", "Shop", "p-gone"),
-        ("p-transfer", "Shop", "transfer"),
-        ("p-rail", "   ", "empty"),
-        ("p-rail", "Rail\nCo", "line break"),
-        ("p-rail", "R" * 501, "500"),
-        ("p-fresh-05", "rail co", "already the name"),
+        ("p-404", "Shop", "Payee p-404 is not in this plan: use a payee_id from list_payees."),
+        ("p-gone", "Shop", "Payee p-gone is not in this plan: use a payee_id from list_payees."),
+        (
+            "p-transfer",
+            "Shop",
+            "Payee p-transfer is a transfer's: YNAB names it after the account the money "
+            "moves to. Rename the account in YNAB itself.",
+        ),
+        ("p-rail", "   ", "The new name is empty: give the merchant's name."),
+        (
+            "p-rail",
+            "Rail\nCo",
+            "'Rail Co' contains a line break, control or format character (such as a "
+            "zero-width or direction mark): give the name on one line, with visible "
+            "characters only.",
+        ),
+        (
+            "p-rail",
+            "R" * 501,
+            "The new name is 501 characters: YNAB refuses a payee name longer than 500.",
+        ),
+        (
+            "p-fresh-05",
+            "rail co",
+            "'rail co' is already the name of another payee: YNAB's API cannot merge two "
+            "payees. Merge them in YNAB, or choose another name.",
+        ),
     ],
+    ids=["unknown", "deleted", "transfer", "empty", "line break", "too long", "taken"],
 )
 def test_what_ynab_or_the_user_could_not_make_sense_of_is_refused(
     payee_id: str, name: str, expected: str
 ) -> None:
-    """Unknown or deleted payee, a transfer, an empty, forged, too long or taken name."""
-    with pytest.raises(ValueError, match=expected):
+    """Unknown or deleted payee, a transfer, an empty, forged, too long or taken name.
+
+    Each message is checked whole: it names the payee and what to do, and a deleted
+    payee must not be told it is a transfer's, whose own id holds the word.
+    """
+    with pytest.raises(ValueError) as refusal:
         payees.plan_rename(_PAYEES, _TRANSACTIONS, payee_id, name)
+    assert str(refusal.value) == expected
 
 
 def test_a_payee_may_keep_its_own_name_with_another_case() -> None:
     """Only another payee's name is taken: fixing the case of this one is a rename."""
     plan = payees.plan_rename(_PAYEES, _TRANSACTIONS, "p-rail", "Rail co")
     assert plan.to_name == "Rail co"
+
+
+# ---------------------------------------------------------------------------
+# Cases found by mutation testing
+# ---------------------------------------------------------------------------
+
+
+def test_a_name_of_exactly_what_ynab_accepts_is_allowed() -> None:
+    """500 characters is the longest name, not the first one refused."""
+    plan = payees.plan_rename(_PAYEES, _TRANSACTIONS, "p-rail", "R" * payees.MAX_NAME)
+    assert len(plan.to_name) == payees.MAX_NAME
+
+
+def test_a_deleted_payees_name_is_free_to_take() -> None:
+    """YNAB cannot merge two payees, but a deleted one is gone: its name is not taken."""
+    plan = payees.plan_rename(_PAYEES, _TRANSACTIONS, "p-rail", "Old Shop")
+    assert plan.to_name == "Old Shop"
+
+
+def test_renaming_a_payee_no_transaction_names_affects_none() -> None:
+    """A label YNAB kept without a transaction can be renamed, and changes no history."""
+    plan = payees.plan_rename(_PAYEES, _TRANSACTIONS, "p-fresh-19", "Market Fresh")
+    assert plan.transactions == 0
+
+
+def test_a_search_matches_a_label_the_merchant_no_longer_holds() -> None:
+    """The word fact is in the bank label and not in the merchant: either one finds it."""
+    found = payees.listing(_PAYEES, _TRANSACTIONS, search="fact")
+    assert {p.payee_id for p in found.payees} == {"p-fresh-05", "p-fresh-19"}
+
+
+def test_transactions_without_a_payee_are_passed_over_not_stopped_at() -> None:
+    """A transaction naming no payee, or deleted, comes before ones that count."""
+    mixed: list[dict[str, Any]] = [
+        {"id": "t0", "payee_id": None, "date": "2026-09-01", "deleted": False},
+        {"id": "t0b", "payee_id": "p-rail", "date": "2026-09-02", "deleted": True},
+        {"id": "t1", "payee_id": "p-rail", "date": "2026-09-03", "deleted": False},
+    ]
+    rail = next(p for p in payees.listing(_PAYEES, mixed).payees if p.payee_id == "p-rail")
+    assert (rail.transactions, rail.last_date) == (1, "2026-09-03")
