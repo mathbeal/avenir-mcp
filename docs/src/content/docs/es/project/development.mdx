@@ -41,7 +41,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | Control | Comando | Falla cuando |
 |---|---|---|
 | formato | `ruff format --check` | un archivo no está formateado |
-| lint | `pylint` | la nota es inferior a 10,00, para lo cual basta con que se repitan cuatro o más líneas de cálculo entre dos de los archivos que lee (`duplicate-code`) |
+| lint | `pylint` | la nota es inferior a 10,00; basta con que se repitan cuatro o más líneas de cálculo entre dos de los archivos que lee para que baje de ahí (`duplicate-code`) |
 | ruff | `ruff check` | un docstring del paquete no sigue el estilo Google u omite un argumento, el valor devuelto o una excepción lanzada; los imports no están ordenados; los controles de seguridad de bandit encuentran un patrón de riesgo (TLS sin verificar, un comando shell, una contraseña en el código…); la complejidad ciclomática de una función supera 19, el valor más alto que alcanza actualmente el repositorio, un límite máximo que solo puede bajar (`C901`) |
 | docstrings | `pydoclint` | un docstring del paquete enumera los argumentos en otro orden que la firma, da un tipo que la anotación ya da, o se reduce a un resumen en una función que recibe argumentos o devuelve un valor |
 | Condiciones de la API de YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | no se cumple una regla de las condiciones de la API de YNAB (nombre, mención palabra por palabra, imagen oficial de YNAB, token solo para su titular, límite de solicitudes por hora), o YNAB cambió sus condiciones desde la fecha comprobada; el distintivo del README lo muestra |

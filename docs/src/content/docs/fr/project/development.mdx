@@ -42,7 +42,7 @@ alors.
 | Contrôle | Commande | Échoue quand |
 |---|---|---|
 | format | `ruff format --check` | un fichier n'est pas formaté |
-| lint | `pylint` | la note est sous 10,00, ce qui signifie qu'il suffit que quatre lignes de calcul ou plus se répètent entre deux des fichiers qu'il lit (`duplicate-code`) |
+| lint | `pylint` | la note est sous 10,00 ; quatre lignes de calcul ou plus répétées entre deux des fichiers qu'il lit suffisent à l'y faire tomber (`duplicate-code`) |
 | ruff | `ruff check` | une docstring du paquet n'est pas au format Google ou omet un argument, la valeur de retour ou une exception levée ; les imports ne sont pas triés ; les contrôles de sécurité de bandit trouvent un motif risqué (TLS non vérifié, commande shell, mot de passe dans le code…) ; la complexité cyclomatique d'une fonction dépasse 19, le pire niveau atteint à ce jour dans le dépôt, un plafond qui ne fait que baisser (`C901`) |
 | docstrings | `pydoclint` | une docstring du paquet liste les arguments dans un autre ordre que la signature, donne un type que l'annotation donne déjà, ou se réduit à un résumé pour une fonction qui prend des arguments ou renvoie une valeur |
 | Conditions de l'API YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | une règle des conditions de l'API YNAB n'est pas respectée (nommage, mention mot pour mot, image officielle de YNAB, jeton réservé à son titulaire, limite de requêtes par heure), ou YNAB a changé ses conditions depuis la date vérifiée ; le badge du README l'affiche |

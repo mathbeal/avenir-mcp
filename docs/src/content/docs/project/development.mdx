@@ -41,7 +41,7 @@ hide the `.pth` file of an editable install, which Python then ignores.
 | Check | Command | Fails when |
 |---|---|---|
 | format | `ruff format --check` | a file is not formatted |
-| lint | `pylint` | the score is below 10.00, which four or more computing lines repeated between two of the files it reads is enough to do (`duplicate-code`) |
+| lint | `pylint` | the score is below 10.00; four or more computing lines repeated between two of the files it reads are enough to put it there (`duplicate-code`) |
 | ruff | `ruff check` | a docstring of the package is not in Google style or leaves out an argument, the return value or an exception raised; imports are not sorted; bandit's security checks find a risky pattern (TLS not verified, a shell command, a password in the code…); the cyclomatic complexity of a function goes over 19, the worst the repository reaches today, a ceiling that only ever comes down (`C901`) |
 | docstrings | `pydoclint` | a docstring of the package lists the arguments in another order than the signature, gives a type the annotation already gives, or is a bare summary for a function that takes arguments or returns a value |
 | YNAB API terms | `pytest -m ynab_terms`, `python -m docsgen.terms` | a rule of YNAB's API terms is broken (naming, attribution word for word, YNAB's own image, a token for its owner only, the hourly limit), or YNAB changed its terms since the date checked; the README badge shows it |

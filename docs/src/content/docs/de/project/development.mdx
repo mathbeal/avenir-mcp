@@ -42,7 +42,7 @@ dann ignoriert.
 | Prüfung | Befehl | Schlägt fehl, wenn |
 |---|---|---|
 | Format | `ruff format --check` | eine Datei nicht formatiert ist |
-| Lint | `pylint` | die Bewertung unter 10,00 liegt, wobei bereits vier oder mehr sich wiederholende Rechenzeilen zwischen zwei der gelesenen Dateien ausreichen (`duplicate-code`) |
+| Lint | `pylint` | die Bewertung unter 10,00 liegt; vier oder mehr rechnende Zeilen, die sich zwischen zwei der von ihm gelesenen Dateien wiederholen, genügen dafür (`duplicate-code`) |
 | ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…); die zyklomatische Komplexität einer Funktion über 19 liegt, dem derzeit höchsten Wert im Repository, einer Obergrenze, die sich stets nur nach unten verschiebt (`C901`) |
 | Docstrings | `pydoclint` | ein Docstring des Pakets die Argumente in anderer Reihenfolge als die Signatur nennt, einen Typ angibt, den die Annotation schon angibt, oder nur eine Zusammenfassung ist, obwohl die Funktion Argumente nimmt oder einen Wert zurückgibt |
 | YNAB-API-Bedingungen | `pytest -m ynab_terms`, `python -m docsgen.terms` | eine Regel der YNAB-API-Bedingungen verletzt ist (Name, Hinweis auf die fehlende Zugehörigkeit im Wortlaut, YNABs eigenes Bild, Token nur für seinen Inhaber, Limit an Anfragen pro Stunde) oder YNAB seine Bedingungen seit dem geprüften Datum geändert hat; das Badge in der README zeigt es an |
