@@ -60,11 +60,11 @@ OpenSSF Scorecard (zodra de repository openbaar is), een wekelijkse vergelijking
 van YNAB met zijn momentopname (`just api-drift`), en de officiële MCP Inspector
 (`just inspect`), die de server controleert zoals een client hem op het demoplan ziet:
 zijn lijsten, de overdraagbaarheid van zijn toolschema's, en één aanroep van elk soort. De
-testsuite draait op Linux en macOS met Python 3.12, 3.13 en 3.14, en op Windows met Python
-3.14 (bij een pull request probeert macOS alleen 3.14: zijn runners kosten evenveel als tien
-Linux-runners); de dekking wordt afgedwongen op Linux en macOS, waar de controles van
-bestandsrechten gelden. Python 3.15 draait ook, als experiment: een fout daar is een
-waarschuwing, geen rode controle. Bij een pull request moet elke commit afgetekend zijn
+testsuite draait op Linux en macOS met Python 3.12, 3.13, 3.14 en 3.15, en op Windows met
+Python 3.14 (bij een pull request probeert macOS alleen de nieuwste Python-versie, 3.15:
+zijn runners kosten evenveel als tien Linux-runners); de dekking wordt afgedwongen op
+Linux en macOS, waar de controles van
+bestandsrechten gelden. Bij een pull request moet elke commit afgetekend zijn
 (sign-off) en moet de titel met het soort wijziging beginnen. Twee controles moeten groen
 zijn: **CI passed**, die voor elke job van de kwaliteitsworkflow staat, en **MCP
 Inspector**, een eigen workflow zodat zijn badge hem alleen toont.
