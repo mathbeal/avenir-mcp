@@ -21,10 +21,11 @@ from avenir_mcp import client
 
 
 def _mock_response(payload: Any, status_code: int = 200) -> MagicMock:
-    """Build a mock httpx response that returns *payload* as JSON."""
+    """Build a mock httpx response that returns *payload* as JSON, with no header."""
     mock_resp = MagicMock()
     mock_resp.status_code = status_code
     mock_resp.json.return_value = payload
+    mock_resp.headers = {}
     mock_resp.raise_for_status = MagicMock()
     return mock_resp
 
@@ -574,21 +575,6 @@ def test_api_error_includes_ynab_detail() -> None:
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
             with pytest.raises(RuntimeError, match="400.*payee name is reserved"):
                 asyncio.run(client.create_transactions("b1", "a1", items))
-
-
-def test_api_error_with_non_json_body_uses_raw_text() -> None:
-    """A gateway error page (non-JSON) must still raise with the raw body text."""
-    mock_resp = MagicMock()
-    mock_resp.status_code = 502
-    mock_resp.json.side_effect = ValueError("not json")
-    mock_resp.text = "Bad Gateway"
-    ctx = _async_client_returning(None)
-    ctx.__aenter__.return_value.get = AsyncMock(return_value=mock_resp)
-
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            with pytest.raises(RuntimeError, match="502: Bad Gateway"):
-                asyncio.run(client.get_plans())
 
 
 # ---------------------------------------------------------------------------

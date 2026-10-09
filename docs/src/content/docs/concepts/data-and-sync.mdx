@@ -98,11 +98,31 @@ Applying a confirmed write adds its own request (one bulk `PATCH` for any number
 transactions). With a warm cache, reading transactions again costs one small delta
 request.
 
-When the quota is spent YNAB answers `429` without saying when to come back, so
-avenir-mcp **retries nothing**: it returns `… YNAB 429: …` and sends no request at all for
-10 minutes. It also stops by itself at **180 requests** in the last hour, leaving the rest
-to other apps using the same token, and says in how many minutes the next request can
-leave. Either way, the agent is told to tell you and not to retry before then.
+When the quota is spent YNAB answers `429`, and **that answer is never retried**:
+avenir-mcp returns `… YNAB 429: …` and sends no request at all for 10 minutes, or for the
+number of seconds YNAB's `Retry-After` header asks for when the answer carries one (held
+between 1 minute and 1 hour).
+avenir-mcp also stops by itself at **180 requests** in the last hour, leaving the rest to
+other apps using the same token, and says in how many minutes the next request can leave.
+Either way, the agent is told to tell you and not to retry before then.
+
+## When YNAB does not answer
+
+A read that fails on the way out — a timeout, a connection refused, a `502`, a `503` or a
+`504` — is sent again, **three times in all**, with a short wait that doubles in between.
+Repeating a read changes nothing, so this costs you only requests, and each try counts
+against the 180 of the hour.
+
+A write is different. Once a `POST`, a `PATCH` or a `DELETE` has left, avenir-mcp **never
+sends it again**: YNAB may have applied it and answered into a connection that was already
+gone, and a second copy would create a second transaction or a second change. The only
+failure that does send a write again is one that proves it never left, such as a
+connection that was refused.
+
+So a write whose answer never came back ends in an answer that says exactly that: the
+change may or may not be applied, and the agent is told to look with `find_transactions`
+or `get_category_balances` rather than repeat it. A read that never got through says
+instead that nothing was changed and can be asked for again in a few minutes.
 
 ## What is never stored
 

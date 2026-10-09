@@ -333,6 +333,9 @@ def _side(category: dict[str, Any], change: int) -> CategoryMove:
 async def _set_both(plan_id: str, month: str, source: CategoryMove, target: CategoryMove) -> None:
     """Take from the source, then give to the target; if the second write fails, undo the first.
 
+    `retry.YnabUnavailable` is a RuntimeError, so a second write that YNAB never
+    answered puts the source back as a refusal does: the error carries what to check.
+
     Args:
         plan_id: YNAB plan id or 'last-used'.
         month: The month, YYYY-MM-01.
@@ -340,7 +343,8 @@ async def _set_both(plan_id: str, month: str, source: CategoryMove, target: Cate
         target: The category the money goes to.
 
     Raises:
-        ToolError: If YNAB refused the target, saying whether the source was put back.
+        ToolError: If YNAB refused the target or answered nothing, saying whether the
+            source was put back.
     """
     await client.set_category_budgeted(plan_id, month, source.category_id, source.to_amount)
     try:

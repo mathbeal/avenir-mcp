@@ -9,7 +9,7 @@ Une erreur revient comme un résultat d'outil marqué `isError`, avec un message
 
 ## Venant de YNAB
 
-Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool '<tool>': YNAB <status>: <detail>` — par exemple `YNAB 401` pour un jeton faux ou révoqué, `YNAB 429` quand les 200 requêtes par heure sont épuisées. Sans `YNAB_API_KEY`, le serveur refuse d'appeler YNAB : `YNAB_API_KEY environment variable is not set`.
+Tout outil qui appelle YNAB peut renvoyer l'erreur de YNAB : `Error calling tool '<tool>': YNAB <status>: <detail>` — par exemple `YNAB 401` pour un jeton faux ou révoqué, `YNAB 429` quand les 200 requêtes par heure sont épuisées. Une réponse `401` contient les informations propres à avenir-mcp plutôt que celles de YNAB : `YNAB 401: the token is invalid or was revoked; create a new Personal Access Token in YNAB's settings.` Lorsque YNAB ne répond pas du tout, le message indique si quelque chose a pu changer : une lecture indique que YNAB n'a pas pu être contacté et qu'aucune modification n'a été effectuée, tandis qu'une écriture déjà envoyée indique que la modification a pu ou non être appliquée et qu'il convient de le vérifier avant de réessayer quoi que ce soit. Sans `YNAB_API_KEY`, le serveur refuse d'appeler YNAB : `YNAB_API_KEY environment variable is not set`.
 
 ## [`find_transactions`](/avenir-mcp/fr/reference/tools/find-transactions/)
 

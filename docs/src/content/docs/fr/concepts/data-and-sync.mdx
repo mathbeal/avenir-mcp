@@ -102,12 +102,34 @@ Appliquer une écriture confirmée ajoute sa propre requête (un seul `PATCH` gr
 que soit le nombre de transactions). Avec un cache chaud, relire les transactions coûte
 une petite requête incrémentale.
 
-Quand le quota est épuisé, YNAB répond `429` sans dire quand revenir : avenir-mcp **ne
-réessaie donc rien**. Il renvoie `… YNAB 429: …` et n'envoie plus aucune requête pendant
-10 minutes. Il s'arrête aussi de lui-même à **180 requêtes** dans l'heure écoulée, laissant
-le reste aux autres applications qui utilisent le même jeton, et dit dans combien de
-minutes la prochaine requête pourra partir. Dans les deux cas, l'agent doit vous prévenir
-et ne pas réessayer avant.
+Quand le quota est épuisé, YNAB répond `429`, et **cette réponse n'est jamais
+réessayée** : avenir-mcp renvoie `… YNAB 429: …` et n'envoie plus aucune requête pendant
+10 minutes, ou pendant le nombre de secondes indiqué dans l'en-tête `Retry-After` de YNAB
+lorsque la réponse en porte un (tenue entre 1 minute et 1 heure). avenir-mcp s'arrête
+aussi de lui-même à **180 requêtes** dans l'heure écoulée, laissant le reste aux autres
+applications qui utilisent le même jeton, et dit dans combien de minutes la prochaine
+requête pourra partir. Dans les deux cas, l'agent doit vous prévenir et ne pas réessayer
+avant.
+
+## Lorsque YNAB ne répond pas
+
+Une lecture qui échoue en route — un délai d'attente dépassé, une connexion refusée, un
+`502`, un `503` ou un `504` — est envoyée à nouveau, **trois fois en tout**, avec une
+courte pause qui double à chaque fois. Répéter une lecture ne change rien : cela ne
+coûte que des requêtes, et chaque tentative est décomptée des 180 de l'heure.
+
+Une écriture est différente. Une fois qu'un `POST`, un `PATCH` ou un `DELETE` est parti,
+avenir-mcp **ne l'envoie jamais une deuxième fois** : YNAB l'a peut-être déjà appliqué et
+répondu dans une connexion qui n'existait plus, et une deuxième copie créerait une
+deuxième transaction ou une deuxième modification. Le seul échec qui fait repartir une
+écriture est celui qui prouve qu'elle n'est jamais partie, par exemple une connexion
+refusée.
+
+Ainsi, une écriture dont la réponse n'est jamais revenue se solde par une réponse qui dit
+exactement cela : la modification est peut-être appliquée, peut-être pas, et l'agent doit
+vérifier avec `find_transactions` ou `get_category_balances` plutôt que de la répéter.
+Une lecture qui n'a jamais abouti dit au contraire que rien n'a été modifié et qu'elle
+peut être redemandée dans quelques minutes.
 
 ## Ce qui n'est jamais stocké
 

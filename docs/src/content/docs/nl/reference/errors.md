@@ -9,7 +9,7 @@ Een fout komt terug als toolresultaat met `isError`, met een melding die zegt wa
 
 ## Van YNAB
 
-Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling tool '<tool>': YNAB <status>: <detail>` — bijvoorbeeld `YNAB 401` voor een verkeerd of ingetrokken token, `YNAB 429` wanneer de 200 verzoeken per uur op zijn. Zonder `YNAB_API_KEY` weigert de server YNAB aan te roepen: `YNAB_API_KEY environment variable is not set`.
+Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling tool '<tool>': YNAB <status>: <detail>` — bijvoorbeeld `YNAB 401` voor een verkeerd of ingetrokken token, `YNAB 429` wanneer de 200 verzoeken per uur op zijn. Een `401`-antwoord bevat de eigen gegevens van avenir-mcp in plaats van die van YNAB: `YNAB 401: the token is invalid or was revoked; create a new Personal Access Token in YNAB's settings.` Wanneer YNAB helemaal niet reageert, geeft het bericht aan of er mogelijk iets is gewijzigd: bij een leesbewerking wordt aangegeven dat YNAB niet bereikbaar was en dat er niets is gewijzigd, terwijl bij een schrijfbewerking die al is verzonden wordt aangegeven dat de wijziging mogelijk wel of niet is doorgevoerd en dat dit moet worden gecontroleerd voordat er opnieuw een poging wordt ondernomen. Zonder `YNAB_API_KEY` weigert de server YNAB aan te roepen: `YNAB_API_KEY environment variable is not set`.
 
 ## [`find_transactions`](/avenir-mcp/nl/reference/tools/find-transactions/)
 

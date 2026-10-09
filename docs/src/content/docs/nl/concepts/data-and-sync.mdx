@@ -100,11 +100,36 @@ Het toepassen van een bevestigde schrijfactie voegt een eigen verzoek toe (één
 `PATCH` voor elk aantal transacties). Met een warme cache kost opnieuw lezen van de
 transacties één klein deltaverzoek.
 
-Wanneer het quotum is opgebruikt, geeft YNAB een antwoord `429`zonder aan te geven wanneer men terug kan komen, dus
-avenir-mcp **doet geen nieuwe pogingen**: het keert terug `… YNAB 429: …`en verstuurt gedurende
-10 minuten helemaal geen verzoeken. Het stopt ook vanzelf bij **180 verzoeken** in het afgelopen uur, waarbij de rest
-wordt overgelaten aan andere apps die hetzelfde token gebruiken, en geeft aan over hoeveel minuten het volgende verzoek kan
-worden verzonden. In beide gevallen krijgt de agent de opdracht om u hiervan op de hoogte te stellen en niet eerder opnieuw te proberen.
+Wanneer het quotum is opgebruikt, geeft YNAB het antwoord `429`, en **dat
+antwoord wordt nooit opnieuw geprobeerd**: avenir-mcp retourneert `… YNAB 429: …` en
+verstuurt gedurende 10 minuten helemaal geen verzoek, of voor het aantal seconden dat in
+de `Retry-After`-header van YNAB wordt gevraagd wanneer het antwoord er een draagt
+(gehouden tussen 1 minuut en 1 uur). Het
+stopt ook vanzelf bij **180 verzoeken** in het afgelopen uur, waarbij de rest wordt
+overgelaten aan andere apps die hetzelfde token gebruiken, en geeft aan over hoeveel
+minuten het volgende verzoek kan worden verzonden. In beide gevallen krijgt de agent de
+opdracht om u hiervan op de hoogte te stellen en niet eerder opnieuw te proberen.
+
+## Wanneer YNAB geen antwoord geeft
+
+Een leesbewerking die onderweg mislukt — een time-out, een geweigerde verbinding, een
+`502`, een `503` of een `504` — wordt opnieuw verzonden, **in totaal drie keer**, met een
+korte wachttijd die zich tussendoor verdubbelt. Een leesbewerking herhalen verandert
+niets, dus het kost u alleen verzoeken, en elke poging telt mee voor de 180 van het uur.
+
+Een schrijfbewerking is anders. Zodra een `POST`, een `PATCH` of een `DELETE` is
+verzonden, verstuurt avenir-mcp deze **nooit nogmaals**: YNAB heeft de bewerking mogelijk
+al toegepast en geantwoord via een verbinding die er niet meer was, en een tweede
+exemplaar zou een tweede transactie of een tweede wijziging aanmaken. De enige fout
+waarbij een schrijfbewerking wel opnieuw wordt verzonden, is die welke bewijst dat ze
+nooit is verzonden, bijvoorbeeld een geweigerde verbinding.
+
+Een schrijfbewerking waarvan het antwoord nooit is teruggekomen, eindigt dus in een
+antwoord dat precies dat zegt: de wijziging is misschien wel en misschien niet
+doorgevoerd, en de agent krijgt de opdracht om met `find_transactions` of
+`get_category_balances` te kijken in plaats van ze te herhalen. Een leesbewerking die
+nooit is doorgekomen, zegt juist dat er niets is gewijzigd en dat ze over enkele minuten
+opnieuw kan worden gevraagd.
 
 ## Wat nooit wordt opgeslagen
 

@@ -25,6 +25,8 @@ class FakeMonth:
         self.sets: list[tuple[str, str, float]] = []
         self.calls = 0
         self.failing_calls: set[int] = set()
+        self.failure: Exception = RuntimeError("YNAB 500: internal error")
+        """What a failing call raises: a refusal by default, a lost answer when a test says so."""
 
     async def get_month_categories(self, _plan_id: str, _month: str) -> list[dict[str, Any]]:
         """Categories of the month, as YNAB returns them."""
@@ -46,7 +48,7 @@ class FakeMonth:
         """Record and apply the new budgeted amount, or fail like YNAB on the calls told to."""
         self.calls += 1
         if self.calls in self.failing_calls:
-            raise RuntimeError("YNAB 500: internal error")
+            raise self.failure
         self.sets.append((month, category_id, amount))
         self.budgeted[category_id] = round(amount * 1000)
         return {"id": category_id, "budgeted": self.budgeted[category_id]}
