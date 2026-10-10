@@ -103,12 +103,36 @@ Das Anwenden einer bestätigten Schreibaktion fügt eine eigene Anfrage hinzu (e
 gebündeltes `PATCH` für beliebig viele Transaktionen). Mit warmem Cache kostet das erneute
 Lesen der Transaktionen eine kleine Delta-Anfrage.
 
-Ist das Kontingent aufgebraucht, antwortet YNAB mit `429`, ohne zu sagen, wann es wieder
-geht; daher **wiederholt avenir-mcp nichts**: Es gibt `… YNAB 429: …` zurück und sendet
-10 Minuten lang überhaupt keine Anfrage. Außerdem hört es von selbst bei **180 Anfragen**
-in der letzten Stunde auf, lässt den Rest anderen Apps mit demselben Token und sagt, in
-wie vielen Minuten die nächste Anfrage gehen kann. In beiden Fällen wird der Agent
-angewiesen, es Ihnen zu sagen und es vorher nicht erneut zu versuchen.
+Ist das Kontingent aufgebraucht, antwortet YNAB mit `429`, und **diese Antwort
+wird nie erneut versucht**: avenir-mcp gibt `… YNAB 429: …` zurück und sendet 10 Minuten
+lang überhaupt keine Anfrage – oder für die Anzahl der Sekunden, die im
+`Retry-After`-Header von YNAB angegeben ist, wenn die Antwort einen solchen Header trägt
+(gehalten zwischen 1 Minute und 1 Stunde). Außerdem hört
+avenir-mcp von selbst bei **180 Anfragen** in der letzten Stunde auf, lässt den Rest
+anderen Apps mit demselben Token und sagt, in wie vielen Minuten die nächste Anfrage
+gehen kann. In beiden Fällen wird der Agent angewiesen, es Ihnen zu sagen und es vorher
+nicht erneut zu versuchen.
+
+## Wenn YNAB keine Antwort gibt
+
+Ein Lesevorgang, der unterwegs fehlschlägt – ein Timeout, eine abgelehnte Verbindung, ein
+`502`, ein `503` oder ein `504` –, wird erneut gesendet, **insgesamt dreimal**, mit einer
+kurzen Wartezeit, die sich dazwischen verdoppelt. Einen Lesevorgang zu wiederholen ändert
+nichts, es kostet Sie also nur Anfragen, und jeder Versuch wird auf die 180 der Stunde
+angerechnet.
+
+Bei einem Schreibvorgang ist es anders. Sobald ein `POST`, ein `PATCH` oder ein `DELETE`
+gegangen ist, sendet avenir-mcp ihn **nie erneut**: YNAB hat ihn möglicherweise schon
+angewendet und in eine Verbindung geantwortet, die es nicht mehr gab, und eine zweite
+Kopie würde eine zweite Transaktion oder eine zweite Änderung anlegen. Der einzige
+Fehler, der einen Schreibvorgang erneut sendet, ist der, der beweist, dass er nie gegangen
+ist, etwa eine abgelehnte Verbindung.
+
+Ein Schreibvorgang, auf den keine Antwort zurückkam, endet also in einer Antwort, die
+genau das sagt: Die Änderung ist vielleicht angewendet, vielleicht nicht, und der Agent
+wird angewiesen, mit `find_transactions` oder `get_category_balances` nachzusehen, statt
+ihn zu wiederholen. Ein Lesevorgang, der nie durchkam, sagt dagegen, dass nichts geändert
+wurde und dass er in wenigen Minuten erneut angefordert werden kann.
 
 ## Was nie gespeichert wird
 

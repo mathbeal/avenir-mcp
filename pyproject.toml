@@ -202,7 +202,9 @@ ignore_decorators = ["@mcp.tool", "@mcp.resource", "@mcp.prompt", "@pytest.fixtu
 
 # Mutation testing (`just mutate`): the modules that compute, against the tests that cover
 # them. What is left out mutates nothing: the client, the transport, the journal and the
-# tool wrappers are checked by their own tests, not by changing them at random.
+# tool wrappers are checked by their own tests, not by changing them at random. `retry.py`
+# only decides, from a method and a failure, what may be sent again: it mutates like any
+# other module that computes, and a change there could duplicate a write.
 [tool.mutmut]
 source_paths = ["avenir_mcp/"]
 do_not_mutate = [
@@ -242,6 +244,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_protocol_runway.py",
     "tests/test_protocol_savings.py",
     "tests/test_reconcile.py",
+    "tests/test_retry.py",
     "tests/test_runway.py",
     "tests/test_savings.py",
     "tests/test_schedule.py",

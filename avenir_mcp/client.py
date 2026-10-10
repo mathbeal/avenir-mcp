@@ -5,18 +5,22 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 import os
 import re
 import time
 from collections import deque
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
 from pydantic import SecretStr
+
+from avenir_mcp import retry
 
 logger = logging.getLogger(__name__)
 
@@ -161,16 +165,17 @@ def _check(response: Any) -> dict[str, Any]:
 class Pace:
     """Keeps avenir-mcp well within YNAB's limit: 200 requests per hour and per token.
 
-    YNAB counts over a rolling hour and, once the limit is reached, answers 429
-    without saying when to come back. So nothing is ever retried: after a 429,
-    no request leaves for ten minutes. And avenir-mcp stops by itself at 180
-    requests in the hour, leaving the rest to other apps using the same token.
+    YNAB counts over a rolling hour and, once the limit is reached, answers 429. That
+    answer is never retried: no request leaves for as long as its `Retry-After` asks,
+    or for ten minutes when it asks for nothing. And avenir-mcp stops by itself at 180
+    requests in the hour, leaving the rest to other apps using the same token. A retry
+    of a failed request counts here like any other, so nothing escapes the budget.
     """
 
     budget = 180
     """Requests sent in the last hour beyond which avenir-mcp waits; YNAB allows 200."""
     pause = 600.0
-    """Seconds without any request after YNAB answered 429."""
+    """Seconds without any request after a 429 that named no delay of its own."""
     hour = 3600.0
 
     def __init__(self) -> None:
@@ -207,9 +212,18 @@ class Pace:
             )
         self.sent.append(now)
 
-    def refused(self) -> None:
-        """Pause every request after YNAB answered 429."""
-        self.paused_until = time.monotonic() + self.pause
+    def refused(self, seconds: float | None = None) -> float:
+        """Pause every request after YNAB answered 429.
+
+        Args:
+            seconds: What YNAB's Retry-After asked for, or None when it asked nothing.
+
+        Returns:
+            The seconds no request leaves for.
+        """
+        held = self.pause if seconds is None else seconds
+        self.paused_until = time.monotonic() + held
+        return held
 
 
 def _minutes(seconds: float) -> str:
@@ -231,14 +245,24 @@ PACE = Pace()
 _TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 
-async def _request(method: str, path: str, **kwargs: Any) -> dict[str, Any]:
-    """Send an authenticated request to a YNAB API path.
+async def _request(
+    method: str,
+    path: str,
+    transport: httpx.AsyncBaseTransport | None = None,
+    sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Send an authenticated request to a YNAB API path, again where that is safe.
 
     The path is checked before anything is opened: a bad id never reaches the network.
+    `retry.py` says which failures may be sent again; every try takes one request from
+    the hour's budget, and no httpx error leaves this function.
 
     Args:
         method: get, patch, post or delete.
         path: The API path.
+        transport: Carries the requests; httpx's own by default, a stand-in in tests.
+        sleep: Waits between two tries.
         **kwargs: Passed to httpx: params, json.
 
     Returns:
@@ -248,19 +272,36 @@ async def _request(method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         ValueError: If a path segment is not a YNAB id.
         RuntimeError: On 4xx/5xx responses, with YNAB's error detail, or when YNAB's
             rate limit keeps the request from leaving.
+        retry.YnabUnavailable: When YNAB answered nothing, saying whether a change
+            may have been applied.
     """
     url = _url(path)
     headers = {"Authorization": f"Bearer {_api_key().get_secret_value()}"}
-    PACE.take()
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        send = getattr(client, method)  # client.get, .patch, .post or .delete
-        response = await send(url, headers=headers, **kwargs)
+
+    async def once() -> httpx.Response:
+        """Take one request from the hour's budget, then send it.
+
+        Returns:
+            YNAB's answer, whatever its status.
+        """
+        PACE.take()
+        async with httpx.AsyncClient(timeout=_TIMEOUT, transport=transport) as client:
+            send = getattr(client, method)  # client.get, .patch, .post or .delete
+            answer: httpx.Response = await send(url, headers=headers, **kwargs)
+            return answer
+
+    response = await retry.answered(method, once, sleep)
     if response.status_code == 429:
-        PACE.refused()
+        held = PACE.refused(retry.pause_after(response.headers.get("Retry-After")))
         raise RuntimeError(
             "YNAB 429: the limit of 200 requests per hour for this token is reached (other "
             "apps using the same token count too). avenir-mcp retries nothing and sends no "
-            f"request for {_minutes(PACE.pause)}. Tell the user; do not retry before then."
+            f"request for {_minutes(held)}. Tell the user; do not retry before then."
+        )
+    if response.status_code == 401:
+        raise RuntimeError(
+            "YNAB 401: the token is invalid or was revoked; create a new Personal Access "
+            "Token in YNAB's settings."
         )
     return _check(response)
 

@@ -10,7 +10,10 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
+
+from avenir_mcp import retry
 
 from .fake_month import FakeMonth, serving
 from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
@@ -126,6 +129,18 @@ def test_a_failed_second_write_puts_the_first_back(month: FakeMonth) -> None:
     assert "nothing was moved" in result.content[0].text
     assert month.budgeted["c-fun"] == 80000
     assert month.sets == [("2026-09-01", "c-fun", 50.0), ("2026-09-01", "c-fun", 80.0)]
+
+
+def test_a_second_write_with_no_answer_also_puts_the_first_back(month: FakeMonth) -> None:
+    """A destination write YNAB never answered puts the source back and says to go and look."""
+    lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
+    month.failure = retry.YnabUnavailable(lost)
+    month.failing_calls = {2}
+    result = call("move_money", _ARGS, accept)
+    assert "may or may not be applied" in result.content[0].text
+    assert result.is_error
+    assert month.sets == [("2026-09-01", "c-fun", 50.0), ("2026-09-01", "c-fun", 80.0)]
+    assert month.budgeted["c-fun"] == 80000
 
 
 def test_a_failed_put_back_says_what_to_fix_in_ynab(month: FakeMonth) -> None:

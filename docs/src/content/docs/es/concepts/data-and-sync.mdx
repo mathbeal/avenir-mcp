@@ -101,12 +101,32 @@ Aplicar una escritura confirmada añade su propia petición (un único `PATCH` a
 cual sea el número de transacciones). Con la caché caliente, releer las transacciones
 cuesta una pequeña petición incremental.
 
-Cuando se agota la cuota, YNAB responde `429` sin decir cuándo volver, así que
-avenir-mcp **no reintenta nada**: devuelve `… YNAB 429: …` y no envía ninguna petición
-durante 10 minutos. También se detiene por sí mismo en **180 peticiones** en la última
-hora, dejando el resto a otras aplicaciones que usen el mismo token, e indica en cuántos
-minutos podrá salir la siguiente petición. En ambos casos, el agente debe avisarle y no
-reintentar antes.
+Cuando se agota la cuota, YNAB responde `429`, y **esa respuesta nunca se
+reintenta**: avenir-mcp devuelve `… YNAB 429: …` y no envía ninguna petición durante
+10 minutos, o durante el número de segundos que indica la cabecera `Retry-After` de YNAB
+cuando la respuesta la incluye (mantenido entre 1 minuto y 1 hora). avenir-mcp también se
+detiene por sí mismo en **180 peticiones** en la última hora, dejando el resto a otras
+aplicaciones que usen el mismo token, e indica en cuántos minutos podrá salir la
+siguiente petición. En ambos casos, el agente debe avisarle y no reintentar antes.
+
+## Cuando YNAB no responde
+
+Una lectura que falla de camino — un tiempo de espera agotado, una conexión rechazada, un
+`502`, un `503` o un `504` — se envía de nuevo, **tres veces en total**, con una breve
+espera que se duplica entre cada intento. Repetir una lectura no cambia nada, así que
+solo le cuesta peticiones, y cada intento se descuenta de las 180 de la hora.
+
+Una escritura es distinta. Una vez que un `POST`, un `PATCH` o un `DELETE` ha salido,
+avenir-mcp **nunca lo vuelve a enviar**: YNAB puede haberlo aplicado y haber respondido
+por una conexión que ya no existía, y una segunda copia crearía una segunda transacción o
+un segundo cambio. El único fallo que vuelve a enviar una escritura es el que demuestra
+que nunca salió, como una conexión rechazada.
+
+Así, una escritura cuya respuesta nunca llegó termina en una respuesta que dice
+exactamente eso: el cambio puede estar aplicado o no, y se le indica al agente que mire
+con `find_transactions` o `get_category_balances` en lugar de repetirla. Una lectura que
+nunca llegó a su destino dice, en cambio, que no se cambió nada y que se puede volver a
+pedir en unos minutos.
 
 ## Lo que nunca se guarda
 

@@ -63,7 +63,7 @@ The package `avenir_mcp/` has four layers. Only the I/O layer has side effects.
 | Confirmation | `confirm.py`, `writes.py` | the single path of every confirmed write: preview, confirmation, apply, journal |
 | Logic | `age.py`, `analytics.py`, `classifier.py`, `triage.py`, `reconcile.py`, `forecast.py`, `charges.py`, `networth.py`, `payoff.py`, `runway.py`, `savings.py`, `schedule.py`, `search.py`, `split.py`, `flags.py`, `targets.py`, `underfunded.py` | pure functions on data already fetched: no network, no disk |
 | Shared types | `model.py`, `amounts.py`, `text.py` | the base model (unknown fields refused), the amount type (finite, bounded), untrusted text made safe to show |
-| I/O | `client.py` (HTTP to YNAB), `journal.py` (disk) | the only code that talks to YNAB, and the only code that writes the journal |
+| I/O | `client.py` (HTTP to YNAB), `retry.py`, `journal.py` (disk) | the only code that talks to YNAB, what a failed request may do next, and the only code that writes the journal |
 
 Amounts arrive from YNAB in milliunits and leave the logic in currency units: no
 tool returns milliunits. The conversions are the two functions of `client.py`
@@ -71,6 +71,13 @@ tool returns milliunits. The conversions are the two functions of `client.py`
 also keeps an in-memory
 delta-sync cache of transactions and paces requests below YNAB's limit of 200 per
 hour.
+
+`retry.py` decides, from the method and the failure alone, whether a request may leave
+again and after how long: a read may, and so may anything that never reached YNAB, but a
+`POST`, `PATCH` or `DELETE` that has been sent never does, because YNAB may have applied
+it and a second copy would duplicate the change. Every try takes one request from the
+hour's budget, and a request YNAB never answered reaches the agent as
+`retry.YnabUnavailable`, whose message says whether anything may have changed.
 
 ### Confirmations
 
