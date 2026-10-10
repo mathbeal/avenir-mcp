@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
+name: Mutation
+
+# Every Monday, change the computing modules on purpose, some 4,400 times, and check
+# that a test notices each time (mutmut, `just mutate`). It fails when a mutant
+# survives, which means no test reads what that line decides, and when one runs no
+# test at all, which means the test selection in pyproject.toml no longer reaches the
+# module. Run `just mutate` locally to see which, then write the missing test, or mark
+# the line `# pragma: no mutate` with the reason it can change no answer.
+on:
+  schedule:
+    - cron: "53 4 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+# A campaign takes minutes: a run started by hand does not cancel the weekly one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  UV_FROZEN: "1"
+
+jobs:
+  mutation:
+    name: No mutant survives
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv run mutmut run --max-children 4
+      - name: What each mutant came to
+        run: |
+          uv run mutmut export-cicd-stats
+          {
+            echo '```json'
+            cat mutants/mutmut-cicd-stats.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Every mutant is tested, and killed
+        run: |
+          uv run mutmut results
+          jq -e '.total > 0 and .survived == 0 and .no_tests == 0' \
+            mutants/mutmut-cicd-stats.json > /dev/null \
+            || { echo "::error::a mutant survived, or ran no test: see mutmut results above"; exit 1; }
