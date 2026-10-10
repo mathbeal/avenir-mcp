@@ -42,8 +42,8 @@ dann ignoriert.
 | Prüfung | Befehl | Schlägt fehl, wenn |
 |---|---|---|
 | Format | `ruff format --check` | eine Datei nicht formatiert ist |
-| Lint | `pylint` | die Bewertung unter 10,00 liegt, wobei bereits vier oder mehr sich wiederholende Rechenzeilen zwischen zwei der gelesenen Dateien ausreichen (`duplicate-code`) |
-| ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…); die zyklomatische Komplexität einer Funktion über 19 liegt, dem derzeit höchsten Wert im Repository, einer Obergrenze, die sich stets nur nach unten verschiebt (`C901`) |
+| Lint | `pylint` | die Bewertung unter 10,00 liegt; vier oder mehr rechnende Zeilen, die sich zwischen zwei der von ihm gelesenen Dateien wiederholen, genügen dafür (`duplicate-code`) |
+| ruff | `ruff check` | ein Docstring des Pakets nicht im Google-Stil ist oder ein Argument, den Rückgabewert oder eine ausgelöste Ausnahme auslässt; Importe nicht sortiert sind; die Sicherheitsprüfungen von bandit ein riskantes Muster finden (TLS nicht geprüft, ein Shell-Befehl, ein Passwort im Code…); die zyklomatische Komplexität einer Funktion über 19 liegt, dem derzeit höchsten Wert im Repository, einer Obergrenze, die sich nur nach unten bewegen kann (`C901`) |
 | Docstrings | `pydoclint` | ein Docstring des Pakets die Argumente in anderer Reihenfolge als die Signatur nennt, einen Typ angibt, den die Annotation schon angibt, oder nur eine Zusammenfassung ist, obwohl die Funktion Argumente nimmt oder einen Wert zurückgibt |
 | YNAB-API-Bedingungen | `pytest -m ynab_terms`, `python -m docsgen.terms` | eine Regel der YNAB-API-Bedingungen verletzt ist (Name, Hinweis auf die fehlende Zugehörigkeit im Wortlaut, YNABs eigenes Bild, Token nur für seinen Inhaber, Limit an Anfragen pro Stunde) oder YNAB seine Bedingungen seit dem geprüften Datum geändert hat; das Badge in der README zeigt es an |
 | Toter Code | `vulture` | ein Name, den sonst nichts im Repository liest, weder von einem Dekorator (`@mcp.tool`, `@pytest.fixture`…) registriert noch mit dem Grund, warum er lebt, in `vulture_whitelist.py` eingetragen ist |
@@ -127,9 +127,9 @@ die Zeilenzahl zusammenfasst. Diese Wertung vergleicht die Dateien untereinander
 auf, in welche Richtung sich jede einzelne entwickelt, anstatt ein endgültiges Urteil zu
 fällen, da die Einstufung A bei radon bereits bei 20 beginnt und jede Datei des Pakets
 weit darüber liegt. Ein Bericht zum Lesen, kein Prüfschritt: Er schlägt niemals fehl, und
-die CI führt ihn nicht aus. Seine Version ist festgesetzt, und `uvx` ruft sie ab, ebenso
-wie bei pydoclint. Die angezeigte Komplexität entspricht nicht den von `C901` festgelegten
-Grenzwerten: radon zählt boolesche Operatoren, bedingte Ausdrücke und Comprehensions, die
+die CI führt ihn nicht aus. Seine Version ist festgesetzt, und `uvx` holt es ab, ebenso
+wie bei pydoclint. Die hier ausgegebene Komplexität ist nicht die Komplexität, die `C901`
+begrenzt: radon zählt boolesche Operatoren, bedingte Ausdrücke und Comprehensions, die
 das mccabe von ruff ausklammert, sodass dieselbe Funktion hier einen höheren Wert erzielt
 als bei der Bewertung anhand des Grenzwerts.
 

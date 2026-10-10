@@ -42,8 +42,8 @@ alors.
 | Contrôle | Commande | Échoue quand |
 |---|---|---|
 | format | `ruff format --check` | un fichier n'est pas formaté |
-| lint | `pylint` | la note est sous 10,00, ce qui signifie qu'il suffit que quatre lignes de calcul ou plus se répètent entre deux des fichiers qu'il lit (`duplicate-code`) |
-| ruff | `ruff check` | une docstring du paquet n'est pas au format Google ou omet un argument, la valeur de retour ou une exception levée ; les imports ne sont pas triés ; les contrôles de sécurité de bandit trouvent un motif risqué (TLS non vérifié, commande shell, mot de passe dans le code…) ; la complexité cyclomatique d'une fonction dépasse 19, le pire niveau atteint à ce jour dans le dépôt, un plafond qui ne fait que baisser (`C901`) |
+| lint | `pylint` | la note est sous 10,00 ; quatre lignes de calcul ou plus répétées entre deux des fichiers qu'il lit suffisent à l'y faire tomber (`duplicate-code`) |
+| ruff | `ruff check` | une docstring du paquet n'est pas au format Google ou omet un argument, la valeur de retour ou une exception levée ; les imports ne sont pas triés ; les contrôles de sécurité de bandit trouvent un motif risqué (TLS non vérifié, commande shell, mot de passe dans le code…) ; la complexité cyclomatique d'une fonction dépasse 19, le pire niveau atteint à ce jour dans le dépôt, un plafond qui ne peut que baisser (`C901`) |
 | docstrings | `pydoclint` | une docstring du paquet liste les arguments dans un autre ordre que la signature, donne un type que l'annotation donne déjà, ou se réduit à un résumé pour une fonction qui prend des arguments ou renvoie une valeur |
 | Conditions de l'API YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | une règle des conditions de l'API YNAB n'est pas respectée (nommage, mention mot pour mot, image officielle de YNAB, jeton réservé à son titulaire, limite de requêtes par heure), ou YNAB a changé ses conditions depuis la date vérifiée ; le badge du README l'affiche |
 | code mort | `vulture` | un nom que rien d'autre dans le dépôt ne lit n'est ni enregistré par un décorateur (`@mcp.tool`, `@pytest.fixture`…) ni inscrit, avec la raison qui le garde vivant, dans `vulture_whitelist.py` |
@@ -116,21 +116,20 @@ enregistré et rejoué, réduit au plus petit cas, au lancement suivant. La CI l
 nuit avec 200 000. Le premier passage a trouvé un octet du journal qui n'était pas du texte
 (0x80) et remontait en erreur de codec brute au lieu de nommer la ligne à corriger.
 
-`just complexity` répertorie les fonctions dont le classement radon est égal ou inférieur
-à C, dont la complexité cyclomatique est supérieure ou égale à 11, en commençant par les
-plus mauvaises de chaque fichier, puis en indiquant la moyenne sur l'ensemble des blocs,
-en tenant compte de ceux qui ne sont pas affichés. Il affiche également l'indice de
-maintenabilité de chaque module du paquet, en commençant par le plus bas : un chiffre
-agrégant le volume de Halstead, la complexité cyclomatique et le nombre de lignes, qui
-classe les fichiers les uns par rapport aux autres et indique la tendance de chacun plutôt
-que de rendre un verdict, puisque le classement A de radon commence à 20 et que tous les
-fichiers du paquet se situent bien au-dessus de ce seuil. Un rapport à lire, pas un
-critère de validation : il ne donne jamais d'échec, et la CI ne l'exécute pas. Sa version
-est figée et `uvx` le récupère, comme pour pydoclint. La complexité qu'il affiche n'est
-pas celle que limite `C901` : radon compte les opérateurs booléens, les expressions
-conditionnelles et les compréhensions, que le mccabe de ruff ne prend pas en compte ;
-ainsi, une même fonction obtient ici un score plus élevé que celui obtenu par rapport à la
-limite.
+`just complexity` répertorie les fonctions que radon classe C ou pire, dont la complexité
+cyclomatique est supérieure ou égale à 11, en commençant par les plus mauvaises de chaque
+fichier, puis en indiquant la moyenne sur l'ensemble des blocs, en tenant compte de ceux
+qui ne sont pas affichés. Il affiche également l'indice de maintenabilité de chaque module
+du paquet, en commençant par le plus bas : un chiffre agrégant le volume de Halstead, la
+complexité cyclomatique et le nombre de lignes, qui classe les fichiers les uns par
+rapport aux autres et indique la tendance de chacun plutôt que de rendre un verdict,
+puisque le classement A de radon commence à 20 et que tous les fichiers du paquet se
+situent bien au-dessus de ce seuil. Un rapport à lire, pas un critère de validation : il
+ne donne jamais d'échec, et la CI ne l'exécute pas. Sa version est figée et `uvx` le
+récupère, comme pour pydoclint. La complexité qu'il affiche n'est pas celle que limite
+`C901` : radon compte les opérateurs booléens, les expressions conditionnelles et les
+compréhensions, que le mccabe de ruff ne prend pas en compte ; ainsi, une même fonction
+obtient ici un score plus élevé que celui obtenu par rapport à la limite.
 
 ## Documentation
 
