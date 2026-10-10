@@ -119,18 +119,17 @@ nuit avec 200 000. Le premier passage a trouvé un octet du journal qui n'était
 `just complexity` répertorie les fonctions que radon classe C ou pire, dont la complexité
 cyclomatique est supérieure ou égale à 11, en commençant par les plus mauvaises de chaque
 fichier, puis en indiquant la moyenne sur l'ensemble des blocs, en tenant compte de ceux
-qui ne sont pas affichés. Il affiche également l'indice de
-maintenabilité de chaque module du paquet, en commençant par le plus bas : un chiffre
-agrégant le volume de Halstead, la complexité cyclomatique et le nombre de lignes, qui
-classe les fichiers les uns par rapport aux autres et indique la tendance de chacun plutôt
-que de rendre un verdict, puisque le classement A de radon commence à 20 et que tous les
-fichiers du paquet se situent bien au-dessus de ce seuil. Un rapport à lire, pas un
-critère de validation : il ne donne jamais d'échec, et la CI ne l'exécute pas. Sa version
-est figée et `uvx` le récupère, comme pour pydoclint. La complexité qu'il affiche n'est
-pas celle que limite `C901` : radon compte les opérateurs booléens, les expressions
-conditionnelles et les compréhensions, que le mccabe de ruff ne prend pas en compte ;
-ainsi, une même fonction obtient ici un score plus élevé que celui obtenu par rapport à la
-limite.
+qui ne sont pas affichés. Il affiche également l'indice de maintenabilité de chaque module
+du paquet, en commençant par le plus bas : un chiffre agrégant le volume de Halstead, la
+complexité cyclomatique et le nombre de lignes, qui classe les fichiers les uns par
+rapport aux autres et indique la tendance de chacun plutôt que de rendre un verdict,
+puisque le classement A de radon commence à 20 et que tous les fichiers du paquet se
+situent bien au-dessus de ce seuil. Un rapport à lire, pas un critère de validation : il
+ne donne jamais d'échec, et la CI ne l'exécute pas. Sa version est figée et `uvx` le
+récupère, comme pour pydoclint. La complexité qu'il affiche n'est pas celle que limite
+`C901` : radon compte les opérateurs booléens, les expressions conditionnelles et les
+compréhensions, que le mccabe de ruff ne prend pas en compte ; ainsi, une même fonction
+obtient ici un score plus élevé que celui obtenu par rapport à la limite.
 
 ## Documentation
 

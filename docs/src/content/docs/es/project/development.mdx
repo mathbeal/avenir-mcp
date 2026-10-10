@@ -41,7 +41,7 @@ puede ocultar el archivo `.pth` de una instalación editable, que Python entonce
 | Control | Comando | Falla cuando |
 |---|---|---|
 | formato | `ruff format --check` | un archivo no está formateado |
-| lint | `pylint` | la nota es inferior a 10,00; basta con que se repitan cuatro o más líneas de cálculo entre dos de los archivos que lee para que baje de ahí (`duplicate-code`) |
+| lint | `pylint` | la nota es inferior a 10,00; cuatro o más líneas de cálculo repetidas entre dos de los archivos que lee bastan para que baje de ahí (`duplicate-code`) |
 | ruff | `ruff check` | un docstring del paquete no sigue el estilo Google u omite un argumento, el valor devuelto o una excepción lanzada; los imports no están ordenados; los controles de seguridad de bandit encuentran un patrón de riesgo (TLS sin verificar, un comando shell, una contraseña en el código…); la complejidad ciclomática de una función supera 19, el valor más alto que alcanza actualmente el repositorio, un límite máximo que solo puede bajar (`C901`) |
 | docstrings | `pydoclint` | un docstring del paquete enumera los argumentos en otro orden que la firma, da un tipo que la anotación ya da, o se reduce a un resumen en una función que recibe argumentos o devuelve un valor |
 | Condiciones de la API de YNAB | `pytest -m ynab_terms`, `python -m docsgen.terms` | no se cumple una regla de las condiciones de la API de YNAB (nombre, mención palabra por palabra, imagen oficial de YNAB, token solo para su titular, límite de solicitudes por hora), o YNAB cambió sus condiciones desde la fecha comprobada; el distintivo del README lo muestra |
@@ -117,16 +117,17 @@ cada noche con 200.000. La primera pasada encontró un byte del diario que no er
 
 `just complexity` enumera las funciones que radon clasifica como C o peor, con una
 complejidad ciclomática de 11 o superior, mostrando primero las peores de cada archivo y,
-a continuación, la media sobre todos los bloques, incluyendo aquellos que no se muestran. Asimismo, muestra el índice de mantenibilidad de cada módulo del
-paquete, ordenados de menor a mayor: una cifra que agrupa el volumen de Halstead, la
-complejidad ciclomática y el recuento de líneas, la cual clasifica los archivos entre sí y
-muestra la tendencia de cada uno en lugar de emitir un veredicto, ya que la clasificación
-A de radon comienza en 20 y todos los archivos del paquete se sitúan muy por encima de ese
-valor. Un informe para leer, no un filtro: nunca falla, y la CI no lo ejecuta. Su versión
-está fijada y `uvx` lo recupera, al igual que con pydoclint. La complejidad que muestra no
-es la que limita `C901`: radon cuenta los operadores booleanos, las expresiones
-condicionales y las comprensiones, que el mccabe de ruff omite, por lo que la misma
-función obtiene una puntuación más alta aquí que la que obtendría según el límite.
+a continuación, la media sobre todos los bloques, incluyendo aquellos que no se muestran.
+Asimismo, muestra el índice de mantenibilidad de cada módulo del paquete, ordenados de
+menor a mayor: una cifra que agrupa el volumen de Halstead, la complejidad ciclomática y
+el recuento de líneas, la cual clasifica los archivos entre sí y muestra la tendencia de
+cada uno en lugar de emitir un veredicto, ya que la clasificación A de radon comienza en
+20 y todos los archivos del paquete se sitúan muy por encima de ese valor. Un informe para
+leer, no un filtro: nunca falla, y la CI no lo ejecuta. Su versión está fijada y `uvx` lo
+recupera, al igual que con pydoclint. La complejidad que muestra no es la que limita
+`C901`: radon cuenta los operadores booleanos, las expresiones condicionales y las
+comprensiones, que el mccabe de ruff omite, por lo que la misma función obtiene una
+puntuación más alta aquí que la que obtendría según el límite.
 
 ## Documentación
 
