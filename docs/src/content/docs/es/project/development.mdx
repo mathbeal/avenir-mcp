@@ -60,11 +60,11 @@ código y `npm audit` sobre sus dependencias, CodeQL y el OpenSSF Scorecard (una
 la API de YNAB con su instantánea (`just api-drift`), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
 cliente, sobre el plan de demostración: sus listas, la portabilidad de los esquemas
 de sus herramientas y una llamada de cada tipo. La batería de pruebas se
-ejecuta en Linux y macOS con Python 3.12, 3.13 y 3.14, y en Windows con Python 3.14 (en
-una pull request, macOS solo prueba 3.14: sus máquinas cuestan diez veces las de Linux); la
-cobertura se exige en Linux y macOS, donde se aplican los controles de permisos de
-archivos. Python 3.15 también se ejecuta, como experimento: un fallo allí es un aviso, no un
-control en rojo. En una pull request, cada commit debe llevar sign-off y el
+ejecuta en Linux y macOS con Python 3.12, 3.13, 3.14 y 3.15, y en Windows con Python 3.14
+(en una pull request, macOS solo prueba la versión más reciente de Python, la 3.15: sus
+máquinas cuestan diez veces las de Linux); la cobertura se exige en Linux y macOS, donde
+se aplican los controles de permisos de
+archivos. En una pull request, cada commit debe llevar sign-off y el
 título debe empezar por el tipo de cambio. Dos controles deben estar en verde:
 **CI passed**, que resume todos los jobs del workflow de calidad, y **MCP Inspector**, un
 workflow aparte para que su badge lo muestre solo.

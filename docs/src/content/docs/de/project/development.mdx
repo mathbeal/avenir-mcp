@@ -61,11 +61,11 @@ OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen 
 API von YNAB mit ihrem Schnappschuss (`just api-drift`) und den offiziellen MCP Inspector
 (`just inspect`), der den Server so prüft, wie ein Client ihn auf dem Demo-Plan sieht:
 seine Listen, die Portabilität seiner Tool-Schemas und je einen Aufruf jeder Art. Die
-Testsuite läuft unter Linux und macOS mit Python 3.12, 3.13 und 3.14 und unter Windows mit
-Python 3.14 (bei einem Pull Request probiert macOS nur 3.14: seine Runner kosten so viel
-wie zehn Linux-Runner); die Abdeckung wird unter Linux und macOS durchgesetzt, wo die
-Prüfungen der Dateiberechtigungen gelten. Python 3.15 läuft ebenfalls, als Experiment: Ein
-Fehlschlag dort ist eine Warnung, keine rote Prüfung. Bei einem Pull Request muss jeder
+Testsuite läuft unter Linux und macOS mit Python 3.12, 3.13, 3.14 und 3.15 und unter
+Windows mit Python 3.14 (bei einem Pull Request probiert macOS nur die neueste
+Python-Version, 3.15: seine Runner kosten so viel wie zehn Linux-Runner); die Abdeckung
+wird unter Linux und macOS durchgesetzt, wo die
+Prüfungen der Dateiberechtigungen gelten. Bei einem Pull Request muss jeder
 Commit abgezeichnet sein (sign-off), und der Titel muss mit der Art der Änderung beginnen.
 Zwei Prüfungen müssen grün sein: **CI passed**, die für jeden Job des Qualitäts-Workflows
 steht, und **MCP Inspector**, ein eigener Workflow, damit sein Badge ihn allein zeigt.
