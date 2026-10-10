@@ -172,3 +172,6 @@ See [Evaluation](/avenir-mcp/project/evaluation/).
 - Then the MCP registry: `server.json` carries the same version (a test checks it); run
   `mcp-publisher login github`, then `mcp-publisher publish`. PyPI ownership is proven by the
   `mcp-name:` line of the README.
+- The Claude Desktop extension carries it too: `mcpb/manifest.json` and the
+  `avenir-mcp==` pin of `mcpb/pyproject.toml` move with `avenir_mcp.__version__` (a test
+  checks both), or the extension installs the release before it.

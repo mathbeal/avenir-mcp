@@ -180,3 +180,6 @@ Zie [Evaluatie](/avenir-mcp/nl/project/evaluation/).
 - Vervolgens het MCP-register:  `server.json`heeft dezelfde versie (dit wordt door een test gecontroleerd); voer
   uit,`mcp-publisher login github` en daarna `mcp-publisher publish`. Het eigendom van PyPI wordt aangetoond door de
   `mcp-name:` regel in het README-bestand.
+- De Claude Desktop-extensie draagt die ook: `mcpb/manifest.json` en de vastzetting
+  `avenir-mcp==` in `mcpb/pyproject.toml` volgen `avenir_mcp.__version__` (een test
+  controleert beide), anders installeert de extensie de vorige versie.
