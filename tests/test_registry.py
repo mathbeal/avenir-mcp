@@ -16,6 +16,7 @@ from avenir_mcp import __version__
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = json.loads((ROOT / "server.json").read_text(encoding="utf-8"))
+GLAMA = json.loads((ROOT / "glama.json").read_text(encoding="utf-8"))
 PROJECT = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
 README = (ROOT / "README.md").read_text(encoding="utf-8")
 
@@ -40,6 +41,14 @@ def test_the_registry_asks_for_the_token_as_a_required_secret() -> None:
     variables = {v["name"]: v for v in SERVER["packages"][0]["environmentVariables"]}
     assert variables["YNAB_API_KEY"]["isRequired"] is True
     assert variables["YNAB_API_KEY"]["isSecret"] is True
+
+
+def test_the_listing_metadata_names_the_account_that_owns_the_repository() -> None:
+    """`glama.json` tells the Glama directory who maintains the server: the repository owner."""
+    owner = SERVER["repository"]["url"].removeprefix("https://github.com/").split("/")[0]
+    assert GLAMA["maintainers"] == [owner]
+    assert GLAMA["$schema"] == "https://glama.ai/mcp/schemas/server.json"
+    assert set(GLAMA) == {"$schema", "maintainers"}, "the schema defines no other field"
 
 
 def test_the_typed_classifier_is_backed_by_the_marker_the_package_ships() -> None:
