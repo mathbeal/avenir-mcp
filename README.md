@@ -4,6 +4,8 @@
 
 [![Works with YNAB](https://api.ynab.com/papi/works_with_ynab.svg)](https://api.ynab.com/#works-with-ynab-third-party)
 [![YNAB API terms: self-checked](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml)
+[![avenir-mcp on Glama](https://glama.ai/mcp/servers/mathbeal/avenir-mcp/badges/score.svg)](https://glama.ai/mcp/servers/mathbeal/avenir-mcp)
+[![Mentioned in Awesome MCP Servers](https://awesome.re/mentioned-badge.svg)](https://github.com/punkpeye/awesome-mcp-servers)
 
 Self-checked on every change against YNAB's API terms of 2025-05-28 (naming, attribution,
 YNAB's own image, a personal token for its owner only, the hourly limit); a weekly job
