@@ -236,6 +236,23 @@ def test_every_link_to_a_file_of_the_repository_names_one_that_exists() -> None:
     assert not broken, f"links to no file of the repository: {broken}"
 
 
+_WORKFLOW_BADGE = re.compile(r"actions/workflows/([^/\s)]+\.yml)/badge\.svg")
+
+
+def test_every_workflow_badge_of_the_readme_shows_a_workflow_that_exists() -> None:
+    """A badge of the README names a workflow file of this checkout.
+
+    GitHub answers a badge for a workflow it does not have: it reads "no status",
+    grey, instead of going red, so a renamed workflow would leave a badge that
+    promises a check nothing runs any more.
+    """
+    root = CONTENT.parents[3]
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    badges = _WORKFLOW_BADGE.findall(readme)
+    missing = [name for name in badges if not (root / ".github" / "workflows" / name).is_file()]
+    assert badges and not missing, f"badges of no workflow: {missing}"
+
+
 def _install_link(prefix: str) -> str:
     readme = (CONTENT.parents[3] / "README.md").read_text(encoding="utf-8")
     found = re.search(rf"\]\(({re.escape(prefix)}[^)]+)\)", readme)

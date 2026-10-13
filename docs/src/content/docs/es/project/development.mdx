@@ -57,7 +57,7 @@ y cada lunes, porque una página externa puede desaparecer), `gitleaks` sobre ca
 Docker), `typos`, `zizmor` sobre los workflows, `reuse lint` (cada archivo indica su copyright y su licencia), dos construcciones del wheel y del sdist que deben ser idénticas bit a bit (`just reproducible`), `pip-audit` sobre las
 dependencias bloqueadas, la construcción de la documentación con las pruebas de su propio
 código y `npm audit` sobre sus dependencias, CodeQL y el OpenSSF Scorecard (una vez público el repositorio), una comparación semanal de
-la API de YNAB con su instantánea (`just api-drift`), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
+la API de YNAB con su instantánea (`just api-drift`), una campaña de mutación semanal (`just mutate`, más abajo), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
 cliente, sobre el plan de demostración: sus listas, la portabilidad de los esquemas
 de sus herramientas y una llamada de cada tipo. La batería de pruebas se
 ejecuta en Linux y macOS con Python 3.12, 3.13, 3.14 y 3.15, y en Windows con Python 3.14
@@ -100,8 +100,28 @@ construcción, la actualización semanal del archivo de bloqueo queda exenta.
 Las pruebas se escriben primero. Ninguna prueba llama a YNAB.
 
 `just mutate` ejecuta las pruebas de mutación (mutmut) sobre los módulos de cálculo: modifica
-a propósito el código, unas 1.500 veces, y comprueba que una prueba falla cada vez. Los
-cambios que ninguna prueba detecta señalan las pruebas que escribir; muchos son inofensivos, como la redacción de un mensaje.
+a propósito el código, unas 4.500 veces, y comprueba que una prueba falla cada vez. Un cambio
+que ninguna prueba detecta es una línea cuya decisión nada lee: la respuesta es la prueba que
+falta, o la marca `# pragma: no mutate` sobre una instrucción de una sola línea, con la razón
+por la que ese cambio no puede alterar ninguna respuesta. Hoy se detecta cada mutante.
+
+Lo que se mide es la lógica pura. `do_not_mutate`, en `pyproject.toml`, descarta los módulos
+que hablan con YNAB, con el transporte o con el disco — el cliente, el servidor y sus módulos
+de herramientas, el diario, los logs, la autenticación HTTP, la confirmación, la aplicación —
+y los que solo contienen anotaciones y constantes: sus pruebas son las de protocolo y las de
+cliente, lentas de ejecutar contra cada mutante, y comprueban cómo se conectan las piezas
+entre sí más que lo que decide una línea. Solo los archivos listados en
+`pytest_add_cli_args_test_selection` se ejecutan contra un mutante, así que cada módulo medido
+debe estar cubierto por uno de ellos: un módulo al que no llega ningún archivo listado vuelve
+con "no tests", lo que no mide nada.
+
+El workflow `mutation` ejecuta la campaña cada lunes, en dos núcleos y en unos ocho minutos, y
+falla cuando un mutante sobrevive, cuando algún mutante no ejecuta ninguna prueba, o cuando la campaña
+no encuentra ningún mutante: de lo contrario, una configuración que no mide nada pasaría. Su
+badge en el README muestra esa única ejecución: un mutante superviviente lo deja en rojo toda
+la semana, hasta el lunes siguiente o hasta una ejecución lanzada a mano. Un mutante que hace
+que una prueba entre en un bucle sin fin en lugar de fallar, no: la prueba sí lo detectó, y
+mutmut lo cuenta aparte, como un tiempo de espera agotado.
 
 `just bench` mide cuánto tardan los módulos de cálculo sobre un plan generado de cinco años,
 unas 9.000 transacciones (pytest-benchmark). En un portátil, la operación más lenta (preparar

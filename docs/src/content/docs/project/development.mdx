@@ -57,7 +57,7 @@ and every Monday, since a page elsewhere can disappear), `typos`, `zizmor` on th
 `gitleaks` on every commit of the history (`just secrets`, with Docker),
 the documentation build with the tests of its own code and `npm audit` on its dependencies, CodeQL and the OpenSSF Scorecard
 (once the repository is public), a weekly comparison of YNAB's API with its snapshot
-(`just api-drift`), and the official MCP Inspector
+(`just api-drift`), a weekly mutation campaign (`just mutate`, below), and the official MCP Inspector
 (`just inspect`), which checks the server as a client sees it on the demo plan: its
 lists, the portability of its tool schemas, and one call of each kind. The test suite runs on Linux and macOS with Python 3.12,
 3.13, 3.14 and 3.15, and on Windows with Python 3.14 (on a pull request, macOS tries the
@@ -99,8 +99,28 @@ the weekly refresh of the lock file is exempt.
 Tests are written first. No test calls YNAB.
 
 `just mutate` runs mutation testing (mutmut) on the modules that compute: it changes the
-code on purpose, some 1,500 times, and checks that a test fails each time. The changes no
-test notices point to the tests to write; many are harmless, such as a message's wording.
+code on purpose, some 4,500 times, and checks that a test fails each time. A change no
+test notices is a line whose decision nothing reads: the answer is the missing test, or
+the mark `# pragma: no mutate` on a one-line statement, with the reason that change can
+alter no answer. Today every mutant is noticed.
+
+What is measured is the pure logic. `do_not_mutate` in `pyproject.toml` leaves out the
+modules that talk to YNAB, to the transport or to the disk — the client, the server and
+its tool modules, the journal, the logs, the HTTP authentication, the confirmation, the
+application — and those holding only annotations and constants: their tests are the
+protocol and client tests, slow to run against every mutant, and they check how the
+pieces are wired together rather than what a line decides. Only the files listed in
+`pytest_add_cli_args_test_selection` run against a mutant, so each measured module has to
+be covered by one of them: a module no listed file reaches comes back "no tests", which
+measures nothing.
+
+The `mutation` workflow runs the campaign every Monday, on two cores in some eight
+minutes, and fails when a mutant survives, when one runs no test, or when the campaign
+finds no mutant at all — a configuration that measures nothing would pass otherwise. Its
+badge in the README shows that single run: a surviving mutant leaves it red for the week,
+until the next Monday or a run started by hand. A mutant that makes a test loop for ever
+instead of failing does not: the test did notice it, and mutmut counts it apart, as a
+timeout.
 
 `just bench` times the modules that compute on a generated five-year plan, about 9,000
 transactions (pytest-benchmark). On a laptop the slowest, preparing a page of suggestions,

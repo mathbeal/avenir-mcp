@@ -57,7 +57,8 @@ en elke maandag, want een pagina elders kan verdwijnen), en draait `typos`, `ziz
 afhankelijkheden, `gitleaks` op elke commit van de geschiedenis (`just secrets`, met
 Docker), de build van de documentatie met de tests van haar eigen code en `npm audit` op haar afhankelijkheden, CodeQL en de
 OpenSSF Scorecard (zodra de repository openbaar is), een wekelijkse vergelijking van de API
-van YNAB met zijn momentopname (`just api-drift`), en de officiële MCP Inspector
+van YNAB met zijn momentopname (`just api-drift`), een wekelijkse mutatiecampagne
+(`just mutate`, hieronder), en de officiële MCP Inspector
 (`just inspect`), die de server controleert zoals een client hem op het demoplan ziet:
 zijn lijsten, de overdraagbaarheid van zijn toolschema's, en één aanroep van elk soort. De
 testsuite draait op Linux en macOS met Python 3.12, 3.13, 3.14 en 3.15, en op Windows met
@@ -100,9 +101,29 @@ het project in opbouw is, geldt dit niet voor de wekelijkse verversing van het l
 Tests worden eerst geschreven. Geen enkele test roept YNAB aan.
 
 `just mutate` draait mutatietests (mutmut) op de modules die rekenen: het verandert de code
-expres, zo'n 1.500 keer, en controleert dat er elke keer een test faalt. De wijzigingen die
-geen enkele test opmerkt, wijzen naar de tests die nog geschreven moeten worden; veel zijn
-onschuldig, zoals de formulering van een melding.
+expres, zo'n 4.500 keer, en controleert dat er elke keer een test faalt. Een wijziging die
+geen enkele test opmerkt, is een regel waarvan niets de beslissing leest: het antwoord is de
+ontbrekende test, of de markering `# pragma: no mutate` op een instructie van één regel, met
+de reden waarom die wijziging geen enkel antwoord kan veranderen. Vandaag wordt elke mutant
+opgemerkt.
+
+Wat gemeten wordt, is de pure logica. `do_not_mutate` in `pyproject.toml` laat de modules weg
+die met YNAB, met het transport of met de schijf praten — de client, de server en zijn
+tool-modules, het journaal, de logs, de HTTP-authenticatie, de bevestiging, de applicatie —
+en de modules die alleen annotaties en constanten bevatten: hun tests zijn de protocol- en
+clienttests, traag om tegen elke mutant te draaien, en ze controleren hoe de onderdelen aan
+elkaar zijn verbonden in plaats van wat een coderegel beslist. Alleen de bestanden die in
+`pytest_add_cli_args_test_selection` staan, draaien tegen een mutant, dus elke gemeten module
+moet door een van hen gedekt zijn: een module die door geen enkel vermeld bestand wordt
+bereikt, komt terug als "no tests", wat niets meet.
+
+De workflow `mutation` draait de campagne elke maandag, op twee cores in zo'n acht minuten, en
+faalt wanneer een mutant overleeft, wanneer er een mutant geen enkele test draait, of wanneer de
+campagne helemaal geen mutant vindt — anders zou een configuratie die niets meet, slagen. De
+badge in de README laat die ene run zien: een overlevende mutant laat hem de hele week rood,
+tot de volgende maandag of tot een met de hand gestarte run. Een mutant die een test eindeloos
+laat lussen in plaats van hem te laten falen, niet: de test heeft hem wel opgemerkt, en mutmut
+telt hem apart, als een time-out.
 
 `just bench` meet hoe lang de rekenende modules duren op een gegenereerd plan van vijf jaar,
 zo'n 9.000 transacties (pytest-benchmark). Op een laptop duurt de traagste stap (een pagina met

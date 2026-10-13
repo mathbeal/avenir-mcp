@@ -15,6 +15,7 @@ Built and tested against YNAB's API v1.87.0. A weekly [`YNAB API drift`](https:/
 
 [![quality](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/quality.yml)
 [![MCP Inspector](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/inspector.yml)
+[![mutation](https://github.com/mathbeal/avenir-mcp/actions/workflows/mutation.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/mutation.yml)
 [![docs](https://github.com/mathbeal/avenir-mcp/actions/workflows/docs.yml/badge.svg)](https://avenir-mcp.pages.dev/avenir-mcp/)
 
 [![PyPI](https://img.shields.io/pypi/v/avenir-mcp)](https://pypi.org/project/avenir-mcp/)

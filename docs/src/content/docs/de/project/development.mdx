@@ -58,7 +58,8 @@ und jeden Montag, denn eine fremde Seite kann verschwinden), führt `typos` aus,
 festgeschriebenen Abhängigkeiten, `gitleaks` auf jedem Commit der Historie (`just secrets`,
 mit Docker), den Build der Dokumentation mit den Tests ihres eigenen Codes und `npm audit` auf ihren Abhängigkeiten, CodeQL und die
 OpenSSF Scorecard (sobald das Repository öffentlich ist), einen wöchentlichen Vergleich der
-API von YNAB mit ihrem Schnappschuss (`just api-drift`) und den offiziellen MCP Inspector
+API von YNAB mit ihrem Schnappschuss (`just api-drift`), eine wöchentliche Mutationskampagne
+(`just mutate`, weiter unten) und den offiziellen MCP Inspector
 (`just inspect`), der den Server so prüft, wie ein Client ihn auf dem Demo-Plan sieht:
 seine Listen, die Portabilität seiner Tool-Schemas und je einen Aufruf jeder Art. Die
 Testsuite läuft unter Linux und macOS mit Python 3.12, 3.13, 3.14 und 3.15 und unter
@@ -101,9 +102,31 @@ das Projekt im Aufbau ist, gilt das nicht für die wöchentliche Auffrischung de
 Tests werden zuerst geschrieben. Kein Test ruft YNAB auf.
 
 `just mutate` führt Mutationstests (mutmut) auf den rechnenden Modulen aus: Es ändert den
-Code absichtlich, etwa 1.500 Mal, und prüft, dass jedes Mal ein Test fehlschlägt. Die
-Änderungen, die kein Test bemerkt, zeigen auf die zu schreibenden Tests; viele sind
-harmlos, etwa der Wortlaut einer Meldung.
+Code absichtlich, etwa 4.500 Mal, und prüft, dass jedes Mal ein Test fehlschlägt. Eine
+Änderung, die kein Test bemerkt, ist eine Zeile, deren Entscheidung nichts liest: Die
+Antwort ist der fehlende Test oder die Markierung `# pragma: no mutate` auf einer
+einzeiligen Anweisung, mit dem Grund, warum diese Änderung keine Antwort ändern kann.
+Heute wird jeder Mutant bemerkt.
+
+Gemessen wird die reine Logik. `do_not_mutate` in `pyproject.toml` lässt die Module aus,
+die mit YNAB, mit dem Transport oder mit der Festplatte sprechen — den Client, den Server und
+seine Tool-Module, das Journal, die Protokolle, die HTTP-Authentifizierung, die
+Bestätigung, die Anwendung — und jene, die nur Annotationen und Konstanten enthalten: Deren
+Tests sind die Protokoll- und Client-Tests, deren Ausführung gegen jeden Mutanten lange
+dauert, und sie prüfen, wie die Teile miteinander verbunden sind, statt was eine Zeile
+entscheidet. Nur die in `pytest_add_cli_args_test_selection` aufgeführten Dateien laufen
+gegen einen Mutanten, deshalb muss jedes gemessene Modul von einer von ihnen abgedeckt sein:
+Ein Modul, das von keiner aufgeführten Datei erreicht wird, kommt als "no tests" zurück, was
+nichts misst.
+
+Der Workflow `mutation` führt die Kampagne jeden Montag aus, auf zwei Kernen in etwa acht
+Minuten, und schlägt fehl, wenn ein Mutant überlebt, wenn einer keinen Test ausführt oder
+wenn die Kampagne überhaupt keinen Mutanten findet — andernfalls würde eine Konfiguration
+bestehen, die nichts misst. Sein Badge in der README zeigt diesen einen Durchlauf: Ein
+überlebender Mutant lässt es die Woche über rot, bis zum nächsten Montag oder bis zu einem
+von Hand gestarteten Durchlauf. Ein Mutant, der einen Test endlos schleifen lässt, statt ihn
+fehlschlagen zu lassen, nicht: Der Test hat ihn bemerkt, und mutmut zählt ihn getrennt, als
+Timeout.
 
 `just bench` misst die rechnenden Module auf einem generierten Budget über fünf Jahre, etwa
 9.000 Buchungen (pytest-benchmark). Auf einem Laptop braucht der langsamste Schritt (eine Seite mit
