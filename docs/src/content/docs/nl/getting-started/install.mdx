@@ -137,11 +137,12 @@ geen van de stappen verschilt op Windows, macOS of Linux, behalve waar dat er st
    **Settings → Extensions → Advanced settings**, en klik onder **Extension Developer**
    op **Install Extension…**; kies het bestand uit uw downloadmap.
 
-4. **Installeer haar.** Het dialoogvenster geeft de naam van de extensie,
+4. **Installeer de extensie.** Het dialoogvenster geeft de naam van de extensie,
    *avenir-mcp for YNAB*, en zegt wat ze doet. Klik op **Install**.
 
 5. **Plak uw token** in het veld **YNAB personal access token**, het token
-   [uit de stap hiervoor](#een-ynab-token-aanmaken). Het veld verbergt wat u erin plakt;
+   [uit de stap hiervoor](#een-ynab-token-aanmaken). `Ctrl` + `V` op Windows en Linux,
+   `⌘` + `V` op macOS. Het veld verbergt wat u erin plakt;
    Claude Desktop bewaart het waar uw systeem wachtwoorden bewaart, en het staat in geen
    enkel bestand dat u kunt openen.
 
@@ -152,7 +153,7 @@ geen van de stappen verschilt op Windows, macOS of Linux, behalve waar dat er st
 7. **Controleer of ze er staat.** **Settings → Extensions** vermeldt nu
    **avenir-mcp for YNAB**, ingeschakeld.
 
-8. **Vraag haar iets.** Schrijf in een nieuw gesprek:
+8. **Vraag het iets.** Schrijf in een nieuw gesprek:
    *„Geef een overzicht van mijn YNAB-plannen.”* Claude vraagt u de eerste keer om het
    gereedschap toe te staan; sta het toe, en het antwoord geeft de namen van uw plannen.
    Het allereerste antwoord duurt een paar seconden langer dan de volgende, terwijl
@@ -168,8 +169,8 @@ installeren met de hand; ga verder met
 <Aside type="caution" title="Geen .mcpb-bestand in de release?">
 Het is de publicatieworkflow die de extensie meegeeft: een release die gepubliceerd is
 voordat die taak bestond, draagt er geen. Wanneer de assets van de nieuwste release geen
-bestand op `.mcpb` vermelden, wacht dan op de volgende release, of installeer avenir-mcp
-met de hand met de stappen hieronder.
+bestand vermelden dat op `.mcpb` eindigt, wacht dan op de volgende release, of
+installeer avenir-mcp met de hand met de stappen hieronder.
 </Aside>
 
 <Aside type="note" title="Claude Desktop zegt dat de extensie niet ondertekend is">
@@ -185,7 +186,7 @@ Een extensie die niet start, komt aan bod in
 |---|---|
 | **Het token wijzigen, of wijzigingen toestaan** | **Settings → Extensions → avenir-mcp for YNAB** |
 | **Bijwerken** | download het bestand van de nieuwere release en open het; het vervangt het geïnstalleerde |
-| **Verwijderen** | verwijder haar via **Settings → Extensions**; het token gaat met haar mee |
+| **Verwijderen** | verwijder de extensie via **Settings → Extensions**; het token gaat mee |
 
 ## Controleren of avenir-mcp start
 
@@ -236,7 +237,7 @@ maar niets wijzigen. [De optie om wijzigingen](#wijzigingen-toestaan) toe te sta
     Claude Code bewaart dit, inclusief het token, in `~/.claude.json`, waar alleen u toegang toe heeft.
   </TabItem>
   <TabItem label="Claude Desktop">
-    **De extensie** is de korte weg, en de enige zonder terminal:
+    **De extensie** is de korte weg, en de weg zonder terminal:
     [De Claude Desktop-extensie installeren](#de-claude-desktop-extensie-installeren).
 
     **Of met de hand**, als u de configuratie liever zelf schrijft:

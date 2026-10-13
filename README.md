@@ -115,6 +115,9 @@ or tick **Allow changes to your plans** in the extension, to allow changes.
 in: no uv, no command, no file to edit. Numbered steps, from the download to a first
 answer:
 [Install the Claude Desktop extension](https://avenir-mcp.pages.dev/avenir-mcp/getting-started/install/#install-the-claude-desktop-extension).
+The `.mcpb` is attached by the release workflow, so a release published before that job
+existed carries none: when the latest release has no `.mcpb` in its assets, install by
+hand below.
 
 Or by hand:
 
