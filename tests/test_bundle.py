@@ -7,7 +7,11 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
+import subprocess  # noqa: S404  # nosec B404 - starts the bundle's own launcher
+import sys
+import threading
 import tomllib
 from pathlib import Path
 from types import ModuleType
@@ -20,6 +24,7 @@ from avenir_mcp import __version__
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from typing import IO
 
 ROOT = Path(__file__).resolve().parent.parent
 WORKFLOWS = ROOT / ".github" / "workflows"
@@ -30,6 +35,20 @@ LAUNCHER = BUNDLE / "src" / "server.py"
 # The one version of the packing tool, in the justfile and in both workflows: two
 # versions would give two verdicts on the same manifest.
 PACKER = "@anthropic-ai/mcpb@2.1.2"
+# A launcher that never answers must fail the suite rather than hold it: the handshake
+# below takes under a second, and the process is killed well before a runner gives up.
+LAUNCH_TIMEOUT = 120.0
+# A write tool, so its absence says the server came up read-only.
+A_WRITE_TOOL = "move_money"
+# What the two requests of the handshake carry.
+PARAMS: dict[str, dict[str, object]] = {
+    "initialize": {
+        "protocolVersion": "2025-06-18",
+        "capabilities": {},
+        "clientInfo": {"name": "avenir-mcp's tests", "version": __version__},
+    },
+    "tools/list": {},
+}
 
 
 def _server() -> Mapping[str, object]:
@@ -74,6 +93,104 @@ def _launcher() -> ModuleType:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _environment_claude_desktop_would_pass(box: str | None) -> dict[str, str]:
+    """The environment of a fresh install: the manifest's two settings and nothing else.
+
+    Args:
+        box: The "Allow changes to your plans" checkbox as Claude Desktop writes it,
+            or None for a client that passes no value.
+
+    Returns:
+        The environment to start the launcher with.
+    """
+    # Whatever this machine sets for avenir-mcp is not what a reader's install has.
+    environment = {name: value for name, value in os.environ.items() if "AVENIR_MCP" not in name}
+    environment["YNAB_API_KEY"] = "not-a-real-token"
+    # The handshake must not depend on PyPI answering.
+    environment["AVENIR_MCP_NO_UPDATE_CHECK"] = "1"
+    if box is not None:
+        environment["AVENIR_MCP_WRITE"] = box
+    return environment
+
+
+def _tools_the_launcher_offers(box: str | None) -> list[str]:
+    """Start the launcher, speak MCP to it over stdio, and read back the tools it lists.
+
+    This is the handshake Claude Desktop makes, with the launcher started here rather
+    than by Claude Desktop's own uv: it says that the file runs and answers on this
+    platform, not that uv resolves the pin, which `mcpb pack` and the pin's tests cover.
+
+    Args:
+        box: The "Allow changes to your plans" checkbox as Claude Desktop writes it,
+            or None for a client that passes no value.
+
+    Returns:
+        The names of the tools the server lists, in the order it lists them.
+
+    Raises:
+        AssertionError: If the server stops before answering, or names itself something
+            other than the release this repository is.
+    """
+    process = subprocess.Popen(  # noqa: S603  # nosec B603 - the bundle's own launcher
+        [sys.executable, str(LAUNCHER)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        # stdout belongs to the protocol; the banner and the logs go to stderr.
+        stderr=subprocess.DEVNULL,
+        env=_environment_claude_desktop_would_pass(box),
+        text=True,
+        encoding="utf-8",
+        bufsize=1,
+    )
+    # The context manager closes the three pipes and waits; the timer makes sure there
+    # is something to wait for, whatever the launcher does.
+    with process:
+        assert process.stdin and process.stdout
+        killer = threading.Timer(LAUNCH_TIMEOUT, process.kill)
+        killer.start()
+        try:
+            return _handshake(process.stdin, process.stdout)
+        finally:
+            killer.cancel()
+            process.kill()
+
+
+def _handshake(to_server: IO[str], from_server: IO[str]) -> list[str]:
+    """Initialise the session, then ask for the tools, one JSON object per line.
+
+    Args:
+        to_server: The launcher's standard input.
+        from_server: The launcher's standard output.
+
+    Returns:
+        The names of the tools the server lists.
+
+    Raises:
+        AssertionError: If the server stops before answering, or names itself something
+            other than the release this repository is.
+    """
+
+    def ask(identifier: int, method: str) -> Mapping[str, object]:
+        request = {"jsonrpc": "2.0", "id": identifier, "method": method, "params": PARAMS[method]}
+        to_server.write(f"{json.dumps(request)}\n")
+        to_server.flush()
+        for line in from_server:
+            answer = json.loads(line)
+            if answer.get("id") == identifier:
+                result = answer["result"]
+                assert isinstance(result, dict), answer
+                return result
+        raise AssertionError(f"the launcher stopped before answering {method}")
+
+    about = ask(1, "initialize")["serverInfo"]
+    assert about == {"name": "avenir-mcp", "version": __version__}, about
+    to_server.write(f"{json.dumps({'jsonrpc': '2.0', 'method': 'notifications/initialized'})}\n")
+    to_server.flush()
+    listed = ask(2, "tools/list")["tools"]
+    assert isinstance(listed, list)
+    return [tool["name"] for tool in listed]
 
 
 def test_the_bundle_installs_the_release_it_says_it_is() -> None:
@@ -232,6 +349,30 @@ def test_one_pinned_packer_checks_and_packs_the_bundle_everywhere() -> None:
         for line in workflow.read_text(encoding="utf-8").splitlines():
             if re.search(r"mcpb (validate|pack) mcpb", line):
                 assert PACKER in line, f"{workflow.name}: {line.strip()}"
+
+
+@pytest.mark.parametrize("box", [None, "false", "true"])
+def test_the_launcher_starts_and_answers_an_mcp_client(box: str | None) -> None:
+    """Started as an installed extension is, it comes up and lists tools, on every platform.
+
+    The unit tests above read the launcher's translation; this one runs the file. It is
+    the check that Windows, where nobody develops avenir-mcp, gets too: the suite runs
+    there, so a launcher that only starts on a Unix fails the pull request.
+    """
+    offered = _tools_the_launcher_offers(box)
+    assert offered, "the server listed no tool at all"
+    assert (A_WRITE_TOOL in offered) is (box == "true")
+
+
+def test_the_extension_packs_where_a_reader_installs_it() -> None:
+    """Packing is checked on Windows as well as Linux: a reader of either opens one file.
+
+    The packer walks the directory and writes a zip; what it does with a path separator
+    or a line ending is its business, and the only way to know is to run it there.
+    """
+    jobs = yaml.safe_load((WORKFLOWS / "quality.yml").read_text(encoding="utf-8"))["jobs"]
+    assert set(jobs["bundle"]["strategy"]["matrix"]["os"]) == {"ubuntu-latest", "windows-latest"}
+    assert jobs["bundle"]["runs-on"] == "${{ matrix.os }}"
 
 
 def test_the_job_that_packs_the_extension_cannot_change_the_release() -> None:
