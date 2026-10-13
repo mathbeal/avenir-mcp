@@ -215,12 +215,24 @@ jobs:
           git /repo --redact --log-opts=--all
 
   bundle:
-    name: the Claude Desktop extension packs
-    runs-on: ubuntu-latest
+    name: the Claude Desktop extension packs on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # The readers the extension is for are mostly on Windows, where nobody develops
+        # avenir-mcp: the packer runs there too, since what it makes of a path separator
+        # is only known by running it. That the launcher starts there is the pytest
+        # job's business: the suite runs on Windows and starts it.
+        os: [ubuntu-latest, windows-latest]
     # Reading the code is all a job needs; a private repository cannot be cloned without it.
     permissions:
       contents: read
+    defaults:
+      run:
+        # One command for both runners: PowerShell would not read $RUNNER_TEMP.
+        shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
