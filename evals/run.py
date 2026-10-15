@@ -107,7 +107,7 @@ def run_task(task: Task, model: str) -> dict[str, Any]:
         server.shutdown()
         server.server_close()
     events = _events(done.stdout)
-    final = next((e for e in reversed(events) if e.get("type") == "result"), {})
+    final: dict[str, Any] = next((e for e in reversed(events) if e.get("type") == "result"), {})
     usage = final.get("usage", {})
     return scored(
         task,
