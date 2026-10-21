@@ -314,8 +314,7 @@ STATE = DemoBudget()
 class Handler(BaseHTTPRequestHandler):
     """Routes YNAB API paths to the demo budget."""
 
-    # The standard library names this parameter `format`.
-    def log_message(self, format: str, *args: Any) -> None:  # pylint: disable=redefined-builtin
+    def log_message(self, format: str, *args: Any) -> None:
         """Stay silent: the evaluation reports what matters."""
 
     def _send(self, status: int, payload: Any) -> None:
