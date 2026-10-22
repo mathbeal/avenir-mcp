@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "avenir-mcp",
   "display_name": "avenir-mcp for YNAB",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Unofficial MCP server for YNAB: budgets, spending and transaction classification, built for agents.",
   "long_description": "Ask Claude about the plan you keep in YNAB: what is left in a category, where the money went last month, whether you will run short before payday. avenir-mcp answers from your own YNAB data, and nothing else.\n\nIt is **read-only when you install it**. Tick *Allow changes to your plans* and the agent can also classify transactions, move money between categories, reconcile an account and create one: every change is shown to you before it happens, you confirm it, and it can be undone.\n\nYou need a YNAB account and a personal access token, which YNAB gives you under *Account settings > Developer settings*. avenir-mcp is not made by YNAB, and it never touches a bank account: it changes a plan in YNAB, never real money.",
   "author": {

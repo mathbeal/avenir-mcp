@@ -215,6 +215,10 @@ Siehe [Evaluierung](/avenir-mcp/de/project/evaluation/).
   die Versionsnummer in `plugin/.claude-plugin/plugin.json` und die festgeschriebene
   Version in `plugin/pyproject.toml`, führen Sie `uv lock --project plugin` aus und
   committen Sie `plugin/uv.lock`. Die drei bezeichnen eine Version, und ein Test schlägt
-  fehl, solange sie nicht übereinstimmen. `uv lock` löst nur eine Version auf, die PyPI
-  bereits bereitstellt; daher handelt es sich um den Commit, der auf die Veröffentlichung
-  folgt, und nicht um einen Teil davon.
+  fehl, solange sie nicht übereinstimmen. Der Test, der das Plugin mit dieser Version
+  vergleicht, wird so lange als `xfail` markiert, wie das Plugin noch auf die vorherige
+  Version verweist; daher meldet pytest diesen Test als erwarteten Fehler, anstatt den
+  Build abzubrechen; ein Plugin, das zwei Versionen hinter dieser Version zurückliegt oder
+  eine Version vor ihr liegt, führt weiterhin zu einem Fehler. `uv lock` löst nur eine
+  Version auf, die PyPI bereits bereitstellt; daher handelt es sich um den Commit, der auf
+  die Veröffentlichung folgt, und nicht um einen Teil davon.

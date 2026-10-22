@@ -30,6 +30,18 @@ SERVERS: dict[str, object] = json.loads((PLUGIN / ".mcp.json").read_text(encodin
 PROJECT = tomllib.loads((PLUGIN / "pyproject.toml").read_text(encoding="utf-8"))
 LOCK = tomllib.loads((PLUGIN / "uv.lock").read_text(encoding="utf-8"))
 PACKAGE = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+# Every release CHANGELOG.md names, newest first, from its `## [0.7.0] — 2026-10-22`
+# headings. git-cliff regenerates the file when a release is cut, so its first entry is
+# the version this tree carries.
+RELEASES = re.findall(
+    r"^## \[([^\]]+)\]", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"), flags=re.MULTILINE
+)
+# The release PyPI already serves while this tree carries the next one, which is the one
+# the plugin may still name until the commit that follows the publication. Read from the
+# changelog: nothing is asked of PyPI, and no tag is needed, which a shallow clone of the
+# repository does not have. Empty when the changelog does not open on this version, a
+# state a test of its own reports rather than widening what the plugin may name.
+PREVIOUS_RELEASE = RELEASES[1] if RELEASES[:1] == [__version__] and len(RELEASES) > 1 else ""
 # The one name the plugin gives its server; a client prefixes the tools with it.
 SERVER = "avenir"
 # The environment Claude Code expands for the plugin: the folder it unpacked the plugin
@@ -138,12 +150,44 @@ def _shipped() -> list[Path]:
     return tracked(PLUGIN.name)
 
 
+def test_the_plugin_names_one_release_everywhere() -> None:
+    """The manifest, the pin and the lock are one version: otherwise it installs another.
+
+    This holds every day, the release window below included: whichever release the plugin
+    names, its three files name the same one, or `uv run --locked` starts something no
+    one chose.
+    """
+    version = MANIFEST["version"]
+    assert PROJECT["project"]["version"] == version
+    assert PROJECT["project"]["dependencies"] == [f"avenir-mcp=={version}"]
+    assert _locked("avenir-mcp")["version"] == version
+
+
+def test_the_changelog_opens_on_the_release_this_tree_carries() -> None:
+    """`PREVIOUS_RELEASE` is read from the changelog, so the file has to open on this one.
+
+    Were the first entry another version, the release window would be measured against
+    nothing: the comparison below would turn strict again without saying why, or allow a
+    version nobody released. This fails instead.
+    """
+    assert RELEASES[:1] == [__version__], RELEASES[:3]
+    assert PREVIOUS_RELEASE == RELEASES[1]
+
+
+@pytest.mark.xfail(
+    MANIFEST["version"] == PREVIOUS_RELEASE,
+    reason="release window: the plugin follows the PyPI publication",
+)
 def test_the_plugin_installs_the_release_it_says_it_is() -> None:
-    """The version, the pin and the lock are one release: otherwise it installs another."""
+    """The plugin names the version of this tree, which is the release a reader installs.
+
+    `uv lock --project plugin` resolves only a release PyPI already serves, so the commit
+    that cuts a release leaves the plugin on the one before it until the commit that
+    follows the publication. That single state is the xfail above: reported as the open
+    window it is, never as a pass. Anything else fails here, a plugin two releases behind
+    as much as one ahead of what this tree carries.
+    """
     assert MANIFEST["version"] == __version__
-    assert PROJECT["project"]["version"] == __version__
-    assert PROJECT["project"]["dependencies"] == [f"avenir-mcp=={__version__}"]
-    assert _locked("avenir-mcp")["version"] == __version__
 
 
 def test_the_lock_was_written_from_the_pin_beside_it() -> None:

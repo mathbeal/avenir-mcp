@@ -199,5 +199,9 @@ See [Evaluation](/avenir-mcp/project/evaluation/).
 - Then the Claude Code plugin, once PyPI has the release: raise the version in
   `plugin/.claude-plugin/plugin.json` and the pin in `plugin/pyproject.toml`, run
   `uv lock --project plugin`, and commit `plugin/uv.lock`. The three name one release, and
-  a test fails while they disagree. `uv lock` resolves only a release PyPI already serves,
-  so this is the commit that follows the publication rather than a part of it.
+  a test fails while they disagree. The test that compares the plugin with this version is
+  marked `xfail` for as long as the plugin still points at the previous release, so pytest
+  reports that test as an expected failure instead of failing the build; a plugin two
+  versions behind, or one ahead of this version, still fails. `uv lock` resolves only a
+  release PyPI already serves, so this is the commit that follows the publication rather
+  than a part of it.

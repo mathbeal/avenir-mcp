@@ -208,6 +208,10 @@ Zie [Evaluatie](/avenir-mcp/nl/project/evaluation/).
 - Vervolgens de Claude Code-plugin, zodra de release op PyPI staat: pas de versie aan in
   `plugin/.claude-plugin/plugin.json` en de vastgezette versie in `plugin/pyproject.toml`,
   voer `uv lock --project plugin` uit en commit `plugin/uv.lock`. De drie verwijzen naar
-  één release, en een test mislukt zolang ze niet overeenkomen. `uv lock` lost alleen een
+  één release, en een test mislukt zolang ze niet overeenkomen. De test waarin de plug-in
+  met deze versie wordt vergeleken, wordt gemarkeerd als `xfail` zolang de plug-in nog naar
+  de vorige release verwijst; pytest rapporteert die test dan als een verwachte fout in
+  plaats van de build te laten mislukken; een plug-in die twee versies achterloopt op deze
+  versie, of één versie voorloopt, leidt nog steeds tot een fout. `uv lock` lost alleen een
   release op die PyPI al aanbiedt, dus dit is de commit die volgt op de publicatie en er
   geen deel van uitmaakt.
