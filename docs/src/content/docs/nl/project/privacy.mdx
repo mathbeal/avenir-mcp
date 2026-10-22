@@ -16,11 +16,16 @@ met de gegevens die het via de API van YNAB verkrijgt.
 | U, op uw computer | avenir-mcp terwijl het programma draait, en het bijbehorende logboek | deze pagina |
 | YNAB | uw plan, zoals altijd: avenir-mcp leest het en wijzigt het wanneer u dit bevestigt met uw eigen token | [Het privacybeleid](https://www.ynab.com/privacy-policy/) van YNAB |
 | Uw modelaanbieder | de toolresultaten die uw MCP-client naar het model verzendt: rekeningen, categorieën, begunstigden, bedragen, notities | die van uw aanbieder; niemand met een [lokaal model](/avenir-mcp/guides/choose-a-model/#local-models) |
+| PyPI | de naam van het opgevraagde pakket, en wat elk webverzoek bevat: uw IP-adres en `python-httpx` als user-agent. Maximaal één verzoek per dag, en geen enkel verzoek wanneer de [updatecontrole](/avenir-mcp/nl/reference/configuration/#avenir_mcp_no_update_check) is uitgeschakeld | [de privacyverklaring van PyPI](https://policies.python.org/pypi.org/Privacy-Notice/), opgesteld door de Python Software Foundation |
 | De uitgever van avenir-mcp | niets | — |
 
 avenir-mcp geeft geen van de gegevens die het via de API van YNAB ophaalt zonder uw
 medeweten door aan derden, en verkoopt er geen: de gegevens gaan nergens anders heen dan
 waar deze tabel aangeeft.
+
+Wanneer de plannen die u met avenir-mcp opent eigendom zijn van anderen — bijvoorbeeld een
+accountant die aan de plannen van zijn cliënten werkt — worden hun gegevens op dezelfde
+manier verzonden, en bent u degene die hiervoor jegens hen verantwoordelijk is.
 
 ## Wat avenir-mcp verwerkt
 
@@ -41,6 +46,13 @@ waar deze tabel aangeeft.
 - **Bevestigingscodes.** In het geheugen, voor eenmalig gebruik, 10 minuten geldig.
 - **Logbestanden.** Op stderr, uitsluitend identificatiegegevens en tellingen, standaard waarschuwingen en fouten. Waar
   deze terechtkomen, hangt af van uw MCP-client.
+- **Het antwoord van de updatecontrole.** `latest-version.json` in
+  `~/.cache/avenir-mcp/`, of onder `XDG_CACHE_HOME`: het door PyPI opgegeven versienummer,
+  of niets wanneer het verzoek is mislukt, en het tijdstip van de controle. Niets over u of
+  uw plannen. De
+  [controle](/avenir-mcp/nl/reference/configuration/#avenir_mcp_no_update_check) vraagt
+  PyPI maximaal één keer per dag; `AVENIR_MCP_NO_UPDATE_CHECK=1` of `DO_NOT_TRACK=1` stopt
+  deze, en een CI-run (`CI=true` of `CI=1`) vraagt nooit iets op.
 
 ## Hoe ze beveiligd zijn
 
@@ -63,6 +75,7 @@ waar deze tabel aangeeft.
 | Abonnementsgegevens | zolang avenir-mcp actief is; verdwijnen wanneer het programma stopt |
 | Bevestigingscodes | 10 minuten geldig, en verdwijnen wanneer avenir-mcp stopt; een code bevat een vingerafdruk van het voorbeeld, nooit de inhoud ervan |
 | Logboek | totdat u het verwijdert; avenir-mcp verwijdert het nooit |
+| Het antwoord van de updatecontrole | in het bestand totdat u het verwijdert; de volgende controle, op zijn vroegst een dag later, overschrijft het |
 | Token | op de plaats waar u het hebt opgeslagen, totdat u het verwijdert of intrekt |
 
 ## Hoe kunt u dit wissen?
@@ -70,16 +83,25 @@ waar deze tabel aangeeft.
 1. **Stop avenir-mcp**, of sluit uw MCP-client af: de plangegevens in het geheugen gaan verloren.
 2. **Verwijder het logboek**: `~/.local/state/avenir-mcp/journal.jsonl`, of het pad in
    `AVENIR_MCP_JOURNAL` of onder `XDG_STATE_HOME`. U verliest de ongedaanmakingsgeschiedenis, verder niets.
-3. **Trek het token in** in [de ontwikkelaarsinstellingen van YNAB](https://app.ynab.com/settings/developer),
+3. **Verwijder het antwoord van de updatecontrole**:
+   `~/.cache/avenir-mcp/latest-version.json`, of hetzelfde bestand onder
+   `XDG_CACHE_HOME`. avenir-mcp vraagt PyPI bij de volgende start opnieuw, tenzij u de
+   controle uitschakelt.
+4. **Trek het token in** in [de ontwikkelaarsinstellingen van YNAB](https://app.ynab.com/settings/developer),
    en verwijder het uit de configuratie van uw client of uit het bijbehorende bestand.
-4. **Gesprekken** met uw agent worden bewaard door uw MCP-client en uw modelprovider,
+5. **Gesprekken** met uw agent worden bewaard door uw MCP-client en uw modelprovider,
    niet door avenir-mcp: verwijder ze daar.
 
 Uw gegevens bij YNAB blijven in uw YNAB-account opgeslagen, conform het beleid van YNAB.
 
 ## Verder wordt niets verzameld
 
-avenir-mcp heeft geen telemetrie, geen account en geen server. Deze documentatiesite
+avenir-mcp heeft geen telemetrie, geen account en geen server: de uitgever ontvangt niets,
+en er verlaat geen informatie over u of uw plannen uw computer, behalve wat naar YNAB en
+naar uw MCP-client wordt verzonden. Het enige verzoek dat het elders doet, is de dagelijkse
+updatecontrole: PyPI krijgt alleen te weten dat iemand op uw adres om de avenir-mcp-pagina
+heeft gevraagd, net zoals bij elke andere download, en `AVENIR_MCP_NO_UPDATE_CHECK=1`
+blokkeert dat verzoek. Deze documentatiesite
 plaatst geen cookies en gebruikt geen analytics; de lettertypen komen van de site zelf.
 Cloudflare Pages, dat de site host, ontvangt de IP-adressen van bezoekers om de pagina's te
 leveren en te beschermen, volgens het [privacybeleid van Cloudflare](https://www.cloudflare.com/privacypolicy/).

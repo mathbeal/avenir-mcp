@@ -16,11 +16,16 @@ programa hace, en su equipo, con los datos que obtiene a través de la API de YN
 | Usted, en su equipo | avenir-mcp mientras se ejecuta, y su diario | esta página |
 | YNAB | su plan, como siempre: avenir-mcp lo lee, y lo modifica cuando usted confirma, con su propio token | [la política de privacidad de YNAB](https://www.ynab.com/privacy-policy/) |
 | Su proveedor de modelo | los resultados de herramientas que su cliente MCP envía a su modelo: cuentas, categorías, beneficiarios, importes, memos | la de su proveedor; ninguna con un [modelo local](/avenir-mcp/es/guides/choose-a-model/#modelos-locales) |
+| PyPI | el nombre del paquete solicitado y lo que incluye cualquier petición web: su dirección IP y `python-httpx` como agente de usuario. Como máximo, una petición al día; ninguna cuando la [comprobación de actualizaciones](/avenir-mcp/es/reference/configuration/#avenir_mcp_no_update_check) está desactivada | [el aviso de privacidad de PyPI](https://policies.python.org/pypi.org/Privacy-Notice/), publicado por la Python Software Foundation |
 | El editor de avenir-mcp | nada | — |
 
 avenir-mcp no transmite a ningún tercero sin que usted lo sepa los datos que obtiene a través
 de la API de YNAB, y no vende ninguno: los datos no van a ningún sitio salvo donde indica esta
 tabla.
+
+Cuando los planes que abre con avenir-mcp pertenecen a otras personas —por ejemplo, un
+contable que trabaja en los planes de sus clientes—, sus datos se transmiten de la misma
+manera, y usted es quien debe responder ante ellos por ello.
 
 ## Qué maneja avenir-mcp
 
@@ -39,6 +44,14 @@ tabla.
 - **Los códigos de confirmación.** En memoria, de un solo uso, válidos 10 minutos.
 - **Los registros de diagnóstico.** En stderr, solo identificadores y recuentos, avisos y
   errores por defecto. Adónde van depende de su cliente MCP.
+- **La respuesta de la comprobación de actualizaciones.** `latest-version.json` en
+  `~/.cache/avenir-mcp/`, o bajo `XDG_CACHE_HOME`: el número de versión facilitado por
+  PyPI, o nada si la petición ha fallado, y el momento de la comprobación. Nada sobre
+  usted ni sobre sus planes. La
+  [comprobación](/avenir-mcp/es/reference/configuration/#avenir_mcp_no_update_check)
+  pregunta a PyPI como máximo una vez al día; `AVENIR_MCP_NO_UPDATE_CHECK=1` o
+  `DO_NOT_TRACK=1` la detiene, y una ejecución de integración continua (`CI=true` o
+  `CI=1`) nunca pregunta.
 
 ## Cómo se protegen
 
@@ -62,6 +75,7 @@ tabla.
 | Datos del plan | mientras avenir-mcp se ejecuta; se borran al detenerse |
 | Códigos de confirmación | utilizables 10 minutos, y se borran al detenerse avenir-mcp; un código contiene una huella de la vista previa, nunca su contenido |
 | Diario | hasta que usted lo borre; avenir-mcp nunca lo recorta |
+| Respuesta de la comprobación de actualizaciones | en su archivo hasta que lo borre; la siguiente comprobación, como muy pronto un día después, lo sobrescribe |
 | Token | donde usted lo guardó, hasta que lo quite o lo revoque |
 
 ## Cómo borrarlos
@@ -71,17 +85,26 @@ tabla.
 2. **Borre el diario**: `~/.local/state/avenir-mcp/journal.jsonl`, o la ruta indicada en
    `AVENIR_MCP_JOURNAL` o bajo `XDG_STATE_HOME`. Pierde el historial para deshacer, nada
    más.
-3. **Revoque el token** en los
+3. **Borre la respuesta de la comprobación de actualizaciones**:
+   `~/.cache/avenir-mcp/latest-version.json`, o el mismo archivo bajo `XDG_CACHE_HOME`.
+   avenir-mcp vuelve a preguntar a PyPI en el siguiente arranque, a menos que detenga la
+   comprobación.
+4. **Revoque el token** en los
    [ajustes de desarrollador de YNAB](https://app.ynab.com/settings/developer), y quítelo
    de la configuración de su cliente o de su archivo.
-4. **Las conversaciones** con su agente las conservan su cliente MCP y su proveedor de
+5. **Las conversaciones** con su agente las conservan su cliente MCP y su proveedor de
    modelo, no avenir-mcp: bórrelas allí.
 
 Sus datos en YNAB permanecen en su cuenta de YNAB, bajo la política de YNAB.
 
 ## No se recopila nada más
 
-avenir-mcp no tiene telemetría, ni cuenta, ni servidor. Este sitio de documentación no
+avenir-mcp no tiene telemetría, ni cuenta, ni servidor: su editor no recibe nada, y ningún
+dato sobre usted ni sobre sus planes sale de su equipo, salvo lo que se envía a YNAB y a
+su cliente MCP. La única petición que realiza a terceros es la comprobación diaria de
+actualizaciones: PyPI solo registra que alguien desde su dirección ha solicitado la página
+de avenir-mcp, tal y como ocurre con cualquier descarga, y
+`AVENIR_MCP_NO_UPDATE_CHECK=1` bloquea dicha petición. Este sitio de documentación no
 instala cookies ni usa analítica; sus fuentes las sirve el propio sitio. Cloudflare Pages,
 que lo aloja, recibe la dirección IP de los visitantes para servir las páginas y protegerlas,
 según la [política de privacidad de Cloudflare](https://www.cloudflare.com/privacypolicy/). Las antiguas

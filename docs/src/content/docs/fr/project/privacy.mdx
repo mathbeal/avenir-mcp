@@ -16,10 +16,15 @@ que le programme fait, sur votre machine, des données qu'il obtient par l'API d
 | Vous, sur votre machine | avenir-mcp pendant qu'il tourne, et son journal | cette page |
 | YNAB | votre plan, comme toujours : avenir-mcp le lit, et le modifie quand vous confirmez, avec votre propre jeton | [la politique de confidentialité de YNAB](https://www.ynab.com/privacy-policy/) |
 | Votre fournisseur de modèle | les résultats d'outils que votre client MCP envoie à son modèle : comptes, catégories, bénéficiaires, montants, mémos | celle de votre fournisseur ; aucun avec un [modèle local](/avenir-mcp/fr/guides/choose-a-model/#modèles-locaux) |
+| PyPI | le nom du paquet demandé, ainsi que les informations transmises lors de toute requête web : votre adresse IP et `python-httpx` comme agent utilisateur. Une requête par jour au maximum, aucune quand la [vérification des mises à jour](/avenir-mcp/fr/reference/configuration/#avenir_mcp_no_update_check) est désactivée | [la politique de confidentialité de PyPI](https://policies.python.org/pypi.org/Privacy-Notice/), publiée par la Python Software Foundation |
 | L'éditeur d'avenir-mcp | rien | — |
 
 avenir-mcp ne transmet à aucun tiers, à votre insu, les données qu'il obtient par l'API de
 YNAB, et n'en vend aucune : elles ne vont nulle part ailleurs que là où ce tableau l'indique.
+
+Lorsque les plans que vous ouvrez avec avenir-mcp appartiennent à d'autres personnes — un
+comptable travaillant sur les plans de ses clients, par exemple —, leurs données sont
+transmises de la même manière, et c'est vous qui en êtes responsable vis-à-vis d'eux.
 
 ## Ce qu'avenir-mcp manipule
 
@@ -39,6 +44,14 @@ YNAB, et n'en vend aucune : elles ne vont nulle part ailleurs que là où ce tab
 - **Les codes de confirmation.** En mémoire, à usage unique, valables 10 minutes.
 - **Les journaux de diagnostic.** Sur stderr, identifiants et comptages seulement,
   avertissements et erreurs par défaut. Leur destination dépend de votre client MCP.
+- **La réponse de la vérification des mises à jour.** `latest-version.json` dans
+  `~/.cache/avenir-mcp/`, ou sous `XDG_CACHE_HOME` : le numéro de version fourni par PyPI,
+  ou rien si la requête a échoué, ainsi que l'heure de la vérification. Aucune information
+  vous concernant ni concernant vos plans. La
+  [vérification](/avenir-mcp/fr/reference/configuration/#avenir_mcp_no_update_check)
+  interroge PyPI au maximum une fois par jour ; `AVENIR_MCP_NO_UPDATE_CHECK=1` ou
+  `DO_NOT_TRACK=1` l'arrête, et une exécution en intégration continue (`CI=true` ou
+  `CI=1`) n'interroge jamais PyPI.
 
 ## Comment elles sont protégées
 
@@ -62,6 +75,7 @@ YNAB, et n'en vend aucune : elles ne vont nulle part ailleurs que là où ce tab
 | Données du plan | tant qu'avenir-mcp tourne ; effacées à son arrêt |
 | Codes de confirmation | utilisables 10 minutes, effacés à l'arrêt d'avenir-mcp ; un code porte une empreinte de l'aperçu, jamais son contenu |
 | Journal | jusqu'à ce que vous le supprimiez ; avenir-mcp ne l'élague jamais |
+| Réponse de la vérification des mises à jour | dans son fichier jusqu'à ce que vous le supprimiez ; la vérification suivante, au plus tôt un jour plus tard, l'écrase |
 | Jeton | là où vous l'avez stocké, jusqu'à ce que vous le retiriez ou le révoquiez |
 
 ## Comment les effacer
@@ -71,17 +85,27 @@ YNAB, et n'en vend aucune : elles ne vont nulle part ailleurs que là où ce tab
 2. **Supprimez le journal** : `~/.local/state/avenir-mcp/journal.jsonl`, ou le chemin
    donné par `AVENIR_MCP_JOURNAL` ou sous `XDG_STATE_HOME`. Vous perdez l'historique des
    annulations, rien d'autre.
-3. **Révoquez le jeton** dans les
+3. **Supprimez la réponse de la vérification des mises à jour** :
+   `~/.cache/avenir-mcp/latest-version.json`, ou le même fichier sous `XDG_CACHE_HOME`.
+   avenir-mcp interroge à nouveau PyPI au prochain démarrage, à moins que vous n'arrêtiez
+   la vérification.
+4. **Révoquez le jeton** dans les
    [paramètres développeur de YNAB](https://app.ynab.com/settings/developer), et retirez-le
    de la configuration de votre client ou de son fichier.
-4. **Les conversations** avec votre agent sont conservées par votre client MCP et votre
+5. **Les conversations** avec votre agent sont conservées par votre client MCP et votre
    fournisseur de modèle, pas par avenir-mcp : supprimez-les chez eux.
 
 Vos données chez YNAB restent dans votre compte YNAB, sous la politique de YNAB.
 
 ## Rien d'autre n'est collecté
 
-avenir-mcp n'a ni télémétrie, ni compte, ni serveur. Ce site de documentation ne dépose
+avenir-mcp n'a ni télémétrie, ni compte, ni serveur : son éditeur ne reçoit aucune donnée,
+et aucune information vous concernant ou relative à vos plans ne quitte votre machine, à
+l'exception de celles transmises à YNAB et à votre client MCP. La seule requête qu'il
+effectue à l'extérieur concerne la vérification quotidienne des mises à jour : PyPI
+apprend simplement qu'une personne à votre adresse a demandé la page avenir-mcp, comme
+c'est le cas pour tout téléchargement, et `AVENIR_MCP_NO_UPDATE_CHECK=1` bloque cette
+requête. Ce site de documentation ne dépose
 aucun cookie et n'utilise aucune mesure d'audience ; ses polices sont servies par le site
 lui-même. Cloudflare Pages, qui l'héberge, reçoit l'adresse IP des visiteurs pour servir les pages et
 les protéger, selon la [politique de confidentialité de Cloudflare](https://www.cloudflare.com/privacypolicy/).
