@@ -192,7 +192,7 @@ An extension that fails to start is covered in
 | To | Do |
 |---|---|
 | **Change the token, or allow changes** | **Settings → Extensions → avenir-mcp for YNAB** |
-| **Update** | [download the extension](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) again and open it over the installed one; the link always gives the newest release |
+| **Update** | [download the extension](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) again and drop it on the **Settings → Extensions** screen, over the installed one; the link always gives the newest release |
 | **Remove it** | **Settings → Extensions**, then remove it; the token goes with it |
 
 ## Check that avenir-mcp starts
@@ -480,7 +480,7 @@ Every change is shown to you before it is applied: see
 
 | To | Do |
 |---|---|
-| **Update** | `uvx` fetches new releases by itself from time to time; force it with `uvx --refresh avenir-mcp`. The Claude Desktop extension is updated by [downloading it](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) again and opening it over the installed one |
+| **Update** | `uvx` fetches new releases by itself from time to time; force it with `uvx --refresh avenir-mcp`. The Claude Desktop extension is updated by [downloading it](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) again and dropping it on the **Settings → Extensions** screen, over the installed one |
 | **Remove** | `claude mcp remove avenir-mcp --scope user`, or delete the `avenir-mcp` entry from the client's configuration. The extension is removed from **Settings → Extensions**, token included |
 | **Clean up** | avenir-mcp's only file on your machine is its [journal](/avenir-mcp/concepts/journal/), in `~/.local/state/avenir-mcp/` |
 | **Revoke the token** | YNAB → Account Settings → Developer Settings → **Revoke** next to the token |

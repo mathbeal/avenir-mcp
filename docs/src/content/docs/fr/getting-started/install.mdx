@@ -208,7 +208,7 @@ Le cas d'une extension qui ne démarre pas est traité dans le
 | Pour | Faire |
 |---|---|
 | **Changer le jeton, ou autoriser les modifications** | **Settings → Extensions → avenir-mcp for YNAB** |
-| **Mettre à jour** | [téléchargez à nouveau l'extension](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) et ouvrez-la par-dessus celle qui est déjà installée ; le lien renvoie toujours vers la dernière version disponible |
+| **Mettre à jour** | [téléchargez à nouveau l'extension](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) et faites-la glisser sur l'écran **Settings → Extensions**, par-dessus celle qui est déjà installée ; le lien renvoie toujours vers la dernière version disponible |
 | **Retirer** | retirez-la depuis **Settings → Extensions** ; le jeton part avec elle |
 
 ## Premier lancement à la main
@@ -503,7 +503,7 @@ Chaque changement vous est montré avant d'être appliqué : voir
 
 | Pour | Faire |
 |---|---|
-| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp`. Pour mettre à jour l'extension Claude Desktop, il suffit de [la télécharger à nouveau](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) et de l'ouvrir par-dessus celle qui est déjà installée |
+| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp`. Pour mettre à jour l'extension Claude Desktop, il suffit de [la télécharger à nouveau](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) et de la glisser-déposer sur l'écran **Settings → Extensions**, par-dessus celle qui est déjà installée |
 | **Retirer** | `claude mcp remove avenir-mcp --scope user`, ou supprimez l'entrée `avenir-mcp` de la configuration du client. L'extension se retire depuis **Settings → Extensions**, jeton compris |
 | **Nettoyer** | le seul fichier d'avenir-mcp sur votre machine est son [journal](/avenir-mcp/fr/concepts/journal/), dans `~/.local/state/avenir-mcp/` |
 | **Révoquer le jeton** | YNAB → Account Settings → Developer Settings → **Revoke** à côté du jeton |
