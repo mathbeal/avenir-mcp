@@ -101,13 +101,13 @@ You need a YNAB personal access token
 (YNAB → Account Settings → Developer Settings → New Token), and, except with the Claude
 Desktop extension, [uv](https://docs.astral.sh/uv/).
 
-[![Install in Claude Desktop](https://img.shields.io/badge/Claude_Desktop-Install_avenir--mcp-D97757?style=flat-square&logo=claude&logoColor=white)](https://github.com/mathbeal/avenir-mcp/releases/latest)
+[![Download for Claude Desktop](https://img.shields.io/badge/Claude_Desktop-Download_the_extension-D97757?style=flat-square&logo=claude&logoColor=white)](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb)
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_avenir--mcp-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=avenir-mcp&inputs=%5B%7B%22id%22%3A%22ynab_token%22%2C%22type%22%3A%22promptString%22%2C%22description%22%3A%22YNAB%20personal%20access%20token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22avenir-mcp%22%5D%2C%22env%22%3A%7B%22YNAB_API_KEY%22%3A%22%24%7Binput%3Aynab_token%7D%22%7D%7D)
 [![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=avenir-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJhdmVuaXItbWNwIl0sImVudiI6eyJZTkFCX0FQSV9LRVkiOiJ5b3VyLXRva2VuIn19)
 
 One click installs avenir-mcp **read-only**: in Claude Desktop, open the
-`avenir-mcp-<version>.mcpb` of the latest release and paste your token, which the
-extension keeps out of sight; VS Code asks for it in a password box and keeps it in its secret
+`avenir-mcp.mcpb` the button downloads and paste your token, which the extension keeps
+out of sight; VS Code asks for it in a password box and keeps it in its secret
 storage; in Cursor, replace `your-token` in the server's settings. Add `AVENIR_MCP_WRITE=1`,
 or tick **Allow changes to your plans** in the extension, to allow changes.
 
@@ -115,9 +115,11 @@ or tick **Allow changes to your plans** in the extension, to allow changes.
 in: no uv, no command, no file to edit. Numbered steps, from the download to a first
 answer:
 [Install the Claude Desktop extension](https://avenir-mcp.pages.dev/avenir-mcp/getting-started/install/#install-the-claude-desktop-extension).
-The `.mcpb` is attached by the release workflow, so a release published before that job
-existed carries none: when the latest release has no `.mcpb` in its assets, install by
-hand below.
+The extension is attached by the release workflow, so a release published before that job
+existed carries none: while the latest release is one of those, the button gives GitHub's
+*Not Found* page, and installing by hand, below, is what works until the next release.
+The [releases](https://github.com/mathbeal/avenir-mcp/releases) say which assets each one
+carries.
 
 Or by hand:
 

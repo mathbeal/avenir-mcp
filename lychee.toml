@@ -35,6 +35,10 @@ exclude = [
   # so a pull request can link to a file it adds.
   '^https://github\.com/mathbeal/avenir-mcp/(blob|tree)/main/',
   '^https://raw\.githubusercontent\.com/mathbeal/avenir-mcp/main/',
+  # The Claude Desktop extension of the newest release: GitHub answers 404 until a
+  # release carries it, which the install page and the README say next to the link.
+  # tests/test_bundle.py checks that the name linked is the one the release attaches.
+  '^https://github\.com/mathbeal/avenir-mcp/releases/latest/download/',
   # GitHub pages that need a signed-in user or do not exist until used.
   '^https://github\.com/mathbeal/avenir-mcp/(issues/new|edit|compare|pull/new)',
   # YNAB's app answers only to a signed-in user.

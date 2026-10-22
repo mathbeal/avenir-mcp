@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Code, LinkButton } from '@astrojs/starlight/components';
 import budgets from '@snippets/list_plans.json?raw';
 
 This page takes you from nothing to a working avenir-mcp, in about ten minutes. Each step
@@ -112,16 +112,28 @@ One file installs avenir-mcp, the Python it runs on and the settings it needs. T
 no terminal and no configuration file in this section, and no step of it is different on
 Windows, macOS or Linux except where it says so.
 
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb" icon="download">Download for Claude Desktop</LinkButton>
+
+The file is always the one of the newest release; which version it installs is written
+inside it, and the steps below are the same whichever that is.
+
+<Aside type="caution" title="The button gives a “Not Found” page?">
+The release workflow attaches the extension, so a release published before that step of
+the workflow existed carries none, and until the next release the link has nothing to
+give. Install avenir-mcp by hand in the meantime, with the
+[steps further down this page](#check-that-avenir-mcp-starts); the
+[releases](https://github.com/mathbeal/avenir-mcp/releases) say under **Assets** which
+files each one carries.
+</Aside>
+
 <Steps>
 
 1. **Install Claude Desktop** if you have not already, from
    [claude.ai/download](https://claude.ai/download), and open it once.
 
-2. **Download the extension.** Open the
-   [latest release](https://github.com/mathbeal/avenir-mcp/releases/latest), scroll to
-   **Assets**, and click the file named `avenir-mcp-` followed by the version and
-   `.mcpb` — `avenir-mcp-0.6.0.mcpb`, for instance. It weighs about 17 kB and goes to
-   your **Downloads** folder.
+2. **Download the extension** with the button above, or with
+   [this link](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb).
+   It weighs about 17 kB and goes to your **Downloads** folder as `avenir-mcp.mcpb`.
 
    On Windows, Edge or Chrome may say that the file *isn't commonly downloaded*. That
    warning is about how rare the file is, not about what is in it: click the three dots
@@ -161,13 +173,6 @@ That is the whole installation. The rest of this page is for the other clients a
 installing by hand; skip to [your first conversation](/avenir-mcp/getting-started/first-conversation/),
 or to [allow changes](#allow-changes) when you want the agent to tidy up for you.
 
-<Aside type="caution" title="No .mcpb file in the release?">
-The release workflow attaches the extension, so a release published before that job
-existed carries none. If the **Assets** of the latest release list no
-`avenir-mcp-<version>.mcpb`, either wait for the next release or install avenir-mcp by
-hand, with the steps below.
-</Aside>
-
 <Aside type="note" title="Claude Desktop says the extension is not signed">
 It is not: signing needs a code-signing certificate the project does not have. What you
 can check instead, and what the file contains, is in
@@ -179,7 +184,7 @@ An extension that fails to start is covered in
 | To | Do |
 |---|---|
 | **Change the token, or allow changes** | **Settings → Extensions → avenir-mcp for YNAB** |
-| **Update** | download the `.mcpb` of the newer release and open it over the old one |
+| **Update** | [download the extension](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) again and open it over the installed one; the link always gives the newest release |
 | **Remove it** | **Settings → Extensions**, then remove it; the token goes with it |
 
 ## Check that avenir-mcp starts
@@ -440,7 +445,7 @@ Every change is shown to you before it is applied: see
 
 | To | Do |
 |---|---|
-| **Update** | `uvx` fetches new releases by itself from time to time; force it with `uvx --refresh avenir-mcp`. The Claude Desktop extension is updated by opening the `.mcpb` of the newer release over it |
+| **Update** | `uvx` fetches new releases by itself from time to time; force it with `uvx --refresh avenir-mcp`. The Claude Desktop extension is updated by [downloading it](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) again and opening it over the installed one |
 | **Remove** | `claude mcp remove avenir-mcp --scope user`, or delete the `avenir-mcp` entry from the client's configuration. The extension is removed from **Settings → Extensions**, token included |
 | **Clean up** | avenir-mcp's only file on your machine is its [journal](/avenir-mcp/concepts/journal/), in `~/.local/state/avenir-mcp/` |
 | **Revoke the token** | YNAB → Account Settings → Developer Settings → **Revoke** next to the token |

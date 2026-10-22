@@ -32,8 +32,11 @@ BUNDLE = ROOT / "mcpb"
 # The one name the extension is attached under, so one link always gives the newest
 # release. A name carrying the version would give every release its own URL.
 ASSET = "avenir-mcp.mcpb"
+DOWNLOAD = f"https://github.com/mathbeal/avenir-mcp/releases/latest/download/{ASSET}"
 # A file name with a version in it, which no longer names the extension anywhere.
 VERSIONED = re.compile(r"avenir-mcp-[^\s\"'`]*\.mcpb")
+# Where a reader is sent to the file: the five install pages and the README's button.
+DOWNLOAD_PAGES = ("", "fr/", "es/", "de/", "nl/")
 MANIFEST: dict[str, object] = json.loads((BUNDLE / "manifest.json").read_text(encoding="utf-8"))
 PROJECT = tomllib.loads((BUNDLE / "pyproject.toml").read_text(encoding="utf-8"))
 LAUNCHER = BUNDLE / "src" / "server.py"
@@ -96,6 +99,12 @@ def _commands(job: Mapping[str, object]) -> list[str]:
     steps = job["steps"]
     assert isinstance(steps, list)
     return [line.strip() for step in steps for line in step.get("run", "").splitlines()]
+
+
+def _install_page(language: str) -> str:
+    """The hand-written install page of one language, English for an empty prefix."""
+    pages = ROOT / "docs" / "src" / "content" / "docs"
+    return (pages / language / "getting-started" / "install.mdx").read_text(encoding="utf-8")
 
 
 def _launcher() -> ModuleType:
@@ -404,6 +413,27 @@ def test_the_release_attaches_the_extension_under_a_name_that_never_changes() ->
     assert not VERSIONED.search(workflow), VERSIONED.search(workflow)
     # And what `just bundle` writes here is the file a release carries, under that name.
     assert f"pack mcpb dist/{ASSET}" in (ROOT / "justfile").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("language", DOWNLOAD_PAGES)
+def test_every_install_page_offers_the_file_itself_rather_than_the_release_page(
+    language: str,
+) -> None:
+    """A reader downloads the extension from the page, without going through GitHub first.
+
+    The link is `releases/latest/download`, which GitHub answers with the file of the
+    newest release, so no page has to name a version.
+    """
+    page = _install_page(language)
+    assert page.count(DOWNLOAD) >= 2, "the download step and the update row both link to it"
+    assert not VERSIONED.search(page), VERSIONED.search(page)
+
+
+def test_the_readme_button_downloads_the_extension_rather_than_opening_a_release() -> None:
+    """The README's Claude Desktop button is the same one-click download as the page's."""
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert f"]({DOWNLOAD})" in readme
+    assert not VERSIONED.search(readme), VERSIONED.search(readme)
 
 
 def test_what_a_reader_can_check_about_the_file_names_the_file_they_downloaded() -> None:

@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Code, LinkButton } from '@astrojs/starlight/components';
 import budgets from '@snippets/de/list_plans.json?raw';
 
 Diese Seite führt Sie in etwa zehn Minuten von null zu einem funktionierenden avenir-mcp.
@@ -118,16 +118,31 @@ Einstellungen, die es braucht. In diesem Abschnitt gibt es weder ein Terminal no
 Konfigurationsdatei, und kein Schritt davon ist unter Windows, macOS oder Linux anders,
 außer wo es dort steht.
 
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb" icon="download">Download für Claude Desktop</LinkButton>
+
+Es handelt sich stets um die Datei der neuesten Version; welche Version installiert wird,
+ist darin vermerkt, und die folgenden Schritte sind unabhängig davon immer dieselben.
+
+<Aside type="caution" title="Führt die Schaltfläche zu einer „Not Found“-Seite?">
+Der Release-Workflow fügt die Erweiterung hinzu; daher enthält ein Release, der vor der
+Einführung dieses Workflow-Schritts veröffentlicht wurde, keine solche Erweiterung, und
+bis zum nächsten Release liefert der Link keine Inhalte. Installieren Sie avenir-mcp in
+der Zwischenzeit manuell anhand der
+[weiter unten auf dieser Seite beschriebenen Schritte](#prüfen-ob-avenir-mcp-startet);
+unter **Assets** ist bei den einzelnen
+[Releases](https://github.com/mathbeal/avenir-mcp/releases) angegeben, welche Dateien
+jeweils enthalten sind.
+</Aside>
+
 <Steps>
 
 1. **Installieren Sie Claude Desktop**, falls noch nicht geschehen, von
    [claude.ai/download](https://claude.ai/download), und öffnen Sie es einmal.
 
-2. **Laden Sie die Erweiterung herunter.** Öffnen Sie die
-   [neueste Version](https://github.com/mathbeal/avenir-mcp/releases/latest), scrollen
-   Sie nach unten zu **Assets**, und klicken Sie auf die Datei, deren Name mit
-   `avenir-mcp-` beginnt und auf `.mcpb` endet, etwa `avenir-mcp-0.6.0.mcpb`. Sie ist
-   rund 17 kB groß und landet in Ihrem Download-Ordner.
+2. **Laden Sie die Erweiterung herunter**, über die Schaltfläche oben oder über
+   [diesen Link](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb).
+   Sie ist etwa 17 kB groß und wird unter dem Namen `avenir-mcp.mcpb` in Ihrem
+   Download-Ordner gespeichert.
 
    Unter Windows warnen Edge oder Chrome Sie möglicherweise, dass die Datei selten
    heruntergeladen wird. Diese Warnung betrifft, wie selten die Datei ist, nicht ihren
@@ -173,13 +188,6 @@ von der Installation von Hand; weiter mit
 [Ihrem ersten Gespräch](/avenir-mcp/de/getting-started/first-conversation/), oder mit
 [Änderungen erlauben](#änderungen-erlauben), wenn der Agent für Sie aufräumen soll.
 
-<Aside type="caution" title="Keine .mcpb-Datei in der Version?">
-Der Release-Workflow ist es, der die Erweiterung anhängt: eine Version, die
-veröffentlicht wurde, bevor es diesen Job gab, trägt keine. Wenn die Assets der neuesten
-Version keine Datei aufführen, deren Name auf `.mcpb` endet, warten Sie auf die nächste
-Version, oder installieren Sie avenir-mcp von Hand mit den Schritten unten.
-</Aside>
-
 <Aside type="note" title="Claude Desktop meldet, dass die Erweiterung nicht signiert ist">
 Sie ist es nicht: Signieren verlangt ein Code-Signing-Zertifikat, über das das Projekt
 nicht verfügt. Was die Datei enthält, und was Sie stattdessen prüfen können, steht in
@@ -191,7 +199,7 @@ Eine Erweiterung, die nicht startet, behandelt die
 | Um | Tun Sie |
 |---|---|
 | **Das Token zu ändern, oder Änderungen zu erlauben** | **Settings → Extensions → avenir-mcp for YNAB** |
-| **Zu aktualisieren** | Laden Sie die Datei der neueren Version herunter und öffnen Sie sie; sie ersetzt die installierte |
+| **Zu aktualisieren** | [Laden Sie die Erweiterung erneut herunter](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) und öffnen Sie sie über der bereits installierten Version; über den Link erhalten Sie stets die neueste Version |
 | **Zu entfernen** | Entfernen Sie sie unter **Settings → Extensions**; das Token geht mit ihr |
 
 ## Prüfen, ob avenir-mcp startet
@@ -455,7 +463,7 @@ Jede Änderung wird Ihnen gezeigt, bevor sie angewendet wird: siehe
 
 | Um | Tun Sie |
 |---|---|
-| **Zu aktualisieren** | `uvx` holt von Zeit zu Zeit selbst neue Versionen; erzwingen Sie es mit `uvx --refresh avenir-mcp`. Die Claude-Desktop-Erweiterung aktualisieren Sie, indem Sie die Datei der neueren Version öffnen, die die installierte ersetzt |
+| **Zu aktualisieren** | `uvx` holt von Zeit zu Zeit selbst neue Versionen; erzwingen Sie es mit `uvx --refresh avenir-mcp`. Die Claude-Desktop-Erweiterung wird aktualisiert, indem Sie sie [erneut herunterladen](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) und über der bereits installierten Version öffnen |
 | **Zu entfernen** | `claude mcp remove avenir-mcp --scope user`, oder löschen Sie den Eintrag `avenir-mcp` aus der Konfiguration des Clients. Die Erweiterung entfernen Sie unter **Settings → Extensions**, mitsamt dem Token |
 | **Aufzuräumen** | Die einzige Datei von avenir-mcp auf Ihrem Rechner ist sein [Journal](/avenir-mcp/de/concepts/journal/), in `~/.local/state/avenir-mcp/` |
 | **Das Token zu widerrufen** | YNAB → Account Settings → Developer Settings → **Revoke** neben dem Token |

@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-import { Tabs, TabItem, Steps, Aside, Code } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Code, LinkButton } from '@astrojs/starlight/components';
 import budgets from '@snippets/fr/list_plans.json?raw';
 
 Cette page vous mène de zéro à avenir-mcp qui fonctionne, en une dizaine de minutes. Chaque
@@ -117,16 +117,30 @@ Un seul fichier installe avenir-mcp, le Python sur lequel il tourne et les régl
 il a besoin. Cette section ne comporte ni terminal ni fichier de configuration, et
 aucune de ses étapes ne diffère entre Windows, macOS et Linux, sauf là où elle le dit.
 
+<LinkButton href="https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb" icon="download">Télécharger pour Claude Desktop</LinkButton>
+
+Le fichier correspond toujours à la dernière version disponible ; la version installée
+est indiquée dans le fichier lui-même, et les étapes ci-dessous sont les mêmes quelle que
+soit cette version.
+
+<Aside type="caution" title="Le bouton affiche-t-il une page « Not Found » ?">
+Le workflow de publication intègre l'extension ; par conséquent, une version publiée
+avant que cette étape du workflow n'existe n'en contient aucune, et jusqu'à la prochaine
+version, le lien ne mène nulle part. En attendant, installez avenir-mcp manuellement en
+suivant les [étapes indiquées plus bas sur cette page](#premier-lancement-à-la-main) ; la
+section **Assets** de chaque [version](https://github.com/mathbeal/avenir-mcp/releases)
+précise les fichiers qu'elle contient.
+</Aside>
+
 <Steps>
 
 1. **Installez Claude Desktop**, si ce n'est pas déjà fait, depuis
    [claude.ai/download](https://claude.ai/download), et lancez-le une fois.
 
-2. **Téléchargez l'extension.** Ouvrez la
-   [dernière version](https://github.com/mathbeal/avenir-mcp/releases/latest), faites
-   défiler jusqu'à **Assets**, et cliquez sur le fichier dont le nom commence par
-   `avenir-mcp-` et se termine par `.mcpb`, par exemple `avenir-mcp-0.6.0.mcpb`. Il pèse
-   environ 17 ko et arrive dans votre dossier de téléchargements.
+2. **Téléchargez l'extension** à l'aide du bouton ci-dessus ou via
+   [ce lien](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb).
+   Elle pèse environ 17 ko et sera enregistrée dans votre dossier de téléchargements sous
+   le nom `avenir-mcp.mcpb`.
 
    Sous Windows, Edge ou Chrome peuvent vous avertir que le fichier n'est pas couramment
    téléchargé. Cet avertissement porte sur la rareté du fichier, non sur son contenu :
@@ -173,13 +187,6 @@ l'installation à la main ; continuez avec
 avec [autoriser les modifications](#autoriser-les-modifications) si vous voulez que
 l'agent range pour vous.
 
-<Aside type="caution" title="Pas de fichier .mcpb dans la version ?">
-L'extension est jointe par le workflow de publication : une version publiée avant que
-cette étape du workflow existe n'en porte pas. Quand les **Assets** de la dernière
-version ne listent aucun fichier se terminant par `.mcpb`, attendez la version suivante,
-ou installez avenir-mcp à la main avec les étapes ci-dessous.
-</Aside>
-
 <Aside type="note" title="Claude Desktop dit que l'extension n'est pas signée">
 Elle ne l'est pas : signer demande un certificat de signature de code dont le projet ne
 dispose pas. Ce que le fichier contient, et ce que vous pouvez vérifier à la place, est
@@ -192,7 +199,7 @@ Le cas d'une extension qui ne démarre pas est traité dans le
 | Pour | Faire |
 |---|---|
 | **Changer le jeton, ou autoriser les modifications** | **Settings → Extensions → avenir-mcp for YNAB** |
-| **Mettre à jour** | téléchargez le fichier de la version plus récente et ouvrez-le ; il remplace celui qui est installé |
+| **Mettre à jour** | [téléchargez à nouveau l'extension](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) et ouvrez-la par-dessus celle qui est déjà installée ; le lien renvoie toujours vers la dernière version disponible |
 | **Retirer** | retirez-la depuis **Settings → Extensions** ; le jeton part avec elle |
 
 ## Premier lancement à la main
@@ -459,7 +466,7 @@ Chaque changement vous est montré avant d'être appliqué : voir
 
 | Pour | Faire |
 |---|---|
-| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp`. L'extension Claude Desktop se met à jour en ouvrant le fichier de la version plus récente, qui remplace celui qui est installé |
+| **Mettre à jour** | `uvx` récupère les nouvelles versions de lui-même de temps en temps ; forcez-le avec `uvx --refresh avenir-mcp`. Pour mettre à jour l'extension Claude Desktop, il suffit de [la télécharger à nouveau](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb) et de l'ouvrir par-dessus celle qui est déjà installée |
 | **Retirer** | `claude mcp remove avenir-mcp --scope user`, ou supprimez l'entrée `avenir-mcp` de la configuration du client. L'extension se retire depuis **Settings → Extensions**, jeton compris |
 | **Nettoyer** | le seul fichier d'avenir-mcp sur votre machine est son [journal](/avenir-mcp/fr/concepts/journal/), dans `~/.local/state/avenir-mcp/` |
 | **Révoquer le jeton** | YNAB → Account Settings → Developer Settings → **Revoke** à côté du jeton |
