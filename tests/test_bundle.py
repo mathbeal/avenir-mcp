@@ -29,6 +29,11 @@ if TYPE_CHECKING:
 ROOT = Path(__file__).resolve().parent.parent
 WORKFLOWS = ROOT / ".github" / "workflows"
 BUNDLE = ROOT / "mcpb"
+# The one name the extension is attached under, so one link always gives the newest
+# release. A name carrying the version would give every release its own URL.
+ASSET = "avenir-mcp.mcpb"
+# A file name with a version in it, which no longer names the extension anywhere.
+VERSIONED = re.compile(r"avenir-mcp-[^\s\"'`]*\.mcpb")
 MANIFEST: dict[str, object] = json.loads((BUNDLE / "manifest.json").read_text(encoding="utf-8"))
 PROJECT = tomllib.loads((BUNDLE / "pyproject.toml").read_text(encoding="utf-8"))
 LAUNCHER = BUNDLE / "src" / "server.py"
@@ -84,6 +89,13 @@ def _artifact(job: Mapping[str, object], action: str) -> str:
     assert len(names) == 1, f"{action}: {names}"
     assert isinstance(names[0], str)
     return names[0]
+
+
+def _commands(job: Mapping[str, object]) -> list[str]:
+    """Every shell line a job runs, one per line, whatever step it belongs to."""
+    steps = job["steps"]
+    assert isinstance(steps, list)
+    return [line.strip() for step in steps for line in step.get("run", "").splitlines()]
 
 
 def _launcher() -> ModuleType:
@@ -373,6 +385,31 @@ def test_the_extension_packs_where_a_reader_installs_it() -> None:
     jobs = yaml.safe_load((WORKFLOWS / "quality.yml").read_text(encoding="utf-8"))["jobs"]
     assert set(jobs["bundle"]["strategy"]["matrix"]["os"]) == {"ubuntu-latest", "windows-latest"}
     assert jobs["bundle"]["runs-on"] == "${{ matrix.os }}"
+
+
+def test_the_release_attaches_the_extension_under_a_name_that_never_changes() -> None:
+    """Every release carries the same file name, so one link gives the newest extension.
+
+    The version a file installs stays readable in its manifest (`mcpb info`); in the name
+    as well, it would give each release its own URL, and the documentation would have to
+    name a release to link to rather than `releases/latest/download`.
+    """
+    workflow = (WORKFLOWS / "publish.yml").read_text(encoding="utf-8")
+    jobs = yaml.safe_load(workflow)["jobs"]
+    packed = [command for command in _commands(jobs["bundle"]) if "pack mcpb" in command]
+    uploaded = [command for command in _commands(jobs["bundle-upload"]) if ASSET in command]
+
+    assert packed == [f"npx --yes {PACKER} pack mcpb {ASSET}"]
+    assert len(uploaded) == 1
+    assert not VERSIONED.search(workflow), VERSIONED.search(workflow)
+    # And what `just bundle` writes here is the file a release carries, under that name.
+    assert f"pack mcpb dist/{ASSET}" in (ROOT / "justfile").read_text(encoding="utf-8")
+
+
+def test_what_a_reader_can_check_about_the_file_names_the_file_they_downloaded() -> None:
+    """The security page's commands take the name the release attaches, not an older one."""
+    assert ASSET in (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    assert not VERSIONED.search((ROOT / "SECURITY.md").read_text(encoding="utf-8"))
 
 
 def test_the_job_that_packs_the_extension_cannot_change_the_release() -> None:

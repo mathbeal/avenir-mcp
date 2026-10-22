@@ -110,16 +110,15 @@ reproducible:
     (cd "$out/first" && sha256sum -- *) | tee "$out/first.sha256"
     (cd "$out/second" && sha256sum --check --strict -- ../first.sha256)
 
-# Check and pack the Claude Desktop extension of mcpb/, as the release does (needs
-# Node.js). The manifest names the released version it installs, so the file this writes
-# only works once that version is on PyPI.
+# Check and pack the Claude Desktop extension of mcpb/, under the name a release attaches
+# it with (needs Node.js). The manifest names the released version it installs, so the
+# file this writes only works once that version is on PyPI.
 bundle:
     #!/usr/bin/env bash
     set -euo pipefail
-    version="$(uv run --no-project python -c 'import json; print(json.load(open("mcpb/manifest.json"))["version"])')"
     npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
     mkdir -p dist
-    npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "dist/avenir-mcp-$version.mcpb"
+    npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb dist/avenir-mcp.mcpb
 
 # Regenerate CHANGELOG.md from the commit history.
 changelog:

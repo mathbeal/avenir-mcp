@@ -97,10 +97,12 @@ jobs:
           found="$(node -p 'require("./mcpb/manifest.json").version')"
           echo "tag=$expected  manifest=$found"
           test "$expected" = "$found"
-          echo "VERSION=$expected" >> "$GITHUB_ENV"
 
       - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
-      - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "avenir-mcp-$VERSION.mcpb"
+      # One name for every release, so the `releases/latest/download/avenir-mcp.mcpb` link
+      # the documentation gives always downloads the newest extension. Which version it
+      # installs is read from its manifest.
+      - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb avenir-mcp.mcpb
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -120,7 +122,7 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: extension
-      - run: gh release upload "$TAG" "avenir-mcp-${TAG#v}.mcpb" --clobber
+      - run: gh release upload "$TAG" avenir-mcp.mcpb --clobber
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

@@ -148,16 +148,18 @@ carries a CycloneDX SBOM (`avenir-mcp.cdx.json`) of the locked dependencies.
 
 ### The Claude Desktop extension
 
-A release also carries `avenir-mcp-<version>.mcpb`, the extension Claude Desktop
-installs, from the first one packed by the `publish` workflow: a release published
-before that job existed has none, and its assets list says so. The workflow packs it
-from `mcpb/`: a manifest, an icon, a
+A release also carries `avenir-mcp.mcpb`, the extension Claude Desktop installs, from
+the first one packed by the `publish` workflow: a release published before that job
+existed has none, and its assets list says so. The name carries no version, so
+`https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb` always
+gives the newest one; which version a file installs is read from the file itself, with
+the command below. The workflow packs it from `mcpb/`: a manifest, an icon, a
 `pyproject.toml` whose single dependency is `avenir-mcp` pinned to that version, and a
 launcher of about forty lines. It holds no copy of avenir-mcp and no Python, so the code
 that runs is the release on PyPI, with the provenance above. The file carries no
 code-signing certificate; what you can check is its content, with `unzip -l` or
-`npx @anthropic-ai/mcpb info avenir-mcp-<version>.mcpb`, and that the pin names the
-version you expect.
+`npx @anthropic-ai/mcpb info avenir-mcp.mcpb`, and that the pin names the version you
+expect.
 
 That pin reaches avenir-mcp and stops there. Of avenir-mcp's own dependencies only
 `fastmcp` is pinned; `httpx`, `pydantic`, `mcp`, `mcp-types` and `starlette` are ranges,
