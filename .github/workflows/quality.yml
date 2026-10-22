@@ -34,6 +34,28 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - run: uv lock --check
+      # The Claude Code plugin's own lock: the server it starts refuses to run (`--locked`)
+      # when it no longer matches the release the plugin pins.
+      - run: uv lock --check --project plugin
+
+  plugin:
+    name: the Claude Code plugin is submittable
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: docs/.nvmrc
+      # The checks the plugin directory runs before it accepts a submission, on a fresh
+      # checkout so that only what is committed is read. `--strict` fails on a warning
+      # too: a missing icon or privacy policy would be a warning on the submission.
+      - run: npx --yes @anthropic-ai/claude-code@2.1.308 plugin validate --profile directory --strict ./plugin
 
   lint:
     name: ruff, pylint, pydoclint, vulture, deptry
@@ -219,7 +241,8 @@ jobs:
     name: CI passed
     # The one check branch protection requires: it stands for every job above.
     if: always()
-    needs: [lock, lint, types, tests, vocabulary, hygiene, audit, secrets, reproducible]
+    needs:
+      [lock, plugin, lint, types, tests, vocabulary, hygiene, audit, secrets, reproducible]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

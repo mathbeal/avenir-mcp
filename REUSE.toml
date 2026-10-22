@@ -19,6 +19,7 @@ path = [
     "**/*.png",
     "**/*.astro",
     "uv.lock",
+    "plugin/uv.lock",
     "lexdrift.lock",
     ".python-version",
     "avenir_mcp/py.typed",

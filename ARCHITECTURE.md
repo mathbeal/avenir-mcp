@@ -116,6 +116,7 @@ from PyPI's answer can reach the agent.
 | `api/` | a snapshot of YNAB's OpenAPI operations, why each unused one is planned or left out, and the rules each sent field follows |
 | `docs/` | the documentation site (Astro Starlight) in English, French, Spanish, German and Dutch |
 | `benchmarks/` | timings of the logic on a generated five-year plan |
+| `plugin/` | avenir-mcp as a Claude Code plugin: its manifest, the server's settings, and a `pyproject.toml` and `uv.lock` that pin the release it starts and every version underneath it |
 
 ## Dependencies
 

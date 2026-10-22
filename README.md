@@ -130,6 +130,19 @@ Drop `AVENIR_MCP_WRITE` to stay read-only. Other clients and every option:
 [Install](https://avenir-mcp.pages.dev/avenir-mcp/getting-started/install/) ·
 [Configuration](https://avenir-mcp.pages.dev/avenir-mcp/reference/configuration/).
 
+## Claude Code plugin
+
+`plugin/` is avenir-mcp as a Claude Code plugin: Claude Code asks for your YNAB token in
+the plugin's settings, keeps it out of sight, and starts the server from the plugin's own
+locked environment. From a clone: `claude --plugin-dir plugin`.
+
+| The plugin | What |
+|---|---|
+| runs | `uv run --locked --project` *the plugin's folder*, which starts the release `plugin/pyproject.toml` pins, and nothing else. No script of its own, no build step, no hook, no shell |
+| contacts | `pypi.org` and `files.pythonhosted.org`, to install that release and the versions `plugin/uv.lock` pins, the first time; then `api.ynab.com`, with your token, as avenir-mcp always does |
+| writes | the environment `uv` resolves inside the plugin's folder, and `uv`'s own cache. Nothing elsewhere |
+| changes in your plan | nothing. It starts avenir-mcp read-only: `AVENIR_MCP_WRITE` is not set, so the tools that change a plan are never registered |
+
 ## What you can ask
 
 | You ask | avenir-mcp |
@@ -166,6 +179,16 @@ Read [AGENTS.md](AGENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md) before openin
 pull request. Security reports: [SECURITY.md](SECURITY.md). Also:
 [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md),
 [GOVERNANCE.md](GOVERNANCE.md) and the [code of conduct](CODE_OF_CONDUCT.md).
+
+## Privacy Policy
+
+avenir-mcp is a program you run yourself, not a service: its publisher runs no server and
+receives none of your data. Your token is read from the environment, kept in memory as a
+secret value and sent only to YNAB; your plan's data is fetched when a tool needs it, kept
+in memory, and returned to your agent, which means the model provider your MCP client
+sends tool results to also sees it. Nothing is sold, and nothing goes to a third party
+this does not name. What is handled, how long it is kept and how to erase it:
+<https://avenir-mcp.pages.dev/avenir-mcp/project/privacy/>.
 
 ## Licence
 

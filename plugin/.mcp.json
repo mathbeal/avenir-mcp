@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "avenir": {
+      "command": "uv",
+      "args": ["run", "--locked", "--project", "${CLAUDE_PLUGIN_ROOT}", "avenir-mcp"],
+      "env": {
+        "YNAB_API_KEY": "${user_config.ynab_token}"
+      }
+    }
+  }
+}

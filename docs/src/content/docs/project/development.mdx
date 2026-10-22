@@ -15,6 +15,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 - evals/ — the demo plan, a stand-in for YNAB's API, the agent evaluation
 - docsgen/ — generates the tool reference, the error catalogue and the examples
 - docs/ — this site (Astro Starlight, English, French, Spanish, German, Dutch)
+- plugin/ — avenir-mcp as a Claude Code plugin, pinned to a release and locked
 - AGENTS.md — the contract for contributors, human or not
 - justfile — every command below
 - pyproject.toml, uv.lock — the Python project, locked
@@ -192,3 +193,8 @@ See [Evaluation](/avenir-mcp/project/evaluation/).
 - Then the MCP registry: `server.json` carries the same version (a test checks it); run
   `mcp-publisher login github`, then `mcp-publisher publish`. PyPI ownership is proven by the
   `mcp-name:` line of the README.
+- Then the Claude Code plugin, once PyPI has the release: raise the version in
+  `plugin/.claude-plugin/plugin.json` and the pin in `plugin/pyproject.toml`, run
+  `uv lock --project plugin`, and commit `plugin/uv.lock`. The three name one release, and
+  a test fails while they disagree. `uv lock` resolves only a release PyPI already serves,
+  so this is the commit that follows the publication rather than a part of it.

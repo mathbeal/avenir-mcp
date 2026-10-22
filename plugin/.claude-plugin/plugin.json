@@ -1,0 +1,25 @@
+{
+  "name": "avenir-mcp",
+  "version": "0.6.0",
+  "description": "Unofficial MCP server for YNAB: budgets, spending and transaction classification, built for agents.",
+  "author": {
+    "name": "The avenir-mcp contributors",
+    "url": "https://github.com/mathbeal/avenir-mcp"
+  },
+  "homepage": "https://avenir-mcp.pages.dev/avenir-mcp/",
+  "repository": "https://github.com/mathbeal/avenir-mcp",
+  "license": "MIT",
+  "privacyPolicyUrl": "https://avenir-mcp.pages.dev/avenir-mcp/project/privacy/",
+  "keywords": ["ynab", "budget", "budgeting", "personal-finance", "money"],
+  "icon": "./.claude-plugin/icon.png",
+  "mcpServers": "./.mcp.json",
+  "userConfig": {
+    "ynab_token": {
+      "type": "string",
+      "title": "YNAB personal access token",
+      "description": "In YNAB, open Account settings > Developer settings > New Token. The token can read and change every plan of your account: YNAB offers no read-only one. avenir-mcp never logs it and never returns it in an answer.",
+      "required": true,
+      "sensitive": true
+    }
+  }
+}

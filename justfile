@@ -30,8 +30,16 @@ test:
 vocabulary:
     uvx lexdrift check avenir_mcp --baseline lexdrift.lock
 
+# Both locks: the package's, and the one the Claude Code plugin starts its server from.
 lock:
     uv lock --check
+    uv lock --check --project plugin
+
+# What the plugin directory checks before it accepts a submission, warnings included
+# (needs Node.js). It reads the folder on disk, and a file git ignores is not submitted
+# with the plugin: run it on a clean clone, as the workflow does.
+plugin:
+    npx --yes @anthropic-ai/claude-code@2.1.308 plugin validate --profile directory --strict ./plugin
 
 # The functions radon ranks C or worse (cyclomatic complexity 11 and above), the worst of
 # each file first, then the average over every block, counting the ones not shown, then the

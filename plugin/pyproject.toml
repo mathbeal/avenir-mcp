@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
+# What `uv run --locked --project <this directory>` resolves when Claude Code starts the
+# plugin's server. It declares no build system on purpose: uv then installs the dependency
+# and never builds this directory. The single dependency is the released avenir-mcp,
+# pinned to the version `.claude-plugin/plugin.json` names, and `uv.lock` beside this file
+# pins everything underneath it too, so two installs a month apart run the same code.
+# `tests/test_plugin.py` keeps the pin, the manifest and `avenir_mcp.__version__` in step.
+[project]
+name = "avenir-mcp-plugin"
+version = "0.6.0"
+description = "Claude Code plugin that runs avenir-mcp"
+requires-python = ">=3.12"
+dependencies = ["avenir-mcp==0.6.0"]
