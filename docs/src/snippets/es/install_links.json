@@ -1,0 +1,5 @@
+{
+  "cursor": "cursor://anysphere.cursor-deeplink/mcp/install?name=avenir-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJhdmVuaXItbWNwIl0sImVudiI6eyJZTkFCX0FQSV9LRVkiOiJzdS10b2tlbiJ9fQ==",
+  "lm_studio": "lmstudio://add_mcp?name=avenir-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJhdmVuaXItbWNwIl0sImVudiI6eyJZTkFCX0FQSV9LRVkiOiJzdS10b2tlbiJ9fQ%3D%3D",
+  "vs_code": "vscode:mcp/install?%7B%22name%22%3A%22avenir-mcp%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22avenir-mcp%22%5D%2C%22env%22%3A%7B%22YNAB_API_KEY%22%3A%22%24%7Binput%3Aynab-token%7D%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22ynab-token%22%2C%22description%22%3A%22Token%20de%20acceso%20personal%20de%20YNAB%22%2C%22password%22%3Atrue%7D%5D%7D"
+}

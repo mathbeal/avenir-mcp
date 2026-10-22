@@ -7,6 +7,7 @@ sidebar:
 
 import { Tabs, TabItem, Steps, Aside, Code, LinkButton } from '@astrojs/starlight/components';
 import budgets from '@snippets/nl/list_plans.json?raw';
+import links from '@snippets/nl/install_links.json';
 
 Op deze pagina leert u in ongeveer tien minuten hoe u vanuit het niets een werkende avenir-mcp kunt opzetten. Elke stap
 wordt afgesloten met een controle, zodat u weet of het gelukt is voordat u verdergaat.
@@ -231,6 +232,8 @@ Verschijnt er in plaats daarvan een fout? Zie [Probleemoplossing](/avenir-mcp/nl
 
 Kies uw client. Deze instellingen zijn **alleen-lezen**: avenir-mcp kan vragen beantwoorden,
 maar niets wijzigen. [De optie om wijzigingen](#wijzigingen-toestaan) toe te staan volgt later.]
+In Cursor, LM Studio en VS Code kunt u het met één muisklik installeren via de knop
+bovenaan het tabblad.
 
 <Tabs syncKey="client">
   <TabItem label="Claude Code">
@@ -279,37 +282,59 @@ maar niets wijzigen. [De optie om wijzigingen](#wijzigingen-toestaan) toe te sta
        in het systeemvak op Windows – en open het opnieuw.
   </TabItem>
   <TabItem label="Cursor">
-    1. Maak of open `~/.cursor/mcp.json` (alle projecten) of `.cursor/mcp.json` in een
-       project, en voeg toe:
-       ```json
-       {
-         "mcpServers": {
-           "avenir-mcp": {
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "uw-token" }
-           }
-         }
-       }
-       ```
-    2. Open **Cursorinstellingen → MCP** en controleer of  `avenir-mcp`is ingeschakeld.
+    <LinkButton href={links.cursor} icon="right-arrow">Installeren in Cursor</LinkButton>
+
+    1. Klik op de knop: Cursor vraagt u om bevestiging en voegt vervolgens `avenir-mcp`
+       toe aan zijn servers.
+    2. Open **Cursor Settings → MCP**, vervang `uw-token` door het token dat u hebt
+       gekopieerd en controleer of `avenir-mcp` is ingeschakeld.
+
+    Of met de hand: maak of open `~/.cursor/mcp.json` (alle projecten) of
+    `.cursor/mcp.json` in een project, en voeg toe:
+    ```json
+    {
+      "mcpServers": {
+        "avenir-mcp": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "uw-token" }
+        }
+      }
+    }
+    ```
   </TabItem>
   <TabItem label="VS Code">
-    1. Maak  aan in`.vscode/mcp.json` uw werkruimte:
-       ```json
-       {
-         "servers": {
-           "avenir-mcp": {
-             "type": "stdio",
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "uw-token" }
-           }
-         }
-       }
-       ```
-    2. Voer het commando **MCP: List Servers** uit, kies `avenir-mcp` en dan **Start Server**.
-    3. Gebruik het vanuit Copilot Chat in de modus **Agent**.
+    <LinkButton href={links.vs_code} icon="right-arrow">Installeren in VS Code</LinkButton>
+
+    1. Klik op de knop: VS Code vraagt u om bevestiging, vraagt vervolgens om uw token in
+       een wachtwoordveld en slaat dit op in zijn eigen geheime opslag.
+    2. Gebruik het vanuit Copilot Chat in de modus **Agent**.
+
+    Of met de hand: maak `.vscode/mcp.json` aan in uw werkruimte. VS Code vraagt ook daar
+    om het token, zodat het nooit in het bestand wordt opgeslagen: een bestand uit een
+    werkruimte kan gemakkelijk per ongeluk aan een repository worden toegevoegd.
+    ```json
+    {
+      "inputs": [
+        {
+          "type": "promptString",
+          "id": "ynab-token",
+          "description": "Persoonlijk YNAB-toegangstoken",
+          "password": true
+        }
+      ],
+      "servers": {
+        "avenir-mcp": {
+          "type": "stdio",
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "${input:ynab-token}" }
+        }
+      }
+    }
+    ```
+    Voer vervolgens het commando **MCP: List Servers** uit, kies `avenir-mcp` en dan
+    **Start Server**.
   </TabItem>
   <TabItem label="Gemini CLI">
     1. Open `~/.gemini/settings.json` (maak het aan als dat nodig is) en voeg toe:
@@ -337,21 +362,26 @@ maar niets wijzigen. [De optie om wijzigingen](#wijzigingen-toestaan) toe te sta
     2. Start  `codex`en typ `/mcp`:  `avenir-mcp`wordt samen met de bijbehorende tools weergegeven. Het model is het model dat Codex gebruikt.
   </TabItem>
   <TabItem label="LM Studio">
+    <LinkButton href={links.lm_studio} icon="right-arrow">Toevoegen aan LM Studio</LinkButton>
+
     Voor een model dat op uw eigen computer draait — zie [Kies een model](/avenir-mcp/guides/choose-a-model/#local-models).
 
-    1. Open in LM Studio het tabblad **Program** van de rechterzijbalk, dan **Install → Edit mcp.json**, en voeg toe:
-       ```json
-       {
-         "mcpServers": {
-           "avenir-mcp": {
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "uw-token" }
-           }
-         }
-       }
-       ```
-    2. Sla op, laad een model dat toolgebruik ondersteunt en begin een chat: LM Studio vraagt het vóór elke toolaanroep.
+    1. Klik op de knop: LM Studio vraagt u om bevestiging en voegt vervolgens `avenir-mcp` toe aan het bestand `mcp.json`.
+    2. Open in LM Studio het tabblad **Program** van de rechterzijbalk, dan **Install → Edit mcp.json**, en vervang `uw-token` door het token dat u hebt gekopieerd.
+    3. Sla op, laad een model dat toolgebruik ondersteunt en begin een chat: LM Studio vraagt het vóór elke toolaanroep.
+
+    Of handmatig: voeg dit toe aan hetzelfde `mcp.json`-bestand:
+    ```json
+    {
+      "mcpServers": {
+        "avenir-mcp": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "uw-token" }
+        }
+      }
+    }
+    ```
   </TabItem>
   <TabItem label="Andere clients">
     Elke MCP-client die servers via **stdio** start, werkt. Geef hem:

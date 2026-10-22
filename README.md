@@ -102,14 +102,12 @@ You need a YNAB personal access token
 Desktop extension, [uv](https://docs.astral.sh/uv/).
 
 [![Download for Claude Desktop](https://img.shields.io/badge/Claude_Desktop-Download_the_extension-D97757?style=flat-square&logo=claude&logoColor=white)](https://github.com/mathbeal/avenir-mcp/releases/latest/download/avenir-mcp.mcpb)
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_avenir--mcp-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=avenir-mcp&inputs=%5B%7B%22id%22%3A%22ynab_token%22%2C%22type%22%3A%22promptString%22%2C%22description%22%3A%22YNAB%20personal%20access%20token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22avenir-mcp%22%5D%2C%22env%22%3A%7B%22YNAB_API_KEY%22%3A%22%24%7Binput%3Aynab_token%7D%22%7D%7D)
-[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=avenir-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJhdmVuaXItbWNwIl0sImVudiI6eyJZTkFCX0FQSV9LRVkiOiJ5b3VyLXRva2VuIn19)
 
-One click installs avenir-mcp **read-only**: in Claude Desktop, open
+One click installs avenir-mcp **read-only** in Claude Desktop: open
 **Settings → Extensions** and drag the `avenir-mcp.mcpb` the button downloads onto that
-screen, then paste your token, which the extension keeps out of sight; VS Code asks for it in a password box and keeps it in its secret
-storage; in Cursor, replace `your-token` in the server's settings. Add `AVENIR_MCP_WRITE=1`,
-or tick **Allow changes to your plans** in the extension, to allow changes.
+screen, then paste your token, which the extension keeps out of sight. Add
+`AVENIR_MCP_WRITE=1`, or tick **Allow changes to your plans** in the extension, to allow
+changes.
 
 **On Windows, or if a terminal is not where you are at home**, the extension is the way
 in: no uv, no command, no file to edit. Numbered steps, from the download to a first
@@ -120,6 +118,12 @@ existed carries none: while the latest release is one of those, the button gives
 *Not Found* page, and installing by hand, below, is what works until the next release.
 The [releases](https://github.com/mathbeal/avenir-mcp/releases) say which assets each one
 carries.
+
+**Cursor**, **LM Studio** and **VS Code** install it read-only in one click too, from the
+buttons on the
+[Install](https://avenir-mcp.pages.dev/avenir-mcp/getting-started/install/#add-avenir-mcp-to-your-client)
+page. A README cannot carry those: GitHub drops a link an editor opens, so the button
+would lead nowhere.
 
 Or by hand:
 

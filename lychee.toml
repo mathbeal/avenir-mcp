@@ -28,9 +28,6 @@ exclude = [
   '^https?://(127\.0\.0\.1|localhost)',
   # Placeholders in examples, not links.
   '\{',
-  # Install buttons: they redirect into an editor, not to a page.
-  '^https://insiders\.vscode\.dev/redirect/mcp/install',
-  '^https://cursor\.com/en/install-mcp',
   # Files of the repository on main: tests/test_docs.py checks them in the checkout,
   # so a pull request can link to a file it adds.
   '^https://github\.com/mathbeal/avenir-mcp/(blob|tree)/main/',

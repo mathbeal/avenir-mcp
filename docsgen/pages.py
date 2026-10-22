@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from docsgen import api, demo, examples, readme, reference
+from docsgen import api, demo, examples, install, readme, reference
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "docs" / "src" / "content" / "docs"
@@ -44,6 +44,8 @@ def generated() -> dict[Path, str]:
     for language, by_name in captures.items():
         for name, capture in by_name.items():
             files[SNIPPETS / language / f"{name}.json"] = capture.text
+    for language in reference.LANGUAGES:
+        files[SNIPPETS / language / "install_links.json"] = install.snippet(language)
     for scheme, svg in readme.charts(captures[""]["forecast"].text).items():
         files[ASSETS / f"forecast-{scheme}.svg"] = svg
     for scheme, svg in readme.net_worth_charts(captures[""]["net_worth"].text).items():

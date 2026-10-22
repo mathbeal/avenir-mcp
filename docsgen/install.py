@@ -142,13 +142,28 @@ def links(language: str) -> dict[str, str]:
         language: "" for English, or a translation's code.
 
     Returns:
-        Each editor's name and its link.
+        Each editor and its link.
     """
     return {
-        "Cursor": cursor(language),
-        "LM Studio": lm_studio(language),
-        "VS Code": vs_code(language),
+        "cursor": cursor(language),
+        "lm_studio": lm_studio(language),
+        "vs_code": vs_code(language),
     }
+
+
+def snippet(language: str) -> str:
+    """The links of one language, as the install page imports them.
+
+    A page holding a base64 by hand would drift from the configuration at the first
+    change; it imports this file instead, which `python -m docsgen` writes.
+
+    Args:
+        language: "" for English, or a translation's code.
+
+    Returns:
+        The JSON of that language's three links.
+    """
+    return json.dumps(links(language), indent=2, ensure_ascii=False) + "\n"
 
 
 if __name__ == "__main__":

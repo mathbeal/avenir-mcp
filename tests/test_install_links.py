@@ -91,9 +91,17 @@ _DEEPLINK = re.compile(r"(?:cursor://|lmstudio://|vscode:mcp/install\?)[^\s)\"'<
 
 
 def _written(language: str) -> list[str]:
-    """Every one-click link written in a language's install page, and the README's."""
-    page = pages.CONTENT / language / "getting-started" / "install.mdx"
-    sources = [page] if language else [page, pages.ROOT / "README.md"]
+    """Every one-click link the documentation of a language carries.
+
+    The install page imports them from the generated snippet; the page itself and the
+    README are read too, so a link pasted there by hand is caught as well.
+    """
+    sources = [
+        pages.SNIPPETS / language / "install_links.json",
+        pages.CONTENT / language / "getting-started" / "install.mdx",
+    ]
+    if not language:
+        sources.append(pages.ROOT / "README.md")
     return [link for source in sources for link in _DEEPLINK.findall(source.read_text("utf-8"))]
 
 
@@ -108,7 +116,9 @@ def test_every_link_of_the_documentation_carries_the_reference_configuration(
     instead of sending a reader an install that cannot work.
     """
     generated = set(install.links(language).values())
-    for link in _written(language):
+    written = _written(language)
+    assert generated <= set(written), f"{language or 'en'}: a link of the page is missing"
+    for link in written:
         assert link in generated, f"{language or 'en'}: run `uv run python -m docsgen.install`"
         payload = _decoded(link)
         if link.startswith("vscode:"):

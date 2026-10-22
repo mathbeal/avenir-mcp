@@ -7,6 +7,7 @@ sidebar:
 
 import { Tabs, TabItem, Steps, Aside, Code, LinkButton } from '@astrojs/starlight/components';
 import budgets from '@snippets/fr/list_plans.json?raw';
+import links from '@snippets/fr/install_links.json';
 
 Cette page vous mène de zéro à avenir-mcp qui fonctionne, en une dizaine de minutes. Chaque
 étape se termine par une vérification : vous savez qu'elle a marché avant de passer à
@@ -238,7 +239,8 @@ Une erreur s'affiche à la place ? Voir le [dépannage](/avenir-mcp/fr/project/t
 
 Choisissez votre client. Ces configurations sont **en lecture seule** : avenir-mcp répond
 aux questions mais ne modifie rien. [Autoriser les modifications](#autoriser-les-modifications)
-vient après.
+vient après. Cursor, LM Studio et VS Code permettent de l'installer en un seul clic, à
+partir du bouton situé en haut de leur onglet.
 
 <Tabs syncKey="client">
   <TabItem label="Claude Code">
@@ -287,38 +289,60 @@ vient après.
        depuis l'icône de la barre des tâches sous Windows — et rouvrez-le.
   </TabItem>
   <TabItem label="Cursor">
-    1. Créez ou ouvrez `~/.cursor/mcp.json` (tous les projets) ou `.cursor/mcp.json`
-       dans un projet, et ajoutez :
-       ```json
-       {
-         "mcpServers": {
-           "avenir-mcp": {
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "votre-jeton" }
-           }
-         }
-       }
-       ```
-    2. Ouvrez **Cursor Settings → MCP** et vérifiez que `avenir-mcp` est activé.
+    <LinkButton href={links.cursor} icon="right-arrow">Installer dans Cursor</LinkButton>
+
+    1. Cliquez sur le bouton : Cursor vous demande de confirmer, puis ajoute `avenir-mcp`
+       à sa liste de serveurs.
+    2. Ouvrez **Cursor Settings → MCP**, remplacez `votre-jeton` par le jeton que vous
+       avez copié, et vérifiez que `avenir-mcp` est activé.
+
+    Ou à la main : créez ou ouvrez `~/.cursor/mcp.json` (tous les projets) ou
+    `.cursor/mcp.json` dans un projet, et ajoutez :
+    ```json
+    {
+      "mcpServers": {
+        "avenir-mcp": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "votre-jeton" }
+        }
+      }
+    }
+    ```
   </TabItem>
   <TabItem label="VS Code">
-    1. Créez `.vscode/mcp.json` dans votre espace de travail :
-       ```json
-       {
-         "servers": {
-           "avenir-mcp": {
-             "type": "stdio",
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "votre-jeton" }
-           }
-         }
-       }
-       ```
-    2. Lancez la commande **MCP: List Servers**, choisissez `avenir-mcp`, puis
-       **Start Server**.
-    3. Utilisez-le dans Copilot Chat en mode **Agent**.
+    <LinkButton href={links.vs_code} icon="right-arrow">Installer dans VS Code</LinkButton>
+
+    1. Cliquez sur le bouton : VS Code vous demande de confirmer, puis vous invite à
+       saisir votre jeton dans un champ de mot de passe et le conserve dans son propre
+       espace de stockage sécurisé.
+    2. Utilisez-le dans Copilot Chat en mode **Agent**.
+
+    Ou à la main : créez `.vscode/mcp.json` dans votre espace de travail. VS Code demande
+    également le jeton à cet endroit ; le fichier ne le contient donc jamais : un fichier
+    d'un espace de travail peut facilement être ajouté par erreur à un dépôt.
+    ```json
+    {
+      "inputs": [
+        {
+          "type": "promptString",
+          "id": "ynab-token",
+          "description": "Jeton d'accès personnel YNAB",
+          "password": true
+        }
+      ],
+      "servers": {
+        "avenir-mcp": {
+          "type": "stdio",
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "${input:ynab-token}" }
+        }
+      }
+    }
+    ```
+    Exécutez ensuite la commande **MCP: List Servers**, choisissez `avenir-mcp`, puis
+    **Start Server**.
   </TabItem>
   <TabItem label="Gemini CLI">
     1. Ouvrez `~/.gemini/settings.json` (créez-le si besoin) et ajoutez :
@@ -346,21 +370,26 @@ vient après.
     2. Lancez `codex` et tapez `/mcp` : `avenir-mcp` apparaît avec ses outils. Le modèle est celui qu'utilise Codex.
   </TabItem>
   <TabItem label="LM Studio">
+    <LinkButton href={links.lm_studio} icon="right-arrow">Ajouter à LM Studio</LinkButton>
+
     Pour un modèle qui tourne sur votre propre machine — voir [Choisir un modèle](/avenir-mcp/fr/guides/choose-a-model/#modèles-locaux).
 
-    1. Dans LM Studio, ouvrez l'onglet **Program** de la barre latérale droite, puis **Install → Edit mcp.json**, et ajoutez :
-       ```json
-       {
-         "mcpServers": {
-           "avenir-mcp": {
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "votre-jeton" }
-           }
-         }
-       }
-       ```
-    2. Enregistrez, chargez un modèle qui gère l'appel d'outils, et ouvrez une conversation : LM Studio demande avant chaque appel d'outil.
+    1. Cliquez sur le bouton : LM Studio vous demande de confirmer, puis ajoute `avenir-mcp` à son fichier `mcp.json`.
+    2. Dans LM Studio, ouvrez l'onglet **Program** de la barre latérale droite, puis **Install → Edit mcp.json**, et remplacez `votre-jeton` par le jeton que vous avez copié.
+    3. Enregistrez, chargez un modèle qui gère l'appel d'outils, et ouvrez une conversation : LM Studio demande avant chaque appel d'outil.
+
+    Ou manuellement : ajoutez ceci dans le même fichier `mcp.json` :
+    ```json
+    {
+      "mcpServers": {
+        "avenir-mcp": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "votre-jeton" }
+        }
+      }
+    }
+    ```
   </TabItem>
   <TabItem label="Autres clients">
     Tout client MCP qui lance ses serveurs en **stdio** fonctionne. Indiquez-lui :

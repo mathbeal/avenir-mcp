@@ -7,6 +7,7 @@ sidebar:
 
 import { Tabs, TabItem, Steps, Aside, Code, LinkButton } from '@astrojs/starlight/components';
 import budgets from '@snippets/de/list_plans.json?raw';
+import links from '@snippets/de/install_links.json';
 
 Diese Seite führt Sie in etwa zehn Minuten von null zu einem funktionierenden avenir-mcp.
 Jeder Schritt endet mit einer Prüfung, damit Sie wissen, dass er geklappt hat, bevor Sie
@@ -240,6 +241,8 @@ Stattdessen erscheint ein Fehler? Siehe [Fehlerbehebung](/avenir-mcp/de/project/
 
 Wählen Sie Ihren Client. Diese Konfigurationen sind **nur lesend**: avenir-mcp kann Fragen
 beantworten, aber nichts ändern. [Änderungen erlauben](#änderungen-erlauben) folgt danach.
+In Cursor, LM Studio und VS Code können Sie es mit einem Klick über die Schaltfläche oben
+auf der jeweiligen Registerkarte installieren.
 
 <Tabs syncKey="client">
   <TabItem label="Claude Code">
@@ -288,37 +291,60 @@ beantworten, aber nichts ändern. [Änderungen erlauben](#änderungen-erlauben) 
        oder über das Symbol im Infobereich unter Windows – und öffnen Sie es erneut.
   </TabItem>
   <TabItem label="Cursor">
-    1. Legen Sie `~/.cursor/mcp.json` (alle Projekte) oder `.cursor/mcp.json` in einem
-       Projekt an oder öffnen Sie die Datei, und fügen Sie hinzu:
-       ```json
-       {
-         "mcpServers": {
-           "avenir-mcp": {
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "ihr-token" }
-           }
-         }
-       }
-       ```
-    2. Öffnen Sie **Cursor Settings → MCP** und prüfen Sie, dass `avenir-mcp` eingeschaltet ist.
+    <LinkButton href={links.cursor} icon="right-arrow">In Cursor installieren</LinkButton>
+
+    1. Klicken Sie auf die Schaltfläche: Cursor fordert Sie zur Bestätigung auf und fügt
+       anschließend `avenir-mcp` zu seinen Servern hinzu.
+    2. Öffnen Sie **Cursor Settings → MCP**, ersetzen Sie `ihr-token` durch das von Ihnen
+       kopierte Token und prüfen Sie, dass `avenir-mcp` eingeschaltet ist.
+
+    Oder von Hand: Legen Sie `~/.cursor/mcp.json` (alle Projekte) oder `.cursor/mcp.json`
+    in einem Projekt an oder öffnen Sie die Datei, und fügen Sie hinzu:
+    ```json
+    {
+      "mcpServers": {
+        "avenir-mcp": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "ihr-token" }
+        }
+      }
+    }
+    ```
   </TabItem>
   <TabItem label="VS Code">
-    1. Legen Sie `.vscode/mcp.json` in Ihrem Arbeitsbereich an:
-       ```json
-       {
-         "servers": {
-           "avenir-mcp": {
-             "type": "stdio",
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "ihr-token" }
-           }
-         }
-       }
-       ```
-    2. Führen Sie den Befehl **MCP: List Servers** aus, wählen Sie `avenir-mcp`, dann **Start Server**.
-    3. Nutzen Sie es aus Copilot Chat im Modus **Agent**.
+    <LinkButton href={links.vs_code} icon="right-arrow">In VS Code installieren</LinkButton>
+
+    1. Klicken Sie auf die Schaltfläche: VS Code fordert Sie zur Bestätigung auf, fragt
+       anschließend in einem Passwortfeld nach Ihrem Token und speichert dieses in seinem
+       eigenen geheimen Speicher.
+    2. Nutzen Sie es aus Copilot Chat im Modus **Agent**.
+
+    Oder von Hand: Legen Sie `.vscode/mcp.json` in Ihrem Arbeitsbereich an. Auch dort
+    fragt VS Code nach dem Token, sodass die Datei dieses niemals enthält: Eine Datei aus
+    einem Arbeitsbereich lässt sich leicht versehentlich in ein Repository aufnehmen.
+    ```json
+    {
+      "inputs": [
+        {
+          "type": "promptString",
+          "id": "ynab-token",
+          "description": "YNAB Personal Access Token",
+          "password": true
+        }
+      ],
+      "servers": {
+        "avenir-mcp": {
+          "type": "stdio",
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "${input:ynab-token}" }
+        }
+      }
+    }
+    ```
+    Führen Sie anschließend den Befehl **MCP: List Servers** aus, wählen Sie `avenir-mcp`,
+    dann **Start Server**.
   </TabItem>
   <TabItem label="Gemini CLI">
     1. Öffnen Sie `~/.gemini/settings.json` (legen Sie die Datei bei Bedarf an) und fügen Sie hinzu:
@@ -346,21 +372,26 @@ beantworten, aber nichts ändern. [Änderungen erlauben](#änderungen-erlauben) 
     2. Starten Sie `codex` und geben Sie `/mcp` ein: `avenir-mcp` erscheint mit seinen Tools. Das Modell ist das, welches Codex verwendet.
   </TabItem>
   <TabItem label="LM Studio">
+    <LinkButton href={links.lm_studio} icon="right-arrow">Zu LM Studio hinzufügen</LinkButton>
+
     Für ein Modell, das auf Ihrem eigenen Rechner läuft – siehe [Ein Modell wählen](/avenir-mcp/de/guides/choose-a-model/#lokale-modelle).
 
-    1. Öffnen Sie in LM Studio den Reiter **Program** der rechten Seitenleiste, dann **Install → Edit mcp.json**, und fügen Sie hinzu:
-       ```json
-       {
-         "mcpServers": {
-           "avenir-mcp": {
-             "command": "uvx",
-             "args": ["avenir-mcp"],
-             "env": { "YNAB_API_KEY": "ihr-token" }
-           }
-         }
-       }
-       ```
-    2. Speichern Sie, laden Sie ein Modell, das Tool-Aufrufe unterstützt, und beginnen Sie einen Chat: LM Studio fragt vor jedem Tool-Aufruf nach.
+    1. Klicken Sie auf die Schaltfläche: LM Studio fordert Sie zur Bestätigung auf und fügt anschließend `avenir-mcp` zu seiner Datei `mcp.json` hinzu.
+    2. Öffnen Sie in LM Studio den Reiter **Program** der rechten Seitenleiste, dann **Install → Edit mcp.json**, und ersetzen Sie `ihr-token` durch das von Ihnen kopierte Token.
+    3. Speichern Sie, laden Sie ein Modell, das Tool-Aufrufe unterstützt, und beginnen Sie einen Chat: LM Studio fragt vor jedem Tool-Aufruf nach.
+
+    Oder manuell: Fügen Sie Folgendes in dieselbe Datei `mcp.json` ein:
+    ```json
+    {
+      "mcpServers": {
+        "avenir-mcp": {
+          "command": "uvx",
+          "args": ["avenir-mcp"],
+          "env": { "YNAB_API_KEY": "ihr-token" }
+        }
+      }
+    }
+    ```
   </TabItem>
   <TabItem label="Andere Clients">
     Jeder MCP-Client, der Server über **stdio** startet, funktioniert. Geben Sie ihm:
