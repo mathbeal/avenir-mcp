@@ -10,7 +10,7 @@
 # installs of the same .mcpb a month apart can therefore run different versions of them.
 [project]
 name = "avenir-mcp-extension"
-version = "0.7.0"
+version = "0.7.1"
 description = "Claude Desktop extension that runs avenir-mcp"
 requires-python = ">=3.12"
-dependencies = ["avenir-mcp==0.7.0"]
+dependencies = ["avenir-mcp==0.7.1"]

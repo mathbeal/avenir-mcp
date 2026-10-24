@@ -3,7 +3,7 @@
 
 """avenir-mcp — an MCP server for YNAB, built for agents."""
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 
 # The version of YNAB's API this release is built and tested against. It must match
 # the snapshot in api/ynab-operations.json, which the weekly "YNAB API drift" check

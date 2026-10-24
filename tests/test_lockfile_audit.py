@@ -24,9 +24,9 @@ AUDITED_LOCKS: dict[Path, str] = {
         "npm audit --prefix docs --package-lock-only --audit-level=high"
     ),
 }
-# plugin/uv.lock still locks fastmcp 4.0.11, a known vulnerability (AIL-586): auditing it
-# today would fail every build until the pin moves, which needs a release of avenir-mcp
-# the plugin can pin to. Move it to AUDITED_LOCKS in the same change that moves the pin.
+# plugin/uv.lock still locks fastmcp 4.0.11, a known vulnerability: auditing it today
+# would fail every build until the pin moves, which needs a release of avenir-mcp the
+# plugin can pin to. Move it to AUDITED_LOCKS in the same change that moves the pin.
 UNAUDITED_LOCKS = {ROOT / "plugin" / "uv.lock"}
 
 
