@@ -153,10 +153,20 @@ class Over:
 
     category: str
     budgeted: float
+    carried_over: float
     spent: float
     utilization: float
     available: float
     trend: tuple[float, ...]
+
+    @property
+    def funded(self) -> float:
+        """What the month had to spend: its budget plus what the months before carried over.
+
+        Both terms are fields of the same answer, and the bar prints each of them beside
+        this total, so a reader checks the addition on the card itself.
+        """
+        return self.budgeted + self.carried_over
 
 
 @dataclass(frozen=True)
@@ -304,6 +314,7 @@ def card() -> Card:
         over=Over(
             category=overspent["name"],
             budgeted=row["budgeted"],
+            carried_over=row["carried_over"],
             spent=row["actual"],
             utilization=row["utilization_pct"],
             available=overspent["balance"],
@@ -563,7 +574,9 @@ def _bar(shown: Card, left: float, top: float, width: float, tone: dict[str, str
         f'<line x1="{marker:.1f}" y1="{top + 6:.1f}" x2="{marker:.1f}" y2="{top + 28:.1f}" '
         f'stroke="{tone["ink"]}" stroke-width="1.5" stroke-dasharray="3 3"/>',
         _text(
-            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.budgeted)} budgeted",
+            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.funded)} "
+            f"({_amount(shown.over.budgeted)} budgeted + "
+            f"{_amount(shown.over.carried_over)} carried over)",
             left,
             top + 44,
             tone["ink"],
@@ -875,7 +888,9 @@ def picture(shown: Card, scheme: str) -> str:
             ASKED,
             "".join(TYPED),
             shown.headline,
-            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.budgeted)} budgeted, "
+            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.funded)} "
+            f"({_amount(shown.over.budgeted)} budgeted + "
+            f"{_amount(shown.over.carried_over)} carried over), "
             f"{shown.over.utilization:g} %, available {_amount(shown.over.available)}.",
             AGREED,
             shown.preview.question,

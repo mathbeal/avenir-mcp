@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="790" viewBox="0 0 720 790" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
 <title id="title">A conversation with avenir-mcp: four reads at once, then a previewed move</title>
-<desc id="desc">Restaurants looks tight. How is the month going, and where is the room? Looking at the month, every category, budget against spending and the last three months… Restaurants is the only category over budget this month. 166.50 spent of 120.00 budgeted, 138.8 %, available −22.50. Cover it from Tennis. Move 22.50 from Tennis to Restaurants for this month?</desc>
+<desc id="desc">Restaurants looks tight. How is the month going, and where is the room? Looking at the month, every category, budget against spending and the last three months… Restaurants is the only category over budget this month. 166.50 spent of 144.00 (120.00 budgeted + 24.00 carried over), 138.8 %, available −22.50. Cover it from Tennis. Move 22.50 from Tennis to Restaurants for this month?</desc>
 <style>
 .p0 { animation: a0 30s linear infinite }
 @keyframes a0 { 0%, 1.0% { opacity: 0 } 3.0%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
@@ -110,7 +110,7 @@
 <rect x="84.0" y="284.0" width="588.0" height="14" rx="7" fill="#c81e1e"/>
 <rect x="84.0" y="284.0" width="423.6" height="14" rx="7" fill="#e8930c"/>
 <line x1="507.6" y1="280.0" x2="507.6" y2="302.0" stroke="#111111" stroke-width="1.5" stroke-dasharray="3 3"/>
-<text x="84.0" y="318.0" font-size="12.5" font-weight="400" fill="#111111">166.50 spent of 120.00 budgeted</text>
+<text x="84.0" y="318.0" font-size="12.5" font-weight="400" fill="#111111">166.50 spent of 144.00 (120.00 budgeted + 24.00 carried over)</text>
 <text x="672.0" y="318.0" font-size="12.5" font-weight="700" text-anchor="end" fill="#c81e1e">138.8 % · available −22.50</text>
 <text x="84.0" y="360.0" font-size="12.5" font-weight="400" fill="#111111">Spending, last three months</text>
 <polyline points="264.0,372.0 433.0,368.0 602.0,338.0" fill="none" stroke="#c81e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
