@@ -4,6 +4,7 @@
     "name": "Huur",
     "group": "Vaste lasten",
     "budgeted": 950.0,
+    "carried_over": 0.0,
     "actual": 950.0,
     "balance": 0.0,
     "utilization_pct": 100.0
@@ -13,6 +14,7 @@
     "name": "Stroom",
     "group": "Vaste lasten",
     "budgeted": 64.2,
+    "carried_over": 0.0,
     "actual": 64.2,
     "balance": 0.0,
     "utilization_pct": 100.0
@@ -22,6 +24,7 @@
     "name": "Internet",
     "group": "Vaste lasten",
     "budgeted": 29.99,
+    "carried_over": 0.0,
     "actual": 29.99,
     "balance": 0.0,
     "utilization_pct": 100.0
@@ -31,6 +34,7 @@
     "name": "Telefoon",
     "group": "Vaste lasten",
     "budgeted": 19.99,
+    "carried_over": 0.0,
     "actual": 19.99,
     "balance": 0.0,
     "utilization_pct": 100.0

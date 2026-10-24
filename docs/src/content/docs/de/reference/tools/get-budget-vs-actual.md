@@ -15,9 +15,12 @@ Use it for "am I over budget?" or "which categories are nearly used up?".
 Give month as the first day of a month, YYYY-MM-01; any other day is refused.
 'current' is the month in progress, where a share under 100 may only mean the
 month is not over. Amounts in currency units, spending as a positive number;
-utilization_pct above 100 means over budget. For what is still available in each
-category use get_category_balances; for the month's totals, get_monthly_summary;
-for the months before, get_spending_trends. One YNAB request; changes nothing.
+utilization_pct above 100 means over budget. carried_over says what the months
+before left in the category, so budgeted plus carried_over is what the month had
+to spend: a category can be over its budget and still have something left. For
+what is still available in each category use get_category_balances; for the
+month's totals, get_monthly_summary; for the months before, get_spending_trends.
+One YNAB request; changes nothing.
 
 ## Verhalten
 
@@ -46,6 +49,7 @@ for the months before, get_spending_trends. One YNAB request; changes nothing.
 | `name` | string | Category name. |
 | `group` | string | Name of the category's group, e.g. Fun for Tennis. |
 | `budgeted` | number | Amount assigned to the category this month. |
+| `carried_over` | number | What the months before left available in the category when this one started; zero when the category started the month on nothing. |
 | `actual` | number | Amount spent this month, as a positive number. |
 | `balance` | number | What is left: budgeted minus spent, plus what was carried over; negative when overspent. |
 | `utilization_pct` | number | Spent as a share of budgeted, in percent; above 100 means overspent, 0 when nothing is budgeted. |
@@ -70,6 +74,7 @@ Antwort auf dem Demo-Budget:
     "name": "Miete",
     "group": "Fixkosten",
     "budgeted": 950.0,
+    "carried_over": 0.0,
     "actual": 950.0,
     "balance": 0.0,
     "utilization_pct": 100.0
@@ -79,6 +84,7 @@ Antwort auf dem Demo-Budget:
     "name": "Strom",
     "group": "Fixkosten",
     "budgeted": 64.2,
+    "carried_over": 0.0,
     "actual": 64.2,
     "balance": 0.0,
     "utilization_pct": 100.0
@@ -88,6 +94,7 @@ Antwort auf dem Demo-Budget:
     "name": "Internet",
     "group": "Fixkosten",
     "budgeted": 29.99,
+    "carried_over": 0.0,
     "actual": 29.99,
     "balance": 0.0,
     "utilization_pct": 100.0
@@ -97,6 +104,7 @@ Antwort auf dem Demo-Budget:
     "name": "Handy",
     "group": "Fixkosten",
     "budgeted": 19.99,
+    "carried_over": 0.0,
     "actual": 19.99,
     "balance": 0.0,
     "utilization_pct": 100.0

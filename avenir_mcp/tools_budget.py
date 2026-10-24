@@ -216,16 +216,19 @@ async def get_budget_vs_actual(
     Give month as the first day of a month, YYYY-MM-01; any other day is refused.
     'current' is the month in progress, where a share under 100 may only mean the
     month is not over. Amounts in currency units, spending as a positive number;
-    utilization_pct above 100 means over budget. For what is still available in each
-    category use get_category_balances; for the month's totals, get_monthly_summary;
-    for the months before, get_spending_trends. One YNAB request; changes nothing.
+    utilization_pct above 100 means over budget. carried_over says what the months
+    before left in the category, so budgeted plus carried_over is what the month had
+    to spend: a category can be over its budget and still have something left. For
+    what is still available in each category use get_category_balances; for the
+    month's totals, get_monthly_summary; for the months before, get_spending_trends.
+    One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
         month: ISO month 'YYYY-MM-01' or 'current'.
 
     Returns:
-        One usage per category: budgeted, spent, balance and share used.
+        One usage per category: budgeted, carried over, spent, balance and share used.
     """
     logger.info("Tool called: get_budget_vs_actual(month=%r)", month)
     check_month(month)

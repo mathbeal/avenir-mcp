@@ -25,6 +25,9 @@ class BudgetUsage(Model):
     """Name of the category's group, e.g. Fun for Tennis."""
     budgeted: float
     """Amount assigned to the category this month."""
+    carried_over: float
+    """What the months before left available in the category when this one started; zero
+    when the category started the month on nothing."""
     actual: float
     """Amount spent this month, as a positive number."""
     balance: float
@@ -60,6 +63,9 @@ def budget_vs_actual(
         budgeted = client.milliunit_to_amount(budgeted_mu)
         actual = client.milliunit_to_amount(abs(activity_mu))
         balance = client.milliunit_to_amount(balance_mu)
+        # YNAB's balance is what the months before left, plus this month's budget and
+        # activity: what is left of that sum is what they carried over.
+        carried_over = client.milliunit_to_amount(balance_mu - budgeted_mu - activity_mu)
 
         if budgeted_mu == 0:
             utilization_pct = 0.0
@@ -72,6 +78,7 @@ def budget_vs_actual(
                 name=cat.get("name", ""),
                 group=cat.get("category_group_name", ""),
                 budgeted=budgeted,
+                carried_over=carried_over,
                 actual=actual,
                 balance=balance,
                 utilization_pct=utilization_pct,

@@ -83,6 +83,28 @@ def test_budget_vs_actual_actual_is_always_positive() -> None:
     assert result[0].actual >= 0.0
 
 
+def test_budget_vs_actual_names_what_earlier_months_carried_over() -> None:
+    """A category funded by earlier months says how much they carried over.
+
+    120.00 budgeted, 166.50 spent and 22.50 still missing only add up when the
+    24.00 the earlier months left is counted, so the answer names it.
+    """
+    cats = [_cat("c1", "Restaurants", budgeted=120_000, activity=-166_500, balance=-22_500)]
+    assert analytics.budget_vs_actual(cats)[0].carried_over == 24.0
+
+
+def test_budget_vs_actual_carries_nothing_over_when_the_month_funds_itself() -> None:
+    """A category whose balance is its budget less its spending carried nothing over."""
+    cats = [_cat("c1", "Rent", budgeted=500_000, activity=-400_000, balance=100_000)]
+    assert analytics.budget_vs_actual(cats)[0].carried_over == 0.0
+
+
+def test_budget_vs_actual_carries_nothing_over_once_overspending_cleared_it() -> None:
+    """An overspent category carries nothing over, as YNAB takes it back to zero."""
+    cats = [_cat("c1", "AWS", budgeted=100_000, activity=-150_000, balance=-50_000)]
+    assert analytics.budget_vs_actual(cats)[0].carried_over == 0.0
+
+
 def test_budget_vs_actual_doctest() -> None:
     """Doctest example: 80.0% utilization."""
     cats = [
@@ -342,6 +364,7 @@ def test_a_category_without_its_figures_counts_as_nothing_everywhere() -> None:
         "name": "",
         "group": "",
         "budgeted": 0.0,
+        "carried_over": 0.0,
         "actual": 0.0,
         "balance": 0.0,
         "utilization_pct": 0.0,
