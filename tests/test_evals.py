@@ -48,7 +48,7 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     # over June to September from October on.
     assert tasks.runway(date(2026, 9, 25)) == (3134.48, 1.9)
     assert tasks.runway(date(2026, 10, 2)) == (3134.48, 1.9)
-    # 4,641.91 kept of 9,600 from June to August; September's spending, with no salary
+    # 4,641.89 kept of 9,600 from June to August; September's spending, with no salary
     # in it yet, brings it down from October on.
     assert tasks.savings_rate(date(2026, 9, 25)) == 48.4
     assert tasks.savings_rate(date(2026, 10, 2)) == 32.7
