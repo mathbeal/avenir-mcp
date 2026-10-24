@@ -197,6 +197,9 @@ jobs:
       # vulnerable dependency is a vulnerable budget.
       - run: uv export --frozen --no-emit-project --all-groups -o requirements.txt
       - run: uvx pip-audit --strict --disable-pip -r requirements.txt
+      # The Claude Code plugin's own lock, which the audit above never reads.
+      - run: uv export --frozen --no-emit-project --project plugin -o plugin-requirements.txt
+      - run: uvx pip-audit --strict --disable-pip -r plugin-requirements.txt
       # The documentation site's own lock, which the audit above never reads.
       - run: npm audit --prefix docs --package-lock-only --audit-level=high
 

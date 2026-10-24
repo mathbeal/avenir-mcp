@@ -23,11 +23,10 @@ AUDITED_LOCKS: dict[Path, str] = {
     ROOT / "docs" / "package-lock.json": (
         "npm audit --prefix docs --package-lock-only --audit-level=high"
     ),
+    ROOT / "plugin" / "uv.lock": (
+        "uvx pip-audit --strict --disable-pip -r plugin-requirements.txt"
+    ),
 }
-# plugin/uv.lock still locks fastmcp 4.0.11, a known vulnerability: auditing it today
-# would fail every build until the pin moves, which needs a release of avenir-mcp the
-# plugin can pin to. Move it to AUDITED_LOCKS in the same change that moves the pin.
-UNAUDITED_LOCKS = {ROOT / "plugin" / "uv.lock"}
 
 
 def _tracked_locks() -> set[Path]:
@@ -38,9 +37,9 @@ def _tracked_locks() -> set[Path]:
     }
 
 
-def test_every_tracked_lock_file_is_named_here() -> None:
-    """A new lock file is either audited or named as a known exception, never silent."""
-    assert _tracked_locks() == AUDITED_LOCKS.keys() | UNAUDITED_LOCKS
+def test_every_tracked_lock_file_is_audited() -> None:
+    """A new lock file is audited here, never silently skipped."""
+    assert _tracked_locks() == AUDITED_LOCKS.keys()
 
 
 def test_the_audit_job_runs_every_declared_command() -> None:

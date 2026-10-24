@@ -1,6 +1,6 @@
 {
   "name": "avenir-mcp",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "description": "Unofficial MCP server for YNAB: budgets, spending and transaction classification, built for agents.",
   "author": {
     "name": "The avenir-mcp contributors",

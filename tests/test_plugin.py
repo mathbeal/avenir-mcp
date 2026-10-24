@@ -36,17 +36,12 @@ PACKAGE = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 RELEASES = re.findall(
     r"^## \[([^\]]+)\]", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"), flags=re.MULTILINE
 )
-# Every release older than the one this tree carries, newest first, which the plugin may
-# still name until the commit that follows the publication moves it. Read from the
+# The release PyPI already serves while this tree carries the next one, which is the one
+# the plugin may still name until the commit that follows the publication. Read from the
 # changelog: nothing is asked of PyPI, and no tag is needed, which a shallow clone of the
 # repository does not have. Empty when the changelog does not open on this version, a
 # state a test of its own reports rather than widening what the plugin may name.
-#
-# Normally the plugin lags by at most one of them: the window widens to any of them while
-# the plugin still pins avenir-mcp 0.6.0, because no published release requires fastmcp
-# 4.1.2 yet, so the pin cannot move before 0.7.1 is on PyPI. Narrow this back to the
-# immediately previous release once the plugin pins 0.7.1.
-OLDER_RELEASES = RELEASES[1:] if RELEASES[:1] == [__version__] else []
+PREVIOUS_RELEASE = RELEASES[1] if RELEASES[:1] == [__version__] and len(RELEASES) > 1 else ""
 # The one name the plugin gives its server; a client prefixes the tools with it.
 SERVER = "avenir"
 # The environment Claude Code expands for the plugin: the folder it unpacked the plugin
@@ -169,31 +164,28 @@ def test_the_plugin_names_one_release_everywhere() -> None:
 
 
 def test_the_changelog_opens_on_the_release_this_tree_carries() -> None:
-    """`OLDER_RELEASES` is read from the changelog, so the file has to open on this one.
+    """`PREVIOUS_RELEASE` is read from the changelog, so the file has to open on this one.
 
     Were the first entry another version, the release window would be measured against
     nothing: the comparison below would turn strict again without saying why, or allow a
     version nobody released. This fails instead.
     """
     assert RELEASES[:1] == [__version__], RELEASES[:3]
-    assert OLDER_RELEASES, RELEASES
+    assert PREVIOUS_RELEASE == RELEASES[1]
 
 
 @pytest.mark.xfail(
-    MANIFEST["version"] in OLDER_RELEASES,
+    MANIFEST["version"] == PREVIOUS_RELEASE,
     reason="release window: the plugin follows the PyPI publication",
 )
 def test_the_plugin_installs_the_release_it_says_it_is() -> None:
     """The plugin names the version of this tree, which is the release a reader installs.
 
     `uv lock --project plugin` resolves only a release PyPI already serves, so the commit
-    that cuts a release leaves the plugin on an older one until the commit that follows
-    the publication moves it. That state is the xfail above: reported as the open window
-    it is, never as a pass. The plugin still pins avenir-mcp 0.6.0: no published release
-    requires fastmcp 4.1.2 yet, so it cannot move before 0.7.1 is on PyPI. Until then the
-    plugin may lag by more than one release; narrow this back to the immediately previous
-    release once it pins 0.7.1. Anything that is not an older release fails here, for
-    instance a plugin naming a release that does not exist yet.
+    that cuts a release leaves the plugin on the one before it until the commit that
+    follows the publication. That single state is the xfail above: reported as the open
+    window it is, never as a pass. Anything else fails here, a plugin two releases behind
+    as much as one ahead of what this tree carries.
     """
     assert MANIFEST["version"] == __version__
 
