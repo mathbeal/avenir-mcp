@@ -18,10 +18,19 @@ agent to work on an invented plan.
 | `evals/tasks.py` | the tasks and their checks |
 | `evals/run.py` | starts Claude Code headless on each task: avenir-mcp as its only tool, writes enabled, a fresh plan, an empty working directory, no session saved |
 | `evals/run_openai.py` | the same tasks with a model behind an OpenAI-compatible API (Mammouth by default), through a small tool-calling loop in place of Claude Code |
+| `evals/frozen_server.py` | starts the real avenir-mcp server with its clock pinned to the demo plan's day |
 
 A task **passes** when the final answer is right **and** the plan ends in the expected
 state. Expected figures are computed from the demo data, never copied from avenir-mcp's
 answers. Amounts are read as people write them: `3,328.50`, `3 328,50`, `-22.5`.
+
+The demo plan carries fixed dates: a yearly payment due in October, targets due by a
+given month. avenir-mcp reads today's date through one function, `app.today()`, and
+`evals/frozen_server.py` pins it to 25 September 2026, the same day the documentation
+generator fixes for its own examples, before starting the real server for each task.
+A task's expected answer is computed from that same fixed day, never from the day the
+evaluation happens to run, so a scheduled payment stays in its forecast whatever the
+calendar says once the run is over.
 
 ## Tasks
 
@@ -74,6 +83,7 @@ answers. Amounts are read as people write them: `3,328.50`, `3 328,50`, `-22.5`.
 | 2026-10-02 | Sonnet | 25/25 | 2.3 | `get_underfunded_targets`, `get_debt_payoff_plan` and `get_age_of_money`, with a task each; the agent answers each with its tool. A first run gave 24/25: in `debts-down` the agent rounded the net worth growth to the unit, so the question now asks for amounts to the cent |
 | 2026-10-05 | Sonnet | 26/26 | 2.4 | `list_payees` and `rename_payee`, with a task asking to rename one bank label to the shop's name: the agent lists the payees of that shop, then renames the one asked for with one preview and one confirmation, leaving the others alone |
 | 2026-10-24 | Sonnet | 26/26 | 2.2 | the demo plan carries a category's available amount from month to month and assigns next month's money as soon as it arrives, so Ready to Assign is 0.00 in every month it covers, and Restaurants is 22.50 overspent once the 24.00 it carried over is counted |
+| 2026-10-24 | Sonnet | 26/26 | 2.5 | the evaluation's clock is now pinned to the demo plan's day instead of the real one: `forecast-yearly` kept failing once the real day passed 20 October, the yearly insurance's due date |
 
 The first run found a real defect: headless clients dismiss every confirmation question,
 and avenir-mcp counted a dismissal as a refusal, so no write could ever go through. A

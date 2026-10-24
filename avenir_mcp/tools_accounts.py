@@ -109,7 +109,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     if account_id not in accounts:
         raise ToolError(f"Account {account_id} is not in this plan: use an id from list_accounts.")
     transactions = await client.get_transactions(plan_id)
-    analysis = reconcile.analyse(account_id, transactions, bank_balance)
+    analysis = reconcile.analyse(account_id, transactions, bank_balance, app.today())
     difference = analysis.difference
     result = ReconcileResult(
         status="nothing_to_do",

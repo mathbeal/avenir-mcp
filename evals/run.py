@@ -42,7 +42,18 @@ def _mcp_config(url: str, journal: Path) -> dict[str, Any]:
     }
     if "UV_PROJECT_ENVIRONMENT" in os.environ:
         env["UV_PROJECT_ENVIRONMENT"] = os.environ["UV_PROJECT_ENVIRONMENT"]
-    args = ["run", "--quiet", "--no-dev", "--directory", str(ROOT), "avenir-mcp"]
+    # evals.frozen_server runs the real avenir-mcp, with its clock pinned to the demo
+    # plan's day.
+    args = [
+        "run",
+        "--quiet",
+        "--no-dev",
+        "--directory",
+        str(ROOT),
+        "python",
+        "-m",
+        "evals.frozen_server",
+    ]
     return {"mcpServers": {"avenir-mcp": {"command": "uv", "args": args, "env": env}}}
 
 

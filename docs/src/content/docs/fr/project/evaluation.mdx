@@ -18,11 +18,21 @@ vrai agent Claude au travail sur un plan inventé.
 | `evals/tasks.py` | les tâches et leurs vérifications |
 | `evals/run.py` | lance Claude Code sans interface sur chaque tâche : avenir-mcp comme seul outil, écritures activées, un plan neuf, un dossier de travail vide, aucune session enregistrée |
 | `evals/run_openai.py` | les mêmes tâches avec un modèle derrière une API compatible OpenAI (Mammouth par défaut), par une petite boucle d'appels d'outils à la place de Claude Code |
+| `evals/frozen_server.py` | lance le véritable serveur avenir-mcp avec son horloge synchronisée sur le jour du plan de démonstration |
 
 Une tâche **réussit** quand la réponse finale est juste **et** que le plan finit dans
 l'état attendu. Les chiffres attendus sont calculés à partir des données de démonstration,
 jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les écrit :
 `3,328.50`, `3 328,50`, `-22.5`.
+
+Le plan de démonstration porte des dates figées : un paiement annuel dû en octobre, des
+objectifs à atteindre avant un mois donné. avenir-mcp lit la date du jour par une seule
+fonction, `app.today()`, et `evals/frozen_server.py` la fixe au 25 septembre 2026, le même
+jour que celui retenu par le générateur de documentation pour ses propres exemples, avant
+de démarrer le vrai serveur pour chaque tâche. La réponse attendue d'une tâche est calculée
+à partir de ce même jour figé, jamais du jour où l'évaluation s'exécute, si bien qu'un
+paiement programmé reste dans la prévision quel que soit le calendrier une fois la tâche
+terminée.
 
 ## Tâches
 
@@ -75,6 +85,7 @@ jamais copiés des réponses d'avenir-mcp. Les montants sont lus comme on les é
 | 2026-10-02 | Sonnet | 25/25 | 2,3 | `get_underfunded_targets`, `get_debt_payoff_plan` et `get_age_of_money`, avec une tâche chacun ; l'agent répond à chacune avec son outil. Une première exécution a donné 24/25 : dans `debts-down`, l'agent arrondissait la hausse de la valeur nette à l'unité, la question demande donc désormais les montants au centime |
 | 2026-10-05 | Sonnet | 26/26 | 2,4 | `list_payees` et `rename_payee`, avec une tâche demandant de renommer un libellé bancaire avec le nom de la boutique : l'agent liste les bénéficiaires de cette boutique, puis renomme celui demandé avec un aperçu et une confirmation, en laissant les autres tels quels |
 | 2026-10-24 | Sonnet | 26/26 | 2,2 | le plan de démonstration reporte le montant disponible d'une catégorie d'un mois à l'autre et assigne l'argent du mois suivant dès qu'il arrive, donc Ready to Assign vaut 0,00 dans chaque mois qu'il couvre, et Restaurants dépasse de 22,50 une fois pris en compte le report de 24,00 |
+| 2026-10-24 | Sonnet | 26/26 | 2,5 | l'horloge de l'évaluation est désormais fixée au jour du plan de démonstration plutôt qu'au jour réel : `forecast-yearly` échouait dès que le jour réel dépassait le 20 octobre, date d'échéance de l'assurance annuelle |
 
 La première exécution a trouvé un vrai défaut : les clients sans interface ferment toutes
 les questions de confirmation, et avenir-mcp comptait une fermeture comme un refus, si bien

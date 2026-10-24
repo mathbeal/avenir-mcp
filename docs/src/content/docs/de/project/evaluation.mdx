@@ -18,11 +18,22 @@ einen echten Claude-Agenten auf einem erfundenen Plan arbeiten.
 | `evals/tasks.py` | die Aufgaben und ihre Prüfungen |
 | `evals/run.py` | startet Claude Code ohne Oberfläche für jede Aufgabe: avenir-mcp als einziges Tool, Schreiben aktiviert, ein frischer Plan, ein leeres Arbeitsverzeichnis, keine gespeicherte Sitzung |
 | `evals/run_openai.py` | dieselben Aufgaben mit einem Modell hinter einer OpenAI-kompatiblen API (standardmäßig Mammouth), über eine kleine Schleife für Tool-Aufrufe anstelle von Claude Code |
+| `evals/frozen_server.py` | startet den eigentlichen avenir-mcp-Server, dessen Uhr auf den Tag des Demo-Plans festgelegt ist |
 
 Eine Aufgabe ist **bestanden**, wenn die Endantwort richtig ist **und** der Plan im
 erwarteten Zustand endet. Erwartete Zahlen werden aus den Demo-Daten berechnet, nie aus
 den Antworten von avenir-mcp kopiert. Beträge werden so gelesen, wie Menschen sie
 schreiben: `3,328.50`, `3 328,50`, `-22.5`.
+
+Der Demo-Plan enthält feste Termine: eine jährliche Zahlung, die im Oktober fällig ist,
+sowie Zielvorgaben, die bis zu einem bestimmten Monat erreicht sein müssen. avenir-mcp
+liest das heutige Datum über eine einzige Funktion, `app.today()`, und
+`evals/frozen_server.py` legt es auf den 25. September 2026 fest, denselben Tag, den
+der Dokumentationsgenerator für seine eigenen Beispiele festlegt, bevor der eigentliche
+Server für jede Aufgabe gestartet wird. Die erwartete Antwort einer Aufgabe wird anhand
+desselben festgelegten Datums berechnet, niemals anhand des Tages, an dem die Auswertung
+tatsächlich stattfindet, sodass eine geplante Zahlung in der Prognose bleibt, unabhängig
+davon, was der Kalender nach Abschluss der Aufgabe anzeigt.
 
 ## Aufgaben
 
@@ -75,6 +86,7 @@ schreiben: `3,328.50`, `3 328,50`, `-22.5`.
 | 2026-10-02 | Sonnet | 25/25 | 2,3 | `get_underfunded_targets`, `get_debt_payoff_plan` und `get_age_of_money`, mit je einer Aufgabe; der Agent beantwortet jede mit ihrem Tool. Ein erster Lauf ergab 24/25: In `debts-down` rundete der Agent den Zuwachs des Nettovermögens auf ganze Einheiten, deshalb verlangt die Frage jetzt Beträge auf den Cent |
 | 2026-10-05 | Sonnet | 26/26 | 2,4 | `list_payees` und `rename_payee`, mit einer Aufgabe, die verlangt, einen Bankbeleg-Text auf den Namen des Ladens umzubenennen: Der Agent listet die Zahlungsempfänger dieses Ladens auf und benennt dann den verlangten mit einer Vorschau und einer Bestätigung um, die anderen bleiben unverändert |
 | 2026-10-24 | Sonnet | 26/26 | 2,2 | der Demo-Plan überträgt den verfügbaren Betrag einer Kategorie von Monat zu Monat und weist das Geld des nächsten Monats zu, sobald es eingeht, daher beträgt Ready to Assign in jedem Monat, den er abdeckt, 0,00, und Restaurants ist um 22,50 überzogen, sobald der Übertrag von 24,00 berücksichtigt wird |
+| 2026-10-24 | Sonnet | 26/26 | 2,5 | die Uhr der Auswertung ist nun auf den Tag des Demo-Plans festgelegt statt auf den tatsächlichen Tag: `forecast-yearly` schlug fehl, sobald der tatsächliche Tag den 20. Oktober, das Fälligkeitsdatum der Jahresversicherung, überschritten hatte |
 
 Der erste Lauf fand einen echten Fehler: Clients ohne Oberfläche klicken jede
 Bestätigungsfrage weg, und avenir-mcp zählte das Wegklicken als Ablehnung, sodass keine

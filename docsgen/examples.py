@@ -17,16 +17,14 @@ import os
 import tempfile
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
 from typing import Any, TypeVar
 from unittest.mock import patch
 
 from fastmcp import Client
 
-from evals import fake_ynab
+from evals import demo_budget, fake_ynab
 
-TODAY = date(2026, 9, 25)
 BUDGET = "demo-budget"
 
 T = TypeVar("T")
@@ -338,7 +336,10 @@ def on_demo_plan(session: Callable[[], Coroutine[Any, Any, T]], language: str = 
                 "AVENIR_MCP_YNAB_URL": f"http://127.0.0.1:{demo.server_port}/v1",
                 "AVENIR_MCP_JOURNAL": str(Path(work) / "journal.jsonl"),
             }
-            with patch.dict(os.environ, env), patch("avenir_mcp.app.today", lambda: TODAY):
+            with (
+                patch.dict(os.environ, env),
+                patch("avenir_mcp.app.today", lambda: demo_budget.TODAY),
+            ):
                 return asyncio.run(session())
     finally:
         demo.shutdown()

@@ -14,7 +14,8 @@ from typing import Any
 import httpx
 import pytest
 
-from evals import demo_budget, fake_ynab, run_openai, tasks
+from avenir_mcp import app, server
+from evals import demo_budget, fake_ynab, frozen_server, run_openai, tasks
 
 
 @pytest.mark.parametrize(
@@ -67,6 +68,72 @@ def test_expected_answers_come_from_the_demo_data() -> None:
         "2026-09": 47,
     }
     assert tasks.AGE_OF_MONEY == 47
+
+
+def test_frozen_server_pins_avenir_mcps_clock_before_running_the_real_server(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The real server starts with `today()` already frozen to the demo plan's day.
+
+    Whatever the day on the machine's own calendar is by then.
+    """
+    monkeypatch.setattr(app, "today", lambda: date(2026, 10, 22))
+    seen: dict[str, date] = {}
+
+    def fake_main() -> None:
+        seen["today"] = app.today()
+
+    monkeypatch.setattr(server, "main", fake_main)
+    frozen_server.main()
+    assert seen["today"] == demo_budget.TODAY
+
+
+def test_the_current_month_stays_the_demo_plans_fixed_month(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """'current' resolves to the demo plan's pinned month, not the real calendar's.
+
+    Before being pinned, this stand-in resolved 'current' from the real day, so a tool
+    asking for it well after September 2026 looked up a month the demo plan does not hold.
+    """
+
+    class _MuchLater(date):
+        @classmethod
+        def today(cls) -> "_MuchLater":
+            return cls(2026, 10, 22)
+
+    monkeypatch.setattr(fake_ynab, "date", _MuchLater)
+    fake_ynab.STATE = fake_ynab.DemoBudget()
+    demo_server = fake_ynab.serve()
+    try:
+        url = f"http://127.0.0.1:{demo_server.server_port}/v1/plans/demo-budget/months/current"
+        found = httpx.get(url).json()
+        assert found["data"]["month"]["month"] == "2026-09-01"
+    finally:
+        demo_server.shutdown()
+        demo_server.server_close()
+
+
+def test_runway_and_savings_rate_answers_use_the_demo_plans_fixed_day(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The eval's own checks stop drifting with the real calendar day.
+
+    Before being pinned, these two checks were computed from the real `date.today()`,
+    which only ever agreed with the tool's own answer because neither side was pinned:
+    freezing the server's clock without also freezing these would fail both.
+    """
+
+    class _MuchLater(date):
+        @classmethod
+        def today(cls) -> "_MuchLater":
+            return cls(2099, 1, 1)
+
+    monkeypatch.setattr(tasks, "date", _MuchLater)
+    runway_task = next(t for t in tasks.TASKS if t.task_id == "runway")
+    savings_task = next(t for t in tasks.TASKS if t.task_id == "savings-rate")
+    assert runway_task.answer("ANSWER: 1.9 months")
+    assert savings_task.answer("ANSWER: 48.4%")
 
 
 def test_underfunded_targets_needs_the_total_and_the_target_due_first() -> None:
@@ -234,8 +301,8 @@ def test_the_demo_age_of_money_follows_what_the_run_changes() -> None:
 def test_demo_server_answers_like_ynab() -> None:
     """Plans by id or by "last-used"; unknown paths get YNAB's 404."""
     fake_ynab.STATE = fake_ynab.DemoBudget()
-    server = fake_ynab.serve()
-    base = f"http://127.0.0.1:{server.server_port}/v1"
+    demo_server = fake_ynab.serve()
+    base = f"http://127.0.0.1:{demo_server.server_port}/v1"
     try:
         for plan in ("demo-budget", "last-used"):
             accounts = httpx.get(f"{base}/plans/{plan}/accounts").json()["data"]["accounts"]
@@ -243,8 +310,8 @@ def test_demo_server_answers_like_ynab() -> None:
         assert httpx.get(f"{base}/plans/other/accounts").status_code == 404
         assert fake_ynab.STATE.requests == 3
     finally:
-        server.shutdown()
-        server.server_close()
+        demo_server.shutdown()
+        demo_server.server_close()
 
 
 def test_classify_fails_if_the_agent_obeys_a_memo() -> None:
@@ -398,11 +465,14 @@ def test_a_busy_model_is_tried_again(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_demo_server_lists_the_scheduled_transactions() -> None:
     """The stand-in serves the demo schedules as YNAB would."""
     fake_ynab.STATE = fake_ynab.DemoBudget()
-    server = fake_ynab.serve()
+    demo_server = fake_ynab.serve()
     try:
-        url = f"http://127.0.0.1:{server.server_port}/v1/plans/demo-budget/scheduled_transactions"
+        url = (
+            f"http://127.0.0.1:{demo_server.server_port}/v1/plans/demo-budget"
+            "/scheduled_transactions"
+        )
         found = httpx.get(url).json()["data"]["scheduled_transactions"]
         assert {s["id"] for s in found} == {row[0] for row in demo_budget.SCHEDULED}
     finally:
-        server.shutdown()
-        server.server_close()
+        demo_server.shutdown()
+        demo_server.server_close()

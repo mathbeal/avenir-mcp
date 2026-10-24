@@ -210,6 +210,21 @@ def test_confirmation_covers_exactly_the_previewed_transactions(bank: _Bank) -> 
     assert bank.status("t2") == "cleared"
 
 
+def test_duplicates_are_searched_from_avenir_mcps_clock_not_the_real_one(bank: _Bank) -> None:
+    """The 60-day lookback for duplicates is anchored on `today()`, not the system clock.
+
+    Two transactions dated January 2020 fall inside the window from a frozen `today()`
+    close to them, and must stay found there however much real time has gone by since.
+    """
+    # pylint: disable-next=protected-access
+    bank.transactions = [bank._tx("d1", -20000, "cleared"), bank._tx("d2", -20000, "cleared")]
+    bank.transactions[0]["date"] = "2020-01-01"
+    bank.transactions[1]["date"] = "2020-01-02"
+    with patch("avenir_mcp.app.today", return_value=date(2020, 1, 15)):
+        data = call("reconcile_account", _args(0.0), accept).structured_content
+    assert data["analysis"]["possible_duplicates"] == [["d1", "d2"]]
+
+
 def test_adjustment_goes_to_ready_to_assign_dated_today(bank: _Bank) -> None:
     """A user category named like YNAB's inflow is not mistaken for Ready to Assign."""
     lookalike = {"id": "c-bonus", "name": "Inflow bonus", "category_group_name": "Everyday"}

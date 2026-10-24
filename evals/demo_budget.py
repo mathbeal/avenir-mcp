@@ -10,6 +10,7 @@ stores them.
 from __future__ import annotations
 
 import calendar
+from datetime import date
 from typing import Any
 
 PLAN_ID = "demo-budget"
@@ -186,6 +187,11 @@ BUDGETED: dict[str, int] = {
 }
 
 MONTHS = ["2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01"]
+
+# The day the plan is pinned to: the documentation generator and the evaluation both
+# freeze avenir-mcp's clock to it, so a scheduled or forecast figure (the yearly home
+# insurance, due 20 October) stays the same whatever day either tool actually runs on.
+TODAY = date(2026, 9, 25)
 
 # Where a month is assigned something else. September is the month the demo talks about:
 # the household set its first two dated targets then, so it started putting the yearly

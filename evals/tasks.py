@@ -104,8 +104,8 @@ def runway(today: date, months_count: int = 6) -> tuple[float, float]:
 
 
 def _runway_answer(text: str) -> bool:
-    """The months the money lasts, as of the day the evaluation runs."""
-    return _number(runway(date.today())[1])(text)
+    """The months the money lasts, as of the demo plan's fixed day."""
+    return _number(runway(demo.TODAY)[1])(text)
 
 
 def savings_rate(today: date, months_count: int = 6) -> float:
@@ -129,8 +129,8 @@ def savings_rate(today: date, months_count: int = 6) -> float:
 
 
 def _savings_answer(text: str) -> bool:
-    """The savings rate, as of the day the evaluation runs."""
-    return _number(savings_rate(date.today()))(text)
+    """The savings rate, as of the demo plan's fixed day."""
+    return _number(savings_rate(demo.TODAY))(text)
 
 
 def _spent(cat_id: str, month: str) -> int:
@@ -492,8 +492,8 @@ TASKS = [
         state=_unchanged,
         notes=(
             "Checking and savings at the average of the last complete months; the joint "
-            "savings are a tracking account, outside the budget. The figure follows the "
-            "date of the run."
+            "savings are a tracking account, outside the budget. The figure is fixed to the "
+            "demo plan's day, not the day the evaluation happens to run."
         ),
         tags=["read"],
     ),
@@ -505,8 +505,8 @@ TASKS = [
         state=_unchanged,
         notes=(
             "The salary is the only income; the monthly transfer to the Savings account "
-            "stays in the budget. September has no salary yet in the demo budget, so from "
-            "October on its spending lowers the rate. The figure follows the date of the run."
+            "stays in the budget. September has no salary yet in the demo budget, so the "
+            "figure is fixed to the demo plan's day, not the day the evaluation happens to run."
         ),
         tags=["read"],
     ),

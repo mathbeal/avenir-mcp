@@ -514,7 +514,7 @@ class Handler(BaseHTTPRequestHandler):
             month_match = re.match(r"^/months/([^/]+)$", rest)
             if method == "GET" and month_match:
                 month = month_match.group(1)
-                month = f"{date.today():%Y-%m}-01" if month == "current" else month
+                month = f"{demo.TODAY:%Y-%m}-01" if month == "current" else month
                 if month not in demo.MONTHS:
                     return self._send(404, {"error": {"detail": "Resource not found"}})
                 return self._send(200, {"data": {"month": STATE.month(month)}})
