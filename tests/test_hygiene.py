@@ -79,3 +79,24 @@ def test_no_home_path_or_icloud_copy_in_repository() -> None:
         if DUPLICATE.match(path.name) or HOME_PATH.search(path.read_bytes()):
             offenders.append(str(path.relative_to(ROOT)))
     assert not offenders
+
+
+def test_no_web_archive_link_in_repository() -> None:
+    """No tracked file links to web.archive.org.
+
+    An archive is not an official source, and the site going down must not break a link
+    anywhere outside a dated evaluation report.
+    """
+    offenders = []
+    for path in _repository_files():
+        if path.name == "test_hygiene.py" or not path.exists():
+            continue
+        if path.relative_to(ROOT).parts[:2] == ("evals", "results"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if "web.archive.org" in text:
+            offenders.append(str(path.relative_to(ROOT)))
+    assert not offenders

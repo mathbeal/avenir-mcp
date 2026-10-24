@@ -36,8 +36,9 @@ spending is negative, money in positive.
 
 ### Plans, formerly budgets
 
-YNAB [renamed budgets to plans](https://web.archive.org/web/20260112213044/https://www.ynab.com/blog/budget-tab-breakdown), in its apps and in its API: the
-specification now documents only `/plans` paths. avenir-mcp follows it: its client
+YNAB's [API changelog](https://api.ynab.com/#changelog) records that v1.79.0 (2026-03-05)
+renamed `/budgets` to `/plans`: the specification now documents only `/plans` paths.
+avenir-mcp follows it: its client
 calls `/plans`, and its tools say `list_plans` and `plan_id`. The word *budget* stays
 where YNAB keeps it, for the money assigned to a category (`budgeted`, shown as
 *Assigned*), hence `set_category_budget` and `get_budget_vs_actual`.
@@ -47,7 +48,7 @@ where YNAB keeps it, for the money assigned to a category (`budgeted`, shown as
 - [YNAB API documentation](https://api.ynab.com/) — endpoints, authentication, rate limit
 - [OpenAPI specification](https://api.ynab.com/papi/open_api_spec.yaml) — the source of
   the [YNAB API coverage](/avenir-mcp/reference/api-coverage/) page
-- [We Renamed the Budget Tab to Plan](https://web.archive.org/web/20260112213044/https://www.ynab.com/blog/budget-tab-breakdown) — YNAB's announcement
+- [YNAB API changelog](https://api.ynab.com/#changelog) — v1.79.0 (2026-03-05), `/budgets` renamed to `/plans`
 - [Navigating Multiple Plans in YNAB](https://support.ynab.com/en_us/navigating-multiple-plans-r1qeOvbC5)
 - [How to Adjust Your Plan Settings](https://support.ynab.com/en_us/how-to-adjust-your-plan-settings-SyFt35cAq)
 
