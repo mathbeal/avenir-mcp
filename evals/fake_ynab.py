@@ -77,14 +77,19 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         ]
 
     @staticmethod
-    def goal_figures(cat: dict[str, Any], month: str, budgeted: int, activity: int) -> Any:
+    def goal_figures(
+        cat: dict[str, Any], month: str, budgeted: int, activity: int, carried: int
+    ) -> Any:
         """What YNAB computes for a target in a month, for the two kinds the demo holds.
 
-        A monthly target set aside asks for its amount each month, whatever was spent. A
-        target by a date spreads what is left evenly over the months up to the date's,
-        this one included; what the category holds counts as funded. The demo's months
-        carry nothing over, as everywhere in this stand-in. Before the target was created,
-        or after its date, there is no target.
+        A monthly target set aside asks for its amount each month, whatever is already
+        there: of a "Set aside another…" target, YNAB writes that it always prompts for
+        the full amount. A target by a date spreads what the category still misses evenly
+        over the months up to the date's, this one included: the money carried over from
+        the months before counts as funded, and what was spent out of the category has to
+        be put back. Before the target was created, or after its date, there is no target.
+
+        https://support.ynab.com/en_us/when-the-month-rolls-over-a-guide-rkyyd6qC9
         """
         due, created = cat.get("goal_target_date"), cat.get("goal_creation_month") or month
         if not cat.get("goal_type") or month < created or (due and month[:7] > due[:7]):
@@ -92,8 +97,9 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
         target = cat["goal_target"]
         if due:
             months = (int(due[:4]) - int(month[:4])) * 12 + int(due[5:7]) - int(month[5:7]) + 1
-            funded = budgeted + activity
-            needed = max(-(-target // months) - budgeted, 0)
+            funded = carried + budgeted + activity
+            missing = max(target - carried - activity, 0)
+            needed = max(-(-missing // months) - budgeted, 0)
         else:
             months, funded = 1, budgeted
             needed = max(target - budgeted, 0)
@@ -105,26 +111,100 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             "goal_months_to_budget": months,
         }
 
+    def assigned(self, month: str, cat_id: str) -> int:
+        """What a month assigns to a category: the run's own amount, else the demo plan's.
+
+        Ready to Assign is a category of YNAB's own: nothing is ever assigned to it.
+
+        Args:
+            month: The month, as YNAB writes it.
+            cat_id: The category's id.
+
+        Returns:
+            The milliunits assigned.
+        """
+        if cat_id == "cat-inflow":
+            return 0
+        return self.budgeted.get((month, cat_id), demo.budgeted(month, cat_id))
+
+    def activity(self, month: str, cat_id: str) -> int:
+        """What went through a category in a month, as YNAB's activity: spending negative.
+
+        Args:
+            month: The month, as YNAB writes it.
+            cat_id: The category's id.
+
+        Returns:
+            The milliunits, negative for spending; 0 for Ready to Assign itself.
+        """
+        if cat_id == "cat-inflow":
+            return 0
+        return sum(
+            tx["amount"]
+            for tx in self.transactions.values()
+            if not tx["deleted"] and tx["date"][:7] == month[:7] and tx["category_id"] == cat_id
+        )
+
+    def carried_into(self, month: str) -> tuple[dict[str, int], int]:
+        """What each category brings into a month, and the overspending it starts short of.
+
+        When the month rolls over, YNAB leaves a positive Available where it is and turns a
+        negative one into a grey zero, taking that cash overspending out of the new month's
+        Ready to Assign. The demo plan holds no credit card, so its overspending is only
+        ever cash: YNAB's other treatment, a debt on the card's payment category, never
+        applies here.
+
+        https://support.ynab.com/en_us/when-the-month-rolls-over-a-guide-rkyyd6qC9
+
+        Args:
+            month: The month being computed, as YNAB writes it.
+
+        Returns:
+            The milliunits each category carries in, and the cash overspending of all the
+            months before it, as a negative amount.
+        """
+        carried: dict[str, int] = {}
+        overspent = 0
+        for past in [m for m in demo.MONTHS if m < month]:
+            for cat_id in [cat["id"] for cat in self.categories()]:
+                available = (
+                    carried.get(cat_id, 0)
+                    + self.assigned(past, cat_id)
+                    + self.activity(past, cat_id)
+                )
+                carried[cat_id] = max(available, 0)
+                overspent += min(available, 0)
+        return carried, overspent
+
     def month(self, month: str) -> dict[str, Any]:
         """A month with its categories, computed from the transactions."""
-        live = [
-            tx
-            for tx in self.transactions.values()
-            if not tx["deleted"] and tx["date"][:7] == month[:7]
-        ]
+        carried, overspent = self.carried_into(month)
         cats = []
         for cat in self.categories():
-            budgeted = self.budgeted.get((month, cat["id"]), demo.BUDGETED.get(cat["id"], 0))
-            activity = sum(tx["amount"] for tx in live if tx["category_id"] == cat["id"])
-            if cat["id"] == "cat-inflow":
-                budgeted, activity = 0, 0
+            budgeted = self.assigned(month, cat["id"])
+            activity = self.activity(month, cat["id"])
+            brought = carried.get(cat["id"], 0)
             cats.append(
-                {**cat, "budgeted": budgeted, "activity": activity, "balance": budgeted + activity}
-                | self.goal_figures(cat, month, budgeted, activity)
+                {
+                    **cat,
+                    "budgeted": budgeted,
+                    "activity": activity,
+                    "balance": brought + budgeted + activity,
+                }
+                | self.goal_figures(cat, month, budgeted, activity, brought)
             )
-        income = sum(tx["amount"] for tx in live if tx["category_id"] == "cat-inflow")
+        income = sum(
+            tx["amount"]
+            for tx in self.transactions.values()
+            if not tx["deleted"]
+            and tx["date"][:7] == month[:7]
+            and tx["category_id"] == "cat-inflow"
+        )
         budgeted_total = sum(c["budgeted"] for c in cats)
-        # Ready to Assign carries over: all income so far minus all money budgeted so far.
+        # Ready to Assign, the way YNAB's own breakdown adds it up: every unit of income
+        # that reached it so far, less everything assigned so far, less the cash
+        # overspending of the months behind.
+        # https://support.ynab.com/en_us/the-plan-header-BkmiuJ_C9
         earned = sum(
             tx["amount"]
             for tx in self.transactions.values()
@@ -133,17 +213,14 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             and tx["date"][:7] <= month[:7]
         )
         assigned = sum(
-            self.budgeted.get((m, cat_id), demo.BUDGETED.get(cat_id, 0))
-            for m in demo.MONTHS
-            if m <= month
-            for cat_id in demo.BUDGETED
+            self.assigned(m, cat_id) for m in demo.MONTHS if m <= month for cat_id in demo.BUDGETED
         )
         return {
             "month": month,
             "income": income,
             "budgeted": budgeted_total,
             "activity": sum(c["activity"] for c in cats),
-            "to_be_budgeted": earned - assigned,
+            "to_be_budgeted": earned - assigned + overspent,
             "age_of_money": self.age_of_money(month),
             "note": None,
             "deleted": False,

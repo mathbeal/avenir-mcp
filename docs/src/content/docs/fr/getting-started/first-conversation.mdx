@@ -31,7 +31,7 @@ L'agent appelle `list_accounts` avec `{"plan_id": "last-used"}` :
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude :** Dans le budget, Compte courant à 3 328,50, entièrement pointé, et Épargne à
+> **Claude :** Dans le budget, Compte courant à 2 534,48, entièrement pointé, et Épargne à
 > 600,00. Suivis hors budget : le livret du foyer à 16 342,36, et le crédit auto, dont il
 > reste 19 040,81 à rembourser. Le prêt étudiant, remboursé, et l'ancienne banque sont clos.
 
@@ -48,7 +48,7 @@ L'agent appelle `get_monthly_summary` avec `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude :** Septembre se déroule comme prévu, sauf Restaurants, en dépassement de
-> 22,50. 1 729,32 attendent encore d'être assignés.
+> 22,50. Il ne reste rien à affecter : Ready to Assign est à 0,00.
 
 Seules les catégories en dépassement sont listées. Pour le détail, demandez-le :
 

@@ -146,7 +146,7 @@ Respuesta sobre el presupuesto de demostración:
       "name": "Luz",
       "group": "Facturas"
     },
-    "… 8 more"
+    "… 10 more"
   ],
   "next_cursor": "b2Zmc2V0OjM="
 }

@@ -40,6 +40,7 @@ GROUPS: dict[str, list[tuple[str, str]]] = {
         ("cat-power", "Electricity"),
         ("cat-internet", "Internet"),
         ("cat-phone", "Phone"),
+        ("cat-insurance", "Home insurance"),
     ],
     "Everyday": [
         ("cat-groceries", "Groceries"),
@@ -47,7 +48,7 @@ GROUPS: dict[str, list[tuple[str, str]]] = {
         ("cat-transport", "Transport"),
     ],
     "Fun": [("cat-tennis", "Tennis"), ("cat-subscriptions", "Subscriptions")],
-    "Savings goals": [("cat-holidays", "Holidays")],
+    "Savings goals": [("cat-holidays", "Holidays"), ("cat-buffer", "Emergency fund")],
 }
 
 # The demo budget as a household would name it in each documentation language. Ids,
@@ -68,6 +69,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Loyer",
         "Electricity": "Électricité",
         "Phone": "Téléphone",
+        "Home insurance": "Assurance habitation",
         "Internet": "Box internet",
         "Groceries": "Courses",
         "Restaurants": "Restaurants",
@@ -75,6 +77,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Tennis": "Tennis",
         "Subscriptions": "Abonnements",
         "Holidays": "Vacances",
+        "Emergency fund": "Fonds d'urgence",
     },
     "es": {
         "Demo household": "Hogar de demostración",
@@ -91,6 +94,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Alquiler",
         "Electricity": "Luz",
         "Phone": "Teléfono",
+        "Home insurance": "Seguro del hogar",
         "Internet": "Fibra",
         "Groceries": "Supermercado",
         "Restaurants": "Restaurantes",
@@ -98,6 +102,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Tennis": "Tenis",
         "Subscriptions": "Suscripciones",
         "Holidays": "Vacaciones",
+        "Emergency fund": "Fondo de emergencia",
     },
     "de": {
         "Demo household": "Demo-Haushalt",
@@ -114,6 +119,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Miete",
         "Electricity": "Strom",
         "Phone": "Handy",
+        "Home insurance": "Hausratversicherung",
         "Internet": "Internet",
         "Groceries": "Lebensmittel",
         "Restaurants": "Restaurants",
@@ -121,6 +127,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Tennis": "Tennis",
         "Subscriptions": "Abos",
         "Holidays": "Urlaub",
+        "Emergency fund": "Notfallfonds",
     },
     "nl": {
         "Demo household": "Demohuishouden",
@@ -137,6 +144,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Rent": "Huur",
         "Electricity": "Stroom",
         "Phone": "Telefoon",
+        "Home insurance": "Woningverzekering",
         "Internet": "Internet",
         "Groceries": "Boodschappen",
         "Restaurants": "Restaurants",
@@ -144,6 +152,7 @@ NAMES: dict[str, dict[str, str]] = {
         "Tennis": "Tennis",
         "Subscriptions": "Abonnementen",
         "Holidays": "Vakantie",
+        "Emergency fund": "Noodfonds",
     },
 }
 
@@ -159,27 +168,58 @@ def group_id(group: str) -> str:
 
 
 # What is budgeted every month, in milliunits. A bill paid by a fixed plan is budgeted
-# at its exact amount: nothing is left in it once paid.
+# at its exact amount: nothing is left in it once paid. Transport and Tennis are budgeted
+# at the monthly rail ticket and the monthly club fee, so nothing piles up in them either.
 BUDGETED: dict[str, int] = {
     "cat-rent": 950_000,
     "cat-power": 64_200,
     "cat-internet": 29_990,
     "cat-phone": 19_990,
+    "cat-insurance": 105_000,
     "cat-groceries": 400_000,
     "cat-restaurants": 120_000,
-    "cat-transport": 90_000,
-    "cat-tennis": 80_000,
+    "cat-transport": 45_000,
+    "cat-tennis": 22_000,
     "cat-subscriptions": 13_490,
     "cat-holidays": 200_000,
+    "cat-buffer": 400_000,
 }
 
 MONTHS = ["2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01"]
 
+# Where a month is assigned something else. September is the month the demo talks about:
+# the household set its first two dated targets then, so it started putting the yearly
+# rail card aside on top of the monthly ticket (45.00 more) and saving for the tennis
+# club's membership (58.00 more), and it gave the rest of what it had kept over the
+# summer to the emergency fund, which brings Ready to Assign to 0.00. The first rule of
+# YNAB's method is that every unit of money carries a job:
+# https://www.ynab.com/the-four-rules
+BUDGETED_BY_MONTH: dict[str, dict[str, int]] = {
+    "2026-09-01": {"cat-transport": 90_000, "cat-tennis": 80_000, "cat-buffer": 418_320},
+}
+
+
+def budgeted(month: str, cat_id: str) -> int:
+    """What the demo plan assigns to a category in a month, in milliunits.
+
+    Args:
+        month: The month, as YNAB writes it: the first day of the month.
+        cat_id: The category's id.
+
+    Returns:
+        The milliunits assigned, 0 for a category the plan never assigns to.
+    """
+    return BUDGETED_BY_MONTH.get(month, {}).get(cat_id, BUDGETED.get(cat_id, 0))
+
+
 # The targets the household set in YNAB, as YNAB returns them, amounts in milliunits.
 # Rent and subscriptions are fully funded each month; groceries and restaurants ask for
-# more than is budgeted. In September the household started saving for two yearly
-# fees: the rail card renewed on 1 October and the tennis club's membership, due on
-# 1 December. Holidays has no target: an evaluation task sets one.
+# more than is budgeted. The home insurance is a yearly premium the household has been
+# putting aside since June, as YNAB's second rule asks of an expense that is not monthly
+# (https://www.ynab.com/the-four-rules): it is fully funded, so it asks for nothing.
+# In September the household started saving for two more yearly fees: the rail card
+# renewed on 1 October and the tennis club's membership, due on 1 December. Holidays and
+# the emergency fund have no target: an evaluation task sets the holidays' own.
 TARGETS: dict[str, dict[str, Any]] = {
     cat_id: {
         "goal_type": "NEED",
@@ -196,6 +236,7 @@ TARGETS: dict[str, dict[str, Any]] = {
         ("cat-subscriptions", 13_490, None, "2026-06-01"),
         ("cat-groceries", 450_000, None, "2026-06-01"),
         ("cat-restaurants", 150_000, None, "2026-06-01"),
+        ("cat-insurance", 420_000, "2026-10-01", "2026-06-01"),
         ("cat-transport", 250_000, "2026-10-01", "2026-09-01"),
         ("cat-tennis", 480_000, "2026-12-01", "2026-09-01"),
     ]
@@ -210,12 +251,14 @@ def _card(merchant: str, day: str) -> str:
 def _month_transactions(month: str) -> list[tuple[str, str, int, str | None, str]]:
     """(date, payee, milliunits, category, account) for one full month."""
     y_m = month[:7]
+    # Each month stays just under what is assigned, so little carries over to the next:
+    # the overspending the demo shows in September is real once the carry-over is counted.
     groceries = {
-        "06": (61_230, 48_900, 72_450),
-        "07": (55_100, 67_800, 49_990),
-        "08": (70_420, 58_310, 63_780),
+        "06": (118_400, 134_900, 141_300),
+        "07": (127_500, 139_800, 128_600),
+        "08": (132_700, 138_100, 126_800),
     }
-    restaurants = {"06": (24_500, 31_000), "07": (18_900, 42_600), "08": (27_800, 61_300)}
+    restaurants = {"06": (44_900, 57_500), "07": (49_200, 64_500), "08": (52_400, 67_500)}
     g1, g2, g3 = groceries[month[5:7]]
     r1, r2 = restaurants[month[5:7]]
     return [
@@ -245,7 +288,7 @@ def _september() -> list[tuple[str, str, int, str | None, str]]:
         ("2026-09-08", "TELCO MOBILE - PRELEV", -19_990, "cat-phone", CHECKING),
         ("2026-09-12", "POWERCO ENERGIE", -64_200, "cat-power", CHECKING),
         ("2026-09-10", _card("CHEZ LUCIE", "2026-09-10"), -88_000, "cat-restaurants", CHECKING),
-        ("2026-09-11", _card("SUSHI GO", "2026-09-11"), -54_500, "cat-restaurants", CHECKING),
+        ("2026-09-11", _card("SUSHI GO", "2026-09-11"), -78_500, "cat-restaurants", CHECKING),
         # Pending: known merchants, an unknown one, and an import that came twice.
         ("2026-09-05", _card("MARKET FRESH", "2026-09-05"), -66_120, None, CHECKING),
         ("2026-09-15", "STREAMFLIX", -13_490, None, CHECKING),
@@ -481,8 +524,8 @@ SCHEDULED: list[tuple[str, str, str, str, int, str, str | None, str, str | None]
      "cat-inflow", CHECKING, None),
     ("sch-savings", "2026-06-29", "2026-09-29", "monthly", -200_000, "Transfer : Savings", None,
      CHECKING, SAVINGS),
-    ("sch-insurance", "2025-10-20", "2026-10-20", "yearly", -420_000, "HOMESAFE INSURANCE", None,
-     CHECKING, None),
+    ("sch-insurance", "2025-10-20", "2026-10-20", "yearly", -420_000, "HOMESAFE INSURANCE",
+     "cat-insurance", CHECKING, None),
 ]  # fmt: skip
 
 

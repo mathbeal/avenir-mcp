@@ -146,7 +146,7 @@ Réponse sur le budget de démonstration :
       "name": "Électricité",
       "group": "Charges fixes"
     },
-    "… 8 more"
+    "… 10 more"
   ],
   "next_cursor": "b2Zmc2V0OjM="
 }

@@ -85,13 +85,13 @@ Réponse sur le budget de démonstration :
     },
     {
       "month": "2026-08",
-      "days": 48,
-      "change": 31
+      "days": 44,
+      "change": 27
     },
     {
       "month": "2026-09",
       "days": 47,
-      "change": -1
+      "change": 3
     }
   ],
   "change": 30,

@@ -146,7 +146,7 @@ Antwoord op het demobudget:
       "name": "Stroom",
       "group": "Vaste lasten"
     },
-    "… 8 more"
+    "… 10 more"
   ],
   "next_cursor": "b2Zmc2V0OjM="
 }

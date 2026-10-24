@@ -113,14 +113,28 @@ Antwoord op het demobudget:
       "amount": 19.99
     }
   ],
-  "Boodschappen": [
+  "Woningverzekering": [
     {
       "month": "2026-07-01",
-      "amount": 172.89
+      "amount": 0.0
     },
     {
       "month": "2026-08-01",
-      "amount": 192.51
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Boodschappen": [
+    {
+      "month": "2026-07-01",
+      "amount": 395.9
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 397.6
     },
     {
       "month": "2026-09-01",
@@ -130,15 +144,15 @@ Antwoord op het demobudget:
   "Restaurants": [
     {
       "month": "2026-07-01",
-      "amount": 61.5
+      "amount": 113.7
     },
     {
       "month": "2026-08-01",
-      "amount": 89.1
+      "amount": 119.9
     },
     {
       "month": "2026-09-01",
-      "amount": 142.5
+      "amount": 166.5
     }
   ],
   "Vervoer": [
@@ -184,6 +198,20 @@ Antwoord op het demobudget:
     }
   ],
   "Vakantie": [
+    {
+      "month": "2026-07-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Noodfonds": [
     {
       "month": "2026-07-01",
       "amount": 0.0

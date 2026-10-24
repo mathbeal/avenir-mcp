@@ -84,7 +84,7 @@ Respuesta sobre el presupuesto de demostración:
 
 ```json
 {
-  "message": "4 targets need 155.00 in 2026-09; Ready to Assign holds 1729.32: enough for all of them, with 1574.32 left.",
+  "message": "4 targets need 155.00 in 2026-09; Ready to Assign holds 0.00: it covers 0.00 of the 155.00, 155.00 short.",
   "month": "2026-09-01",
   "targets": [
     {
@@ -138,11 +138,11 @@ Respuesta sobre el presupuesto de demostración:
   ],
   "more": 0,
   "needed": 155.0,
-  "ready_to_assign": 1729.32,
-  "enough": true,
-  "covered": 155.0,
-  "short_by": 0.0,
-  "on_track": 2,
+  "ready_to_assign": 0.0,
+  "enough": false,
+  "covered": 0.0,
+  "short_by": 155.0,
+  "on_track": 3,
   "notes": [
     "needed is what YNAB says each category still needs this month to stay on track (Underfunded in its app); left is what the target needs over its whole period.",
     "Most urgent first: targets due by a date, the soonest first; then monthly and weekly funding and debt payments; then the rest; the largest need first in each."

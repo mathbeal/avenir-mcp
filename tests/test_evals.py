@@ -35,20 +35,25 @@ def test_amounts_are_read_as_people_write_them(text: str, expected: list[float])
 
 def test_expected_answers_come_from_the_demo_data() -> None:
     """The figures the agent must find, computed from the invented budget."""
-    assert tasks.RESTAURANTS_AUGUST == pytest.approx(89.10)
+    assert tasks.RESTAURANTS_AUGUST == pytest.approx(119.90)
+    # 24.00 carried over from June to August, 120.00 assigned, 166.50 spent in September.
     assert tasks.RESTAURANTS_SEPTEMBER_OVER == pytest.approx(-22.5)
-    assert tasks.CHECKING == pytest.approx(3328.50)
+    assert tasks.RESTAURANTS_BUDGET == pytest.approx(120.0)
+    # Nothing has gone out of Tennis in September: it holds exactly what was assigned to it.
+    assert tasks.TENNIS_AVAILABLE == pytest.approx(80.0)
+    assert tasks.CHECKING == pytest.approx(2534.48)
     assert tasks.OWED == pytest.approx(19040.81)
-    assert tasks.NET_WORTH_GROWTH == pytest.approx(25268.26)
+    assert tasks.NET_WORTH_GROWTH == pytest.approx(24474.24)
     # Checking and savings, over June to August when docsgen's date sets "now" in September,
     # over June to September from October on.
-    assert tasks.runway(date(2026, 9, 25)) == (3928.5, 2.8)
-    assert tasks.runway(date(2026, 10, 2)) == (3928.5, 2.8)
-    # 5,411.91 kept of 9,600 from June to August; September's spending, with no salary
+    assert tasks.runway(date(2026, 9, 25)) == (3134.48, 1.9)
+    assert tasks.runway(date(2026, 10, 2)) == (3134.48, 1.9)
+    # 4,641.91 kept of 9,600 from June to August; September's spending, with no salary
     # in it yet, brings it down from October on.
-    assert tasks.savings_rate(date(2026, 9, 25)) == 56.4
-    assert tasks.savings_rate(date(2026, 10, 2)) == 40.9
+    assert tasks.savings_rate(date(2026, 9, 25)) == 48.4
+    assert tasks.savings_rate(date(2026, 10, 2)) == 32.7
     # Rail card 35 and tennis club 40, both due by a date, groceries 50 and restaurants 30.
+    # The home insurance, put aside since June, is ahead of its date and asks for nothing.
     assert tasks.underfunded("2026-09-01") == (155.0, "cat-transport")
     assert tasks.underfunded("2026-08-01") == (80.0, None)
     # The 19,040.81 left on the car loan, at 4.5 % and 400 a month.
@@ -58,7 +63,7 @@ def test_expected_answers_come_from_the_demo_data() -> None:
     assert tasks.ages_of_money() == {
         "2026-06": None,
         "2026-07": 17,
-        "2026-08": 48,
+        "2026-08": 44,
         "2026-09": 47,
     }
     assert tasks.AGE_OF_MONEY == 47
@@ -80,6 +85,100 @@ def test_a_removed_target_hides_the_demo_plans_own() -> None:
     assert (rent["goal_type"], rent.get("goal_under_funded")) == (None, None)
 
 
+def _category(state: fake_ynab.DemoBudget, cat_id: str, month: str) -> dict[str, Any]:
+    """One category of a month, as the stand-in serves it."""
+    return next(c for c in state.month(month)["categories"] if c["id"] == cat_id)
+
+
+def test_a_positive_available_amount_carries_into_the_next_month() -> None:
+    """YNAB leaves a positive Available where it is when the month rolls over.
+
+    "Any positive Available amounts in your categories will not change", says
+    https://support.ynab.com/en_us/when-the-month-rolls-over-a-guide-rkyyd6qC9
+    Holidays is assigned 200.00 a month and nothing is ever spent out of it, so its
+    Available is one month's assignment more every month.
+    """
+    state = fake_ynab.DemoBudget()
+    assigned = demo_budget.budgeted("2026-06-01", "cat-holidays")
+    balances = [_category(state, "cat-holidays", m)["balance"] for m in demo_budget.MONTHS]
+    assert balances == [assigned * n for n in (1, 2, 3, 4)]
+
+
+def test_cash_overspending_stays_out_of_the_category_and_off_ready_to_assign() -> None:
+    """Overspent in cash, a category starts the next month at zero and lightens Ready to Assign.
+
+    "If your category had been overspent in cash (negative red Available), that amount
+    will be deducted from Ready to Assign in the new month", and "in the new month, the
+    Available will now show as a gray zero":
+    https://support.ynab.com/en_us/when-the-month-rolls-over-a-guide-rkyyd6qC9
+    The demo plan holds no credit card, so its overspending is only ever cash. Assigning
+    nothing to Groceries in June overspends it by what June's three shops cost.
+    """
+    state = fake_ynab.DemoBudget()
+    spent = _category(state, "cat-groceries", "2026-06-01")["activity"]
+    ready = state.month("2026-07-01")["to_be_budgeted"]
+    state.budgeted[("2026-06-01", "cat-groceries")] = 0
+    assert _category(state, "cat-groceries", "2026-06-01")["balance"] == spent
+    july = _category(state, "cat-groceries", "2026-07-01")
+    assert july["balance"] == july["budgeted"] + july["activity"]
+    # June's assignment is no longer taken out of Ready to Assign, its overspending is.
+    assigned = demo_budget.budgeted("2026-06-01", "cat-groceries")
+    assert state.month("2026-07-01")["to_be_budgeted"] == ready + assigned + spent
+
+
+def test_every_unit_of_money_has_a_job_in_the_month_the_demo_talks_about() -> None:
+    """September leaves Ready to Assign at 0.00, the first rule of YNAB's method.
+
+    "Give every dollar a job": https://www.ynab.com/the-four-rules
+    The household kept a month of income over the summer and assigned all of it to
+    September, which is why September assigns more than a month's salary.
+    """
+    state = fake_ynab.DemoBudget()
+    september = state.month("2026-09-01")
+    assert september["to_be_budgeted"] == 0
+    assert september["income"] == 0
+    assert september["budgeted"] == state.month("2026-08-01")["to_be_budgeted"]
+
+
+def test_restaurants_is_overspent_in_september_once_the_carry_over_is_counted() -> None:
+    """The three months before September end close to their assignment, so little carries.
+
+    Without the carry-over the demo would call a category overspent that a real YNAB
+    would show in the green. 24.00 comes in from June to August, 120.00 is assigned and
+    166.50 is spent, so Restaurants is 22.50 in the red.
+    """
+    state = fake_ynab.DemoBudget()
+    carried, _ = state.carried_into("2026-09-01")
+    assert carried["cat-restaurants"] == 24_000
+    assert _category(state, "cat-restaurants", "2026-09-01")["balance"] == -22_500
+    assert tasks.RESTAURANTS_SEPTEMBER_OVER == -22.5
+
+
+def test_the_category_the_demo_moves_money_from_holds_what_was_assigned_to_it() -> None:
+    """Nothing has left Tennis in September: its Available is its assignment, 80.00."""
+    state = fake_ynab.DemoBudget()
+    tennis = _category(state, "cat-tennis", "2026-09-01")
+    assert (tennis["activity"], tennis["balance"]) == (0, tennis["budgeted"])
+    assert tennis["balance"] == 80_000
+
+
+def test_a_target_by_a_date_counts_the_money_the_category_carries_over() -> None:
+    """The yearly home insurance, put aside since June, asks for nothing more in September.
+
+    YNAB's second rule is to set aside an expense that is not monthly before its bill
+    arrives: https://www.ynab.com/the-four-rules
+    105.00 a month from June brings the 420.00 premium, due on 20 October, to its target.
+    """
+    state = fake_ynab.DemoBudget()
+    insurance = _category(state, "cat-insurance", "2026-09-01")
+    assert insurance["balance"] == 420_000
+    assert (insurance["goal_overall_funded"], insurance["goal_overall_left"]) == (420_000, 0)
+    assert insurance["goal_under_funded"] == 0
+    # In June nothing was carried yet, and the premium had five months to be put aside.
+    june = _category(state, "cat-insurance", "2026-06-01")
+    assert (june["goal_months_to_budget"], june["goal_under_funded"]) == (5, 0)
+
+
 def test_the_demo_server_serves_the_age_of_money_computed_from_the_demo_data() -> None:
     """Each month, alone or in the list of months, carries the figure the eval expects."""
     state = fake_ynab.DemoBudget()
@@ -96,7 +195,7 @@ def test_the_demo_age_of_money_follows_what_the_run_changes() -> None:
         [{"account_id": demo_budget.CHECKING, "date": "2026-09-20", "amount": -10_000}]
     )
     assert state.month("2026-09-01")["age_of_money"] == 49
-    assert state.month("2026-08-01")["age_of_money"] == 48
+    assert state.month("2026-08-01")["age_of_money"] == 44
 
 
 def test_demo_server_answers_like_ynab() -> None:

@@ -75,36 +75,36 @@ Réponse sur le budget de démonstration :
 
 ```json
 {
-  "message": "Over the last 3 complete months, 9600.00 came in and 4188.09 went out: 5411.91 saved, 56.4 % of the income. Best month: 2026-07 (56.9 %), worst: 2026-08 (55.4 %).",
+  "message": "Over the last 3 complete months, 9600.00 came in and 4958.11 went out: 4641.89 saved, 48.4 % of the income. Best month: 2026-06 (48.7 %), worst: 2026-08 (48.1 %).",
   "months": [
     {
       "month": "2026-06",
       "income": 3200.0,
-      "spending": -1382.75,
-      "saved": 1817.25,
-      "rate": 56.8
+      "spending": -1641.67,
+      "saved": 1558.33,
+      "rate": 48.7
     },
     {
       "month": "2026-07",
       "income": 3200.0,
-      "spending": -1379.06,
-      "saved": 1820.94,
-      "rate": 56.9
+      "spending": -1654.27,
+      "saved": 1545.73,
+      "rate": 48.3
     },
     {
       "month": "2026-08",
       "income": 3200.0,
-      "spending": -1426.28,
-      "saved": 1773.72,
-      "rate": 55.4
+      "spending": -1662.17,
+      "saved": 1537.83,
+      "rate": 48.1
     }
   ],
   "income": 9600.0,
-  "spending": -4188.09,
-  "saved": 5411.91,
-  "rate": 56.4,
-  "average_saved": 1803.97,
-  "best_month": "2026-07",
+  "spending": -4958.11,
+  "saved": 4641.89,
+  "rate": 48.4,
+  "average_saved": 1547.297,
+  "best_month": "2026-06",
   "worst_month": "2026-08",
   "moved_to_tracking": 0.0,
   "notes": [

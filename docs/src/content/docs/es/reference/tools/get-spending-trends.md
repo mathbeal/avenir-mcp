@@ -113,14 +113,28 @@ Respuesta sobre el presupuesto de demostración:
       "amount": 19.99
     }
   ],
-  "Supermercado": [
+  "Seguro del hogar": [
     {
       "month": "2026-07-01",
-      "amount": 172.89
+      "amount": 0.0
     },
     {
       "month": "2026-08-01",
-      "amount": 192.51
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Supermercado": [
+    {
+      "month": "2026-07-01",
+      "amount": 395.9
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 397.6
     },
     {
       "month": "2026-09-01",
@@ -130,15 +144,15 @@ Respuesta sobre el presupuesto de demostración:
   "Restaurantes": [
     {
       "month": "2026-07-01",
-      "amount": 61.5
+      "amount": 113.7
     },
     {
       "month": "2026-08-01",
-      "amount": 89.1
+      "amount": 119.9
     },
     {
       "month": "2026-09-01",
-      "amount": 142.5
+      "amount": 166.5
     }
   ],
   "Transporte": [
@@ -184,6 +198,20 @@ Respuesta sobre el presupuesto de demostración:
     }
   ],
   "Vacaciones": [
+    {
+      "month": "2026-07-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Fondo de emergencia": [
     {
       "month": "2026-07-01",
       "amount": 0.0

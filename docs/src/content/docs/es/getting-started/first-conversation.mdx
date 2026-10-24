@@ -31,7 +31,7 @@ El agente llama a `list_accounts` con `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** En el presupuesto, Cuenta corriente con 3.328,50, todo punteado, y Ahorro con
+> **Claude:** En el presupuesto, Cuenta corriente con 2.534,48, todo punteado, y Ahorro con
 > 600,00. Fuera de él, a seguimiento: el ahorro común con 16.342,36 y el préstamo del
 > coche, con 19.040,81 aún por pagar. El préstamo de estudios, pagado, y el banco anterior
 > están cerrados.
@@ -49,7 +49,7 @@ El agente llama a `get_monthly_summary` con `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** Septiembre va según lo previsto salvo la categoría Restaurantes, excedida en 22,50.
-> Quedan 1.729,32 por asignar.
+> No queda nada por asignar: Ready to Assign está en 0,00.
 
 Solo se listan las categorías excedidas. Para el detalle, pídalo:
 

@@ -36,40 +36,49 @@
     "utilization_pct": 100.0
   },
   {
+    "id": "cat-insurance",
+    "name": "Assurance habitation",
+    "group": "Charges fixes",
+    "budgeted": 105.0,
+    "actual": 0.0,
+    "balance": 315.0,
+    "utilization_pct": 0.0
+  },
+  {
     "id": "cat-groceries",
     "name": "Courses",
     "group": "Quotidien",
     "budgeted": 400.0,
-    "actual": 192.51,
-    "balance": 207.49,
-    "utilization_pct": 48.1
+    "actual": 397.6,
+    "balance": 11.9,
+    "utilization_pct": 99.4
   },
   {
     "id": "cat-restaurants",
     "name": "Restaurants",
     "group": "Quotidien",
     "budgeted": 120.0,
-    "actual": 89.1,
-    "balance": 30.9,
-    "utilization_pct": 74.2
+    "actual": 119.9,
+    "balance": 24.0,
+    "utilization_pct": 99.9
   },
   {
     "id": "cat-transport",
     "name": "Transports",
     "group": "Quotidien",
-    "budgeted": 90.0,
+    "budgeted": 45.0,
     "actual": 45.0,
-    "balance": 45.0,
-    "utilization_pct": 50.0
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-tennis",
     "name": "Tennis",
     "group": "Loisirs",
-    "budgeted": 80.0,
+    "budgeted": 22.0,
     "actual": 22.0,
-    "balance": 58.0,
-    "utilization_pct": 27.5
+    "balance": 0.0,
+    "utilization_pct": 100.0
   },
   {
     "id": "cat-subscriptions",
@@ -86,7 +95,16 @@
     "group": "Projets",
     "budgeted": 200.0,
     "actual": 0.0,
-    "balance": 200.0,
+    "balance": 600.0,
+    "utilization_pct": 0.0
+  },
+  {
+    "id": "cat-buffer",
+    "name": "Fonds d'urgence",
+    "group": "Projets",
+    "budgeted": 400.0,
+    "actual": 0.0,
+    "balance": 1200.0,
     "utilization_pct": 0.0
   }
 ]

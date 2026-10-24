@@ -79,8 +79,8 @@ Réponse sur le budget de démonstration :
     },
     {
       "payee": "MARKET FRESH",
-      "monthly_amount": -182.58,
-      "yearly_amount": -2190.96,
+      "monthly_amount": -395.9,
+      "yearly_amount": -4750.8,
       "day": 14,
       "months_seen": 3,
       "category": "Courses",
@@ -96,6 +96,15 @@ Réponse sur le budget de démonstration :
       "scheduled": false
     },
     {
+      "payee": "SUSHI GO",
+      "monthly_amount": -64.5,
+      "yearly_amount": -774.0,
+      "day": 24,
+      "months_seen": 3,
+      "category": "Restaurants",
+      "scheduled": false
+    },
+    {
       "payee": "POWERCO ENERGIE",
       "monthly_amount": -64.2,
       "yearly_amount": -770.4,
@@ -103,6 +112,15 @@ Réponse sur le budget de démonstration :
       "months_seen": 3,
       "category": "Électricité",
       "scheduled": true
+    },
+    {
+      "payee": "CHEZ LUCIE",
+      "monthly_amount": -49.2,
+      "yearly_amount": -590.4,
+      "day": 10,
+      "months_seen": 3,
+      "category": "Restaurants",
+      "scheduled": false
     },
     {
       "payee": "RAIL CO",
@@ -140,17 +158,9 @@ Réponse sur le budget de démonstration :
       "category": "Téléphone",
       "scheduled": true
     },
-    {
-      "payee": "STREAMFLIX",
-      "monthly_amount": -13.49,
-      "yearly_amount": -161.88,
-      "day": 15,
-      "months_seen": 3,
-      "category": "Abonnements",
-      "scheduled": false
-    }
+    "… 1 more"
   ],
-  "yearly_total": -16835.16,
+  "yearly_total": -20759.4,
   "months_looked_at": [
     "2026-05",
     "2026-06",

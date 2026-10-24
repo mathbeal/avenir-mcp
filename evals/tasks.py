@@ -133,27 +133,60 @@ def _savings_answer(text: str) -> bool:
     return _number(savings_rate(date.today()))(text)
 
 
+def _spent(cat_id: str, month: str) -> int:
+    """The milliunits that moved through a category in a month: spending is negative."""
+    return sum(
+        int(tx["amount"])
+        for tx in demo.transactions()
+        if tx["category_id"] == cat_id and str(tx["date"])[:7] == month[:7]
+    )
+
+
+def carried(cat_id: str, month: str) -> int:
+    """What a category brings into a month: the Available it ended the month before with.
+
+    YNAB leaves a positive Available where it is when the month rolls over and turns a
+    negative one into a zero, the overspending coming off Ready to Assign instead:
+    https://support.ynab.com/en_us/when-the-month-rolls-over-a-guide-rkyyd6qC9
+    """
+    brought = 0
+    for past in demo.MONTHS:
+        if past >= month:
+            break
+        brought = max(brought + demo.budgeted(past, cat_id) + _spent(cat_id, past), 0)
+    return brought
+
+
+def available(cat_id: str, month: str) -> float:
+    """What a category has left in a month, carry-over included: YNAB's Available."""
+    return _milli(carried(cat_id, month) + demo.budgeted(month, cat_id) + _spent(cat_id, month))
+
+
 def underfunded(month: str) -> tuple[float, str | None]:
     """What the targets still need in a month, and the category whose dated target is due first.
 
-    A monthly target asks for its amount less what is budgeted; a target by a date asks
-    for an even share of its amount over the months left to its date, this one included,
-    less what is budgeted. The demo budget carries nothing over between months, and its
-    dated targets, created in September, have nothing spent in them yet. The month is
-    named in the task: the figure does not move with the date of the run.
+    A monthly target asks for its amount less what is budgeted, whatever the category
+    already carries. A target by a date asks for an even share of what it still misses
+    over the months left to its date, this one included, less what is budgeted: the money
+    carried over counts as already put aside, so a target can be ahead of its date and ask
+    for nothing. Only a target still short is ranked by its date. The month is named in the
+    task: the figure does not move with the date of the run.
     """
     needed, dated = 0, []
     for cat_id, goal in demo.TARGETS.items():
-        due, budgeted = goal["goal_target_date"], demo.BUDGETED[cat_id]
+        due, budgeted = goal["goal_target_date"], demo.budgeted(month, cat_id)
         if month < goal["goal_creation_month"]:
             continue
         if due is None:
             share = goal["goal_target"]
         else:
             left = (int(due[:4]) - int(month[:4])) * 12 + int(due[5:7]) - int(month[5:7]) + 1
-            share = -(-goal["goal_target"] // left)
+            missing = max(goal["goal_target"] - carried(cat_id, month) - _spent(cat_id, month), 0)
+            share = -(-missing // left)
+        short = max(share - budgeted, 0)
+        needed += short
+        if due and short:
             dated.append((due, cat_id))
-        needed += max(share - budgeted, 0)
     return _milli(needed), min(dated)[1] if dated else None
 
 
@@ -231,9 +264,9 @@ def ages_of_money() -> dict[str, int | None]:
 AGE_OF_MONEY = ages_of_money()[demo.MONTHS[-1][:7]]
 DUPLICATE = 71.86
 RESTAURANTS_AUGUST = -_sum("cat-restaurants", "2026-08")
-RESTAURANTS_SEPTEMBER_OVER = round(
-    demo.BUDGETED["cat-restaurants"] / 1000 + _sum("cat-restaurants", "2026-09"), 2
-)
+RESTAURANTS_SEPTEMBER_OVER = available("cat-restaurants", "2026-09-01")
+RESTAURANTS_BUDGET = _milli(demo.budgeted("2026-09-01", "cat-restaurants"))
+TENNIS_AVAILABLE = available("cat-tennis", "2026-09-01")
 CHECKING = _checking()
 OWED = _owed()
 NET_WORTH_GROWTH = _grown_since("2025-04-30")
@@ -385,7 +418,7 @@ TASKS = [
     Task(
         "restaurants-budget",
         "What is my budget for Restaurants in September 2026?" + FORMAT,
-        answer=_number(demo.BUDGETED["cat-restaurants"] / 1000),
+        answer=_number(RESTAURANTS_BUDGET),
         state=_unchanged,
         notes="Here budget means the amount assigned to a category, not a plan.",
         tags=["read", "vocabulary"],
@@ -429,6 +462,10 @@ TASKS = [
         "Which category is overspent in September 2026, and by how much?" + FORMAT,
         answer=lambda t: _words("restaurant")(t) and _number(RESTAURANTS_SEPTEMBER_OVER)(t),
         state=_unchanged,
+        notes=(
+            "Restaurants is the only one, and only once the 24.00 it carried over from June "
+            "to August is counted: 166.50 spent against 144.00 available."
+        ),
         tags=["read"],
     ),
     Task(
@@ -482,7 +519,8 @@ TASKS = [
         notes=(
             "Groceries and Restaurants ask for more each month than is budgeted; Transport "
             "(the rail card, due 1 October) and Tennis (the club, due 1 December) save for "
-            "a yearly fee. Rent and Subscriptions are funded."
+            "a yearly fee. Rent and Subscriptions are funded, and so is the home insurance, "
+            "put aside since June: a target ahead of its date asks for nothing."
         ),
         tags=["read"],
     ),

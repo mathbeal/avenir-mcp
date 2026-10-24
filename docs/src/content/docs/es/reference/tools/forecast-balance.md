@@ -92,12 +92,18 @@ Respuesta sobre el presupuesto de demostración:
     "Cuenta corriente",
     "Ahorro"
   ],
-  "start_balance": 3928.5,
+  "start_balance": 3134.48,
   "assumptions": {
     "recurring": [
       {
+        "payee": "CHEZ LUCIE",
+        "amount": -49.2,
+        "day": 10,
+        "months_seen": 3
+      },
+      {
         "payee": "MARKET FRESH",
-        "amount": -182.58,
+        "amount": -395.9,
         "day": 14,
         "months_seen": 3
       },
@@ -114,13 +120,19 @@ Respuesta sobre el presupuesto de demostración:
         "months_seen": 3
       },
       {
+        "payee": "SUSHI GO",
+        "amount": -64.5,
+        "day": 24,
+        "months_seen": 3
+      },
+      {
         "payee": "TENNIS CLUB - PRELEV",
         "amount": -22.0,
         "day": 20,
         "months_seen": 3
       }
     ],
-    "variable_monthly": -68.7,
+    "variable_monthly": 0.0,
     "monthly_income": 3200.0,
     "one_offs": [],
     "scheduled": [
@@ -173,7 +185,7 @@ Respuesta sobre el presupuesto de demostración:
         "date": "2026-10-20",
         "amount": -420.0,
         "account": "Cuenta corriente",
-        "category": null,
+        "category": "Seguro del hogar",
         "payee": "HOMESAFE INSURANCE",
         "memo": null,
         "frequency": "yearly",
@@ -196,35 +208,35 @@ Respuesta sobre el presupuesto de demostración:
   "months": [
     {
       "month": "2026-09",
-      "start": 3928.5,
+      "start": 3134.48,
       "inflows": 3200.0,
       "outflows": 0.0,
-      "end": 7128.5,
-      "lowest": 3928.5
+      "end": 6334.48,
+      "lowest": 3134.48
     },
     {
       "month": "2026-10",
-      "start": 7128.5,
+      "start": 6334.48,
       "inflows": 3200.0,
-      "outflows": -1815.95,
-      "end": 8512.55,
-      "lowest": 6481.56
+      "outflows": -2074.27,
+      "end": 7460.21,
+      "lowest": 5694.17
     },
     {
       "month": "2026-11",
-      "start": 8512.55,
+      "start": 7460.21,
       "inflows": 3200.0,
-      "outflows": -1395.95,
-      "end": 10316.6,
-      "lowest": 7875.69
+      "outflows": -1654.27,
+      "end": 9005.94,
+      "lowest": 6830.22
     },
     {
       "month": "2026-12",
-      "start": 10316.6,
+      "start": 9005.94,
       "inflows": 3200.0,
-      "outflows": -1395.95,
-      "end": 12120.65,
-      "lowest": 9669.66
+      "outflows": -1654.27,
+      "end": 10551.67,
+      "lowest": 8365.63
     }
   ],
   "first_shortfall": null

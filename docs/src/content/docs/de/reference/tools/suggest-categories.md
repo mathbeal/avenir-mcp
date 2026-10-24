@@ -146,7 +146,7 @@ Antwort auf dem Demo-Budget:
       "name": "Strom",
       "group": "Fixkosten"
     },
-    "… 8 more"
+    "… 10 more"
   ],
   "next_cursor": "b2Zmc2V0OjM="
 }

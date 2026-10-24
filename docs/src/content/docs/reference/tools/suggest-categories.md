@@ -146,7 +146,7 @@ Answer on the demo budget:
       "name": "Electricity",
       "group": "Bills"
     },
-    "… 8 more"
+    "… 10 more"
   ],
   "next_cursor": "b2Zmc2V0OjM="
 }

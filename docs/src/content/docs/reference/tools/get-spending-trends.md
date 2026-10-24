@@ -113,14 +113,28 @@ Answer on the demo budget:
       "amount": 19.99
     }
   ],
-  "Groceries": [
+  "Home insurance": [
     {
       "month": "2026-07-01",
-      "amount": 172.89
+      "amount": 0.0
     },
     {
       "month": "2026-08-01",
-      "amount": 192.51
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Groceries": [
+    {
+      "month": "2026-07-01",
+      "amount": 395.9
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 397.6
     },
     {
       "month": "2026-09-01",
@@ -130,15 +144,15 @@ Answer on the demo budget:
   "Restaurants": [
     {
       "month": "2026-07-01",
-      "amount": 61.5
+      "amount": 113.7
     },
     {
       "month": "2026-08-01",
-      "amount": 89.1
+      "amount": 119.9
     },
     {
       "month": "2026-09-01",
-      "amount": 142.5
+      "amount": 166.5
     }
   ],
   "Transport": [
@@ -184,6 +198,20 @@ Answer on the demo budget:
     }
   ],
   "Holidays": [
+    {
+      "month": "2026-07-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-08-01",
+      "amount": 0.0
+    },
+    {
+      "month": "2026-09-01",
+      "amount": 0.0
+    }
+  ],
+  "Emergency fund": [
     {
       "month": "2026-07-01",
       "amount": 0.0

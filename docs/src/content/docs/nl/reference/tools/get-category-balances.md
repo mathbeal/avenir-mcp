@@ -97,7 +97,7 @@ Antwoord op het demobudget:
     "activity": -19.99,
     "balance": 0.0
   },
-  "… 6 more"
+  "… 8 more"
 ]
 ```
 

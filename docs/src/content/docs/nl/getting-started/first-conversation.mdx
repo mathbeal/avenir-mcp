@@ -30,7 +30,7 @@ De agent roept `list_accounts` aan met `{"plan_id": "last-used"}`:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** In het budget: Betaalrekening met 3.328,50, alles verwerkt, en Spaarrekening
+> **Claude:** In het budget: Betaalrekening met 2.534,48, alles verwerkt, en Spaarrekening
 > met 600,00. Daarbuiten gevolgd: de gezamenlijke spaarrekening met 16.342,36 en de
 > autolening, waarvan nog 19.040,81 open staat. De afbetaalde studielening en de vorige
 > bank zijn gesloten.
@@ -48,7 +48,7 @@ De agent roept `get_monthly_summary` aan met `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** September verloopt volgens plan, behalve Restaurants, 22,50 over budget.
-> Er wacht nog 1.729,32 om toegewezen te worden.
+> Er valt niets meer toe te wijzen: Ready to Assign staat op 0,00.
 
 Alleen categorieën die over budget zijn, worden vermeld. Vraag om de details:
 

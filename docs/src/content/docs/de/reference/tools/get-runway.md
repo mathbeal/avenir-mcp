@@ -87,16 +87,16 @@ Antwort auf dem Demo-Budget:
 
 ```json
 {
-  "message": "At the average spending of the last 3 complete months, 1396.03 a month, the 3928.50 available would last 2.8 months. On essential spending alone, 1360.54 a month: 2.9 months.",
-  "liquid": 3928.5,
+  "message": "At the average spending of the last 3 complete months, 1652.70 a month, the 3134.48 available would last 1.9 months. On essential spending alone, 1617.21 a month: 1.9 months.",
+  "liquid": 3134.48,
   "owed_on_cards": 0.0,
   "spending": {
-    "monthly_spending": -1396.03,
-    "runway_months": 2.8
+    "monthly_spending": -1652.703,
+    "runway_months": 1.9
   },
   "essential": {
-    "monthly_spending": -1360.54,
-    "runway_months": 2.9
+    "monthly_spending": -1617.213,
+    "runway_months": 1.9
   },
   "essential_groups": [
     "Fixkosten",
@@ -111,7 +111,7 @@ Antwort auf dem Demo-Budget:
     {
       "name": "Girokonto",
       "type": "checking",
-      "balance": 3328.5
+      "balance": 2534.48
     },
     {
       "name": "Sparkonto",

@@ -31,7 +31,7 @@ Der Agent ruft `list_accounts` mit `{"plan_id": "last-used"}` auf:
 
 <Code code={accounts} lang="json" title="list_accounts" />
 
-> **Claude:** Im Budget: Girokonto mit 3.328,50, alles gebucht, und Sparkonto mit 600,00.
+> **Claude:** Im Budget: Girokonto mit 2.534,48, alles gebucht, und Sparkonto mit 600,00.
 > Außerhalb verfolgt: das gemeinsame Sparkonto mit 16.342,36 und der Autokredit, von dem
 > noch 19.040,81 offen sind. Der abbezahlte Studienkredit und die alte Bank sind geschlossen.
 
@@ -48,7 +48,7 @@ Der Agent ruft `get_monthly_summary` mit `{"plan_id": "last-used", "month":
 <Code code={summary} lang="json" title="get_monthly_summary" />
 
 > **Claude:** Der September verläuft wie geplant, bis auf Restaurants, um 22,50 überzogen.
-> 1.729,32 warten noch darauf, zugewiesen zu werden.
+> Es ist nichts mehr zuzuweisen: Ready to Assign steht bei 0,00.
 
 Nur überzogene Kategorien werden aufgeführt. Für die Einzelheiten fragen Sie danach:
 

@@ -101,7 +101,7 @@ Réponse sur le budget de démonstration :
     "balance": 0.0,
     "utilization_pct": 100.0
   },
-  "… 6 more"
+  "… 8 more"
 ]
 ```
 

@@ -86,32 +86,32 @@
     },
     {
       "month": "2026-06-01",
-      "assets": 17759.61,
+      "assets": 17500.69,
       "debts": -20019.26,
-      "net_worth": -2259.65
+      "net_worth": -2518.57
     },
     {
       "month": "2026-07-01",
-      "assets": 19180.55,
+      "assets": 18646.42,
       "debts": -19694.33,
-      "net_worth": -513.78
+      "net_worth": -1047.91
     },
     {
       "month": "2026-08-01",
-      "assets": 20554.27,
+      "assets": 19784.25,
       "debts": -19368.18,
-      "net_worth": 1186.09
+      "net_worth": 416.07
     },
     {
       "month": "2026-09-01",
-      "assets": 20270.86,
+      "assets": 19476.84,
       "debts": -19040.81,
-      "net_worth": 1230.05
+      "net_worth": 436.03
     }
   ],
   "first_net_worth": -24038.21,
-  "last_net_worth": 1230.05,
-  "change": 25268.26,
+  "last_net_worth": 436.03,
+  "change": 24474.24,
   "accounts": [
     "Checking",
     "Savings",

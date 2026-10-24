@@ -1,13 +1,13 @@
 {
   "status": "difference_found",
-  "message": "YNAB's cleared balance differs from the bank by 112.30. Nothing was changed. Check explained_by, uncleared and possible_duplicates with the user; call again once fixed, or with adjust=true to record the gap as an adjustment.",
+  "message": "YNAB's cleared balance differs from the bank by 906.32. Nothing was changed. Check explained_by, uncleared and possible_duplicates with the user; call again once fixed, or with adjust=true to record the gap as an adjustment.",
   "account": "Compte courant",
   "analysis": {
     "account_id": "acc-checking",
     "bank_balance": 3440.8,
-    "cleared_balance": 3328.5,
-    "working_balance": 3328.5,
-    "difference": 112.3,
+    "cleared_balance": 2534.48,
+    "working_balance": 2534.48,
+    "difference": 906.32,
     "to_reconcile_count": 54,
     "uncleared_count": 0,
     "uncleared": [],
