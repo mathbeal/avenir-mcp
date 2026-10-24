@@ -7,9 +7,10 @@
 version = 1
 
 # Markdown, whose first line is a title or front matter; JSON, which has no comments;
-# images; lock files; one-line version files; the PEP 561 marker, which is empty; Astro
-# components, whose first line is their script fence; generated documentation pages and
-# examples, and the evaluation's reports, which docsgen and evals/run.py write.
+# images and video; lock files; one-line version files; the PEP 561 marker, which is
+# empty; Astro components, whose first line is their script fence; generated
+# documentation pages and examples, and the evaluation's reports, which docsgen and
+# evals/run.py write.
 [[annotations]]
 path = [
     "**/*.md",
@@ -17,6 +18,8 @@ path = [
     "**/*.json",
     "**/*.svg",
     "**/*.png",
+    "**/*.jpg",
+    "**/*.mp4",
     "**/*.astro",
     "uv.lock",
     "plugin/uv.lock",
