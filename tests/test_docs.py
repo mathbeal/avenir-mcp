@@ -53,7 +53,7 @@ def test_the_demo_previews_a_write_then_applies_it_then_undoes_it(
     assert preview.lines == (
         "Move 30.00 from Tennis to Restaurants for this month?",
         "- Tennis: 80.00 → 50.00",
-        "- Restaurants: 120.00 → 150.00",
+        "- Restaurants: 120.00 → 150.00 (available -22.50 → +7.50)",
     )
     assert "undo_operation" in applied.lines[0]
     assert undone.lines == (

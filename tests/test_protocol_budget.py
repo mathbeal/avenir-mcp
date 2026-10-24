@@ -28,18 +28,50 @@ _ARGS = {"plan_id": "b1", "month": "2026-10-01", "category_id": "c-food", "amoun
 def test_budget_change_is_previewed_in_currency_then_applied_with_the_code(
     month: FakeMonth,
 ) -> None:
-    """The preview names the category and both amounts; the code applies it."""
+    """The preview names the category, its amounts and what it has available; the code applies."""
+    month.spent["c-food"] = -50000
     preview = call("set_category_budget", _ARGS).structured_content
     assert preview["status"] == "confirmation_required"
-    assert (preview["category"], preview["from_amount"], preview["to_amount"]) == (
-        "Restaurants",
-        200.0,
-        150.0,
-    )
+    assert (
+        preview["category"],
+        preview["from_amount"],
+        preview["to_amount"],
+        preview["available_before"],
+        preview["available_after"],
+    ) == ("Restaurants", 200.0, 150.0, 150.0, 100.0)
     assert not month.sets
     done = call("set_category_budget", {**_ARGS, "confirmation": preview["confirmation"]})
     assert done.structured_content["status"] == "applied"
     assert month.sets == [("2026-10-01", "c-food", 150.0)]
+
+
+def test_the_question_leaves_available_out_when_it_matches_the_budget(month: FakeMonth) -> None:
+    """Nothing spent and nothing carried over: the budgeted amounts already say what is left."""
+    asked: list[str] = []
+    call("set_category_budget", _ARGS, asking(asked))
+    assert asked == ["Budget Restaurants for 2026-10-01: 200.00 → 150.00?"]
+    assert month.sets == [("2026-10-01", "c-food", 150.0)]
+
+
+def test_the_question_shows_an_overspent_category_brought_back_to_zero(month: FakeMonth) -> None:
+    """Covering the overspending exactly: the available amount reaches 0.00, with no sign."""
+    month.budgeted["c-food"] = 120000
+    month.spent["c-food"] = -142500
+    asked: list[str] = []
+    call("set_category_budget", {**_ARGS, "amount": 142.5}, asking(asked))
+    assert asked == [
+        "Budget Restaurants for 2026-10-01: 120.00 → 142.50 (available -22.50 → 0.00)?"
+    ]
+
+
+def test_the_question_signs_an_available_amount_that_stays_positive(month: FakeMonth) -> None:
+    """A category with spending that keeps money left: both available amounts carry a '+'."""
+    month.spent["c-food"] = -50000
+    asked: list[str] = []
+    call("set_category_budget", _ARGS, asking(asked))
+    assert asked == [
+        "Budget Restaurants for 2026-10-01: 200.00 → 150.00 (available +150.00 → +100.00)?"
+    ]
 
 
 def test_budget_change_is_undone_to_the_previous_amount(month: FakeMonth) -> None:

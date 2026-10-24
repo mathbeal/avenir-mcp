@@ -40,7 +40,7 @@ _ARGS = {
 
 
 def test_a_move_is_one_preview_naming_both_categories(month: FakeMonth) -> None:
-    """The preview gives both categories, before and after, and what the source keeps."""
+    """The preview gives both categories, budgeted and available, before and after."""
     preview = call("move_money", _ARGS).structured_content
     assert preview["status"] == "confirmation_required"
     assert preview["from_category"] == {
@@ -48,6 +48,7 @@ def test_a_move_is_one_preview_naming_both_categories(month: FakeMonth) -> None:
         "name": "Tennis",
         "from_amount": 80.0,
         "to_amount": 50.0,
+        "available_before": 80.0,
         "available_after": 50.0,
     }
     assert preview["to_category"] == {
@@ -55,6 +56,7 @@ def test_a_move_is_one_preview_naming_both_categories(month: FakeMonth) -> None:
         "name": "Restaurants",
         "from_amount": 120.0,
         "to_amount": 150.0,
+        "available_before": -22.5,
         "available_after": 7.5,
     }
     assert not month.sets
@@ -70,7 +72,12 @@ def test_one_confirmation_applies_both_amounts(month: FakeMonth) -> None:
 
 
 def test_the_user_is_asked_one_readable_question(month: FakeMonth) -> None:
-    """The question says the amount, both categories and the month."""
+    """The question says the amount, both categories and the month.
+
+    Tennis has nothing spent and nothing carried over, so its available amount is its
+    budgeted one and the line stays bare; Restaurants is overspent, so its line says
+    what the move leaves available, each amount with its sign.
+    """
     asked: list[str] = []
 
     async def record(message: str, *_: Any) -> Any:
@@ -82,7 +89,33 @@ def test_the_user_is_asked_one_readable_question(month: FakeMonth) -> None:
     assert asked == [
         "Move 30.00 from Tennis to Restaurants for 2026-09-01?\n"
         "- Tennis: 80.00 → 50.00\n"
-        "- Restaurants: 120.00 → 150.00"
+        "- Restaurants: 120.00 → 150.00 (available -22.50 → +7.50)"
+    ]
+
+
+def test_an_overspent_category_brought_back_to_zero_shows_an_unsigned_zero(
+    month: FakeMonth,
+) -> None:
+    """Covering the overspending exactly: the available amount reaches 0.00, with no sign."""
+    asked: list[str] = []
+    call("move_money", {**_ARGS, "amount": 22.5}, asking(asked))
+    assert asked == [
+        "Move 22.50 from Tennis to Restaurants for 2026-09-01?\n"
+        "- Tennis: 80.00 → 57.50\n"
+        "- Restaurants: 120.00 → 142.50 (available -22.50 → 0.00)"
+    ]
+    assert month.sets == [("2026-09-01", "c-fun", 57.5), ("2026-09-01", "c-food", 142.5)]
+
+
+def test_a_category_that_stays_in_credit_keeps_a_plus_sign(month: FakeMonth) -> None:
+    """A source with spending of its own still has money left: both amounts carry a '+'."""
+    month.spent["c-fun"] = -22000
+    asked: list[str] = []
+    call("move_money", _ARGS, asking(asked))
+    assert asked == [
+        "Move 30.00 from Tennis to Restaurants for 2026-09-01?\n"
+        "- Tennis: 80.00 → 50.00 (available +58.00 → +28.00)\n"
+        "- Restaurants: 120.00 → 150.00 (available -22.50 → +7.50)"
     ]
 
 

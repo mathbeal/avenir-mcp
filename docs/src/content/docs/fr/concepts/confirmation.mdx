@@ -119,7 +119,7 @@ Seuls les clients qui gèrent l'élicitation MCP peuvent alors écrire.
 | Outil | Question |
 |---|---|
 | `apply_categories` | *Recategorise 2 transaction(s)?* puis une ligne par changement : date, bénéficiaire, montant, avant → après |
-| `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00?* |
+| `set_category_budget` | *Budget Restaurants for 2026-09-01: 120.00 → 150.00 (available -22.50 → +7.50)?* |
 | `move_money` | *Move 30.00 from Tennis to Restaurants for 2026-09-01?* puis une ligne par catégorie, avant → après |
 | `flag_transactions` | *Change the flag of 2 transaction(s)?* puis une ligne par transaction : date, bénéficiaire, montant, couleur avant → après |
 | `set_category_target` | *Set the target of Vacances: no target → 1200.00 by 2027-06-01?*, et un avertissement quand l'annulation ne peut pas rétablir l'objectif précédent |
@@ -130,5 +130,11 @@ Seuls les clients qui gèrent l'élicitation MCP peuvent alors écrire.
 | `split_transaction` | *Split 2026-09-12 Market 86.40 into 2 lines?* puis une ligne par catégorie, et l'avertissement que seul YNAB peut l'annuler |
 | `reconcile_account` | *Reconcile Compte courant: mark 49 cleared transaction(s) reconciled?* |
 | `undo_operation` | *Undo: recategorise 2 transaction(s)?*, ou la sorte d'annulation |
+
+Lorsqu'une question modifie un montant budgété, elle indique également le solde
+disponible de la catégorie, avant et après la modification, chaque fois que celui-ci
+diffère du montant budgété en raison de dépenses engagées ou d'un report du mois
+précédent. Chaque solde disponible est accompagné de son signe : `+` lorsqu'il reste de
+l'argent et `-` lorsque la catégorie a dépassé son budget ; le zéro est noté `0.00`.
 
 Les questions sont en anglais, comme les réponses des outils.

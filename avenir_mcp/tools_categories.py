@@ -157,6 +157,38 @@ async def update_category(  # pylint: disable=too-many-arguments
     )
 
 
+def _signed(amount: float) -> str:
+    """Write an amount to the cent with its sign, so a negative one cannot be read as positive.
+
+    Args:
+        amount: An amount in currency units.
+
+    Returns:
+        The amount prefixed with '+' or '-', or '0.00' when it rounds to nothing: a zero
+        has no direction, and '+0.00' would read as money left.
+    """
+    return "0.00" if round(amount, 2) == 0 else f"{amount:+.2f}"
+
+
+def _available(before: float, after: float, budgeted_before: float) -> str:
+    """Say what a category has available before and after a change, when that adds anything.
+
+    With nothing spent and nothing carried over, the available amount is the budgeted one
+    and repeating it would only lengthen the question.
+
+    Args:
+        before: Amount available before the change, in currency units.
+        after: Amount available after it.
+        budgeted_before: Amount budgeted before the change, to compare the first with.
+
+    Returns:
+        ' (available <before> → <after>)', both signed, or '' when available matches budgeted.
+    """
+    if before == budgeted_before:
+        return ""
+    return f" (available {_signed(before)} → {_signed(after)})"
+
+
 class BudgetChange(Model):
     """The outcome of set_category_budget."""
 
@@ -176,6 +208,10 @@ class BudgetChange(Model):
     """Amount budgeted before."""
     to_amount: float
     """Amount budgeted after."""
+    available_before: float
+    """Amount available in the category before the change; negative means overspent."""
+    available_after: float
+    """Amount available in the category once the change is applied; negative means overspent."""
     confirmation: str | None
     """Single-use code confirming exactly this preview, valid 10 minutes; null unless status is
     confirmation_required.
@@ -205,8 +241,8 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     """Set the amount budgeted ("Assigned") in a category for a month, after the user confirms.
 
     The amount is absolute, in currency units, not a change. The result gives the
-    amount before and after; undo_operation restores the previous one.
-    Confirmation works as for apply_categories.
+    amount before and after, and what the category has available each time;
+    undo_operation restores the previous one. Confirmation works as for apply_categories.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -243,13 +279,17 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         month=month,
         from_amount=client.milliunit_to_amount(before),
         to_amount=client.milliunit_to_amount(after),
+        available_before=client.milliunit_to_amount(category["balance"]),
+        available_after=client.milliunit_to_amount(category["balance"] + after - before),
         confirmation=None,
         operation_id=None,
     )
     if before == after:
         return result
     question = (
-        f"Budget {result.category} for {month}: {result.from_amount:.2f} → {result.to_amount:.2f}?"
+        f"Budget {result.category} for {month}: "
+        f"{result.from_amount:.2f} → {result.to_amount:.2f}"
+        f"{_available(result.available_before, result.available_after, result.from_amount)}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
     stop = await gate(ctx, plan_id, subject, question, confirmation)
@@ -282,6 +322,8 @@ class CategoryMove(Model):
     """Amount budgeted before."""
     to_amount: float
     """Amount budgeted after."""
+    available_before: float
+    """Amount available in the category before the move; negative means overspent."""
     available_after: float
     """Amount available in the category once the move is applied; negative means overspent."""
 
@@ -326,8 +368,22 @@ def _side(category: dict[str, Any], change: int) -> CategoryMove:
         name=untrusted(category["name"]),
         from_amount=client.milliunit_to_amount(category["budgeted"]),
         to_amount=client.milliunit_to_amount(category["budgeted"] + change),
+        available_before=client.milliunit_to_amount(category["balance"]),
         available_after=client.milliunit_to_amount(category["balance"] + change),
     )
+
+
+def _line(side: CategoryMove) -> str:
+    """One category's line in the preview of a move.
+
+    Args:
+        side: The category, with its amounts before and after.
+
+    Returns:
+        Its name and budgeted amounts, then what it has available when that differs.
+    """
+    available = _available(side.available_before, side.available_after, side.from_amount)
+    return f"- {side.name}: {side.from_amount:.2f} → {side.to_amount:.2f}{available}"
 
 
 async def _set_both(plan_id: str, month: str, source: CategoryMove, target: CategoryMove) -> None:
@@ -391,7 +447,7 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
     The way to cover overspending: one preview, one confirmation and one
     undo_operation for both categories, where set_category_budget would take two.
     The amount is what moves, in currency units, not a new total. The result gives
-    both categories before and after, and what each will have available.
+    both categories before and after, and what each has available each time.
     Confirmation works as for apply_categories.
 
     Args:
@@ -438,8 +494,7 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
     )
     question = (
         f"Move {result.amount:.2f} from {source.name} to {target.name} for {month}?\n"
-        f"- {source.name}: {source.from_amount:.2f} → {source.to_amount:.2f}\n"
-        f"- {target.name}: {target.from_amount:.2f} → {target.to_amount:.2f}"
+        f"{_line(source)}\n{_line(target)}"
     )
     subject = {"from": from_category_id, "to": to_category_id, "month": month, "amount": moved}
     stop = await gate(ctx, plan_id, subject, question, confirmation)

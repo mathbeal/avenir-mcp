@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="498" viewBox="0 0 720 498" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
 <title id="title">One write in avenir-mcp: previewed, confirmed, then undone</title>
-<desc id="desc">Restaurants is over budget. Move 30 from Tennis to cover it. Move 30.00 from Tennis to Restaurants for this month? - Tennis: 80.00 → 50.00 - Restaurants: 120.00 → 150.00 Yes, go ahead. Moved. undo_operation with operation_id &lt;operation id&gt; moves it back. Actually, put it back. Undo: move 30.00 back from Restaurants to Tennis for this month? Both amounts restored.</desc>
+<desc id="desc">Restaurants is over budget. Move 30 from Tennis to cover it. Move 30.00 from Tennis to Restaurants for this month? - Tennis: 80.00 → 50.00 - Restaurants: 120.00 → 150.00 (available -22.50 → +7.50) Yes, go ahead. Moved. undo_operation with operation_id &lt;operation id&gt; moves it back. Actually, put it back. Undo: move 30.00 back from Restaurants to Tennis for this month? Both amounts restored.</desc>
 <style>
 .p0 { animation: a0 30s linear infinite }
 @keyframes a0 { 0%, 1.0% { opacity: 0 } 3.7%, 96.7% { opacity: 1 } 100% { opacity: 0 } }
@@ -39,7 +39,7 @@
 <rect x="28" y="136.0" width="3" height="57" rx="1.5" fill="#eb6834"/>
 <text x="44" y="150.0" font-size="13" fill="#0b0b0b">Move 30.00 from Tennis to Restaurants for this month?</text>
 <text x="44" y="169.0" font-size="13" fill="#0b0b0b">- Tennis: 80.00 → 50.00</text>
-<text x="44" y="188.0" font-size="13" fill="#0b0b0b">- Restaurants: 120.00 → 150.00</text>
+<text x="44" y="188.0" font-size="13" fill="#0b0b0b">- Restaurants: 120.00 → 150.00 (available -22.50 → +7.50)</text>
 </g>
 <g class="p3">
 <rect x="559.9" y="211.0" width="132.1" height="34" rx="17.0" fill="#2a78d6"/>
