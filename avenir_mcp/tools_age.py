@@ -33,9 +33,12 @@ async def get_age_of_money(
     Use it for "how old is my money?", "am I living on last month's income?" or "is my
     buffer growing?". The figure is YNAB's own, in days: how long, on average, money
     stayed in the budget accounts before being spent, the oldest money spent first. Over
-    30 days means living on last month's income. The answer gives each month's figure up
-    to the current one, the latest, the change and its direction over the period; a month
-    is null when YNAB had not enough history. Relay the notes with the figures. For how
+    30 days means living on last month's income. months_count counts back from the
+    current month, included, so 1 gives this month alone and the default 12 the year up
+    to it; a plan that holds fewer months gives those, and says so in the notes. The
+    answer gives each month's figure, the latest, the change and its direction over the
+    period. A month YNAB had not enough history for comes back null, not as an error,
+    and the notes name those months. Relay the notes with the figures. For how
     long the money would last without income use get_runway. One YNAB request, the list
     of months; changes nothing.
 

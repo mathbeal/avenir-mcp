@@ -14,6 +14,8 @@ List all YNAB plans accessible with the current API key.
 A plan is what YNAB now calls a budget, and what users may still call their budget.
 Use the plan id in subsequent tool calls. 'last-used' also works, but names
 whichever plan was last opened in YNAB: with several plans, pass the id.
+Call it once and keep the id; no other tool reads this list. For what a plan holds,
+get_monthly_summary gives the month, list_accounts the accounts.
 
 ## Gedrag
 

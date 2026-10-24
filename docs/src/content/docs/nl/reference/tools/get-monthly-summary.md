@@ -11,10 +11,13 @@ Gegenereerd uit de code door `python -m docsgen`; een test faalt zodra de pagina
 
 A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories.
 
-Use it first to review a month. Amounts in currency units; activity is negative
-for spending. Only overspent categories are listed: use get_category_balances
-for all of them, get_spending_trends to compare with earlier months, and
-forecast_balance for the months ahead. One YNAB request; changes nothing.
+Use it first to review a month. Give month as the first day of a month,
+YYYY-MM-01; any other day is refused. 'current' is the month in progress: its
+income and spending stop at today, so its figures are partial until it ends.
+Amounts in currency units; activity is negative for spending. Only overspent
+categories are listed: for every category use get_category_balances; for the
+months before, get_spending_trends; for the months ahead, forecast_balance.
+One YNAB request; changes nothing.
 
 ## Gedrag
 

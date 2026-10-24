@@ -1,6 +1,6 @@
 ---
 title: "list_category_groups"
-description: "List the category groups a new category can be created in."
+description: "List the category groups a category can be created in or moved to."
 ---
 
 :::note[Generated]
@@ -9,10 +9,15 @@ Generated from the code by `python -m docsgen`; a test fails when it no longer m
 
 ## What it does
 
-List the category groups a new category can be created in.
+List the category groups a category can be created in or moved to.
 
-Hidden, deleted and system groups are left out.
-Pass a group id to create_category.
+A group is a heading over categories: it holds no amount of its own, so nothing
+here says what was budgeted or spent.
+A group id goes to create_category, or to update_category as category_group_id.
+For the money in each category use get_category_balances; to classify
+transactions, suggest_categories. With several plans, pass the plan id from
+list_plans: 'last-used' follows the plan last opened in YNAB. Hidden, deleted and
+system groups are left out. One YNAB request; changes nothing.
 
 ## Behaviour
 

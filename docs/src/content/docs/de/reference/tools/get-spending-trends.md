@@ -11,11 +11,14 @@ Aus dem Code erzeugt mit `python -m docsgen`; ein Test schlägt fehl, sobald die
 
 Spending per category, month by month, over the last N months.
 
-Use it for "is my grocery spending going up?" or to compare months. The result
-maps each category name to its spending month by month, oldest first, as a
-positive number in currency units. For a single month use get_category_balances
-or get_budget_vs_actual; for the months ahead, forecast_balance. One YNAB
-request for the list of months, then one per month; changes nothing.
+Use it for "is my grocery spending going up?" or to compare months. months_count
+counts back from the current month, included: the default 3 gives this month and
+the two before it, and the current one is still partial. A plan younger than that
+gives the months it holds. The result maps each category name to its spending
+month by month, oldest first, as a positive number in currency units. For a
+single month use get_category_balances or get_budget_vs_actual; for the months
+ahead, forecast_balance. One YNAB request for the list of months, then one per
+month, so a year of months costs twelve requests; changes nothing.
 
 ## Verhalten
 

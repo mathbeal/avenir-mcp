@@ -25,7 +25,7 @@ avenir-mcp stellt diese Tools bereit. Lesende Tools sind immer verfügbar; schre
 | [`get_spending_trends`](/avenir-mcp/de/reference/tools/get-spending-trends/) | Spending per category, month by month, over the last N months. |
 | [`get_underfunded_targets`](/avenir-mcp/de/reference/tools/get-underfunded-targets/) | The categories whose target still needs money this month, the most urgent first. |
 | [`list_accounts`](/avenir-mcp/de/reference/tools/list-accounts/) | List the plan's accounts with their balances, bank link and last reconciliation. |
-| [`list_category_groups`](/avenir-mcp/de/reference/tools/list-category-groups/) | List the category groups a new category can be created in. |
+| [`list_category_groups`](/avenir-mcp/de/reference/tools/list-category-groups/) | List the category groups a category can be created in or moved to. |
 | [`list_payees`](/avenir-mcp/de/reference/tools/list-payees/) | List the payees of a plan, those most transactions name first. |
 | [`list_plans`](/avenir-mcp/de/reference/tools/list-plans/) | List all YNAB plans accessible with the current API key. |
 | [`list_scheduled_transactions`](/avenir-mcp/de/reference/tools/list-scheduled-transactions/) | List the scheduled transactions due between two dates: bills, salary, transfers. |

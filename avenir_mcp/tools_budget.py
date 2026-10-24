@@ -93,7 +93,9 @@ _LIST_PLANS = """List all YNAB plans accessible with the current API key.
 
 A plan is what YNAB now calls a budget, and what users may still call their budget.
 Use the plan id in subsequent tool calls. 'last-used' also works, but names
-whichever plan was last opened in YNAB: with several plans, pass the id."""
+whichever plan was last opened in YNAB: with several plans, pass the id.
+Call it once and keep the id; no other tool reads this list. For what a plan holds,
+get_monthly_summary gives the month, list_accounts the accounts."""
 
 
 # Without a parameter to document, FastMCP would show the whole docstring, sections
@@ -145,7 +147,8 @@ async def get_category_balances(
     internal categories are left out, and so are categories with nothing
     budgeted, spent or available unless include_empty is true. For the share of
     each budget consumed use get_budget_vs_actual; for the month's totals,
-    get_monthly_summary. One YNAB request; changes nothing.
+    get_monthly_summary; for the months before, get_spending_trends. One YNAB
+    request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -175,10 +178,13 @@ async def get_monthly_summary(
 ) -> analytics.MonthOverview:
     """A month at a glance: income, budgeted, spent, Ready to Assign, overspent categories.
 
-    Use it first to review a month. Amounts in currency units; activity is negative
-    for spending. Only overspent categories are listed: use get_category_balances
-    for all of them, get_spending_trends to compare with earlier months, and
-    forecast_balance for the months ahead. One YNAB request; changes nothing.
+    Use it first to review a month. Give month as the first day of a month,
+    YYYY-MM-01; any other day is refused. 'current' is the month in progress: its
+    income and spending stop at today, so its figures are partial until it ends.
+    Amounts in currency units; activity is negative for spending. Only overspent
+    categories are listed: for every category use get_category_balances; for the
+    months before, get_spending_trends; for the months ahead, forecast_balance.
+    One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -207,10 +213,12 @@ async def get_budget_vs_actual(
     """Share of each category's budget spent in a month, to see what is over or close.
 
     Use it for "am I over budget?" or "which categories are nearly used up?".
-    Amounts in currency units, spending as a positive number; utilization_pct above
-    100 means over budget. For what is still available in each category use
-    get_category_balances; for the month's totals, get_monthly_summary; for several
-    months, get_spending_trends. One YNAB request; changes nothing.
+    Give month as the first day of a month, YYYY-MM-01; any other day is refused.
+    'current' is the month in progress, where a share under 100 may only mean the
+    month is not over. Amounts in currency units, spending as a positive number;
+    utilization_pct above 100 means over budget. For what is still available in each
+    category use get_category_balances; for the month's totals, get_monthly_summary;
+    for the months before, get_spending_trends. One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -239,11 +247,14 @@ async def get_spending_trends(
 ) -> dict[str, list[analytics.MonthSpending]]:
     """Spending per category, month by month, over the last N months.
 
-    Use it for "is my grocery spending going up?" or to compare months. The result
-    maps each category name to its spending month by month, oldest first, as a
-    positive number in currency units. For a single month use get_category_balances
-    or get_budget_vs_actual; for the months ahead, forecast_balance. One YNAB
-    request for the list of months, then one per month; changes nothing.
+    Use it for "is my grocery spending going up?" or to compare months. months_count
+    counts back from the current month, included: the default 3 gives this month and
+    the two before it, and the current one is still partial. A plan younger than that
+    gives the months it holds. The result maps each category name to its spending
+    month by month, oldest first, as a positive number in currency units. For a
+    single month use get_category_balances or get_budget_vs_actual; for the months
+    ahead, forecast_balance. One YNAB request for the list of months, then one per
+    month, so a year of months costs twelve requests; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -279,10 +290,15 @@ async def get_spending_trends(
     }
 )
 async def list_category_groups(plan_id: str) -> list[CategoryGroup]:
-    """List the category groups a new category can be created in.
+    """List the category groups a category can be created in or moved to.
 
-    Hidden, deleted and system groups are left out.
-    Pass a group id to create_category.
+    A group is a heading over categories: it holds no amount of its own, so nothing
+    here says what was budgeted or spent.
+    A group id goes to create_category, or to update_category as category_group_id.
+    For the money in each category use get_category_balances; to classify
+    transactions, suggest_categories. With several plans, pass the plan id from
+    list_plans: 'last-used' follows the plan last opened in YNAB. Hidden, deleted and
+    system groups are left out. One YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -305,11 +321,15 @@ async def list_category_groups(plan_id: str) -> list[CategoryGroup]:
 async def list_accounts(plan_id: str) -> list[Account]:
     """List the plan's accounts with their balances, bank link and last reconciliation.
 
-    Use it to reconcile YNAB with the bank, and to tell the user when a bank link is
-    broken (no transaction comes in until they fix it in YNAB) or when an account has
-    not been reconciled for months. Its ids are the account_ids other tools take.
-    Balances are in currency units. Every account comes in one response, closed
-    ones included, in one YNAB request; changes nothing.
+    Use it to tell the user when a bank link is broken (no transaction comes in until
+    they fix it in YNAB) or when an account has not been reconciled for months. Its
+    ids are the account_ids other tools take. Balances are in currency units, today's:
+    cleared_balance is the part the bank has shown.
+    reconcile_account compares one account with the balance the bank shows.
+    For the balances of the months before use get_net_worth_trend; for the months
+    ahead, forecast_balance. With several plans, pass the plan id from list_plans:
+    'last-used' follows the plan last opened in YNAB. Every account comes in one
+    response, closed ones included, in one YNAB request; changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -533,7 +553,13 @@ async def import_transactions(plan_id: str) -> ImportResult:
 
 
 set_read_only_wording(
+    "list_accounts",
+    "reconcile_account compares one account with the balance the bank shows.",
+    "Comparing an account with the bank is done in YNAB itself.",
+)
+
+set_read_only_wording(
     "list_category_groups",
-    "Pass a group id to create_category.",
-    "New categories are created in YNAB itself.",
+    "A group id goes to create_category, or to update_category as category_group_id.",
+    "Categories are created in groups, and moved between them, in YNAB itself.",
 )

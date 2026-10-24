@@ -280,16 +280,19 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     Starts from today's balance of the open on-budget accounts (or those given).
     For the current month, what was already spent or received since the 1st is
     deducted from the monthly averages, so only what is left is projected.
-    Assumes, and returns as `assumptions` so the user can correct them:
-    YNAB's scheduled transactions on their dates (a payee with a schedule is
-    projected by it alone; transfers between projected accounts left out),
-    charges that recur in the last 4 months (same payee, stable amount), the
-    average of all other spending over the last 3 months, and what you pass:
-    expected monthly income (default: the last 3 months' non-recurring inflows,
+    Assumes, and returns as `assumptions` so the user can correct them: YNAB's
+    scheduled transactions on their dates, charges that recur in the last 4 months
+    (same payee, stable amount), the average of all other spending over the last 3
+    months, and what you pass. A payee with a schedule is projected by that schedule
+    alone, and transfers between the projected accounts are left out. What you pass is
+    the expected monthly income (default: the last 3 months' non-recurring inflows,
     which may include one-off money such as capital injections) and one-off amounts
     such as a tax bill (negative) or a refund (positive). Amounts in currency
     units. `lowest` is the lowest point within a month; `first_shortfall` is the
-    first month it goes below zero. Changes nothing.
+    first month it goes below zero. The months ahead are guessed from the history,
+    never read from what the user budgeted for them: for a month already gone use
+    get_monthly_summary, or get_spending_trends to compare several. For how long
+    today's money would last with no income at all, get_runway. Changes nothing.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.

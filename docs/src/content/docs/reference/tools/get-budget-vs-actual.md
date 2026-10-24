@@ -12,10 +12,12 @@ Generated from the code by `python -m docsgen`; a test fails when it no longer m
 Share of each category's budget spent in a month, to see what is over or close.
 
 Use it for "am I over budget?" or "which categories are nearly used up?".
-Amounts in currency units, spending as a positive number; utilization_pct above
-100 means over budget. For what is still available in each category use
-get_category_balances; for the month's totals, get_monthly_summary; for several
-months, get_spending_trends. One YNAB request; changes nothing.
+Give month as the first day of a month, YYYY-MM-01; any other day is refused.
+'current' is the month in progress, where a share under 100 may only mean the
+month is not over. Amounts in currency units, spending as a positive number;
+utilization_pct above 100 means over budget. For what is still available in each
+category use get_category_balances; for the month's totals, get_monthly_summary;
+for the months before, get_spending_trends. One YNAB request; changes nothing.
 
 ## Behaviour
 

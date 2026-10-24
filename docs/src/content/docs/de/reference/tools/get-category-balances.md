@@ -16,7 +16,8 @@ Amounts in currency units; activity is negative for spending. Hidden and
 internal categories are left out, and so are categories with nothing
 budgeted, spent or available unless include_empty is true. For the share of
 each budget consumed use get_budget_vs_actual; for the month's totals,
-get_monthly_summary. One YNAB request; changes nothing.
+get_monthly_summary; for the months before, get_spending_trends. One YNAB
+request; changes nothing.
 
 ## Verhalten
 

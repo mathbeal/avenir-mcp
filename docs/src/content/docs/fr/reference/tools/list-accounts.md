@@ -11,11 +11,15 @@ Généré depuis le code par `python -m docsgen` ; un test échoue s'il ne corre
 
 List the plan's accounts with their balances, bank link and last reconciliation.
 
-Use it to reconcile YNAB with the bank, and to tell the user when a bank link is
-broken (no transaction comes in until they fix it in YNAB) or when an account has
-not been reconciled for months. Its ids are the account_ids other tools take.
-Balances are in currency units. Every account comes in one response, closed
-ones included, in one YNAB request; changes nothing.
+Use it to tell the user when a bank link is broken (no transaction comes in until
+they fix it in YNAB) or when an account has not been reconciled for months. Its
+ids are the account_ids other tools take. Balances are in currency units, today's:
+cleared_balance is the part the bank has shown.
+reconcile_account compares one account with the balance the bank shows.
+For the balances of the months before use get_net_worth_trend; for the months
+ahead, forecast_balance. With several plans, pass the plan id from list_plans:
+'last-used' follows the plan last opened in YNAB. Every account comes in one
+response, closed ones included, in one YNAB request; changes nothing.
 
 ## Comportement
 
