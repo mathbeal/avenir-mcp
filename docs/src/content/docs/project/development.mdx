@@ -186,16 +186,26 @@ See [Evaluation](/avenir-mcp/project/evaluation/).
 
 - Commit messages start with a type — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
   `build:`, `ci:`, `chore:` — because `CHANGELOG.md` is generated from them by
-  git-cliff.
-- To release: `just changelog`, commit, tag `vX.Y.Z` matching `avenir_mcp.__version__`,
-  and publish a GitHub release. The `publish` workflow builds twice with the tagged commit's date, stops unless both builds agree, runs `twine check
-  --strict` and uploads to PyPI through Trusted Publishing: no token is stored.
-- Then the MCP registry: `server.json` carries the same version (a test checks it); run
-  `mcp-publisher login github`, then `mcp-publisher publish`. PyPI ownership is proven by the
-  `mcp-name:` line of the README.
+  git-cliff, which also decides the next version from them: a breaking change raises
+  the major number, a `feat:` the minor, anything else the patch.
+- To release: open a pull request titled `chore(release): X.Y.Z`, where `X.Y.Z` is
+  what `git-cliff --bumped-version` prints on the branch. Run `just changelog`
+  (`git-cliff --bump`, the same computation, written into `CHANGELOG.md`'s new entry),
+  and raise `avenir_mcp.__version__` to the same number. A CI check repeats
+  `git-cliff --bumped-version` itself and fails the pull request, naming the number it
+  expected, when the title or any version below disagrees with it: the number is never
+  chosen by hand. Once merged, tag `vX.Y.Z` matching `avenir_mcp.__version__` and
+  publish a GitHub release. The `publish` workflow builds twice with the tagged
+  commit's date, stops unless both builds agree, runs `twine check --strict` and
+  uploads to PyPI through Trusted Publishing: no token is stored.
+- Then the MCP registry: `server.json` carries the same version (a test, and the
+  release pull request's CI check, verify it); run `mcp-publisher login github`, then
+  `mcp-publisher publish`. PyPI ownership is proven by the `mcp-name:` line of the
+  README.
 - The Claude Desktop extension carries it too: `mcpb/manifest.json` and the
-  `avenir-mcp==` pin of `mcpb/pyproject.toml` move with `avenir_mcp.__version__` (a test
-  checks both), or the extension installs the release before it.
+  `avenir-mcp==` pin of `mcpb/pyproject.toml` move with `avenir_mcp.__version__` (a
+  test, and the same CI check, verify both), or the extension installs the release
+  before it.
 - Then the Claude Code plugin, once PyPI has the release: raise the version in
   `plugin/.claude-plugin/plugin.json` and the pin in `plugin/pyproject.toml`, run
   `uv lock --project plugin`, and commit `plugin/uv.lock`. The three name one release, and

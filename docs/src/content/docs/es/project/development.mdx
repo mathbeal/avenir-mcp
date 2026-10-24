@@ -191,19 +191,32 @@ Vea [Evaluación](/avenir-mcp/es/project/evaluation/).
 ## Commits y versiones
 
 - Los mensajes de commit empiezan por un tipo — `feat:`, `fix:`, `docs:`, `refactor:`,
-  `test:`, `build:`, `ci:`, `chore:` — porque `CHANGELOG.md` se genera a partir de ellos
-  con git-cliff.
-- Para publicar: `just changelog`, commit, etiqueta `vX.Y.Z` igual a
-  `avenir_mcp.__version__`, y una release de GitHub. El workflow `publish` construye
-  dos veces con la fecha del commit etiquetado, se detiene si las dos construcciones difieren,
-  ejecuta `twine check --strict` y sube a PyPI mediante Trusted Publishing: no se guarda
-  ningún token.
-- Después, el registro de servidores MCP: `server.json` lleva la misma versión (una prueba lo comprueba);
-  ejecute `mcp-publisher login github` y luego `mcp-publisher publish`. La línea `mcp-name:`
-  del README demuestra que el paquete de PyPI es suyo.
+  `test:`, `build:`, `ci:`, `chore:` — porque git-cliff genera `CHANGELOG.md` a partir
+  de ellos y, además, determina la siguiente versión basándose en ellos: un cambio
+  incompatible aumenta el número mayor, un `feat:` aumenta el menor y cualquier otra
+  cosa, el número de parche.
+- Para publicar una versión: abra una pull request titulada `chore(release): X.Y.Z`,
+  donde `X.Y.Z` es el resultado que muestra el comando `git-cliff --bumped-version` en
+  la rama. Ejecute `just changelog` (`git-cliff --bump`, el mismo cálculo, que se
+  escribe en la nueva entrada de `CHANGELOG.md`) y actualice `avenir_mcp.__version__`
+  con el mismo número. Una comprobación de CI repite el propio comando
+  `git-cliff --bumped-version` y rechaza la pull request, indicando el número que
+  esperaba, cuando el título o cualquier versión inferior no coincidan con él: el
+  número nunca se elige manualmente. Una vez fusionado, se etiqueta `vX.Y.Z` para que
+  coincida con `avenir_mcp.__version__` y se publica una versión en GitHub. El flujo de
+  trabajo `publish` realiza dos compilaciones con la fecha de la confirmación
+  etiquetada, se detiene a menos que ambas compilaciones coincidan, ejecuta
+  `twine check --strict` y realiza la subida a PyPI a través de Trusted Publishing: no
+  se almacena ningún token.
+- A continuación, el registro de servidores MCP: `server.json` lleva la misma versión
+  (se trata de una prueba; la comprobación de CI de la pull request de la versión lo
+  verifica); ejecute `mcp-publisher login github` y, a continuación,
+  `mcp-publisher publish`. La titularidad en PyPI queda demostrada mediante la línea
+  `mcp-name:` del README.
 - La extensión de Claude Desktop también la lleva: `mcpb/manifest.json` y el anclaje
   `avenir-mcp==` de `mcpb/pyproject.toml` siguen a `avenir_mcp.__version__` (una prueba
-  comprueba ambos); de lo contrario, la extensión instala la versión anterior.
+  y la misma comprobación de CI verifican ambos); de lo contrario, la extensión
+  instala la versión anterior.
 - A continuación, el plugin de Claude Code, una vez que PyPI tenga la versión publicada:
   actualice la versión en `plugin/.claude-plugin/plugin.json` y la versión fijada en
   `plugin/pyproject.toml`, ejecute `uv lock --project plugin` y haga commit de

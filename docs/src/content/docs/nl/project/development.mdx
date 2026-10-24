@@ -194,17 +194,31 @@ Zie [Evaluatie](/avenir-mcp/nl/project/evaluation/).
 ## Commits en releases
 
 - Commitberichten beginnen met een type — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
-  `build:`, `ci:`,  `chore:`— omdat  daaruit `CHANGELOG.md`wordt gegenereerd door
-  git-cliff.
-- Om een release uit te brengen: `just changelog`, commit, tag  die overeenkomt`vX.Y.Z` met `avenir_mcp.__version__`,
-  en publiceer een GitHub-release. De  `publish`workflow voert twee keer een build uit met de datum van de getagde commit, stopt tenzij beide builds overeenkomen, voert  uit en`twine check
-  --strict` uploadt naar PyPI via Trusted Publishing: er wordt geen token opgeslagen.
-- Vervolgens het MCP-register:  `server.json`heeft dezelfde versie (dit wordt door een test gecontroleerd); voer
-  uit,`mcp-publisher login github` en daarna `mcp-publisher publish`. Het eigendom van PyPI wordt aangetoond door de
-  `mcp-name:` regel in het README-bestand.
+  `build:`, `ci:`, `chore:` — omdat `CHANGELOG.md` hieruit wordt gegenereerd door
+  git-cliff, dat op basis hiervan ook de volgende versie bepaalt: een brekende
+  wijziging verhoogt het hoofdnummer, een `feat:` het subnummer en al het overige het
+  patchnummer.
+- Om een release uit te brengen: open een pull request met de titel
+  `chore(release): X.Y.Z`, waarbij `X.Y.Z` overeenkomt met wat
+  `git-cliff --bumped-version` op de branch weergeeft. Voer `just changelog` uit
+  (`git-cliff --bump`, dezelfde berekening, die in het nieuwe item van `CHANGELOG.md`
+  wordt geschreven) en pas `avenir_mcp.__version__` aan naar hetzelfde getal. Een
+  CI-controle voert zelf `git-cliff --bumped-version` uit en keurt de pull request af,
+  waarbij het verwachte getal wordt vermeld, wanneer de titel of een lagere versie
+  hiermee niet overeenkomt: het getal wordt nooit handmatig gekozen. Zodra de
+  samenvoeging is voltooid, maakt u een tag `vX.Y.Z` aan die overeenkomt met
+  `avenir_mcp.__version__` en publiceert u een GitHub-release. De `publish`-workflow
+  voert twee keer een build uit met de datum van de getagde commit, stopt tenzij
+  beide builds overeenkomen, voert `twine check --strict` uit en uploadt naar PyPI
+  via Trusted Publishing: er wordt geen token opgeslagen.
+- Vervolgens het MCP-register: `server.json` heeft dezelfde versie (dit is een test;
+  de CI-controle van de pull request voor de release bevestigt dit); voer
+  `mcp-publisher login github` uit, gevolgd door `mcp-publisher publish`. Het eigendom
+  van PyPI wordt aangetoond door de regel `mcp-name:` in de README.
 - De Claude Desktop-extensie draagt die ook: `mcpb/manifest.json` en de vastzetting
-  `avenir-mcp==` in `mcpb/pyproject.toml` volgen `avenir_mcp.__version__` (een test
-  controleert beide), anders installeert de extensie de vorige versie.
+  `avenir-mcp==` in `mcpb/pyproject.toml` volgen `avenir_mcp.__version__` (een test en
+  dezelfde CI-controle verifiëren beide), anders installeert de extensie de vorige
+  versie.
 - Vervolgens de Claude Code-plugin, zodra de release op PyPI staat: pas de versie aan in
   `plugin/.claude-plugin/plugin.json` en de vastgezette versie in `plugin/pyproject.toml`,
   voer `uv lock --project plugin` uit en commit `plugin/uv.lock`. De drie verwijzen naar

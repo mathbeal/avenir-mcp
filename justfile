@@ -127,9 +127,10 @@ bundle:
     mkdir -p dist
     npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb dist/avenir-mcp.mcpb
 
-# Regenerate CHANGELOG.md from the commit history.
+# Regenerate CHANGELOG.md from the commit history, under the version `--bump` computes:
+# no tag exists yet at this point, so without it the new entry would read "Unreleased".
 changelog:
-    uvx git-cliff -o CHANGELOG.md
+    uvx git-cliff --bump -o CHANGELOG.md
 
 # Fail if CHANGELOG.md is not what the history produces.
 changelog-check:

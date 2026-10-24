@@ -194,19 +194,34 @@ Voir [Évaluation](/avenir-mcp/fr/project/evaluation/).
 ## Commits et versions
 
 - Les messages de commit commencent par un type — `feat:`, `fix:`, `docs:`,
-  `refactor:`, `test:`, `build:`, `ci:`, `chore:` — car `CHANGELOG.md` en est généré par
-  git-cliff.
-- Pour publier : `just changelog`, commit, étiquette `vX.Y.Z` égale à
-  `avenir_mcp.__version__`, puis une release GitHub. Le workflow `publish` construit
-  deux fois avec la date du commit étiqueté, s'arrête si les deux constructions diffèrent,
-  lance `twine check --strict` et envoie sur PyPI par Trusted Publishing : aucun jeton
-  n'est stocké.
-- Puis le registre MCP : `server.json` porte la même version (un test le vérifie) ; lancez
-  `mcp-publisher login github`, puis `mcp-publisher publish`. La ligne `mcp-name:` du README
-  prouve que le paquet PyPI vous appartient.
-- L'extension Claude Desktop la porte aussi : `mcpb/manifest.json` et l'épinglage
-  `avenir-mcp==` de `mcpb/pyproject.toml` suivent `avenir_mcp.__version__` (un test
-  vérifie les deux), sinon l'extension installe la version précédente.
+  `refactor:`, `test:`, `build:`, `ci:`, `chore:` — car le fichier `CHANGELOG.md` est
+  généré à partir de ceux-ci par git-cliff, qui détermine également la version suivante
+  en fonction de ces messages : une modification rompant la compatibilité fait
+  augmenter le numéro de version majeur, un `feat:` fait augmenter le numéro de version
+  mineur, et tout autre changement fait augmenter le numéro de patch.
+- Pour publier une version : ouvrez une pull request intitulée `chore(release): X.Y.Z`,
+  où `X.Y.Z` correspond à la valeur affichée par la commande `git-cliff --bumped-version`
+  sur la branche. Exécutez `just changelog` (`git-cliff --bump`, le même calcul,
+  transcrit dans la nouvelle entrée du fichier `CHANGELOG.md`), puis mettez à jour
+  `avenir_mcp.__version__` avec ce même numéro. Un contrôle CI répète lui-même la
+  commande `git-cliff --bumped-version` et rejette la pull request en indiquant le
+  numéro attendu, lorsque le titre ou l'une des versions inférieures ne correspond pas
+  à celui-ci : le numéro n'est jamais choisi manuellement. Une fois la fusion effectuée,
+  créez une balise `vX.Y.Z` correspondant à `avenir_mcp.__version__` et publiez une
+  version sur GitHub. Le workflow `publish` effectue deux compilations avec la date du
+  commit balisé, s'arrête si les deux compilations ne concordent pas, exécute
+  `twine check --strict` et effectue le téléchargement vers PyPI via Trusted
+  Publishing : aucun jeton n'est stocké.
+- Ensuite, le registre MCP : le fichier `server.json` porte la même version (il s'agit
+  d'un test ; la vérification CI de la pull request de publication permet de le
+  confirmer) ; exécutez la commande `mcp-publisher login github`, puis
+  `mcp-publisher publish`. La propriété sur PyPI est attestée par la ligne `mcp-name:`
+  du fichier README.
+- L'extension Claude Desktop la porte aussi : le fichier `mcpb/manifest.json` et
+  l'épinglage `avenir-mcp==` du fichier `mcpb/pyproject.toml` suivent
+  `avenir_mcp.__version__` (un test, ainsi que la même vérification CI, permettent de
+  s'assurer que les deux sont cohérents) ; sinon l'extension installe la version
+  précédente.
 - Ensuite, le plugin Claude Code, une fois que la version est disponible sur PyPI :
   mettez à jour la version dans `plugin/.claude-plugin/plugin.json` et l'épinglage dans
   `plugin/pyproject.toml`, exécutez `uv lock --project plugin`, puis ajoutez

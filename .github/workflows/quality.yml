@@ -299,13 +299,61 @@ jobs:
           (cd "$RUNNER_TEMP/first" && sha256sum -- *) | tee "$RUNNER_TEMP/first.sha256"
           (cd "$RUNNER_TEMP/second" && sha256sum --check --strict -- ../first.sha256)
 
+  release-number:
+    name: a release pull request's number is the one git-cliff computes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Reading the code and its tags is all this job needs.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # git-cliff computes the next version from the whole history and every tag.
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      # Only a release pull request carries a number to check; every other run of this
+      # job, including a push to main once one is merged, has nothing to compare and
+      # succeeds at once.
+      - name: the number must be the one git-cliff computes
+        if: "github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'chore(release): ')"
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          expected="$(uvx git-cliff --bumped-version)"
+          expected="${expected#v}"
+          titled="${TITLE#chore(release): }"
+          init="$(uv run --no-project python -c 'import re,pathlib; print(re.search(r"__version__ = \"([^\"]+)\"", pathlib.Path("avenir_mcp/__init__.py").read_text()).group(1))')"
+          server="$(uv run --no-project python -c 'import json; print(json.load(open("server.json"))["version"])')"
+          server_pkg="$(uv run --no-project python -c 'import json; print(json.load(open("server.json"))["packages"][0]["version"])')"
+          manifest="$(uv run --no-project python -c 'import json; print(json.load(open("mcpb/manifest.json"))["version"])')"
+          mcpb_version="$(uv run --no-project python -c 'import tomllib; print(tomllib.load(open("mcpb/pyproject.toml","rb"))["project"]["version"])')"
+          mcpb_pin="$(uv run --no-project python -c 'import tomllib; d=tomllib.load(open("mcpb/pyproject.toml","rb"))["project"]["dependencies"]; print(next(x for x in d if x.startswith("avenir-mcp==")).removeprefix("avenir-mcp=="))')"
+          echo "git-cliff computed $expected"
+          status=0
+          check() {
+            if [ "$2" != "$expected" ]; then
+              echo "::error::git-cliff computed $expected; $1 says $2"
+              status=1
+            fi
+          }
+          check "the pull request's title" "$titled"
+          check "avenir_mcp/__init__.py" "$init"
+          check "server.json's version" "$server"
+          check "server.json's package version" "$server_pkg"
+          check "mcpb/manifest.json" "$manifest"
+          check "mcpb/pyproject.toml's version" "$mcpb_version"
+          check "mcpb/pyproject.toml's avenir-mcp pin" "$mcpb_pin"
+          exit "$status"
+
   passed:
     name: CI passed
     # The one check branch protection requires: it stands for every job above.
     if: always()
     needs:
       [lock, plugin, lint, types, tests, vocabulary, hygiene, audit, secrets, bundle,
-       docker, reproducible]
+       docker, reproducible, release-number]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

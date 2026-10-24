@@ -199,18 +199,32 @@ Siehe [Evaluierung](/avenir-mcp/de/project/evaluation/).
 
 - Commit-Nachrichten beginnen mit einem Typ – `feat:`, `fix:`, `docs:`, `refactor:`,
   `test:`, `build:`, `ci:`, `chore:` –, weil `CHANGELOG.md` von git-cliff daraus erzeugt
-  wird.
-- Zum Veröffentlichen: `just changelog`, committen, Tag `vX.Y.Z` passend zu
-  `avenir_mcp.__version__` setzen und ein GitHub-Release veröffentlichen. Der Workflow
-  `publish` baut zweimal mit dem Datum des getaggten Commits, bricht ab, wenn die beiden Builds
-  voneinander abweichen, führt `twine check --strict` aus und lädt über Trusted Publishing auf PyPI
-  hoch: Es wird kein Token gespeichert.
-- Danach die MCP-Registry: `server.json` trägt dieselbe Version (ein Test prüft das); führen
-  Sie `mcp-publisher login github` und dann `mcp-publisher publish` aus. Die Zeile `mcp-name:`
-  in der README belegt, dass das PyPI-Paket Ihnen gehört.
-- Die Claude-Desktop-Erweiterung trägt sie ebenfalls: `mcpb/manifest.json` und die
-  Festlegung `avenir-mcp==` in `mcpb/pyproject.toml` folgen `avenir_mcp.__version__` (ein
-  Test prüft beides), sonst installiert die Erweiterung die vorherige Version.
+  wird, das daraus auch die nächste Versionsnummer ermittelt: Eine inkompatible
+  Änderung erhöht die Hauptversionsnummer, ein `feat:` die Nebenversionsnummer, alles
+  andere die Patch-Nummer.
+- Zur Veröffentlichung: Erstellen Sie einen Pull-Request mit dem Titel
+  `chore(release): X.Y.Z`, wobei `X.Y.Z` dem Wert entspricht, den
+  `git-cliff --bumped-version` auf dem Zweig ausgibt. Führen Sie `just changelog` aus
+  (`git-cliff --bump`, dieselbe Berechnung, die in den neuen Eintrag in
+  `CHANGELOG.md` geschrieben wird), und setzen Sie `avenir_mcp.__version__` auf
+  dieselbe Zahl. Eine CI-Prüfung wiederholt `git-cliff --bumped-version` selbst und
+  lehnt den Pull-Request mit Angabe der erwarteten Nummer ab, wenn der Titel oder eine
+  darunterliegende Version davon abweicht: Die Nummer wird niemals manuell festgelegt.
+  Nach der Zusammenführung erstellen Sie ein Tag `vX.Y.Z`, das mit
+  `avenir_mcp.__version__` übereinstimmt, und veröffentlichen eine GitHub-Version. Der
+  `publish`-Workflow führt zwei Builds mit dem Datum des getaggten Commits durch,
+  bricht ab, sofern nicht beide Builds übereinstimmen, führt `twine check --strict`
+  aus und lädt die Datei über Trusted Publishing auf PyPI hoch: Es wird kein Token
+  gespeichert.
+- Anschließend die MCP-Registrierung: Die Datei `server.json` weist dieselbe Version
+  auf (ein Test; die CI-Prüfung des Pull-Requests für die Veröffentlichung bestätigt
+  dies); führen Sie `mcp-publisher login github` und anschließend
+  `mcp-publisher publish` aus. Die Eigentümerschaft bei PyPI wird durch die Zeile
+  `mcp-name:` in der README-Datei nachgewiesen.
+- Auch die Claude-Desktop-Erweiterung enthält dies: `mcpb/manifest.json` und der
+  `avenir-mcp==`-Pin in `mcpb/pyproject.toml` passen sich an `avenir_mcp.__version__`
+  an (ein Test sowie die entsprechende CI-Prüfung überprüfen beides), andernfalls
+  installiert die Erweiterung die vorherige Version.
 - Danach das Claude-Code-Plugin, sobald die Version auf PyPI verfügbar ist: Erhöhen Sie
   die Versionsnummer in `plugin/.claude-plugin/plugin.json` und die festgeschriebene
   Version in `plugin/pyproject.toml`, führen Sie `uv lock --project plugin` aus und
