@@ -381,6 +381,11 @@ VS Code install it in one click, from the button at the top of their tab.
     | arguments | `avenir-mcp` |
     | environment | `YNAB_API_KEY` = your token |
 
+    To run it in a container instead, build the image from the `Dockerfile` at the root
+    of the repository with `docker build -t avenir-mcp .`, then give the client `docker`
+    as the command and `run -i --rm -e YNAB_API_KEY avenir-mcp` as the arguments, so
+    that the token travels in the environment rather than on a command line.
+
     For clients that connect to a URL instead, see
     [Run over HTTP](/avenir-mcp/guides/run-options/#run-over-http).
   </TabItem>

@@ -9,9 +9,7 @@ import importlib.util
 import json
 import os
 import re
-import subprocess  # noqa: S404  # nosec B404 - starts the bundle's own launcher
 import sys
-import threading
 import tomllib
 from pathlib import Path
 from types import ModuleType
@@ -21,10 +19,10 @@ import pytest
 import yaml
 
 from avenir_mcp import __version__
+from tests import handshake
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from typing import IO
 
 ROOT = Path(__file__).resolve().parent.parent
 WORKFLOWS = ROOT / ".github" / "workflows"
@@ -43,20 +41,8 @@ LAUNCHER = BUNDLE / "src" / "server.py"
 # The one version of the packing tool, in the justfile and in both workflows: two
 # versions would give two verdicts on the same manifest.
 PACKER = "@anthropic-ai/mcpb@2.1.2"
-# A launcher that never answers must fail the suite rather than hold it: the handshake
-# below takes under a second, and the process is killed well before a runner gives up.
-LAUNCH_TIMEOUT = 120.0
 # A write tool, so its absence says the server came up read-only.
 A_WRITE_TOOL = "move_money"
-# What the two requests of the handshake carry.
-PARAMS: dict[str, dict[str, object]] = {
-    "initialize": {
-        "protocolVersion": "2025-06-18",
-        "capabilities": {},
-        "clientInfo": {"name": "avenir-mcp's tests", "version": __version__},
-    },
-    "tools/list": {},
-}
 
 
 def _server() -> Mapping[str, object]:
@@ -149,69 +135,10 @@ def _tools_the_launcher_offers(box: str | None) -> list[str]:
 
     Returns:
         The names of the tools the server lists, in the order it lists them.
-
-    Raises:
-        AssertionError: If the server stops before answering, or names itself something
-            other than the release this repository is.
     """
-    process = subprocess.Popen(  # noqa: S603  # nosec B603 - the bundle's own launcher
-        [sys.executable, str(LAUNCHER)],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        # stdout belongs to the protocol; the banner and the logs go to stderr.
-        stderr=subprocess.DEVNULL,
-        env=_environment_claude_desktop_would_pass(box),
-        text=True,
-        encoding="utf-8",
-        bufsize=1,
+    return handshake.tools_listed(
+        [sys.executable, str(LAUNCHER)], _environment_claude_desktop_would_pass(box)
     )
-    # The context manager closes the three pipes and waits; the timer makes sure there
-    # is something to wait for, whatever the launcher does.
-    with process:
-        assert process.stdin and process.stdout
-        killer = threading.Timer(LAUNCH_TIMEOUT, process.kill)
-        killer.start()
-        try:
-            return _handshake(process.stdin, process.stdout)
-        finally:
-            killer.cancel()
-            process.kill()
-
-
-def _handshake(to_server: IO[str], from_server: IO[str]) -> list[str]:
-    """Initialise the session, then ask for the tools, one JSON object per line.
-
-    Args:
-        to_server: The launcher's standard input.
-        from_server: The launcher's standard output.
-
-    Returns:
-        The names of the tools the server lists.
-
-    Raises:
-        AssertionError: If the server stops before answering, or names itself something
-            other than the release this repository is.
-    """
-
-    def ask(identifier: int, method: str) -> Mapping[str, object]:
-        request = {"jsonrpc": "2.0", "id": identifier, "method": method, "params": PARAMS[method]}
-        to_server.write(f"{json.dumps(request)}\n")
-        to_server.flush()
-        for line in from_server:
-            answer = json.loads(line)
-            if answer.get("id") == identifier:
-                result = answer["result"]
-                assert isinstance(result, dict), answer
-                return result
-        raise AssertionError(f"the launcher stopped before answering {method}")
-
-    about = ask(1, "initialize")["serverInfo"]
-    assert about == {"name": "avenir-mcp", "version": __version__}, about
-    to_server.write(f"{json.dumps({'jsonrpc': '2.0', 'method': 'notifications/initialized'})}\n")
-    to_server.flush()
-    listed = ask(2, "tools/list")["tools"]
-    assert isinstance(listed, list)
-    return [tool["name"] for tool in listed]
 
 
 def test_the_bundle_installs_the_release_it_says_it_is() -> None:

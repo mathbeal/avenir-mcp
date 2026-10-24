@@ -402,6 +402,12 @@ auf der jeweiligen Registerkarte installieren.
     | Argumente | `avenir-mcp` |
     | Umgebung | `YNAB_API_KEY` = Ihr Token |
 
+    Um das Programm stattdessen in einem Container auszuführen, erstellen Sie das Image
+    anhand der Datei `Dockerfile` im Stammverzeichnis des Repositorys mit dem Befehl
+    `docker build -t avenir-mcp .`. Geben Sie anschließend dem Client `docker` als Befehl
+    und `run -i --rm -e YNAB_API_KEY avenir-mcp` als Argumente ein, damit das Token in der
+    Umgebungsvariablen statt in der Befehlszeile übermittelt wird.
+
     Für Clients, die sich stattdessen mit einer URL verbinden, siehe
     [Über HTTP betreiben](/avenir-mcp/de/guides/run-options/#über-http-betreiben).
   </TabItem>

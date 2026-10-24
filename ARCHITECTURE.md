@@ -138,6 +138,20 @@ Desktop keeps it out of sight, since the manifest marks that setting sensitive.
 checks that an extension installed without a tick is read-only, and that the packing
 command is the same one in the justfile and in both workflows.
 
+### The container image
+
+The `Dockerfile` at the root builds avenir-mcp from the sources of the commit it sits
+on, installing the versions `uv.lock` pins and nothing else. The project publishes no
+image: the file is there for a reader who runs the server in a container, and for
+Docker's MCP catalogue, which builds it itself. The image starts with no token,
+read-only and as a user that is not root, and `avenir-mcp` is its entry point, so a
+client starts it with `docker run -i`.
+
+`tests/test_docker.py` reads the file for those properties and, when
+`AVENIR_MCP_DOCKER_IMAGE` names an image built from it, speaks MCP to a container and
+compares the tools it lists with the server's read-only ones. `just docker` does both,
+as the `docker` job of the quality workflow does.
+
 ## Dependencies
 
 At run time: `fastmcp` (the MCP protocol, schemas and transports), `httpx` (HTTP to

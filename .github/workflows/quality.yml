@@ -245,6 +245,29 @@ jobs:
       - run: npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb
       - run: npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb "$RUNNER_TEMP/avenir-mcp.mcpb"
 
+  docker:
+    name: the container starts and lists its tools
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Reading the code is all a job needs; a private repository cannot be cloned without it.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          enable-cache: true
+      # The image Docker's MCP catalogue builds from this repository, built the same way
+      # here, on the runner's own Docker: nothing is pushed and nothing is published.
+      - run: docker build -t avenir-mcp:ci .
+      # Then the handshake the catalogue makes to list the tools: a container started
+      # with no token at all answers `initialize` and `tools/list`, read-only.
+      - env:
+          AVENIR_MCP_DOCKER_IMAGE: avenir-mcp:ci
+        run: uv run pytest tests/test_docker.py -o addopts="" -p no:cacheprovider
+
   reproducible:
     name: the build is reproducible
     runs-on: ubuntu-latest
@@ -274,7 +297,7 @@ jobs:
     if: always()
     needs:
       [lock, plugin, lint, types, tests, vocabulary, hygiene, audit, secrets, bundle,
-       reproducible]
+       docker, reproducible]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

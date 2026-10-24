@@ -88,6 +88,7 @@ just check              # lint, types, tests at 100 %, vocabulary, lockfile
 uv run python -m docsgen  # when a tool, resource, prompt or answer changed
 just docs               # the site builds in every language, every link valid
 just links              # every link of the README and the docs leads somewhere (Docker)
+just docker             # the image builds and the container lists its tools (Docker)
 ```
 
 A test fails when the generated tool reference or an example no longer matches the

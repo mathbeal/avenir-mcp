@@ -394,6 +394,12 @@ la parte superior de su pestaña.
     | argumentos | `avenir-mcp` |
     | entorno | `YNAB_API_KEY` = su token |
 
+    Para ejecutarlo en un contenedor, compile la imagen a partir del archivo `Dockerfile`
+    situado en la raíz del repositorio con el comando `docker build -t avenir-mcp .`, y, a
+    continuación, indique `docker` como comando en el cliente y
+    `run -i --rm -e YNAB_API_KEY avenir-mcp` como argumentos, de modo que el token se
+    transmita a través del entorno en lugar de a través de la línea de comandos.
+
     Para los clientes que se conectan a una URL, vea
     [Ejecutar por HTTP](/avenir-mcp/es/guides/run-options/#ejecutar-por-http).
   </TabItem>

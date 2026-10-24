@@ -67,6 +67,13 @@ fix:
     uv run ruff check --select I --fix avenir_mcp tests evals docsgen benchmarks mcpb/src
     uv run ruff format avenir_mcp tests evals docsgen benchmarks mcpb/src
 
+# Build the image of the Dockerfile Docker's MCP catalogue builds, then speak MCP to a
+# container of it: it must start with no token and list the read-only tools (needs
+# Docker). Not part of `just check`, which needs neither Docker nor a build.
+docker:
+    docker build -t avenir-mcp:local .
+    AVENIR_MCP_DOCKER_IMAGE=avenir-mcp:local uv run pytest tests/test_docker.py -o addopts="" -p no:cacheprovider
+
 # Look for secrets in every commit of every branch, as CI does (needs Docker).
 # It mounts the repository that holds the history, so a worktree works too.
 secrets:

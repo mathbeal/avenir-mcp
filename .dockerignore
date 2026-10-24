@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
+# What `docker build` sends to the daemon. Everything is excluded, then the four files
+# and the one directory the Dockerfile copies are put back: written the other way round,
+# a list of exclusions, it would have to grow with every directory added to the
+# repository, and whatever it forgot would ship. Left out this way: the tests, the
+# evaluations, the benchmarks, the documentation site with its node_modules, the Claude
+# Desktop extension, the Claude Code plugin, the virtual environment, the caches, and
+# the git history, which holds every version of all of them.
+*
+!LICENSE
+!README.md
+!pyproject.toml
+!uv.lock
+!avenir_mcp
+
+# Compiled bytecode of a local run, which came back with avenir_mcp: the image compiles
+# its own, for the Python it ships.
+avenir_mcp/**/__pycache__
