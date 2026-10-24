@@ -574,9 +574,7 @@ def _bar(shown: Card, left: float, top: float, width: float, tone: dict[str, str
         f'<line x1="{marker:.1f}" y1="{top + 6:.1f}" x2="{marker:.1f}" y2="{top + 28:.1f}" '
         f'stroke="{tone["ink"]}" stroke-width="1.5" stroke-dasharray="3 3"/>',
         _text(
-            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.funded)} "
-            f"({_amount(shown.over.budgeted)} budgeted + "
-            f"{_amount(shown.over.carried_over)} carried over)",
+            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.funded)} available",
             left,
             top + 44,
             tone["ink"],
@@ -590,6 +588,16 @@ def _bar(shown: Card, left: float, top: float, width: float, tone: dict[str, str
             12.5,
             "700",
             "end",
+        ),
+        # What those 144.00 are made of, on its own line: beside the percentage, the
+        # sentence would run into it.
+        _text(
+            f"({_amount(shown.over.budgeted)} budgeted + "
+            f"{_amount(shown.over.carried_over)} left from earlier months)",
+            left,
+            top + 62,
+            tone["muted"],
+            12,
         ),
     ]
 
@@ -758,6 +766,7 @@ def _rows(shown: Card, inner: float, top: float, tone: dict[str, str]) -> list[s
         line = top + index * 30
         rows += [
             _text(side.name, inner, line, tone["ink"], 12.5),
+            _text("Budgeted", inner + 96, line, tone["muted"], 12),
             _text(_amount(side.before), inner + 190, line, tone["muted"], 12.5, "400", "end"),
             _text("→", inner + 200, line, tone["muted"], 12.5),
             _text(_amount(side.after), inner + 218, line, tone["ink"], 12.5, "700"),
@@ -888,9 +897,9 @@ def picture(shown: Card, scheme: str) -> str:
             ASKED,
             "".join(TYPED),
             shown.headline,
-            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.funded)} "
+            f"{_amount(shown.over.spent)} spent of {_amount(shown.over.funded)} available "
             f"({_amount(shown.over.budgeted)} budgeted + "
-            f"{_amount(shown.over.carried_over)} carried over), "
+            f"{_amount(shown.over.carried_over)} left from earlier months), "
             f"{shown.over.utilization:g} %, available {_amount(shown.over.available)}.",
             AGREED,
             shown.preview.question,
