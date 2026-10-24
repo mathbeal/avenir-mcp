@@ -13,7 +13,7 @@ A month at a glance: income, budgeted, spent, Ready to Assign, overspent categor
 
 Use it first to review a month. Give month as the first day of a month,
 YYYY-MM-01; any other day is refused. 'current' is the month in progress: its
-income and spending stop at today, so its figures are partial until it ends.
+figures are partial, and already count what is entered for the days left.
 Amounts in currency units; activity is negative for spending. Only overspent
 categories are listed: for every category use get_category_balances; for the
 months before, get_spending_trends; for the months ahead, forecast_balance.

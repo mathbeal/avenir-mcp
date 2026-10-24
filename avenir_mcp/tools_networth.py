@@ -36,8 +36,9 @@ async def get_net_worth_trend(
     account is an asset. A closed account counts for the months it still had a balance.
     months_count counts back from the current month, included, so 1 gives this month
     alone and the default 12 the year up to it, however long the plan has existed. Each
-    month is read on its last day, today for the current one, as today's balance less
-    the transactions dated after that day. Amounts in currency units; debts are
+    month is read on its last day, the current one included: today's balance less the
+    transactions dated after that day, so this month already counts what is entered
+    for the days left. Amounts in currency units; debts are
     negative, as YNAB shows them, and net_worth is assets plus debts. For each account's
     balance today use list_accounts; for the months ahead, forecast_balance. Two YNAB
     requests: accounts, transactions; changes nothing.
