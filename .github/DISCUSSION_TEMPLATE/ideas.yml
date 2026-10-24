@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 The avenir-mcp contributors
+# SPDX-License-Identifier: MIT
+
+title: "A question I would like to ask my budget"
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tell us the question you would like to ask your budget. It does not have to map to a
+        tool, or to anything avenir-mcp can do today. English is preferred; French, Spanish,
+        German and Dutch are welcome.
+
+        **Never paste real transactions, balances, account names, payees or tokens.**
+        Invent the figures: this discussion is public.
+  - type: textarea
+    id: question
+    attributes:
+      label: The question you would like to ask your budget
+      description: In your words, as you would type it to the agent.
+      placeholder: "Which subscriptions cost more than they did three months ago?"
+    validations:
+      required: true
+  - type: textarea
+    id: answer
+    attributes:
+      label: The answer you hope for
+      description: Optional. What a useful answer would say, with invented figures.
+      placeholder: |
+        A list of payees with the old and the new monthly amount, biggest rise first.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before posting
+      options:
+        - label: This discussion contains no real financial data and no token.
+          required: true

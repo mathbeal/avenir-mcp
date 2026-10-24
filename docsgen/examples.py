@@ -169,7 +169,8 @@ CALLS: list[Call] = [
             "plan_id": BUDGET,
             "month": "2026-09-01",
             "category_id": "cat-restaurants",
-            "amount": 150,
+            # What the category needs to come back to zero: 120.00 budgeted, 22.50 over.
+            "amount": 142.50,
         },
     ),
     Call(
@@ -180,7 +181,8 @@ CALLS: list[Call] = [
             "month": "2026-09-01",
             "from_category_id": "cat-tennis",
             "to_category_id": "cat-restaurants",
-            "amount": 30,
+            # Exactly what Restaurants is over: covering more would leave money idle.
+            "amount": 22.50,
         },
     ),
     Call(

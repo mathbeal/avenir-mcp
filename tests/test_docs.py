@@ -34,50 +34,62 @@ def test_generated_files_are_current() -> None:
         assert path.read_text(encoding="utf-8") == text, f"{path.name}: {REGENERATE}"
 
 
-@pytest.fixture(scope="module", name="demo_steps")
-def fixture_demo_steps() -> list[demo.Step]:
-    """The three exchanges of the animated demo, played once for the tests that read them."""
-    return demo.steps(demo.capture())
+@pytest.fixture(scope="module", name="demo_card")
+def fixture_demo_card() -> demo.Card:
+    """The conversation of the animated demo, played once for the tests that read it."""
+    return demo.card()
 
 
-def test_the_demo_previews_a_write_then_applies_it_then_undoes_it(
-    demo_steps: list[demo.Step],
+def test_the_demo_answers_from_four_reads_made_at_the_same_time(demo_card: demo.Card) -> None:
+    """Every figure of the answer comes from one of the four calls, sent in one go."""
+    assert demo_card.headline == "Restaurants is the only category over budget this month."
+    assert (demo_card.over.spent, demo_card.over.budgeted) == (166.50, 120.00)
+    assert (demo_card.over.utilization, demo_card.over.available) == (138.8, -22.50)
+    assert demo_card.over.trend == (113.70, 119.90, 166.50)
+    assert demo_card.room == (("Tennis", 80.00), ("Groceries", 411.90))
+    assert demo_card.requests == 7
+
+
+def test_the_demo_offers_to_cover_what_is_over_and_no_more(demo_card: demo.Card) -> None:
+    """The amount proposed is the category's own shortfall, so nothing is set aside idle."""
+    assert demo_card.offer.amount == -demo_card.over.available
+    assert demo_card.preview.question == "Move 22.50 from Tennis to Restaurants for this month?"
+    source, covered = demo_card.preview.sides
+    assert (source.name, source.before, source.after) == ("Tennis", 80.00, 57.50)
+    assert (covered.name, covered.before, covered.after) == ("Restaurants", 120.00, 142.50)
+    assert (covered.available_before, covered.available_after) == (-22.50, 0.00)
+
+
+def test_the_demo_draws_the_available_amount_only_where_it_differs(
+    demo_card: demo.Card,
 ) -> None:
-    """The card shows a move that changed nothing yet, the confirmed move, and its undo."""
-    preview, applied, undone = demo_steps
-    assert (preview.status, applied.status, undone.status) == (
-        "confirmation_required",
-        "applied",
-        "applied",
-    )
-    assert preview.lines == (
-        "Move 30.00 from Tennis to Restaurants for this month?",
-        "- Tennis: 80.00 → 50.00",
-        "- Restaurants: 120.00 → 150.00 (available -22.50 → +7.50)",
-    )
-    assert "undo_operation" in applied.lines[0]
-    assert undone.lines == (
-        "Undo: move 30.00 back from Restaurants to Tennis for this month?",
-        "Both amounts restored.",
-    )
+    """Repeating the budget as the available amount would say nothing: Tennis has spent none."""
+    source, covered = demo_card.preview.sides
+    assert not source.shifts
+    assert covered.shifts
 
 
-def test_the_demo_names_neither_a_date_nor_the_journal_id_it_was_given(
-    demo_steps: list[demo.Step],
+def test_the_demo_says_the_source_has_nothing_spent_only_when_it_has_not(
+    demo_card: demo.Card,
 ) -> None:
-    """A date would make the picture look old, and a random id would change it every run."""
-    drawn = demo.picture(demo_steps, "light")
+    """The sentence offering to cover rests on what the plan says the category spent."""
+    assert demo_card.offer.source_spent == 0.0
+    assert "nothing spent yet" in demo.picture(demo_card, "light")
+
+
+def test_the_demo_names_no_date(demo_card: demo.Card) -> None:
+    """A date would make the picture look old: the month it works on is "this month"."""
+    drawn = demo.picture(demo_card, "light")
     assert "2026-" not in drawn
     assert "this month" in drawn
-    assert "&lt;operation id&gt;" in drawn
 
 
 def test_the_demo_plays_for_thirty_seconds_and_holds_still_when_asked_to(
-    demo_steps: list[demo.Step],
+    demo_card: demo.Card,
 ) -> None:
     """Each part appears in its own second of a thirty-second loop, unless motion is refused."""
-    drawn = demo.picture(demo_steps, "light")
-    assert drawn.count("30s linear infinite") == 3 * len(demo_steps)
+    drawn = demo.picture(demo_card, "light")
+    assert drawn.count("30s linear infinite") == 12 + len(demo.LANDS)
     assert "@media (prefers-reduced-motion: reduce)" in drawn
     assert "animation: none" in drawn
 
@@ -105,17 +117,15 @@ def _overflowing(drawn: str) -> list[str]:
 
 
 @pytest.mark.parametrize("scheme", ("light", "dark"))
-def test_every_line_of_the_demo_fits_inside_the_card(
-    demo_steps: list[demo.Step], scheme: str
-) -> None:
+def test_every_line_of_the_demo_fits_inside_the_card(demo_card: demo.Card, scheme: str) -> None:
     """SVG text neither wraps nor shrinks: a longer message would run off the card."""
-    over = _overflowing(demo.picture(demo_steps, scheme))
+    over = _overflowing(demo.picture(demo_card, scheme))
     assert not over, f"drawn past the edge of the card: {over}"
 
 
-def test_the_site_shows_the_demo_at_the_size_it_was_drawn(demo_steps: list[demo.Step]) -> None:
+def test_the_site_shows_the_demo_at_the_size_it_was_drawn(demo_card: demo.Card) -> None:
     """Sizes left behind would stretch the picture: the home pages declare the SVG's own."""
-    picture = demo.picture(demo_steps, "light")
+    picture = demo.picture(demo_card, "light")
     drawn = ElementTree.fromstring(picture)  # noqa: S314  # nosec B314 - drawn here, not read in
     component = (COMPONENTS / "WriteDemo.astro").read_text(encoding="utf-8")
     assert (

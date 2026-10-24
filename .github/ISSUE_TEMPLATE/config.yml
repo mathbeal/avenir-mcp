@@ -3,6 +3,9 @@
 
 blank_issues_enabled: false
 contact_links:
+  - name: Ask a question, or propose one for your budget
+    url: https://github.com/mathbeal/avenir-mcp/discussions
+    about: Help with using it goes to Q&A; a question you wish you could ask your budget goes to Ideas.
   - name: Documentation
     url: https://avenir-mcp.pages.dev/avenir-mcp/
     about: Guides, concepts, the reference of every tool, and troubleshooting.
