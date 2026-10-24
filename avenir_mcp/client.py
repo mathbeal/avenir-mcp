@@ -500,7 +500,11 @@ async def get_scheduled_transactions(plan_id: str) -> list[dict[str, Any]]:
 
 
 async def get_months(plan_id: str) -> list[dict[str, Any]]:
-    """Return all available months for a plan, ordered chronologically.
+    """Return all the months of a plan, in the order YNAB lists them.
+
+    YNAB's specification says "Returns all plan months" and promises no order, so a
+    caller that needs one sorts, as forecast.held_months does. The months budgeted
+    ahead are in the list, and a delta response also carries the deleted ones.
 
     Args:
         plan_id: YNAB plan id or "last-used".

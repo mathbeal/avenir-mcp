@@ -102,6 +102,29 @@ def months_before(today: date, count: int) -> list[str]:
     return sorted(months)
 
 
+def held_months(months: list[dict[str, Any]], today: date, count: int) -> list[dict[str, Any]]:
+    """Keep the last months a plan holds up to today's, oldest first.
+
+    YNAB lists a plan's months with those budgeted ahead, which have nothing spent in
+    them yet, and its documentation promises no order; a deleted month holds nothing
+    either. Taking the end of the list as it comes would answer with an empty month and
+    drop one that has gone by.
+
+    Args:
+        months: The plan's months as YNAB lists them, each with its month.
+        today: The day of the question; months after its month are left out.
+        count: How many months, at most, the current one included.
+
+    Returns:
+        The months kept, oldest first.
+    """
+    current = f"{today:%Y-%m}"
+    return sorted(
+        (m for m in months if not m.get("deleted") and str(m["month"])[:7] <= current),
+        key=lambda m: str(m["month"]),
+    )[-count:]
+
+
 def lookback(today: date) -> list[str]:
     """List the full months recurring charges are looked for in.
 

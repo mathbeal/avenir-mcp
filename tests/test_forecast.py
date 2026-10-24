@@ -445,3 +445,52 @@ def test_a_month_is_walked_from_its_first_projected_day_to_its_last() -> None:
     assert (month.start, month.end, month.lowest) == (1.0, 1.2, 0.9)
     assert (month.inflows, month.outflows) == (0.3, -0.8)
     assert not forecast.is_scheduled("", False, frozenset({("", False)}))
+
+
+def _months(*labels: str) -> list[dict[str, Any]]:
+    """Make the months of a plan as YNAB lists them.
+
+    Args:
+        labels: Each month as YYYY-MM-01, in the order YNAB would return them.
+
+    Returns:
+        One month summary per label.
+    """
+    return [{"month": label, "deleted": False} for label in labels]
+
+
+def _held(months: list[dict[str, Any]], count: int) -> list[str]:
+    """Keep the months of a plan up to TODAY's and name them.
+
+    Args:
+        months: The plan's months as YNAB lists them.
+        count: How many months, at most.
+
+    Returns:
+        The labels of the months kept, in the order they come back.
+    """
+    return [str(month["month"]) for month in forecast.held_months(months, TODAY, count)]
+
+
+def test_the_months_held_stop_at_the_current_one() -> None:
+    """A month budgeted ahead is empty: it takes no place among the last three."""
+    ahead = _months("2026-07-01", "2026-08-01", "2026-09-01", "2026-10-01", "2026-11-01")
+    assert _held(ahead, 3) == ["2026-07-01", "2026-08-01", "2026-09-01"]
+
+
+def test_the_months_held_come_back_oldest_first_whatever_the_order_given() -> None:
+    """YNAB promises no order: the months are sorted before the last are taken."""
+    jumbled = _months("2026-09-01", "2026-06-01", "2026-08-01", "2026-07-01")
+    assert _held(jumbled, 3) == ["2026-07-01", "2026-08-01", "2026-09-01"]
+
+
+def test_a_deleted_month_is_not_held() -> None:
+    """A month YNAB marks deleted has nothing left to read."""
+    with_deleted = _months("2026-06-01", "2026-07-01", "2026-08-01", "2026-09-01")
+    with_deleted[2]["deleted"] = True
+    assert _held(with_deleted, 3) == ["2026-06-01", "2026-07-01", "2026-09-01"]
+
+
+def test_all_the_months_are_held_when_the_plan_has_fewer() -> None:
+    """A plan younger than the period asked for gives every month it has."""
+    assert _held(_months("2026-08-01", "2026-09-01"), 3) == ["2026-08-01", "2026-09-01"]

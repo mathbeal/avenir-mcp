@@ -12,7 +12,7 @@ from typing import Annotated, Any, Literal
 from fastmcp.exceptions import ToolError
 from pydantic import Field
 
-from avenir_mcp import analytics, app, client, schedule, search
+from avenir_mcp import analytics, app, client, forecast, schedule, search
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp, set_read_only_wording
 from avenir_mcp.model import Model
@@ -257,9 +257,9 @@ async def get_spending_trends(
         plan_id,
         months_count,
     )
-    # Fetch the list of available months and pick the last N
+    # A plan's months include those budgeted ahead: only those up to this one are read.
     all_months = await client.get_months(plan_id)
-    recent_months = all_months[-months_count:]
+    recent_months = forecast.held_months(all_months, app.today(), months_count)
 
     months_data: list[tuple[str, list[dict[str, Any]]]] = []
     for m in recent_months:

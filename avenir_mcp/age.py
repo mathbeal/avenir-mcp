@@ -13,6 +13,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Literal
 
+from avenir_mcp.forecast import held_months
 from avenir_mcp.model import Model
 
 MAX_MONTHS = 24
@@ -102,23 +103,19 @@ def _notes(rows: list[AgeMonth], asked: int, current: str) -> list[str]:
     return notes
 
 
-def _rows(months: list[dict[str, Any]], current: str, months_count: int) -> list[AgeMonth]:
+def _rows(months: list[dict[str, Any]], today: date, months_count: int) -> list[AgeMonth]:
     """Keep the last months up to the current one, each with its change.
 
     Args:
         months: The plan's months as YNAB lists them.
-        current: The current month, YYYY-MM; later months are left out.
+        today: The day of the question; months after its month are left out.
         months_count: How many months, at most.
 
     Returns:
         The months kept, oldest first.
     """
-    held = sorted(
-        (m for m in months if not m.get("deleted") and m["month"][:7] <= current),
-        key=lambda m: str(m["month"]),
-    )[-months_count:]
     rows: list[AgeMonth] = []
-    for month in held:
+    for month in held_months(months, today, months_count):
         days = month.get("age_of_money")
         before = rows[-1].days if rows else None
         change = days - before if days is not None and before is not None else None
@@ -172,7 +169,7 @@ def summary(months: list[dict[str, Any]], today: date, months_count: int) -> Age
         Each month's figure, the latest, the change over the period, and the notes.
     """
     current = f"{today:%Y-%m}"
-    rows = _rows(months, current, months_count)
+    rows = _rows(months, today, months_count)
     known = [(row.month, row.days) for row in rows if row.days is not None]
     change = known[-1][1] - known[0][1] if len(known) > 1 else None
     trend: Literal["up", "down", "steady"] | None = None

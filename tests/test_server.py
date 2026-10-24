@@ -206,23 +206,59 @@ def test_get_budget_vs_actual_returns_analytics_output() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_get_spending_trends_fetches_last_n_months() -> None:
-    """get_spending_trends with months_count=2 should fetch 2 months of categories."""
-    months = [{"month": "2026-02-01"}, {"month": "2026-03-01"}, {"month": "2026-04-01"}]
-    cats = [{"id": "c1", "name": "AWS", "budgeted": 0, "activity": -100_000, "balance": 0}]
+_TREND_CATS = [{"id": "c1", "name": "AWS", "budgeted": 0, "activity": -100_000, "balance": 0}]
 
-    mock_get_months = AsyncMock(return_value=months)
-    mock_month_cats = AsyncMock(return_value=cats)
 
+def _trends(months: list[dict[str, Any]], months_count: int, today: date) -> list[str]:
+    """Call get_spending_trends on those months and return the ones it reports.
+
+    Args:
+        months: The plan's months, as client.get_months would give them.
+        months_count: How many months to ask the tool for.
+        today: The day of the call.
+
+    Returns:
+        The month labels the one category of the answer carries, in the answer's order.
+    """
+    month_cats = AsyncMock(return_value=_TREND_CATS)
     with (
-        patch("avenir_mcp.client.get_months", mock_get_months),
-        patch("avenir_mcp.client.get_month_categories", mock_month_cats),
+        patch("avenir_mcp.client.get_months", AsyncMock(return_value=months)),
+        patch("avenir_mcp.client.get_month_categories", month_cats),
+        patch("avenir_mcp.app.today", lambda: today),
     ):
-        result = asyncio.run(tools_budget.get_spending_trends("b1", months_count=2))
+        answer = asyncio.run(tools_budget.get_spending_trends("b1", months_count=months_count))
+    fetched = [point.month for point in answer["AWS"]]
+    assert [call.args[1] for call in month_cats.call_args_list] == fetched
+    return fetched
 
-    # Should have fetched categories for exactly 2 months (last 2)
-    assert mock_month_cats.call_count == 2
-    assert "AWS" in result
+
+def test_get_spending_trends_fetches_last_n_months() -> None:
+    """Two months asked for: the last two the plan holds, one request each, oldest first."""
+    months = [{"month": "2026-02-01"}, {"month": "2026-03-01"}, {"month": "2026-04-01"}]
+    assert _trends(months, 2, date(2026, 4, 20)) == ["2026-03-01", "2026-04-01"]
+
+
+def test_get_spending_trends_leaves_out_a_month_budgeted_ahead() -> None:
+    """A month after the current one is empty: it takes no place among the last three."""
+    months = [{"month": f"2026-{month:02d}-01"} for month in (8, 9, 10, 11)]
+    assert _trends(months, 3, date(2026, 10, 24)) == ["2026-08-01", "2026-09-01", "2026-10-01"]
+
+
+def test_get_spending_trends_reads_the_months_oldest_first() -> None:
+    """YNAB promises no order: the months are sorted before the last three are taken."""
+    months = [{"month": f"2026-{month:02d}-01"} for month in (11, 9, 7, 10, 8)]
+    assert _trends(months, 3, date(2026, 10, 24)) == ["2026-08-01", "2026-09-01", "2026-10-01"]
+
+
+def test_get_spending_trends_leaves_out_a_deleted_month() -> None:
+    """A month YNAB marks deleted has no categories to count."""
+    months: list[dict[str, Any]] = [
+        {"month": "2026-07-01"},
+        {"month": "2026-08-01"},
+        {"month": "2026-09-01", "deleted": True},
+        {"month": "2026-10-01"},
+    ]
+    assert _trends(months, 3, date(2026, 10, 24)) == ["2026-07-01", "2026-08-01", "2026-10-01"]
 
 
 # ---------------------------------------------------------------------------
