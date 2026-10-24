@@ -14,6 +14,7 @@ SKIPPED_DIRS = {".git", ".venv", ".mypy_cache", ".pytest_cache", ".ruff_cache", 
 FORBIDDEN_SUFFIXES = {".pdf", ".csv", ".ofx", ".qif"}
 IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b")
 YNAB_TOKEN = re.compile(r"YNAB_API_KEY\s*=\s*['\"]?[A-Za-z0-9_-]{20,}")
+WEB_ARCHIVE = re.compile(r"web\.archive\.org")
 
 
 # A home directory in an absolute path says who and where: /Users/name, /home/name.
@@ -39,6 +40,7 @@ def test_detectors_recognise_known_samples() -> None:
     """Positive control: a pattern that never matches would prove nothing."""
     assert IBAN.search("FR76 3000 6000 0112 3456 7890 189")
     assert YNAB_TOKEN.search("YNAB_API_KEY=abcdefghijklmnopqrstuvwxyz012345")
+    assert WEB_ARCHIVE.search("https://web.archive.org/web/20260112213044/https://example.com")
 
 
 def test_no_financial_documents_in_repository() -> None:
@@ -97,6 +99,6 @@ def test_no_web_archive_link_in_repository() -> None:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        if "web.archive.org" in text:
+        if WEB_ARCHIVE.search(text):
             offenders.append(str(path.relative_to(ROOT)))
     assert not offenders
