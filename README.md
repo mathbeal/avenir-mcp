@@ -56,6 +56,8 @@ Both install it read-only. Cursor, LM Studio, VS Code, Windows, changes to your 
   <img alt="One conversation, in thirty seconds. Asked how the month is going and where the room is, the agent calls four read-only tools at the same time: Month summary, Every category, Budget vs spent and Three months. It answers that Restaurants is the only category over budget: 166.50 spent of 144.00 available (120.00 budgeted + 24.00 left from earlier months), 138.8 %, available −22.50; that its spending rose 113.70 → 119.90 → 166.50 over three months; and that 80.00 is left in Tennis and 411.90 in Groceries. It offers to cover the 22.50 from Tennis, which has nothing spent yet. The user answers “Cover it from Tennis.”, and move_money shows a preview that changes nothing: Tennis budgeted 80.00 → 57.50, Restaurants budgeted 120.00 → 142.50, available −22.50 → 0.00, exactly on budget, with a Cancel button, a Confirm button, and the reminder that nothing changes until you confirm and that any change can be undone." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/demo-light.svg" width="720">
 </picture>
 
+▶ [Watch the 20-second tour](https://avenir-mcp.pages.dev/avenir-mcp/#tour)
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-dark.svg">
   <img alt="get_net_worth_trend on the demo plan: over the last 18 months the debts shrink from 27,198 to 19,041 despite the car loan's interest, the assets grow, and the net worth rises from −24,038 to +1,230, with a dip for a car repair and another at Christmas." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/networth-light.svg" width="720">

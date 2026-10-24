@@ -178,6 +178,14 @@ def test_every_home_page_shows_the_demo_with_its_own_alternative_text(language: 
     assert labels.count("writeDemo:") == 1 + len(TRANSLATED)
 
 
+@pytest.mark.parametrize("language", ("", *TRANSLATED))
+def test_every_home_page_shows_the_tour_with_its_own_caption(language: str) -> None:
+    """The 20-second tour is on every home page, and each language says what it shows."""
+    assert "<Tour />" in (CONTENT / language / "index.mdx").read_text(encoding="utf-8")
+    labels = (COMPONENTS / "home-i18n.ts").read_text(encoding="utf-8")
+    assert labels.count("tour:") == 1 + len(TRANSLATED)
+
+
 @pytest.mark.parametrize("language", TRANSLATED)
 def test_every_written_page_is_translated(language: str) -> None:
     """Each translation has every hand-written page English has, and no other."""
