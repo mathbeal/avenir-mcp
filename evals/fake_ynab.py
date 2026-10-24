@@ -176,9 +176,79 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
                 overspent += min(available, 0)
         return carried, overspent
 
+    def assigned_in_future(self, month: str) -> int:
+        """What the money of a month, or of one before it, is set aside for further on.
+
+        YNAB's Ready to Assign takes out "Dollars available this month but set aside for
+        a future month", and its guide to getting a month ahead spells out that assigning
+        into the future empties the current month's Ready to Assign rather than a later
+        one: "Ready to Assign will remain $0.00 in the current month, and the $200
+        decreases Ready to Assign in the future month." A month can only set aside what
+        it holds, so this never exceeds what is left to assign.
+
+        https://support.ynab.com/en_us/the-plan-header-BkmiuJ_C9
+        https://support.ynab.com/en_us/getting-a-month-ahead-HJidy13C5
+
+        Args:
+            month: The month being computed, as YNAB writes it.
+
+        Returns:
+            The milliunits assigned to the months after it, capped at what it has left.
+        """
+        ahead = sum(
+            self.assigned(later, cat_id)
+            for later in demo.MONTHS
+            if later > month
+            for cat_id in demo.BUDGETED
+        )
+        return min(max(self.unassigned(month), 0), ahead)
+
+    def unassigned(self, month: str) -> int:
+        """What reached Ready to Assign up to a month and has not been assigned to one yet.
+
+        Args:
+            month: The month being computed, as YNAB writes it.
+
+        Returns:
+            The milliunits: income so far, less everything assigned to this month or an
+            earlier one, less the cash overspending of the months behind.
+        """
+        earned: int = sum(
+            tx["amount"]
+            for tx in self.transactions.values()
+            if not tx["deleted"]
+            and tx["category_id"] == "cat-inflow"
+            and tx["date"][:7] <= month[:7]
+        )
+        assigned = sum(
+            self.assigned(past, cat_id)
+            for past in demo.MONTHS
+            if past <= month
+            for cat_id in demo.BUDGETED
+        )
+        return earned - assigned + self.carried_into(month)[1]
+
+    def ready_to_assign(self, month: str) -> int:
+        """Ready to Assign at a month, the way YNAB's own breakdown adds it up.
+
+        Every unit of income that reached it up to the month, less everything assigned to
+        the month or to one before it, less the cash overspending of the months behind,
+        less what the household set aside for a month further on.
+
+        https://support.ynab.com/en_us/the-plan-header-BkmiuJ_C9
+
+        Args:
+            month: The month being computed, as YNAB writes it.
+
+        Returns:
+            The milliunits still waiting for a job, negative when more was assigned than
+            the plan holds.
+        """
+        return self.unassigned(month) - self.assigned_in_future(month)
+
     def month(self, month: str) -> dict[str, Any]:
         """A month with its categories, computed from the transactions."""
-        carried, overspent = self.carried_into(month)
+        carried, _ = self.carried_into(month)
         cats = []
         for cat in self.categories():
             budgeted = self.assigned(month, cat["id"])
@@ -201,26 +271,12 @@ class DemoBudget:  # pylint: disable=too-many-instance-attributes
             and tx["category_id"] == "cat-inflow"
         )
         budgeted_total = sum(c["budgeted"] for c in cats)
-        # Ready to Assign, the way YNAB's own breakdown adds it up: every unit of income
-        # that reached it so far, less everything assigned so far, less the cash
-        # overspending of the months behind.
-        # https://support.ynab.com/en_us/the-plan-header-BkmiuJ_C9
-        earned = sum(
-            tx["amount"]
-            for tx in self.transactions.values()
-            if not tx["deleted"]
-            and tx["category_id"] == "cat-inflow"
-            and tx["date"][:7] <= month[:7]
-        )
-        assigned = sum(
-            self.assigned(m, cat_id) for m in demo.MONTHS if m <= month for cat_id in demo.BUDGETED
-        )
         return {
             "month": month,
             "income": income,
             "budgeted": budgeted_total,
             "activity": sum(c["activity"] for c in cats),
-            "to_be_budgeted": earned - assigned + overspent,
+            "to_be_budgeted": self.ready_to_assign(month),
             "age_of_money": self.age_of_money(month),
             "note": None,
             "deleted": False,

@@ -105,39 +105,72 @@ def test_a_positive_available_amount_carries_into_the_next_month() -> None:
 
 
 def test_cash_overspending_stays_out_of_the_category_and_off_ready_to_assign() -> None:
-    """Overspent in cash, a category starts the next month at zero and lightens Ready to Assign.
+    """Overspent in cash, a category starts the next month at zero and Ready to Assign short.
 
     "If your category had been overspent in cash (negative red Available), that amount
     will be deducted from Ready to Assign in the new month", and "in the new month, the
     Available will now show as a gray zero":
     https://support.ynab.com/en_us/when-the-month-rolls-over-a-guide-rkyyd6qC9
-    The demo plan holds no credit card, so its overspending is only ever cash. Assigning
-    nothing to Groceries in June overspends it by what June's three shops cost.
+    The demo plan holds no credit card, so its overspending is only ever cash. A 500.00
+    restaurant bill in August takes the category far past the 143.90 it had to spend.
     """
     state = fake_ynab.DemoBudget()
-    spent = _category(state, "cat-groceries", "2026-06-01")["activity"]
-    ready = state.month("2026-07-01")["to_be_budgeted"]
-    state.budgeted[("2026-06-01", "cat-groceries")] = 0
-    assert _category(state, "cat-groceries", "2026-06-01")["balance"] == spent
-    july = _category(state, "cat-groceries", "2026-07-01")
-    assert july["balance"] == july["budgeted"] + july["activity"]
-    # June's assignment is no longer taken out of Ready to Assign, its overspending is.
-    assigned = demo_budget.budgeted("2026-06-01", "cat-groceries")
-    assert state.month("2026-07-01")["to_be_budgeted"] == ready + assigned + spent
+    state.create_transactions(
+        [
+            {
+                "account_id": demo_budget.CHECKING,
+                "date": "2026-08-27",
+                "amount": -500_000,
+                "category_id": "cat-restaurants",
+            }
+        ]
+    )
+    august = _category(state, "cat-restaurants", "2026-08-01")
+    assert august["balance"] == -476_000
+    # The overspending does not follow the category: September starts it at a grey zero.
+    carried, overspent = state.carried_into("2026-09-01")
+    assert (carried["cat-restaurants"], overspent) == (0, -476_000)
+    september = _category(state, "cat-restaurants", "2026-09-01")
+    assert september["balance"] == september["budgeted"] + september["activity"]
+    # Every month of the plan is assigned to the unit, so the overspending is all that is
+    # left to come off September's Ready to Assign.
+    assert state.month("2026-09-01")["to_be_budgeted"] == -476_000
 
 
-def test_every_unit_of_money_has_a_job_in_the_month_the_demo_talks_about() -> None:
-    """September leaves Ready to Assign at 0.00, the first rule of YNAB's method.
+def test_every_unit_of_money_has_a_job_in_every_month_of_the_demo_plan() -> None:
+    """Ready to Assign is 0.00 in all four months, the first rule of YNAB's method.
 
     "Give every dollar a job": https://www.ynab.com/the-four-rules
-    The household kept a month of income over the summer and assigned all of it to
-    September, which is why September assigns more than a month's salary.
+    June to August earn more than they assign, and the household assigns that money to
+    the months ahead as soon as it arrives rather than leaving it in Ready to Assign.
+    September is funded without a salary of its own because August's was assigned to it.
     """
     state = fake_ynab.DemoBudget()
+    assert [state.month(m)["to_be_budgeted"] for m in demo_budget.MONTHS] == [0, 0, 0, 0]
     september = state.month("2026-09-01")
-    assert september["to_be_budgeted"] == 0
     assert september["income"] == 0
-    assert september["budgeted"] == state.month("2026-08-01")["to_be_budgeted"]
+    assert september["budgeted"] == state.assigned_in_future("2026-08-01")
+
+
+def test_money_assigned_to_a_future_month_leaves_ready_to_assign_at_once() -> None:
+    """Assigning more this month empties no further than zero; the future month pays for it.
+
+    YNAB's Ready to Assign takes out "Dollars available this month but set aside for a
+    future month" (https://support.ynab.com/en_us/the-plan-header-BkmiuJ_C9), and its
+    guide to getting a month ahead spells the consequence out: "Ready to Assign is $0.00
+    in the current month and funds have been assigned in the future. Then, $200 is added
+    to the Auto Maintenance category this month. Ready to Assign will remain $0.00 in the
+    current month, and the $200 decreases Ready to Assign in the future month."
+    https://support.ynab.com/en_us/getting-a-month-ahead-HJidy13C5
+    August stands for the current month here, with September's assignment ahead of it.
+    """
+    state = fake_ynab.DemoBudget()
+    assert state.month("2026-08-01")["to_be_budgeted"] == 0
+    state.budgeted[("2026-08-01", "cat-holidays")] = (
+        demo_budget.budgeted("2026-08-01", "cat-holidays") + 200_000
+    )
+    assert state.month("2026-08-01")["to_be_budgeted"] == 0
+    assert state.month("2026-09-01")["to_be_budgeted"] == -200_000
 
 
 def test_restaurants_is_overspent_in_september_once_the_carry_over_is_counted() -> None:
