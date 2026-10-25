@@ -144,12 +144,12 @@
 <text x="84.0" y="583.0" font-size="13.5" font-weight="700" fill="#e2694a">Move 22.50 from Tennis to Restaurants for this month?</text>
 <text x="672.0" y="583.0" font-size="10.5" font-weight="400" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="end" fill="#c3c2b7">move_money · preview</text>
 <text x="84.0" y="632.0" font-size="12.5" font-weight="400" fill="#ffffff">Tennis</text>
-<text x="180.0" y="632.0" font-size="12" font-weight="400" fill="#c3c2b7">Budgeted</text>
+<text x="168.0" y="632.0" font-size="12" font-weight="400" fill="#c3c2b7">Budgeted</text>
 <text x="274.0" y="632.0" font-size="12.5" font-weight="400" text-anchor="end" fill="#c3c2b7">80.00</text>
 <text x="284.0" y="632.0" font-size="12.5" font-weight="400" fill="#c3c2b7">→</text>
 <text x="302.0" y="632.0" font-size="12.5" font-weight="700" fill="#ffffff">57.50</text>
 <text x="84.0" y="662.0" font-size="12.5" font-weight="400" fill="#ffffff">Restaurants</text>
-<text x="180.0" y="662.0" font-size="12" font-weight="400" fill="#c3c2b7">Budgeted</text>
+<text x="168.0" y="662.0" font-size="12" font-weight="400" fill="#c3c2b7">Budgeted</text>
 <text x="274.0" y="662.0" font-size="12.5" font-weight="400" text-anchor="end" fill="#c3c2b7">120.00</text>
 <text x="284.0" y="662.0" font-size="12.5" font-weight="400" fill="#c3c2b7">→</text>
 <text x="302.0" y="662.0" font-size="12.5" font-weight="700" fill="#ffffff">142.50</text>

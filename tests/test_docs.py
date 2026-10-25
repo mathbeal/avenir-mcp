@@ -94,6 +94,30 @@ def test_the_demo_plays_for_thirty_seconds_and_holds_still_when_asked_to(
     assert "animation: none" in drawn
 
 
+def _spans(drawn: str, share: float | None = None) -> list[tuple[str, float, float, float]]:
+    """Where every string of a card is drawn, as the generator estimates its width.
+
+    Args:
+        drawn: An SVG document.
+        share: The average character width to measure with, as a share of the font size;
+            None to take the one the string is drawn with.
+
+    Returns:
+        One tuple per string, in the order they are drawn: the string, the ordinate of
+        its baseline, and the abscissas of its left and right edges.
+    """
+    spans = []
+    root = ElementTree.fromstring(drawn)  # noqa: S314  # nosec B314 - drawn here, not read in
+    for node in root.iter(f"{SVG}text"):
+        text, size = node.text or "", float(node.get("font-size", "0"))
+        drawn_with = demo.FIXED if node.get("font-family") == demo.MONO else demo.SANS
+        width = demo.text_width(text, size, drawn_with if share is None else share)
+        anchor, x = node.get("text-anchor", "start"), float(node.get("x", "0"))
+        left = {"start": x, "middle": x - width / 2, "end": x - width}[anchor]
+        spans.append((text, float(node.get("y", "0")), left, left + width))
+    return spans
+
+
 def _overflowing(drawn: str) -> list[str]:
     """Every string of a card that would be drawn past one of its edges.
 
@@ -103,17 +127,11 @@ def _overflowing(drawn: str) -> list[str]:
     Returns:
         The strings that do not fit, in the order they are drawn.
     """
-    over = []
-    root = ElementTree.fromstring(drawn)  # noqa: S314  # nosec B314 - drawn here, not read in
-    for node in root.iter(f"{SVG}text"):
-        text, size = node.text or "", float(node.get("font-size", "0"))
-        share = demo.FIXED if node.get("font-family") == demo.MONO else demo.SANS
-        width = demo.text_width(text, size, share)
-        anchor, x = node.get("text-anchor", "start"), float(node.get("x", "0"))
-        left = {"start": x, "middle": x - width / 2, "end": x - width}[anchor]
-        if left < demo.MARGIN - 1 or left + width > demo.WIDTH - demo.MARGIN + 1:
-            over.append(text)
-    return over
+    return [
+        text
+        for text, _, left, right in _spans(drawn)
+        if left < demo.MARGIN - 1 or right > demo.WIDTH - demo.MARGIN + 1
+    ]
 
 
 @pytest.mark.parametrize("scheme", ("light", "dark"))
@@ -121,6 +139,24 @@ def test_every_line_of_the_demo_fits_inside_the_card(demo_card: demo.Card, schem
     """SVG text neither wraps nor shrinks: a longer message would run off the card."""
     over = _overflowing(demo.picture(demo_card, scheme))
     assert not over, f"drawn past the edge of the card: {over}"
+
+
+@pytest.mark.parametrize("scheme", ("light", "dark"))
+def test_the_preview_keeps_its_label_off_the_amount(demo_card: demo.Card, scheme: str) -> None:
+    """Each line of the preview leaves the label clear of the budget it labels.
+
+    Measured with the widest character width the card knows, since the average one
+    reads these labels and amounts narrower than the font draws them.
+    """
+    spans = _spans(demo.picture(demo_card, scheme), demo.FIXED)
+    labelled = [
+        (span, next(beside for beside in spans[index + 1 :] if beside[1] == span[1]))
+        for index, span in enumerate(spans)
+        if span[0] == "Budgeted"
+    ]
+    assert len(labelled) == len(demo_card.preview.sides)
+    touching = [amount[0] for label, amount in labelled if label[3] > amount[2]]
+    assert not touching, f"the label runs into the amount beside it: {touching}"
 
 
 def test_the_site_shows_the_demo_at_the_size_it_was_drawn(demo_card: demo.Card) -> None:

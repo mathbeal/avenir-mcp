@@ -766,7 +766,7 @@ def _rows(shown: Card, inner: float, top: float, tone: dict[str, str]) -> list[s
         line = top + index * 30
         rows += [
             _text(side.name, inner, line, tone["ink"], 12.5),
-            _text("Budgeted", inner + 96, line, tone["muted"], 12),
+            _text("Budgeted", inner + 84, line, tone["muted"], 12),
             _text(_amount(side.before), inner + 190, line, tone["muted"], 12.5, "400", "end"),
             _text("→", inner + 200, line, tone["muted"], 12.5),
             _text(_amount(side.after), inner + 218, line, tone["ink"], 12.5, "700"),
