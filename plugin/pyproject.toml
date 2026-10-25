@@ -9,7 +9,7 @@
 # `tests/test_plugin.py` keeps the pin, the manifest and `avenir_mcp.__version__` in step.
 [project]
 name = "avenir-mcp-plugin"
-version = "0.7.1"
+version = "0.8.0"
 description = "Claude Code plugin that runs avenir-mcp"
 requires-python = ">=3.12"
-dependencies = ["avenir-mcp==0.7.1"]
+dependencies = ["avenir-mcp==0.8.0"]

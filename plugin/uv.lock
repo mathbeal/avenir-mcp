@@ -65,7 +65,7 @@ wheels = [
 
 [[package]]
 name = "avenir-mcp"
-version = "0.7.1"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beartype", marker = "python_full_version >= '3.15'" },
@@ -76,21 +76,21 @@ dependencies = [
     { name = "pydantic" },
     { name = "starlette" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5e/b5/c7236ecffbc3dd74c47d0d99185b59bd16a41014998f99635c0cc9277a7c/avenir_mcp-0.7.1.tar.gz", hash = "sha256:dbb72d26fc3693b713a62da38fdadf744048f12950cf7ce922bff170037c818c", size = 270112, upload-time = "2026-10-24T17:14:24.287Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/3d/ed55b9a716545695cc2c96dc481185465b32d7da21b941b73b8f71ebb1b1/avenir_mcp-0.8.0.tar.gz", hash = "sha256:642de8164781e15d0f28384b045555ed6f3ff6f780430b02ed8ac639f2a0de84", size = 271394, upload-time = "2026-10-25T05:18:50.099Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/18/342787b2c3abcb6d225c510661ef4af2dec58a76422f7233d206c06d9771/avenir_mcp-0.7.1-py3-none-any.whl", hash = "sha256:4422d890fdaf7336579ad52b32979166fa79c3b48f24c4c91b725697d23ee369", size = 145110, upload-time = "2026-10-24T17:14:22.579Z" },
+    { url = "https://files.pythonhosted.org/packages/85/08/7d843f7be8cda8ebcb21817ae0331e865f0c1c615b3686b8dd6b81ca0302/avenir_mcp-0.8.0-py3-none-any.whl", hash = "sha256:9c7b9cee1c12993c1001ab99f3f6e1d296cedf46eb06974c794a85ff8c59fe24", size = 145364, upload-time = "2026-10-25T05:18:48.567Z" },
 ]
 
 [[package]]
 name = "avenir-mcp-plugin"
-version = "0.7.1"
+version = "0.8.0"
 source = { virtual = "." }
 dependencies = [
     { name = "avenir-mcp" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "avenir-mcp", specifier = "==0.7.1" }]
+requires-dist = [{ name = "avenir-mcp", specifier = "==0.8.0" }]
 
 [[package]]
 name = "beartype"
