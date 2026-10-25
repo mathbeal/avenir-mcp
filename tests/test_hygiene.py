@@ -14,7 +14,7 @@ SKIPPED_DIRS = {".git", ".venv", ".mypy_cache", ".pytest_cache", ".ruff_cache", 
 FORBIDDEN_SUFFIXES = {".pdf", ".csv", ".ofx", ".qif"}
 IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b")
 YNAB_TOKEN = re.compile(r"YNAB_API_KEY\s*=\s*['\"]?[A-Za-z0-9_-]{20,}")
-WEB_ARCHIVE = re.compile(r"web\.archive\.org")
+WEB_ARCHIVE = re.compile(r"https?://web\.archive\.org")
 
 
 # A home directory in an absolute path says who and where: /Users/name, /home/name.
@@ -81,6 +81,16 @@ def test_no_home_path_or_icloud_copy_in_repository() -> None:
         if DUPLICATE.match(path.name) or HOME_PATH.search(path.read_bytes()):
             offenders.append(str(path.relative_to(ROOT)))
     assert not offenders
+
+
+def test_web_archive_pattern_matches_a_link() -> None:
+    """A web.archive.org URL is flagged."""
+    assert WEB_ARCHIVE.search("https://web.archive.org/web/20260112213044/https://example.com")
+
+
+def test_web_archive_pattern_ignores_naming_the_site_in_a_sentence() -> None:
+    """Naming web.archive.org in prose, without a link, is not flagged."""
+    assert not WEB_ARCHIVE.search("replace web.archive.org links with YNAB's API changelog")
 
 
 def test_no_web_archive_link_in_repository() -> None:
