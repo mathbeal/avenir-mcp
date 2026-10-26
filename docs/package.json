@@ -16,11 +16,11 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@astrojs/markdown-satteri": "0.4.3",
+    "@astrojs/markdown-satteri": "0.4.4",
     "@astrojs/starlight": "0.42.6",
     "@fontsource-variable/source-sans-3": "5.3.1",
     "@fontsource-variable/source-serif-4": "5.3.1",
-    "astro": "7.3.8",
+    "astro": "7.4.0",
     "satteri": "0.10.5",
     "sharp": "0.35.5",
     "starlight-links-validator": "0.27.0"
