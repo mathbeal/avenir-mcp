@@ -43,12 +43,12 @@ dependencies = [
     # Already required by fastmcp; declared because tool arguments, results and
     # journal entries are pydantic models, whose field docstrings become the
     # descriptions agents read.
-    "pydantic>=2.13,<3",
+    "pydantic>=2.14.1,<3",
     # Imported directly, though fastmcp brings them: declared so that a change in
     # fastmcp's own dependencies cannot remove them unnoticed. deptry checks it.
     "mcp>=2.2.0,<3",
     "mcp-types>=2.2.0,<3",
-    "starlette>=1.7.0,<2",
+    "starlette>=1.10.0,<2",
     # py-key-value-aio (brought by fastmcp) needs beartype, whose 0.22 does not import on
     # Python 3.15 (typing no longer has no_type_check_decorator). Required here until
     # py-key-value-aio asks for 0.23.

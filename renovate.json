@@ -68,7 +68,7 @@
       "automerge": true
     },
     {
-      "description": "fastmcp, the MCP SDK it builds on, httpx and pydantic run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp or mcp update.",
+      "description": "fastmcp, the MCP SDK it builds on, httpx and pydantic run in front of users' budgets. Each update is reviewed on its own, and the evaluation is run before merging a fastmcp or mcp update. rangeStrategy is bump, not the default: these ranges are wide enough that a newer release usually already satisfies them, so the default strategy never opens a pull request for one.",
       "matchPackageNames": [
         "fastmcp",
         "mcp",
@@ -78,7 +78,8 @@
         "pydantic"
       ],
       "groupName": null,
-      "automerge": false
+      "automerge": false,
+      "rangeStrategy": "bump"
     },
     {
       "description": "Major versions change what the build accepts or how the code behaves: reviewed one at a time.",
