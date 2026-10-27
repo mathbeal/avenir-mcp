@@ -110,7 +110,6 @@ jobs:
         # avenir-mcp runs on its users' machines: Linux and macOS are required.
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.12", "3.13", "3.14", "3.15"]
-        experimental: [false]
         # A macOS runner costs ten Linux ones: a pull request tries the newest Python
         # there; main tries them all.
         exclude:
@@ -124,8 +123,7 @@ jobs:
           # Windows is required too. POSIX-only checks (file permissions) are
           # skipped there, so coverage is enforced on Linux and macOS only.
           - os: windows-latest
-            python-version: "3.14"
-            experimental: false
+            python-version: "3.15"
             coverage: "--cov-fail-under=0"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -136,13 +134,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       # The suite never calls YNAB: no token is needed, and none is available here.
-      - id: pytest
-        run: uv run pytest ${{ matrix.coverage }}
-        continue-on-error: ${{ matrix.experimental }}
-      - if: steps.pytest.outcome == 'failure'
-        env:
-          PYTHON: ${{ matrix.python-version }}
-        run: echo "::warning::The tests fail on Python $PYTHON, which is still experimental."
+      - run: uv run pytest ${{ matrix.coverage }}
 
   vocabulary:
     name: lexdrift against its baseline

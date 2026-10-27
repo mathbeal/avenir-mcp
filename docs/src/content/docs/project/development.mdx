@@ -25,7 +25,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 
 ```bash
 git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
-uv sync            # Python 3.14 and the locked dependencies
+uv sync            # Python 3.15 and the locked dependencies
 just check         # every gate CI runs
 ```
 
@@ -61,7 +61,7 @@ the documentation build with the tests of its own code and `npm audit` on its de
 (`just api-drift`), a weekly mutation campaign (`just mutate`, below), and the official MCP Inspector
 (`just inspect`), which checks the server as a client sees it on the demo plan: its
 lists, the portability of its tool schemas, and one call of each kind. The test suite runs on Linux and macOS with Python 3.12,
-3.13, 3.14 and 3.15, and on Windows with Python 3.14 (on a pull request, macOS tries the
+3.13, 3.14 and 3.15, and on Windows with Python 3.15 (on a pull request, macOS tries the
 newest Python only, 3.15: its runners cost ten Linux ones); coverage is enforced on Linux
 and macOS, where the file-permission checks apply. On a pull request, every commit must be
 signed off and the title must start with the kind of
