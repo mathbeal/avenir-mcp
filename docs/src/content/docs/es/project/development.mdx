@@ -25,7 +25,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 
 ```bash
 git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
-uv sync            # Python 3.14 y las dependencias bloqueadas
+uv sync            # Python 3.15 y las dependencias bloqueadas
 just check         # todos los controles de la CI
 ```
 
@@ -61,7 +61,7 @@ código y `npm audit` sobre sus dependencias, CodeQL y el OpenSSF Scorecard (una
 la API de YNAB con su instantánea (`just api-drift`), una campaña de mutación semanal (`just mutate`, más abajo), y el MCP Inspector oficial (`just inspect`), que comprueba el servidor como lo ve un
 cliente, sobre el plan de demostración: sus listas, la portabilidad de los esquemas
 de sus herramientas y una llamada de cada tipo. La batería de pruebas se
-ejecuta en Linux y macOS con Python 3.12, 3.13, 3.14 y 3.15, y en Windows con Python 3.14
+ejecuta en Linux y macOS con Python 3.12, 3.13, 3.14 y 3.15, y en Windows con Python 3.15
 (en una pull request, macOS solo prueba la versión más reciente de Python, la 3.15: sus
 máquinas cuestan diez veces las de Linux); la cobertura se exige en Linux y macOS, donde
 se aplican los controles de permisos de

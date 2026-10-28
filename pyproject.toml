@@ -50,9 +50,9 @@ dependencies = [
     "mcp-types>=2.2.0,<3",
     "starlette>=1.10.0,<2",
     # py-key-value-aio (brought by fastmcp) needs beartype, whose 0.22 does not import on
-    # Python 3.15 (typing no longer has no_type_check_decorator). Required here until
-    # py-key-value-aio asks for 0.23.
-    "beartype>=0.23; python_version >= '3.15'",
+    # Python 3.15 (typing no longer has no_type_check_decorator). Declared without a
+    # python_version marker so every supported Python locks the same 0.23.
+    "beartype>=0.23",
 ]
 
 [project.urls]

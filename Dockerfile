@@ -14,7 +14,7 @@
 # files, nor a development tool ships. Both images are pinned by digest, as every image
 # and action of this repository is; the tag beside each digest says which release it is.
 
-FROM python:3.14-slim@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8 AS build
+FROM python:3.15-slim@sha256:f786b2e19cf9bb54e96bfcd4c1b40c4c56336c22e60607ffd4b080ae5b5dee83 AS build
 
 # uv, as one binary from its own image: nothing is installed into the Python to get it.
 COPY --from=ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff /uv /usr/local/bin/uv
@@ -41,7 +41,7 @@ COPY avenir_mcp ./avenir_mcp
 # are not needed at run time and the next stage leaves them behind.
 RUN uv sync --no-dev --no-editable
 
-FROM python:3.14-slim@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8
+FROM python:3.15-slim@sha256:f786b2e19cf9bb54e96bfcd4c1b40c4c56336c22e60607ffd4b080ae5b5dee83
 
 LABEL org.opencontainers.image.title="avenir-mcp" \
       org.opencontainers.image.description="Unofficial MCP server for YNAB: budgets, spending and transaction classification, built for agents." \

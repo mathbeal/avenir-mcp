@@ -25,7 +25,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 
 ```bash
 git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
-uv sync            # Python 3.14 en de vastgelegde afhankelijkheden
+uv sync            # Python 3.15 en de vastgelegde afhankelijkheden
 just check         # elke controle die de CI draait
 ```
 
@@ -63,7 +63,7 @@ van YNAB met zijn momentopname (`just api-drift`), een wekelijkse mutatiecampagn
 (`just inspect`), die de server controleert zoals een client hem op het demoplan ziet:
 zijn lijsten, de overdraagbaarheid van zijn toolschema's, en één aanroep van elk soort. De
 testsuite draait op Linux en macOS met Python 3.12, 3.13, 3.14 en 3.15, en op Windows met
-Python 3.14 (bij een pull request probeert macOS alleen de nieuwste Python-versie, 3.15:
+Python 3.15 (bij een pull request probeert macOS alleen de nieuwste Python-versie, 3.15:
 zijn runners kosten evenveel als tien Linux-runners); de dekking wordt afgedwongen op
 Linux en macOS, waar de controles van
 bestandsrechten gelden. Bij een pull request moet elke commit afgetekend zijn

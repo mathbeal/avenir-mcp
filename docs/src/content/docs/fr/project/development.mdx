@@ -25,7 +25,7 @@ import { FileTree, Aside } from '@astrojs/starlight/components';
 
 ```bash
 git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
-uv sync            # Python 3.14 et les dépendances verrouillées
+uv sync            # Python 3.15 et les dépendances verrouillées
 just check         # tous les contrôles de la CI
 ```
 
@@ -63,7 +63,7 @@ avec son instantané (`just api-drift`), une campagne de mutation hebdomadaire (
 le MCP Inspector officiel (`just inspect`), qui contrôle le serveur comme le voit un
 client, sur le plan de démonstration : ses listes, la portabilité des schémas de ses
 outils et un appel de chaque sorte. La suite de tests tourne sous Linux
-et macOS avec Python 3.12, 3.13, 3.14 et 3.15, et sous Windows avec Python 3.14 (sur une
+et macOS avec Python 3.12, 3.13, 3.14 et 3.15, et sous Windows avec Python 3.15 (sur une
 pull request, macOS n'essaie que la dernière version de Python, la 3.15 : ses machines
 coûtent dix fois celles de Linux) ; la couverture est exigée sous Linux et macOS, où
 s'appliquent les vérifications de permissions de
