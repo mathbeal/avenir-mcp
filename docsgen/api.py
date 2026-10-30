@@ -17,8 +17,8 @@ test covers it, why it does not apply, or that it is a known gap. A rule YNAB ad
 or rewords is caught by the same weekly check.
 
 `python -m docsgen.api` compares the snapshot with the live specification and fails
-when YNAB added, removed or renamed an operation, or changed one of its rules;
-`--update` rewrites the snapshot.
+when YNAB added, removed or renamed an operation, changed one of its rules, or
+deprecated or un-deprecated one; `--update` rewrites the snapshot.
 """
 
 from __future__ import annotations
@@ -145,6 +145,8 @@ def operations(spec: dict[str, Any]) -> dict[str, Any]:
         for method, op in item.items():
             if method in METHODS:
                 entry = {"id": op["operationId"], "method": method.upper(), "path": path}
+                if op.get("deprecated"):
+                    entry["deprecated"] = True
                 if rules := _body_rules(spec, op):
                     entry["rules"] = rules
                 found.append(entry)
@@ -282,9 +284,9 @@ def differences(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
         new: The live specification's operations.
 
     Returns:
-        One line per operation added, removed or moved to another path, and per rule
-        added or removed; empty when
-        nothing changed.
+        One line per operation added, removed or moved to another path, per rule
+        added or removed, and per operation newly or no longer deprecated; empty
+        when nothing changed.
     """
     before = {op["id"]: op for op in old["operations"]}
     after = {op["id"]: op for op in new["operations"]}
@@ -307,6 +309,10 @@ def differences(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
         old_rules, new_rules = set(before[i].get("rules", [])), set(after[i].get("rules", []))
         lines += [f"rule added: {i} {rule}" for rule in new_rules - old_rules]
         lines += [f"rule removed: {i} {rule}" for rule in old_rules - new_rules]
+    for i in both:
+        was, is_now = before[i].get("deprecated", False), after[i].get("deprecated", False)
+        if was != is_now:
+            lines.append(f"{'deprecated' if is_now else 'no longer deprecated'}: {i}")
     return sorted(lines)
 
 

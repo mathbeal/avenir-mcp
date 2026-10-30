@@ -86,6 +86,38 @@ def test_differences_name_what_was_added_removed_or_moved() -> None:
     assert not api.differences(old, old)
 
 
+def test_operations_capture_the_deprecated_flag() -> None:
+    """A deprecated operation keeps that flag, so differences() can react to it changing."""
+    spec: dict[str, Any] = {
+        "info": {"version": "9.9.9"},
+        "paths": {
+            "/plans": {
+                "get": {"operationId": "getPlans"},
+                "post": {"operationId": "createPlan", "deprecated": True},
+            },
+        },
+    }
+    assert api.operations(spec)["operations"] == [
+        {"id": "getPlans", "method": "GET", "path": "/plans"},
+        {"id": "createPlan", "method": "POST", "path": "/plans", "deprecated": True},
+    ]
+
+
+def test_differences_name_a_newly_or_no_longer_deprecated_operation() -> None:
+    """YNAB deprecating, or undeprecating, a covered operation is a change to act on."""
+    plain = _ops(("a", "GET", "/a"), ("b", "GET", "/b"))
+    flagged = {
+        "version": "1",
+        "operations": [
+            {"id": "a", "method": "GET", "path": "/a", "deprecated": True},
+            {"id": "b", "method": "GET", "path": "/b"},
+        ],
+    }
+    assert api.differences(plain, flagged) == ["deprecated: a"]
+    assert api.differences(flagged, plain) == ["no longer deprecated: a"]
+    assert not api.differences(flagged, flagged)
+
+
 def test_the_check_passes_fails_and_updates(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
