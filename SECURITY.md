@@ -35,8 +35,6 @@ What the server does:
   folder apply)
 - `approve_transactions` acts immediately: it only marks transactions as reviewed.
   Keep your MCP client's per-call confirmation on for it.
-- `import_transactions` acts immediately too: it asks YNAB to import what the linked
-  banks already have, as the app's Import does, and deletes or changes nothing.
 
 ## Untrusted text and prompt injection
 
@@ -295,6 +293,6 @@ risk that remains are in
 - A client without elicitation leaves the confirmation code to the agent, and a model
   can still be misled into using it (see [Scope](#scope)). Use a client that supports
   elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`.
-- `approve_transactions` and `import_transactions` act without a preview.
+- `approve_transactions` acts without a preview.
 - The YNAB token cannot be narrowed to read-only access.
 - Over HTTP, traffic on `127.0.0.1` is not encrypted.

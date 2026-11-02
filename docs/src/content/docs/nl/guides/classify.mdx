@@ -9,7 +9,6 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import pending from '@snippets/nl/suggest_categories.json?raw';
 import preview from '@snippets/nl/apply_preview.json?raw';
 import approved from '@snippets/nl/approve.json?raw';
-import imported from '@snippets/nl/import.json?raw';
 import flagged from '@snippets/nl/flag_preview.json?raw';
 import payeeList from '@snippets/nl/payees.json?raw';
 import renamed from '@snippets/nl/rename_payee_preview.json?raw';
@@ -99,11 +98,10 @@ Details en voorbeelden: [Suggesties](/avenir-mcp/nl/concepts/suggestions/).
 
 ## Varianten
 
-- **Transacties nog niet binnen:** vraag *„importeer eerst de nieuwste transacties van mijn
-  bank“*; `import_transactions` doet wat Import in YNAB doet, meteen toegepast omdat het
-  niets verwijdert of wijzigt:
-
-  <Code code={imported} lang="json" title="import_transactions" />
+- **Transacties nog niet binnen:** YNAB importeert nu zelf de transacties van een
+  gekoppelde rekening; ontbreken de nieuwste van de bank nog steeds, vraag dan
+  *„controleer mijn bankkoppelingen“*: `list_accounts` toont een defecte, die u in
+  YNAB herstelt.
 - **Eerst iets nakijken:** de import van september bracht *Market Fresh* twee keer binnen.
   Vraag *„zet een vlag op de tweede, ik kijk het na in YNAB“*: `flag_transactions` zet na
   bevestiging een gekleurde vlag, en `undo_operation` haalt die weg:

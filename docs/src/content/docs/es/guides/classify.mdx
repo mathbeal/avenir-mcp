@@ -9,7 +9,6 @@ import { Code, Steps, Aside } from '@astrojs/starlight/components';
 import pending from '@snippets/es/suggest_categories.json?raw';
 import preview from '@snippets/es/apply_preview.json?raw';
 import approved from '@snippets/es/approve.json?raw';
-import imported from '@snippets/es/import.json?raw';
 import flagged from '@snippets/es/flag_preview.json?raw';
 import payeeList from '@snippets/es/payees.json?raw';
 import renamed from '@snippets/es/rename_payee_preview.json?raw';
@@ -100,11 +99,10 @@ Detalles y ejemplos: [Sugerencias](/avenir-mcp/es/concepts/suggestions/).
 
 ## Variantes
 
-- **Transacciones que aún no han llegado:** pida *«importa primero las últimas transacciones
-  de mi banco»*; `import_transactions` hace lo que hace Import en YNAB, aplicado al momento
-  porque no borra ni cambia nada:
-
-  <Code code={imported} lang="json" title="import_transactions" />
+- **Transacciones que aún no han llegado:** YNAB ahora importa automáticamente las
+  transacciones de una cuenta vinculada; si las últimas del banco siguen faltando,
+  pida *«comprueba mis enlaces bancarios»*: `list_accounts` muestra uno averiado, que
+  arregla en YNAB.
 - **Algo que revisar antes:** la importación de septiembre trajo *Market Fresh* dos veces.
   Pida *«marca la segunda con una bandera, la revisaré en YNAB»*: `flag_transactions` pone
   una bandera de color, tras la confirmación, y `undo_operation` la quita:

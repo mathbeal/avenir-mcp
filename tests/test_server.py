@@ -55,7 +55,6 @@ def test_catalog_is_exactly_the_published_tools() -> None:
             "move_money",
             "create_transactions",
             "approve_transactions",
-            "import_transactions",
             "flag_transactions",
             "find_recurring_charges",
             "get_net_worth_trend",

@@ -38,9 +38,10 @@ GUIDE = """# avenir-mcp: how to work with this YNAB server
   live specification.
 
 ## Workflows
-- Classify pending transactions: `import_transactions` if the bank's latest are
-  missing, then `suggest_categories`, show the suggestions and ask about the rest,
-  then `apply_categories`.
+- Classify pending transactions: `suggest_categories`, show the suggestions and ask
+  about the rest, then `apply_categories`. YNAB now imports a linked account's
+  transactions on its own; if the bank's latest are missing, see "Missing
+  transactions" below.
 - Reconcile an account: ask for the balance the bank shows, then `reconcile_account`.
   If there is a difference, explain it from the answer; adjust only if the user asks.
 - Something the user should check (a likely duplicate, an unknown charge): propose

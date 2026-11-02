@@ -217,7 +217,7 @@ Beyond the open findings above, the risks the assurance case already accepts rem
 - A client without elicitation leaves the confirmation code to the agent, and a misled
   model can use it; `AVENIR_MCP_REQUIRE_ELICITATION=1` with a client that supports
   elicitation removes this.
-- `approve_transactions` and `import_transactions` act without a preview.
+- `approve_transactions` acts without a preview.
 - The YNAB token cannot be narrowed to read-only access, and is readable by any program
   running as the user, through the environment or the token file.
 - Over HTTP, traffic on `127.0.0.1` is not encrypted.
