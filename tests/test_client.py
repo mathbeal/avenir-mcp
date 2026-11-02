@@ -657,19 +657,6 @@ def test_approve_transactions_bulk_patches_approved_flag() -> None:
     }
 
 
-def test_import_transactions_asks_ynab_to_import_from_linked_accounts() -> None:
-    """import_transactions POSTs to the import endpoint, with no body, and returns the new ids."""
-    payload = {"data": {"transaction_ids": ["t7", "t8"]}}
-    ctx = _async_client_returning(payload)
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            result = asyncio.run(client.import_transactions("b1"))
-    http = ctx.__aenter__.return_value
-    assert result == ["t7", "t8"]
-    assert http.post.call_args.args[0].endswith("/plans/b1/transactions/import")
-    assert "json" not in http.post.call_args.kwargs
-
-
 def test_approve_transactions_empty_list_makes_no_call() -> None:
     """Nothing to approve must not hit the API."""
     with patch("httpx.AsyncClient") as mock_client:

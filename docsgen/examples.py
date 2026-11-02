@@ -226,7 +226,6 @@ CALLS: list[Call] = [
         "rename_payee",
         {"plan_id": BUDGET, "payee_id": "pay-009", "name": "Market Fresh"},
     ),
-    Call("import", "import_transactions", {"plan_id": BUDGET}),
     # The duplicate import of 19 September, flagged for the user to check in YNAB.
     Call(
         "flag_preview",

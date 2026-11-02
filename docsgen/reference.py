@@ -39,12 +39,11 @@ UNDOABLE = {
     "set_category_target",
     "rename_payee",
 }
-UNCONFIRMED_WRITES = {"approve_transactions", "import_transactions"}
+UNCONFIRMED_WRITES = {"approve_transactions"}
 
 # Tool -> the page that shows it at work.
 GUIDES = {
     "suggest_categories": "guides/classify",
-    "import_transactions": "guides/classify",
     "apply_categories": "guides/classify",
     "flag_transactions": "guides/classify",
     "list_payees": "guides/classify",
