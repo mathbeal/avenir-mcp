@@ -54,8 +54,7 @@ review; category groups; editing one transaction.
 - **Move real money.** It changes a YNAB plan, never a bank account: no payment, no
   transfer between banks.
 - **Act without the user.** No write without a preview and the user's confirmation,
-  apart from marking transactions reviewed and asking YNAB to import from linked banks;
-  no automatic schedule, no background job.
+  apart from marking transactions reviewed; no automatic schedule, no background job.
 - **Serve several people.** No hosted or shared server, no user accounts: YNAB's terms
   require OAuth for an application used by others.
 - **Give financial advice.** It reports and projects what the plan holds; the decisions
@@ -88,19 +87,34 @@ review; category groups; editing one transaction.
 
 ## 1.0: verified and published
 
-- Contract tests through the MCP protocol, and an MCP Inspector session in CI.
+- Contract tests through the MCP protocol, and an MCP Inspector session in CI. *Done.*
 - An evaluation suite run by a real agent on a demo budget. *Done: 26 tasks, 26/26.*
 - Tooling: ruff, 100 % branch coverage, mutation testing, hardened GitHub Actions,
-  pip-audit, Python 3.12–3.15.
+  pip-audit, Python 3.12–3.15. *Done.*
 - PyPI release through Trusted Publishing, a generated changelog, a `.mcpb` bundle for
-  Claude Desktop.
+  Claude Desktop. *Done.*
 
-## Done since 0.5
+## 0.8: what a budget change leaves available
 
-- `forecast_balance`: month-by-month projection with visible assumptions.
-- A `.mcpb` extension for Claude Desktop, attached by the release workflow from the
-  next release on: one file installs avenir-mcp, keeps the token out of sight, and
-  leaves it read-only until a box is ticked.
+- `get_budget_vs_actual` says what the months before carried over, for each category,
+  not only what each spent against its budget. *Done.*
+
+## 0.7: installed in one step, wherever the agent runs
+
+- A `.mcpb` extension for Claude Desktop: one file installs avenir-mcp, keeps the token
+  out of sight, and leaves it read-only until a box is ticked. *Done.*
+- A plugin for Claude Code, read-only and locked until writes are turned on. *Done.*
+- A `Dockerfile` at the repository's root, to run avenir-mcp in a container. *Done.*
+- A budget change previews what the category will have available, before and after.
+  *Done.*
+
+## 0.6: a split transfer, and fewer retries lost to a transient failure
+
+- `split_transaction` splits a transfer that leaves the budget for a tracking account.
+  *Done.*
+- A transient failure of YNAB's API is retried; only a request that cannot duplicate
+  its effect.
+- Python 3.15 is supported, alongside 3.12 through 3.14.
 
 ## 0.5: tasks, not endpoints
 
