@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/docs/src/assets/logo.svg" alt="avenir-mcp logo" width="96">
+</p>
+
 # avenir-mcp: an unofficial MCP server for YNAB
 
 <!-- mcp-name: io.github.mathbeal/avenir-mcp -->
