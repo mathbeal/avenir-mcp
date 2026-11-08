@@ -6,8 +6,9 @@
 
 <!-- mcp-name: io.github.mathbeal/avenir-mcp -->
 
-**avenir-mcp** (*avenir* is French for *the future*) lets an AI agent read your YNAB plan
-and help you plan what comes next.
+**avenir-mcp** lets an AI agent read your YNAB plan and help you plan what comes next.
+
+Unofficial, and listed by YNAB in its [Works with YNAB](https://api.ynab.com/#works-with-ynab-third-party) directory.
 
 [English](https://avenir-mcp.pages.dev/avenir-mcp/) · [Français](https://avenir-mcp.pages.dev/avenir-mcp/fr/) · [Español](https://avenir-mcp.pages.dev/avenir-mcp/es/) · [Deutsch](https://avenir-mcp.pages.dev/avenir-mcp/de/) · [Nederlands](https://avenir-mcp.pages.dev/avenir-mcp/nl/)
 
@@ -18,53 +19,28 @@ and help you plan what comes next.
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15139/badge)](https://www.bestpractices.dev/projects/15139)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](https://github.com/mathbeal/avenir-mcp/blob/main/LICENSE)
 
-Ask Claude, or any [MCP](https://modelcontextprotocol.io) client, about your plan in
-plain words. Read-only by default; every change is previewed, confirmed by you, and can
-be undone.
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/demo-dark.svg">
-  <img alt="One conversation, in thirty seconds. Asked how the month is going and where the room is, the agent calls four read-only tools at the same time: Month summary, Every category, Budget vs spent and Three months. It answers that Restaurants is the only category over budget: 166.50 spent of 144.00 available (120.00 budgeted + 24.00 left from earlier months), 138.8 %, available −22.50; that its spending rose 113.70 → 119.90 → 166.50 over three months; and that 80.00 is left in Tennis and 411.90 in Groceries. It offers to cover the 22.50 from Tennis, which has nothing spent yet. The user answers “Cover it from Tennis.”, and move_money shows a preview that changes nothing: Tennis budgeted 80.00 → 57.50, Restaurants budgeted 120.00 → 142.50, available −22.50 → 0.00, exactly on budget, with a Cancel button, a Confirm button, and the reminder that nothing changes until you confirm and that any change can be undone." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/demo-light.svg" width="720">
+  <img alt="avenir-mcp answering a question about a YNAB plan, then previewing and confirming a change before it is made." src="https://raw.githubusercontent.com/mathbeal/avenir-mcp/main/.github/assets/demo-light.svg" width="720">
 </picture>
 
-▶ [Watch the 20-second tour](https://avenir-mcp.pages.dev/avenir-mcp/#tour)
+[Watch the 20-second tour](https://avenir-mcp.pages.dev/avenir-mcp/#tour)
 
-This comes from an invented demo plan, replayed by `python -m docsgen`: every figure is
-what avenir-mcp answers today.
+- **Read-only by default.** The tools that change your plan are registered only if you enable them.
+- **Preview, confirm, undo.** A change is shown before it happens, confirmed by you, and can be undone.
+- **Works with Claude Desktop, Claude Code, Cursor, VS Code, LM Studio and other MCP clients.**
 
-## What you can ask
+## Features
 
-- **Understand a month:** "Which category is overspent this month?" → `get_monthly_summary`
-- **Prepare a spend:** "Will I go below zero before December?" → `forecast_balance`
-- **Pay off a debt:** "When will my debts be paid off if I put 500 a month on them?" → `get_debt_payoff_plan`
-- **Tidy the transactions:** "Categorise what is pending." → `suggest_categories`, applied after your yes
-- **Find one transaction:** "Which transaction is my 86.40 receipt from the 12th?" → `find_transactions`
-- **Reconcile an account:** "My bank shows 3,440.80. Does YNAB agree?" → `reconcile_account`
-- **Change something:** "Move 30 from Tennis to Restaurants." → `move_money`, previewed, confirmed, and undone by `undo_operation`
+- **Ask in plain language.** "Which category is overspent this month?", "Will I go below zero before December?", "When will my debts be paid off if I put 500 a month on them?"
+- **Forecasts and plans.** `forecast_balance` projects the balance forward from scheduled transactions and recent spending; `get_runway` says how many months your money would last without income; `get_debt_payoff_plan` compares paying debts off by avalanche (highest interest first) or snowball (smallest balance first) order.
+- **Classifies and reconciles.** `suggest_categories` proposes a category for each pending transaction from your own history; `reconcile_account` explains a gap with your bank before changing anything.
+- **Finds what repeats.** `find_recurring_charges` lists subscriptions and recurring payments, ranked by their yearly cost.
+- **One tool per task, not one call per endpoint.** Classifying a month, reconciling an account or building a forecast is a single tool call with typed, readable output.
 
-Every tool, with a real answer:
-[Reference](https://avenir-mcp.pages.dev/avenir-mcp/reference/tools/) ·
-[Use cases](https://avenir-mcp.pages.dev/avenir-mcp/guides/classify/).
+Every tool, with a real answer: [Reference](https://avenir-mcp.pages.dev/avenir-mcp/reference/tools/) · [Use cases](https://avenir-mcp.pages.dev/avenir-mcp/guides/classify/).
 
-## More than an API wrapper
-
-YNAB's API gives data; these tools give answers computed from it, with every write
-confirmed first:
-
-- **`forecast_balance`** projects the balance forward month by month, from scheduled
-  transactions, recent spending and what you give it.
-- **`get_runway`** says how many months the money in the budget would last without
-  income.
-- **`get_debt_payoff_plan`** pays debts down month by month, avalanche or snowball, and
-  says when each is paid off.
-- **`find_recurring_charges`** finds what is paid most months, ranked by its yearly
-  cost, so a subscription does not go unnoticed.
-- **`suggest_categories`** proposes a category for a pending transaction from how its
-  payee was categorised before.
-- Every write is previewed first; the confirmation is bound to that exact preview, and
-  `undo_operation` reverts it.
-
-## Install
+## Quick start
 
 You need a YNAB personal access token: YNAB → Account Settings → Developer Settings →
 New Token.
@@ -90,28 +66,11 @@ Both install it read-only. Cursor, LM Studio, VS Code, Windows, changes to your 
 A model running on your own machine, for instance through [LM Studio](https://lmstudio.ai),
 keeps your transactions off any AI provider's servers: see [Where your data
 goes](https://avenir-mcp.pages.dev/avenir-mcp/guides/choose-a-model/#where-your-data-goes).
-Small local models call tools less reliably than the current large cloud models: in the
-[evaluation](https://avenir-mcp.pages.dev/avenir-mcp/project/evaluation/#local-models), a
-7B model served locally passed only 1 of 25 tasks, getting every write wrong. With a
-local model, keep avenir-mcp read-only (no `AVENIR_MCP_WRITE`), or set
-`AVENIR_MCP_REQUIRE_ELICITATION=1` so that only your own answer in the client, never a
+Small local models call tools less reliably than large cloud models; see the
+[evaluation](https://avenir-mcp.pages.dev/avenir-mcp/project/evaluation/#local-models) for
+measured results. With a local model, keep avenir-mcp read-only (no `AVENIR_MCP_WRITE`), or
+set `AVENIR_MCP_REQUIRE_ELICITATION=1` so that only your own answer in the client, never a
 model relaying a confirmation code on its own, can confirm a change.
-
-## Why avenir-mcp
-
-- **Tools for tasks, not endpoints.** One tool classifies a month, one reconciles an account.
-- **Read-only by default.** The tools that change a plan are registered only if you enable them.
-- **Preview, confirm, undo.** A write waits for your yes; `undo_operation` reverts it.
-- **Answers an agent can read.** Currency units, typed answers, bank text treated as untrusted.
-- **Verified.** 100 % line and branch coverage, and a real agent on an invented plan: 25/25.
-
-**📖 Documentation:** <https://avenir-mcp.pages.dev/avenir-mcp/>
-
-**Missing a question? Have an idea?** Tell us the question you would like to ask your budget
-in [Discussions → Ideas](https://github.com/mathbeal/avenir-mcp/discussions/categories/ideas);
-help with using avenir-mcp is in
-[Discussions → Q&A](https://github.com/mathbeal/avenir-mcp/discussions/categories/q-a).
-Never post a real amount, a real account or your token.
 
 ## Claude Code plugin
 
@@ -126,7 +85,33 @@ out of sight, and starts the server from the plugin's own locked environment. Fr
 | writes | the environment `uv` resolves inside the plugin's folder, and `uv`'s own cache. Nothing elsewhere |
 | changes in your plan | nothing. It starts avenir-mcp read-only: `AVENIR_MCP_WRITE` is not set, so the tools that change a plan are never registered |
 
-## Development
+## Security
+
+Read-only by default; a write is previewed, the confirmation is bound to that exact
+preview, and `undo_operation` reverts it. Memos and payee names from your bank are
+treated as data, never as instructions. Details: [Safety by
+design](https://avenir-mcp.pages.dev/avenir-mcp/concepts/safety/).
+
+## Privacy Policy
+
+avenir-mcp is a program you run yourself, not a service: its publisher runs no server and
+receives none of your data. Your token is read from the environment, kept in memory as a
+secret value and sent only to YNAB; your plan's data is fetched when a tool needs it and
+returned to your agent, so the model provider behind your MCP client sees it too. What is
+handled, how long it is kept and how to erase it:
+<https://avenir-mcp.pages.dev/avenir-mcp/project/privacy/>.
+
+## Documentation
+
+Full documentation, in five languages: <https://avenir-mcp.pages.dev/avenir-mcp/>.
+
+Have a question or an idea? [Discussions →
+Ideas](https://github.com/mathbeal/avenir-mcp/discussions/categories/ideas) for feature
+ideas, [Discussions →
+Q&A](https://github.com/mathbeal/avenir-mcp/discussions/categories/q-a) for help using
+avenir-mcp. Never post a real amount, a real account or your token.
+
+## Contributing
 
 ```bash
 git clone https://github.com/mathbeal/avenir-mcp && cd avenir-mcp
@@ -147,15 +132,6 @@ check fails when YNAB publishes a new version. Self-checked on every change agai
 YNAB's API terms of 2025-05-28 (naming, attribution, YNAB's own image, a personal token
 for its owner only, the hourly limit); a weekly job turns that badge red when they change:
 [![YNAB API terms: self-checked](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml/badge.svg)](https://github.com/mathbeal/avenir-mcp/actions/workflows/ynab-terms.yml)
-
-## Privacy Policy
-
-avenir-mcp is a program you run yourself, not a service: its publisher runs no server and
-receives none of your data. Your token is read from the environment, kept in memory as a
-secret value and sent only to YNAB; your plan's data is fetched when a tool needs it and
-returned to your agent, so the model provider behind your MCP client sees it too. What is
-handled, how long it is kept and how to erase it:
-<https://avenir-mcp.pages.dev/avenir-mcp/project/privacy/>.
 
 ## Licence
 
