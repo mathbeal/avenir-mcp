@@ -34,13 +34,27 @@ tests = [
 ]
 
 [[rule]]
-rule = "SaveCategory.goal_frequency: Cannot be combined with goal_target_date and is not supported for Credit Card Payment categories or categories paired to a loan account."
+rule = "SaveCategory.goal_frequency: 'monthly' accepts an optional goal_target_date, and 'weekly' cannot be combined with goal_target_date."
+status = "not-applicable"
+reason = "set_category_target takes either a date or a frequency, never both: avenir_mcp/targets.py's _check refuses any goal_target_date and goal_frequency sent together, whatever the frequency, so the combination this rule allows for 'monthly' is never attempted."
+
+[[rule]]
+rule = "SaveCategory.goal_frequency: 'yearly' also requires goal_target_date, the date the target is next due."
+status = "gap"
+reason = "set_category_target lets a caller ask for frequency=\"yearly\" alone: avenir_mcp/targets.py's plan() then sends goal_frequency with no goal_target_date, which YNAB now refuses for a new target."
+
+[[rule]]
+rule = "SaveCategory.goal_frequency: Not supported for Credit Card Payment categories or categories paired to a loan account."
 status = "tested"
 tests = [
-  "tests/test_targets.py::test_contradictory_targets_are_refused",
   "tests/test_targets.py::test_what_card_and_loan_categories_do_not_take_is_refused_first",
   "tests/test_protocol_targets.py::test_invalid_targets_are_refused_before_asking",
 ]
+
+[[rule]]
+rule = "SaveCategory.goal_target_date: Required for yearly targets, so it cannot be removed from one."
+status = "not-applicable"
+reason = "avenir_mcp/targets.py only removes a date by removing the whole target (goal_target: None); it never sends goal_target_date: null alone while keeping a frequency."
 
 [[rule]]
 rule = "SaveCategory.goal_frequency: Requires goal_target."
