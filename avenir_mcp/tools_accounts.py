@@ -284,9 +284,11 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     scheduled transactions on their dates, whatever their frequency, a yearly bill
     included, charges that recur in the last 4 months (same payee, stable amount),
     the average of all other spending over the last 3 months, and what you pass.
-    A payee with a schedule is projected by that schedule alone, and transfers
-    between the projected accounts are left out. What you pass is the expected
-    monthly income (default: the last 3 months' non-recurring inflows, which may
+    A payee with a schedule is projected by that schedule alone. A transfer between
+    two projected accounts is left out, since it moves nothing out of them; a
+    transfer to an account left out of the projection (a card not projected, a loan
+    in a tracking account) is real money leaving, and counts. What you pass is the
+    expected monthly income (default: the last 3 months' non-recurring inflows, which may
     include one-off money such as capital injections) and one-off amounts such as
     a tax bill (negative) or a refund (positive). Amounts in currency units.
     `lowest` is the lowest point within a month; `first_shortfall` is the first
@@ -324,7 +326,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         chosen = [a for a in accounts if a["id"] in account_ids]
     else:
         chosen = [a for a in accounts if a["on_budget"] and not a["closed"]]
-    ids = {a["id"] for a in chosen}
+    ids = frozenset(a["id"] for a in chosen)
     history = [tx for tx in await client.get_transactions(plan_id) if tx.get("account_id") in ids]
     plans = [
         item
@@ -349,7 +351,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     )
     charges = [
         r
-        for r in forecast.recurring(history, now)
+        for r in forecast.recurring(history, now, account_ids=ids)
         if not forecast.is_scheduled(r.payee, r.amount < 0, planned)
     ]
     if monthly_income is not None:
@@ -358,17 +360,17 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
     variable = (
         variable_monthly
         if variable_monthly is not None
-        else forecast.variable_average(history, now, charges, also=planned)
+        else forecast.variable_average(history, now, charges, also=planned, account_ids=ids)
     )
     income = (
         monthly_income
         if monthly_income is not None
-        else forecast.income_average(history, now, charges, also=planned)
+        else forecast.income_average(history, now, charges, also=planned, account_ids=ids)
     )
     start = client.milliunit_to_amount(
         sum(client.amount_to_milliunit(a["balance"]) for a in chosen)
     )
-    spent, received = forecast.month_to_date(history, now, charges, also=planned)
+    spent, received = forecast.month_to_date(history, now, charges, also=planned, account_ids=ids)
     projection = forecast.project(
         start_balance=start,
         today=now,

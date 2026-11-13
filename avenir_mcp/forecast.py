@@ -28,6 +28,9 @@ MIN_MONTHS_SEEN = 3
 AMOUNT_TOLERANCE = 0.2
 VARIABLE_MONTHS = 3
 
+OPENING_BALANCE_PAYEE = "Starting Balance"
+"""The payee YNAB gives an account's first balance: money already there, not a flow."""
+
 # Words of a payee name: letters and digits, whatever the punctuation between them.
 _WORD = re.compile(r"[A-Z0-9]+")
 
@@ -137,16 +140,41 @@ def lookback(today: date) -> list[str]:
     return months_before(today, LOOKBACK_MONTHS)
 
 
-def usable(tx: dict[str, Any]) -> bool:
-    """Tell whether a transaction is money in or out of the accounts.
+def is_opening_balance(tx: dict[str, Any]) -> bool:
+    """Tell whether a transaction is the opening balance YNAB gives a new account.
 
     Args:
         tx: A YNAB transaction.
 
     Returns:
-        False for a deleted transaction or a transfer between accounts.
+        True for YNAB's own "Starting Balance" payee: money already there when the
+        account was added, neither income nor spending.
     """
-    return not tx.get("deleted") and not tx.get("transfer_account_id")
+    return tx.get("payee_name") == OPENING_BALANCE_PAYEE
+
+
+def usable(tx: dict[str, Any], account_ids: frozenset[str] | None = None) -> bool:
+    """Tell whether a transaction is money in or out of the projected accounts.
+
+    A transfer between two of the projected accounts cancels out and is not usable.
+    A transfer whose other side is outside them (a tracking account, a card left out
+    of the projection) is real money leaving or entering the projection, and is.
+
+    Args:
+        tx: A YNAB transaction.
+        account_ids: The accounts projected together; None to treat every transfer
+            as internal, as recurring-charge detection does across a whole plan.
+
+    Returns:
+        False for a deleted transaction, or a transfer whose other side is one of
+        account_ids (or any transfer at all, when account_ids is None).
+    """
+    if tx.get("deleted"):
+        return False
+    other = tx.get("transfer_account_id")
+    if not other:
+        return True
+    return account_ids is not None and other not in account_ids
 
 
 def _is_outflow(amount: float) -> bool:
@@ -193,12 +221,18 @@ def _day_of(tx: dict[str, Any]) -> int:
     return int(tx["date"][8:10])  # pragma: no mutate
 
 
-def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring]:
+def recurring(
+    transactions: list[dict[str, Any]],
+    today: date,
+    account_ids: frozenset[str] | None = None,
+) -> list[Recurring]:
     """Find the payees seen in 3 of the last 4 full months, each month within 20 % of the median.
 
     Args:
         transactions: The plan's transactions, amounts in milliunits.
         today: The day the forecast is made; its month is incomplete and not looked at.
+        account_ids: The accounts projected together, as :func:`usable` takes them;
+            None to treat every transfer as internal.
 
     Returns:
         One recurring charge or income per payee and direction, sorted by payee.
@@ -206,7 +240,7 @@ def recurring(transactions: list[dict[str, Any]], today: date) -> list[Recurring
     months = set(lookback(today))
     groups: dict[tuple[str, bool], list[dict[str, Any]]] = defaultdict(list)
     for tx in transactions:
-        if usable(tx) and tx["date"][:7] in months:
+        if usable(tx, account_ids) and tx["date"][:7] in months:
             payee = _merchant(tx)
             if payee:
                 groups[(payee, _is_outflow(tx["amount"]))].append(tx)
@@ -258,12 +292,13 @@ def is_scheduled(payee: str, outflow: bool, scheduled: frozenset[tuple[str, bool
     )
 
 
-def _other_average(
+def _other_average(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     transactions: list[dict[str, Any]],
     today: date,
     known: list[Recurring],
     outflow: bool,
     also: frozenset[tuple[str, bool]] = frozenset(),
+    account_ids: frozenset[str] | None = None,
 ) -> float:
     """Average one direction of money over the last 3 full months, recurring amounts excluded.
 
@@ -274,6 +309,8 @@ def _other_average(
         outflow: True for money out, False for money in.
         also: Other (normalised payee, is money out) pairs to leave out, e.g. the
             payees of scheduled transactions, which are projected apart.
+        account_ids: The accounts projected together, as :func:`usable` takes them;
+            None to treat every transfer as internal.
 
     Returns:
         The monthly average in currency units, negative for money out.
@@ -283,7 +320,8 @@ def _other_average(
     total = sum(
         tx["amount"]
         for tx in transactions
-        if usable(tx)
+        if usable(tx, account_ids)
+        and not is_opening_balance(tx)
         and _is_outflow(tx["amount"]) == outflow
         and tx["date"][:7] in months
         and _merchant(tx) not in recurring_payees
@@ -297,6 +335,7 @@ def variable_average(
     today: date,
     known: list[Recurring],
     also: frozenset[tuple[str, bool]] = frozenset(),
+    account_ids: frozenset[str] | None = None,
 ) -> float:
     """Average the monthly outflow over the last 3 full months, recurring charges excluded.
 
@@ -306,11 +345,15 @@ def variable_average(
         known: Recurring amounts found by :func:`recurring`, left out of the average.
         also: Other (normalised payee, is money out) pairs to leave out, e.g. the
             payees of scheduled transactions, which are projected apart.
+        account_ids: The accounts projected together, as :func:`usable` takes them;
+            None to treat every transfer as internal.
 
     Returns:
         The monthly average in currency units, negative.
     """
-    return _other_average(transactions, today, known, outflow=True, also=also)
+    return _other_average(
+        transactions, today, known, outflow=True, also=also, account_ids=account_ids
+    )
 
 
 def income_average(
@@ -318,6 +361,7 @@ def income_average(
     today: date,
     known: list[Recurring],
     also: frozenset[tuple[str, bool]] = frozenset(),
+    account_ids: frozenset[str] | None = None,
 ) -> float:
     """Average the monthly inflow over the last 3 full months, recurring income excluded.
 
@@ -327,11 +371,15 @@ def income_average(
         known: Recurring amounts found by :func:`recurring`, left out of the average.
         also: Other (normalised payee, is money out) pairs to leave out, e.g. the
             payees of scheduled transactions, which are projected apart.
+        account_ids: The accounts projected together, as :func:`usable` takes them;
+            None to treat every transfer as internal.
 
     Returns:
         The monthly average in currency units.
     """
-    return _other_average(transactions, today, known, outflow=False, also=also)
+    return _other_average(
+        transactions, today, known, outflow=False, also=also, account_ids=account_ids
+    )
 
 
 def month_to_date(
@@ -339,6 +387,7 @@ def month_to_date(
     today: date,
     known: list[Recurring],
     also: frozenset[tuple[str, bool]] = frozenset(),
+    account_ids: frozenset[str] | None = None,
 ) -> tuple[float, float]:
     """Sum what was spent and received since the 1st of this month, recurring amounts excluded.
 
@@ -348,6 +397,8 @@ def month_to_date(
         known: Recurring amounts found by :func:`recurring`, left out of the average.
         also: Other (normalised payee, is money out) pairs to leave out, e.g. the
             payees of scheduled transactions, which are projected apart.
+        account_ids: The accounts projected together, as :func:`usable` takes them;
+            None to treat every transfer as internal.
 
     Returns:
         (spent, received) in currency units; spent is negative.
@@ -356,7 +407,7 @@ def month_to_date(
     recurring_payees = {(r.payee, _is_outflow(r.amount)) for r in known}
     spent = received = 0
     for tx in transactions:
-        if not usable(tx) or tx["date"][:7] != this_month:
+        if not usable(tx, account_ids) or is_opening_balance(tx) or tx["date"][:7] != this_month:
             continue
         key = (_merchant(tx), _is_outflow(tx["amount"]))
         if key in recurring_payees or is_scheduled(*key, also):

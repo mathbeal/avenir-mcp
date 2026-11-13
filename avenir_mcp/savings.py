@@ -14,7 +14,7 @@ from datetime import date
 from typing import Any
 
 from avenir_mcp.client import milliunit_to_amount
-from avenir_mcp.forecast import months_before
+from avenir_mcp.forecast import is_opening_balance, months_before
 from avenir_mcp.model import Model
 from avenir_mcp.networth import tracking_assets
 from avenir_mcp.runway import lines_of
@@ -26,8 +26,6 @@ INTERNAL_GROUP = "Internal Master Category"
 """YNAB's own group: "Inflow: Ready to Assign", where income goes, and "Uncategorized"."""
 UNCATEGORIZED = "Uncategorized"
 """The internal category of a transaction waiting for one: not income."""
-STARTING_BALANCE = "Starting Balance"
-"""The payee YNAB gives an account's first balance: money already there, not income."""
 
 
 class SavingsMonth(Model):
@@ -98,10 +96,12 @@ def _notes(months: list[SavingsMonth], asked: int, uncategorized: list[int]) -> 
         The notes, one sentence each.
     """
     notes = [
-        "Income is money in categorised to Ready to Assign on the budget accounts; starting "
-        "balances and transfers, from a tracking account too, are not income.",
+        "Income is money in categorised to Ready to Assign on the budget accounts; transfers, "
+        "from a tracking account too, are not income.",
         "Spending is money out of the budget accounts less refunds (money in categorised "
         "to a spending category); transfers between budget accounts are left out.",
+        "An account's opening balance (YNAB's \"Starting Balance\") is money already there "
+        "when it was added, not income or spending, whichever way it goes.",
         "A transfer to a tracking account that holds an asset (savings, investments) is "
         "saved, not spent; a transfer to a tracking loan or debt is spending, as YNAB's "
         "budget counts it.",
@@ -162,7 +162,7 @@ def summary(  # pylint: disable=too-many-locals
     uncategorized: list[int] = []
     for tx in history:
         month = tx["date"][:7]
-        if month not in income:
+        if month not in income or is_opening_balance(tx):
             continue
         for line in lines_of(tx):
             amount, transfer = line["amount"], line.get("transfer_account_id")
@@ -181,7 +181,7 @@ def summary(  # pylint: disable=too-many-locals
                 spent[month] += amount
             elif category not in income_ids:
                 uncategorized.append(amount)
-            elif tx.get("payee_name") != STARTING_BALANCE:
+            else:
                 income[month] += amount
 
     rows = [
