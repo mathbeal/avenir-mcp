@@ -14,7 +14,7 @@ from unittest.mock import patch
 import pytest
 
 
-class FakeMonth:
+class FakeMonth:  # pylint: disable=too-many-instance-attributes
     """Categories of one month, and the amounts the tools set, as YNAB would hold them."""
 
     def __init__(self, names: dict[str, str], budgeted: dict[str, int]) -> None:
@@ -25,11 +25,19 @@ class FakeMonth:
         self.sets: list[tuple[str, str, float]] = []
         self.calls = 0
         self.failing_calls: set[int] = set()
+        self.landed_calls: set[int] = set()
+        """Calls that apply their change before raising `failure`: a lost answer that landed."""
         self.failure: Exception = RuntimeError("YNAB 500: internal error")
         """What a failing call raises: a refusal by default, a lost answer when a test says so."""
+        self.reads = 0
+        self.failing_reads: set[int] = set()
+        """Reads of the month's categories that fail, counting from 1."""
 
     async def get_month_categories(self, _plan_id: str, _month: str) -> list[dict[str, Any]]:
-        """Categories of the month, as YNAB returns them."""
+        """Categories of the month, as YNAB returns them, or fail like YNAB on the reads told to."""
+        self.reads += 1
+        if self.reads in self.failing_reads:
+            raise RuntimeError("YNAB 503: gateway timeout")
         return [
             {
                 "id": cat_id,
@@ -47,6 +55,10 @@ class FakeMonth:
     ) -> dict[str, Any]:
         """Record and apply the new budgeted amount, or fail like YNAB on the calls told to."""
         self.calls += 1
+        if self.calls in self.landed_calls:
+            self.sets.append((month, category_id, amount))
+            self.budgeted[category_id] = round(amount * 1000)
+            raise self.failure
         if self.calls in self.failing_calls:
             raise self.failure
         self.sets.append((month, category_id, amount))

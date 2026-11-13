@@ -45,6 +45,18 @@ class YnabUnavailable(RuntimeError):
     applied and has to be looked at before anything else is sent.
     """
 
+    def __init__(self, message: str, *, maybe_applied: bool) -> None:
+        """Carry the message with whether the request may have reached YNAB.
+
+        Args:
+            message: What an agent reads, from `no_answer`.
+            maybe_applied: `landed(method, failure)` for the request that failed: True
+                when a write may already be applied and is worth checking before
+                anything is undone on its account.
+        """
+        super().__init__(message)
+        self.maybe_applied = maybe_applied
+
 
 def _repeatable(method: str, failure: Exception | int) -> bool:
     """Say whether sending this request again could neither duplicate nor help nothing.
@@ -169,7 +181,9 @@ async def answered(
             return await send()
         except httpx.TransportError as error:
             failure = error
-    raise YnabUnavailable(no_answer(method, failure, tries)) from failure
+    raise YnabUnavailable(
+        no_answer(method, failure, tries), maybe_applied=landed(method, failure)
+    ) from failure
 
 
 def pause_after(header: str | None) -> float | None:

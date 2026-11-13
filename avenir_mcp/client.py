@@ -626,6 +626,26 @@ async def set_category_budgeted(
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
+async def category_budgeted_is(plan_id: str, month: str, category_id: str, amount: float) -> bool:
+    """Say whether a category already carries this budgeted amount, read fresh from YNAB.
+
+    For a write whose answer was lost, this tells apart one YNAB applied before losing
+    the answer from one that never reached the category.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+        month: ISO month "YYYY-MM-01" or "current".
+        category_id: Category UUID.
+        amount: The amount to compare against, in currency units.
+
+    Returns:
+        True if the category's budgeted amount already equals this one.
+    """
+    categories = await get_month_categories(plan_id, month)
+    current = next((c for c in categories if c["id"] == category_id), None)
+    return current is not None and current["budgeted"] == amount_to_milliunit(amount)
+
+
 def _bank_link(account: dict[str, Any]) -> str:
     """Say whether YNAB imports the account from the bank, and whether that works.
 

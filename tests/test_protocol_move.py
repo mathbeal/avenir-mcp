@@ -137,6 +137,65 @@ def test_undo_leaves_both_alone_when_one_changed_since(month: FakeMonth) -> None
     assert len(month.sets) == 2
 
 
+def test_a_failed_second_undo_write_puts_the_first_back(month: FakeMonth) -> None:
+    """If putting the source back fails, the already-reverted target is put back too."""
+    call("move_money", _ARGS, accept)
+    month.failing_calls = {month.calls + 2}
+    result = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert result.is_error
+    assert "nothing was undone" in result.content[0].text
+    assert month.budgeted == {"c-food": 150000, "c-fun": 50000, "c-car": 0}
+
+
+def test_a_lost_undo_answer_that_actually_landed_counts_as_restored(month: FakeMonth) -> None:
+    """If the second undo write was applied by YNAB but its answer was lost, undo still succeeds."""
+    call("move_money", _ARGS, accept)
+    lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
+    month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
+    month.landed_calls = {month.calls + 2}
+    result = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert result.structured_content["status"] == "applied"
+    assert month.budgeted == {"c-food": 120000, "c-fun": 80000, "c-car": 0}
+
+
+def test_a_second_undo_write_with_no_answer_also_puts_the_first_back(month: FakeMonth) -> None:
+    """A lost undo answer that did not land, checked by rereading, puts the first back too."""
+    call("move_money", _ARGS, accept)
+    lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
+    month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
+    month.failing_calls = {month.calls + 2}
+    result = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert result.is_error
+    assert "nothing was undone" in result.content[0].text
+    assert month.budgeted == {"c-food": 150000, "c-fun": 50000, "c-car": 0}
+
+
+def test_a_lost_undo_answer_that_cannot_be_checked_says_so(month: FakeMonth) -> None:
+    """If rereading to tell also fails during undo, the error names both categories."""
+    call("move_money", _ARGS, accept)
+    lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
+    month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
+    month.failing_calls = {month.calls + 2}
+    # Reads 3 and 4 are undo's own preview and confirmed-call guard; 5 is the new reread.
+    month.failing_reads = {month.reads + 3}
+    result = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert result.is_error
+    text = result.content[0].text
+    assert "Tennis" in text and "Restaurants" in text
+    assert "nothing was undone" not in text
+    assert month.budgeted == {"c-food": 120000, "c-fun": 50000, "c-car": 0}
+
+
+def test_a_failed_put_back_during_undo_says_what_still_needs_fixing(month: FakeMonth) -> None:
+    """If putting the first category back fails too, the error says which one still does."""
+    call("move_money", _ARGS, accept)
+    month.failing_calls = {month.calls + 2, month.calls + 3}
+    result = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert result.is_error
+    assert "set Tennis to 80.00 in YNAB to finish undoing the move" in result.content[0].text
+    assert month.budgeted == {"c-food": 120000, "c-fun": 50000, "c-car": 0}
+
+
 def test_the_journal_line_holds_ids_and_the_two_budgeted_amounts(
     month: FakeMonth, tmp_path: Path
 ) -> None:
@@ -165,15 +224,46 @@ def test_a_failed_second_write_puts_the_first_back(month: FakeMonth) -> None:
 
 
 def test_a_second_write_with_no_answer_also_puts_the_first_back(month: FakeMonth) -> None:
-    """A destination write YNAB never answered puts the source back and says to go and look."""
+    """A lost answer that did not land, checked by rereading, puts the source back too."""
     lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
-    month.failure = retry.YnabUnavailable(lost)
+    month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
     month.failing_calls = {2}
     result = call("move_money", _ARGS, accept)
     assert "may or may not be applied" in result.content[0].text
     assert result.is_error
     assert month.sets == [("2026-09-01", "c-fun", 50.0), ("2026-09-01", "c-fun", 80.0)]
     assert month.budgeted["c-fun"] == 80000
+
+
+def test_a_lost_answer_that_actually_landed_counts_as_applied(month: FakeMonth) -> None:
+    """If the destination write was applied by YNAB but its answer was lost, nothing is undone."""
+    lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
+    month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
+    month.landed_calls = {2}
+    result = call("move_money", _ARGS, accept)
+    assert result.structured_content["status"] == "applied"
+    assert result.structured_content["operation_id"]
+    assert month.budgeted == {"c-food": 150000, "c-fun": 50000, "c-car": 0}
+    assert month.sets == [("2026-09-01", "c-fun", 50.0), ("2026-09-01", "c-food", 150.0)]
+
+
+def test_a_lost_answer_that_cannot_be_checked_says_so_without_touching_anything(
+    month: FakeMonth,
+) -> None:
+    """If rereading to tell also fails, the error names both categories and nothing is written."""
+    lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
+    month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
+    month.failing_calls = {2}
+    # Reads 1 and 2 are the preview's and the confirmed call's own category fetch; 3 is the
+    # reread this fix adds, once the destination write is lost.
+    month.failing_reads = {3}
+    result = call("move_money", _ARGS, accept)
+    assert result.is_error
+    text = result.content[0].text
+    assert "Tennis" in text and "Restaurants" in text
+    assert "nothing was moved" not in text
+    assert month.sets == [("2026-09-01", "c-fun", 50.0)]
+    assert month.budgeted["c-fun"] == 50000
 
 
 def test_a_failed_put_back_says_what_to_fix_in_ynab(month: FakeMonth) -> None:
