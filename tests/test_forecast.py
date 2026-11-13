@@ -78,6 +78,26 @@ def test_transfers_and_deleted_transactions_are_ignored() -> None:
     assert not forecast.recurring(txs, TODAY)
 
 
+def test_a_transfer_leaving_the_projected_accounts_is_a_real_charge() -> None:
+    """A loan repaid by transfer to an account outside the projection is money that left."""
+    txs = [
+        _tx("TRANSFER : MORTGAGE", -120000, f"{m}-05", transfer_account_id="mortgage")
+        for m in ("2026-05", "2026-06", "2026-07")
+    ]
+    assert forecast.recurring(txs, TODAY, account_ids=frozenset({"acc"})) == [
+        forecast.Recurring(payee="TRANSFER : MORTGAGE", amount=-120.0, day=5, months_seen=3)
+    ]
+
+
+def test_a_transfer_between_projected_accounts_still_cancels_out() -> None:
+    """A transfer whose other side is also projected moves nothing out of the projection."""
+    txs = [
+        _tx("TRANSFER : SAVINGS", -120000, f"{m}-05", transfer_account_id="savings")
+        for m in ("2026-05", "2026-06", "2026-07")
+    ]
+    assert not forecast.recurring(txs, TODAY, account_ids=frozenset({"acc", "savings"}))
+
+
 # ---------------------------------------------------------------------------
 # variable_average
 # ---------------------------------------------------------------------------
@@ -93,6 +113,21 @@ def test_variable_spending_is_the_monthly_average_of_the_rest() -> None:
     ]
     rec = forecast.recurring(txs, TODAY)
     assert forecast.variable_average(txs, TODAY, rec) == -40.0
+
+
+def test_variable_average_counts_a_transfer_leaving_the_projected_accounts() -> None:
+    """A card payment from the only projected account is spending, not an ignored transfer."""
+    txs = [
+        _tx("TRANSFER : VISA", -150000, f"{m}-10", transfer_account_id="visa")
+        for m in ("2026-06", "2026-07", "2026-08")
+    ]
+    assert forecast.variable_average(txs, TODAY, [], account_ids=frozenset({"acc"})) == -150.0
+
+
+def test_variable_average_excludes_the_opening_balance() -> None:
+    """A card's negative opening balance is money already owed, not a month's spending."""
+    txs = [_tx("Starting Balance", -240000, "2026-07-03")]
+    assert forecast.variable_average(txs, TODAY, []) == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -180,6 +215,21 @@ def test_income_average_is_the_monthly_average_of_non_recurring_inflows() -> Non
     assert forecast.income_average(txs, TODAY, rec) == 3000.0
 
 
+def test_income_average_excludes_the_opening_balance() -> None:
+    """An account's opening balance is money already there, not income."""
+    txs = [_tx("Starting Balance", 12000000, "2026-07-03", category_id="cat-rta")]
+    assert forecast.income_average(txs, TODAY, []) == 0.0
+
+
+def test_income_average_counts_a_transfer_leaving_the_projected_accounts() -> None:
+    """Money transferred in from an account outside the projection is real income."""
+    txs = [
+        _tx("TRANSFER : BROKERAGE", 200000, f"{m}-10", transfer_account_id="brokerage")
+        for m in ("2026-06", "2026-07", "2026-08")
+    ]
+    assert forecast.income_average(txs, TODAY, [], account_ids=frozenset({"acc"})) == 200.0
+
+
 def test_projection_amounts_are_whole_cents() -> None:
     """Spreading spending over days never leaves fractions of a cent."""
     result = forecast.project(
@@ -260,6 +310,18 @@ def test_month_to_date_sums_this_month_without_recurring_amounts() -> None:
     ]
     rec = forecast.recurring(txs, TODAY)
     assert forecast.month_to_date(txs, TODAY, rec) == (-1638.0, 500.0)
+
+
+def test_month_to_date_excludes_the_opening_balance() -> None:
+    """An opening balance added this month is neither spent nor received since the 1st."""
+    txs = [_tx("Starting Balance", 500000, "2026-09-03")]
+    assert forecast.month_to_date(txs, TODAY, []) == (0.0, 0.0)
+
+
+def test_month_to_date_counts_a_transfer_leaving_the_projected_accounts() -> None:
+    """A card payment from the projected account counts since the 1st, as real spending."""
+    txs = [_tx("TRANSFER : VISA", -45000, "2026-09-10", transfer_account_id="visa")]
+    assert forecast.month_to_date(txs, TODAY, [], account_ids=frozenset({"acc"})) == (-45.0, 0.0)
 
 
 # ---------------------------------------------------------------------------

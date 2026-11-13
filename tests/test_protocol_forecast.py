@@ -240,6 +240,25 @@ def test_transfers_between_projected_accounts_cancel(budget: AsyncMock) -> None:
     assert [o["amount"] for o in alone["assumptions"]["scheduled"]] == [-200.0, -200.0]
 
 
+def test_a_transfer_to_an_account_outside_the_projection_is_real_spending() -> None:
+    """A loan repaid by transfer to a tracking account left out of the projection still counts."""
+    payments = [
+        {
+            "payee_name": "Transfer : Loan",
+            "amount": -500000,
+            "date": f"2026-{m:02d}-15",
+            "deleted": False,
+            "transfer_account_id": "loan",
+            "account_id": "acc",
+        }
+        for m in (5, 6, 7, 8)
+    ]
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=_TXS + payments)):
+        data = _call({"plan_id": "b1", "until": "2026-10"}).structured_content
+    assert "TRANSFER : LOAN" in {r["payee"] for r in data["assumptions"]["recurring"]}
+    assert data["months"][1]["outflows"] == -400.0 - 30.0 - 500.0
+
+
 def test_schedules_of_other_accounts_are_left_out(budget: AsyncMock) -> None:
     """Only the projected accounts' schedules count."""
     budget.return_value = [
