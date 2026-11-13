@@ -160,6 +160,10 @@ async def _undo_reconcile(
 
     Returns:
         What was done, or what to return instead when the user did not agree.
+
+    Raises:
+        RuntimeError: If deleting the adjustment fails for a reason other than it
+            being already gone from YNAB.
     """
     details = entry.details
     statuses = {tx["id"]: tx for tx in await client.get_transactions(plan_id)}
@@ -176,7 +180,12 @@ async def _undo_reconcile(
         return refused
     await client.set_transactions_cleared(plan_id, reverted, "cleared")
     if adjustment:
-        await client.delete_transaction(plan_id, adjustment)
+        try:
+            await client.delete_transaction(plan_id, adjustment)
+        except RuntimeError as error:
+            # Already gone from YNAB: nothing left to delete, not a reason to block the undo.
+            if not str(error).startswith("YNAB 404:"):
+                raise
     return _undone(book, entry, "Reconciliation undone.")
 
 

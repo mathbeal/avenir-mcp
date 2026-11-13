@@ -156,6 +156,117 @@ def test_adjustment_is_created_on_request_then_undone(bank: _Bank) -> None:
     assert bank.status("t2") == "cleared"
 
 
+def test_adjustment_is_removed_when_marking_reconciled_fails(bank: _Bank) -> None:
+    """A failed PATCH after the adjustment POST does not leave an orphan in YNAB.
+
+    The adjustment transaction that was just created is deleted again, and nothing
+    is journaled: there is no half-applied operation left for undo_operation to find.
+    """
+    with patch(
+        "avenir_mcp.client.set_transactions_cleared",
+        AsyncMock(side_effect=RuntimeError("YNAB 500: internal error")),
+    ):
+        result = call("reconcile_account", _args(80.0, adjust=True), accept)
+    assert result.is_error
+    assert bank.created and bank.deleted == ["adj"]
+    undo = call("undo_operation", {"plan_id": "b1"})
+    assert undo.is_error
+    assert "Nothing to undo" in undo.content[0].text
+
+
+def test_cleared_status_failure_without_an_adjustment_is_not_hidden(bank: _Bank) -> None:
+    """A PATCH failure with no adjustment to clean up is reported as is.
+
+    There is nothing to compensate for when adjust was not requested: the original
+    error reaches the caller unchanged.
+    """
+    with patch(
+        "avenir_mcp.client.set_transactions_cleared",
+        AsyncMock(side_effect=RuntimeError("YNAB 500: internal error")),
+    ):
+        result = call("reconcile_account", _args(70.0), accept)
+    assert result.is_error
+    assert "YNAB 500" in result.content[0].text
+    assert not bank.deleted
+
+
+def test_adjustment_cleanup_failure_is_reported_alongside_the_original_error(bank: _Bank) -> None:
+    """If the compensating delete also fails, both failures reach the user.
+
+    Silently giving up would leave a balance adjustment stuck in YNAB without saying so.
+    """
+    with (
+        patch(
+            "avenir_mcp.client.set_transactions_cleared",
+            AsyncMock(side_effect=RuntimeError("YNAB 500: internal error")),
+        ),
+        patch(
+            "avenir_mcp.client.delete_transaction",
+            AsyncMock(side_effect=RuntimeError("YNAB 503: service unavailable")),
+        ),
+    ):
+        result = call("reconcile_account", _args(80.0, adjust=True), accept)
+    assert result.is_error
+    message = result.content[0].text
+    assert "YNAB 500" in message and "YNAB 503" in message
+    assert not bank.deleted
+
+
+def test_undo_reconcile_tolerates_adjustment_already_gone(bank: _Bank) -> None:
+    """A 404 deleting an adjustment already gone from YNAB still completes the undo.
+
+    Without this, an adjustment removed directly in YNAB would make every later
+    undo_operation of this reconciliation fail forever on the same 404.
+    """
+    call("reconcile_account", _args(80.0, adjust=True), accept)
+    with patch(
+        "avenir_mcp.client.delete_transaction",
+        AsyncMock(side_effect=RuntimeError("YNAB 404: transaction not found")),
+    ):
+        undo = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert undo.structured_content["status"] == "applied"
+    assert bank.status("t2") == "cleared"
+    again = call("undo_operation", {"plan_id": "b1"})
+    assert again.is_error
+    assert "Nothing to undo" in again.content[0].text
+
+
+def test_undo_reconcile_does_not_hide_a_real_delete_failure(bank: _Bank) -> None:
+    """A delete failure other than 404 still blocks the undo, so it can be retried.
+
+    Only "already gone" is safe to ignore; any other failure must stay visible, or a
+    balance adjustment could silently stay in YNAB and be reported wrongly as undone.
+    """
+    call("reconcile_account", _args(80.0, adjust=True), accept)
+    with patch(
+        "avenir_mcp.client.delete_transaction",
+        AsyncMock(side_effect=RuntimeError("YNAB 503: service unavailable")),
+    ):
+        undo = call("undo_operation", {"plan_id": "b1"}, accept)
+    assert undo.is_error
+    assert "YNAB 503" in undo.content[0].text
+    assert bank.status("adj") == "cleared"
+    still_there = call("undo_operation", {"plan_id": "b1"})
+    assert still_there.structured_content["status"] == "confirmation_required"
+
+
+def test_adjustment_goes_to_ready_to_assign_not_uncategorized(bank: _Bank) -> None:
+    """The internal group also holds Uncategorized: the adjustment must not land there.
+
+    The category is chosen by its name, not by being first in the group: YNAB gives
+    no guarantee of order among the internal categories.
+    """
+    uncategorized = {
+        "id": "c-uncat",
+        "name": "Uncategorized",
+        "category_group_name": "Internal Master Category",
+    }
+    cats = [uncategorized, *_CATS]
+    with patch("avenir_mcp.client.get_categories", AsyncMock(return_value=cats)):
+        call("reconcile_account", _args(80.0, adjust=True), accept)
+    assert bank.created[0]["category_id"] == "c-inflow"
+
+
 def test_nothing_to_reconcile(bank: _Bank) -> None:
     """Already reconciled and matching: nothing to do."""
     bank.transactions = [bank.transactions[0]]
