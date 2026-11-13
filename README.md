@@ -135,7 +135,7 @@ request. Security reports: [SECURITY.md](SECURITY.md). Also: [ARCHITECTURE.md](A
 [ROADMAP.md](ROADMAP.md), [GOVERNANCE.md](GOVERNANCE.md) and the
 [code of conduct](CODE_OF_CONDUCT.md).
 
-Built and tested against YNAB's API v1.88.0; a weekly
+Built and tested against YNAB's API v1.90.0; a weekly
 [`YNAB API drift`](https://github.com/mathbeal/avenir-mcp/actions/workflows/api-drift.yml)
 check fails when YNAB publishes a new version. Self-checked on every change against
 YNAB's API terms of 2025-05-28 (naming, attribution, YNAB's own image, a personal token

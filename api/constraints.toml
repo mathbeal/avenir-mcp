@@ -69,6 +69,17 @@ tests = [
 # which categories are paired to a loan. targets.py says so.
 
 [[rule]]
+rule = "SaveCategory.goal_target: Must not be negative."
+status = "tested"
+tests = [
+  "tests/test_targets.py::test_contradictory_targets_are_refused",
+  "tests/test_protocol_targets.py::test_invalid_targets_are_refused_before_asking",
+]
+# create_category never sends goal_target. set_category_target is the only path that
+# does, and targets.plan() already refuses an amount that is not greater than 0 before
+# any call reaches YNAB.
+
+[[rule]]
 rule = "SaveCategory.goal_target_date: Not supported for categories paired to a loan account."
 status = "tested"
 tests = ["tests/test_targets.py::test_what_card_and_loan_categories_do_not_take_is_refused_first"]

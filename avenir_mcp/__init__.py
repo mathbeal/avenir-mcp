@@ -8,4 +8,4 @@ __version__ = "0.8.0"
 # The version of YNAB's API this release is built and tested against. It must match
 # the snapshot in api/ynab-operations.json, which the weekly "YNAB API drift" check
 # compares with the live specification; a test enforces the match.
-YNAB_API_VERSION = "1.88.0"
+YNAB_API_VERSION = "1.90.0"
