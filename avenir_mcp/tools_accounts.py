@@ -55,8 +55,10 @@ class ReconcileResult(Model):
     """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
-# YNAB's own group, which holds the single "Inflow: Ready to Assign" category.
+# YNAB's own group: "Inflow: Ready to Assign", where the adjustment goes, and other
+# internal categories such as "Uncategorized", in no guaranteed order.
 READY_TO_ASSIGN_GROUP = "Internal Master Category"
+READY_TO_ASSIGN_CATEGORY = "Inflow: Ready to Assign"
 
 
 @mcp.tool(
@@ -103,6 +105,8 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
 
     Raises:
         ToolError: If the account is not in the plan, or the confirmation code is refused.
+        RuntimeError: If marking transactions reconciled fails and adjust was not
+            requested, so there is no adjustment transaction to clean up.
     """
     logger.info("Tool called: reconcile_account(adjust=%s)", adjust)
     accounts = {a["id"]: a["name"] for a in await client.get_accounts(plan_id)}
@@ -164,6 +168,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
                 c["id"]
                 for c in await client.get_categories(plan_id)
                 if c.get("category_group_name") == READY_TO_ASSIGN_GROUP
+                and c.get("name") == READY_TO_ASSIGN_CATEGORY
             ),
             None,
         )
@@ -182,7 +187,23 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         )
         adjustment_id = created["transaction_ids"][0]
         to_reconcile.append(adjustment_id)
-    await client.set_transactions_cleared(plan_id, to_reconcile, "reconciled")
+    try:
+        await client.set_transactions_cleared(plan_id, to_reconcile, "reconciled")
+    except RuntimeError as error:
+        if adjustment_id is None:
+            raise
+        try:
+            await client.delete_transaction(plan_id, adjustment_id)
+        except RuntimeError as cleanup_error:
+            raise ToolError(
+                f"{error} The balance adjustment of {difference:.2f} was created in YNAB "
+                f"(transaction {adjustment_id}) but could not be removed either: "
+                f"{cleanup_error} Check it in YNAB before reconciling again."
+            ) from cleanup_error
+        raise ToolError(
+            f"{error} The balance adjustment of {difference:.2f} that had just been created "
+            "was removed again: nothing was left changed. Call reconcile_account again."
+        ) from error
     operation_id = journal.Journal(journal.default_path()).record(
         plan_id,
         "reconcile",
