@@ -1,5 +1,5 @@
 {
- "version": "1.90.0",
+ "version": "1.91.0",
  "operations": [
   {
    "id": "getPlans",
@@ -42,13 +42,16 @@
    "path": "/plans/{plan_id}/categories",
    "rules": [
     "SaveCategory.category_group_id: An internal category group may not be specified.",
-    "SaveCategory.goal_frequency: Cannot be combined with goal_target_date and is not supported for Credit Card Payment categories or categories paired to a loan account.",
+    "SaveCategory.goal_frequency: 'monthly' accepts an optional goal_target_date, and 'weekly' cannot be combined with goal_target_date.",
+    "SaveCategory.goal_frequency: 'yearly' also requires goal_target_date, the date the target is next due.",
+    "SaveCategory.goal_frequency: Not supported for Credit Card Payment categories or categories paired to a loan account.",
     "SaveCategory.goal_frequency: Requires goal_target.",
     "SaveCategory.goal_needs_whole_amount: Only supported for 'NEED' goals, and not supported for Credit Card Payment categories or categories paired to a loan account.",
     "SaveCategory.goal_needs_whole_amount: Whether the goal requires the full target amount each period.",
     "SaveCategory.goal_target: If goal_type is not specified, it will default to 'NEED', or to 'MF' for Credit Card Payment categories and 'DEBT' for categories paired to a loan account.",
     "SaveCategory.goal_target: Must not be negative.",
-    "SaveCategory.goal_target_date: Not supported for categories paired to a loan account."
+    "SaveCategory.goal_target_date: Not supported for categories paired to a loan account.",
+    "SaveCategory.goal_target_date: Required for yearly targets, so it cannot be removed from one."
    ]
   },
   {
@@ -62,13 +65,16 @@
    "path": "/plans/{plan_id}/categories/{category_id}",
    "rules": [
     "SaveCategory.category_group_id: An internal category group may not be specified.",
-    "SaveCategory.goal_frequency: Cannot be combined with goal_target_date and is not supported for Credit Card Payment categories or categories paired to a loan account.",
+    "SaveCategory.goal_frequency: 'monthly' accepts an optional goal_target_date, and 'weekly' cannot be combined with goal_target_date.",
+    "SaveCategory.goal_frequency: 'yearly' also requires goal_target_date, the date the target is next due.",
+    "SaveCategory.goal_frequency: Not supported for Credit Card Payment categories or categories paired to a loan account.",
     "SaveCategory.goal_frequency: Requires goal_target.",
     "SaveCategory.goal_needs_whole_amount: Only supported for 'NEED' goals, and not supported for Credit Card Payment categories or categories paired to a loan account.",
     "SaveCategory.goal_needs_whole_amount: Whether the goal requires the full target amount each period.",
     "SaveCategory.goal_target: If goal_type is not specified, it will default to 'NEED', or to 'MF' for Credit Card Payment categories and 'DEBT' for categories paired to a loan account.",
     "SaveCategory.goal_target: Must not be negative.",
-    "SaveCategory.goal_target_date: Not supported for categories paired to a loan account."
+    "SaveCategory.goal_target_date: Not supported for categories paired to a loan account.",
+    "SaveCategory.goal_target_date: Required for yearly targets, so it cannot be removed from one."
    ]
   },
   {
