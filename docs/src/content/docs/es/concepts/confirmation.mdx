@@ -72,11 +72,15 @@ de acuerdo, vuelve a llamar con los mismos argumentos más `confirmation`.
 | formulario aceptado, casilla marcada | `applied` |
 | formulario aceptado, casilla **no** marcada | `declined` |
 | `decline` | `declined` — nada escrito |
-| `cancel` (cerrado, o cliente incapaz de mostrarlo) | se recurre a un código de confirmación |
+| `cancel`, el cliente mostró la pregunta | se recurre a un código de confirmación, o `declined` con `AVENIR_MCP_DISMISS_IS_DECLINE=1` |
+| `cancel`, el cliente es incapaz de mostrarla | se recurre a un código de confirmación, sea cual sea el valor de `AVENIR_MCP_DISMISS_IS_DECLINE` |
 
-Cerrar no es rechazar: los clientes no interactivos cierran todas las preguntas, y
-contarlas como un *no* haría imposible cualquier escritura — el defecto que encontró la
-primera ejecución de la [evaluación](/avenir-mcp/es/project/evaluation/).
+Cerrar no es rechazar por defecto: los clientes no interactivos cierran todas las
+preguntas, y contarlas como un *no* haría imposible cualquier escritura — el defecto que
+encontró la primera ejecución de la [evaluación](/avenir-mcp/es/project/evaluation/). Un
+cliente que usted sepa que muestra la pregunta, y solo la cierra cuando el usuario la
+cierra, puede activar esta opción con `AVENIR_MCP_DISMISS_IS_DECLINE=1` — vea
+[Tratar una pregunta cerrada como un rechazo](#tratar-una-pregunta-cerrada-como-un-rechazo).
 
 ## Códigos de confirmación
 
@@ -112,6 +116,24 @@ Con `AVENIR_MCP_REQUIRE_ELICITATION=1`:
 | se pasa un código `confirmation` | comprobado y aplicado | error: códigos desactivados |
 
 Solo los clientes que admiten la elicitación MCP pueden entonces escribir.
+
+## Tratar una pregunta cerrada como un rechazo
+
+Un cliente que puede mostrar la pregunta, pero cuyo usuario la cerró sin responder,
+recurre por defecto a un código de confirmación; el agente debe entonces transmitir
+únicamente el acuerdo del propio usuario, nunca el código por sí solo. Un cliente que,
+según sabe, se comporta así solo cuando el usuario cierra la pregunta — nunca cuando
+simplemente no puede mostrarla —, puede omitir el código por completo con
+`AVENIR_MCP_DISMISS_IS_DECLINE=1`:
+
+| Situación | Sin la variable | Con ella |
+|---|---|---|
+| el cliente sabe preguntar, pregunta cerrada sin responder | un código de confirmación | `declined` |
+| el cliente no sabe preguntar | un código de confirmación | un código de confirmación (sin cambios) |
+| también está definida `AVENIR_MCP_REQUIRE_ELICITATION=1` | ya `declined` | `declined`, sin cambios |
+
+Desactivada por defecto: un cliente incapaz de distinguir un rechazo real del usuario de
+una pregunta simplemente cerrada sin leer no debería tratar cada cierre como un rechazo.
 
 ## Lo que ve el usuario
 

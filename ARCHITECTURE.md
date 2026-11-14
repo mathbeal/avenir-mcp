@@ -82,11 +82,14 @@ hour's budget, and a request YNAB never answered reaches the agent as
 ### Confirmations
 
 `confirm.py` asks the user through MCP elicitation when the client supports it.
-Otherwise the tool returns the preview and a single-use code (`writes.Confirmations`)
-bound to a SHA-256 fingerprint of exactly that preview, valid ten minutes, kept in
-memory. With `AVENIR_MCP_REQUIRE_ELICITATION=1`, codes are disabled. One write tool
-acts at once, without a preview: `approve_transactions` (marks transactions as
-reviewed).
+Otherwise, or if the question is dismissed without an answer, the tool returns the
+preview and a single-use code (`writes.Confirmations`) bound to a SHA-256 fingerprint
+of exactly that preview, valid ten minutes, kept in memory. With
+`AVENIR_MCP_REQUIRE_ELICITATION=1`, codes are disabled and a dismissal counts as no.
+`AVENIR_MCP_DISMISS_IS_DECLINE=1` does the same for a dismissal alone, on a client that
+can ask but had the box closed unanswered; a client that cannot ask at all still gets a
+code. One write tool acts at once, without a preview: `approve_transactions` (marks
+transactions as reviewed).
 
 ### Journal and undo
 

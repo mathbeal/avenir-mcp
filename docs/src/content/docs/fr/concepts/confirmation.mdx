@@ -73,11 +73,15 @@ rappelle l'outil avec les mêmes arguments plus `confirmation`.
 | formulaire accepté, case cochée | `applied` |
 | formulaire accepté, case **non** cochée | `declined` |
 | `decline` | `declined` — rien d'écrit |
-| `cancel` (fermé, ou client incapable de l'afficher) | repli sur un code de confirmation |
+| `cancel`, le client a affiché la question | repli sur un code de confirmation, ou `declined` avec `AVENIR_MCP_DISMISS_IS_DECLINE=1` |
+| `cancel`, le client est incapable de l'afficher | repli sur un code de confirmation, quelle que soit la valeur de `AVENIR_MCP_DISMISS_IS_DECLINE` |
 
-Une fermeture n'est pas un refus : les clients non interactifs ferment toutes les
-questions, et les compter comme un *non* rendrait toute écriture impossible — le défaut
-qu'a trouvé la première exécution de l'[évaluation](/avenir-mcp/fr/project/evaluation/).
+Une fermeture n'est pas un refus par défaut : les clients non interactifs ferment toutes
+les questions, et les compter comme un *non* rendrait toute écriture impossible — le
+défaut qu'a trouvé la première exécution de l'[évaluation](/avenir-mcp/fr/project/evaluation/).
+Un client dont vous savez qu'il affiche la question, et ne la ferme que lorsque
+l'utilisateur la ferme, peut activer cette option avec `AVENIR_MCP_DISMISS_IS_DECLINE=1`
+— voir [Considérer une question fermée comme un refus](#considérer-une-question-fermée-comme-un-refus).
 
 ## Codes de confirmation
 
@@ -113,6 +117,25 @@ Un code de confirmation prouve qu'un aperçu a existé, pas que vous l'avez lu. 
 | un code `confirmation` est transmis | vérifié, puis appliqué | erreur : les codes sont désactivés |
 
 Seuls les clients qui gèrent l'élicitation MCP peuvent alors écrire.
+
+## Considérer une question fermée comme un refus
+
+Un client capable d'afficher la question, mais dont l'utilisateur l'a fermée sans y
+répondre, a recours par défaut à un code de confirmation ; l'agent doit alors toujours
+transmettre l'accord de l'utilisateur lui-même, jamais le code seul. Un client dont vous
+savez qu'il se comporte ainsi uniquement lorsque l'utilisateur ferme la question — et
+jamais lorsqu'il ne peut tout simplement pas l'afficher —, peut écarter entièrement le
+code avec `AVENIR_MCP_DISMISS_IS_DECLINE=1` :
+
+| Situation | Sans la variable | Avec |
+|---|---|---|
+| le client sait demander, question fermée sans réponse | un code de confirmation | `declined` |
+| le client ne sait pas demander | un code de confirmation | un code de confirmation (non concerné) |
+| `AVENIR_MCP_REQUIRE_ELICITATION=1` est aussi définie | déjà `declined` | `declined`, inchangé |
+
+Désactivée par défaut : un client incapable de distinguer un vrai refus de l'utilisateur
+d'une question seulement fermée sans être lue ne doit pas voir chaque fermeture traitée
+comme un refus.
 
 ## Ce que voit l'utilisateur
 
