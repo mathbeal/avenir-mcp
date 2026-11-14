@@ -119,6 +119,66 @@ def test_required_client_confirmation_still_accepts_a_yes() -> None:
     assert _ask(_Ctx("2025-11-25", answer=AcceptedElicitation(data=True))) == "applied"
 
 
+# ---------------------------------------------------------------------------
+# AVENIR_MCP_DISMISS_IS_DECLINE=1: a closed box, on a client that can ask,
+# counts as a no instead of falling back to a code
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(name="dismiss_is_decline")
+def _dismiss_is_decline(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AVENIR_MCP_DISMISS_IS_DECLINE", "1")
+
+
+@pytest.mark.usefixtures("dismiss_is_decline")
+def test_dismiss_is_decline_treats_an_older_protocol_dismissal_as_no() -> None:
+    """A closed box on the pre-2026-07-28 protocol declines instead of issuing a code."""
+    assert _ask(_Ctx("2025-11-25", answer=CancelledElicitation())) == "declined"
+
+
+@pytest.mark.usefixtures("dismiss_is_decline")
+def test_dismiss_is_decline_treats_a_modern_protocol_dismissal_as_no() -> None:
+    """A closed box on the 2026-07-28 protocol declines instead of issuing a code."""
+    ctx = _Ctx(
+        "2026-07-28",
+        input_responses={"confirm": types.ElicitResult(action="cancel")},
+        request_state=writes.fingerprint("b1", "change"),
+    )
+    assert _ask(ctx) == "declined"
+
+
+def test_dismiss_is_decline_unset_keeps_issuing_a_code() -> None:
+    """Without the variable, a closed box falls back to a code as before."""
+    code = _ask(_Ctx("2025-11-25", answer=CancelledElicitation()))
+    assert code not in ("applied", "declined")
+    assert confirm.CONFIRMATIONS.consume(code, "b1", "change")
+
+
+@pytest.mark.usefixtures("dismiss_is_decline")
+def test_dismiss_is_decline_does_not_apply_to_a_client_that_cannot_ask() -> None:
+    """A client with no elicitation support still gets a code: it never showed a box."""
+    code = _ask(_Ctx("2025-11-25", session=_Session(can_ask=False)))
+    assert code not in ("applied", "declined")
+    assert confirm.CONFIRMATIONS.consume(code, "b1", "change")
+
+
+@pytest.mark.usefixtures("dismiss_is_decline", "required")
+def test_dismiss_is_decline_combined_with_require_elicitation_still_declines() -> None:
+    """The stricter AVENIR_MCP_REQUIRE_ELICITATION=1 keeps winning when both are set."""
+    assert _ask(_Ctx("2025-11-25", answer=CancelledElicitation())) == "declined"
+
+
+@pytest.mark.parametrize("value", ["0", "true", "yes", ""])
+def test_dismiss_is_decline_any_other_value_is_disabled(
+    monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    """Only the exact value "1" turns the behaviour on."""
+    monkeypatch.setenv("AVENIR_MCP_DISMISS_IS_DECLINE", value)
+    code = _ask(_Ctx("2025-11-25", answer=CancelledElicitation()))
+    assert code not in ("applied", "declined")
+    assert confirm.CONFIRMATIONS.consume(code, "b1", "change")
+
+
 def test_every_code_comes_with_the_warning_that_only_the_user_can_agree() -> None:
     """Writes other than recategorisation say it too, before their question."""
     stop = confirm.not_applied("code-1", "Budget Rent for 2026-09-01: 800.00 → 50.00?")

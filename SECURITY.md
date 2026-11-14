@@ -22,11 +22,15 @@ What the server does:
   only confirms the exact changes it was issued for
 - with `AVENIR_MCP_REQUIRE_ELICITATION=1`, only the user's yes given in the client
   confirms a write: codes, which an agent could relay alone, are disabled
-- a client that cannot ask the user (no MCP elicitation) leaves the code to the agent.
-  Every code comes with the instruction that only the user can agree, never a payee or
-  a memo, but a model can still be misled: in the evaluation, one model out of eight
-  used a code on its own after reading a planted memo, then undid the change. Use a
-  client that supports elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`
+- a client that cannot ask the user (no MCP elicitation), **or one that can ask but had
+  the question closed without an answer**, leaves the code to the agent. Every code
+  comes with the instruction that only the user can agree, never a payee or a memo, but
+  a model can still be misled: in the evaluation, one model out of eight used a code on
+  its own after reading a planted memo, then undid the change. Use a client that
+  supports elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`; or, on a client you know
+  shows the question and only closes it when the user dismisses it,
+  `AVENIR_MCP_DISMISS_IS_DECLINE=1` turns a closed question into a decline without
+  forbidding codes for a client that cannot ask at all
 - they record applied operations in a local journal (`AVENIR_MCP_JOURNAL`) holding
   identifiers, the amounts a budget change or a move assigned before and after, the
   colours of a flag change, a target to restore and, for a renamed payee, its name
@@ -290,9 +294,11 @@ risk that remains are in
 
 ### Residual risk
 
-- A client without elicitation leaves the confirmation code to the agent, and a model
-  can still be misled into using it (see [Scope](#scope)). Use a client that supports
-  elicitation, with `AVENIR_MCP_REQUIRE_ELICITATION=1`.
+- A client without elicitation, or one whose question was closed without an answer,
+  leaves the confirmation code to the agent, and a model can still be misled into using
+  it (see [Scope](#scope)). Use a client that supports elicitation, with
+  `AVENIR_MCP_REQUIRE_ELICITATION=1`, or `AVENIR_MCP_DISMISS_IS_DECLINE=1` for the
+  closed-question case alone.
 - `approve_transactions` acts without a preview.
 - The YNAB token cannot be narrowed to read-only access.
 - Over HTTP, traffic on `127.0.0.1` is not encrypted.

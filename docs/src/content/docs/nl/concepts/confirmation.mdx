@@ -72,11 +72,15 @@ als die akkoord gaat, opnieuw aan met dezelfde argumenten plus `confirmation`.
 | formulier geaccepteerd, vakje aangevinkt | `applied` |
 | formulier geaccepteerd, vakje **niet** aangevinkt | `declined` |
 | `decline` | `declined` – niets geschreven |
-| `cancel` (weggeklikt, of een client die het niet kan tonen) | terugval op een bevestigingscode |
+| `cancel`, client toonde de vraag | terugval op een bevestigingscode, of `declined` met `AVENIR_MCP_DISMISS_IS_DECLINE=1` |
+| `cancel`, client kan de vraag helemaal niet tonen | terugval op een bevestigingscode, wat `AVENIR_MCP_DISMISS_IS_DECLINE` ook is |
 
-Wegklikken is geen weigering: clients zonder interface klikken elke vraag weg, en dat als
-*nee* behandelen zou elke schrijfactie onmogelijk maken – het defect dat de
+Wegklikken is standaard geen weigering: clients zonder interface klikken elke vraag weg,
+en dat als *nee* behandelen zou elke schrijfactie onmogelijk maken – het defect dat de
 [evaluatie](/avenir-mcp/nl/project/evaluation/) van avenir-mcp bij haar eerste run vond.
+Een client waarvan u weet dat hij de vraag toont, en deze alleen sluit wanneer de
+gebruiker hem wegklikt, kan dit inschakelen met `AVENIR_MCP_DISMISS_IS_DECLINE=1` – zie
+[Een weggeklikte vraag behandelen als een weigering](#een-weggeklikte-vraag-behandelen-als-een-weigering).
 
 ## Bevestigingscodes
 
@@ -113,6 +117,25 @@ Een bevestigingscode bewijst dat er een voorbeeldversie bestond, niet dat u deze
 | er wordt een  code`confirmation` doorgegeven | gecontroleerd en vervolgens toegepast | fout: codes zijn uitgeschakeld |
 
 Alleen clients die MCP-elicitation ondersteunen, kunnen dan schrijven.
+
+## Een weggeklikte vraag behandelen als een weigering
+
+Een client die de vraag kan tonen, maar waarvan de gebruiker deze zonder antwoord heeft
+weggeklikt, valt standaard terug op een bevestigingscode; de agent moet dan toch de
+eigen instemming van de gebruiker doorgeven, nooit alleen de code. Een client waarvan u
+weet dat hij zich alleen zo gedraagt wanneer de gebruiker de vraag wegklikt – nooit
+wanneer hij de vraag simpelweg niet kan tonen –, kan de code volledig overslaan met
+`AVENIR_MCP_DISMISS_IS_DECLINE=1`:
+
+| Situatie | Zonder de variabele | Met de variabele |
+|---|---|---|
+| client kan vragen, vraag weggeklikt zonder antwoord | een bevestigingscode | `declined` |
+| client kan helemaal niet vragen | een bevestigingscode | een bevestigingscode (geen verandering) |
+| `AVENIR_MCP_REQUIRE_ELICITATION=1` is ook ingesteld | al `declined` | `declined`, ongewijzigd |
+
+Standaard uitgeschakeld: een client die een echte weigering van de gebruiker niet kan
+onderscheiden van een vraag die alleen ongelezen wordt weggeklikt, mag niet elke
+wegklik als een weigering behandelen.
 
 ## Wat de gebruiker ziet
 

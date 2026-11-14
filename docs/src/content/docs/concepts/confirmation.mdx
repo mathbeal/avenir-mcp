@@ -72,11 +72,15 @@ calls again with the same arguments plus `confirmation`.
 | form accepted, box ticked | `applied` |
 | form accepted, box **not** ticked | `declined` |
 | `decline` | `declined` — nothing written |
-| `cancel` (dismissed, or a client that cannot show it) | falls back to a confirmation code |
+| `cancel`, client showed the box | falls back to a confirmation code, or `declined` with `AVENIR_MCP_DISMISS_IS_DECLINE=1` |
+| `cancel`, client cannot show the box at all | falls back to a confirmation code, whatever `AVENIR_MCP_DISMISS_IS_DECLINE` is set to |
 
-A dismissal is not a refusal: headless clients dismiss every question, and treating that
-as *no* would make every write impossible — the defect avenir-mcp's
-[evaluation](/avenir-mcp/project/evaluation/) found on its first run.
+A dismissal is not a refusal by default: headless clients dismiss every question, and
+treating that as *no* would make every write impossible — the defect avenir-mcp's
+[evaluation](/avenir-mcp/project/evaluation/) found on its first run. A client you know
+shows the box, and only closes it when the user dismisses it, can opt in with
+`AVENIR_MCP_DISMISS_IS_DECLINE=1` — see
+[Treating a dismissed question as a refusal](#treating-a-dismissed-question-as-a-refusal).
 
 ## Confirmation codes
 
@@ -112,6 +116,23 @@ A confirmation code proves that a preview existed, not that you read it. With
 | a `confirmation` code is passed | checked, then applied | error: codes are disabled |
 
 Only clients that support MCP elicitation can then write.
+
+## Treating a dismissed question as a refusal
+
+A client that can show the question, but whose user closed it without an answer, falls
+back to a confirmation code by default — the agent must then still relay the user's own
+agreement, never the code on its own. A client you know behaves this way only when the
+user dismisses the box — never when it simply cannot show one — can skip the code
+entirely with `AVENIR_MCP_DISMISS_IS_DECLINE=1`:
+
+| Situation | Without the variable | With it |
+|---|---|---|
+| client can ask, question closed unanswered | a confirmation code | `declined` |
+| client cannot ask at all | a confirmation code | a confirmation code (unaffected) |
+| `AVENIR_MCP_REQUIRE_ELICITATION=1` is also set | `declined` already | `declined`, unchanged |
+
+Off by default, because a client that cannot tell "the user said no" apart from "every
+question gets closed unread" should not have every dismissal treated as a refusal.
 
 ## What the user sees
 

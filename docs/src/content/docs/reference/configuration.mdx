@@ -18,6 +18,7 @@ block or in the shell that starts it. Nothing else is read: no configuration fil
 | `YNAB_API_KEY_FILE` | unset | A file holding the token, used when `YNAB_API_KEY` is unset. |
 | `AVENIR_MCP_WRITE` | unset: read-only | `1` registers the tools that change your plan. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | unset | `1` accepts only a yes given in the client: no confirmation codes. |
+| `AVENIR_MCP_DISMISS_IS_DECLINE` | unset | `1` treats a question closed unanswered, on a client that can ask, as `declined`. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP address. |
 | `AVENIR_MCP_PORT` | `8103` | HTTP port. |
@@ -77,6 +78,16 @@ confirmation box. Confirmation codes are neither issued nor accepted, a dismisse
 question counts as no, and a client that cannot ask gets an error. Use it when the model
 might relay a code without asking you — see
 [Confirmation](/avenir-mcp/concepts/confirmation/#requiring-the-users-own-answer).
+
+### `AVENIR_MCP_DISMISS_IS_DECLINE`
+
+Exactly `1`: on a client that can show the confirmation box, closing it without an
+answer is read as `declined` instead of falling back to a confirmation code. A client
+that cannot show the box at all is unaffected, and still gets a code — this variable
+alone does not force every client to support elicitation; use
+`AVENIR_MCP_REQUIRE_ELICITATION` for that. Turn it on only for a client you know shows
+the box and closes it only when the user dismisses it — see
+[Confirmation](/avenir-mcp/concepts/confirmation/#treating-a-dismissed-question-as-a-refusal).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
 

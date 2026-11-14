@@ -18,6 +18,7 @@ blok van uw MCP-client of in de shell waarmee het programma wordt gestart. Er wo
 |  `YNAB_API_KEY_FILE`| niet ingesteld | Een bestand waarin het token is opgeslagen, dat wordt gebruikt wanneer  niet is`YNAB_API_KEY` ingesteld. |
 |  `AVENIR_MCP_WRITE`| niet ingesteld: alleen-lezen |  `1`registreert de tools die uw plan wijzigen. |
 |  `AVENIR_MCP_REQUIRE_ELICITATION`| niet ingesteld |  `1`accepteert alleen een ‘ja’ dat in de client wordt opgegeven: geen bevestigingscodes. |
+| `AVENIR_MCP_DISMISS_IS_DECLINE` | niet ingesteld | `1` behandelt een onbeantwoord weggeklikte vraag, op een client die kan vragen, als `declined`. |
 |  `AVENIR_MCP_TRANSPORT`|  `stdio`|  `stdio`of `http`. |
 |  `AVENIR_MCP_HOST`|  `127.0.0.1`| HTTP-adres. |
 |  `AVENIR_MCP_PORT`|  `8103`| HTTP-poort. |
@@ -79,6 +80,17 @@ bevestigingsvenster van de client ‘ja’ heeft gezegd. Er worden geen bevestig
 vraag geldt als ‘nee’, en een client die geen vraag kan stellen, krijgt een foutmelding. Gebruik dit wanneer het model
 mogelijk een code doorgeeft zonder u hierom te vragen — zie
 [Bevestiging](/avenir-mcp/concepts/confirmation/#requiring-the-users-own-answer).
+
+### `AVENIR_MCP_DISMISS_IS_DECLINE`
+
+Precies `1`: bij een client die het bevestigingsvenster kan tonen, wordt het sluiten
+ervan zonder antwoord gelezen als `declined`, in plaats van terug te vallen op een
+bevestigingscode. Een client die het venster helemaal niet kan tonen, ondervindt hier
+geen invloed van en krijgt nog steeds een code — deze variabele alleen dwingt geen
+client om elicitation te ondersteunen; gebruik daarvoor `AVENIR_MCP_REQUIRE_ELICITATION`.
+Schakel dit alleen in voor een client waarvan u weet dat hij het venster toont en het
+alleen sluit wanneer de gebruiker het wegklikt — zie
+[Bevestiging](/avenir-mcp/nl/concepts/confirmation/#een-weggeklikte-vraag-behandelen-als-een-weigering).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
 
