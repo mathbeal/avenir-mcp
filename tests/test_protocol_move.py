@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Iterator
 from pathlib import Path
@@ -13,10 +14,20 @@ from typing import Any
 import httpx
 import pytest
 
-from avenir_mcp import retry
+from avenir_mcp import retry, tools_categories
 
 from .fake_month import FakeMonth, serving
-from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
+from .mcp_helpers import (
+    FLAT,
+    FORGED,
+    OldProtocolContext,
+    accept,
+    asking,
+    call,
+    decline,
+    one_line,
+    undo_through_a_blocking_drift,
+)
 
 
 @pytest.fixture(name="month")
@@ -137,6 +148,22 @@ def test_undo_leaves_both_alone_when_one_changed_since(month: FakeMonth) -> None
     assert len(month.sets) == 2
 
 
+def test_undo_move_leaves_both_alone_when_one_changed_while_the_blocking_answer_was_open(
+    month: FakeMonth,
+) -> None:
+    """Before 2026-07-28, the question can stay open a long time: reread before writing.
+
+    If an amount moved again while the user was still being asked to undo the move, the
+    yes is not applied: no absolute amount is written from a reread that is no longer true.
+    """
+    call("move_money", _ARGS, accept)
+    applied = len(month.sets)
+    undo = undo_through_a_blocking_drift(lambda: month.budgeted.update({"c-fun": 1000}))
+    assert undo.status == "nothing_to_do"
+    assert undo.conflicts == ["c-fun"]
+    assert len(month.sets) == applied
+
+
 def test_the_journal_line_holds_ids_and_the_two_budgeted_amounts(
     month: FakeMonth, tmp_path: Path
 ) -> None:
@@ -188,6 +215,46 @@ def test_a_failed_put_back_says_what_to_fix_in_ynab(month: FakeMonth) -> None:
 def test_declined_move_writes_nothing(month: FakeMonth) -> None:
     """If the user says no, both amounts stay."""
     assert call("move_money", _ARGS, decline).structured_content["status"] == "declined"
+    assert not month.sets
+
+
+def test_a_confirmation_code_is_refused_when_a_category_moved_meanwhile(month: FakeMonth) -> None:
+    """A code confirms the exact amounts previewed: if either moved since, nothing is moved.
+
+    The result is a fresh preview of the current amounts, not a bare error, so the agent
+    can show it and ask again.
+    """
+    preview = call("move_money", _ARGS).structured_content
+    month.budgeted["c-food"] = 999000
+    result = call(
+        "move_money", {**_ARGS, "confirmation": preview["confirmation"]}
+    ).structured_content
+    assert result["status"] == "confirmation_required"
+    assert result["to_category"]["from_amount"] == 999.0
+    assert "999.00" in result["message"]
+    assert not month.sets
+
+
+def test_a_blocking_answer_is_refused_when_a_category_moved_while_it_was_open(
+    month: FakeMonth,
+) -> None:
+    """Before 2026-07-28, the question can stay open a long time: reread before writing.
+
+    If an amount moved while the user was still being asked, the yes is not applied: the
+    tool rereads and refuses rather than write two absolute amounts computed from a read
+    that is no longer true.
+    """
+
+    def drift() -> None:
+        month.budgeted["c-fun"] = 1000
+
+    ctx = OldProtocolContext(on_elicit=drift)
+    coro = tools_categories.move_money("b1", "2026-09-01", "c-fun", "c-food", 30.0, ctx)  # type: ignore[arg-type]
+    result = asyncio.run(coro)
+    assert isinstance(result, tools_categories.MoneyMove)
+    assert result.status == "confirmation_required"
+    assert result.from_category.from_amount == 1.0
+    assert "1.00" in result.message
     assert not month.sets
 
 
