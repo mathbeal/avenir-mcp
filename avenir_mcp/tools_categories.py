@@ -16,7 +16,7 @@ from pydantic import Field
 from avenir_mcp import app, client, journal
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
-from avenir_mcp.confirm import WriteStatus, gate, merged
+from avenir_mcp.confirm import WriteStatus, gate, merged, peek, reissue
 from avenir_mcp.model import Model
 from avenir_mcp.text import one_line, untrusted
 
@@ -220,6 +220,121 @@ class BudgetChange(Model):
     """Journal id of the applied operation, for undo_operation; null unless status is applied."""
 
 
+def _budget_change(
+    category_id: str, category: dict[str, Any], month: str, after: int
+) -> BudgetChange:
+    """Preview setting a category's budgeted amount, from its current state.
+
+    Args:
+        category_id: The category.
+        category: Its current state, as YNAB returns it, in milliunits.
+        month: The month, YYYY-MM-01.
+        after: The amount wanted, in milliunits.
+
+    Returns:
+        The amounts before and after, status "nothing_to_do" until the caller says otherwise.
+    """
+    before = category["budgeted"]
+    return BudgetChange(
+        status="nothing_to_do",
+        message="Nothing to change.",
+        category_id=category_id,
+        category=untrusted(category["name"]),
+        month=month,
+        from_amount=client.milliunit_to_amount(before),
+        to_amount=client.milliunit_to_amount(after),
+        available_before=client.milliunit_to_amount(category["balance"]),
+        available_after=client.milliunit_to_amount(category["balance"] + after - before),
+        confirmation=None,
+        operation_id=None,
+    )
+
+
+def _budget_question(result: BudgetChange) -> str:
+    """Write the question a budget change is confirmed with.
+
+    Args:
+        result: The preview, as :func:`_budget_change` builds it.
+
+    Returns:
+        The question.
+    """
+    return (
+        f"Budget {result.category} for {result.month}: "
+        f"{result.from_amount:.2f} → {result.to_amount:.2f}"
+        f"{_available(result.available_before, result.available_after, result.from_amount)}?"
+    )
+
+
+def _budget_snapshot(category: dict[str, Any]) -> dict[str, int]:
+    """What a budget change's confirmation is bound to, besides the category, month and amount.
+
+    Args:
+        category: The category's current state, in milliunits.
+
+    Returns:
+        Its budgeted and available amounts, so a code issued for other ones is refused.
+    """
+    return {"before": category["budgeted"], "balance": category["balance"]}
+
+
+async def _reread_category(plan_id: str, month: str, category_id: str) -> dict[str, Any]:
+    """Read a category's current state again, right before a write confirms it.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        category_id: The category.
+
+    Returns:
+        Its current state, in milliunits.
+
+    Raises:
+        ToolError: If the category is no longer in the plan.
+    """
+    categories = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
+    category = categories.get(category_id)
+    if category is None:
+        raise ToolError(
+            f"Category {category_id} is not in this plan: "
+            "use a category_id from get_category_balances."
+        )
+    return category
+
+
+def _stale_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    plan_id: str, category_id: str, fresh: dict[str, Any], month: str, after: int, was_before: int
+) -> BudgetChange:
+    """Refuse a confirmed budget change whose amount moved since the preview, with a fresh one.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        category_id: The category.
+        fresh: Its current state, just reread.
+        month: The month, YYYY-MM-01.
+        after: The amount still wanted, in milliunits.
+        was_before: The budgeted amount the preview showed, in milliunits.
+
+    Returns:
+        A new preview, confirmation_required with a new code bound to the current amounts.
+    """
+    result = _budget_change(category_id, fresh, month, after)
+    question = _budget_question(result)
+    subject = {"category": category_id, "month": month, "amount": after, **_budget_snapshot(fresh)}
+    message = (
+        f"{result.category}'s budgeted amount changed since the preview: "
+        f"{client.milliunit_to_amount(was_before):.2f} → {result.from_amount:.2f}. "
+        f"Nothing was changed. New preview:\n{question}"
+    )
+    return result.model_copy(
+        update={
+            "status": "confirmation_required",
+            "message": message,
+            "confirmation": reissue(plan_id, subject),
+        }
+    )
+
+
 @mcp.tool(
     tags={WRITE_TAG},
     annotations={
@@ -230,7 +345,7 @@ class BudgetChange(Model):
         "open_world_hint": True,
     },
 )
-async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
     plan_id: str,
     month: str,
     category_id: str,
@@ -243,6 +358,9 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     The amount is absolute, in currency units, not a change. The result gives the
     amount before and after, and what the category has available each time;
     undo_operation restores the previous one. Confirmation works as for apply_categories.
+    The amount and what the category has available are read again right before writing:
+    if either moved since the preview was shown, nothing is changed and a fresh preview
+    comes back instead, with a new code.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -263,38 +381,32 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
     logger.info("Tool called: set_category_budget(month=%r)", month)
     check_month(month)
     month = app.resolve_month(month)
-    categories = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
-    category = categories.get(category_id)
-    if category is None:
-        raise ToolError(
-            f"Category {category_id} is not in this plan: "
-            "use a category_id from get_category_balances."
-        )
+    category = await _reread_category(plan_id, month, category_id)
     before, after = category["budgeted"], client.amount_to_milliunit(amount)
-    result = BudgetChange(
-        status="nothing_to_do",
-        message="Nothing to change.",
-        category_id=category_id,
-        category=untrusted(category["name"]),
-        month=month,
-        from_amount=client.milliunit_to_amount(before),
-        to_amount=client.milliunit_to_amount(after),
-        available_before=client.milliunit_to_amount(category["balance"]),
-        available_after=client.milliunit_to_amount(category["balance"] + after - before),
-        confirmation=None,
-        operation_id=None,
-    )
+    result = _budget_change(category_id, category, month, after)
     if before == after:
         return result
-    question = (
-        f"Budget {result.category} for {month}: "
-        f"{result.from_amount:.2f} → {result.to_amount:.2f}"
-        f"{_available(result.available_before, result.available_after, result.from_amount)}?"
-    )
-    subject = {"category": category_id, "month": month, "amount": after}
+    question = _budget_question(result)
+    subject = {
+        "category": category_id,
+        "month": month,
+        "amount": after,
+        **_budget_snapshot(category),
+    }
+    if confirmation is not None:
+        issued = peek(confirmation, plan_id)
+        if (
+            isinstance(issued, dict)
+            and {"before", "balance"} <= issued.keys()
+            and (issued["before"] != before or issued["balance"] != category["balance"])
+        ):
+            return _stale_budget(plan_id, category_id, category, month, after, issued["before"])
     stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
+    fresh = await _reread_category(plan_id, month, category_id)
+    if fresh["budgeted"] != before or fresh["balance"] != category["balance"]:
+        return _stale_budget(plan_id, category_id, fresh, month, after, before)
     await client.set_category_budgeted(plan_id, month, category_id, amount)
     operation_id = journal.Journal(journal.default_path()).record(
         plan_id,
@@ -386,6 +498,132 @@ def _line(side: CategoryMove) -> str:
     return f"- {side.name}: {side.from_amount:.2f} → {side.to_amount:.2f}{available}"
 
 
+def _move_change(
+    month: str, moved: int, from_category: dict[str, Any], to_category: dict[str, Any]
+) -> MoneyMove:
+    """Preview moving money between two categories, from their current state.
+
+    Args:
+        month: The month, YYYY-MM-01.
+        moved: Milliunits to move from the first category to the second.
+        from_category: The source's current state, in milliunits.
+        to_category: The target's current state, in milliunits.
+
+    Returns:
+        Both categories before and after, status "applied" until the caller says otherwise.
+    """
+    return MoneyMove(
+        status="applied",
+        message="",
+        month=month,
+        amount=client.milliunit_to_amount(moved),
+        from_category=_side(from_category, -moved),
+        to_category=_side(to_category, moved),
+        confirmation=None,
+        operation_id=None,
+    )
+
+
+def _move_question(result: MoneyMove) -> str:
+    """Write the question a move is confirmed with.
+
+    Args:
+        result: The preview, as :func:`_move_change` builds it.
+
+    Returns:
+        The question.
+    """
+    return (
+        f"Move {result.amount:.2f} from {result.from_category.name} to {result.to_category.name} "
+        f"for {result.month}?\n{_line(result.from_category)}\n{_line(result.to_category)}"
+    )
+
+
+def _move_snapshot(from_category: dict[str, Any], to_category: dict[str, Any]) -> dict[str, int]:
+    """What a move's confirmation is bound to, besides the categories, month and amount.
+
+    Args:
+        from_category: The source's current state, in milliunits.
+        to_category: The target's current state, in milliunits.
+
+    Returns:
+        Both categories' budgeted and available amounts, so a code issued for other ones
+        is refused.
+    """
+    return {
+        "from_before": from_category["budgeted"],
+        "from_balance": from_category["balance"],
+        "to_before": to_category["budgeted"],
+        "to_balance": to_category["balance"],
+    }
+
+
+async def _reread_categories(
+    plan_id: str, month: str, from_category_id: str, to_category_id: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Read both categories' current state again, right before a write confirms it.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        from_category_id: The source category.
+        to_category_id: The target category.
+
+    Returns:
+        Their current state, in milliunits.
+
+    Raises:
+        ToolError: If either category is no longer in the plan.
+    """
+    categories = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
+    for category_id in (from_category_id, to_category_id):
+        if category_id not in categories:
+            raise ToolError(
+                f"Category {category_id} is not in this plan: "
+                "use a category_id from get_category_balances."
+            )
+    return categories[from_category_id], categories[to_category_id]
+
+
+def _stale_move(
+    plan_id: str, month: str, moved: int, from_category: dict[str, Any], to_category: dict[str, Any]
+) -> MoneyMove:
+    """Refuse a confirmed move whose categories moved since the preview, with a fresh one.
+
+    No absolute amount is written from the stale read: the move is skipped entirely.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        moved: Milliunits still wanted to move.
+        from_category: The source's current state, just reread.
+        to_category: The target's current state, just reread.
+
+    Returns:
+        A new preview, confirmation_required with a new code bound to the current amounts.
+    """
+    result = _move_change(month, moved, from_category, to_category)
+    question = _move_question(result)
+    subject = {
+        "from": from_category["id"],
+        "to": to_category["id"],
+        "month": month,
+        "amount": moved,
+        **_move_snapshot(from_category, to_category),
+    }
+    message = (
+        "One of the categories' budgeted amount or what it has available changed since "
+        f"the preview: nothing was moved. New preview:\n{question}"
+    )
+    return result.model_copy(
+        update={
+            "status": "confirmation_required",
+            "message": message,
+            "confirmation": reissue(plan_id, subject),
+        }
+    )
+
+
 async def _set_both(plan_id: str, month: str, source: CategoryMove, target: CategoryMove) -> None:
     """Take from the source, then give to the target; if the second write fails, undo the first.
 
@@ -448,7 +686,9 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
     undo_operation for both categories, where set_category_budget would take two.
     The amount is what moves, in currency units, not a new total. The result gives
     both categories before and after, and what each has available each time.
-    Confirmation works as for apply_categories.
+    Confirmation works as for apply_categories. Both categories' amounts are read
+    again right before writing: if either moved since the preview was shown, nothing
+    is moved and a fresh preview comes back instead, with a new code.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -472,34 +712,37 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
     month = app.resolve_month(month)
     if from_category_id == to_category_id:
         raise ToolError("Give two different categories: money moves from one to another.")
-    categories = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
-    for category_id in (from_category_id, to_category_id):
-        if category_id not in categories:
-            raise ToolError(
-                f"Category {category_id} is not in this plan: "
-                "use a category_id from get_category_balances."
-            )
+    from_category, to_category = await _reread_categories(
+        plan_id, month, from_category_id, to_category_id
+    )
     moved = client.amount_to_milliunit(amount)
-    source = _side(categories[from_category_id], -moved)
-    target = _side(categories[to_category_id], moved)
-    result = MoneyMove(
-        status="applied",
-        message="",
-        month=month,
-        amount=client.milliunit_to_amount(moved),
-        from_category=source,
-        to_category=target,
-        confirmation=None,
-        operation_id=None,
-    )
-    question = (
-        f"Move {result.amount:.2f} from {source.name} to {target.name} for {month}?\n"
-        f"{_line(source)}\n{_line(target)}"
-    )
-    subject = {"from": from_category_id, "to": to_category_id, "month": month, "amount": moved}
+    result = _move_change(month, moved, from_category, to_category)
+    question = _move_question(result)
+    snapshot = _move_snapshot(from_category, to_category)
+    subject = {
+        "from": from_category_id,
+        "to": to_category_id,
+        "month": month,
+        "amount": moved,
+        **snapshot,
+    }
+    if confirmation is not None:
+        issued = peek(confirmation, plan_id)
+        if (
+            isinstance(issued, dict)
+            and snapshot.keys() <= issued.keys()
+            and any(issued[key] != value for key, value in snapshot.items())
+        ):
+            return _stale_move(plan_id, month, moved, from_category, to_category)
     stop = await gate(ctx, plan_id, subject, question, confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
+    fresh_from, fresh_to = await _reread_categories(
+        plan_id, month, from_category_id, to_category_id
+    )
+    if _move_snapshot(fresh_from, fresh_to) != snapshot:
+        return _stale_move(plan_id, month, moved, fresh_from, fresh_to)
+    source, target = result.from_category, result.to_category
     await _set_both(plan_id, month, source, target)
     operation_id = journal.Journal(journal.default_path()).record(
         plan_id,
@@ -510,7 +753,9 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
             "changes": [
                 {
                     "category_id": side.category_id,
-                    "from": categories[side.category_id]["budgeted"],
+                    "from": from_category["budgeted"]
+                    if side.category_id == from_category_id
+                    else to_category["budgeted"],
                     "to": client.amount_to_milliunit(side.to_amount),
                 }
                 for side in (source, target)

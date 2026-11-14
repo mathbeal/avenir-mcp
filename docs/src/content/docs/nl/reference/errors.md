@@ -113,8 +113,8 @@ Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling too
 ## [`move_money`](/avenir-mcp/nl/reference/tools/move-money/)
 
 - `Give two different categories: money moves from one to another.`
-- `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
+- `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `{refused}; {name} is back to {from_amount}: nothing was moved.`
 - `{refused}, then putting {name} back failed too ({again}): set {name} back to {from_amount} in YNAB.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
@@ -145,8 +145,8 @@ Elke tool die YNAB aanroept, kan de fout van YNAB teruggeven: `Error calling too
 
 ## [`set_category_budget`](/avenir-mcp/nl/reference/tools/set-category-budget/)
 
-- `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
+- `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`

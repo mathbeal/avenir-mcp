@@ -137,6 +137,33 @@ def _answer(action: str, content: dict[str, Any] | None) -> WriteStatus | None:
     return None
 
 
+def peek(code: str, plan_id: str) -> object | None:
+    """The subject a confirmation code still matches, without spending it.
+
+    Args:
+        code: A code from a previous preview.
+        plan_id: YNAB plan id or 'last-used'.
+
+    Returns:
+        The subject it was issued for, or None if the code is unknown, expired, or for
+        another plan.
+    """
+    return CONFIRMATIONS.peek(code, plan_id)
+
+
+def reissue(plan_id: str, subject: object) -> str:
+    """Issue a fresh code for a preview rebuilt after the one shown went stale.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        subject: The exact change now being previewed, as JSON data.
+
+    Returns:
+        The new code.
+    """
+    return CONFIRMATIONS.issue(plan_id, subject)
+
+
 def _spend_code(confirmation: str, plan_id: str, subject: object, required: bool) -> WriteStatus:
     """Spend a confirmation code.
 
