@@ -15,7 +15,9 @@ The way to cover overspending: one preview, one confirmation and one
 undo_operation for both categories, where set_category_budget would take two.
 The amount is what moves, in currency units, not a new total. The result gives
 both categories before and after, and what each has available each time.
-Confirmation works as for apply_categories.
+Confirmation works as for apply_categories. Both categories' amounts are read
+again right before writing: if either moved since the preview was shown, nothing
+is moved and a fresh preview comes back instead, with a new code.
 
 ## Comportamiento
 
@@ -110,8 +112,8 @@ Respuesta sobre el presupuesto de demostración:
 ## Errores
 
 - `Give two different categories: money moves from one to another.`
-- `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
+- `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `{refused}; {name} is back to {from_amount}: nothing was moved.`
 - `{refused}, then putting {name} back failed too ({again}): set {name} back to {from_amount} in YNAB.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`

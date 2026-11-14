@@ -255,7 +255,7 @@ class Confirmations:
         """
         self._ttl = ttl_seconds
         self._clock = clock
-        self._issued: dict[str, tuple[str, float]] = {}
+        self._issued: dict[str, tuple[str, object, float]] = {}
 
     def issue(self, plan_id: str, subject: object) -> str:
         """Issue a code that confirms this subject, and nothing else.
@@ -270,9 +270,9 @@ class Confirmations:
             The new code.
         """
         now = self._clock()
-        self._issued = {c: v for c, v in self._issued.items() if now - v[1] <= self._ttl}
+        self._issued = {c: v for c, v in self._issued.items() if now - v[2] <= self._ttl}
         code = secrets.token_urlsafe(8)
-        self._issued[code] = (fingerprint(plan_id, subject), now)
+        self._issued[code] = (plan_id, subject, now)
         return code
 
     def consume(self, code: str, plan_id: str, subject: object) -> bool:
@@ -289,6 +289,30 @@ class Confirmations:
         issued = self._issued.pop(code, None)
         if issued is None:
             return False
-        expected, issued_at = issued
+        issued_plan_id, issued_subject, issued_at = issued
         fresh = self._clock() - issued_at <= self._ttl
-        return fresh and expected == fingerprint(plan_id, subject)
+        return fresh and fingerprint(plan_id, subject) == fingerprint(
+            issued_plan_id, issued_subject
+        )
+
+    def peek(self, code: str, plan_id: str) -> object | None:
+        """The subject a code still confirms, without spending it.
+
+        Lets a tool tell a stale preview from an unknown code, and show a fresh one
+        instead of a bare refusal.
+
+        Args:
+            code: A code from a previous preview.
+            plan_id: YNAB plan id or 'last-used'.
+
+        Returns:
+            The subject it was issued for, or None if the code is unknown, expired, or
+            was issued for another plan.
+        """
+        issued = self._issued.get(code)
+        if issued is None:
+            return None
+        issued_plan_id, subject, issued_at = issued
+        if issued_plan_id != plan_id or self._clock() - issued_at > self._ttl:
+            return None
+        return subject

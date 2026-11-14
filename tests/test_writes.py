@@ -202,6 +202,35 @@ def test_plan_rejects_a_split_transaction() -> None:
         )
 
 
+def test_peek_gives_the_subject_without_spending_the_code() -> None:
+    """A tool can tell a stale preview from an unknown code without using the code up."""
+    confirmations = writes.Confirmations()
+    code = confirmations.issue("b1", {"before": 100})
+    assert confirmations.peek(code, "b1") == {"before": 100}
+    assert confirmations.consume(code, "b1", {"before": 100}) is True
+
+
+def test_peek_refuses_an_unknown_code() -> None:
+    """A code the server never issued has no subject to show."""
+    assert writes.Confirmations().peek("made-up", "b1") is None
+
+
+def test_peek_refuses_a_code_issued_for_another_plan() -> None:
+    """A code bound to one plan is not shown for another."""
+    confirmations = writes.Confirmations()
+    code = confirmations.issue("b1", {"before": 100})
+    assert confirmations.peek(code, "b2") is None
+
+
+def test_peek_refuses_an_expired_code() -> None:
+    """A code older than its lifetime has nothing to show either."""
+    now = [0.0]
+    confirmations = writes.Confirmations(ttl_seconds=600, clock=lambda: now[0])
+    code = confirmations.issue("b1", {"before": 100})
+    now[0] = 601.0
+    assert confirmations.peek(code, "b1") is None
+
+
 def test_expired_codes_are_forgotten() -> None:
     """Previews never confirmed do not pile up in memory: expired codes are dropped."""
     now = [0.0]
