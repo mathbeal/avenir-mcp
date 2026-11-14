@@ -19,6 +19,7 @@ configuración.
 | `YNAB_API_KEY_FILE` | sin definir | Un archivo con el token, usado cuando `YNAB_API_KEY` no está definida. |
 | `AVENIR_MCP_WRITE` | sin definir: solo lectura | `1` registra las herramientas que modifican su plan. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | sin definir | `1` solo acepta un sí dado en el cliente: sin códigos de confirmación. |
+| `AVENIR_MCP_DISMISS_IS_DECLINE` | sin definir | `1` trata una pregunta cerrada sin responder, en un cliente que sabe preguntar, como `declined`. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` o `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | Dirección HTTP. |
 | `AVENIR_MCP_PORT` | `8103` | Puerto HTTP. |
@@ -82,6 +83,16 @@ confirmación del propio cliente. Los códigos de confirmación ni se emiten ni 
 una pregunta cerrada cuenta como no, y un cliente que no sabe preguntar recibe un error.
 Úselo cuando el modelo podría transmitir un código sin preguntarle — vea
 [Confirmación](/avenir-mcp/es/concepts/confirmation/#exigir-la-respuesta-del-propio-usuario).
+
+### `AVENIR_MCP_DISMISS_IS_DECLINE`
+
+Exactamente `1`: en un cliente que puede mostrar la ventana de confirmación, cerrarla
+sin responder se lee como `declined` en lugar de recurrir a un código de confirmación.
+Un cliente que no puede mostrar la ventana en absoluto no se ve afectado, y sigue
+recibiendo un código — esta variable sola no obliga a todos los clientes a saber
+preguntar; use `AVENIR_MCP_REQUIRE_ELICITATION` para eso. Actívela solo para un cliente
+que usted sepa que muestra la ventana y solo la cierra cuando el usuario la cierra — vea
+[Confirmación](/avenir-mcp/es/concepts/confirmation/#tratar-una-pregunta-cerrada-como-un-rechazo).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
 

@@ -74,11 +74,16 @@ dieser zustimmt, erneut mit denselben Argumenten plus `confirmation` auf.
 | Formular angenommen, Häkchen gesetzt | `applied` |
 | Formular angenommen, Häkchen **nicht** gesetzt | `declined` |
 | `decline` | `declined` – nichts geschrieben |
-| `cancel` (weggeklickt, oder ein Client, der es nicht anzeigen kann) | Rückfall auf einen Bestätigungscode |
+| `cancel`, Client hat die Frage angezeigt | Rückfall auf einen Bestätigungscode, oder `declined` mit `AVENIR_MCP_DISMISS_IS_DECLINE=1` |
+| `cancel`, Client kann sie gar nicht anzeigen | Rückfall auf einen Bestätigungscode, unabhängig davon, wie `AVENIR_MCP_DISMISS_IS_DECLINE` gesetzt ist |
 
-Wegklicken ist keine Ablehnung: Clients ohne Oberfläche klicken jede Frage weg, und das
-als *Nein* zu werten, würde jede Schreibaktion unmöglich machen – der Fehler, den die
-[Evaluierung](/avenir-mcp/de/project/evaluation/) von avenir-mcp bei ihrem ersten Lauf fand.
+Wegklicken ist standardmäßig keine Ablehnung: Clients ohne Oberfläche klicken jede Frage
+weg, und das als *Nein* zu werten, würde jede Schreibaktion unmöglich machen – der
+Fehler, den die [Evaluierung](/avenir-mcp/de/project/evaluation/) von avenir-mcp bei
+ihrem ersten Lauf fand. Ein Client, von dem Sie wissen, dass er die Frage anzeigt und sie
+nur schließt, wenn der Nutzer sie wegklickt, kann das mit
+`AVENIR_MCP_DISMISS_IS_DECLINE=1` aktivieren – siehe
+[Eine weggeklickte Frage als Ablehnung behandeln](#eine-weggeklickte-frage-als-ablehnung-behandeln).
 
 ## Bestätigungscodes
 
@@ -116,6 +121,25 @@ haben. Mit `AVENIR_MCP_REQUIRE_ELICITATION=1`:
 | ein Code `confirmation` wird übergeben | geprüft, dann angewendet | Fehler: Codes sind abgeschaltet |
 
 Nur Clients, die MCP-Elicitation unterstützen, können dann schreiben.
+
+## Eine weggeklickte Frage als Ablehnung behandeln
+
+Ein Client, der die Frage anzeigen kann, dessen Nutzer sie aber ohne Antwort
+weggeklickt hat, greift standardmäßig auf einen Bestätigungscode zurück; der Agent muss
+dann weiterhin die eigene Zustimmung des Nutzers übermitteln, niemals den Code allein.
+Ein Client, von dem Sie wissen, dass er sich nur so verhält, wenn der Nutzer die Frage
+wegklickt – niemals, wenn er sie einfach nicht anzeigen kann –, kann den Code mit
+`AVENIR_MCP_DISMISS_IS_DECLINE=1` ganz überspringen:
+
+| Situation | Ohne die Variable | Mit ihr |
+|---|---|---|
+| der Client kann fragen, Frage weggeklickt ohne Antwort | ein Bestätigungscode | `declined` |
+| der Client kann gar nicht fragen | ein Bestätigungscode | ein Bestätigungscode (unverändert) |
+| `AVENIR_MCP_REQUIRE_ELICITATION=1` ist auch gesetzt | bereits `declined` | `declined`, unverändert |
+
+Standardmäßig deaktiviert: Ein Client, der eine echte Ablehnung des Nutzers nicht von
+einer Frage unterscheiden kann, die nur ungelesen weggeklickt wurde, soll nicht jedes
+Wegklicken als Ablehnung werten.
 
 ## Was der Nutzer sieht
 
