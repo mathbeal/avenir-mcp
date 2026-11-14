@@ -91,7 +91,8 @@ sin responder se lee como `declined` en lugar de recurrir a un código de confir
 Un cliente que no puede mostrar la ventana en absoluto no se ve afectado, y sigue
 recibiendo un código — esta variable sola no obliga a todos los clientes a saber
 preguntar; use `AVENIR_MCP_REQUIRE_ELICITATION` para eso. Actívela solo para un cliente
-que usted sepa que muestra la ventana y solo la cierra cuando el usuario la cierra — vea
+que usted sepa que muestra la ventana y nunca la cierra salvo por una acción explícita
+del usuario — vea
 [Confirmación](/avenir-mcp/es/concepts/confirmation/#tratar-una-pregunta-cerrada-como-un-rechazo).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
