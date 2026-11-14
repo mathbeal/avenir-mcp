@@ -19,6 +19,7 @@ keine Konfigurationsdatei.
 | `YNAB_API_KEY_FILE` | nicht gesetzt | Eine Datei mit dem Token, verwendet, wenn `YNAB_API_KEY` nicht gesetzt ist. |
 | `AVENIR_MCP_WRITE` | nicht gesetzt: nur lesend | `1` registriert die Tools, die Ihren Plan ändern. |
 | `AVENIR_MCP_REQUIRE_ELICITATION` | nicht gesetzt | `1` akzeptiert nur ein im Client gegebenes Ja: keine Bestätigungscodes. |
+| `AVENIR_MCP_DISMISS_IS_DECLINE` | nicht gesetzt | `1` behandelt eine unbeantwortet weggeklickte Frage, bei einem Client, der fragen kann, als `declined`. |
 | `AVENIR_MCP_TRANSPORT` | `stdio` | `stdio` oder `http`. |
 | `AVENIR_MCP_HOST` | `127.0.0.1` | HTTP-Adresse. |
 | `AVENIR_MCP_PORT` | `8103` | HTTP-Port. |
@@ -82,6 +83,17 @@ akzeptiert, eine weggeklickte Frage zählt als Nein, und ein Client, der nicht f
 erhält einen Fehler. Nutzen Sie es, wenn das Modell einen Code weitergeben könnte, ohne Sie
 zu fragen – siehe
 [Bestätigung](/avenir-mcp/de/concepts/confirmation/#die-eigene-antwort-des-nutzers-verlangen).
+
+### `AVENIR_MCP_DISMISS_IS_DECLINE`
+
+Genau `1`: Bei einem Client, der das Bestätigungsfeld anzeigen kann, wird das
+Wegklicken ohne Antwort als `declined` gewertet, statt auf einen Bestätigungscode
+zurückzugreifen. Ein Client, der das Feld überhaupt nicht anzeigen kann, ist davon nicht
+betroffen und erhält weiterhin einen Code – diese Variable allein zwingt keinen Client
+dazu, Elicitation zu unterstützen; verwenden Sie dafür `AVENIR_MCP_REQUIRE_ELICITATION`.
+Aktivieren Sie sie nur für einen Client, von dem Sie wissen, dass er das Feld anzeigt
+und es nur schließt, wenn der Nutzer es wegklickt – siehe
+[Bestätigung](/avenir-mcp/de/concepts/confirmation/#eine-weggeklickte-frage-als-ablehnung-behandeln).
 
 ### `AVENIR_MCP_TRANSPORT`, `AVENIR_MCP_HOST`, `AVENIR_MCP_PORT`
 
