@@ -187,3 +187,46 @@ def test_an_operation_recorded_with_budget_id_is_still_found(tmp_path: Path) -> 
     entry = journal.Journal(path).find("b1")
     assert entry is not None
     assert (entry.operation_id, entry.plan_id) == ("op1", "b1")
+
+
+def test_a_recorded_operation_carries_its_schema_version(tmp_path: Path) -> None:
+    """Every line written now says which schema it follows, for a future version to check."""
+    path = tmp_path / "journal.jsonl"
+    op_id = journal.Journal(path).record("b1", "categorize", _MOVES)
+    assert _found(journal.Journal(path), "b1", op_id).schema_version == 1
+    assert '"schema_version":1' in path.read_text(encoding="utf-8")
+
+
+def test_a_line_without_a_schema_version_defaults_to_1(tmp_path: Path) -> None:
+    """A line written before this field existed is read as schema version 1."""
+    path = tmp_path / "journal.jsonl"
+    path.write_text(
+        '{"operation_id":"op1","plan_id":"b1","kind":"categorize",'
+        '"applied_at":"2026-09-01T10:00:00+00:00","moves":[]}\n',
+        encoding="utf-8",
+    )
+    assert _found(journal.Journal(path), "b1").schema_version == 1
+
+
+def test_a_line_of_an_unknown_kind_is_skipped_with_a_warning(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A kind written by a later version does not block undoing the latest known operation.
+
+    Reproduces the audit's case C: a 'split' line (from a version that does not exist yet
+    here) left as the most recent line used to make every undo_operation() call land on it,
+    forever, since nothing dispatches on an unknown kind.
+    """
+    path = tmp_path / "journal.jsonl"
+    book = journal.Journal(path)
+    known = book.record("b1", "categorize", _MOVES)
+    with path.open("a", encoding="utf-8") as file:
+        file.write(
+            '{"operation_id":"future1","plan_id":"b1","kind":"split",'
+            '"applied_at":"2026-09-20T00:00:00+00:00","moves":[],"details":{}}\n'
+        )
+    with caplog.at_level("WARNING"):
+        entry = book.find("b1")
+    assert entry is not None
+    assert entry.operation_id == known
+    assert "future1" in caplog.text and "split" in caplog.text
