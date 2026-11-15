@@ -292,12 +292,24 @@ async def _undo_create(
         when the user did not agree.
     """
     created = entry.details["transaction_ids"]
-    live = {tx["id"] for tx in await client.get_transactions(plan_id) if not tx.get("deleted")}
-    present = [tx_id for tx_id in created if tx_id in live]
-    gone = [tx_id for tx_id in created if tx_id not in live]
+    fingerprints = entry.details.get("fingerprints", {})
+    live = {tx["id"]: tx for tx in await client.get_transactions(plan_id) if not tx.get("deleted")}
+    present = [
+        tx_id
+        for tx_id in created
+        if tx_id in live
+        # A line recorded before this check kept no fingerprint: nothing to compare.
+        and (
+            tx_id not in fingerprints
+            or writes.transaction_fingerprint(plan_id, live[tx_id]) == fingerprints[tx_id]
+        )
+    ]
+    gone = [tx_id for tx_id in created if tx_id not in present]
     if not present:
         return result_of(
-            "nothing_to_do", "Already deleted: nothing to undo.", writes.Plan(conflicts=gone)
+            "nothing_to_do",
+            "Already deleted or changed since: nothing to undo.",
+            writes.Plan(conflicts=gone),
         )
     question = f"Undo: delete the {len(present)} transaction(s) this operation created?"
     if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
@@ -368,7 +380,13 @@ async def _undo_target(
         (c for c in await client.get_categories(plan_id) if c["id"] == details["category_id"]),
         None,
     )
-    if category is None or targets.describe(category) != details["after"]:
+    after = details["after"]
+    # A line recorded before undo compared fields keeps the text describe() made then.
+    if category is None or (
+        targets.fingerprint(category) != after
+        if isinstance(after, dict)
+        else targets.describe(category) != after
+    ):
         conflict = writes.Plan(conflicts=[details["category_id"]])
         return result_of("nothing_to_do", "The target changed since: left alone.", conflict)
     question = f"Undo: set the target of {untrusted(category['name'])} back?"

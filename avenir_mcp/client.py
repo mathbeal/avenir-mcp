@@ -731,7 +731,8 @@ async def create_transactions(
         approved: False leaves them for the user to review in YNAB.
 
     Returns:
-        {"created", "transaction_ids", "duplicate_import_ids"}.
+        {"created", "transaction_ids", "transactions", "duplicate_import_ids"}. "transactions"
+        holds the ones actually saved (not a duplicate), as YNAB returns them.
     """
     transactions = []
     for item in items:
@@ -750,6 +751,7 @@ async def create_transactions(
     return {
         "created": len(payload.get("transaction_ids", [])),
         "transaction_ids": payload.get("transaction_ids", []),
+        "transactions": payload.get("transactions", []),
         "duplicate_import_ids": payload.get("duplicate_import_ids", []),
     }
 

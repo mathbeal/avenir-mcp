@@ -39,11 +39,26 @@ class _Ledger:
     async def create_transactions(
         self, _budget_id: str, _account_id: str, items: list[dict[str, Any]], approved: bool = True
     ) -> dict[str, Any]:
-        """Create one transaction per item."""
+        """Create one transaction per item, as YNAB would report them back."""
         self.created.append((items, approved))
         ids = [f"new{len(self.transactions) + i}" for i in range(len(items))]
-        self.transactions += [{"id": tx_id, "deleted": False} for tx_id in ids]
-        return {"created": len(ids), "transaction_ids": ids, "duplicate_import_ids": []}
+        new = [
+            {
+                "id": tx_id,
+                "deleted": False,
+                "date": item["date"],
+                "amount": item["amount"],
+                "category_id": item.get("category_id"),
+            }
+            for tx_id, item in zip(ids, items, strict=True)
+        ]
+        self.transactions += new
+        return {
+            "created": len(ids),
+            "transaction_ids": ids,
+            "transactions": new,
+            "duplicate_import_ids": [],
+        }
 
     async def get_transactions(self, _budget_id: str) -> list[dict[str, Any]]:
         """Current transactions."""
@@ -112,6 +127,21 @@ def test_undo_skips_transactions_already_deleted(ledger: _Ledger) -> None:
     """A created transaction deleted since is reported, not deleted twice."""
     call("create_transactions", _args(), accept)
     ledger.transactions[0]["deleted"] = True
+    undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
+    assert undo["status"] == "nothing_to_do"
+    assert undo["conflicts"] == ["new0"]
+    assert not ledger.deleted
+
+
+def test_undo_leaves_a_transaction_edited_since_alone(ledger: _Ledger) -> None:
+    """A created transaction corrected by hand (category, amount) is a conflict, not deleted.
+
+    Reproduces the audit's case C9: undo_operation used to only check whether the
+    transaction still existed, so a correction made after creation (not a deletion) was
+    silently destroyed, against the promise that anything changed since is left alone.
+    """
+    call("create_transactions", _args(), accept)
+    ledger.transactions[0]["category_id"] = "c-other"
     undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
     assert undo["status"] == "nothing_to_do"
     assert undo["conflicts"] == ["new0"]
