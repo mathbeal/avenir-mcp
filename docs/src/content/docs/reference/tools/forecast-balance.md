@@ -210,33 +210,33 @@ Answer on the demo budget:
       "month": "2026-09",
       "start": 3134.48,
       "inflows": 3200.0,
-      "outflows": 0.0,
-      "end": 6334.48,
+      "outflows": -22.0,
+      "end": 6312.48,
       "lowest": 3134.48
     },
     {
       "month": "2026-10",
-      "start": 6334.48,
+      "start": 6312.48,
       "inflows": 3200.0,
       "outflows": -2074.27,
-      "end": 7460.21,
-      "lowest": 5694.17
+      "end": 7438.21,
+      "lowest": 5672.17
     },
     {
       "month": "2026-11",
-      "start": 7460.21,
+      "start": 7438.21,
       "inflows": 3200.0,
       "outflows": -1654.27,
-      "end": 9005.94,
-      "lowest": 6830.22
+      "end": 8983.94,
+      "lowest": 6808.22
     },
     {
       "month": "2026-12",
-      "start": 9005.94,
+      "start": 8983.94,
       "inflows": 3200.0,
       "outflows": -1654.27,
-      "end": 10551.67,
-      "lowest": 8365.63
+      "end": 10529.67,
+      "lowest": 8343.63
     }
   ],
   "first_shortfall": null

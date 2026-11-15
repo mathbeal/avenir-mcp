@@ -494,3 +494,65 @@ def test_a_deleted_month_is_not_held() -> None:
 def test_all_the_months_are_held_when_the_plan_has_fewer() -> None:
     """A plan younger than the period asked for gives every month it has."""
     assert _held(_months("2026-08-01", "2026-09-01"), 3) == ["2026-08-01", "2026-09-01"]
+
+
+# ---------------------------------------------------------------------------
+# paid_this_month, and the current month's recurring charges
+# ---------------------------------------------------------------------------
+
+
+def test_paid_this_month_matches_a_recurring_payee_and_direction() -> None:
+    """A payment this month to a recurring payee, in its direction, counts as paid."""
+    rec = [forecast.Recurring(payee="RENT", amount=-100.0, day=15, months_seen=4)]
+    txs = [_tx("RENT", -100000, "2026-09-10"), _tx("OTHER", -5000, "2026-09-11")]
+    assert forecast.paid_this_month(txs, TODAY, rec) == frozenset({("RENT", True)})
+    assert forecast.paid_this_month([], TODAY, rec) == frozenset()
+
+
+def test_a_charge_already_paid_earlier_this_month_is_not_projected_again() -> None:
+    """Paid on the 10th, a charge whose usual day is the 15th does not fall due twice."""
+    rec = [forecast.Recurring(payee="RENT", amount=-100.0, day=15, months_seen=4)]
+    paid = frozenset({("RENT", True)})
+    result = forecast.project(
+        start_balance=0.0,
+        today=TODAY,
+        until="2026-09",
+        recurring=rec,
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[],
+        paid_this_month=paid,
+    )
+    assert result.months[0].outflows == 0.0
+
+
+def test_a_late_charge_not_yet_paid_is_still_projected() -> None:
+    """Unpaid, a charge whose usual day already passed this month still falls due."""
+    rec = [forecast.Recurring(payee="RENT", amount=-100.0, day=5, months_seen=4)]
+    result = forecast.project(
+        start_balance=0.0,
+        today=TODAY,
+        until="2026-09",
+        recurring=rec,
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[],
+    )
+    assert result.months[0].outflows == -100.0
+
+
+def test_a_recurring_charge_past_the_last_day_still_leaves_the_balance() -> None:
+    """On the last day of a short month, a charge dated beyond it still lowers the end."""
+    rec = [forecast.Recurring(payee="FEE", amount=-100.0, day=31, months_seen=4)]
+    result = forecast.project(
+        start_balance=1000.0,
+        today=date(2026, 4, 30),
+        until="2026-04",
+        recurring=rec,
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[],
+    )
+    month = result.months[0]
+    assert round(month.start + month.inflows + month.outflows, 2) == month.end
+    assert month.end == 900.0

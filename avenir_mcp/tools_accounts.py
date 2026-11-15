@@ -356,9 +356,13 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         # The income the caller gives replaces every income, scheduled ones too.
         and (monthly_income is None or item["amount"] < 0)
     ]
-    # A payee with a schedule is projected by it, not guessed from the history.
+    # A payee with a schedule that recurs is projected by it, not guessed from the
+    # history; a schedule that fires once ("never") does not speak for the rest of
+    # the payee's history, so it does not remove that payee from the averages.
     planned = frozenset(
-        (normalize_payee(item.get("payee_name") or ""), item["amount"] < 0) for item in plans
+        (normalize_payee(item.get("payee_name") or ""), item["amount"] < 0)
+        for item in plans
+        if item["frequency"] != "never"
     )
     year, month = (int(part) for part in until.split("-"))
     upcoming = schedule.occurrences(
@@ -404,6 +408,7 @@ async def forecast_balance(  # pylint: disable=too-many-arguments,too-many-posit
         ],
         spent_this_month=spent,
         received_this_month=received,
+        paid_this_month=forecast.paid_this_month(history, now, charges),
     )
     shortfall = projection.first_shortfall
     message = (
