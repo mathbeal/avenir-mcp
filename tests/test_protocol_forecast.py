@@ -87,7 +87,8 @@ def test_forecast_uses_open_budget_accounts_and_shows_its_assumptions() -> None:
     assert {r["payee"] for r in data["assumptions"]["recurring"]} == {"CAR LEASE", "GYM"}
     assert data["assumptions"]["variable_monthly"] == 0.0
     assert [m["month"] for m in data["months"]] == ["2026-09", "2026-10", "2026-11"]
-    assert data["months"][-1]["end"] == 1500.0 - 400.0 * 3 - 30.0 * 2
+    # September has no history yet for either charge: unpaid, both still fall due in it.
+    assert data["months"][-1]["end"] == 1500.0 - 400.0 * 3 - 30.0 * 3
 
 
 def test_forecast_can_be_limited_to_chosen_accounts() -> None:
@@ -172,7 +173,8 @@ def test_current_month_deducts_what_already_happened() -> None:
     with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=_TXS + past + [spent])):
         data = _call({"plan_id": "b1", "until": "2026-09"}).structured_content
     assert data["assumptions"]["variable_monthly"] == -100.0
-    assert data["months"][0]["outflows"] == -400.0
+    # CAR LEASE and GYM have no September history yet: unpaid, both still fall due.
+    assert data["months"][0]["outflows"] == -400.0 - 30.0
 
 
 def test_given_income_replaces_income_found_in_history() -> None:
@@ -274,3 +276,26 @@ def test_a_schedule_named_briefly_still_replaces_the_bank_payee(budget: AsyncMoc
     assert "CAR LEASE" not in [r["payee"] for r in after["assumptions"]["recurring"]]
     for month in ("2026-09", "2026-10"):
         assert _outflows(after, month) == _outflows(before, month)
+
+
+def test_a_one_time_schedule_does_not_remove_the_payee_from_the_variable_average(
+    budget: AsyncMock,
+) -> None:
+    """A schedule that fires once does not erase a payee's other, irregular spending."""
+    coffee = [
+        {
+            "payee_name": "COFFEE SHOP",
+            "amount": amount,
+            "date": f"2026-{m:02d}-12",
+            "deleted": False,
+            "transfer_account_id": None,
+            "account_id": "acc",
+        }
+        for m, amount in ((6, -20000), (7, -80000), (8, -50000))
+    ]
+    budget.return_value = [
+        scheduled("COFFEE SHOP", "2026-10-05", "2026-10-05", "never", amount=-30_000)
+    ]
+    with patch("avenir_mcp.client.get_transactions", AsyncMock(return_value=_TXS + coffee)):
+        data = _call({"plan_id": "b1", "until": "2026-09"}).structured_content
+    assert data["assumptions"]["variable_monthly"] == -50.0

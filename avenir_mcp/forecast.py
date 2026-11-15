@@ -368,6 +368,35 @@ def month_to_date(
     return milliunit_to_amount(spent), milliunit_to_amount(received)
 
 
+def paid_this_month(
+    transactions: list[dict[str, Any]], today: date, known: list[Recurring]
+) -> frozenset[tuple[str, bool]]:
+    """Tell which recurring payees already have a transaction since the 1st of this month.
+
+    A recurring charge's usual day is only a median of past months: this month it may
+    have fallen earlier or later, or not happened yet. Projecting it on its usual day
+    regardless of what already happened either counts it twice or forgets it.
+
+    Args:
+        transactions: The plan's transactions, amounts in milliunits.
+        today: The day the forecast is made.
+        known: Recurring amounts found by :func:`recurring`.
+
+    Returns:
+        (normalised payee, is money out) pairs of the recurring payees already seen
+        this month.
+    """
+    this_month = today.isoformat()[:7]
+    recurring_payees = {(r.payee, _is_outflow(r.amount)) for r in known}
+    return frozenset(
+        (_merchant(tx), _is_outflow(tx["amount"]))
+        for tx in transactions
+        if usable(tx)
+        and tx["date"][:7] == this_month
+        and (_merchant(tx), _is_outflow(tx["amount"])) in recurring_payees
+    )
+
+
 def _horizon(today: date, until: str) -> list[tuple[int, int]]:
     """List the months from today's month to the horizon.
 
@@ -414,24 +443,29 @@ def _dated(  # pylint: disable=too-many-arguments
     first_day: int,
     days: int,
     today: date,
+    paid: frozenset[tuple[str, bool]] = frozenset(),
 ) -> dict[int, int]:
     """Place recurring amounts and one-offs on their days of one month.
 
     Args:
-        recurring: Recurring amounts; only those on or after first_day count.
+        recurring: Recurring amounts; those already paid this month are left out.
         one_offs: One-off amounts; only those in this month and after today count.
         label: The month, YYYY-MM.
         first_day: First day still to project.
-        days: Number of days in the month; a recurring day beyond it falls on the last.
+        days: Number of days in the month; a recurring day before first_day falls on
+            it, and one beyond days falls on days, so it always lands on a day
+            :func:`_walk` still visits.
         today: The day the forecast is made.
+        paid: (normalised payee, is money out) pairs already paid this month,
+            from :func:`paid_this_month`; left out so they are not counted twice.
 
     Returns:
         Milliunits falling on each day.
     """
     dated: dict[int, int] = defaultdict(int)
     for r in recurring:
-        if r.day >= first_day:
-            dated[min(r.day, days)] += amount_to_milliunit(r.amount)
+        if (r.payee, _is_outflow(r.amount)) not in paid:
+            dated[min(days, max(first_day, r.day))] += amount_to_milliunit(r.amount)
     for o in one_offs:
         if o.date.isoformat().startswith(label) and o.date > today:
             dated[o.date.day] += amount_to_milliunit(o.amount)
@@ -446,7 +480,9 @@ def _walk(
     Args:
         label: The month, YYYY-MM.
         balance: Balance at the start, in milliunits.
-        first_day: First day to walk.
+        first_day: First day to walk; past the month's last day when today already is
+            that last day, in which case only that last day is walked, so an amount
+            dated there (see :func:`_dated`) still moves the balance.
         days: Number of days in the month.
         daily: Amounts per day, in milliunits, one mapping per source.
 
@@ -454,7 +490,7 @@ def _walk(
         The month's projection, and its closing balance in milliunits.
     """
     running = lowest = balance
-    for day in range(first_day, days + 1):
+    for day in range(min(first_day, days), days + 1):
         running += sum(flow.get(day, 0) for flow in daily)
         lowest = min(lowest, running)
     amounts = [amount for flow in daily for amount in flow.values()]
@@ -480,6 +516,7 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
     one_offs: list[OneOff],
     spent_this_month: float = 0.0,
     received_this_month: float = 0.0,
+    paid_this_month: frozenset[tuple[str, bool]] = frozenset(),  # pylint: disable=redefined-outer-name
 ) -> Projection:
     """Walk day by day from tomorrow to the end of `until` ("YYYY-MM").
 
@@ -487,7 +524,7 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
     amounts and one-offs fall on their dates. For the current month, only what
     is left is projected: the averages minus what was already spent
     (`spent_this_month`, negative) and received (`received_this_month`), and
-    recurring amounts dated after today.
+    recurring amounts not yet paid this month, whatever their usual day.
 
     Args:
         start_balance: Today's balance, in currency units.
@@ -499,6 +536,9 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         one_offs: Amounts expected once, on their dates.
         spent_this_month: Already spent since the 1st, negative.
         received_this_month: Already received since the 1st.
+        paid_this_month: Recurring payees already paid this month, from
+            :func:`paid_this_month`; left out of this month's projection so they are
+            not counted twice.
 
     Returns:
         The projected months and the first one whose lowest balance is below zero.
@@ -525,7 +565,15 @@ def project(  # pylint: disable=too-many-arguments,too-many-locals
         daily = [
             _spread(to_spend, first_day, days),
             _spread(to_receive, first_day, days),
-            _dated(recurring, one_offs, label=label, first_day=first_day, days=days, today=today),
+            _dated(
+                recurring,
+                one_offs,
+                label=label,
+                first_day=first_day,
+                days=days,
+                today=today,
+                paid=paid_this_month if current else frozenset(),
+            ),
         ]
         projection, balance = _walk(label, balance, first_day, days, daily)
         months.append(projection)
