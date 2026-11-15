@@ -151,14 +151,18 @@ async def set_category_target(  # pylint: disable=too-many-arguments,too-many-po
     )
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
-    await client.set_category_target(plan_id, category_id, change.fields)
+    category = await client.set_category_target(plan_id, category_id, change.fields)
     if change.undo is None:
         return result.model_copy(update={"message": f"Target set. {_warning(change.before)}"})
     operation_id = journal.Journal(journal.default_path()).record(
         plan_id,
         "target",
         [],
-        {"category_id": category_id, "undo": change.undo, "after": change.after},
+        {
+            "category_id": category_id,
+            "undo": change.undo,
+            "after": targets.fingerprint(category),
+        },
     )
     return result.model_copy(
         update={

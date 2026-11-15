@@ -239,6 +239,29 @@ def fingerprint(plan_id: str, subject: object) -> str:
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
+def transaction_fingerprint(plan_id: str, transaction: dict[str, Any]) -> str:
+    """Hash a transaction's date, amount and category, to detect a change since.
+
+    create_transactions journals this instead of the amount itself: the journal keeps
+    no transaction amount in clear.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        transaction: A transaction as YNAB returns it.
+
+    Returns:
+        A SHA-256 hex digest.
+    """
+    return fingerprint(
+        plan_id,
+        {
+            "date": transaction["date"],
+            "amount": transaction["amount"],
+            "category_id": transaction.get("category_id"),
+        },
+    )
+
+
 class Confirmations:
     """Single-use confirmation codes, each bound to one exact plan."""
 

@@ -530,7 +530,12 @@ def test_create_transactions_posts_milliunits_and_reports_duplicates() -> None:
         with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
             result = asyncio.run(client.create_transactions("b1", "a1", items))
 
-    assert result == {"created": 1, "transaction_ids": ["t1"], "duplicate_import_ids": ["dup-1"]}
+    assert result == {
+        "created": 1,
+        "transaction_ids": ["t1"],
+        "transactions": [{"id": "t1"}],
+        "duplicate_import_ids": ["dup-1"],
+    }
     assert mock_http.post.call_args.args[0].endswith("/plans/b1/transactions")
     sent = mock_http.post.call_args.kwargs["json"]["transactions"]
     assert sent[0] == {

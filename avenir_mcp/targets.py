@@ -39,6 +39,30 @@ _KIND = {
 _CARD = "a credit card payment category"
 _LOAN = "a category paired to a loan account"
 
+# Every field YNAB uses to say what a target is. describe() only reads some of these
+# (it rounds the amount and ignores goal_needs_whole_amount), so undo compares this
+# fingerprint instead of the text a user reads, to catch a change describe() would miss.
+GOAL_FIELDS = (
+    "goal_type",
+    "goal_target",
+    "goal_target_date",
+    "goal_cadence",
+    "goal_cadence_frequency",
+    "goal_needs_whole_amount",
+)
+
+
+def fingerprint(category: dict[str, Any]) -> dict[str, Any]:
+    """Every field that makes up a category's target, for detecting a change since.
+
+    Args:
+        category: A category as YNAB returns it.
+
+    Returns:
+        Each of GOAL_FIELDS, None where the category does not carry it.
+    """
+    return {field: category.get(field) for field in GOAL_FIELDS}
+
 
 class TargetPlan(Model):
     """A change of target, before it is sent."""

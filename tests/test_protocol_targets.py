@@ -128,6 +128,22 @@ def test_undo_leaves_a_target_changed_since_alone(ynab: FakeTargets) -> None:
     assert len(ynab.sent) == 1
 
 
+def test_undo_leaves_a_target_alone_when_only_whole_amount_changed_since(
+    ynab: FakeTargets,
+) -> None:
+    """goal_needs_whole_amount is not in describe(): a toggle since must still count as changed.
+
+    Reproduces the audit's finding: comparing targets.describe() text misses this field, so
+    undo used to overwrite a goal_needs_whole_amount flipped since in YNAB.
+    """
+    call("set_category_target", _HOLIDAYS, accept)
+    ynab.categories["c-hol"]["goal_needs_whole_amount"] = True
+    undo = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
+    assert undo["status"] == "nothing_to_do"
+    assert undo["conflicts"] == ["c-hol"]
+    assert len(ynab.sent) == 1
+
+
 def test_changing_only_the_amount_keeps_the_kind_and_undo_restores_it(ynab: FakeTargets) -> None:
     """Monthly funding from YNAB's app, 30 → 45: undo puts 30 back, same kind."""
     args = {"plan_id": "b1", "category_id": "c-car", "amount": 45.0}
@@ -160,14 +176,21 @@ def test_replacing_a_kind_the_api_cannot_set_is_said_before_and_not_journaled(
 def test_the_journal_keeps_the_target_to_restore_and_nothing_else(
     ynab: FakeTargets, tmp_path: Path
 ) -> None:
-    """Ids and target amounts only, as for a budget change."""
+    """Ids and target fields only, as for a budget change: 'after' is the fields, not the text."""
     call("set_category_target", _HOLIDAYS, accept)
     line = json.loads((tmp_path / "journal.jsonl").read_text(encoding="utf-8"))
     assert line["kind"] == "target"
     assert line["details"] == {
         "category_id": "c-hol",
         "undo": {"goal_target": None},
-        "after": "1200.00 by 2027-06-01",
+        "after": {
+            "goal_type": "NEED",
+            "goal_target": 1_200_000,
+            "goal_target_date": "2027-06-01",
+            "goal_cadence": 0,
+            "goal_cadence_frequency": None,
+            "goal_needs_whole_amount": None,
+        },
     }
     assert ynab.sent
 
