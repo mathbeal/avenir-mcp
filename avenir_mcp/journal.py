@@ -88,16 +88,51 @@ class Journal:
         """
         self._path = path
 
+    def _open(self) -> int:
+        """Open the journal for append, creating it readable by its owner only.
+
+        Returns:
+            The file descriptor, not yet closed.
+        """
+        self._path.parent.mkdir(parents=True, exist_ok=True)
+        return os.open(self._path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+
+    def check_writable(self) -> None:
+        """Check that the journal can be appended to, before a write only it can undo.
+
+        Raises:
+            RuntimeError: If the journal's directory or file cannot be opened for
+                writing, naming the path; nothing has been sent to YNAB yet.
+        """
+        try:
+            os.close(self._open())
+        except OSError as error:
+            raise RuntimeError(
+                f"The journal at {self._path} cannot be written to ({error.strerror}): "
+                "nothing was sent to YNAB. Fix its permissions or location, or point "
+                "AVENIR_MCP_JOURNAL elsewhere, before trying again."
+            ) from error
+
     def _append(self, line: dict[str, Any]) -> None:
-        """Append one line, creating the file readable by its owner only.
+        """Append one line.
 
         Args:
             line: The JSON object to write.
+
+        Raises:
+            RuntimeError: If the line cannot be written: a change already applied
+                through YNAB that this journal cannot now record.
         """
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        descriptor = os.open(self._path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
-        with os.fdopen(descriptor, "a", encoding="utf-8") as file:
-            file.write(json.dumps(line, separators=(",", ":")) + "\n")
+        try:
+            descriptor = self._open()
+            with os.fdopen(descriptor, "a", encoding="utf-8") as file:
+                file.write(json.dumps(line, separators=(",", ":")) + "\n")
+        except OSError as error:
+            raise RuntimeError(
+                f"Applied, but not recorded in the journal at {self._path} "
+                f"({error.strerror}): this operation cannot be undone. Do not repeat it; "
+                "fix the journal's permissions or location first."
+            ) from error
 
     def _lines(self) -> tuple[list[Entry], set[str]]:
         """Read the journal.

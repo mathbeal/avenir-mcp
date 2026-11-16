@@ -128,7 +128,9 @@ async def flag_transactions(
         )
     head = f"Change the flag of {len(plan.changes)} transaction(s)?"
     subject = {"flags": [(c.transaction_id, c.to_color) for c in plan.changes]}
-    stop = await gate(ctx, plan_id, subject, question(plan.changes, head), confirmation)
+    stop = await gate(
+        ctx, plan_id, subject, question(plan.changes, head), confirmation, journal_required=True
+    )
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.set_flags(plan_id, [(c.transaction_id, c.to_color) for c in plan.changes])

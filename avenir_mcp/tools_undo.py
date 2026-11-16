@@ -74,6 +74,7 @@ async def undo_operation(
             "Nothing to undo: no operation of this plan is still in effect"
             + (f" with id {operation_id}." if operation_id else ".")
         )
+    book.check_writable()
     if entry.kind == "reconcile":
         return await _undo_reconcile(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "budget":

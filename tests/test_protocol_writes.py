@@ -205,6 +205,26 @@ def test_undo_leaves_alone_what_was_changed_since(budget: _Budget) -> None:
     assert len(budget.patches) == 1
 
 
+def test_a_write_is_blocked_before_ynab_when_the_journal_cannot_record_it(
+    budget: _Budget, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An unwritable journal stops the write before YNAB sees it: no patch, no doubt."""
+    blocker = tmp_path / "not-a-directory"
+    blocker.write_text("in the way")
+    monkeypatch.setenv("AVENIR_MCP_JOURNAL", str(blocker / "journal.jsonl"))
+    code = call("apply_categories", {"plan_id": "b1", "assignments": _ASSIGN}).structured_content[
+        "confirmation"
+    ]
+
+    result = call(
+        "apply_categories", {"plan_id": "b1", "assignments": _ASSIGN, "confirmation": code}
+    )
+
+    assert result.is_error
+    assert "cannot be written to" in result.content[0].text
+    assert not budget.patches
+
+
 def test_undo_with_a_damaged_journal_says_which_line(budget: _Budget, tmp_path: Path) -> None:
     """A damaged journal is a tool error naming the line, not a crash; nothing is written."""
     (tmp_path / "journal.jsonl").write_text("not json\n", encoding="utf-8")
