@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import os
+import re
 import stat
 from pathlib import Path
 
@@ -186,7 +187,7 @@ def _unwritable(tmp_path: Path) -> Path:
 def test_check_writable_raises_before_anything_is_written(tmp_path: Path) -> None:
     """A broken path is caught before a write, naming the path, not a bare OSError."""
     path = _unwritable(tmp_path)
-    with pytest.raises(RuntimeError, match=str(path)):
+    with pytest.raises(RuntimeError, match=re.escape(str(path))):
         journal.Journal(path).check_writable()
     assert not path.exists()
 
