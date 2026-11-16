@@ -292,7 +292,7 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         f"{_available(result.available_before, result.available_after, result.from_amount)}?"
     )
     subject = {"category": category_id, "month": month, "amount": after}
-    stop = await gate(ctx, plan_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation, journal_required=True)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.set_category_budgeted(plan_id, month, category_id, amount)
@@ -497,7 +497,7 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
         f"{_line(source)}\n{_line(target)}"
     )
     subject = {"from": from_category_id, "to": to_category_id, "month": month, "amount": moved}
-    stop = await gate(ctx, plan_id, subject, question, confirmation)
+    stop = await gate(ctx, plan_id, subject, question, confirmation, journal_required=True)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await _set_both(plan_id, month, source, target)

@@ -312,6 +312,8 @@ async def write_plan(
             "arguments and this confirmation code (valid 10 minutes)."
         )
         return result_of("confirmation_required", message, plan, confirmation=decision), None
+    book = journal.Journal(journal.default_path())
+    book.check_writable()
     await client.set_transaction_categories(
         plan_id, [(c.transaction_id, c.to_category_id) for c in plan.changes]
     )
@@ -323,7 +325,7 @@ async def write_plan(
         )
         for c in plan.changes
     ]
-    operation_id = journal.Journal(journal.default_path()).record(plan_id, "categorize", moves)
+    operation_id = book.record(plan_id, "categorize", moves)
     message = f"Applied. undo_operation with operation_id {operation_id} reverts it."
     result = result_of("applied", message, plan, operation_id=operation_id)
     return result, operation_id
@@ -368,10 +370,15 @@ def not_applied(decision: WriteStatus | str, question: str) -> NotApplied | None
     )
 
 
-async def gate(
-    ctx: Context, plan_id: str, subject: object, question: str, confirmation: str | None
+async def gate(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    ctx: Context,
+    plan_id: str,
+    subject: object,
+    question: str,
+    confirmation: str | None,
+    journal_required: bool = False,
 ) -> NotApplied | types.InputRequiredResult | None:
-    """Ask for confirmation before a write.
+    """Ask for confirmation before a write, and that the journal can record it.
 
     A tool returns an InputRequiredResult as is, and merges NotApplied fields
     into its own result with :func:`merged`.
@@ -382,14 +389,23 @@ async def gate(
         subject: The exact change being confirmed, as JSON data.
         question: What the user is asked.
         confirmation: A code from a previous preview, or None.
+        journal_required: True for a write the caller journals right after, making it
+            undoable: the journal must be writable before the write, or nothing is sent.
 
     Returns:
         None when the write may proceed; otherwise what to return instead.
+
+    Raises:
+        RuntimeError: If the user agreed and the journal cannot be written to: nothing
+            was sent to YNAB yet.
     """
     decision = await ask(ctx, plan_id, subject, question, confirmation)
     if isinstance(decision, types.InputRequiredResult):
         return decision
-    return not_applied(decision, question)
+    stop = not_applied(decision, question)
+    if stop is None and journal_required:
+        journal.Journal(journal.default_path()).check_writable()
+    return stop
 
 
 def merged[R: Model](result: R, stop: NotApplied) -> R:
