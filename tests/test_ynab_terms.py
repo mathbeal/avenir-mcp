@@ -5,8 +5,7 @@
 
 Each test marked `ynab_terms` enforces one rule of YNAB's API Terms of Service, as
 dated in api/ynab-terms.json; `python -m docsgen.terms` fails when YNAB changes them.
-Self-checked means exactly that: the checks are the project's own. YNAB lists avenir-mcp
-among the third-party apps of its "Works with YNAB" directory, and endorses nothing.
+Self-checked means exactly that: the checks are the project's own.
 """
 
 from __future__ import annotations
@@ -28,13 +27,6 @@ pytestmark = pytest.mark.ynab_terms
 
 ROOT = Path(__file__).resolve().parent.parent
 TERMS = json.loads((ROOT / "api" / "ynab-terms.json").read_text(encoding="utf-8"))
-OFFICIAL_IMAGE = "https://api.ynab.com/papi/works_with_ynab.svg"
-DIRECTORY = "https://api.ynab.com/#works-with-ynab-third-party"
-LISTED_IMAGE = f"[![Works with YNAB]({OFFICIAL_IMAGE})]({DIRECTORY})"
-# What the project may say about the listing: a fact and its limit, nothing in between.
-LISTING = (
-    "Listed by YNAB in its Works with YNAB directory, among third-party apps. Not endorsed by YNAB."
-)
 LANGUAGES = ["", "fr", "es", "de", "nl"]
 
 
@@ -65,13 +57,13 @@ def test_every_legal_page_quotes_ynabs_attribution_word_for_word(language: str) 
     assert TERMS["attribution"] in _words(page.read_text(encoding="utf-8").replace("*", ""))
 
 
-def test_only_ynabs_own_image_stands_for_ynab() -> None:
-    """The "Works with YNAB" image is YNAB's, linked unmodified; no copy lives here."""
+def test_no_ynab_artwork_is_shown_or_copied() -> None:
+    """No YNAB image is displayed in the README, and no copy of one lives in the tree."""
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     images = re.findall(r"!\[[^\]]*\]\(([^)]*ynab[^)]*)\)", readme, flags=re.I)
     # A workflow's status badge is GitHub's image, not YNAB artwork.
     artwork = [url for url in images if not url.startswith("https://github.com/")]
-    assert artwork == [OFFICIAL_IMAGE]
+    assert artwork == []
     copies = [p for p in ROOT.rglob("*ynab*") if p.suffix in {".svg", ".png", ".jpg", ".webp"}]
     assert [p for p in copies if ".venv" not in p.parts and "node_modules" not in p.parts] == []
 
@@ -111,17 +103,8 @@ def test_the_readme_dates_the_badge_with_the_terms_checked() -> None:
     assert f"YNAB's API terms of {TERMS['last_updated']}" in readme
 
 
-def test_the_readme_says_avenir_mcp_is_listed_by_ynab_and_claims_nothing_more() -> None:
-    """The README states the listing as a fact, links it, and says YNAB endorses nothing."""
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert LISTED_IMAGE in readme
-    assert LISTING in _words(readme)
-
-
 @pytest.mark.parametrize("language", LANGUAGES)
-def test_every_home_page_links_ynabs_image_to_the_entry_that_lists_avenir_mcp(
-    language: str,
-) -> None:
-    """Each home page shows YNAB's own image, linked to the third-party part of its directory."""
+def test_no_home_page_mentions_a_ynab_directory_listing(language: str) -> None:
+    """No home page links to api.ynab.com, in any language: no badge, no directory claim."""
     page = ROOT / "docs" / "src" / "content" / "docs" / language / "index.mdx"
-    assert LISTED_IMAGE in page.read_text(encoding="utf-8")
+    assert "api.ynab.com" not in page.read_text(encoding="utf-8")
