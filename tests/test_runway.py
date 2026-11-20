@@ -36,6 +36,7 @@ def _tx(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     transfer: str | None = None,
     deleted: bool = False,
     lines: list[dict[str, Any]] | None = None,
+    payee: str | None = None,
 ) -> dict[str, Any]:
     return {
         "account_id": account,
@@ -45,6 +46,7 @@ def _tx(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         "transfer_account_id": transfer,
         "deleted": deleted,
         "subtransactions": lines or [],
+        "payee_name": payee,
     }
 
 
@@ -135,6 +137,17 @@ def test_a_transfer_to_an_asset_tracking_account_is_saved_not_spent() -> None:
     answer = runway.summary(ACCOUNTS, history, TODAY, 3)
     assert answer.spending.monthly_spending == -1_000.0
     assert any("holds an asset" in note for note in answer.notes)
+
+
+def test_a_cards_opening_balance_is_not_spending() -> None:
+    """A card's starting debt is money already owed when it was added, not a month's spending."""
+    history = [
+        *_months_of(-600_000),
+        _tx("card", "2026-08-01", -2_400_000, payee="Starting Balance"),
+    ]
+    answer = runway.summary(ACCOUNTS, history, TODAY, 3)
+    assert answer.spending.monthly_spending == -600.0
+    assert answer.spending.runway_months == 5.0
 
 
 def test_a_split_counts_each_line_on_its_own() -> None:
@@ -249,6 +262,10 @@ _WHAT_A_TRANSFER_OUT_IS = (
     "A transfer to a tracking account that holds an asset (savings, investments) is not "
     "spending: that money is still yours, as get_savings_rate counts it."
 )
+_WHAT_AN_OPENING_BALANCE_IS = (
+    "An account's opening balance (YNAB's \"Starting Balance\") is money already there "
+    "when it was added, not spending, even when it is negative (a card's starting debt)."
+)
 _WHAT_IS_LEFT_OUT = (
     "Tracking accounts are not counted as money available: investments and loans "
     "outside the budget are listed in left_out."
@@ -272,6 +289,7 @@ def test_every_answer_states_its_assumptions() -> None:
         _NO_INCOME_IS_ASSUMED,
         _WHAT_SPENDING_IS,
         _WHAT_A_TRANSFER_OUT_IS,
+        _WHAT_AN_OPENING_BALANCE_IS,
         _WHAT_IS_LEFT_OUT,
         _THE_PAST_IS_NO_PROMISE,
         _WHAT_THE_CARDS_OWE,
@@ -292,6 +310,7 @@ def test_a_plan_without_a_card_says_nothing_about_what_cards_owe() -> None:
         _NO_INCOME_IS_ASSUMED,
         _WHAT_SPENDING_IS,
         _WHAT_A_TRANSFER_OUT_IS,
+        _WHAT_AN_OPENING_BALANCE_IS,
         _WHAT_IS_LEFT_OUT,
         _THE_PAST_IS_NO_PROMISE,
     ]
