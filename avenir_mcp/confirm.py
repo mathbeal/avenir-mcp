@@ -235,7 +235,9 @@ async def ask(
     `subject` is the exact change being confirmed: a code, or an answer, only ever
     confirms it. With AVENIR_MCP_REQUIRE_ELICITATION=1 only the user's answer in the
     client counts: an agent could relay a code without asking, so codes are neither
-    issued nor accepted.
+    issued nor accepted. With AVENIR_MCP_DISMISS_IS_DECLINE=1, a client that showed the
+    box but had it closed without an answer declines instead of falling back to a
+    code; a client that cannot show the box at all is unaffected, and still gets one.
 
     Args:
         ctx: The MCP context of the call.
@@ -253,6 +255,7 @@ async def ask(
             the client cannot ask.
     """
     required = os.getenv("AVENIR_MCP_REQUIRE_ELICITATION") == "1"
+    dismiss_is_decline = os.getenv("AVENIR_MCP_DISMISS_IS_DECLINE") == "1"
     if confirmation is not None:
         return _spend_code(confirmation, plan_id, subject, required)
     can_ask = ctx.session.check_client_capability(
@@ -270,8 +273,8 @@ async def ask(
     if decision is not None:
         return decision
     # Nobody said no when the question was dismissed: fall back to a code, unless
-    # only an answer in the client may confirm.
-    return "declined" if required else CONFIRMATIONS.issue(plan_id, subject)
+    # only an answer in the client may confirm, or a dismissal counts as one.
+    return "declined" if required or dismiss_is_decline else CONFIRMATIONS.issue(plan_id, subject)
 
 
 async def write_plan(
