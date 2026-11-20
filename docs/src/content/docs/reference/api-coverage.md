@@ -55,7 +55,7 @@ YNAB's API 1.90.0 has 44 operations: 15 used by avenir-mcp, 11 planned, 18 left 
 | `POST /plans/{plan_id}/transactions/import` | excluded | Deprecated by YNAB: accepted for backwards compatibility, but no import is performed and the response always has an empty list of transaction ids, since YNAB now imports a linked account's transactions on its own. |
 | `GET /plans/{plan_id}/transactions/{transaction_id}` | excluded | Transactions are read in one request for the whole plan, then kept in sync. |
 | `PUT /plans/{plan_id}/transactions/{transaction_id}` | planned | Edit one transaction: memo, flag, payee, date or amount. |
-| `DELETE /plans/{plan_id}/transactions/{transaction_id}` | covered | `undo_operation` |
+| `DELETE /plans/{plan_id}/transactions/{transaction_id}` | covered | `reconcile_account`, `undo_operation` |
 | `GET /user` | excluded | The user's id tells an agent nothing about the money. |
 
 ## By tool
@@ -92,7 +92,7 @@ What each tool and resource reads and writes, paths without the leading `/plans/
 | `create_transactions` | `GET /accounts`, `GET /categories` | `POST /transactions` |
 | `flag_transactions` | `GET /transactions` | `PATCH /transactions` |
 | `move_money` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
-| `reconcile_account` | `GET /accounts`, `GET /categories`, `GET /transactions` | `POST /transactions`, `PATCH /transactions` |
+| `reconcile_account` | `GET /accounts`, `GET /categories`, `GET /transactions` | `POST /transactions`, `PATCH /transactions`, `DELETE /transactions/{transaction_id}` |
 | `rename_payee` | `GET /payees`, `GET /transactions` | `PATCH /payees/{payee_id}` |
 | `set_category_budget` | `GET /months/{month}` | `PATCH /months/{month}/categories/{category_id}` |
 | `set_category_target` | `GET /categories` | `PATCH /categories/{category_id}` |
