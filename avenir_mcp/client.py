@@ -469,10 +469,13 @@ async def get_transactions(
         return [tx for tx in transactions if not tx.get("deleted")]
 
     # A delta only holds what changed since the last load: merge it into the
-    # cached transactions, dropping the deleted ones.
+    # cached transactions, dropping the deleted ones and the hidden half of a pair
+    # YNAB matched during import (its matched_transaction_id names a transaction
+    # already in the cache, which is the one that stays visible).
     known: dict[str, dict[str, Any]] = _CACHE.get(cache_key, {}).get("transactions", {})
     for tx in transactions:
-        if tx.get("deleted"):
+        matched_id = tx.get("matched_transaction_id")
+        if tx.get("deleted") or (matched_id and matched_id in known):
             known.pop(tx["id"], None)
         else:
             known[tx["id"]] = tx
