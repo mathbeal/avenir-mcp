@@ -8,7 +8,6 @@
 > 🇫🇷 **avenir-mcp** permet à un agent IA de lire votre plan YNAB et de vous aider
 > à préparer la suite.
 
-[![Works with YNAB](https://api.ynab.com/papi/works_with_ynab.svg)](https://api.ynab.com/#works-with-ynab-third-party)
 [![PyPI](https://img.shields.io/pypi/v/avenir-mcp)](https://pypi.org/project/avenir-mcp/)
 [![avenir-mcp on Glama](https://glama.ai/mcp/servers/mathbeal/avenir-mcp/badges/score.svg)](https://glama.ai/mcp/servers/mathbeal/avenir-mcp)
 [![Mentioned in Awesome MCP Servers](https://awesome.re/mentioned-badge.svg)](https://github.com/punkpeye/awesome-mcp-servers)
@@ -160,9 +159,7 @@ We are not affiliated, associated, or in any way officially connected with YNAB 
 its subsidiaries or affiliates. The official YNAB website can be found at
 https://www.ynab.com. The names YNAB and You Need A Budget, as well as related names,
 tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB. They
-are named here only to say which service avenir-mcp works with. Listed by YNAB in its
-[Works with YNAB](https://api.ynab.com/#works-with-ynab-third-party) directory, among
-third-party apps. Not endorsed by YNAB.
+are named here only to say which service avenir-mcp works with.
 
 avenir-mcp is for **personal use on your own machine, with your own YNAB token**. Running
 it as a public or shared server is not supported. It is provided as is, without warranty,
