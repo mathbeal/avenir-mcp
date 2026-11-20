@@ -12,7 +12,7 @@ from fastmcp import Context
 from fastmcp.exceptions import ToolError
 from mcp.types import InputRequiredResult
 
-from avenir_mcp import client, flags, journal, targets, writes
+from avenir_mcp import client, flags, journal, retry, targets, writes
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteResult, ask, not_applied, result_of, write_plan
 from avenir_mcp.text import untrusted
@@ -260,15 +260,102 @@ async def _undo_move(
         if current.get(change["category_id"], {}).get("budgeted") != change["to"]
     ]
     if moved:
-        conflict = writes.Plan(conflicts=moved)
-        return result_of("nothing_to_do", "An amount changed since: both left alone.", conflict)
+        return result_of(
+            "nothing_to_do",
+            "An amount changed since: both left alone.",
+            writes.Plan(conflicts=moved),
+        )
     question = _move_back_question(current, changes, month)
     if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
         return refused
-    for change in reversed(changes):
-        previous = client.milliunit_to_amount(change["from"])
-        await client.set_category_budgeted(plan_id, month, change["category_id"], previous)
+    names = {c["category_id"]: untrusted(current[c["category_id"]]["name"]) for c in changes}
+    first, second = reversed(changes)
+    await client.set_category_budgeted(
+        plan_id, month, first["category_id"], client.milliunit_to_amount(first["from"])
+    )
+    try:
+        await client.set_category_budgeted(
+            plan_id, month, second["category_id"], client.milliunit_to_amount(second["from"])
+        )
+    except retry.YnabUnavailable as error:
+        if error.maybe_applied and await _undo_landed(plan_id, month, second, names, error):
+            return _undone(book, entry, "Both amounts restored.")
+        await _put_first_back(plan_id, month, (first, second), names, error)
+    except RuntimeError as error:
+        await _put_first_back(plan_id, month, (first, second), names, error)
     return _undone(book, entry, "Both amounts restored.")
+
+
+async def _undo_landed(
+    plan_id: str, month: str, second: dict[str, Any], names: dict[str, str], error: Exception
+) -> bool:
+    """Reread the second category to tell a lost answer that landed from one that did not.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        second: The change undone second, as the journal holds it.
+        names: Both categories' names, by id, for the error if rereading fails too.
+        error: The lost answer, named if rereading itself fails.
+
+    Returns:
+        True if the category already carries its restored amount: the undo is complete.
+
+    Raises:
+        ToolError: If rereading the category failed too: neither amount is known to be
+            right, so neither is touched further.
+    """
+    try:
+        return await client.category_budgeted_is(
+            plan_id, month, second["category_id"], client.milliunit_to_amount(second["from"])
+        )
+    except RuntimeError as unknown:
+        both = " and ".join(names.values())
+        raise ToolError(
+            f"YNAB's answer for {names[second['category_id']]} was lost ({error}), and "
+            f"checking afterwards failed too ({unknown}): check {both} in YNAB by hand "
+            "before doing anything else."
+        ) from unknown
+
+
+async def _put_first_back(
+    plan_id: str,
+    month: str,
+    changes: tuple[dict[str, Any], dict[str, Any]],
+    names: dict[str, str],
+    error: Exception,
+) -> None:
+    """Put the first category back to its moved amount, after the second was refused or lost.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        changes: The change undone first, then the one whose undo was refused or lost,
+            each as the journal holds it.
+        names: Both categories' names, by id.
+        error: Why the second category was not put back.
+
+    Raises:
+        ToolError: Always; says whether the first category was put back too, or, when
+            that failed as well, that it needs no fix and which one still does.
+    """
+    first, second = changes
+    first_name, second_name = names[first["category_id"]], names[second["category_id"]]
+    refused = f"YNAB refused to put {second_name} back ({error})"
+    try:
+        await client.set_category_budgeted(
+            plan_id, month, first["category_id"], client.milliunit_to_amount(first["to"])
+        )
+    except RuntimeError as again:
+        second_from = client.milliunit_to_amount(second["from"])
+        raise ToolError(
+            f"{refused}, and putting {first_name} back to its moved amount failed too "
+            f"({again}): {first_name} is already back to how it was; set {second_name} to "
+            f"{second_from:.2f} in YNAB to finish undoing the move."
+        ) from again
+    raise ToolError(
+        f"{refused}; {first_name} is back to its moved amount: nothing was undone."
+    ) from error
 
 
 async def _undo_create(

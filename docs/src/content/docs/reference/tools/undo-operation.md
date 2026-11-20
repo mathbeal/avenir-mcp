@@ -107,6 +107,9 @@ Answer on the demo budget:
 
 - `Nothing to undo: no operation of this plan is still in effect with id {operation_id}.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
+- `{refused}; {first_name} is back to its moved amount: nothing was undone.`
+- `{refused}, and putting {first_name} back to its moved amount failed too ({again}): {first_name} is already back to how it was; set {second_name} to {second_from} in YNAB to finish undoing the move.`
+- `YNAB's answer for {name} was lost ({error}), and checking afterwards failed too ({unknown}): check {both} in YNAB by hand before doing anything else.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
 - `The plan changed between the preview and the answer. Call again without an answer to get a new preview.`

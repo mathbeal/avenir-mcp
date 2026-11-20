@@ -13,7 +13,7 @@ from fastmcp.exceptions import ToolError
 from mcp.types import InputRequiredResult
 from pydantic import Field
 
-from avenir_mcp import app, client, journal
+from avenir_mcp import app, client, journal, retry
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.confirm import WriteStatus, gate, merged
@@ -389,8 +389,9 @@ def _line(side: CategoryMove) -> str:
 async def _set_both(plan_id: str, month: str, source: CategoryMove, target: CategoryMove) -> None:
     """Take from the source, then give to the target; if the second write fails, undo the first.
 
-    `retry.YnabUnavailable` is a RuntimeError, so a second write that YNAB never
-    answered puts the source back as a refusal does: the error carries what to check.
+    A second write YNAB never answered may still have landed: before touching the
+    source, this rereads the target to tell a change applied behind a lost answer
+    from one that was truly refused.
 
     Args:
         plan_id: YNAB plan id or 'last-used'.
@@ -399,26 +400,78 @@ async def _set_both(plan_id: str, month: str, source: CategoryMove, target: Cate
         target: The category the money goes to.
 
     Raises:
-        ToolError: If YNAB refused the target or answered nothing, saying whether the
-            source was put back.
+        ToolError: If YNAB refused the target or answered nothing and it did not land,
+            saying whether the source was put back; or if rereading the target to tell
+            could not be done either, saying both amounts are unknown.
     """
     await client.set_category_budgeted(plan_id, month, source.category_id, source.to_amount)
     try:
         await client.set_category_budgeted(plan_id, month, target.category_id, target.to_amount)
+    except retry.YnabUnavailable as error:
+        if error.maybe_applied and await _landed(plan_id, month, target, source, error):
+            return
+        await _put_back(plan_id, month, source, target, error)
     except RuntimeError as error:
-        refused = f"YNAB refused to change {target.name} ({error})"
-        try:
-            await client.set_category_budgeted(
-                plan_id, month, source.category_id, source.from_amount
-            )
-        except RuntimeError as again:
-            raise ToolError(
-                f"{refused}, then putting {source.name} back failed too ({again}): "
-                f"set {source.name} back to {source.from_amount:.2f} in YNAB."
-            ) from again
+        await _put_back(plan_id, month, source, target, error)
+
+
+async def _landed(
+    plan_id: str, month: str, target: CategoryMove, source: CategoryMove, error: Exception
+) -> bool:
+    """Reread the target to tell a lost answer that landed from one that did not.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        target: The category the money goes to.
+        source: The category the money is taken from, named if rereading itself fails.
+        error: The lost answer, named if rereading itself fails.
+
+    Returns:
+        True if the target already carries its new amount: the move is complete.
+
+    Raises:
+        ToolError: If rereading the target failed too: neither category's amount is
+            known to be right, so neither is touched.
+    """
+    try:
+        return await client.category_budgeted_is(
+            plan_id, month, target.category_id, target.to_amount
+        )
+    except RuntimeError as unknown:
         raise ToolError(
-            f"{refused}; {source.name} is back to {source.from_amount:.2f}: nothing was moved."
-        ) from error
+            f"YNAB's answer for {target.name} was lost ({error}), and checking afterwards "
+            f"failed too ({unknown}): check {target.name} and {source.name} in YNAB by hand "
+            "before doing anything else."
+        ) from unknown
+
+
+async def _put_back(
+    plan_id: str, month: str, source: CategoryMove, target: CategoryMove, error: Exception
+) -> None:
+    """Put the source back to what it had, after the target's write was refused or lost.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        month: The month, YYYY-MM-01.
+        source: The category the money is taken from.
+        target: The category the money goes to.
+        error: Why the target was not changed.
+
+    Raises:
+        ToolError: Always; says whether the source was put back.
+    """
+    refused = f"YNAB refused to change {target.name} ({error})"
+    try:
+        await client.set_category_budgeted(plan_id, month, source.category_id, source.from_amount)
+    except RuntimeError as again:
+        raise ToolError(
+            f"{refused}, then putting {source.name} back failed too ({again}): "
+            f"set {source.name} back to {source.from_amount:.2f} in YNAB."
+        ) from again
+    raise ToolError(
+        f"{refused}; {source.name} is back to {source.from_amount:.2f}: nothing was moved."
+    ) from error
 
 
 @mcp.tool(
