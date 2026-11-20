@@ -15,7 +15,7 @@ from fastmcp.exceptions import ToolError
 from mcp.types import InputRequiredResult
 from pydantic import Field
 
-from avenir_mcp import app, client, forecast, journal, reconcile, schedule
+from avenir_mcp import app, client, forecast, journal, reconcile, schedule, writes
 from avenir_mcp.amounts import Amount
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.classifier import normalize_payee
@@ -576,8 +576,14 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         [item.model_dump(mode="json", exclude_none=True) for item in transactions],
         approved=approved,
     )
+    fingerprints = {
+        tx["id"]: writes.transaction_fingerprint(plan_id, tx) for tx in created["transactions"]
+    }
     operation_id = journal.Journal(journal.default_path()).record(
-        plan_id, "create", [], {"transaction_ids": created["transaction_ids"]}
+        plan_id,
+        "create",
+        [],
+        {"transaction_ids": created["transaction_ids"], "fingerprints": fingerprints},
     )
     return result.model_copy(
         update={

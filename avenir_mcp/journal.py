@@ -16,6 +16,7 @@ payee's name before and after, and nothing else of the transactions naming it.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import secrets
 from datetime import UTC, datetime
@@ -30,6 +31,14 @@ from pydantic import (
 )
 
 from avenir_mcp.model import Model
+
+logger = logging.getLogger(__name__)
+
+# What record() may be called with; a kind outside this set is read by a version that
+# does not exist yet here, and dispatching on it would be a guess.
+_KINDS = frozenset(
+    {"categorize", "reconcile", "budget", "move", "create", "flag", "target", "payee"}
+)
 
 
 class Move(Model):
@@ -62,6 +71,8 @@ class Entry(Model):
     """Category changes (categorize operations)."""
     details: dict[str, Any] = {}
     """What undoing other kinds needs, as identifiers."""
+    schema_version: int = 1
+    """Shape of this line; a line written before this field existed is version 1."""
 
 
 def default_path() -> Path:
@@ -121,13 +132,24 @@ class Journal:
                     data = json.loads(raw.decode("utf-8"))
                     if isinstance(data, dict) and isinstance(data.get("undone"), str):
                         undone.add(data["undone"])
-                    else:
-                        entries.append(Entry.model_validate(data))
+                        continue
+                    entry = Entry.model_validate(data)
                 except (UnicodeDecodeError, json.JSONDecodeError, ValidationError) as error:
                     raise ValueError(
                         f"{self._path}, line {number}, is not a journal entry: fix or remove "
                         "that line, or move the file aside to start a new journal."
                     ) from error
+                if entry.kind not in _KINDS:
+                    logger.warning(
+                        "%s, line %d: operation %s has kind %r, from a version not known "
+                        "here: skipped.",
+                        self._path,
+                        number,
+                        entry.operation_id,
+                        entry.kind,
+                    )
+                    continue
+                entries.append(entry)
         return entries, undone
 
     def record(
