@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+import calendar
 import random
 import tempfile
 import unicodedata
@@ -75,16 +76,70 @@ def _next_month(label: str) -> str:
     return f"{year + 1}-01" if number == 12 else f"{year}-{number + 1:02d}"
 
 
+_days_of_month = st.integers(min_value=1, max_value=31) | st.integers(min_value=28, max_value=31)
+recurring_charges = st.lists(
+    st.tuples(
+        st.sampled_from(["RENT", "GYM", "PHONE", "SALARY"]),
+        st.integers(min_value=-300_000, max_value=300_000),
+        _days_of_month,
+    ),
+    max_size=4,
+).map(
+    lambda rows: [
+        forecast.Recurring(payee=payee, amount=amount / 100, day=day, months_seen=4)
+        for payee, amount, day in rows
+    ]
+)
+one_off_amounts = st.lists(
+    st.tuples(
+        st.integers(min_value=-200, max_value=200),
+        st.integers(min_value=-300_000, max_value=300_000),
+    ),
+    max_size=4,
+)
+
+
+def _one_offs(today: date, rows: list[tuple[int, int]]) -> list[forecast.OneOff]:
+    """Turn (day offset from today, amount in cents) pairs into one-offs."""
+    return [
+        forecast.OneOff(date=today + timedelta(days=offset), amount=amount / 100, label="x")
+        for offset, amount in rows
+    ]
+
+
+def _last_day_of_month(year: int, month: int) -> date:
+    """The last date of a given month, short months (28 to 30 days) included."""
+    return date(year, month, calendar.monthrange(year, month)[1])
+
+
+# Half the time, today is a month's last day: the only case where a recurring day
+# falls both on or after it and past the month it walks, which is what let a
+# recurring amount count in a month's total without moving its balance.
+_todays = st.dates(min_value=date(2026, 1, 1), max_value=date(2027, 12, 31)) | st.builds(
+    _last_day_of_month,
+    year=st.integers(min_value=2026, max_value=2027),
+    month=st.integers(min_value=1, max_value=12),
+)
+
+
 @settings(max_examples=200)
 @given(
     start=st.integers(min_value=-10_000_000, max_value=10_000_000),
     variable=st.integers(min_value=-5_000_000, max_value=0),
     income=st.integers(min_value=0, max_value=5_000_000),
-    today=st.dates(min_value=date(2026, 1, 1), max_value=date(2027, 12, 31)),
+    today=_todays,
     months=st.integers(min_value=0, max_value=6),
+    recurring=recurring_charges,
+    one_offs=one_off_amounts,
 )
-def test_projected_months_follow_on_and_add_up(
-    start: int, variable: int, income: int, today: date, months: int
+def test_projected_months_follow_on_and_add_up(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    start: int,
+    variable: int,
+    income: int,
+    today: date,
+    months: int,
+    recurring: list[forecast.Recurring],
+    one_offs: list[tuple[int, int]],
 ) -> None:
     """Each month starts where the last ended, and ends at start plus inflows plus outflows."""
     until = today.replace(day=1) + timedelta(days=31 * months)
@@ -92,10 +147,10 @@ def test_projected_months_follow_on_and_add_up(
         start_balance=start / 100,
         today=today,
         until=f"{until:%Y-%m}",
-        recurring=[],
+        recurring=recurring,
         variable_monthly=variable / 100,
         monthly_income=income / 100,
-        one_offs=[],
+        one_offs=_one_offs(today, one_offs),
     )
     assert projection.months[0].start == start / 100
     labels = [month.month for month in projection.months]
