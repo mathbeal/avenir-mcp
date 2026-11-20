@@ -98,8 +98,13 @@ async def undo_operation(
     return result
 
 
-async def _confirm_undo(
-    ctx: Context, plan_id: str, entry: journal.Entry, question: str, confirmation: str | None
+async def _confirm_undo(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    ctx: Context,
+    plan_id: str,
+    entry: journal.Entry,
+    fields: dict[str, Any],
+    question: str,
+    confirmation: str | None,
 ) -> WriteResult | InputRequiredResult | None:
     """Ask the user to confirm an undo.
 
@@ -107,13 +112,17 @@ async def _confirm_undo(
         ctx: The MCP context, used to ask the user.
         plan_id: YNAB plan id or 'last-used'.
         entry: The operation to undo.
+        fields: What the question names, besides the operation: ids and amounts shown, so a
+            code issued for a different undo is refused.
         question: What the user is asked.
         confirmation: A code from a previous preview, or None.
 
     Returns:
         None when the user agreed; otherwise what to return instead of undoing.
     """
-    decision = await ask(ctx, plan_id, {"undo": entry.operation_id}, question, confirmation)
+    decision = await ask(
+        ctx, plan_id, {"undo": entry.operation_id, **fields}, question, confirmation
+    )
     if isinstance(decision, InputRequiredResult):
         return decision
     outcome = not_applied(decision, question)
@@ -172,12 +181,31 @@ async def _undo_reconcile(
     question = f"Undo reconciliation: mark {len(reverted)} transaction(s) back to cleared" + (
         " and delete the balance adjustment?" if adjustment else "?"
     )
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"reconciled": sorted(reverted), "adjustment": adjustment}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
     await client.set_transactions_cleared(plan_id, reverted, "cleared")
     if adjustment:
         await client.delete_transaction(plan_id, adjustment)
     return _undone(book, entry, "Reconciliation undone.")
+
+
+async def _current_budgeted_category(
+    plan_id: str, details: dict[str, Any]
+) -> dict[str, Any] | None:
+    """The category a budget-undo would restore, read fresh.
+
+    Args:
+        plan_id: YNAB plan id or 'last-used'.
+        details: The journal entry's details: month and category_id.
+
+    Returns:
+        Its current state, in milliunits, or None if it is no longer in the plan.
+    """
+    categories = await client.get_month_categories(plan_id, details["month"])
+    return next((c for c in categories if c["id"] == details["category_id"]), None)
 
 
 async def _undo_budget(
@@ -188,6 +216,9 @@ async def _undo_budget(
     confirmation: str | None,
 ) -> WriteResult | InputRequiredResult:
     """Set a category's budgeted amount back to what it was, unless it moved since.
+
+    Read again right before writing: the old protocol's question can stay open a long
+    time, and the amount could have moved again while it was.
 
     Args:
         ctx: The MCP context, used to ask the user.
@@ -200,17 +231,22 @@ async def _undo_budget(
         What was done, or what to return instead when the user did not agree.
     """
     details = entry.details
-    categories = await client.get_month_categories(plan_id, details["month"])
-    current = next((c for c in categories if c["id"] == details["category_id"]), None)
+    current = await _current_budgeted_category(plan_id, details)
+    conflict = writes.Plan(conflicts=[details["category_id"]])
     if current is None or current["budgeted"] != details["to"]:
-        conflict = writes.Plan(conflicts=[details["category_id"]])
         return result_of("nothing_to_do", "The amount changed since: left alone.", conflict)
     previous = client.milliunit_to_amount(details["from"])
     question = (
         f"Undo: set {untrusted(current['name'])} for {details['month']} back to {previous:.2f}?"
     )
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"category": details["category_id"], "month": details["month"], "to": details["to"]}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
+    fresh = await _current_budgeted_category(plan_id, details)
+    if fresh is None or fresh["budgeted"] != details["to"]:
+        return result_of("nothing_to_do", "The amount changed since: left alone.", conflict)
     await client.set_category_budgeted(plan_id, details["month"], details["category_id"], previous)
     return _undone(book, entry, "Budgeted amount restored.")
 
@@ -233,7 +269,24 @@ def _move_back_question(
     return f"Undo: move {amount:.2f} back from {target} to {source} for {month}?"
 
 
-async def _undo_move(
+def _moved_since(current: dict[str, dict[str, Any]], changes: list[dict[str, Any]]) -> list[str]:
+    """Categories of a move-undo whose amount no longer matches what the operation left.
+
+    Args:
+        current: The month's categories by id, freshly read.
+        changes: The move's two changes, as the journal holds them.
+
+    Returns:
+        Their ids; empty when both still match.
+    """
+    return [
+        change["category_id"]
+        for change in changes
+        if current.get(change["category_id"], {}).get("budgeted") != change["to"]
+    ]
+
+
+async def _undo_move(  # pylint: disable=too-many-locals
     ctx: Context,
     plan_id: str,
     book: journal.Journal,
@@ -241,6 +294,9 @@ async def _undo_move(
     confirmation: str | None,
 ) -> WriteResult | InputRequiredResult:
     """Put both categories of a move back, unless either changed since.
+
+    Read again right before writing: the old protocol's question can stay open a long
+    time, and no absolute amount is written from a reread that is no longer true.
 
     Args:
         ctx: The MCP context, used to ask the user.
@@ -254,17 +310,21 @@ async def _undo_move(
     """
     month, changes = entry.details["month"], entry.details["changes"]
     current = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
-    moved = [
-        change["category_id"]
-        for change in changes
-        if current.get(change["category_id"], {}).get("budgeted") != change["to"]
-    ]
+    moved = _moved_since(current, changes)
     if moved:
         conflict = writes.Plan(conflicts=moved)
         return result_of("nothing_to_do", "An amount changed since: both left alone.", conflict)
     question = _move_back_question(current, changes, month)
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"month": month, "changes": changes}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
+    fresh = {c["id"]: c for c in await client.get_month_categories(plan_id, month)}
+    moved_again = _moved_since(fresh, changes)
+    if moved_again:
+        conflict = writes.Plan(conflicts=moved_again)
+        return result_of("nothing_to_do", "An amount changed since: both left alone.", conflict)
     for change in reversed(changes):
         previous = client.milliunit_to_amount(change["from"])
         await client.set_category_budgeted(plan_id, month, change["category_id"], previous)
@@ -300,7 +360,10 @@ async def _undo_create(
             "nothing_to_do", "Already deleted: nothing to undo.", writes.Plan(conflicts=gone)
         )
     question = f"Undo: delete the {len(present)} transaction(s) this operation created?"
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"transactions": sorted(present)}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
     for tx_id in present:
         await client.delete_transaction(plan_id, tx_id)
@@ -337,7 +400,10 @@ async def _undo_flag(
         conflict = writes.Plan(conflicts=moved)
         return result_of("nothing_to_do", "Every flag changed since: left alone.", conflict)
     question = f"Undo: put back the flag of {len(back)} transaction(s)?"
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"flags": sorted([c["transaction_id"], c["to"]] for c in back)}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
     await client.set_flags(plan_id, [(c["transaction_id"], c["from"]) for c in back])
     return _undone(book, entry, "Flags restored.", moved)
@@ -372,7 +438,10 @@ async def _undo_target(
         conflict = writes.Plan(conflicts=[details["category_id"]])
         return result_of("nothing_to_do", "The target changed since: left alone.", conflict)
     question = f"Undo: set the target of {untrusted(category['name'])} back?"
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"category": details["category_id"], "target": details["after"]}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
     await client.set_category_target(plan_id, details["category_id"], details["undo"])
     return _undone(book, entry, "Target restored.")
@@ -407,7 +476,10 @@ async def _undo_payee(
         conflict = writes.Plan(conflicts=[details["payee_id"]])
         return result_of("nothing_to_do", "The payee was renamed since: left alone.", conflict)
     question = f"Undo: name the payee {untrusted(details['from'])!r} again?"
-    if (refused := await _confirm_undo(ctx, plan_id, entry, question, confirmation)) is not None:
+    fields = {"payee": details["payee_id"], "name": details["to"]}
+    if (
+        refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
+    ) is not None:
         return refused
     await client.rename_payee(plan_id, details["payee_id"], details["from"])
     return _undone(book, entry, "The payee's previous name is back.")

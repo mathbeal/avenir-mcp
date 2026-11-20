@@ -5,14 +5,27 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
 import pytest
 
+from avenir_mcp import tools_categories
+
 from .fake_month import FakeMonth, serving
-from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
+from .mcp_helpers import (
+    FLAT,
+    FORGED,
+    OldProtocolContext,
+    accept,
+    asking,
+    call,
+    decline,
+    one_line,
+    undo_through_a_blocking_drift,
+)
 
 
 @pytest.fixture(name="month")
@@ -92,6 +105,23 @@ def test_undo_leaves_a_budget_changed_since_alone(month: FakeMonth) -> None:
     assert len(month.sets) == 1
 
 
+def test_undo_leaves_a_budget_changed_while_the_blocking_answer_was_open(
+    month: FakeMonth,
+) -> None:
+    """Before 2026-07-28, the question can stay open a long time: reread before writing.
+
+    If the amount moved again while the user was still being asked to undo, the yes is
+    not applied: the tool rereads right before writing and leaves it alone, as it would
+    have if the change had already happened before the question was asked.
+    """
+    call("set_category_budget", _ARGS, accept)
+    applied = len(month.sets)
+    undo = undo_through_a_blocking_drift(lambda: month.budgeted.update({"c-food": 999000}))
+    assert undo.status == "nothing_to_do"
+    assert undo.conflicts == ["c-food"]
+    assert len(month.sets) == applied
+
+
 def test_same_amount_changes_nothing(month: FakeMonth) -> None:
     """Setting the current amount again asks and writes nothing."""
     data = call("set_category_budget", {**_ARGS, "amount": 200.0}).structured_content
@@ -102,6 +132,47 @@ def test_same_amount_changes_nothing(month: FakeMonth) -> None:
 def test_declined_budget_change_writes_nothing(month: FakeMonth) -> None:
     """If the user says no, the amount stays."""
     assert call("set_category_budget", _ARGS, decline).structured_content["status"] == "declined"
+    assert not month.sets
+
+
+def test_a_confirmation_code_is_refused_when_the_amount_moved_meanwhile(month: FakeMonth) -> None:
+    """A code confirms the exact amount previewed: if it moved since, nothing is written.
+
+    The result is a fresh preview of the current amount, not a bare error, so the agent
+    can show it and ask again.
+    """
+    preview = call("set_category_budget", _ARGS).structured_content
+    month.budgeted["c-food"] = 300000
+    result = call(
+        "set_category_budget", {**_ARGS, "confirmation": preview["confirmation"]}
+    ).structured_content
+    assert result["status"] == "confirmation_required"
+    assert result["from_amount"] == 300.0
+    assert "200.00" in result["message"]
+    assert "300.00" in result["message"]
+    assert not month.sets
+
+
+def test_a_blocking_answer_is_refused_when_the_amount_moved_while_it_was_open(
+    month: FakeMonth,
+) -> None:
+    """Before 2026-07-28, the question can stay open a long time: reread before writing.
+
+    If the amount moved while the user was still being asked, the yes is not applied: the
+    tool rereads and refuses with a fresh preview instead of writing a now-wrong amount.
+    """
+
+    def drift() -> None:
+        month.budgeted["c-food"] = 300000
+
+    ctx = OldProtocolContext(on_elicit=drift)
+    coro = tools_categories.set_category_budget("b1", "2026-10-01", "c-food", 150.0, ctx)  # type: ignore[arg-type]
+    result = asyncio.run(coro)
+    assert isinstance(result, tools_categories.BudgetChange)
+    assert result.status == "confirmation_required"
+    assert result.from_amount == 300.0
+    assert "200.00" in result.message
+    assert "300.00" in result.message
     assert not month.sets
 
 
