@@ -141,25 +141,63 @@ def milliunit_to_amount(milliunit: int) -> float:
     return milliunit / 1000
 
 
-def _check(response: Any) -> dict[str, Any]:
-    """Check a response: its JSON body, or YNAB's own error detail on a 4xx/5xx.
+def _text(response: Any) -> str:
+    """Read a response's body as text, or say it could not be decoded at all.
 
     Args:
         response: The httpx response.
 
     Returns:
+        The body as text, or a short placeholder when even that fails.
+    """
+    try:
+        return response.text  # type: ignore[no-any-return]
+    except httpx.DecodingError:
+        return "<body could not be decoded>"
+
+
+def _error_detail(response: Any) -> str:
+    """Read YNAB's own error detail from a 4xx/5xx body, or fall back to the raw text.
+
+    Args:
+        response: The httpx response.
+
+    Returns:
+        The detail string, or the response's text when the body is not the
+        {"error": {"detail": ...}} shape YNAB documents (a gateway's HTML error page, a
+        JSON array, or {"error": null} all fall back the same way).
+    """
+    try:
+        body = response.json()
+    except (ValueError, httpx.DecodingError):
+        return _text(response)
+    if isinstance(body, dict):
+        error = body.get("error")
+        if isinstance(error, dict):
+            return str(error.get("detail", ""))
+    return _text(response)
+
+
+def _check(response: Any, method: str) -> dict[str, Any]:
+    """Check a response: its JSON body, or YNAB's own error detail on a 4xx/5xx.
+
+    Args:
+        response: The httpx response.
+        method: get, patch, post or delete; says what an undecodable body means for a write.
+
+    Returns:
         The JSON body.
 
     Raises:
-        RuntimeError: "YNAB <status>: <detail>" when the API rejects the request.
+        RuntimeError: "YNAB <status>: <detail>" when the API rejects the request, or when
+            its body could not be read as the JSON this client expects.
     """
     if response.status_code >= 400:
-        try:
-            detail = response.json().get("error", {}).get("detail", "")
-        except ValueError:
-            detail = response.text
-        raise RuntimeError(f"YNAB {response.status_code}: {detail}")
-    return response.json()  # type: ignore[no-any-return]
+        raise RuntimeError(f"YNAB {response.status_code}: {_error_detail(response)}")
+    try:
+        return response.json()  # type: ignore[no-any-return]
+    except (ValueError, httpx.DecodingError) as error:
+        raise RuntimeError(retry.undecodable(method, error)) from error
 
 
 class Pace:
@@ -270,10 +308,10 @@ async def _request(
 
     Raises:
         ValueError: If a path segment is not a YNAB id.
-        RuntimeError: On 4xx/5xx responses, with YNAB's error detail, or when YNAB's
-            rate limit keeps the request from leaving.
-        retry.YnabUnavailable: When YNAB answered nothing, saying whether a change
-            may have been applied.
+        RuntimeError: On 4xx responses, with YNAB's error detail, or when YNAB's rate
+            limit keeps the request from leaving.
+        retry.YnabUnavailable: When YNAB answered nothing, or a write got a 5xx, saying
+            the change may or may not have been applied.
     """
     url = _url(path)
     headers = {"Authorization": f"Bearer {_api_key().get_secret_value()}"}
@@ -303,7 +341,13 @@ async def _request(
             "YNAB 401: the token is invalid or was revoked; create a new Personal Access "
             "Token in YNAB's settings."
         )
-    return _check(response)
+    # A read that still gets a 5xx after retry.answered's retries is YNAB's own answer, no
+    # more ambiguous than a 4xx. A write is never retried on a 5xx (it might have landed),
+    # so its first and only answer is as unknown as a timeout: told the same way, without
+    # the body, which may be a gateway's error page rather than anything YNAB wrote.
+    if method != "get" and response.status_code >= 500:
+        raise retry.YnabUnavailable(retry.server_error(response.status_code))
+    return _check(response, method)
 
 
 async def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:

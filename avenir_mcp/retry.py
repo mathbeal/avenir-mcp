@@ -103,6 +103,12 @@ def landed(method: str, failure: Exception) -> bool:
     return method != "get" and not isinstance(failure, NEVER_SENT)
 
 
+_UNKNOWN_OUTCOME = (
+    "the change may or may not be applied. Check with find_transactions / "
+    "get_category_balances before trying again; do not repeat it blindly."
+)
+
+
 def no_answer(method: str, failure: Exception, attempts: int) -> str:
     """Write what an agent reads when no answer came back from YNAB.
 
@@ -117,15 +123,45 @@ def no_answer(method: str, failure: Exception, attempts: int) -> str:
     detail = str(failure)
     cause = f"{type(failure).__name__}: {detail}" if detail else type(failure).__name__
     if landed(method, failure):
-        return (
-            f"The request reached YNAB but no answer came back ({cause}): the "
-            "change may or may not be applied. Check with find_transactions / "
-            "get_category_balances before trying again; do not repeat it blindly."
-        )
+        return f"The request reached YNAB but no answer came back ({cause}): {_UNKNOWN_OUTCOME}"
     return (
         f"YNAB could not be reached after {attempts} attempts ({cause}). Nothing "
         "was changed. Try again in a few minutes."
     )
+
+
+def server_error(status: int) -> str:
+    """Write what an agent reads when a write's own answer was a 5xx, not a timeout.
+
+    YNAB (or a gateway in front of it) read the request far enough to answer with a
+    status, but a 5xx says its own server failed before finishing: for a write that is
+    exactly as ambiguous as getting no answer at all, so it is told the same way, and
+    never with the body YNAB sent, which may be an error page rather than data.
+
+    Args:
+        status: The HTTP status answered.
+
+    Returns:
+        A short message saying the change may or may not be applied.
+    """
+    return f"YNAB {status}: the server failed to answer. {_UNKNOWN_OUTCOME}"
+
+
+def undecodable(method: str, error: Exception) -> str:
+    """Say a successful response's body could not be read, as the client expects to.
+
+    YNAB already answered success, so for a write the change was very likely applied,
+    unlike a request that never got an answer at all.
+
+    Args:
+        method: get, patch, post or delete.
+        error: What went wrong reading the body.
+
+    Returns:
+        A message naming the failure; for a write, adding that it was probably applied.
+    """
+    outcome = " The change was probably applied: YNAB answered success." if method != "get" else ""
+    return f"YNAB's answer could not be read ({error}).{outcome}"
 
 
 async def answered(

@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import os
+import re
 import stat
 from pathlib import Path
 
@@ -174,6 +175,42 @@ def test_a_line_that_is_not_utf8_is_named_with_a_way_forward(tmp_path: Path) -> 
         file.write(b"\x80\xff\n")
     with pytest.raises(ValueError, match=r"line 2, is not a journal entry"):
         journal.Journal(path).find("b1")
+
+
+def _unwritable(tmp_path: Path) -> Path:
+    """A journal path whose parent can never become a directory."""
+    blocker = tmp_path / "not-a-directory"
+    blocker.write_text("in the way")
+    return blocker / "journal.jsonl"
+
+
+def test_check_writable_raises_before_anything_is_written(tmp_path: Path) -> None:
+    """A broken path is caught before a write, naming the path, not a bare OSError."""
+    path = _unwritable(tmp_path)
+    with pytest.raises(RuntimeError, match=re.escape(str(path))):
+        journal.Journal(path).check_writable()
+    assert not path.exists()
+
+
+def test_check_writable_passes_for_a_journal_not_yet_created(tmp_path: Path) -> None:
+    """A journal that can be created on the first write is writable, and records nothing yet."""
+    path = tmp_path / "sub" / "journal.jsonl"
+    journal.Journal(path).check_writable()
+    assert journal.Journal(path).find("b1") is None
+
+
+def test_record_that_cannot_be_written_says_the_change_was_not_journaled(tmp_path: Path) -> None:
+    """A write already applied through YNAB must not fail silently if the journal cannot keep up."""
+    book = journal.Journal(_unwritable(tmp_path))
+    with pytest.raises(RuntimeError, match="not recorded in the journal"):
+        book.record("b1", "categorize", _MOVES)
+
+
+def test_mark_undone_that_cannot_be_written_says_so(tmp_path: Path) -> None:
+    """An undo already applied through YNAB must not fail silently either."""
+    book = journal.Journal(_unwritable(tmp_path))
+    with pytest.raises(RuntimeError, match="not recorded in the journal"):
+        book.mark_undone("op1")
 
 
 def test_an_operation_recorded_with_budget_id_is_still_found(tmp_path: Path) -> None:
