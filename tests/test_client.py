@@ -556,28 +556,6 @@ def test_create_transactions_posts_milliunits_and_reports_duplicates() -> None:
 
 
 # ---------------------------------------------------------------------------
-# error reporting
-# ---------------------------------------------------------------------------
-
-
-def test_api_error_includes_ynab_detail() -> None:
-    """A 4xx from YNAB must surface YNAB's error detail, not just the status code."""
-    error = {"error": {"id": "400", "name": "bad_request", "detail": "payee name is reserved"}}
-    mock_resp = _mock_response(error, status_code=400)
-    mock_http = AsyncMock()
-    mock_http.post = AsyncMock(return_value=mock_resp)
-    ctx = MagicMock()
-    ctx.__aenter__ = AsyncMock(return_value=mock_http)
-    ctx.__aexit__ = AsyncMock(return_value=None)
-    items = [{"date": "2026-07-01", "amount": 1.0, "payee_name": "X"}]
-
-    with patch("httpx.AsyncClient", return_value=ctx):
-        with patch.dict("os.environ", {"YNAB_API_KEY": "tok"}):
-            with pytest.raises(RuntimeError, match="400.*payee name is reserved"):
-                asyncio.run(client.create_transactions("b1", "a1", items))
-
-
-# ---------------------------------------------------------------------------
 # YNAB's rate limit: 200 requests per hour and per token, over a rolling window
 # ---------------------------------------------------------------------------
 

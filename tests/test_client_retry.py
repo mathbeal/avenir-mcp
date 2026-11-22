@@ -184,3 +184,33 @@ def test_a_gateway_error_page_still_there_on_the_last_try_raises_with_its_text()
         _sent("get", transport)
 
     assert len(seen) == 3
+
+
+# ---------------------------------------------------------------------------
+# A 5xx on a write: as unknown as a timeout, never the raw body
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("method", ["post", "patch", "delete"])
+@pytest.mark.parametrize("status", [500, 502, 503, 504])
+def test_a_write_that_gets_a_5xx_is_left_unknown_without_its_body(method: str, status: int) -> None:
+    """A write answered with a 5xx is sent once, treated like a timeout: no HTML in the message."""
+    html = "<html><body><h1>502 Bad Gateway</h1><p>nginx</p></body></html>"
+    transport, seen = _answering(httpx.Response(status, text=html))
+
+    with pytest.raises(retry.YnabUnavailable) as raised:
+        _sent(method, transport)
+
+    assert html not in str(raised.value)
+    assert "may or may not be applied" in str(raised.value)
+    assert len(seen) == 1
+
+
+def test_a_read_that_gets_a_500_still_carries_the_raw_body() -> None:
+    """A read is not a write: a 500 is YNAB's own answer, raw body and all, not unknown outcome."""
+    transport, seen = _answering(httpx.Response(500, text="Internal Server Error"))
+
+    with pytest.raises(RuntimeError, match="500: Internal Server Error"):
+        _sent("get", transport)
+
+    assert len(seen) == 1
