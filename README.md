@@ -8,7 +8,7 @@
 
 **avenir-mcp** lets an AI agent read your YNAB plan and help you plan what comes next.
 
-Unofficial, and listed by YNAB in its [Works with YNAB](https://api.ynab.com/#works-with-ynab-third-party) directory.
+Unofficial: not affiliated with, or endorsed by, YNAB.
 
 [English](https://avenir-mcp.pages.dev/avenir-mcp/) · [Français](https://avenir-mcp.pages.dev/avenir-mcp/fr/) · [Español](https://avenir-mcp.pages.dev/avenir-mcp/es/) · [Deutsch](https://avenir-mcp.pages.dev/avenir-mcp/de/) · [Nederlands](https://avenir-mcp.pages.dev/avenir-mcp/nl/)
 
