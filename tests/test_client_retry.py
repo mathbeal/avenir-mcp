@@ -43,7 +43,7 @@ def _sent(method: str, transport: httpx.MockTransport, clock: float = 1000.0) ->
     """Send one request of *method* to /plans through *transport*, with the clock stopped."""
     with (
         patch.dict("os.environ", {"YNAB_API_KEY": "tok"}),
-        patch("avenir_mcp.client.time.monotonic", return_value=clock),
+        patch("avenir_mcp.pace.time.monotonic", return_value=clock),
     ):
         return asyncio.run(
             client._request(  # pylint: disable=protected-access
@@ -203,6 +203,7 @@ def test_a_write_that_gets_a_5xx_is_left_unknown_without_its_body(method: str, s
 
     assert html not in str(raised.value)
     assert "may or may not be applied" in str(raised.value)
+    assert raised.value.maybe_applied is True
     assert len(seen) == 1
 
 
