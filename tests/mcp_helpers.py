@@ -6,12 +6,15 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from typing import Any
 
 from fastmcp import Client
 from fastmcp.client.elicitation import ElicitResult
+from fastmcp.server.elicitation import AcceptedElicitation
 
-from avenir_mcp import server
+from avenir_mcp import server, tools_undo
 
 
 async def accept(*_: Any) -> ElicitResult[Any]:
@@ -65,3 +68,54 @@ def asking(asked: list[str]) -> Any:
 def one_line(question: str) -> bool:
     """Whether the forged name stayed inside its line of the question."""
     return FLAT in question and "\n- 2026-09-03 Fake" not in question
+
+
+@dataclass
+class _Session:
+    def check_client_capability(self, _capability: Any) -> bool:
+        """A client that can always ask."""
+        return True
+
+
+@dataclass
+class _RequestContext:
+    protocol_version: str
+
+
+@dataclass
+class OldProtocolContext:
+    """A fake Context whose elicitation blocks synchronously, as before 2026-07-28.
+
+    Calls a tool directly (not through a Client), to make something happen between the
+    state read before asking and the write after: the gap this codebase calls the old
+    protocol's "no limit on how long the question stays open".
+    """
+
+    on_elicit: Callable[[], None] = lambda: None
+    protocol_version: str = "2025-06-18"
+    session: _Session = field(default_factory=_Session)
+
+    @property
+    def request_context(self) -> _RequestContext:
+        """The negotiated protocol version."""
+        return _RequestContext(self.protocol_version)
+
+    async def elicit(self, _question: str, _response_type: type) -> Any:
+        """Run the side effect, then answer yes, as a user would after a long wait."""
+        self.on_elicit()
+        return AcceptedElicitation(data=True)
+
+
+def undo_through_a_blocking_drift(drift: Callable[[], None]) -> Any:
+    """Undo plan b1 directly, as the old protocol would once a blocking question is answered.
+
+    `drift` runs as the side effect of saying yes, standing in for a change made in YNAB
+    while the question was still open.
+
+    Args:
+        drift: What to do once the question is answered, before the write.
+
+    Returns:
+        What undo_operation returns.
+    """
+    return asyncio.run(tools_undo.undo_operation("b1", OldProtocolContext(on_elicit=drift)))  # type: ignore[arg-type]
