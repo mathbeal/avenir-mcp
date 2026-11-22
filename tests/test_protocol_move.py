@@ -203,8 +203,9 @@ def test_a_lost_undo_answer_that_cannot_be_checked_says_so(month: FakeMonth) -> 
     lost = retry.no_answer("patch", httpx.ReadTimeout("no answer"), 1)
     month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
     month.failing_calls = {month.calls + 2}
-    # Reads 3 and 4 are undo's own preview and confirmed-call guard; 5 is the new reread.
-    month.failing_reads = {month.reads + 3}
+    # Reads 3 and 4 are undo's own preview and confirmed-call guard; 5 is the fresh reread
+    # right before writing; 6 is the reread this fix adds, once the second write is lost.
+    month.failing_reads = {month.reads + 4}
     result = call("undo_operation", {"plan_id": "b1"}, accept)
     assert result.is_error
     text = result.content[0].text
@@ -282,8 +283,9 @@ def test_a_lost_answer_that_cannot_be_checked_says_so_without_touching_anything(
     month.failure = retry.YnabUnavailable(lost, maybe_applied=True)
     month.failing_calls = {2}
     # Reads 1 and 2 are the preview's and the confirmed call's own category fetch; 3 is the
-    # reread this fix adds, once the destination write is lost.
-    month.failing_reads = {3}
+    # fresh reread right before writing; 4 is the reread this fix adds, once the
+    # destination write is lost.
+    month.failing_reads = {4}
     result = call("move_money", _ARGS, accept)
     assert result.is_error
     text = result.content[0].text
