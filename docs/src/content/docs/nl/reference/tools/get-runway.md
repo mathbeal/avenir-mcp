@@ -127,6 +127,7 @@ Antwoord op het demobudget:
     "No income is assumed: the runway is how long the money would last if nothing came in.",
     "Spending is the past average of money out of the budget accounts; refunds and other money in are not deducted, transfers between budget accounts are left out, and transfers to a tracking loan or debt (a loan payment, say) count as spending.",
     "A transfer to a tracking account that holds an asset (savings, investments) is not spending: that money is still yours, as get_savings_rate counts it.",
+    "An account's opening balance (YNAB's \"Starting Balance\") is money already there when it was added, not spending, even when it is negative (a card's starting debt).",
     "Tracking accounts are not counted as money available: investments and loans outside the budget are listed in left_out.",
     "The past is no promise: yearly bills, holidays or a job search change the pace.",
     "Only the last 3 of the 6 months hold budget transactions: the average is over those."

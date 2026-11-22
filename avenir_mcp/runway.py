@@ -15,7 +15,7 @@ from datetime import date
 from typing import Any
 
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
-from avenir_mcp.forecast import months_before
+from avenir_mcp.forecast import is_opening_balance, months_before
 from avenir_mcp.model import Model
 from avenir_mcp.networth import tracking_assets
 from avenir_mcp.text import untrusted
@@ -187,6 +187,8 @@ def _notes(  # pylint: disable=too-many-arguments
         "and transfers to a tracking loan or debt (a loan payment, say) count as spending.",
         "A transfer to a tracking account that holds an asset (savings, investments) is not "
         "spending: that money is still yours, as get_savings_rate counts it.",
+        "An account's opening balance (YNAB's \"Starting Balance\") is money already there "
+        "when it was added, not spending, even when it is negative (a card's starting debt).",
         "Tracking accounts are not counted as money available: investments and loans "
         "outside the budget are listed in left_out.",
         "The past is no promise: yearly bills, holidays or a job search change the pace.",
@@ -250,7 +252,7 @@ def summary(  # pylint: disable=too-many-arguments,too-many-locals
     vital_ids = {cat_id for group in essential or [] for cat_id in group["category_ids"]}
     spent = vital = 0
     for tx in history:
-        if tx["date"][:7] not in months:
+        if tx["date"][:7] not in months or is_opening_balance(tx):
             continue
         for line in lines_of(tx):
             # Which way the line goes. A line of zero adds nothing to either total, so a

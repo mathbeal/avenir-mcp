@@ -108,8 +108,9 @@ Antwoord op het demobudget:
   "worst_month": "2026-08",
   "moved_to_tracking": 0.0,
   "notes": [
-    "Income is money in categorised to Ready to Assign on the budget accounts; starting balances and transfers, from a tracking account too, are not income.",
+    "Income is money in categorised to Ready to Assign on the budget accounts; transfers, from a tracking account too, are not income.",
     "Spending is money out of the budget accounts less refunds (money in categorised to a spending category); transfers between budget accounts are left out.",
+    "An account's opening balance (YNAB's \"Starting Balance\") is money already there when it was added, not income or spending, whichever way it goes.",
     "A transfer to a tracking account that holds an asset (savings, investments) is saved, not spent; a transfer to a tracking loan or debt is spending, as YNAB's budget counts it.",
     "Saved is income less spending: what stayed in the budget accounts or went to an asset outside them. The rate is saved over income.",
     "Only the last 3 of the 6 months hold budget transactions: the figures are over those."

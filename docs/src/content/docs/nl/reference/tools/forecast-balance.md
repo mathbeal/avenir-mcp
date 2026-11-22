@@ -18,9 +18,11 @@ Assumes, and returns as `assumptions` so the user can correct them: YNAB's
 scheduled transactions on their dates, whatever their frequency, a yearly bill
 included, charges that recur in the last 4 months (same payee, stable amount),
 the average of all other spending over the last 3 months, and what you pass.
-A payee with a schedule is projected by that schedule alone, and transfers
-between the projected accounts are left out. What you pass is the expected
-monthly income (default: the last 3 months' non-recurring inflows, which may
+A payee with a schedule is projected by that schedule alone. A transfer between
+two projected accounts is left out, since it moves nothing out of them; a
+transfer to an account left out of the projection (a card not projected, a loan
+in a tracking account) is real money leaving, and counts. What you pass is the
+expected monthly income (default: the last 3 months' non-recurring inflows, which may
 include one-off money such as capital injections) and one-off amounts such as
 a tax bill (negative) or a refund (positive). Amounts in currency units.
 `lowest` is the lowest point within a month; `first_shortfall` is the first

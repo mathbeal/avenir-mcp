@@ -184,6 +184,16 @@ def test_starting_balances_and_uncategorised_inflows_are_not_income() -> None:
     assert any("2 inflows without a category (100.00)" in note for note in answer.notes)
 
 
+def test_a_cards_opening_balance_is_not_spending() -> None:
+    """A card's starting debt is money already owed when it was added, not a month's spending."""
+    history = [
+        *_salary_and_rent(months=("08",)),
+        _tx("card", "2026-08-01", -2_400_000, payee="Starting Balance"),
+    ]
+    month = _summary(history, months=1).months[0]
+    assert (month.income, month.spending, month.rate) == (3_000.0, -1_000.0, 66.7)
+
+
 def test_tracking_accounts_and_deleted_transactions_are_left_out() -> None:
     """What happens inside a tracking account, or was deleted, is not the budget's."""
     history = [
@@ -265,12 +275,16 @@ def test_without_any_history_nothing_is_measured() -> None:
 
 
 _WHAT_INCOME_IS = (
-    "Income is money in categorised to Ready to Assign on the budget accounts; starting "
-    "balances and transfers, from a tracking account too, are not income."
+    "Income is money in categorised to Ready to Assign on the budget accounts; transfers, "
+    "from a tracking account too, are not income."
 )
 _WHAT_SPENDING_IS = (
     "Spending is money out of the budget accounts less refunds (money in categorised "
     "to a spending category); transfers between budget accounts are left out."
+)
+_WHAT_AN_OPENING_BALANCE_IS = (
+    "An account's opening balance (YNAB's \"Starting Balance\") is money already there "
+    "when it was added, not income or spending, whichever way it goes."
 )
 _WHAT_A_TRANSFER_OUT_IS = (
     "A transfer to a tracking account that holds an asset (savings, investments) is "
@@ -287,11 +301,12 @@ def test_every_answer_states_its_rules() -> None:
     """Refunds, transfers and what counts as saving are said in plain words.
 
     The notes are what the user is told the figures mean, so they are checked whole:
-    four rules, and nothing else when every month asked for holds transactions.
+    five rules, and nothing else when every month asked for holds transactions.
     """
     assert _summary(_salary_and_rent()).notes == [
         _WHAT_INCOME_IS,
         _WHAT_SPENDING_IS,
+        _WHAT_AN_OPENING_BALANCE_IS,
         _WHAT_A_TRANSFER_OUT_IS,
         _WHAT_SAVED_IS,
     ]
