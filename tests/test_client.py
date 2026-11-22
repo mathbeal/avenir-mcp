@@ -588,7 +588,7 @@ def _plans(ctx: MagicMock, clock: float) -> Any:
     with (
         patch("httpx.AsyncClient", return_value=ctx),
         patch.dict("os.environ", {"YNAB_API_KEY": "tok"}),
-        patch("avenir_mcp.client.time.monotonic", return_value=clock),
+        patch("avenir_mcp.pace.time.monotonic", return_value=clock),
     ):
         return asyncio.run(client.get_plans())
 
