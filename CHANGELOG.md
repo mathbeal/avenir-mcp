@@ -11,6 +11,7 @@ by hand: edit the commits, or the configuration in `cliff.toml`.
 
 ### Fixed
 
+- Avenir-mcp 0.9.0 (#217)
 - Reread before rolling back a lost move_money or undo_operation write (#193)
 
 ## [0.9.0] — 2026-11-22
