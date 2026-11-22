@@ -224,6 +224,13 @@ def test_get_transactions_delta_sync_merges_changes() -> None:
     ]
 
 
+def test_get_transactions_delta_sync_drops_matched_transaction_ghost() -> None:
+    """A delta's hidden half of a matched pair must not join the cached transactions."""
+    first = [{"id": "t1", "deleted": False}]
+    delta = [{"id": "ghost", "deleted": False, "matched_transaction_id": "t1"}]
+    assert _get_transactions_twice(first, delta) == first
+
+
 def test_get_month_returns_month_dict() -> None:
     """get_month should return the 'month' key from the API response."""
     payload = {
