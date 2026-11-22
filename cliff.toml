@@ -62,3 +62,8 @@ commit_parsers = [
   { message = "^Merge (pull request|branch|remote)", skip = true },
   { message = ".*",               group = "Changed" },
 ]
+
+[bump]
+# Pre-1.0: a breaking change bumps the minor version, per semver
+# https://semver.org/spec/v2.0.0.html#spec-item-4.
+breaking_always_bump_major = false
