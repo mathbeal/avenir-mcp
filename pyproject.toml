@@ -250,6 +250,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_flags.py",
     "tests/test_forecast.py",
     "tests/test_networth.py",
+    "tests/test_pace.py",
     "tests/test_payees.py",
     "tests/test_payoff.py",
     "tests/test_properties.py",

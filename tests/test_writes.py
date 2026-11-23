@@ -231,6 +231,15 @@ def test_peek_refuses_an_expired_code() -> None:
     assert confirmations.peek(code, "b1") is None
 
 
+def test_peek_still_shows_a_code_exactly_at_its_ttl() -> None:
+    """A code is fresh through its whole ttl, inclusive: only past it does it expire."""
+    now = [0.0]
+    confirmations = writes.Confirmations(ttl_seconds=600, clock=lambda: now[0])
+    code = confirmations.issue("b1", {"before": 100})
+    now[0] = 600.0
+    assert confirmations.peek(code, "b1") == {"before": 100}
+
+
 def test_expired_codes_are_forgotten() -> None:
     """Previews never confirmed do not pile up in memory: expired codes are dropped."""
     now = [0.0]
@@ -293,6 +302,24 @@ def test_the_fingerprint_ignores_the_order_of_keys() -> None:
     assert writes.fingerprint("b1", {"a": 1, "b": 2}) == writes.fingerprint("b1", {"b": 2, "a": 1})
     assert writes.fingerprint("b1", [{"a": 1, "b": 2}]) == writes.fingerprint(
         "b1", [{"b": 2, "a": 1}]
+    )
+
+
+def test_transaction_fingerprint_hashes_date_amount_and_category() -> None:
+    """A transaction's fingerprint is the plain fingerprint of its date, amount and category."""
+    transaction = {"id": "tx1", "date": "2026-01-01", "amount": -5000, "category_id": "cat1"}
+
+    assert writes.transaction_fingerprint("b1", transaction) == writes.fingerprint(
+        "b1", {"date": "2026-01-01", "amount": -5000, "category_id": "cat1"}
+    )
+
+
+def test_transaction_fingerprint_is_bound_to_its_plan() -> None:
+    """The same transaction in two different plans never shares a fingerprint."""
+    transaction = {"date": "2026-01-01", "amount": -5000, "category_id": "cat1"}
+
+    assert writes.transaction_fingerprint("b1", transaction) != writes.transaction_fingerprint(
+        "b2", transaction
     )
 
 

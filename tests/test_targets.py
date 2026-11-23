@@ -36,6 +36,17 @@ CARD = _cat(name="Visa", category_group_name=triage.CARD_GROUP)
 LOAN = _cat(name="Car loan", goal_type="DEBT", goal_target=250_000)
 
 
+def test_fingerprint_reads_every_goal_field_by_its_own_name() -> None:
+    """Each goal field in the fingerprint comes from the category entry of the same name."""
+    fingerprint = targets.fingerprint(NEED_BY_DATE)
+    assert fingerprint["goal_type"] == "NEED"
+    assert fingerprint["goal_target"] == 1_200_000
+    assert fingerprint["goal_target_date"] == "2027-06-01"
+    assert fingerprint["goal_cadence"] == 0
+    assert fingerprint["goal_cadence_frequency"] is None
+    assert fingerprint["goal_needs_whole_amount"] is False
+
+
 @pytest.mark.parametrize(
     ("category", "expected"),
     [
