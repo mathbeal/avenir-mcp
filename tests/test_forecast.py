@@ -621,6 +621,21 @@ def test_the_current_month_is_walked_from_tomorrow() -> None:
     assert result.months[0].end == 950.0
 
 
+def test_a_future_month_s_one_off_on_its_first_day_moves_the_balance() -> None:
+    """A one-off on the 1st of a later month, not the current one, still moves its balance."""
+    one_off = forecast.OneOff(date=date(2026, 10, 1), amount=-50.0, label="first of october")
+    result = forecast.project(
+        start_balance=1000.0,
+        today=TODAY,
+        until="2026-10",
+        recurring=[],
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[one_off],
+    )
+    assert result.months[1].end == 950.0
+
+
 def test_a_late_charge_not_yet_paid_is_still_projected() -> None:
     """Unpaid, a charge whose usual day already passed this month still falls due."""
     rec = [forecast.Recurring(payee="RENT", amount=-100.0, day=5, months_seen=4)]
