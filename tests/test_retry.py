@@ -213,6 +213,19 @@ def test_a_lost_request_is_a_runtime_error_like_any_refusal_by_ynab() -> None:
     assert issubclass(retry.YnabUnavailable, RuntimeError)
 
 
+def test_undecodable_names_the_failure_for_a_read() -> None:
+    """A read whose answer could not be read says only that: nothing was changed to check."""
+    assert retry.undecodable("get", ValueError("boom")) == "YNAB's answer could not be read (boom)."
+
+
+def test_undecodable_says_a_write_was_probably_applied() -> None:
+    """A write whose success answer could not be read still very likely went through."""
+    assert retry.undecodable("post", ValueError("boom")) == (
+        "YNAB's answer could not be read (boom). The change was probably applied: "
+        "YNAB answered success."
+    )
+
+
 # ---------------------------------------------------------------------------
 # answered: the tries themselves
 # ---------------------------------------------------------------------------
@@ -242,6 +255,7 @@ def test_a_read_that_never_gets_through_gives_up_after_three_requests() -> None:
         "YNAB could not be reached after 3 attempts (ReadTimeout: no answer). "
         "Nothing was changed. Try again in a few minutes."
     )
+    assert raised.value.maybe_applied is False
     assert len(sent) == 3
     assert len(waits) == 2
 
@@ -259,8 +273,26 @@ def test_a_write_with_no_answer_is_sent_once_and_told_as_unknown() -> None:
         "change may or may not be applied. Check with find_transactions / "
         "get_category_balances before trying again; do not repeat it blindly."
     )
+    assert raised.value.maybe_applied is True
     assert len(sent) == 1
     assert not waits
+
+
+def test_a_write_that_never_left_after_three_tries_says_nothing_was_changed() -> None:
+    """A write whose connection failed every time never landed: nothing may have changed."""
+    send, sent = _ynab(*[httpx.ConnectError("refused")] * 3)
+    sleep, waits = _waits()
+
+    with pytest.raises(retry.YnabUnavailable) as raised:
+        asyncio.run(retry.answered("post", send, sleep))
+
+    assert str(raised.value) == (
+        "YNAB could not be reached after 3 attempts (ConnectError: refused). "
+        "Nothing was changed. Try again in a few minutes."
+    )
+    assert raised.value.maybe_applied is False
+    assert len(sent) == 3
+    assert len(waits) == 2
 
 
 def test_a_write_that_could_not_connect_is_sent_again() -> None:

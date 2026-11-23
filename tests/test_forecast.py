@@ -588,6 +588,39 @@ def test_a_charge_already_paid_earlier_this_month_is_not_projected_again() -> No
     assert result.months[0].outflows == 0.0
 
 
+def test_paid_this_month_does_not_carry_into_a_later_month() -> None:
+    """A charge already paid this month still falls due once the next month starts."""
+    rec = [forecast.Recurring(payee="RENT", amount=-100.0, day=15, months_seen=4)]
+    paid = frozenset({("RENT", True)})
+    result = forecast.project(
+        start_balance=0.0,
+        today=TODAY,
+        until="2026-10",
+        recurring=rec,
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[],
+        paid_this_month=paid,
+    )
+    assert result.months[0].outflows == 0.0
+    assert result.months[1].outflows == -100.0
+
+
+def test_the_current_month_is_walked_from_tomorrow() -> None:
+    """A one-off dated tomorrow is on the first day walked, and moves the end balance."""
+    one_off = forecast.OneOff(date=date(2026, 9, 25), amount=-50.0, label="tomorrow")
+    result = forecast.project(
+        start_balance=1000.0,
+        today=TODAY,
+        until="2026-09",
+        recurring=[],
+        variable_monthly=0.0,
+        monthly_income=0.0,
+        one_offs=[one_off],
+    )
+    assert result.months[0].end == 950.0
+
+
 def test_a_late_charge_not_yet_paid_is_still_projected() -> None:
     """Unpaid, a charge whose usual day already passed this month still falls due."""
     rec = [forecast.Recurring(payee="RENT", amount=-100.0, day=5, months_seen=4)]
