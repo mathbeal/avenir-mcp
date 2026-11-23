@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
-from .mcp_helpers import accept, call, decline
+from .mcp_helpers import accept, call, checked_plan, decline
 
 
 class FakeFlags:
@@ -24,8 +24,9 @@ class FakeFlags:
         self.flags: dict[str, str | None] = {"t1": None, "t2": "blue", "t3": ""}
         self.sent: list[list[tuple[str, str | None]]] = []
 
-    async def get_transactions(self, _plan_id: str, **_: Any) -> list[dict[str, Any]]:
+    async def get_transactions(self, plan_id: str, **_: Any) -> list[dict[str, Any]]:
         """The transactions, as YNAB returns them."""
+        checked_plan(plan_id)
         payees = {"t1": "CB MARKET FRESH", "t2": "STREAMFLIX", "t3": "RAIL CO"}
         return [
             {
@@ -39,8 +40,9 @@ class FakeFlags:
             for tx_id, color in self.flags.items()
         ]
 
-    async def set_flags(self, _plan_id: str, changes: list[tuple[str, str | None]]) -> list[str]:
+    async def set_flags(self, plan_id: str, changes: list[tuple[str, str | None]]) -> list[str]:
         """Record and apply the flags."""
+        checked_plan(plan_id)
         self.sent.append(changes)
         self.flags.update(changes)
         return [tx_id for tx_id, _ in changes]

@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
-from .mcp_helpers import FORGED, accept, asking, call, decline, one_line
+from .mcp_helpers import FORGED, accept, asking, call, checked_plan, decline, one_line
 
 _FREQ = {"monthly": 1, "weekly": 2, "yearly": 13}
 
@@ -36,14 +36,16 @@ class FakeTargets:
         }
         self.sent: list[tuple[str, dict[str, Any]]] = []
 
-    async def get_categories(self, _plan_id: str) -> list[dict[str, Any]]:
+    async def get_categories(self, plan_id: str) -> list[dict[str, Any]]:
         """The categories, as YNAB lists them."""
+        checked_plan(plan_id)
         return [dict(c) for c in self.categories.values()]
 
     async def set_category_target(
-        self, _plan_id: str, category_id: str, fields: dict[str, Any]
+        self, plan_id: str, category_id: str, fields: dict[str, Any]
     ) -> dict[str, Any]:
         """Record and apply the change the way YNAB does, and refuse what YNAB refuses."""
+        checked_plan(plan_id)
         self.sent.append((category_id, fields))
         cat = self.categories[category_id]
         if "goal_frequency" in fields and cat.get("category_group_name") == "Credit Card Payments":

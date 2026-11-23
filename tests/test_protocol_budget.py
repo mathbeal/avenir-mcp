@@ -193,6 +193,28 @@ def test_invalid_budget_change_is_a_tool_error(
     assert not month.sets
 
 
+def test_a_confirmation_code_for_one_undo_is_refused_for_another(month: FakeMonth) -> None:
+    """A code previewed to undo one operation does not also confirm undoing a different one.
+
+    Without this, a pending undo code would let an agent apply whichever operation it
+    names, not the one actually shown and agreed to by the user.
+    """
+    first = call("set_category_budget", _ARGS, accept).structured_content["operation_id"]
+    second = call(
+        "set_category_budget", {**_ARGS, "category_id": "c-fun", "amount": 50.0}, accept
+    ).structured_content["operation_id"]
+    code_for_second = call(
+        "undo_operation", {"plan_id": "b1", "operation_id": second}
+    ).structured_content["confirmation"]
+    result = call(
+        "undo_operation",
+        {"plan_id": "b1", "operation_id": first, "confirmation": code_for_second},
+    )
+    assert result.is_error
+    assert "issued for different changes" in result.content[0].text
+    assert len(month.sets) == 2
+
+
 def test_declined_undo_keeps_the_new_amount(month: FakeMonth) -> None:
     """If the user refuses the undo, the budget keeps its new amount."""
     call("set_category_budget", _ARGS, accept)
