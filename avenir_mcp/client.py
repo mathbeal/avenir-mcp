@@ -18,7 +18,7 @@ from urllib.parse import urlsplit
 import httpx
 from pydantic import SecretStr
 
-from avenir_mcp import pace, retry
+from avenir_mcp import amounts, pace, retry
 from avenir_mcp.pace import _minutes
 
 logger = logging.getLogger(__name__)
@@ -334,6 +334,22 @@ async def get_plans() -> list[dict[str, Any]]:
     return data["data"]["plans"]  # type: ignore[no-any-return]
 
 
+async def get_currency_format(plan_id: str) -> dict[str, Any]:
+    """Return the plan's currency format: how many decimal digits it uses, its symbol.
+
+    Args:
+        plan_id: YNAB plan id or "last-used".
+
+    Returns:
+        The currency_format dict ("decimal_digits", "iso_code", …), or
+        amounts.DEFAULT_CURRENCY_FORMAT when YNAB has none set for this plan.
+    """
+    logger.info("Fetching currency format for plan %s", plan_id)
+    data = await _get(f"/plans/{plan_id}/settings")
+    currency_format = data["data"]["settings"]["currency_format"]
+    return currency_format if currency_format is not None else amounts.DEFAULT_CURRENCY_FORMAT
+
+
 async def get_categories(plan_id: str) -> list[dict[str, Any]]:
     """Return all non-hidden categories for the given plan (flattened).
 
@@ -554,17 +570,21 @@ async def create_category(plan_id: str, category_group_id: str, name: str) -> di
     return data["data"]["category"]  # type: ignore[no-any-return]
 
 
-def amount_to_milliunit(amount: float) -> int:
+def amount_to_milliunit(amount: float, currency_format: dict[str, Any] | None = None) -> int:
     """Convert a decimal amount to YNAB milliunits, rounding to avoid float drift.
 
     Args:
         amount: An amount in currency units.
+        currency_format: The plan's currency format, to refuse an amount with more
+            decimal digits than its currency holds; omit to convert without that check,
+            for a caller with no plan currency in hand (a forecast, a debt payoff plan).
 
     Returns:
         The amount in milliunits (thousandths of the currency unit).
 
     Raises:
-        ValueError: If the amount is not a finite number.
+        ValueError: If the amount is not a finite number, or currency_format is given
+            and the amount needs more decimal digits than its currency holds.
 
     Examples:
         >>> amount_to_milliunit(111.32)
@@ -572,6 +592,14 @@ def amount_to_milliunit(amount: float) -> int:
     """
     if not math.isfinite(amount):
         raise ValueError(f"An amount must be a finite number, got {amount!r}.")
+    if currency_format is not None:
+        digits = currency_format["decimal_digits"]
+        needed = amounts.decimal_places(amount)
+        if needed > digits:
+            raise ValueError(
+                f"{amount} has {needed} decimal digit(s): this plan's currency holds only "
+                f"{digits}, round it to {amounts.format_amount(amount, currency_format)}."
+            )
     return round(amount * 1000)
 
 

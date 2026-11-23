@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastmcp import Context
 from fastmcp.exceptions import ToolError
@@ -14,6 +14,7 @@ from mcp.types import InputRequiredResult
 from pydantic import Field
 
 from avenir_mcp import client, split, triage, writes
+from avenir_mcp.amounts import format_amount
 from avenir_mcp.app import WRITE_TAG, mcp, set_read_only_wording
 from avenir_mcp.confirm import WriteResult, WriteStatus, gate, merged, write_plan
 
@@ -139,7 +140,8 @@ async def apply_categories(
         plan = writes.plan_categorization(transactions, categories, assignments, off_budget)
     except ValueError as error:
         raise ToolError(str(error)) from error
-    result, _ = await write_plan(ctx, plan_id, plan, "Recategorise", confirmation)
+    currency_format = await client.get_currency_format(plan_id)
+    result, _ = await write_plan(ctx, plan_id, plan, "Recategorise", confirmation, currency_format)
     return result
 
 
@@ -161,20 +163,25 @@ class SplitResult(split.SplitPlan):
 _UNDO_IN_YNAB = "undo_operation cannot revert a split: to undo it, edit the transaction in YNAB."
 
 
-def _question(plan: split.SplitPlan) -> str:
+def _question(plan: split.SplitPlan, currency_format: dict[str, Any] | None) -> str:
     """Write the question put to the user: the transaction, then each line.
 
     Args:
         plan: The split to confirm.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The question, with the warning that only YNAB can undo it.
     """
     lines = [
-        f"- {line.amount:.2f} {line.category}" + (f" ({line.memo})" if line.memo else "")
+        f"- {format_amount(line.amount, currency_format)} {line.category}"
+        + (f" ({line.memo})" if line.memo else "")
         for line in plan.lines
     ]
-    head = f"Split {plan.date} {plan.payee} {plan.amount:.2f} into {len(plan.lines)} lines?"
+    head = (
+        f"Split {plan.date} {plan.payee} {format_amount(plan.amount, currency_format)} "
+        f"into {len(plan.lines)} lines?"
+    )
     return "\n".join([head, *lines, _UNDO_IN_YNAB])
 
 
@@ -219,20 +226,24 @@ async def split_transaction(
         client answers by asking the user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the transaction cannot be split, the lines do not add up or name an
-            unknown category, or the confirmation code is refused.
+        ToolError: If the transaction cannot be split, the lines do not add up, a line
+            needs more decimal digits than the plan's currency holds, a category is
+            unknown, or the confirmation code is refused.
     """
     logger.info("Tool called: split_transaction(lines=%d)", len(lines))
     transactions = await client.get_transactions(plan_id)
     categories = await client.get_categories(plan_id)
     off_budget = await _off_budget(plan_id)
+    currency_format = await client.get_currency_format(plan_id)
     try:
-        plan = split.plan_split(transactions, categories, transaction_id, lines, off_budget)
+        plan = split.plan_split(
+            transactions, categories, transaction_id, lines, off_budget, currency_format
+        )
     except ValueError as error:
         raise ToolError(str(error)) from error
     result = SplitResult(**plan.model_dump(), status="applied", message="", confirmation=None)
     subject = {"transaction": transaction_id, "lines": lines}
-    stop = await gate(ctx, plan_id, subject, _question(plan), confirmation)
+    stop = await gate(ctx, plan_id, subject, _question(plan, currency_format), confirmation)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     await client.split_transaction(

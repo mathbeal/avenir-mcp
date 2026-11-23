@@ -65,7 +65,7 @@ for apply_categories.
 - `Transaction {tx_id} is a transfer between accounts: it cannot be split.`
 - `Transaction {tx_id} is on an off-budget account: YNAB does not split those.`
 - `Give at least two lines: to give the whole transaction one category, use apply_categories.`
-- `The lines add up to {total}, the transaction is {amount}: they must match to the cent.`
+- `The lines add up to {total}, the transaction is {amount}: they must match exactly.`
 - `A line is zero: leave it out.`
 - `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
 - `Category {category_id} is not in this plan: use a category_id from suggest_categories or get_category_balances.`

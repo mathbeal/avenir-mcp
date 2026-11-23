@@ -13,6 +13,7 @@ from fastmcp.exceptions import ToolError
 from mcp.types import InputRequiredResult
 
 from avenir_mcp import client, flags, journal, retry, targets, writes
+from avenir_mcp.amounts import format_amount
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteResult, ask, not_applied, result_of, write_plan
 from avenir_mcp.text import untrusted
@@ -75,12 +76,13 @@ async def undo_operation(
             + (f" with id {operation_id}." if operation_id else ".")
         )
     book.check_writable()
+    currency_format = await client.get_currency_format(plan_id)
     if entry.kind == "reconcile":
         return await _undo_reconcile(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "budget":
-        return await _undo_budget(ctx, plan_id, book, entry, confirmation)
+        return await _undo_budget(ctx, plan_id, book, entry, confirmation, currency_format)
     if entry.kind == "move":
-        return await _undo_move(ctx, plan_id, book, entry, confirmation)
+        return await _undo_move(ctx, plan_id, book, entry, confirmation, currency_format)
     if entry.kind == "create":
         return await _undo_create(ctx, plan_id, book, entry, confirmation)
     if entry.kind == "flag":
@@ -92,7 +94,9 @@ async def undo_operation(
     transactions = await client.get_transactions(plan_id)
     categories = await client.get_categories(plan_id)
     plan = writes.plan_undo(transactions, categories, entry.moves)
-    result, new_operation = await write_plan(ctx, plan_id, plan, "Undo: recategorise", confirmation)
+    result, new_operation = await write_plan(
+        ctx, plan_id, plan, "Undo: recategorise", confirmation, currency_format
+    )
     if new_operation is not None:
         book.mark_undone(entry.operation_id)
         book.mark_undone(new_operation)
@@ -218,12 +222,13 @@ async def _current_budgeted_category(
     return next((c for c in categories if c["id"] == details["category_id"]), None)
 
 
-async def _undo_budget(
+async def _undo_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     ctx: Context,
     plan_id: str,
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
+    currency_format: dict[str, Any] | None,
 ) -> WriteResult | InputRequiredResult:
     """Set a category's budgeted amount back to what it was, unless it moved since.
 
@@ -236,6 +241,7 @@ async def _undo_budget(
         book: The journal, to mark the operation undone.
         entry: The operation to undo.
         confirmation: A code from a previous preview, or None.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         What was done, or what to return instead when the user did not agree.
@@ -246,9 +252,8 @@ async def _undo_budget(
     if current is None or current["budgeted"] != details["to"]:
         return result_of("nothing_to_do", "The amount changed since: left alone.", conflict)
     previous = client.milliunit_to_amount(details["from"])
-    question = (
-        f"Undo: set {untrusted(current['name'])} for {details['month']} back to {previous:.2f}?"
-    )
+    shown = format_amount(previous, currency_format)
+    question = f"Undo: set {untrusted(current['name'])} for {details['month']} back to {shown}?"
     fields = {"category": details["category_id"], "month": details["month"], "to": details["to"]}
     if (
         refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
@@ -262,7 +267,10 @@ async def _undo_budget(
 
 
 def _move_back_question(
-    current: dict[str, dict[str, Any]], changes: list[dict[str, Any]], month: str
+    current: dict[str, dict[str, Any]],
+    changes: list[dict[str, Any]],
+    month: str,
+    currency_format: dict[str, Any] | None,
 ) -> str:
     """Say what undoing a move does, for the user to confirm.
 
@@ -270,13 +278,15 @@ def _move_back_question(
         current: The month's categories by id.
         changes: The move's two changes, source first, as the journal holds them.
         month: The month, YYYY-MM-01.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The question, naming the amount and both categories.
     """
     source, target = (untrusted(current[change["category_id"]]["name"]) for change in changes)
     amount = client.milliunit_to_amount(changes[0]["from"] - changes[0]["to"])
-    return f"Undo: move {amount:.2f} back from {target} to {source} for {month}?"
+    shown = format_amount(amount, currency_format)
+    return f"Undo: move {shown} back from {target} to {source} for {month}?"
 
 
 def _moved_since(current: dict[str, dict[str, Any]], changes: list[dict[str, Any]]) -> list[str]:
@@ -296,12 +306,13 @@ def _moved_since(current: dict[str, dict[str, Any]], changes: list[dict[str, Any
     ]
 
 
-async def _undo_move(  # pylint: disable=too-many-locals
+async def _undo_move(  # pylint: disable=too-many-locals,too-many-arguments,too-many-positional-arguments
     ctx: Context,
     plan_id: str,
     book: journal.Journal,
     entry: journal.Entry,
     confirmation: str | None,
+    currency_format: dict[str, Any] | None,
 ) -> WriteResult | InputRequiredResult:
     """Put both categories of a move back, unless either changed since.
 
@@ -314,6 +325,7 @@ async def _undo_move(  # pylint: disable=too-many-locals
         book: The journal, to mark the operation undone.
         entry: The operation to undo.
         confirmation: A code from a previous preview, or None.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         What was done, or what to return instead when the user did not agree.
@@ -327,7 +339,7 @@ async def _undo_move(  # pylint: disable=too-many-locals
             "An amount changed since: both left alone.",
             writes.Plan(conflicts=moved),
         )
-    question = _move_back_question(current, changes, month)
+    question = _move_back_question(current, changes, month, currency_format)
     fields = {"month": month, "changes": changes}
     if (
         refused := await _confirm_undo(ctx, plan_id, entry, fields, question, confirmation)
@@ -350,9 +362,9 @@ async def _undo_move(  # pylint: disable=too-many-locals
     except retry.YnabUnavailable as error:
         if error.maybe_applied and await _undo_landed(plan_id, month, second, names, error):
             return _undone(book, entry, "Both amounts restored.")
-        await _put_first_back(plan_id, month, (first, second), names, error)
+        await _put_first_back(plan_id, month, (first, second), names, error, currency_format)
     except RuntimeError as error:
-        await _put_first_back(plan_id, month, (first, second), names, error)
+        await _put_first_back(plan_id, month, (first, second), names, error, currency_format)
     return _undone(book, entry, "Both amounts restored.")
 
 
@@ -388,12 +400,13 @@ async def _undo_landed(
         ) from unknown
 
 
-async def _put_first_back(
+async def _put_first_back(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     plan_id: str,
     month: str,
     changes: tuple[dict[str, Any], dict[str, Any]],
     names: dict[str, str],
     error: Exception,
+    currency_format: dict[str, Any] | None,
 ) -> None:
     """Put the first category back to its moved amount, after the second was refused or lost.
 
@@ -404,6 +417,7 @@ async def _put_first_back(
             each as the journal holds it.
         names: Both categories' names, by id.
         error: Why the second category was not put back.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Raises:
         ToolError: Always; says whether the first category was put back too, or, when
@@ -417,11 +431,11 @@ async def _put_first_back(
             plan_id, month, first["category_id"], client.milliunit_to_amount(first["to"])
         )
     except RuntimeError as again:
-        second_from = client.milliunit_to_amount(second["from"])
+        second_from = format_amount(client.milliunit_to_amount(second["from"]), currency_format)
         raise ToolError(
             f"{refused}, and putting {first_name} back to its moved amount failed too "
             f"({again}): {first_name} is already back to how it was; set {second_name} to "
-            f"{second_from:.2f} in YNAB to finish undoing the move."
+            f"{second_from} in YNAB to finish undoing the move."
         ) from again
     raise ToolError(
         f"{refused}; {first_name} is back to its moved amount: nothing was undone."

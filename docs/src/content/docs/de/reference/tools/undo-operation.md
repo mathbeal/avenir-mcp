@@ -28,7 +28,7 @@ Confirmation works as for apply_categories.
 | Rückgängig | nein |
 | Destruktiv | ja |
 | Idempotent | nein |
-| YNAB-Anfragen | 2 für das Beispiel unten, leerer Cache |
+| YNAB-Anfragen | 3 für das Beispiel unten, leerer Cache |
 
 ## Parameter
 

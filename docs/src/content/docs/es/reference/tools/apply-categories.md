@@ -29,7 +29,7 @@ Amounts are in currency units.
 | Deshacer | sí, con `undo_operation` |
 | Destructiva | sí |
 | Idempotente | sí |
-| Peticiones a YNAB | 3 para el ejemplo de abajo, con la caché vacía |
+| Peticiones a YNAB | 4 para el ejemplo de abajo, con la caché vacía |
 
 ## Parámetros
 

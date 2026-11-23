@@ -26,7 +26,7 @@ as for apply_categories.
 | Rückgängig | ja, mit `undo_operation` |
 | Destruktiv | nein |
 | Idempotent | nein |
-| YNAB-Anfragen | 2 für das Beispiel unten, leerer Cache |
+| YNAB-Anfragen | 3 für das Beispiel unten, leerer Cache |
 
 ## Parameter
 

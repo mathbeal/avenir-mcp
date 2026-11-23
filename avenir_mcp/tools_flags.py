@@ -6,12 +6,14 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from fastmcp import Context
 from fastmcp.exceptions import ToolError
 from mcp.types import InputRequiredResult
 
 from avenir_mcp import client, journal
+from avenir_mcp.amounts import format_amount
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.confirm import WriteStatus, gate, merged
 from avenir_mcp.flags import Flag, FlagChange, plan_flags
@@ -53,18 +55,22 @@ def _name(color: str | None) -> str:
     return color or "none"
 
 
-def question(changes: list[FlagChange], head: str) -> str:
+def question(
+    changes: list[FlagChange], head: str, currency_format: dict[str, Any] | None = None
+) -> str:
     """Write the question put to the user: one line per transaction.
 
     Args:
         changes: The flags that change.
         head: The first line.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The question.
     """
     lines = [
-        f"- {c.date} {c.payee} {c.amount:.2f}: {_name(c.from_color)} → {_name(c.to_color)}"
+        f"- {c.date} {c.payee} {format_amount(c.amount, currency_format)}: "
+        f"{_name(c.from_color)} → {_name(c.to_color)}"
         for c in changes
     ]
     return "\n".join([head, *lines])
@@ -128,8 +134,14 @@ async def flag_transactions(
         )
     head = f"Change the flag of {len(plan.changes)} transaction(s)?"
     subject = {"flags": [(c.transaction_id, c.to_color) for c in plan.changes]}
+    currency_format = await client.get_currency_format(plan_id)
     stop = await gate(
-        ctx, plan_id, subject, question(plan.changes, head), confirmation, journal_required=True
+        ctx,
+        plan_id,
+        subject,
+        question(plan.changes, head, currency_format),
+        confirmation,
+        journal_required=True,
     )
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)

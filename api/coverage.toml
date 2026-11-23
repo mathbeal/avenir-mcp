@@ -18,10 +18,6 @@ reason = "The user's id tells an agent nothing about the money."
 status = "excluded"
 reason = "The whole plan at once: far more than an agent can read; tools fetch the parts they need."
 
-[operations.getPlanSettingsById]
-status = "planned"
-reason = "The plan's currency and formats, to show amounts with their currency."
-
 [operations.createAccount]
 status = "excluded"
 reason = "Accounts are opened in YNAB, where the bank connection is set up."

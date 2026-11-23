@@ -27,7 +27,7 @@ Confirmation works as for apply_categories.
 | Rückgängig | ja, mit `undo_operation` |
 | Destruktiv | nein |
 | Idempotent | ja |
-| YNAB-Anfragen | 1 für das Beispiel unten, leerer Cache |
+| YNAB-Anfragen | 2 für das Beispiel unten, leerer Cache |
 
 ## Parameter
 

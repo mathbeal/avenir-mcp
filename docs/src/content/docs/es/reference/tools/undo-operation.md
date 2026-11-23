@@ -28,7 +28,7 @@ Confirmation works as for apply_categories.
 | Deshacer | no |
 | Destructiva | sí |
 | Idempotente | no |
-| Peticiones a YNAB | 2 para el ejemplo de abajo, con la caché vacía |
+| Peticiones a YNAB | 3 para el ejemplo de abajo, con la caché vacía |
 
 ## Parámetros
 

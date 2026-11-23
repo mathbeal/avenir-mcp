@@ -71,7 +71,7 @@ def _warning(before: str) -> str:
         "open_world_hint": True,
     },
 )
-async def set_category_target(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+async def set_category_target(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
     plan_id: str,
     category_id: str,
     ctx: Context,
@@ -108,7 +108,8 @@ async def set_category_target(  # pylint: disable=too-many-arguments,too-many-po
 
     Raises:
         ToolError: If the category is not in the plan, the change is one YNAB would refuse,
-            or the confirmation code is refused.
+            the amount needs more decimal digits than the plan's currency holds, or the
+            confirmation code is refused.
     """
     logger.info("Tool called: set_category_target")
     category = next(
@@ -119,12 +120,14 @@ async def set_category_target(  # pylint: disable=too-many-arguments,too-many-po
             f"Category {category_id} is not in this plan: use a category_id from "
             "get_category_balances or list_category_groups."
         )
+    currency_format = await client.get_currency_format(plan_id)
     try:
         change = targets.plan(
             category,
             amount=amount,
             date=by_date.isoformat() if by_date else None,
             frequency=frequency,
+            currency_format=currency_format,
         )
     except ValueError as error:
         raise ToolError(str(error)) from error

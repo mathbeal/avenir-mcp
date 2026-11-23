@@ -28,7 +28,7 @@ Confirmation works as for apply_categories.
 | Annulation | non |
 | Destructif | oui |
 | Idempotent | non |
-| Requêtes YNAB | 2 pour l'exemple ci-dessous, cache vide |
+| Requêtes YNAB | 3 pour l'exemple ci-dessous, cache vide |
 
 ## Paramètres
 

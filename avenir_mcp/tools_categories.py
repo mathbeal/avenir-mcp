@@ -14,7 +14,7 @@ from mcp.types import InputRequiredResult
 from pydantic import Field
 
 from avenir_mcp import app, client, journal, retry
-from avenir_mcp.amounts import Amount
+from avenir_mcp.amounts import Amount, format_amount
 from avenir_mcp.app import WRITE_TAG, check_month, mcp
 from avenir_mcp.confirm import WriteStatus, gate, merged, peek, reissue
 from avenir_mcp.model import Model
@@ -157,20 +157,9 @@ async def update_category(  # pylint: disable=too-many-arguments
     )
 
 
-def _signed(amount: float) -> str:
-    """Write an amount to the cent with its sign, so a negative one cannot be read as positive.
-
-    Args:
-        amount: An amount in currency units.
-
-    Returns:
-        The amount prefixed with '+' or '-', or '0.00' when it rounds to nothing: a zero
-        has no direction, and '+0.00' would read as money left.
-    """
-    return "0.00" if round(amount, 2) == 0 else f"{amount:+.2f}"
-
-
-def _available(before: float, after: float, budgeted_before: float) -> str:
+def _available(
+    before: float, after: float, budgeted_before: float, currency_format: dict[str, Any] | None
+) -> str:
     """Say what a category has available before and after a change, when that adds anything.
 
     With nothing spent and nothing carried over, the available amount is the budgeted one
@@ -180,13 +169,16 @@ def _available(before: float, after: float, budgeted_before: float) -> str:
         before: Amount available before the change, in currency units.
         after: Amount available after it.
         budgeted_before: Amount budgeted before the change, to compare the first with.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         ' (available <before> → <after>)', both signed, or '' when available matches budgeted.
     """
     if before == budgeted_before:
         return ""
-    return f" (available {_signed(before)} → {_signed(after)})"
+    shown_before = format_amount(before, currency_format, signed=True)
+    shown_after = format_amount(after, currency_format, signed=True)
+    return f" (available {shown_before} → {shown_after})"
 
 
 class BudgetChange(Model):
@@ -250,20 +242,22 @@ def _budget_change(
     )
 
 
-def _budget_question(result: BudgetChange) -> str:
+def _budget_question(result: BudgetChange, currency_format: dict[str, Any] | None) -> str:
     """Write the question a budget change is confirmed with.
 
     Args:
         result: The preview, as :func:`_budget_change` builds it.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The question.
     """
-    return (
-        f"Budget {result.category} for {result.month}: "
-        f"{result.from_amount:.2f} → {result.to_amount:.2f}"
-        f"{_available(result.available_before, result.available_after, result.from_amount)}?"
+    available = _available(
+        result.available_before, result.available_after, result.from_amount, currency_format
     )
+    from_shown = format_amount(result.from_amount, currency_format)
+    to_shown = format_amount(result.to_amount, currency_format)
+    return f"Budget {result.category} for {result.month}: {from_shown} → {to_shown}{available}?"
 
 
 def _budget_snapshot(category: dict[str, Any]) -> dict[str, int]:
@@ -303,7 +297,13 @@ async def _reread_category(plan_id: str, month: str, category_id: str) -> dict[s
 
 
 def _stale_budget(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    plan_id: str, category_id: str, fresh: dict[str, Any], month: str, after: int, was_before: int
+    plan_id: str,
+    category_id: str,
+    fresh: dict[str, Any],
+    month: str,
+    after: int,
+    was_before: int,
+    currency_format: dict[str, Any] | None,
 ) -> BudgetChange:
     """Refuse a confirmed budget change whose amount moved since the preview, with a fresh one.
 
@@ -314,16 +314,18 @@ def _stale_budget(  # pylint: disable=too-many-arguments,too-many-positional-arg
         month: The month, YYYY-MM-01.
         after: The amount still wanted, in milliunits.
         was_before: The budgeted amount the preview showed, in milliunits.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         A new preview, confirmation_required with a new code bound to the current amounts.
     """
     result = _budget_change(category_id, fresh, month, after)
-    question = _budget_question(result)
+    question = _budget_question(result, currency_format)
     subject = {"category": category_id, "month": month, "amount": after, **_budget_snapshot(fresh)}
+    was_shown = format_amount(client.milliunit_to_amount(was_before), currency_format)
     message = (
         f"{result.category}'s budgeted amount changed since the preview: "
-        f"{client.milliunit_to_amount(was_before):.2f} → {result.from_amount:.2f}. "
+        f"{was_shown} → {format_amount(result.from_amount, currency_format)}. "
         f"Nothing was changed. New preview:\n{question}"
     )
     return result.model_copy(
@@ -375,18 +377,24 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
         (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the month is malformed, the category is not in the plan, or the
-            confirmation code is refused.
+        ToolError: If the month is malformed, the category is not in the plan, the amount
+            needs more decimal digits than the plan's currency holds, or the confirmation
+            code is refused.
     """
     logger.info("Tool called: set_category_budget(month=%r)", month)
     check_month(month)
     month = app.resolve_month(month)
+    currency_format = await client.get_currency_format(plan_id)
     category = await _reread_category(plan_id, month, category_id)
-    before, after = category["budgeted"], client.amount_to_milliunit(amount)
+    try:
+        after = client.amount_to_milliunit(amount, currency_format)
+    except ValueError as error:
+        raise ToolError(str(error)) from error
+    before = category["budgeted"]
     result = _budget_change(category_id, category, month, after)
     if before == after:
         return result
-    question = _budget_question(result)
+    question = _budget_question(result, currency_format)
     subject = {
         "category": category_id,
         "month": month,
@@ -400,13 +408,15 @@ async def set_category_budget(  # pylint: disable=too-many-arguments,too-many-po
             and {"before", "balance"} <= issued.keys()
             and (issued["before"] != before or issued["balance"] != category["balance"])
         ):
-            return _stale_budget(plan_id, category_id, category, month, after, issued["before"])
+            return _stale_budget(
+                plan_id, category_id, category, month, after, issued["before"], currency_format
+            )
     stop = await gate(ctx, plan_id, subject, question, confirmation, journal_required=True)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
     fresh = await _reread_category(plan_id, month, category_id)
     if fresh["budgeted"] != before or fresh["balance"] != category["balance"]:
-        return _stale_budget(plan_id, category_id, fresh, month, after, before)
+        return _stale_budget(plan_id, category_id, fresh, month, after, before, currency_format)
     await client.set_category_budgeted(plan_id, month, category_id, amount)
     operation_id = journal.Journal(journal.default_path()).record(
         plan_id,
@@ -485,17 +495,22 @@ def _side(category: dict[str, Any], change: int) -> CategoryMove:
     )
 
 
-def _line(side: CategoryMove) -> str:
+def _line(side: CategoryMove, currency_format: dict[str, Any] | None) -> str:
     """One category's line in the preview of a move.
 
     Args:
         side: The category, with its amounts before and after.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         Its name and budgeted amounts, then what it has available when that differs.
     """
-    available = _available(side.available_before, side.available_after, side.from_amount)
-    return f"- {side.name}: {side.from_amount:.2f} → {side.to_amount:.2f}{available}"
+    available = _available(
+        side.available_before, side.available_after, side.from_amount, currency_format
+    )
+    from_shown = format_amount(side.from_amount, currency_format)
+    to_shown = format_amount(side.to_amount, currency_format)
+    return f"- {side.name}: {from_shown} → {to_shown}{available}"
 
 
 def _move_change(
@@ -524,18 +539,21 @@ def _move_change(
     )
 
 
-def _move_question(result: MoneyMove) -> str:
+def _move_question(result: MoneyMove, currency_format: dict[str, Any] | None) -> str:
     """Write the question a move is confirmed with.
 
     Args:
         result: The preview, as :func:`_move_change` builds it.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The question.
     """
+    amount_shown = format_amount(result.amount, currency_format)
     return (
-        f"Move {result.amount:.2f} from {result.from_category.name} to {result.to_category.name} "
-        f"for {result.month}?\n{_line(result.from_category)}\n{_line(result.to_category)}"
+        f"Move {amount_shown} from {result.from_category.name} to {result.to_category.name} "
+        f"for {result.month}?\n{_line(result.from_category, currency_format)}\n"
+        f"{_line(result.to_category, currency_format)}"
     )
 
 
@@ -585,8 +603,13 @@ async def _reread_categories(
     return categories[from_category_id], categories[to_category_id]
 
 
-def _stale_move(
-    plan_id: str, month: str, moved: int, from_category: dict[str, Any], to_category: dict[str, Any]
+def _stale_move(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    plan_id: str,
+    month: str,
+    moved: int,
+    from_category: dict[str, Any],
+    to_category: dict[str, Any],
+    currency_format: dict[str, Any] | None,
 ) -> MoneyMove:
     """Refuse a confirmed move whose categories moved since the preview, with a fresh one.
 
@@ -598,12 +621,13 @@ def _stale_move(
         moved: Milliunits still wanted to move.
         from_category: The source's current state, just reread.
         to_category: The target's current state, just reread.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         A new preview, confirmation_required with a new code bound to the current amounts.
     """
     result = _move_change(month, moved, from_category, to_category)
-    question = _move_question(result)
+    question = _move_question(result, currency_format)
     subject = {
         "from": from_category["id"],
         "to": to_category["id"],
@@ -624,7 +648,13 @@ def _stale_move(
     )
 
 
-async def _set_both(plan_id: str, month: str, source: CategoryMove, target: CategoryMove) -> None:
+async def _set_both(
+    plan_id: str,
+    month: str,
+    source: CategoryMove,
+    target: CategoryMove,
+    currency_format: dict[str, Any] | None,
+) -> None:
     """Take from the source, then give to the target; if the second write fails, undo the first.
 
     A second write YNAB never answered may still have landed: before touching the
@@ -636,6 +666,7 @@ async def _set_both(plan_id: str, month: str, source: CategoryMove, target: Cate
         month: The month, YYYY-MM-01.
         source: The category the money is taken from.
         target: The category the money goes to.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Raises:
         ToolError: If YNAB refused the target or answered nothing and it did not land,
@@ -648,9 +679,9 @@ async def _set_both(plan_id: str, month: str, source: CategoryMove, target: Cate
     except retry.YnabUnavailable as error:
         if error.maybe_applied and await _landed(plan_id, month, target, source, error):
             return
-        await _put_back(plan_id, month, source, target, error)
+        await _put_back(plan_id, month, source, target, error, currency_format)
     except RuntimeError as error:
-        await _put_back(plan_id, month, source, target, error)
+        await _put_back(plan_id, month, source, target, error, currency_format)
 
 
 async def _landed(
@@ -684,8 +715,13 @@ async def _landed(
         ) from unknown
 
 
-async def _put_back(
-    plan_id: str, month: str, source: CategoryMove, target: CategoryMove, error: Exception
+async def _put_back(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    plan_id: str,
+    month: str,
+    source: CategoryMove,
+    target: CategoryMove,
+    error: Exception,
+    currency_format: dict[str, Any] | None,
 ) -> None:
     """Put the source back to what it had, after the target's write was refused or lost.
 
@@ -695,20 +731,22 @@ async def _put_back(
         source: The category the money is taken from.
         target: The category the money goes to.
         error: Why the target was not changed.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Raises:
         ToolError: Always; says whether the source was put back.
     """
     refused = f"YNAB refused to change {target.name} ({error})"
+    source_from = format_amount(source.from_amount, currency_format)
     try:
         await client.set_category_budgeted(plan_id, month, source.category_id, source.from_amount)
     except RuntimeError as again:
         raise ToolError(
             f"{refused}, then putting {source.name} back failed too ({again}): "
-            f"set {source.name} back to {source.from_amount:.2f} in YNAB."
+            f"set {source.name} back to {source_from} in YNAB."
         ) from again
     raise ToolError(
-        f"{refused}; {source.name} is back to {source.from_amount:.2f}: nothing was moved."
+        f"{refused}; {source.name} is back to {source_from}: nothing was moved."
     ) from error
 
 
@@ -758,19 +796,24 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
 
     Raises:
         ToolError: If the month is malformed, a category is not in the plan, both are the same,
-            YNAB refuses the change, or the confirmation code is refused.
+            the amount needs more decimal digits than the plan's currency holds, YNAB refuses
+            the change, or the confirmation code is refused.
     """
     logger.info("Tool called: move_money(month=%r)", month)
     check_month(month)
     month = app.resolve_month(month)
     if from_category_id == to_category_id:
         raise ToolError("Give two different categories: money moves from one to another.")
+    currency_format = await client.get_currency_format(plan_id)
     from_category, to_category = await _reread_categories(
         plan_id, month, from_category_id, to_category_id
     )
-    moved = client.amount_to_milliunit(amount)
+    try:
+        moved = client.amount_to_milliunit(amount, currency_format)
+    except ValueError as error:
+        raise ToolError(str(error)) from error
     result = _move_change(month, moved, from_category, to_category)
-    question = _move_question(result)
+    question = _move_question(result, currency_format)
     snapshot = _move_snapshot(from_category, to_category)
     subject = {
         "from": from_category_id,
@@ -786,7 +829,7 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
             and snapshot.keys() <= issued.keys()
             and any(issued[key] != value for key, value in snapshot.items())
         ):
-            return _stale_move(plan_id, month, moved, from_category, to_category)
+            return _stale_move(plan_id, month, moved, from_category, to_category, currency_format)
     stop = await gate(ctx, plan_id, subject, question, confirmation, journal_required=True)
     if stop is not None:
         return stop if isinstance(stop, InputRequiredResult) else merged(result, stop)
@@ -794,9 +837,9 @@ async def move_money(  # pylint: disable=too-many-arguments,too-many-positional-
         plan_id, month, from_category_id, to_category_id
     )
     if _move_snapshot(fresh_from, fresh_to) != snapshot:
-        return _stale_move(plan_id, month, moved, fresh_from, fresh_to)
+        return _stale_move(plan_id, month, moved, fresh_from, fresh_to, currency_format)
     source, target = result.from_category, result.to_category
-    await _set_both(plan_id, month, source, target)
+    await _set_both(plan_id, month, source, target, currency_format)
     operation_id = journal.Journal(journal.default_path()).record(
         plan_id,
         "move",

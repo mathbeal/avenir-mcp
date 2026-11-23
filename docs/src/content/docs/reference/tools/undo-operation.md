@@ -28,7 +28,7 @@ Confirmation works as for apply_categories.
 | Undo | no |
 | Destructive | yes |
 | Idempotent | no |
-| YNAB requests | 2 for the example below, on a cold cache |
+| YNAB requests | 3 for the example below, on a cold cache |
 
 ## Parameters
 
