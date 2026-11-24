@@ -204,7 +204,8 @@ def test_plan_rejects_a_split_transaction() -> None:
 
 def test_peek_gives_the_subject_without_spending_the_code() -> None:
     """A tool can tell a stale preview from an unknown code without using the code up."""
-    confirmations = writes.Confirmations()
+    now = [1_000_000.0]
+    confirmations = writes.Confirmations(clock=lambda: now[0])
     code = confirmations.issue("b1", {"before": 100})
     assert confirmations.peek(code, "b1") == {"before": 100}
     assert confirmations.consume(code, "b1", {"before": 100}) is True
