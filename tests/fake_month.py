@@ -32,10 +32,13 @@ class FakeMonth:  # pylint: disable=too-many-instance-attributes
         self.reads = 0
         self.failing_reads: set[int] = set()
         """Reads of the month's categories that fail, counting from 1."""
+        self.months_read: list[str] = []
+        """The month string each read was asked for, in call order."""
 
-    async def get_month_categories(self, _plan_id: str, _month: str) -> list[dict[str, Any]]:
+    async def get_month_categories(self, _plan_id: str, month: str) -> list[dict[str, Any]]:
         """Categories of the month, as YNAB returns them, or fail like YNAB on the reads told to."""
         self.reads += 1
+        self.months_read.append(month)
         if self.reads in self.failing_reads:
             raise RuntimeError("YNAB 503: gateway timeout")
         return [

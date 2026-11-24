@@ -121,14 +121,15 @@ def test_list_budgets_keeps_what_an_agent_needs() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_get_category_balances_default_month() -> None:
-    """Default month is 'current'."""
+def test_get_category_balances_default_month(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Default month is 'current', resolved to the machine's local date before YNAB is asked."""
+    monkeypatch.setattr("avenir_mcp.app.today", lambda: date(2026, 11, 30))
     cats = [{"id": "c1", "name": "Rent", "budgeted": 500_000, "activity": 0, "balance": 500_000}]
     with patch(
         "avenir_mcp.client.get_month_categories", new=AsyncMock(return_value=cats)
     ) as mock_fn:
         asyncio.run(tools_budget.get_category_balances("b1"))
-    mock_fn.assert_called_once_with("b1", "current")
+    mock_fn.assert_called_once_with("b1", "2026-11-01")
 
 
 def test_get_category_balances_explicit_month() -> None:

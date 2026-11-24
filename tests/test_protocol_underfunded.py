@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Iterator
+from datetime import date
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -87,12 +88,13 @@ def test_the_month_in_one_request(ynab: AsyncMock) -> None:
     ynab.assert_awaited_once_with("b1", "2026-09-01")
 
 
-def test_the_current_month_by_default(ynab: AsyncMock) -> None:
-    """Without a month, YNAB is asked for the current one."""
+def test_the_current_month_by_default(ynab: AsyncMock, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Without a month, YNAB is asked for the machine's local current month, resolved first."""
+    monkeypatch.setattr("avenir_mcp.app.today", lambda: date(2026, 11, 30))
     answer = call("get_underfunded_targets", {"plan_id": "b1", "limit": 1}).structured_content
     assert [t["category_id"] for t in answer["targets"]] == ["rail"]
     assert answer["more"] == 1
-    ynab.assert_awaited_once_with("b1", "current")
+    ynab.assert_awaited_once_with("b1", "2026-11-01")
 
 
 def test_a_malformed_month_is_refused_before_any_request(ynab: AsyncMock) -> None:
