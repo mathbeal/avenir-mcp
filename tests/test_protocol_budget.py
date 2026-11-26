@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Iterator
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -217,3 +218,18 @@ def test_a_category_name_cannot_forge_lines_in_the_undo_question(month: FakeMont
     asked: list[str] = []
     call("undo_operation", {"plan_id": "b1"}, asking(asked))
     assert one_line(asked[0])
+
+
+def test_current_month_resolves_the_same_way_for_reads_and_writes(
+    month: FakeMonth, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """'current' names the same month for a read and a write in the same conversation.
+
+    Before this, a read sent YNAB the literal 'current' while a write resolved it from the
+    machine's local date first: whenever the two disagree on what day it is, a tool reading
+    the month in progress and a tool writing to it could land in different months.
+    """
+    monkeypatch.setattr("avenir_mcp.app.today", lambda: date(2026, 11, 30))
+    call("get_category_balances", {"plan_id": "b1"})
+    call("set_category_budget", {**_ARGS, "month": "current"}, accept)
+    assert month.months_read[0] == month.sets[-1][0] == "2026-11-01"

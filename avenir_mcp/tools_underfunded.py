@@ -11,7 +11,7 @@ from typing import Annotated
 from pydantic import Field
 
 from avenir_mcp import client, underfunded
-from avenir_mcp.app import check_month, mcp, set_read_only_wording
+from avenir_mcp.app import check_month, mcp, resolve_month, set_read_only_wording
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,7 @@ async def get_underfunded_targets(
     """
     logger.info("Tool called: get_underfunded_targets(month=%r)", month)
     check_month(month)
+    month = resolve_month(month)
     return underfunded.summary(await client.get_month(plan_id, month), limit)
 
 

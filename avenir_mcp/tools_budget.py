@@ -149,6 +149,7 @@ async def get_category_balances(
     """
     logger.info("Tool called: get_category_balances(month=%r)", month)
     check_month(month)
+    month = app.resolve_month(month)
     categories = await client.get_month_categories(plan_id, month)
     return analytics.category_balances(categories, include_empty=include_empty)
 
@@ -184,6 +185,7 @@ async def get_monthly_summary(
     """
     logger.info("Tool called: get_monthly_summary(month=%r)", month)
     check_month(month)
+    month = app.resolve_month(month)
     return analytics.month_overview(await client.get_month(plan_id, month))
 
 
@@ -221,6 +223,7 @@ async def get_budget_vs_actual(
     """
     logger.info("Tool called: get_budget_vs_actual(month=%r)", month)
     check_month(month)
+    month = app.resolve_month(month)
     month_cats = await client.get_month_categories(plan_id, month)
     return analytics.budget_vs_actual(month_cats)
 
