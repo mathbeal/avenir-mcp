@@ -19,12 +19,12 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 # Every lock file this repository tracks, and the command in the `audit` job that reads
 # it for a known vulnerability. A lock file missing here is a lock file CI never checks.
 AUDITED_LOCKS: dict[Path, str] = {
-    ROOT / "uv.lock": "uvx pip-audit --strict --disable-pip -r requirements.txt",
+    ROOT / "uv.lock": "uvx pip-audit --strict --disable-pip --timeout 60 -r requirements.txt",
     ROOT / "docs" / "package-lock.json": (
         "npm audit --prefix docs --package-lock-only --audit-level=high"
     ),
     ROOT / "plugin" / "uv.lock": (
-        "uvx pip-audit --strict --disable-pip -r plugin-requirements.txt"
+        "uvx pip-audit --strict --disable-pip --timeout 60 -r plugin-requirements.txt"
     ),
 }
 
