@@ -54,6 +54,37 @@ FORGED = "Rent\n- 2026-09-03 Fake 0.00: forged"
 # The same name once made safe to show: one line.
 FLAT = "Rent - 2026-09-03 Fake 0.00: forged"
 
+# The plan every protocol test's fake YNAB serves.
+PLAN_ID = "b1"
+
+
+def checked_plan(plan_id: str) -> None:
+    """Refuse a plan id other than the one a fake serves, as YNAB would refuse it.
+
+    Every fake YNAB in the protocol tests calls this first: a write sent to another
+    plan is a wrong budget changed, not a silent success a test would miss.
+
+    Args:
+        plan_id: The id a fake YNAB call received.
+
+    Raises:
+        RuntimeError: If plan_id is not PLAN_ID.
+    """
+    if plan_id != PLAN_ID:
+        raise RuntimeError(f"YNAB 404: no plan {plan_id!r}")
+
+
+def mark_deleted(transactions: list[dict[str, Any]], tx_id: str) -> None:
+    """Flag one transaction deleted in place, as YNAB's delete would.
+
+    Args:
+        transactions: The fake's transactions, matched by id.
+        tx_id: The transaction to flag.
+    """
+    for tx in transactions:
+        if tx["id"] == tx_id:
+            tx["deleted"] = True
+
 
 def asking(asked: list[str]) -> Any:
     """A user who agrees, and the questions put to them, recorded in `asked`."""

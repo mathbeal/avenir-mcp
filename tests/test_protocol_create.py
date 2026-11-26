@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, asking, call, checked_plan, decline, mark_deleted
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking"}]
 _CATS = [
@@ -37,9 +37,10 @@ class _Ledger:
         self.transactions: list[dict[str, Any]] = []
 
     async def create_transactions(
-        self, _budget_id: str, _account_id: str, items: list[dict[str, Any]], approved: bool = True
+        self, plan_id: str, _account_id: str, items: list[dict[str, Any]], approved: bool = True
     ) -> dict[str, Any]:
         """Create one transaction per item, as YNAB would report them back."""
+        checked_plan(plan_id)
         self.created.append((items, approved))
         ids = [f"new{len(self.transactions) + i}" for i in range(len(items))]
         new = [
@@ -60,16 +61,16 @@ class _Ledger:
             "duplicate_import_ids": [],
         }
 
-    async def get_transactions(self, _budget_id: str) -> list[dict[str, Any]]:
+    async def get_transactions(self, plan_id: str) -> list[dict[str, Any]]:
         """Current transactions."""
+        checked_plan(plan_id)
         return [dict(tx) for tx in self.transactions]
 
-    async def delete_transaction(self, _budget_id: str, tx_id: str) -> None:
+    async def delete_transaction(self, plan_id: str, tx_id: str) -> None:
         """Delete one."""
+        checked_plan(plan_id)
         self.deleted.append(tx_id)
-        for tx in self.transactions:
-            if tx["id"] == tx_id:
-                tx["deleted"] = True
+        mark_deleted(self.transactions, tx_id)
 
 
 @pytest.fixture(name="ledger")

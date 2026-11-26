@@ -13,7 +13,17 @@ from unittest.mock import patch
 
 import pytest
 
-from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line, tool_schema
+from .mcp_helpers import (
+    FLAT,
+    FORGED,
+    accept,
+    asking,
+    call,
+    checked_plan,
+    decline,
+    one_line,
+    tool_schema,
+)
 
 _LABEL = "CB MARKET FRESH FACT 050926 525130******1"
 
@@ -32,8 +42,9 @@ class FakePayees:
         }
         self.sent: list[tuple[str, str]] = []
 
-    async def get_payees(self, _plan_id: str) -> list[dict[str, Any]]:
+    async def get_payees(self, plan_id: str) -> list[dict[str, Any]]:
         """The payees, as YNAB returns them."""
+        checked_plan(plan_id)
         return [
             {
                 "id": payee_id,
@@ -44,8 +55,9 @@ class FakePayees:
             for payee_id, name in self.names.items()
         ]
 
-    async def get_transactions(self, _plan_id: str, **_: Any) -> list[dict[str, Any]]:
+    async def get_transactions(self, plan_id: str, **_: Any) -> list[dict[str, Any]]:
         """Three transactions on the direct debit, one on the card label."""
+        checked_plan(plan_id)
         rows = [("p-fresh", "2026-09-05"), ("p-rail", "2026-07-18"), ("p-rail", "2026-08-18")]
         rows.append(("p-rail", "2026-09-18"))
         return [
@@ -60,8 +72,9 @@ class FakePayees:
             for i, (payee_id, date) in enumerate(rows)
         ]
 
-    async def rename_payee(self, _plan_id: str, payee_id: str, name: str) -> dict[str, Any]:
+    async def rename_payee(self, plan_id: str, payee_id: str, name: str) -> dict[str, Any]:
         """Record and apply the rename."""
+        checked_plan(plan_id)
         self.sent.append((payee_id, name))
         self.names[payee_id] = name
         return {"id": payee_id, "name": name}

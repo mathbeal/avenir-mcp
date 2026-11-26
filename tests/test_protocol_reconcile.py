@@ -17,7 +17,17 @@ from fastmcp import Client
 
 from avenir_mcp import server
 
-from .mcp_helpers import FLAT, FORGED, accept, asking, call, decline, one_line
+from .mcp_helpers import (
+    FLAT,
+    FORGED,
+    accept,
+    asking,
+    call,
+    checked_plan,
+    decline,
+    mark_deleted,
+    one_line,
+)
 
 _ACCOUNTS = [{"id": "acc", "name": "Checking"}]
 _CATS = [
@@ -54,14 +64,16 @@ class _Bank:
             "deleted": False,
         }
 
-    async def get_transactions(self, _budget_id: str) -> list[dict[str, Any]]:
+    async def get_transactions(self, plan_id: str) -> list[dict[str, Any]]:
         """Return copies, as YNAB would."""
+        checked_plan(plan_id)
         return [dict(tx) for tx in self.transactions]
 
     async def create_transactions(
-        self, _budget_id: str, account_id: str, items: list[dict[str, Any]]
+        self, plan_id: str, account_id: str, items: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Record the adjustment and add it, cleared, to the account."""
+        checked_plan(plan_id)
         self.created.extend(items)
         tx = self._tx("adj", round(items[0]["amount"] * 1000), "cleared")
         tx["account_id"] = account_id
@@ -69,20 +81,20 @@ class _Bank:
         return {"created": 1, "transaction_ids": ["adj"], "duplicate_import_ids": []}
 
     async def set_transactions_cleared(
-        self, _budget_id: str, tx_ids: list[str], cleared: str
+        self, plan_id: str, tx_ids: list[str], cleared: str
     ) -> list[str]:
         """Apply a cleared status."""
+        checked_plan(plan_id)
         for tx in self.transactions:
             if tx["id"] in tx_ids:
                 tx["cleared"] = cleared
         return tx_ids
 
-    async def delete_transaction(self, _budget_id: str, tx_id: str) -> None:
+    async def delete_transaction(self, plan_id: str, tx_id: str) -> None:
         """Mark a transaction deleted."""
+        checked_plan(plan_id)
         self.deleted.append(tx_id)
-        for tx in self.transactions:
-            if tx["id"] == tx_id:
-                tx["deleted"] = True
+        mark_deleted(self.transactions, tx_id)
 
     def status(self, tx_id: str) -> str:
         """Current cleared status of a transaction."""
@@ -299,6 +311,22 @@ def test_undo_reconcile_without_elicitation_needs_the_code(bank: _Bank) -> None:
     data = call("undo_operation", {"plan_id": "b1", "confirmation": code}).structured_content
     assert data["status"] == "applied"
     assert bank.status("t2") == "cleared"
+
+
+def test_undo_reconcile_leaves_alone_a_transaction_no_longer_reconciled(bank: _Bank) -> None:
+    """A transaction moved off 'reconciled' since is not forced back to cleared.
+
+    Reverting it anyway, whatever its current status, would silently reopen a
+    transaction a later reconciliation or an edit in YNAB deliberately moved on.
+    """
+    call("reconcile_account", _args(70.0), accept)
+    assert bank.status("t2") == "reconciled"
+    for tx in bank.transactions:
+        if tx["id"] == "t2":
+            tx["cleared"] = "uncleared"
+    data = call("undo_operation", {"plan_id": "b1"}, accept).structured_content
+    assert data["status"] == "applied"
+    assert bank.status("t2") == "uncleared"
 
 
 def test_declined_undo_of_a_reconciliation_changes_nothing(bank: _Bank) -> None:

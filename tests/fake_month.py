@@ -13,6 +13,8 @@ from unittest.mock import patch
 
 import pytest
 
+from .mcp_helpers import checked_plan
+
 
 class FakeMonth:  # pylint: disable=too-many-instance-attributes
     """Categories of one month, and the amounts the tools set, as YNAB would hold them."""
@@ -33,8 +35,9 @@ class FakeMonth:  # pylint: disable=too-many-instance-attributes
         self.failing_reads: set[int] = set()
         """Reads of the month's categories that fail, counting from 1."""
 
-    async def get_month_categories(self, _plan_id: str, _month: str) -> list[dict[str, Any]]:
+    async def get_month_categories(self, plan_id: str, _month: str) -> list[dict[str, Any]]:
         """Categories of the month, as YNAB returns them, or fail like YNAB on the reads told to."""
+        checked_plan(plan_id)
         self.reads += 1
         if self.reads in self.failing_reads:
             raise RuntimeError("YNAB 503: gateway timeout")
@@ -51,9 +54,10 @@ class FakeMonth:  # pylint: disable=too-many-instance-attributes
         ]
 
     async def set_category_budgeted(
-        self, _plan_id: str, month: str, category_id: str, amount: float
+        self, plan_id: str, month: str, category_id: str, amount: float
     ) -> dict[str, Any]:
         """Record and apply the new budgeted amount, or fail like YNAB on the calls told to."""
+        checked_plan(plan_id)
         self.calls += 1
         if self.calls in self.landed_calls:
             self.sets.append((month, category_id, amount))

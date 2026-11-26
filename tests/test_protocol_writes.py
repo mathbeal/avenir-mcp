@@ -17,7 +17,7 @@ from fastmcp.client.elicitation import ElicitResult
 
 from avenir_mcp import confirm, server
 
-from .mcp_helpers import FLAT, FORGED, accept, call, decline
+from .mcp_helpers import FLAT, FORGED, accept, call, checked_plan, decline
 
 _CATS = [
     {"id": "c-food", "name": "Groceries"},
@@ -47,14 +47,16 @@ class _Budget:
         self.transactions = _txs()
         self.patches: list[list[tuple[str, str | None]]] = []
 
-    async def get_transactions(self, _budget_id: str) -> list[dict[str, Any]]:
+    async def get_transactions(self, plan_id: str) -> list[dict[str, Any]]:
         """Return a copy of the transactions, as YNAB would."""
+        checked_plan(plan_id)
         return [dict(tx) for tx in self.transactions]
 
     async def set_transaction_categories(
-        self, _budget_id: str, moves: list[tuple[str, str | None]]
+        self, plan_id: str, moves: list[tuple[str, str | None]]
     ) -> list[str]:
         """Record the PATCH and apply it to the fake budget."""
+        checked_plan(plan_id)
         self.patches.append(moves)
         for tx_id, category_id in moves:
             for tx in self.transactions:
