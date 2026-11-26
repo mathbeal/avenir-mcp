@@ -13,6 +13,7 @@ import json
 import re
 import threading
 from collections import deque
+from collections.abc import Callable
 from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -462,6 +463,14 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(length) or b"{}")
 
+    @staticmethod
+    def _settings() -> dict[str, Any]:
+        """The plan's date and currency format, as `getPlanSettingsById` returns them."""
+        return {
+            "date_format": {"format": "DD/MM/YYYY"},
+            "currency_format": demo.CURRENCY_FORMAT,
+        }
+
     # One route per YNAB endpoint avenir-mcp calls: a flat dispatch reads best here.
     # pylint: disable-next=too-many-return-statements,too-many-branches,too-many-locals
     def _route(self, method: str) -> None:
@@ -484,8 +493,14 @@ class Handler(BaseHTTPRequestHandler):
             if not match:
                 return self._send(404, {"error": {"detail": "Resource not found"}})
             rest = match.group(1)
-            if method == "GET" and rest == "/accounts":
-                return self._send(200, {"data": {"accounts": STATE.accounts()}})
+            # Every GET that takes no argument and answers with its own name as the key.
+            simple_gets: dict[str, Callable[[], Any]] = {
+                "/accounts": STATE.accounts,
+                "/payees": STATE.payees,
+                "/settings": self._settings,
+            }
+            if method == "GET" and rest in simple_gets:
+                return self._send(200, {"data": {rest.strip("/"): simple_gets[rest]()}})
             if method == "GET" and rest == "/categories":
                 groups = [
                     {
@@ -502,8 +517,6 @@ class Handler(BaseHTTPRequestHandler):
                     for name in STATE.groups
                 ]
                 return self._send(200, {"data": {"category_groups": groups}})
-            if method == "GET" and rest == "/payees":
-                return self._send(200, {"data": {"payees": STATE.payees()}})
             payee_match = re.match(r"^/payees/([^/]+)$", rest)
             if method == "PATCH" and payee_match:
                 payee = STATE.rename_payee(payee_match.group(1), self._body()["payee"]["name"])

@@ -14,6 +14,16 @@ from datetime import date
 from typing import Any
 
 PLAN_ID = "demo-budget"
+CURRENCY_FORMAT: dict[str, Any] = {
+    "iso_code": "USD",
+    "example_format": "123,456.78",
+    "decimal_digits": 2,
+    "decimal_separator": ".",
+    "symbol_first": True,
+    "group_separator": ",",
+    "currency_symbol": "$",
+    "display_symbol": True,
+}
 CHECKING = "acc-checking"
 SAVINGS = "acc-savings"
 # Tracking accounts: they hold no category, so the budget's figures never see them.

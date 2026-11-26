@@ -29,7 +29,7 @@ user confirms (as for apply_categories). undo_operation reverts it.
 | Deshacer | sí, con `undo_operation` |
 | Destructiva | sí |
 | Idempotente | no |
-| Peticiones a YNAB | 2 para el ejemplo de abajo, con la caché vacía |
+| Peticiones a YNAB | 3 para el ejemplo de abajo, con la caché vacía |
 
 ## Parámetros
 
@@ -108,8 +108,8 @@ Respuesta sobre el presupuesto de demostración:
 ## Errores
 
 - `Account {account_id} is not in this plan: use an id from list_accounts.`
-- `{error} The balance adjustment of {difference} that had just been created was removed again: nothing was left changed. Call reconcile_account again.`
-- `{error} The balance adjustment of {difference} was created in YNAB (transaction {adjustment_id}) but could not be removed either: {cleanup_error} Check it in YNAB before reconciling again.`
+- `{error} The balance adjustment of {difference_shown} that had just been created was removed again: nothing was left changed. Call reconcile_account again.`
+- `{error} The balance adjustment of {difference_shown} was created in YNAB (transaction {adjustment_id}) but could not be removed either: {cleanup_error} Check it in YNAB before reconciling again.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`

@@ -29,7 +29,7 @@ Amounts are in currency units.
 | Rückgängig | ja, mit `undo_operation` |
 | Destruktiv | ja |
 | Idempotent | ja |
-| YNAB-Anfragen | 3 für das Beispiel unten, leerer Cache |
+| YNAB-Anfragen | 4 für das Beispiel unten, leerer Cache |
 
 ## Parameter
 

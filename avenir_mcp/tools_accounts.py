@@ -8,7 +8,7 @@ from __future__ import annotations
 import calendar
 import logging
 from datetime import date, timedelta
-from typing import Literal
+from typing import Any, Literal
 
 from fastmcp import Context
 from fastmcp.exceptions import ToolError
@@ -16,7 +16,7 @@ from mcp.types import InputRequiredResult
 from pydantic import Field
 
 from avenir_mcp import app, client, forecast, journal, reconcile, schedule, writes
-from avenir_mcp.amounts import Amount
+from avenir_mcp.amounts import Amount, format_amount
 from avenir_mcp.app import WRITE_TAG, mcp
 from avenir_mcp.classifier import normalize_payee
 from avenir_mcp.confirm import WriteStatus, gate, merged
@@ -104,7 +104,8 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         asking the user (protocol 2026-07-28).
 
     Raises:
-        ToolError: If the account is not in the plan, or the confirmation code is refused.
+        ToolError: If the account is not in the plan, the balance needs more decimal
+            digits than the plan's currency holds, or the confirmation code is refused.
         RuntimeError: If marking transactions reconciled fails and adjust was not
             requested, so there is no adjustment transaction to clean up.
     """
@@ -112,6 +113,11 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     accounts = {a["id"]: a["name"] for a in await client.get_accounts(plan_id)}
     if account_id not in accounts:
         raise ToolError(f"Account {account_id} is not in this plan: use an id from list_accounts.")
+    currency_format = await client.get_currency_format(plan_id)
+    try:
+        client.amount_to_milliunit(bank_balance, currency_format)
+    except ValueError as error:
+        raise ToolError(str(error)) from error
     transactions = await client.get_transactions(plan_id)
     analysis = reconcile.analyse(account_id, transactions, bank_balance, app.today())
     difference = analysis.difference
@@ -124,12 +130,13 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
         confirmation=None,
         operation_id=None,
     )
+    difference_shown = format_amount(difference, currency_format)
     if difference and not adjust:
         return result.model_copy(
             update={
                 "status": "difference_found",
                 "message": (
-                    f"YNAB's cleared balance differs from the bank by {difference:.2f}. Nothing "
+                    f"YNAB's cleared balance differs from the bank by {difference_shown}. Nothing "
                     "was changed. Check explained_by, uncleared and possible_duplicates with the "
                     "user; call again once fixed, or with adjust=true to record the gap as an "
                     "adjustment."
@@ -141,7 +148,7 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
     question = (
         f"Reconcile {result.account}: mark {analysis.to_reconcile_count} "
         "cleared transaction(s) reconciled"
-        + (f" and add a balance adjustment of {difference:.2f}?" if difference else "?")
+        + (f" and add a balance adjustment of {difference_shown}?" if difference else "?")
     )
     # The code confirms these exact transactions: any cleared after the preview
     # changes the subject, so the code no longer applies.
@@ -196,12 +203,12 @@ async def reconcile_account(  # pylint: disable=too-many-arguments,too-many-loca
             await client.delete_transaction(plan_id, adjustment_id)
         except RuntimeError as cleanup_error:
             raise ToolError(
-                f"{error} The balance adjustment of {difference:.2f} was created in YNAB "
+                f"{error} The balance adjustment of {difference_shown} was created in YNAB "
                 f"(transaction {adjustment_id}) but could not be removed either: "
                 f"{cleanup_error} Check it in YNAB before reconciling again."
             ) from cleanup_error
         raise ToolError(
-            f"{error} The balance adjustment of {difference:.2f} that had just been created "
+            f"{error} The balance adjustment of {difference_shown} that had just been created "
             "was removed again: nothing was left changed. Call reconcile_account again."
         ) from error
     operation_id = journal.Journal(journal.default_path()).record(
@@ -490,7 +497,11 @@ class CreateResult(Model):
 
 
 def _check_new(
-    items: list[NewTransaction], categories: dict[str, str], cards: set[str], now: date
+    items: list[NewTransaction],
+    categories: dict[str, str],
+    cards: set[str],
+    now: date,
+    currency_format: dict[str, Any] | None,
 ) -> None:
     """Refuse what YNAB would refuse, or what cannot be what the user meant.
 
@@ -499,10 +510,12 @@ def _check_new(
         categories: The plan's category names by id.
         cards: Ids of the categories that pay credit cards.
         now: Today.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Raises:
-        ToolError: If the list is empty, a date is in the future, or a category is not
-            in the plan or pays a credit card.
+        ToolError: If the list is empty, a date is in the future, an amount needs more
+            decimal digits than the plan's currency holds, or a category is not in the
+            plan or pays a credit card.
     """
     if not items:
         raise ToolError("Give at least one transaction to create.")
@@ -511,6 +524,10 @@ def _check_new(
             raise ToolError(
                 f"{item.date} is in the future: YNAB only records transactions that happened."
             )
+        try:
+            client.amount_to_milliunit(item.amount, currency_format)
+        except ValueError as error:
+            raise ToolError(str(error)) from error
         category = item.category_id
         if category and category not in categories:
             raise ToolError(
@@ -561,7 +578,8 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
 
     Raises:
         ToolError: If the account or a category is not in the plan, a date is in the
-            future, the list is empty, or the confirmation code is refused.
+            future, an amount needs more decimal digits than the plan's currency holds,
+            the list is empty, or the confirmation code is refused.
     """
     logger.info("Tool called: create_transactions(n=%d)", len(transactions))
     accounts = {a["id"]: a["name"] for a in await client.get_accounts(plan_id)}
@@ -569,7 +587,8 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         raise ToolError(f"Account {account_id} is not in this plan: use an id from list_accounts.")
     listed = await client.get_categories(plan_id)
     categories = {c["id"]: c["name"] for c in listed}
-    _check_new(transactions, categories, card_payments(listed), app.today())
+    currency_format = await client.get_currency_format(plan_id)
+    _check_new(transactions, categories, card_payments(listed), app.today(), currency_format)
     preview = [
         NewTransactionPreview(
             date=item.date.isoformat(),
@@ -591,7 +610,9 @@ async def create_transactions(  # pylint: disable=too-many-arguments,too-many-po
         operation_id=None,
     )
     lines = [
-        f"- {p.date} {p.payee} {p.amount:.2f} ({p.category or 'no category'})" for p in preview[:20]
+        f"- {p.date} {p.payee} {format_amount(p.amount, currency_format)} "
+        f"({p.category or 'no category'})"
+        for p in preview[:20]
     ]
     question = f"Create {len(preview)} transaction(s) on {result.account}?\n" + "\n".join(lines)
     subject = {"account": account_id, "items": transactions, "approved": approved}

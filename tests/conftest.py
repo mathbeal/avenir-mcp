@@ -8,12 +8,13 @@ from __future__ import annotations
 import os
 from collections.abc import Iterator
 from typing import Any
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 from hypothesis import HealthCheck, settings
 
-from avenir_mcp import client, server
+from avenir_mcp import amounts, client, server
 
 # `just fuzz`: the same properties, many more examples each. What fails is saved in
 # .hypothesis/ and replayed, minimised, by the next ordinary run.
@@ -85,3 +86,13 @@ def writes_enabled() -> Iterator[None]:
     server.configure(enable_writes=True)
     yield
     server.configure(enable_writes=True)
+
+
+@pytest.fixture(autouse=True)
+def default_currency_format() -> Iterator[AsyncMock]:
+    """Every plan uses two decimal digits, unless a test patches get_currency_format itself."""
+    with patch(
+        "avenir_mcp.client.get_currency_format",
+        AsyncMock(return_value=amounts.DEFAULT_CURRENCY_FORMAT),
+    ) as fetch:
+        yield fetch

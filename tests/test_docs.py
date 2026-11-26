@@ -28,6 +28,15 @@ def _english_pages() -> set[Path]:
     }
 
 
+@pytest.fixture(autouse=True)
+def default_currency_format() -> None:
+    """Undo conftest's mock for this module.
+
+    The demo runs real tools against the local fake YNAB server, and the request count
+    documented for each tool must come from a real call to it, not a mock.
+    """
+
+
 def test_generated_files_are_current() -> None:
     """Tool reference, security page and every JSON example match the code today."""
     for path, text in pages.generated().items():

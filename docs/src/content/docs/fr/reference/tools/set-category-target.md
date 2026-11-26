@@ -28,7 +28,7 @@ user is told before confirming. Confirmation works as for apply_categories.
 | Annulation | oui, avec `undo_operation` |
 | Destructif | oui |
 | Idempotent | oui |
-| Requêtes YNAB | 1 pour l'exemple ci-dessous, cache vide |
+| Requêtes YNAB | 2 pour l'exemple ci-dessous, cache vide |
 
 ## Paramètres
 

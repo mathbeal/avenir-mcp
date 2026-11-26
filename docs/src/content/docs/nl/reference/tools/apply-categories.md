@@ -29,7 +29,7 @@ Amounts are in currency units.
 | Ongedaan maken | ja, met `undo_operation` |
 | Destructief | ja |
 | Idempotent | ja |
-| YNAB-verzoeken | 3 voor het voorbeeld hieronder, lege cache |
+| YNAB-verzoeken | 4 voor het voorbeeld hieronder, lege cache |
 
 ## Parameters
 

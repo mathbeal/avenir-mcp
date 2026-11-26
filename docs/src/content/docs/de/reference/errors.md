@@ -116,8 +116,8 @@ Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error call
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
 - `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
-- `{refused}; {name} is back to {from_amount}: nothing was moved.`
-- `{refused}, then putting {name} back failed too ({again}): set {name} back to {from_amount} in YNAB.`
+- `{refused}; {name} is back to {source_from}: nothing was moved.`
+- `{refused}, then putting {name} back failed too ({again}): set {name} back to {source_from} in YNAB.`
 - `YNAB's answer for {name} was lost ({error}), and checking afterwards failed too ({unknown}): check {name} and {name} in YNAB by hand before doing anything else.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
@@ -126,8 +126,8 @@ Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error call
 ## [`reconcile_account`](/avenir-mcp/de/reference/tools/reconcile-account/)
 
 - `Account {account_id} is not in this plan: use an id from list_accounts.`
-- `{error} The balance adjustment of {difference} that had just been created was removed again: nothing was left changed. Call reconcile_account again.`
-- `{error} The balance adjustment of {difference} was created in YNAB (transaction {adjustment_id}) but could not be removed either: {cleanup_error} Check it in YNAB before reconciling again.`
+- `{error} The balance adjustment of {difference_shown} that had just been created was removed again: nothing was left changed. Call reconcile_account again.`
+- `{error} The balance adjustment of {difference_shown} was created in YNAB (transaction {adjustment_id}) but could not be removed either: {cleanup_error} Check it in YNAB before reconciling again.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`
@@ -176,7 +176,7 @@ Jedes Tool, das YNAB aufruft, kann den Fehler von YNAB zurückgeben: `Error call
 - `Transaction {tx_id} is a transfer between accounts: it cannot be split.`
 - `Transaction {tx_id} is on an off-budget account: YNAB does not split those.`
 - `Give at least two lines: to give the whole transaction one category, use apply_categories.`
-- `The lines add up to {total}, the transaction is {amount}: they must match to the cent.`
+- `The lines add up to {total}, the transaction is {amount}: they must match exactly.`
 - `A line is zero: leave it out.`
 - `Category {category_id} is YNAB's internal Uncategorized: choose a real category.`
 - `Category {category_id} is not in this plan: use a category_id from suggest_categories or get_category_balances.`

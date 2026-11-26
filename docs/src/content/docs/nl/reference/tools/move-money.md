@@ -28,7 +28,7 @@ is moved and a fresh preview comes back instead, with a new code.
 | Ongedaan maken | ja, met `undo_operation` |
 | Destructief | ja |
 | Idempotent | nee |
-| YNAB-verzoeken | 1 voor het voorbeeld hieronder, lege cache |
+| YNAB-verzoeken | 2 voor het voorbeeld hieronder, lege cache |
 
 ## Parameters
 
@@ -115,8 +115,8 @@ Antwoord op het demobudget:
 - `month must be 'current' or the first day of a month as YYYY-MM-01, got '{month}'.`
 - `Category {category_id} is not in this plan: use a category_id from get_category_balances.`
 - `This client cannot ask the user to confirm, and AVENIR_MCP_REQUIRE_ELICITATION=1 forbids confirmation codes: nothing was changed. Use a client that supports MCP elicitation, or unset the variable.`
-- `{refused}; {name} is back to {from_amount}: nothing was moved.`
-- `{refused}, then putting {name} back failed too ({again}): set {name} back to {from_amount} in YNAB.`
+- `{refused}; {name} is back to {source_from}: nothing was moved.`
+- `{refused}, then putting {name} back failed too ({again}): set {name} back to {source_from} in YNAB.`
 - `YNAB's answer for {name} was lost ({error}), and checking afterwards failed too ({unknown}): check {name} and {name} in YNAB by hand before doing anything else.`
 - `This confirmation code is unknown, expired, already used, or was issued for different changes. Call again without confirmation to get a new preview.`
 - `Confirmation codes are disabled (AVENIR_MCP_REQUIRE_ELICITATION=1): call again without confirmation, and the user answers in the client.`

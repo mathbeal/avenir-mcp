@@ -26,6 +26,7 @@ from mcp import types
 from mcp_types.version import MODERN_PROTOCOL_VERSIONS
 
 from avenir_mcp import client, journal, writes
+from avenir_mcp.amounts import format_amount
 from avenir_mcp.model import Model
 from avenir_mcp.text import untrusted
 
@@ -96,18 +97,19 @@ def result_of(status: WriteStatus, message: str, plan: writes.Plan, **extra: Any
     )
 
 
-def describe(plan: writes.Plan, action: str) -> str:
+def describe(plan: writes.Plan, action: str, currency_format: dict[str, Any] | None = None) -> str:
     """Write the question put to the user: the first 20 changes, and how many more.
 
     Args:
         plan: The changes to confirm.
         action: What is done to them, e.g. "Recategorise".
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The question; bank text in it is made safe to show.
     """
     lines = [
-        f"- {c.date} {untrusted(c.payee)} {c.amount:.2f}: "
+        f"- {c.date} {untrusted(c.payee)} {format_amount(c.amount, currency_format)}: "
         f"{untrusted(c.from_category) or 'no category'} → "
         f"{untrusted(c.to_category) or 'no category'}"
         for c in plan.changes[:20]
@@ -301,12 +303,13 @@ async def ask(
     return "declined" if required else CONFIRMATIONS.issue(plan_id, subject)
 
 
-async def write_plan(
+async def write_plan(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     ctx: Context,
     plan_id: str,
     plan: writes.Plan,
     action: str,
     confirmation: str | None,
+    currency_format: dict[str, Any] | None = None,
 ) -> tuple[WriteResult | types.InputRequiredResult, str | None]:
     """Confirm a recategorisation plan, apply it and journal it.
 
@@ -316,6 +319,7 @@ async def write_plan(
         plan: The changes to make.
         action: What is done to them, e.g. "Recategorise", for the question.
         confirmation: A code from a previous preview, or None.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The result (or the input request to return), and the new operation's id when
@@ -328,7 +332,8 @@ async def write_plan(
             else ""
         )
         return result_of("nothing_to_do", message, plan), None
-    decision = await ask(ctx, plan_id, plan.changes, describe(plan, action), confirmation)
+    question = describe(plan, action, currency_format)
+    decision = await ask(ctx, plan_id, plan.changes, question, confirmation)
     if isinstance(decision, types.InputRequiredResult):
         return decision, None
     if decision == "declined":

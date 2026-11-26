@@ -28,7 +28,7 @@ user is told before confirming. Confirmation works as for apply_categories.
 | Ongedaan maken | ja, met `undo_operation` |
 | Destructief | ja |
 | Idempotent | ja |
-| YNAB-verzoeken | 1 voor het voorbeeld hieronder, lege cache |
+| YNAB-verzoeken | 2 voor het voorbeeld hieronder, lege cache |
 
 ## Parameters
 

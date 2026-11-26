@@ -28,7 +28,7 @@ Confirmation works as for apply_categories.
 | Ongedaan maken | nee |
 | Destructief | ja |
 | Idempotent | nee |
-| YNAB-verzoeken | 2 voor het voorbeeld hieronder, lege cache |
+| YNAB-verzoeken | 3 voor het voorbeeld hieronder, lege cache |
 
 ## Parameters
 

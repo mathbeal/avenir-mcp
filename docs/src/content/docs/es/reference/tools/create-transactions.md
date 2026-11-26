@@ -26,7 +26,7 @@ as for apply_categories.
 | Deshacer | sí, con `undo_operation` |
 | Destructiva | no |
 | Idempotente | no |
-| Peticiones a YNAB | 2 para el ejemplo de abajo, con la caché vacía |
+| Peticiones a YNAB | 3 para el ejemplo de abajo, con la caché vacía |
 
 ## Parámetros
 

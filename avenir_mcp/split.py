@@ -14,7 +14,7 @@ from typing import Any
 
 from pydantic import Field
 
-from avenir_mcp.amounts import Amount
+from avenir_mcp.amounts import Amount, format_amount
 from avenir_mcp.client import amount_to_milliunit, milliunit_to_amount
 from avenir_mcp.model import Model
 from avenir_mcp.text import MAX_MEMO, YnabText, untrusted
@@ -121,6 +121,7 @@ def _check_lines(
     names: dict[str, str],
     refused: tuple[set[str], set[str]],
     lines: list[SplitLine],
+    currency_format: dict[str, Any] | None,
 ) -> None:
     """Refuse lines that name no real category or do not add up to the transaction.
 
@@ -130,11 +131,12 @@ def _check_lines(
         refused: Ids of YNAB's internal Uncategorized, and of the categories that pay
             credit cards.
         lines: The lines proposed.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Raises:
-        ValueError: If there are fewer than two lines, a line is zero, a category is
-            unknown, internal or pays a credit card, or the sum differs from the
-            transaction.
+        ValueError: If there are fewer than two lines, a line is zero or needs more
+            decimal digits than the plan's currency holds, a category is unknown,
+            internal or pays a credit card, or the sum differs from the transaction.
     """
     uncategorized, cards = refused
     if len(lines) < 2:
@@ -144,7 +146,7 @@ def _check_lines(
         )
     total = 0
     for line in lines:
-        milliunits = amount_to_milliunit(line.amount)
+        milliunits = amount_to_milliunit(line.amount, currency_format)
         if milliunits == 0:
             raise ValueError("A line is zero: leave it out.")
         if line.category_id in uncategorized:
@@ -162,17 +164,20 @@ def _check_lines(
         total += milliunits
     if total != tx["amount"]:
         raise ValueError(
-            f"The lines add up to {milliunit_to_amount(total):.2f}, the transaction is "
-            f"{milliunit_to_amount(tx['amount']):.2f}: they must match to the cent."
+            f"The lines add up to {format_amount(milliunit_to_amount(total), currency_format)}, "
+            f"the transaction is "
+            f"{format_amount(milliunit_to_amount(tx['amount']), currency_format)}: "
+            "they must match exactly."
         )
 
 
-def plan_split(
+def plan_split(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     transactions: list[dict[str, Any]],
     categories: list[dict[str, Any]],
     transaction_id: str,
     lines: list[SplitLine],
     off_budget: set[str] | frozenset[str] = frozenset(),
+    currency_format: dict[str, Any] | None = None,
 ) -> SplitPlan:
     """Work out the split of one transaction, refusing what cannot be meant.
 
@@ -182,6 +187,7 @@ def plan_split(
         transaction_id: The transaction to split.
         lines: Its lines, at least two, adding up to its amount.
         off_budget: Ids of the tracking accounts.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         The transaction and its lines, as the user will see them.
@@ -189,8 +195,9 @@ def plan_split(
     Raises:
         ValueError: With a message saying what to fix, if the transaction is unknown,
             deleted, already split, off-budget, or a transfer other than one from an on-budget
-            account to a tracking one, or if the lines are fewer than two, zero, in an unknown
-            or internal category, or do not add up.
+            account to a tracking one, or if the lines are fewer than two, zero, need more
+            decimal digits than the plan's currency holds, are in an unknown or internal
+            category, or do not add up.
     """
     tx = next((t for t in transactions if t["id"] == transaction_id), None)
     if tx is None:
@@ -201,7 +208,7 @@ def plan_split(
     _check_transaction(tx, off_budget)
     names = {c["id"]: c["name"] for c in categories}
     refused = (internal_uncategorized(categories), card_payments(categories))
-    _check_lines(tx, names, refused, lines)
+    _check_lines(tx, names, refused, lines, currency_format)
     current = tx.get("category_id")
     return SplitPlan(
         transaction_id=transaction_id,

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
+from avenir_mcp.amounts import format_amount
 from avenir_mcp.client import amount_to_milliunit
 from avenir_mcp.model import Model
 from avenir_mcp.triage import CARD_GROUP
@@ -93,11 +94,12 @@ def _frequency(category: dict[str, Any]) -> str | None:
     return _CADENCE.get(category.get("goal_cadence") or 0)
 
 
-def describe(category: dict[str, Any]) -> str:
+def describe(category: dict[str, Any], currency_format: dict[str, Any] | None = None) -> str:
     """Say a category's target as the user reads it.
 
     Args:
         category: A category as YNAB returns it, amounts in milliunits.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         "no target", "50.00 each month", "1200.00 by 2027-06-01", or the amount with the
@@ -106,7 +108,7 @@ def describe(category: dict[str, Any]) -> str:
     kind, target = category.get("goal_type"), category.get("goal_target")
     if kind is None or target is None:
         return "no target"
-    amount = f"{target / 1000:.2f}"
+    amount = format_amount(target / 1000, currency_format)
     date = category.get("goal_target_date")
     if kind == "NEED" and date:
         return f"{amount} by {date}"
@@ -187,6 +189,7 @@ def plan(
     amount: float | None,
     date: str | None,
     frequency: str | None,
+    currency_format: dict[str, Any] | None = None,
 ) -> TargetPlan:
     """Work out a change of target, and how to undo it.
 
@@ -195,12 +198,14 @@ def plan(
         amount: The target amount in currency units, or None to remove the target.
         date: YYYY-MM-DD to reach the amount by, or None.
         frequency: monthly, weekly or yearly, or None.
+        currency_format: The plan's currency format; omit for DEFAULT_CURRENCY_FORMAT.
 
     Returns:
         What to send, what brings the previous target back, and both as the user reads them.
 
     Raises:
-        ValueError: If the change is one YNAB would refuse.
+        ValueError: If the change is one YNAB would refuse, or the amount needs more
+            decimal digits than the plan's currency holds.
     """
     paired = _paired(category)
     _check(amount, date, frequency, paired)
@@ -211,7 +216,7 @@ def plan(
         # they are called here: a target removed has nothing left to describe.
         after: dict[str, Any] = {"goal_type": None, "goal_target": None}  # pragma: no mutate
     else:
-        milli = amount_to_milliunit(amount)
+        milli = amount_to_milliunit(amount, currency_format)
         fields = {"goal_target": milli}
         if date:
             fields["goal_target_date"] = date
@@ -231,7 +236,7 @@ def plan(
     return TargetPlan(
         fields=fields,
         undo=undo,
-        before=describe(category),
-        after=describe(after),
-        unchanged=describe(after) == describe(category),
+        before=describe(category, currency_format),
+        after=describe(after, currency_format),
+        unchanged=describe(after, currency_format) == describe(category, currency_format),
     )
