@@ -70,7 +70,8 @@ def test_the_descriptions_fit_on_one_line_and_name_ynab() -> None:
 @pytest.mark.ynab_terms
 def test_no_name_starts_with_ynab_as_ynab_forbids() -> None:
     """YNAB's API terms: a name may say "YNAB" only after "for" ("Tools for YNAB")."""
-    names = [PROJECT["name"], SERVER["name"], README.splitlines()[0]]
+    title = next(line for line in README.splitlines() if line.startswith("# "))
+    names = [PROJECT["name"], SERVER["name"], title]
     for name in names:
         for match in re.finditer(r"ynab|you need a budget", name, flags=re.IGNORECASE):
             assert re.search(r"\bfor\s+$", name[: match.start()], flags=re.IGNORECASE), name
